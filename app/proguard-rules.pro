@@ -1,0 +1,4 @@
+-keep class com.bisc.flauncher.data.model.** { *; }
+-keep class com.bisc.flauncher.data.db.** { *; }
+-keepattributes *Annotation*
+-dontwarn kotlin.**

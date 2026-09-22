@@ -1,0 +1,5 @@
+# Baseline profile: ART pre-compiles these on install instead of interpreting them until the JIT
+# warms up — the difference between a stuttery first minute and a smooth start. Hot + startup +
+# post-startup for the whole app (Compose, Material 3 and the other libraries ship their own profiles,
+# which the build merges in).
+HSPLcom/bisc/flauncher/**;->**(**)**
