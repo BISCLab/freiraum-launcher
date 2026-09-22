@@ -407,6 +407,8 @@
     <string name="settings_quick_overview_animation_label">Öffnen animieren</string>
     <string name="settings_quick_overview_animation_summary">Standardmäßig aus, damit die Schnellübersicht sofort auf- und zugeht. Einschalten für eine kurze Wisch-/Überblend-Animation.</string>
     <string name="settings_folder_hide_status_bar">Statusleiste in Ordnern ausblenden</string>
+    <string name="settings_folder_hide_dock">Dock in Ordnern ausblenden</string>
+    <string name="settings_folder_hide_dock_summary">Standardmäßig aus, sodass das schwebende Dock sichtbar bleibt, während ein Ordner geöffnet ist.</string>
 
     <string name="settings_folder_creator_title">Neuer Ordner</string>
     <string name="settings_folder_creator_name_hint">Ordnername</string>
@@ -506,7 +508,6 @@
     <string name="settings_search_engine_custom_url_unset">Nicht festgelegt</string>
     <string name="settings_search_engine_custom_howto">So gibst du eine eigene URL ein</string>
     <string name="settings_search_engine_custom_info" formatted="false">Schreibe %s an die Stelle des Suchbegriffs, zum Beispiel https://www.google.com/search?q=%s. Ohne %s wird der Begriff als ?q= angehängt, ein fehlendes https:// wird automatisch ergänzt.</string>
-    <string name="settings_search_engine_custom_hint" formatted="false">URL mit %s für den Suchbegriff, z. B. https://www.google.com/search?q=%s</string>
 
     <string name="picker_widget_clock">Uhr</string>
     <string name="picker_widget_music">Musik</string>

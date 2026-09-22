@@ -47,6 +47,8 @@ fun SearchBar(
     handedness: Handedness = Handedness.RIGHT,
     iconShape: IconShape = IconShape.ROUNDED_SQUARE,
     appearance: ElementAppearance = ElementAppearance(),
+    // Layer 3: null keeps the automatic light/dark look derived from the dock's own (Layer 2) colors.
+    searchButtonAppearance: ElementAppearance? = null,
     quickLaunchSlots: List<QuickLaunchSlot> = defaultQuickLaunchSlots,
     loadQuickLaunchIcon: (ComponentName) -> ImageBitmap? = { null },
     onQuickLaunchClick: (ComponentName) -> Unit = {}
@@ -116,18 +118,27 @@ fun SearchBar(
                 )
             }
 
+            val customSearchColors = searchButtonAppearance?.let { resolveElementColors(it) }
             val searchButton = @Composable {
                 Box(
                     modifier = Modifier
                         .size(d.buttonSize)
                         .clip(itemShape)
                         .then(
-                            if (usesLightPillDetailing) {
-                                Modifier
+                            when {
+                                customSearchColors != null -> Modifier
+                                    .background(customSearchColors.background, alpha = customSearchColors.backgroundAlpha)
+                                    .then(
+                                        if (searchButtonAppearance?.borderEnabled == true) {
+                                            Modifier.border(customSearchColors.borderWidth, customSearchColors.borderColor, itemShape)
+                                        } else {
+                                            Modifier
+                                        }
+                                    )
+                                usesLightPillDetailing -> Modifier
                                     .background(SearchButtonSurfaceColor)
                                     .border(1.dp, SearchButtonBorderColor, itemShape)
-                            } else {
-                                Modifier.background(contentColor.copy(alpha = 0.12f))
+                                else -> Modifier.background(contentColor.copy(alpha = 0.12f))
                             }
                         )
                         .combinedClickable(onClick = onSingleTap, onDoubleClick = onDoubleTap),
@@ -136,7 +147,11 @@ fun SearchBar(
                     Icon(
                         imageVector = Icons.Filled.Search,
                         contentDescription = stringResource(R.string.dock_search_hint),
-                        tint = if (usesLightPillDetailing) Color.Black.copy(alpha = 0.8f) else contentColor
+                        tint = when {
+                            customSearchColors != null -> customSearchColors.contentColor
+                            usesLightPillDetailing -> Color.Black.copy(alpha = 0.8f)
+                            else -> contentColor
+                        }
                     )
                 }
             }

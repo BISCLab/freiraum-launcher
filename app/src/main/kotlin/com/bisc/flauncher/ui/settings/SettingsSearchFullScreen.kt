@@ -253,7 +253,6 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
                             customUrl = it
                             viewModel.setSearchEngineCustomUrl(it)
                         },
-                        label = { Text(stringResource(R.string.settings_search_engine_custom_hint)) },
                         singleLine = true,
                         shape = SettingsTextFieldShape,
                         modifier = Modifier.fillMaxWidth()

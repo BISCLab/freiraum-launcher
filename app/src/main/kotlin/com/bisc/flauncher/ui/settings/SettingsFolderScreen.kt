@@ -27,6 +27,7 @@ import com.bisc.flauncher.ui.home.FolderIcon
 fun SettingsFolderScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val cardAppearance by viewModel.folderCardAppearance.collectAsState()
     val hideStatusBar by viewModel.folderHideStatusBar.collectAsState()
+    val hideDock by viewModel.folderHideDock.collectAsState()
     val folders by viewModel.folders.collectAsState()
     val folderItems by viewModel.folderItems.collectAsState()
     val browsableApps by viewModel.browsableApps.collectAsState()
@@ -52,6 +53,13 @@ fun SettingsFolderScreen(navController: NavController, onBack: () -> Unit, viewM
                 title = stringResource(R.string.settings_folder_hide_status_bar),
                 onClick = { viewModel.setFolderHideStatusBar(!hideStatusBar) },
                 trailing = { Switch(checked = hideStatusBar, onCheckedChange = viewModel::setFolderHideStatusBar) }
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_folder_hide_dock),
+                info = stringResource(R.string.settings_folder_hide_dock_summary),
+                onClick = { viewModel.setFolderHideDock(!hideDock) },
+                trailing = { Switch(checked = hideDock, onCheckedChange = viewModel::setFolderHideDock) }
             )
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_folder_list_label)) {

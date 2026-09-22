@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
@@ -18,16 +19,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
+import com.bisc.flauncher.data.model.ColorFill
 import com.bisc.flauncher.data.model.DockTapAction
+import com.bisc.flauncher.data.model.ElementAppearance
+import com.bisc.flauncher.data.model.ElementFillMode
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
+import com.bisc.flauncher.ui.home.dock.resolveElementColors
+import com.bisc.flauncher.ui.theme.SearchButtonBorderColor
+import com.bisc.flauncher.ui.theme.SearchButtonSurfaceColor
 
 /** Everything about the dock pill, consolidated in one place. */
 @Composable
@@ -37,6 +46,7 @@ fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavig
     val singleTapAction by viewModel.dockSingleTapAction.collectAsState()
     val doubleTapAction by viewModel.dockDoubleTapAction.collectAsState()
     val matchWidgetCorners by viewModel.dockMatchWidgetCorners.collectAsState()
+    val searchButtonAppearance by viewModel.dockSearchButtonAppearance.collectAsState()
     val pages by viewModel.pages.collectAsState()
     val rowsByPage by viewModel.rowsByPage.collectAsState()
     val homePage = pages.find { it.isHome }
@@ -44,6 +54,7 @@ fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavig
 
     var pickingSlotIndex by remember { mutableStateOf<Int?>(null) }
     var showBackgroundSheet by remember { mutableStateOf(false) }
+    var showSearchButtonSheet by remember { mutableStateOf(false) }
     var pickingTapAction by remember { mutableStateOf<DockTap?>(null) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_dock), navController = navController, onBack = onBack) {
@@ -73,6 +84,12 @@ fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavig
                     icon = null,
                     title = layerBackgroundLabel(2, R.string.settings_layer_surface_dock),
                     onClick = { showBackgroundSheet = true },
+                    trailing = null
+                )
+                SettingsPreference(
+                    icon = null,
+                    title = layerBackgroundLabel(3, R.string.settings_layer_surface_search_button),
+                    onClick = { showSearchButtonSheet = true },
                     trailing = null
                 )
             }
@@ -141,6 +158,27 @@ fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavig
         }
     }
 
+    if (showSearchButtonSheet && dockRow != null) {
+        val layerLabel = layerBackgroundLabel(3, R.string.settings_layer_surface_search_button)
+        SettingsEditPage(title = layerLabel, onDismiss = { showSearchButtonSheet = false }) {
+            ElementAppearanceSection(
+                appearance = searchButtonAppearance ?: automaticSearchButtonAppearance(dockRow.appearance()),
+                onAppearanceChange = viewModel::setDockSearchButtonAppearance,
+                styleGroupTitle = layerLabel
+            )
+            if (searchButtonAppearance != null) {
+                SettingsPreferenceGroup {
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(R.string.settings_element_color_reset),
+                        onClick = viewModel::resetDockSearchButtonAppearance,
+                        trailing = null
+                    )
+                }
+            }
+        }
+    }
+
     pickingTapAction?.let { which ->
         val current = if (which == DockTap.SINGLE) singleTapAction else doubleTapAction
         DockTapActionSheet(
@@ -150,6 +188,28 @@ fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavig
                 pickingTapAction = null
             },
             onDismiss = { pickingTapAction = null }
+        )
+    }
+}
+
+/** A starting point for the search button editor that matches its current automatic light/dark look. */
+@Composable
+private fun automaticSearchButtonAppearance(dockAppearance: ElementAppearance): ElementAppearance {
+    val surfaceDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    val dockColors = resolveElementColors(dockAppearance, surfaceDark)
+    val usesLightDetailing = dockAppearance.fillMode != ElementFillMode.NONE && dockColors.solidBackground.luminance() > 0.5f
+    return if (usesLightDetailing) {
+        ElementAppearance(
+            fill = ColorFill(color = SearchButtonSurfaceColor.toArgb()),
+            borderEnabled = true,
+            borderColor = SearchButtonBorderColor.toArgb(),
+            contentColor = SearchButtonBorderColor.copy(alpha = 0.8f).toArgb()
+        )
+    } else {
+        ElementAppearance(
+            fill = ColorFill(color = dockColors.contentColor.toArgb()),
+            opacity = 0.12f,
+            contentColor = dockColors.contentColor.toArgb()
         )
     }
 }
