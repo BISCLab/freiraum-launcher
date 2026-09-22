@@ -326,6 +326,9 @@
         <item quantity="one">%1$d row</item>
         <item quantity="other">%1$d rows</item>
     </plurals>
+    <string name="settings_widget_size_px">%1$d px tall</string>
+    <string name="settings_widget_size_increase">Increase by %1$d</string>
+    <string name="settings_widget_size_decrease">Decrease by %1$d</string>
     <string name="settings_rows_add">Add row</string>
     <string name="settings_rows_add_apps_row">Apps row</string>
     <string name="settings_rows_add_search_bar">Dock</string>

@@ -17,6 +17,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -34,9 +36,12 @@ import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.data.model.clockDateAction
 import com.bisc.flauncher.data.model.clockTimeAction
 import com.bisc.flauncher.ui.home.HomeViewModel
+import com.bisc.flauncher.ui.home.PageRowDimens
 import com.bisc.flauncher.ui.home.WidgetSizeEditor
+import com.bisc.flauncher.ui.home.dock.DockDimens
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 import com.bisc.flauncher.util.captureViewBitmap
+import kotlin.math.roundToInt
 
 private enum class ClockActionSlot { DATE, TIME }
 
@@ -79,13 +84,38 @@ fun SettingsWidgetRowEditScreen(
     val showsStyleControls = row.type == PageRowType.SYSTEM_WIDGET ||
         (isBuiltIn && row.payload != WidgetKind.CLOCK && row.payload != WidgetKind.SPACER)
 
+    // Same dock-aware rule as the coarse maxSpan above, but in exact pixels for the fine stepper.
+    // This is a page-level approximation (it doesn't know what other rows sit above this one); the real,
+    // position-aware limit is enforced for real at render time by PagedRows' clip, so it's fine if this
+    // is occasionally a bit generous.
+    val configuration = LocalConfiguration.current
+    val density = LocalDensity.current
+    val heightPxRange = remember(pageHasDock, configuration.screenWidthDp, configuration.screenHeightDp, density) {
+        val screenWidthDp = configuration.screenWidthDp.dp
+        val screenHeightDp = configuration.screenHeightDp.dp
+        val innerWidth = (screenWidthDp - DockDimens.horizontalMargin * 2).coerceAtLeast(0.dp)
+        val dockFootprint = DockDimens.scaled(innerWidth)
+            .let { it.barHeight + DockDimens.topMargin + DockDimens.bottomMargin } + DockDimens.contentGap
+        val topChrome = 16.dp
+        val bottomReserve = if (pageHasDock) PageRowDimens.rowSpacing else DockDimens.bottomMargin
+        val reservedAbove = topChrome + (if (pageHasDock) dockFootprint else 16.dp)
+        val viewportHeightDp = (screenHeightDp - reservedAbove - bottomReserve).coerceAtLeast(PageRowDimens.rowUnitHeight)
+        with(density) {
+            val minPx = PageRowDimens.rowUnitHeight.toPx().roundToInt()
+            val maxPx = viewportHeightDp.toPx().roundToInt()
+            minPx..maxOf(maxPx, minPx)
+        }
+    }
+
     SettingsSubScreen(title = rowLabel(row), navController = navController, onBack = onBack) {
         WidgetSizeEditor(
             row = row,
             minSpan = minSpan,
             maxSpan = maxSpan,
             onSpanChange = { viewModel.setRowSpanY(row, it) },
-            onSystemWidgetViewReady = { hostedWidgetView = it }
+            onSystemWidgetViewReady = { hostedWidgetView = it },
+            heightPxRange = heightPxRange,
+            onHeightPxChange = { viewModel.setRowHeightPx(row, it) }
         )
         if (showsStyleControls) {
             ElementAppearanceSection(
