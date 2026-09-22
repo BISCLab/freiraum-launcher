@@ -142,6 +142,13 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setFolderHideStatusBar(hide) }
     }
 
+    val folderHideDock: StateFlow<Boolean> =
+        repository.folderHideDock.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun setFolderHideDock(hide: Boolean) {
+        viewModelScope.launch { repository.setFolderHideDock(hide) }
+    }
+
     val accentColor: StateFlow<Int> =
         repository.accentColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF3B82F6.toInt())
 

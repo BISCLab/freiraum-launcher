@@ -340,6 +340,13 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[FOLDER_HIDE_STATUS_BAR_KEY] = hide }
     }
 
+    /** Whether opening a folder also hides the floating dock, like it can hide the status bar. Off by default. */
+    val folderHideDock: Flow<Boolean> = dataStore.data.map { it[FOLDER_HIDE_DOCK_KEY] ?: false }
+
+    suspend fun setFolderHideDock(hide: Boolean) {
+        dataStore.edit { it[FOLDER_HIDE_DOCK_KEY] = hide }
+    }
+
     /** One-shot command: hides the status bar on every screen (quick overview, search, folders, every page). */
     suspend fun hideStatusBarEverywhere(pageIds: List<Long>) {
         dataStore.edit { prefs ->
@@ -377,6 +384,14 @@ class SettingsRepository @Inject constructor(
     suspend fun setSearchAlphabetRailAppearance(appearance: ElementAppearance) = setElementAppearanceFor(RAIL_PREFIX, appearance)
 
     suspend fun resetSearchAlphabetRailAppearance() = resetElementAppearanceFor(RAIL_PREFIX)
+
+    /** Layer 3: the dock's search (magnifying glass) button. Null keeps the automatic light/dark look. */
+    val dockSearchButtonAppearance: Flow<ElementAppearance?> =
+        customElementAppearanceFor(SEARCH_BUTTON_PREFIX, ElementAppearance(borderEnabled = true))
+
+    suspend fun setDockSearchButtonAppearance(appearance: ElementAppearance) = setElementAppearanceFor(SEARCH_BUTTON_PREFIX, appearance)
+
+    suspend fun resetDockSearchButtonAppearance() = resetElementAppearanceFor(SEARCH_BUTTON_PREFIX)
 
     val appListSearchButtonAppearance: Flow<ElementAppearance?> =
         customElementAppearanceFor("app_list_search_button", ElementAppearance(borderEnabled = true))
@@ -602,6 +617,7 @@ class SettingsRepository @Inject constructor(
         private val ICON_SHAPE_KEY = stringPreferencesKey("icon_shape")
         private val QUICK_OVERVIEW_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("quick_overview_hide_status_bar")
         private val FOLDER_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("folder_hide_status_bar")
+        private val FOLDER_HIDE_DOCK_KEY = booleanPreferencesKey("folder_hide_dock")
         private val ACCENT_COLOR_KEY = intPreferencesKey("accent_color")
         private val DOCK_SINGLE_TAP_ACTION_KEY = stringPreferencesKey("dock_single_tap_action")
         private val DOCK_DOUBLE_TAP_ACTION_KEY = stringPreferencesKey("dock_double_tap_action")
@@ -626,6 +642,7 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_KEYBOARD_HAPTICS_KEY = booleanPreferencesKey("search_keyboard_haptics")
         private val SEARCH_INDEX_SHOW_RAIL_BAR_KEY = booleanPreferencesKey("search_index_show_rail_bar")
         private const val RAIL_PREFIX = "search_alphabet_rail"
+        private const val SEARCH_BUTTON_PREFIX = "dock_search_button"
         private val APP_LIST_DISPLAY_MODE_KEY = stringPreferencesKey("app_list_display_mode")
         private val APP_LIST_LAYOUT_KEY = stringPreferencesKey("app_list_layout")
         private val APP_LIST_SHOW_SEARCH_BUTTON_KEY = booleanPreferencesKey("app_list_show_search_button")

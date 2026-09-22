@@ -408,6 +408,8 @@
     <string name="settings_quick_overview_animation_label">Animate opening</string>
     <string name="settings_quick_overview_animation_summary">Off by default so quick overview opens and closes instantly. Turn on for a short slide/fade animation instead.</string>
     <string name="settings_folder_hide_status_bar">Hide status bar in folders</string>
+    <string name="settings_folder_hide_dock">Hide dock in folders</string>
+    <string name="settings_folder_hide_dock_summary">Off by default, so the floating dock stays visible while a folder is open.</string>
 
     <string name="settings_folder_creator_title">New folder</string>
     <string name="settings_folder_creator_name_hint">Folder name</string>
@@ -507,7 +509,6 @@
     <string name="settings_search_engine_custom_url_unset">Not set</string>
     <string name="settings_search_engine_custom_howto">How to enter your own URL</string>
     <string name="settings_search_engine_custom_info" formatted="false">Write %s where the search term belongs, for example https://www.google.com/search?q=%s. Without %s the term is appended as ?q=, and a missing https:// is added automatically.</string>
-    <string name="settings_search_engine_custom_hint" formatted="false">URL with %s for the search term, e.g. https://www.google.com/search?q=%s</string>
 
     <string name="picker_widget_clock">Clock</string>
     <string name="picker_widget_music">Music</string>

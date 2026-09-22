@@ -189,6 +189,20 @@ class HomeViewModel @Inject constructor(
     val folderHideStatusBar: StateFlow<Boolean> =
         settingsRepository.folderHideStatusBar.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    val folderHideDock: StateFlow<Boolean> =
+        settingsRepository.folderHideDock.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val dockSearchButtonAppearance: StateFlow<ElementAppearance?> =
+        settingsRepository.dockSearchButtonAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    fun setDockSearchButtonAppearance(appearance: ElementAppearance) {
+        viewModelScope.launch { settingsRepository.setDockSearchButtonAppearance(appearance) }
+    }
+
+    fun resetDockSearchButtonAppearance() {
+        viewModelScope.launch { settingsRepository.resetDockSearchButtonAppearance() }
+    }
+
     val searchOverlayBackground: StateFlow<BackgroundConfig> =
         settingsRepository.searchOverlayBackground.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig(opacity = 0f))
 

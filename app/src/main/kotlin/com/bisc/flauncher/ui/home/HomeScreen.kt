@@ -159,6 +159,8 @@ fun HomeScreen(
     val openFolderPath by viewModel.openFolderPath.collectAsState()
     val folderOpen = openFolderPath.isNotEmpty()
     val folderHideStatusBar by viewModel.folderHideStatusBar.collectAsState()
+    val folderHideDock by viewModel.folderHideDock.collectAsState()
+    val dockSearchButtonAppearance by viewModel.dockSearchButtonAppearance.collectAsState()
     val quickHideStatusBar by viewModel.quickOverviewHideStatusBar.collectAsState()
     val notes by viewModel.notes.collectAsState()
     val savedMapTargets by viewModel.savedMapTargets.collectAsState()
@@ -576,7 +578,7 @@ fun HomeScreen(
             }
             if (pinnedSearchBarRow != null) {
                 val dockAlpha by animateFloatAsState(
-                    targetValue = if (searchOpen && searchKeyboardType == SearchKeyboardType.SYSTEM) 0f else 1f,
+                    targetValue = if ((searchOpen && searchKeyboardType == SearchKeyboardType.SYSTEM) || (folderOpen && folderHideDock)) 0f else 1f,
                     animationSpec = tween(200),
                     label = "dockAlpha"
                 )
@@ -587,6 +589,7 @@ fun HomeScreen(
                     handedness = handedness,
                     iconShape = iconShape,
                     appearance = pinnedSearchBarRow.appearance(),
+                    searchButtonAppearance = dockSearchButtonAppearance,
                     quickLaunchSlots = quickLaunchSlots,
                     loadQuickLaunchIcon = viewModel::loadIcon,
                     onQuickLaunchClick = { componentName -> launchApp(context, componentName) }
