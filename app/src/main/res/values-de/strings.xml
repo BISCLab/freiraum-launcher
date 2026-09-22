@@ -325,6 +325,9 @@
         <item quantity="one">%1$d Zeile</item>
         <item quantity="other">%1$d Zeilen</item>
     </plurals>
+    <string name="settings_widget_size_px">%1$d px hoch</string>
+    <string name="settings_widget_size_increase">Um %1$d erhöhen</string>
+    <string name="settings_widget_size_decrease">Um %1$d verringern</string>
     <string name="settings_rows_add">Zeile hinzufügen</string>
     <string name="settings_rows_add_apps_row">App-Zeile</string>
     <string name="settings_rows_add_search_bar">Dock</string>

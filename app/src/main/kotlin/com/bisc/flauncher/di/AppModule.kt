@@ -89,6 +89,12 @@ private val MIGRATION_32_33 = object : Migration(32, 33) {
     }
 }
 
+private val MIGRATION_33_34 = object : Migration(33, 34) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE page_rows ADD COLUMN heightPx INTEGER")
+    }
+}
+
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "flauncher_settings")
 
 @Module
@@ -102,7 +108,7 @@ object AppModule {
     @Singleton
     fun provideDatabase(@ApplicationContext ctx: Context): FLauncherDatabase =
         Room.databaseBuilder(ctx, FLauncherDatabase::class.java, "flauncher.db")
-            .addMigrations(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33)
+            .addMigrations(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34)
             .fallbackToDestructiveMigration(dropAllTables = true)
             .build()
 

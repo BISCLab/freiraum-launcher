@@ -138,6 +138,11 @@ class PageContentRepository @Inject constructor(
         rowDao.update(row.copy(spanY = spanY))
     }
 
+    /** Exact-pixel sizing for a SYSTEM_WIDGET row; null reverts it to the ordinary spanY-based height. */
+    suspend fun setRowHeightPx(row: PageRow, heightPx: Int?) {
+        rowDao.update(row.copy(heightPx = heightPx))
+    }
+
     suspend fun setRowAppearance(row: PageRow, appearance: ElementAppearance) {
         rowDao.update(row.withAppearance(appearance))
     }

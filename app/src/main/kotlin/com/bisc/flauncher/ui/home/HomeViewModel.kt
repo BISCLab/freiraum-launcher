@@ -796,6 +796,10 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { pageContentRepository.setRowSpanY(row, spanY) }
     }
 
+    fun setRowHeightPx(row: PageRow, heightPx: Int?) {
+        viewModelScope.launch { pageContentRepository.setRowHeightPx(row, heightPx) }
+    }
+
     fun setRowAppearance(row: PageRow, appearance: ElementAppearance) {
         viewModelScope.launch { pageContentRepository.setRowAppearance(row, appearance) }
     }

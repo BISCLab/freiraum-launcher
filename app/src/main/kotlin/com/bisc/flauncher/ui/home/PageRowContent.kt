@@ -116,9 +116,15 @@ fun PageRowContent(
             val appWidgetId = remember(row.payload) { row.payload.toIntOrNull() }
             if (appWidgetId != null) {
                 val horizontalMargin = if (row.edgeToEdge) 0.dp else DockDimens.horizontalMargin
+                val exactHeightPx = row.heightPx
+                val rowHeight = if (exactHeightPx != null && exactHeightPx > 0) {
+                    with(androidx.compose.ui.platform.LocalDensity.current) { exactHeightPx.toDp() }
+                } else {
+                    PageRowDimens.rowUnitHeight * row.spanY
+                }
                 SystemWidgetView(
                     appWidgetId = appWidgetId,
-                    modifier = Modifier.fillMaxWidth().height(PageRowDimens.rowUnitHeight * row.spanY),
+                    modifier = Modifier.fillMaxWidth().height(rowHeight),
                     appearance = row.appearance(),
                     cornerStyle = row.cornerStyle,
                     horizontalMargin = horizontalMargin,

@@ -13,6 +13,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,9 +35,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.PageRow
+import com.bisc.flauncher.data.model.PageRowType
 import kotlin.math.roundToInt
 
-/** Widget preview with +/- buttons and a drag handle, either of which sets the row height. */
+/**
+ * Widget preview with size controls below it: a coarse row-count stepper for our own widgets, or —
+ * for a hosted external widget — a fine, per-digit pixel-height stepper (see [PixelHeightStepper]).
+ */
 @Composable
 fun WidgetSizeEditor(
     row: PageRow,
@@ -43,7 +49,9 @@ fun WidgetSizeEditor(
     maxSpan: Int,
     onSpanChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    onSystemWidgetViewReady: ((android.view.View) -> Unit)? = null
+    onSystemWidgetViewReady: ((android.view.View) -> Unit)? = null,
+    heightPxRange: IntRange? = null,
+    onHeightPxChange: ((Int) -> Unit)? = null
 ) {
     val density = LocalDensity.current
     val unitPx = remember(density) { with(density) { PageRowDimens.rowUnitHeight.toPx() } }
@@ -59,6 +67,16 @@ fun WidgetSizeEditor(
             onFolderClick = {},
             onSystemWidgetViewReady = onSystemWidgetViewReady
         )
+        if (row.type == PageRowType.SYSTEM_WIDGET && heightPxRange != null && onHeightPxChange != null) {
+            val currentHeightPx = row.heightPx ?: unitPx.roundToInt().let { it * row.spanY }
+            PixelHeightStepper(
+                valuePx = currentHeightPx.coerceIn(heightPxRange),
+                range = heightPxRange,
+                onValueChange = onHeightPxChange,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+            return@Column
+        }
         Row(
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             horizontalArrangement = Arrangement.Center,
@@ -110,6 +128,51 @@ fun WidgetSizeEditor(
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+            }
+        }
+    }
+}
+
+private val PLACE_VALUES = listOf(1000, 100, 10, 1)
+
+/**
+ * Four small up/down steppers, one per decimal place (thousands/hundreds/tens/ones), for dialling in
+ * an exact pixel height. Each nudges [valuePx] by its own place value and clamps to [range].
+ */
+@Composable
+fun PixelHeightStepper(valuePx: Int, range: IntRange, onValueChange: (Int) -> Unit, modifier: Modifier = Modifier) {
+    Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            stringResource(R.string.settings_widget_size_px, valuePx),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(bottom = 6.dp)
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            PLACE_VALUES.forEach { place ->
+                val digit = (valuePx / place) % 10
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    IconButton(
+                        onClick = { onValueChange((valuePx + place).coerceIn(range)) },
+                        enabled = valuePx + place <= range.last
+                    ) {
+                        Icon(Icons.Filled.KeyboardArrowUp, contentDescription = stringResource(R.string.settings_widget_size_increase, place))
+                    }
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(digit.toString(), style = MaterialTheme.typography.titleMedium)
+                    }
+                    IconButton(
+                        onClick = { onValueChange((valuePx - place).coerceIn(range)) },
+                        enabled = valuePx - place >= range.first
+                    ) {
+                        Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.settings_widget_size_decrease, place))
+                    }
                 }
             }
         }

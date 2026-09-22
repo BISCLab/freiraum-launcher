@@ -25,6 +25,9 @@ data class PageRow(
     val type: PageRowType,
     val payload: String = "",
     val spanY: Int = 1,
+    // Exact pixel height, used only for SYSTEM_WIDGET rows once resized with the fine (per-digit) size
+    // editor; null means "not set yet", falling back to spanY * the shared row unit height as usual.
+    val heightPx: Int? = null,
     val elementFillMode: ElementFillMode = ElementFillMode.COLOR,
     val fillColor: Int = android.graphics.Color.WHITE,
     val fillSecondaryColor: Int = android.graphics.Color.BLACK,
