@@ -35,8 +35,15 @@ class SystemWidgetHostManager @Inject constructor(
     fun installedProviders(): List<AppWidgetProviderInfo> = appWidgetManager.installedProviders
 
     /**
-     * [dark] forces the hosted widget's own dark/light resources to follow the launcher's chosen
-     * mode for the surface it sits on, instead of the system's separate day/night setting.
+     * [dark] forces the hosted widget's own dark/light resources to follow the launcher's chosen mode
+     * for the surface it sits on, instead of the system's separate day/night setting. A themed
+     * [Configuration] context is what actually makes this work broadly — [AppWidgetHostView]'s own
+     * [AppWidgetHostView.setOnLightBackground] (also set below, API 29+) sounds like it should be
+     * enough and doesn't require recreating the view on a change, but in practice most third-party
+     * widgets simply don't check it and keep rendering with whatever their default theme is; only
+     * widgets built specifically for Material You dynamic color tend to honor it. Recreating on every
+     * [dark] change (via `key(dark)` at the call site) is the reliable option, even though it costs a
+     * brief blank/white flash right when it happens.
      */
     fun createHostView(appWidgetId: Int, info: AppWidgetProviderInfo, dark: Boolean): AppWidgetHostView {
         val nightMode = if (dark) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
@@ -44,7 +51,10 @@ class SystemWidgetHostManager @Inject constructor(
             uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or nightMode
         }
         val themedContext = context.createConfigurationContext(configuration)
-        return appWidgetHost.createView(themedContext, appWidgetId, info).apply { setAppWidget(appWidgetId, info) }
+        return appWidgetHost.createView(themedContext, appWidgetId, info).apply {
+            setAppWidget(appWidgetId, info)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) setOnLightBackground(!dark)
+        }
     }
 
     /**

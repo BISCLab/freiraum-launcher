@@ -6,12 +6,12 @@ import com.bisc.flauncher.ui.home.dock.DockDimens
 import kotlin.math.roundToInt
 
 /**
- * The largest a SYSTEM_WIDGET row is ever allowed to be sized to, in px. [PagedRows] will still clip a
- * too-tall widget at render time as a last resort, but that abrupt, last-moment squeeze is itself what
- * has caused real widget-process crashes for some third-party widgets — so this cap exists to keep a
- * widget from ever being sized past what genuinely fits in the first place. Shared by the settings height
- * stepper and the dock-conflict auto-relocate check so both agree on exactly the same threshold; this is
- * a page-level approximation (it doesn't know what other rows already sit above this one on the page).
+ * The largest a SYSTEM_WIDGET row is ever allowed to be sized to, in px. Pages don't scroll — a page is
+ * exactly one screen — so a widget sized past this would simply overflow off-screen with nothing to
+ * compensate; this cap keeps that from ever happening in the first place. Shared by the settings height
+ * stepper and the page-overflow rebalancing check so both agree on exactly the same threshold; this is
+ * a page-level approximation (it doesn't know what other rows already sit above this one on the page —
+ * rebalancing handles that separately by moving rows to a new page once they no longer fit together).
  */
 fun safeSystemWidgetMaxHeightPx(
     pageHasDock: Boolean,
@@ -28,7 +28,11 @@ fun safeSystemWidgetMaxHeightPx(
             .let { it.barHeight + DockDimens.topMargin + DockDimens.bottomMargin }.toPx() + DockDimens.contentGap.toPx()
         val topChromePx = statusBarPx + 16.dp.toPx()
         val bottomReservePx = if (pageHasDock) dockFootprintPx else navigationBarPx + 16.dp.toPx()
-        val safetyMarginPx = 24.dp.toPx()
+        // Was 24dp — that on top of an *already* accurate top-chrome reservation (real status bar +
+        // display cutout, not a guess) ate enough budget to reject page layouts that visibly fit fine,
+        // like 3+2+1 row-unit built-in widgets stacked above a dock. A small margin is enough now that
+        // the inputs themselves are no longer the imprecise part.
+        val safetyMarginPx = 4.dp.toPx()
         val viewportPx = screenHeightPx - topChromePx - bottomReservePx - safetyMarginPx
         return viewportPx.roundToInt().coerceAtLeast(PageRowDimens.rowUnitHeight.toPx().roundToInt())
     }

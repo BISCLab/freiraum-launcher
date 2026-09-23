@@ -26,6 +26,7 @@ fun SettingsAppearanceScreen(navController: NavController, onBack: () -> Unit, v
     val handedness by viewModel.handedness.collectAsState()
     val chargingAnimation by viewModel.chargingAnimationEnabled.collectAsState()
     val chargingColor by viewModel.chargingAnimationColor.collectAsState()
+    val statusBarHiddenEverywhere by viewModel.statusBarHiddenEverywhere.collectAsState()
     var confirmingPreset by remember { mutableStateOf<DesignPreset?>(null) }
     val context = androidx.compose.ui.platform.LocalContext.current
     var pendingImport by remember { mutableStateOf<android.net.Uri?>(null) }
@@ -84,13 +85,17 @@ fun SettingsAppearanceScreen(navController: NavController, onBack: () -> Unit, v
             RadioPreference(stringResource(R.string.settings_handedness_right), Handedness.RIGHT, handedness, viewModel::setHandedness)
         }
         // Home, Pages, Quick overview and Text search each have their own status-bar switch on their own screen.
+        // This one is a bulk action over all of them — checked reflects whether every one of them is
+        // currently hidden, and toggling it off sets every one of them back to shown.
         SettingsPreferenceGroup(title = stringResource(R.string.settings_statusbar_label)) {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_statusbar_hide_all),
                 info = stringResource(R.string.settings_statusbar_hide_all_summary),
-                onClick = { viewModel.hideStatusBarEverywhere() },
-                trailing = null
+                onClick = { viewModel.setStatusBarHiddenEverywhere(!statusBarHiddenEverywhere) },
+                trailing = {
+                    Switch(checked = statusBarHiddenEverywhere, onCheckedChange = { viewModel.setStatusBarHiddenEverywhere(it) })
+                }
             )
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_backup_label)) {

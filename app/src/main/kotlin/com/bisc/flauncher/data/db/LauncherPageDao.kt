@@ -13,6 +13,9 @@ interface LauncherPageDao {
     @Query("SELECT * FROM launcher_pages ORDER BY orderIndex")
     fun observeAll(): Flow<List<LauncherPage>>
 
+    @Query("SELECT * FROM launcher_pages ORDER BY orderIndex")
+    suspend fun getAllOnce(): List<LauncherPage>
+
     @Query("SELECT * FROM launcher_pages WHERE isHome = 1 LIMIT 1")
     suspend fun getHomePage(): LauncherPage?
 

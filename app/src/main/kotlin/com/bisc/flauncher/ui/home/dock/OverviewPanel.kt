@@ -38,6 +38,8 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -423,6 +425,11 @@ private fun NoteOverviewItem(
                     text = { Text(stringResource(R.string.folder_item_move)) },
                     leadingIcon = { Icon(Icons.AutoMirrored.Filled.CompareArrows, contentDescription = null) },
                     onClick = onRequestMove
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(if (note.hiddenInWidget) R.string.widget_notes_show_in_widget else R.string.widget_notes_hide)) },
+                    leadingIcon = { Icon(if (note.hiddenInWidget) Icons.Filled.Visibility else Icons.Filled.VisibilityOff, contentDescription = null) },
+                    onClick = { onDismissMenu(); onSave(note.copy(hiddenInWidget = !note.hiddenInWidget)) }
                 )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.folder_item_remove)) },

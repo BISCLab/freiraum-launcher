@@ -47,6 +47,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -117,8 +119,19 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setPageHideStatusBar(pageId, hide) }
     }
 
-    fun hideStatusBarEverywhere() {
-        viewModelScope.launch { repository.hideStatusBarEverywhere(pages.value.map { it.id }) }
+    // Includes every page (not just the filtered `pages` above, which excludes the app overview
+    // page), so "everywhere" actually means everywhere, including app overview's own flag.
+    val statusBarHiddenEverywhere: StateFlow<Boolean> = pageContentRepository.allPages.flatMapLatest { allPages ->
+        val perPageFlows = allPages.map { repository.pageHideStatusBar(it.id) }
+        val sharedFlows = listOf(repository.quickOverviewHideStatusBar, repository.searchHideStatusBar, repository.folderHideStatusBar)
+        combine(perPageFlows + sharedFlows) { values -> values.all { it } }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun setStatusBarHiddenEverywhere(hidden: Boolean) {
+        viewModelScope.launch {
+            val pageIds = pageContentRepository.allPages.first().map { it.id }
+            repository.setStatusBarHiddenEverywhere(pageIds, hidden)
+        }
     }
 
     val quickOverviewHideStatusBar: StateFlow<Boolean> =
@@ -589,7 +602,18 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun setAppListDisplayMode(mode: AppListDisplayMode) {
-        viewModelScope.launch { repository.setAppListDisplayMode(mode) }
+        // Layer 2's own background otherwise still renders (now covering the whole screen, since
+        // fullscreen mode paints it as a full-bleed fill rather than a bounded card) and can make it
+        // look like a background image change did nothing, when it's actually just hidden behind it.
+        // Unconditional on every select of FULLSCREEN (not just an actual mode change) so this also
+        // recovers a page that's *already* stuck with an explicit non-zero opacity from before — e.g.
+        // fullscreen is the app's own default, so most people never see an actual mode-switch event.
+        viewModelScope.launch {
+            repository.setAppListDisplayMode(mode)
+            if (mode == AppListDisplayMode.FULLSCREEN) {
+                repository.setAppListContentAppearance(appListContentAppearance.value.copy(opacity = 0f))
+            }
+        }
     }
 
     fun setAppListContentAppearance(appearance: ElementAppearance) {

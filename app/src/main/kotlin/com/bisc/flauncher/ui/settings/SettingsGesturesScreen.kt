@@ -5,7 +5,6 @@ import android.content.Intent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.SwipeDown
 import androidx.compose.material.icons.filled.SwipeUp
 import androidx.compose.material.icons.filled.TouchApp
@@ -199,7 +198,6 @@ private fun gestureIcon(gesture: HomeGesture) = when (gesture) {
     HomeGesture.DOUBLE_TAP -> Icons.Filled.TouchApp
     HomeGesture.SWIPE_UP -> Icons.Filled.SwipeUp
     HomeGesture.SWIPE_DOWN -> Icons.Filled.SwipeDown
-    HomeGesture.HOME_BUTTON -> Icons.Filled.Home
 }
 
 @Composable
@@ -208,7 +206,6 @@ private fun gestureLabel(gesture: HomeGesture): String = when (gesture) {
     HomeGesture.DOUBLE_TAP -> stringResource(R.string.settings_gesture_double_tap)
     HomeGesture.SWIPE_UP -> stringResource(R.string.settings_gesture_swipe_up)
     HomeGesture.SWIPE_DOWN -> stringResource(R.string.settings_gesture_swipe_down)
-    HomeGesture.HOME_BUTTON -> stringResource(R.string.settings_gesture_home_button)
 }
 
 @Composable

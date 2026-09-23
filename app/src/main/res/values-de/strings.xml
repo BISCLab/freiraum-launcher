@@ -276,11 +276,6 @@
 
     <string name="wallpaper_light">Heller Hintergrund</string>
     <string name="wallpaper_dark">Dunkler Hintergrund</string>
-    <string name="settings_background_system_row">Als System-Hintergrund festlegen …</string>
-    <string name="settings_background_system_title">Auch als System-Hintergrund verwenden?</string>
-    <string name="settings_background_system_text">Android lässt dich dann zwischen Startbildschirm, Sperrbildschirm oder beidem wählen.</string>
-    <string name="settings_background_system_confirm">Auswählen</string>
-    <string name="settings_background_system_dismiss">Jetzt nicht</string>
     <string name="settings_background_bundled_label">Mitgelieferte Hintergründe</string>
     <string name="settings_background_source_custom_image">Eigenes Bild</string>
     <string name="settings_background_source_color">Farbe</string>
@@ -296,7 +291,6 @@
     <string name="settings_gesture_double_tap">Doppeltippen</string>
     <string name="settings_gesture_swipe_up">Nach oben wischen</string>
     <string name="settings_gesture_swipe_down">Nach unten wischen</string>
-    <string name="settings_gesture_home_button">Home-Taste</string>
     <string name="settings_gesture_action_none">Keine Aktion</string>
     <string name="settings_gesture_action_app">App öffnen</string>
     <string name="settings_gesture_action_shortcut">Verknüpfung ausführen</string>
@@ -553,6 +547,8 @@
     <string name="widget_notes_title">Notizen</string>
     <string name="widget_notes_empty">Noch keine Notizen</string>
     <string name="widget_notes_untitled">Ohne Titel</string>
+    <string name="widget_notes_hide">Im Widget ausblenden</string>
+    <string name="widget_notes_show_in_widget">Im Widget anzeigen</string>
     <string name="widget_notes_add">Neue Notiz</string>
     <string name="widget_notes_edit">Bearbeiten</string>
     <string name="widget_notes_done">Fertig</string>

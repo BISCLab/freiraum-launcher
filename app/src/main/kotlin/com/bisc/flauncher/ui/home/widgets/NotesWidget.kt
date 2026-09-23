@@ -68,6 +68,9 @@ fun NotesWidget(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val notes by viewModel.notes.collectAsState()
+    // Hiding only affects this widget's own grid; the note stays visible everywhere else, so
+    // reordering (moveBy below) still operates on the full, unfiltered list.
+    val visibleNotes = remember(notes) { notes.filter { !it.hiddenInWidget } }
     var editingNote by remember { mutableStateOf<Note?>(null) }
     var showEditor by remember { mutableStateOf(false) }
     var menuForNoteId by remember { mutableStateOf<Long?>(null) }
@@ -75,7 +78,7 @@ fun NotesWidget(
 
     val rows = spanY.coerceAtLeast(1)
     val perPage = rows * COLUMNS
-    val pageCount = ((notes.size - 1) / perPage + 1).coerceAtLeast(1)
+    val pageCount = ((visibleNotes.size - 1) / perPage + 1).coerceAtLeast(1)
     val pagerState = rememberPagerState(pageCount = { pageCount })
     // Same automatic black/white the rest of the app uses so the grid lines read against any background.
     val gridLineColor = resolveElementColors(appearance).borderColor
@@ -122,7 +125,7 @@ fun NotesWidget(
                     }
                 }
             }
-            if (notes.isEmpty()) {
+            if (visibleNotes.isEmpty()) {
                 Row(
                     modifier = Modifier.fillMaxSize().combinedClickable(onClick = { editingNote = null; showEditor = true }).padding(horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -131,7 +134,7 @@ fun NotesWidget(
                 }
             } else {
                 HorizontalPager(state = pagerState, modifier = Modifier.weight(1f).fillMaxWidth()) { page ->
-                    val pageNotes = notes.drop(page * perPage).take(perPage)
+                    val pageNotes = visibleNotes.drop(page * perPage).take(perPage)
                     Column(
                         modifier = Modifier.fillMaxSize().padding(8.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -153,6 +156,7 @@ fun NotesWidget(
                                         onLongClick = { note -> menuForNoteId = note.id },
                                         onDismissMenu = { menuForNoteId = null },
                                         onRequestMove = { note -> menuForNoteId = null; movingNoteId = note.id },
+                                        onRequestHide = { note -> menuForNoteId = null; viewModel.saveNote(note.copy(hiddenInWidget = true)) },
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
@@ -188,6 +192,7 @@ private fun NoteCell(
     onLongClick: (Note) -> Unit,
     onDismissMenu: () -> Unit,
     onRequestMove: (Note) -> Unit,
+    onRequestHide: (Note) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(10.dp)
@@ -211,6 +216,7 @@ private fun NoteCell(
         if (note != null) {
             DropdownMenu(expanded = menuExpanded, onDismissRequest = onDismissMenu) {
                 DropdownMenuItem(text = { Text(stringResource(R.string.folder_item_move)) }, onClick = { onRequestMove(note) })
+                DropdownMenuItem(text = { Text(stringResource(R.string.widget_notes_hide)) }, onClick = { onRequestHide(note) })
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (note.type == NoteType.CHECKLISTE) {

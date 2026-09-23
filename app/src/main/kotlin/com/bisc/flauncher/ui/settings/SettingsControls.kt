@@ -33,6 +33,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -58,6 +59,36 @@ fun layerBackgroundLabel(layer: Int, surfaceNameRes: Int): String =
 
 /** Corner shape of all text fields in the settings. */
 val SettingsTextFieldShape = RoundedCornerShape(16.dp)
+
+/**
+ * A [Slider] whose value is only persisted once the drag ends, not on every intermediate frame.
+ * Persisted settings live in a single shared DataStore Preferences file, and every write there
+ * re-serializes and rewrites the *whole* file to disk — firing that on every drag frame (as plain
+ * `onValueChange` does) can queue up dozens of full-file writes per second while dragging, which is
+ * what made these screens feel massively laggy, and could even bury a just-made unrelated change
+ * (like picking a background image) behind a long backlog of stale slider writes. The slider itself
+ * still tracks the drag smoothly via local state — [label] is handed that live value so any text next
+ * to the slider (e.g. a percentage) stays in sync while dragging too.
+ */
+@Composable
+fun SettledSlider(
+    value: Float,
+    onSettled: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    modifier: Modifier = Modifier,
+    label: @Composable (Float) -> Unit = {}
+) {
+    var local by remember(value) { mutableFloatStateOf(value) }
+    Column(modifier = modifier) {
+        label(local)
+        Slider(
+            value = local,
+            onValueChange = { local = it },
+            onValueChangeFinished = { onSettled(local) },
+            valueRange = valueRange
+        )
+    }
+}
 
 /** Shared generic radio-list row, one [SettingsPreference] with a trailing [RadioButton]. */
 @Composable
@@ -167,17 +198,18 @@ fun ElementAppearanceSection(
         }
 
         SettingsPreferenceGroup(title = stringResource(R.string.settings_background_opacity_label)) {
-            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                Text(
-                    stringResource(R.string.settings_background_opacity_value, (appearance.opacity * 100).roundToInt()),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Slider(
-                    value = appearance.opacity,
-                    onValueChange = { onAppearanceChange(appearance.copy(opacity = it)) },
-                    valueRange = 0f..1f
-                )
-            }
+            SettledSlider(
+                value = appearance.opacity,
+                onSettled = { onAppearanceChange(appearance.copy(opacity = it)) },
+                valueRange = 0f..1f,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                label = { live ->
+                    Text(
+                        stringResource(R.string.settings_background_opacity_value, (live * 100).roundToInt()),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            )
         }
     }
 
@@ -197,17 +229,18 @@ fun ElementAppearanceSection(
 
     if (appearance.borderEnabled) {
         SettingsPreferenceGroup(title = stringResource(R.string.settings_element_border_style_label)) {
-            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                Text(
-                    stringResource(R.string.settings_element_border_width_value, String.format(java.util.Locale.US, "%.1f", appearance.borderWidth)),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Slider(
-                    value = appearance.borderWidth,
-                    onValueChange = { onAppearanceChange(appearance.copy(borderWidth = (it * 2f).roundToInt() / 2f)) },
-                    valueRange = 0.5f..6f
-                )
-            }
+            SettledSlider(
+                value = appearance.borderWidth,
+                onSettled = { onAppearanceChange(appearance.copy(borderWidth = (it * 2f).roundToInt() / 2f)) },
+                valueRange = 0.5f..6f,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                label = { live ->
+                    Text(
+                        stringResource(R.string.settings_element_border_width_value, String.format(java.util.Locale.US, "%.1f", live)),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            )
         }
         AutomaticColorPicker(
             title = stringResource(R.string.settings_element_border_color),

@@ -268,11 +268,6 @@
 
     <string name="wallpaper_light">Light wallpaper</string>
     <string name="wallpaper_dark">Dark wallpaper</string>
-    <string name="settings_background_system_row">Set as system wallpaper…</string>
-    <string name="settings_background_system_title">Use as system wallpaper too?</string>
-    <string name="settings_background_system_text">Android then lets you choose between home screen, lock screen or both.</string>
-    <string name="settings_background_system_confirm">Choose</string>
-    <string name="settings_background_system_dismiss">Not now</string>
     <string name="settings_background_bundled_label">Bundled wallpapers</string>
     <string name="settings_background_source_custom_image">Custom image</string>
     <string name="settings_background_source_color">Color</string>
@@ -297,7 +292,6 @@
     <string name="settings_gesture_double_tap">Double tap</string>
     <string name="settings_gesture_swipe_up">Swipe up</string>
     <string name="settings_gesture_swipe_down">Swipe down</string>
-    <string name="settings_gesture_home_button">Home button</string>
     <string name="settings_gesture_action_none">No action</string>
     <string name="settings_gesture_action_app">Open app</string>
     <string name="settings_gesture_action_shortcut">Run shortcut</string>
@@ -554,6 +548,8 @@
     <string name="widget_notes_title">Notes</string>
     <string name="widget_notes_empty">No notes yet</string>
     <string name="widget_notes_untitled">Untitled</string>
+    <string name="widget_notes_hide">Hide in widget</string>
+    <string name="widget_notes_show_in_widget">Show in widget</string>
     <string name="widget_notes_add">New note</string>
     <string name="widget_notes_edit">Edit</string>
     <string name="widget_notes_done">Done</string>

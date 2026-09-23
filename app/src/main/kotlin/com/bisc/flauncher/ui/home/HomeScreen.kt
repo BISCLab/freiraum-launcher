@@ -11,7 +11,6 @@ import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -66,7 +65,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -84,6 +82,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import kotlin.math.ceil
+import kotlin.math.floor
 import com.bisc.flauncher.data.model.SearchKeyboardType
 import com.bisc.flauncher.util.setStatusBarHidden
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -97,7 +97,6 @@ import com.bisc.flauncher.data.model.ContactInfo
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.SidebarCategoryViewMode
-import com.bisc.flauncher.ui.home.dock.SidebarEntryType
 import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.settings.Handedness
@@ -125,13 +124,6 @@ import com.bisc.flauncher.util.launchSettingsShortcut
 import com.bisc.flauncher.util.openContact
 import com.bisc.flauncher.util.openWebsite
 import kotlinx.coroutines.launch
-
-/** Bundles the per-invocation args of the movable quick-overview panel content (see [HomeScreen]). */
-private data class OverviewPanelParams(
-    val entry: SidebarEntryType,
-    val dock: com.bisc.flauncher.ui.home.dock.ScaledDock,
-    val shape: androidx.compose.ui.graphics.Shape
-)
 
 /** Hosts the paged home screen ([PageRowsColumn] per page). */
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -231,13 +223,33 @@ fun HomeScreen(
     val currentPageId = pages.getOrNull(pagerState.currentPage)?.id ?: -1L
     val currentPageHideStatusBar by remember(currentPageId) { viewModel.pageHideStatusBar(currentPageId) }
         .collectAsState(initial = false)
+    // Its own page-scoped flag, independent of text search's — previously it silently borrowed
+    // search's setting, with no way to configure it separately from the app overview's own screen.
+    val appOverviewHideStatusBar by remember(appOverviewPageId) { viewModel.pageHideStatusBar(appOverviewPageId ?: -1L) }
+        .collectAsState(initial = false)
     val hideStatusBar = when {
         folderOpen -> folderHideStatusBar
-        searchOpen || onAppOverviewPage -> searchHideStatusBar
+        onAppOverviewPage -> appOverviewHideStatusBar
+        searchOpen -> searchHideStatusBar
         overviewEntry != null -> quickHideStatusBar
         else -> currentPageHideStatusBar
     }
     val immersiveSearch = hideStatusBar && !folderOpen
+    // Real inset values only ever arrive once WindowInsets are actually delivered, and are cached here
+    // (never reset back to 0) so our own top-padding animation below always has a real, stable target
+    // to animate toward — instead of tracking the *live*, mid-transition system inset while the OS
+    // separately animates the real status bar in/out. Two independently-timed animations racing each
+    // other is what caused content (e.g. the clock) to visibly slide and "find its place" instead of
+    // moving once, cleanly, whenever hideStatusBar differs between two things the user navigates
+    // between (e.g. one page hides it, another doesn't).
+    var cachedStatusBarInset by remember { mutableStateOf(0.dp) }
+    var cachedCutoutInset by remember { mutableStateOf(0.dp) }
+    val liveStatusBarInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val liveCutoutInset = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
+    if (liveStatusBarInset > 0.dp) cachedStatusBarInset = liveStatusBarInset
+    if (liveCutoutInset > 0.dp) cachedCutoutInset = liveCutoutInset
+    val targetTopInset = if (immersiveSearch) cachedCutoutInset else maxOf(cachedStatusBarInset, cachedCutoutInset)
+    val animatedTopInset by animateDpAsState(targetTopInset, animationSpec = tween(200), label = "topInset")
     val view = LocalView.current
     DisposableEffect(hideStatusBar) {
         val window = (view.context as? Activity)?.window
@@ -301,14 +313,6 @@ fun HomeScreen(
         onNavigateToSettings()
     }
 
-    var lastSeenHomeButtonPressCount by remember { mutableStateOf(homeButtonPressCount) }
-    LaunchedEffect(homeButtonPressCount) {
-        if (homeButtonPressCount != lastSeenHomeButtonPressCount) {
-            lastSeenHomeButtonPressCount = homeButtonPressCount
-            viewModel.executeGestureAction(HomeGesture.HOME_BUTTON, context, openPageById, openSettingsFromGesture)
-        }
-    }
-
     // Whether *any* level of the folder stack is open.
     val blurRadius by animateDpAsState(
         targetValue = if (folderOpen && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) 20.dp else 0.dp,
@@ -329,28 +333,73 @@ fun HomeScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (pages.isNotEmpty()) {
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.fillMaxSize().then(if (blurRadius > 0.dp) Modifier.blur(blurRadius) else Modifier)
-            ) { pageIndex ->
-                BoxWithConstraints(
-                    modifier = Modifier.fillMaxSize().detectHomeGestures(
-                        onLongPress = { viewModel.executeGestureAction(HomeGesture.LONG_PRESS, context, openPageById, openSettingsFromGesture) },
-                        onDoubleTap = { viewModel.executeGestureAction(HomeGesture.DOUBLE_TAP, context, openPageById, openSettingsFromGesture) },
-                        onSwipeUp = { viewModel.executeGestureAction(HomeGesture.SWIPE_UP, context, openPageById, openSettingsFromGesture) },
-                        onSwipeDown = { viewModel.executeGestureAction(HomeGesture.SWIPE_DOWN, context, openPageById, openSettingsFromGesture) }
-                    )
-                ) {
+            Box(modifier = Modifier.fillMaxSize().then(if (blurRadius > 0.dp) Modifier.blur(blurRadius) else Modifier)) {
+                // Layer 1 used to live *inside* each page's pager slot, so it physically slid along with
+                // that page's content — fine when neighboring pages share the same background, but a hard,
+                // sudden seam wherever two pages carry genuinely different images/colors (you'd see both
+                // full images sliding edge-to-edge). Pulled out here as one shared layer behind the pager,
+                // crossfading between the settling and target page's background based on the pager's own
+                // continuous drag position, so the backdrop dissolves smoothly while the content on top
+                // still slides normally — the effect the user asked for without giving up per-page Ebene 1.
+                val continuousPage = pagerState.currentPage + pagerState.currentPageOffsetFraction
+                val lowerIndex = floor(continuousPage).toInt().coerceIn(0, pages.lastIndex)
+                val upperIndex = ceil(continuousPage).toInt().coerceIn(0, pages.lastIndex)
+                val crossfadeFraction = (continuousPage - lowerIndex).coerceIn(0f, 1f)
+                val lowerPageId = pages.getOrNull(lowerIndex)?.id
+                val upperPageId = pages.getOrNull(upperIndex)?.id
+                val lowerBackground by remember(lowerPageId) { viewModel.pageBackgroundConfig(lowerPageId ?: -1L) }
+                    .collectAsState(initial = BackgroundConfig())
+                BackgroundFill(lowerBackground, Modifier.fillMaxSize())
+                if (upperPageId != null && upperPageId != lowerPageId && crossfadeFraction > 0f) {
+                    val upperBackground by remember(upperPageId) { viewModel.pageBackgroundConfig(upperPageId) }
+                        .collectAsState(initial = BackgroundConfig())
+                    BackgroundFill(upperBackground, Modifier.fillMaxSize().graphicsLayer { alpha = crossfadeFraction })
+                }
+
+                HorizontalPager(
+                    state = pagerState,
+                    // Composes the page directly left/right of the current one ahead of time, while idle,
+                    // instead of only once the user actually starts dragging onto it — that first-ever
+                    // composition of a widget-heavy page (own or external widgets alike) is what causes the
+                    // one-time hitch on a page's first visit; pre-warming its neighbors moves that cost to
+                    // before the swipe instead of during it.
+                    beyondViewportPageCount = 1,
+                    modifier = Modifier.fillMaxSize()
+                ) { pageIndex ->
                     val page = pages.getOrNull(pageIndex)
+                    // A plain Box, not BoxWithConstraints — BoxWithConstraints is backed by SubcomposeLayout,
+                    // and subcomposing every page's full widget content (each with its own state, icon
+                    // loading, etc.) on first entering the pager's composition range is what made swiping
+                    // onto a widget-heavy page feel janky, regardless of whether the widgets were external
+                    // or built-in. The one thing this used maxWidth for (innerWidth, for the dock's reserved
+                    // space) is read from LocalConfiguration instead, which costs nothing to recompute.
+                    val innerWidth = (LocalConfiguration.current.screenWidthDp.dp - DockDimens.horizontalMargin * 2).coerceAtLeast(0.dp)
+                    Box(
+                        // Restricted to the home page only — recognizing these on every page meant a
+                        // swipe-up from e.g. page 2 could open the app overview, and closing it again left
+                        // you wherever the pager already was instead of back on home, which read as a bug
+                        // ("closing app overview drops me on page 1 instead of home"). Home is the one page
+                        // guaranteed to be where the user actually started from.
+                        modifier = Modifier.fillMaxSize().then(
+                            if (page?.isHome == true) {
+                                Modifier.detectHomeGestures(
+                                    onLongPress = { viewModel.executeGestureAction(HomeGesture.LONG_PRESS, context, openPageById, openSettingsFromGesture) },
+                                    onDoubleTap = { viewModel.executeGestureAction(HomeGesture.DOUBLE_TAP, context, openPageById, openSettingsFromGesture) },
+                                    onSwipeUp = { viewModel.executeGestureAction(HomeGesture.SWIPE_UP, context, openPageById, openSettingsFromGesture) },
+                                    onSwipeDown = { viewModel.executeGestureAction(HomeGesture.SWIPE_DOWN, context, openPageById, openSettingsFromGesture) }
+                                )
+                            } else {
+                                Modifier
+                            }
+                        )
+                    ) {
                     if (page != null) {
                         val pageRows = rowsByPage[page.id].orEmpty()
                         val pinnedSearchBarRow = pageRows.lastOrNull()?.takeIf { it.type == PageRowType.SEARCH_BAR }
                         val inlineRows = if (pinnedSearchBarRow != null) pageRows.dropLast(1) else pageRows
-                        val innerWidth = (maxWidth - DockDimens.horizontalMargin * 2).coerceAtLeast(0.dp)
                         val reservedForDock = DockDimens.scaled(innerWidth)
                             .let { it.barHeight + DockDimens.topMargin + DockDimens.bottomMargin } + DockDimens.contentGap
                         val pageBackgroundConfigOrNull by remember(page.id) { viewModel.pageBackgroundConfig(page.id) }.collectAsState(initial = null)
-                        BackgroundFill(pageBackgroundConfigOrNull ?: BackgroundConfig(), Modifier.fillMaxSize())
                         val loadedPageBackgroundConfig = pageBackgroundConfigOrNull
                         // Null (not yet loaded from disk) until proven otherwise, so a hosted system widget
                         // never mounts guessing at dark/light and then gets stuck once the real value arrives.
@@ -363,11 +412,7 @@ fun HomeScreen(
                             null
                         }
                         val contentModifier = Modifier
-                            .then(
-                                // With a hidden status bar only the display cutout inset remains.
-                                if (immersiveSearch) Modifier.windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top))
-                                else Modifier.statusBarsPadding()
-                            )
+                            .padding(top = animatedTopInset)
                             .padding(top = 16.dp)
                             .then(
                                 if (pinnedSearchBarRow != null) Modifier.padding(bottom = reservedForDock)
@@ -396,12 +441,9 @@ fun HomeScreen(
                                 quickLaunchSlots = quickLaunchSlots,
                                 loadQuickLaunchIcon = viewModel::loadIcon,
                                 onQuickLaunchClick = { componentName -> launchApp(context, componentName) },
-                                // Dock on this page: viewport is already shrunk to its top edge by contentModifier's
-                                // padding, so the same gap rows use between each other is enough extra buffer. No
-                                // dock here: the floating dock further down the pager still needs clearance.
-                                widgetBottomReserve = if (pinnedSearchBarRow != null) PageRowDimens.rowSpacing else DockDimens.bottomMargin,
                                 modifier = contentModifier.graphicsLayer { alpha = pageContentAlpha }
                             ) } }
+                    }
                     }
                 }
             }
@@ -450,120 +492,19 @@ fun HomeScreen(
         Column(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
             val overviewPivotX = if (handedness == Handedness.LEFT) 0.12f else 0.88f
 
-            // The whole rail+category panel is defined once here via movableContentOf and *moved*
-            // (never disposed+rebuilt) between the always-alive zero-size holder below (while hidden)
-            // and the animated visible slot (while open). Without this, AnimatedVisibility disposes
-            // its content once its exit animation finishes, so composing the whole panel from scratch
-            // used to happen again on *every* open, even a reopen of the same, already-seen category.
-            // The very first claim happens at startup inside the zero-size holder, so even the first
-            // open of the session doesn't pay that cost either.
-            val overviewPanelContent = remember {
-                movableContentOf<OverviewPanelParams> { params ->
-                    val currentOverviewEntry = params.entry
-                    val sidebarViewMode by remember(currentOverviewEntry) { viewModel.sidebarCategoryViewMode(currentOverviewEntry) }
-                        .collectAsState(initial = SidebarCategoryViewMode.LIST)
-                    val sidebarShowAddRow by remember(currentOverviewEntry) { viewModel.sidebarCategoryShowAddRow(currentOverviewEntry) }
-                        .collectAsState(initial = true)
-
-                    CompositionLocalProvider(com.bisc.flauncher.ui.home.search.LocalRailAppearance provides railAppearance) { SidebarOverviewPanel(
-                        entry = currentOverviewEntry,
-                        items = sidebarItems,
-                        pages = pages,
-                        installedApps = browsableApps,
-                        sidebarPinnedApps = sidebarPinnedApps,
-                        folders = folders,
-                        folderItemsByFolder = folderItemsByFolder,
-                        notes = notes,
-                        savedMapTargets = savedMapTargets,
-                        pinnedWebsites = pinnedWebsites,
-                        pinnedShortcuts = pinnedShortcuts,
-                        hasShortcutPermission = hasShortcutHostPermission,
-                        viewMode = sidebarViewMode,
-                        showAddRow = sidebarShowAddRow,
-                        loadIcon = viewModel::loadIcon,
-                        loadPackIcon = viewModel::loadPackIcon,
-                        onAppClick = { app ->
-                            launchApp(context, app.componentName)
-                            viewModel.closeOverview()
-                        },
-                        onPageClick = { page ->
-                            val index = pages.indexOf(page)
-                            if (index >= 0) {
-                                coroutineScope.launch { pagerState.animateScrollToPage(index) }
-                            }
-                            viewModel.closeOverview()
-                        },
-                        onFolderClick = { folder -> viewModel.openFolder(folder.id) },
-                        onAddFolderClick = { showFolderCreator = true },
-                        onSaveNote = viewModel::saveNote,
-                        onDeleteNote = viewModel::deleteNote,
-                        onCreateNote = viewModel::createNote,
-                        onReorderNotes = viewModel::reorderNotes,
-                        onMapTargetClick = { target ->
-                            launchMapTarget(context, target)
-                            viewModel.closeOverview()
-                        },
-                        onRemoveMapTarget = viewModel::removeMapTarget,
-                        onAddMapTargetClick = { showAddMapTargetDialog = true },
-                        onWebsiteClick = { website ->
-                            openWebsite(context, website)
-                            viewModel.closeOverview()
-                        },
-                        onRemoveWebsite = viewModel::removeWebsite,
-                        onAddWebsiteClick = { showAddWebsiteDialog = true },
-                        onShortcutClick = { shortcut ->
-                            viewModel.launchShortcut(shortcut)
-                            viewModel.closeOverview()
-                        },
-                        onRemoveShortcut = viewModel::unpinShortcut,
-                        onAddShortcutClick = viewModel::openShortcutAppPicker,
-                        onAddSidebarAppsClick = { showAddSidebarAppsChooser = true },
-                        onRemoveSidebarApp = viewModel::removeSidebarApp,
-                        pinnedContacts = pinnedContacts,
-                        hasContactsPermission = contactsPermissionGranted,
-                        onContactClick = { pinned ->
-                            openContact(context, ContactInfo(pinned.contactId, pinned.lookupKey, pinned.displayName, pinned.photoUri))
-                            viewModel.closeOverview()
-                        },
-                        onRemoveContact = viewModel::unpinContact,
-                        onAddContactClick = viewModel::openContactPicker,
-                        onContactsPermissionResult = viewModel::onContactsPermissionResult,
-                        loadContactPhoto = viewModel::loadContactPhoto,
-                        onSidebarItemClick = { item ->
-                            when (item) {
-                                is ResolvedSidebarItem.Category -> viewModel.selectSidebarEntry(item.entryType)
-                                is ResolvedSidebarItem.App -> {
-                                    launchApp(context, item.app.componentName)
-                                    viewModel.closeOverview()
-                                }
-                                is ResolvedSidebarItem.Shortcut -> {
-                                    viewModel.launchShortcut(item.shortcut)
-                                    viewModel.closeOverview()
-                                }
-                                is ResolvedSidebarItem.MapTarget -> {
-                                    launchMapTarget(context, item.target)
-                                    viewModel.closeOverview()
-                                }
-                            }
-                        },
-                        onSettingsClick = {
-                            viewModel.closeOverview()
-                            onNavigateToSettings()
-                        },
-                        panelAppearance = sidebarPanelAppearance,
-                        shape = params.shape,
-                        handedness = handedness,
-                        dock = params.dock,
-                        modifier = Modifier.fillMaxSize()
-                    ) }
-                }
-            }
-
             // BoxWithConstraints sits *outside* the AnimatedVisibility, and the AnimatedVisibility
             // below gets a fixed width/height instead of sizing to its content — expandVertically
             // would otherwise force a full remeasure (a subcompose pass, since BoxWithConstraints is
             // backed by SubcomposeLayout) on every single animation frame, which used to make opening
             // the quick overview feel choppy compared to text search's own, already pre-sized overlay.
+            //
+            // A previous version of this also kept the panel composed permanently (movableContentOf,
+            // moved between a hidden zero-size holder and this visible slot) to avoid rebuilding it on
+            // every open. That made *unrelated* screens (app overview, background sliders) noticeably
+            // laggier — an always-mounted panel recomposing on every change to any of the many lists it
+            // reads (apps, folders, notes, …) competed for frame time even while fully closed — so it's
+            // back to disposing normally. The plain-composition cost turned out not to be the actual
+            // cause of the felt delay anyway; that was the single/double-tap timing fixed separately.
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -585,11 +526,8 @@ fun HomeScreen(
                     .coerceAtLeast(200.dp)
                 val panelShape = RoundedCornerShape(d.cornerRadius)
 
-                val overviewVisibleState = remember { MutableTransitionState(false) }
-                overviewVisibleState.targetState = overviewEntry != null && !folderOpen
-
                 androidx.compose.animation.AnimatedVisibility(
-                    visibleState = overviewVisibleState,
+                    visible = overviewEntry != null && !folderOpen,
                     enter = expandVertically(animationSpec = tween(120), expandFrom = Alignment.Bottom) +
                         scaleIn(animationSpec = tween(120), initialScale = 0.94f, transformOrigin = TransformOrigin(overviewPivotX, 1f)) +
                         fadeIn(tween(90)),
@@ -600,16 +538,102 @@ fun HomeScreen(
                 ) {
                     val currentOverviewEntry = lastOverviewEntry
                     if (currentOverviewEntry != null) {
-                        overviewPanelContent(OverviewPanelParams(currentOverviewEntry, d, panelShape))
-                    }
-                }
+                        val sidebarViewMode by remember(currentOverviewEntry) { viewModel.sidebarCategoryViewMode(currentOverviewEntry) }
+                            .collectAsState(initial = SidebarCategoryViewMode.LIST)
+                        val sidebarShowAddRow by remember(currentOverviewEntry) { viewModel.sidebarCategoryShowAddRow(currentOverviewEntry) }
+                            .collectAsState(initial = true)
 
-                // Only claims the content once the exit animation is fully finished (not merely
-                // targeting hidden), so it's never composed in the visible slot above and here at the
-                // same time.
-                if (!overviewVisibleState.currentState && overviewVisibleState.isIdle) {
-                    Box(Modifier.size(0.dp)) {
-                        overviewPanelContent(OverviewPanelParams(lastOverviewEntry ?: SidebarEntryType.APPS, d, panelShape))
+                        CompositionLocalProvider(com.bisc.flauncher.ui.home.search.LocalRailAppearance provides railAppearance) { SidebarOverviewPanel(
+                            entry = currentOverviewEntry,
+                            items = sidebarItems,
+                            pages = pages,
+                            installedApps = browsableApps,
+                            sidebarPinnedApps = sidebarPinnedApps,
+                            folders = folders,
+                            folderItemsByFolder = folderItemsByFolder,
+                            notes = notes,
+                            savedMapTargets = savedMapTargets,
+                            pinnedWebsites = pinnedWebsites,
+                            pinnedShortcuts = pinnedShortcuts,
+                            hasShortcutPermission = hasShortcutHostPermission,
+                            viewMode = sidebarViewMode,
+                            showAddRow = sidebarShowAddRow,
+                            loadIcon = viewModel::loadIcon,
+                            loadPackIcon = viewModel::loadPackIcon,
+                            onAppClick = { app ->
+                                launchApp(context, app.componentName)
+                                viewModel.closeOverview()
+                            },
+                            onPageClick = { page ->
+                                val index = pages.indexOf(page)
+                                if (index >= 0) {
+                                    coroutineScope.launch { pagerState.animateScrollToPage(index) }
+                                }
+                                viewModel.closeOverview()
+                            },
+                            onFolderClick = { folder -> viewModel.openFolder(folder.id) },
+                            onAddFolderClick = { showFolderCreator = true },
+                            onSaveNote = viewModel::saveNote,
+                            onDeleteNote = viewModel::deleteNote,
+                            onCreateNote = viewModel::createNote,
+                            onReorderNotes = viewModel::reorderNotes,
+                            onMapTargetClick = { target ->
+                                launchMapTarget(context, target)
+                                viewModel.closeOverview()
+                            },
+                            onRemoveMapTarget = viewModel::removeMapTarget,
+                            onAddMapTargetClick = { showAddMapTargetDialog = true },
+                            onWebsiteClick = { website ->
+                                openWebsite(context, website)
+                                viewModel.closeOverview()
+                            },
+                            onRemoveWebsite = viewModel::removeWebsite,
+                            onAddWebsiteClick = { showAddWebsiteDialog = true },
+                            onShortcutClick = { shortcut ->
+                                viewModel.launchShortcut(shortcut)
+                                viewModel.closeOverview()
+                            },
+                            onRemoveShortcut = viewModel::unpinShortcut,
+                            onAddShortcutClick = viewModel::openShortcutAppPicker,
+                            onAddSidebarAppsClick = { showAddSidebarAppsChooser = true },
+                            onRemoveSidebarApp = viewModel::removeSidebarApp,
+                            pinnedContacts = pinnedContacts,
+                            hasContactsPermission = contactsPermissionGranted,
+                            onContactClick = { pinned ->
+                                openContact(context, ContactInfo(pinned.contactId, pinned.lookupKey, pinned.displayName, pinned.photoUri))
+                                viewModel.closeOverview()
+                            },
+                            onRemoveContact = viewModel::unpinContact,
+                            onAddContactClick = viewModel::openContactPicker,
+                            onContactsPermissionResult = viewModel::onContactsPermissionResult,
+                            loadContactPhoto = viewModel::loadContactPhoto,
+                            onSidebarItemClick = { item ->
+                                when (item) {
+                                    is ResolvedSidebarItem.Category -> viewModel.selectSidebarEntry(item.entryType)
+                                    is ResolvedSidebarItem.App -> {
+                                        launchApp(context, item.app.componentName)
+                                        viewModel.closeOverview()
+                                    }
+                                    is ResolvedSidebarItem.Shortcut -> {
+                                        viewModel.launchShortcut(item.shortcut)
+                                        viewModel.closeOverview()
+                                    }
+                                    is ResolvedSidebarItem.MapTarget -> {
+                                        launchMapTarget(context, item.target)
+                                        viewModel.closeOverview()
+                                    }
+                                }
+                            },
+                            onSettingsClick = {
+                                viewModel.closeOverview()
+                                onNavigateToSettings()
+                            },
+                            panelAppearance = sidebarPanelAppearance,
+                            shape = panelShape,
+                            handedness = handedness,
+                            dock = d,
+                            modifier = Modifier.fillMaxSize()
+                        ) }
                     }
                 }
             }
@@ -641,7 +665,7 @@ fun HomeScreen(
     AnimatedVisibility(
         visible = appListOpen,
         modifier = Modifier.fillMaxSize(),
-        enter = fadeIn(tween(140)) + slideInVertically(animationSpec = tween(180)) { it / 8 },
+        enter = fadeIn(tween(110)) + slideInVertically(animationSpec = tween(130)) { it / 8 },
         exit = fadeOut(tween(110)) + slideOutVertically(animationSpec = tween(130)) { it / 8 }
     ) {
         val pullDownToClose = remember(viewModel) {

@@ -16,6 +16,9 @@ interface AppRowEntryDao {
     @Query("SELECT MAX(orderIndex) FROM app_row_entries WHERE pageRowId = :pageRowId")
     suspend fun maxOrderIndex(pageRowId: Long): Int?
 
+    @Query("SELECT COUNT(*) FROM app_row_entries WHERE pageRowId = :pageRowId")
+    suspend fun countForRow(pageRowId: Long): Int
+
     @Insert
     suspend fun insert(entry: AppRowEntry): Long
 
