@@ -57,9 +57,9 @@ fun AppOverviewContent(
     val surfaceIsDark = rememberSurfaceIsDark(contentAppearance, pageBackground)
     // Same footprint the dock has.
     val screenWidth = androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp.dp
+    val scaledDock = DockDimens.scaled((screenWidth - DockDimens.horizontalMargin * 2).coerceAtLeast(0.dp))
     val bottomInset = if (showSearchButton) {
-        DockDimens.scaled((screenWidth - DockDimens.horizontalMargin * 2).coerceAtLeast(0.dp)).barHeight +
-            DockDimens.bottomMargin + DockDimens.contentGap
+        scaledDock.barHeight + DockDimens.bottomMargin + DockDimens.contentGap
     } else DockDimens.bottomMargin
     val surfaceTextColor = com.bisc.flauncher.ui.home.dock.resolveElementColors(contentAppearance, surfaceIsDark).contentColor
 
@@ -79,7 +79,8 @@ fun AppOverviewContent(
             handedness = handedness,
             accentColor = accentColor,
             edgeInset = edgeInset,
-            layout = layout
+            layout = layout,
+            iconSize = scaledDock.iconSize
         )
     }
 

@@ -1,6 +1,10 @@
 package com.bisc.flauncher.ui.home.widgets
 
 import android.appwidget.AppWidgetHostView
+import android.view.View
+import android.view.ViewGroup
+import android.widget.AbsListView
+import android.widget.ScrollView
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,12 +21,27 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.view.iterator
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.LocalSurfaceIsDark
 import com.bisc.flauncher.ui.home.LocalSurfaceIsDarkLoading
+
+/**
+ * Legacy [AbsListView] (ListView/GridView) and [ScrollView] default to nested-scrolling *disabled*
+ * for backward compatibility, so they never cooperate with an ancestor Compose scrollable (our page
+ * paging, the page-swipe pager) at all — they just sit there inert while the ancestor eats every drag.
+ * Turning it on lets Android's nested-scroll protocol arbitrate properly, exactly like any other
+ * nested scrollable. (Same fix used by Kvaesitso's launcher for this exact problem.)
+ */
+private fun enableNestedScroll(view: View) {
+    if (view is ViewGroup) {
+        for (child in view.iterator()) enableNestedScroll(child)
+    }
+    if (view is AbsListView || view is ScrollView) view.isNestedScrollingEnabled = true
+}
 
 /** Embeds a real, hosted third-party AppWidget (as opposed to our own Compose widgets). */
 @Composable
@@ -56,12 +75,12 @@ fun SystemWidgetView(
         // Follows the surface the widget sits on (our own dark/light decision), not the system's
         // separate day/night setting, so it doesn't clash with the rest of the launcher.
         val dark = LocalSurfaceIsDark.current ?: (MaterialTheme.colorScheme.background.luminance() < 0.5f)
-        // No custom pointer handling here: a hosted widget's own scrollable content (e.g. a list)
-        // calls requestDisallowInterceptTouchEvent on its own when it starts scrolling, and Compose's
-        // View interop already honors that against every ancestor gesture (page scroll, page-swipe,
-        // ...). Adding our own drag interception here previously *prevented* the widget from ever
-        // seeing the continued drag, which is why it couldn't scroll and could leave the page's own
-        // swipe gesture in a half-consumed, stuck state.
+        // Still no custom pointer handling here. What was actually missing (per Kvaesitso, which gets
+        // this right) is that a widget's internal ListView/GridView/ScrollView defaults to nested
+        // scrolling *disabled* for legacy compatibility, so it never even entered Android's nested
+        // scroll protocol our ancestor Compose scrollables (page paging, page-swipe) rely on — it just
+        // sat there while the ancestor consumed the whole drag. enableNestedScroll() below turns that
+        // on. A hand-rolled interception layer here was tried before and made things worse.
         val density = LocalDensity.current
         androidx.compose.runtime.key(dark) {
             var hostView by remember { mutableStateOf<AppWidgetHostView?>(null) }
@@ -80,6 +99,7 @@ fun SystemWidgetView(
                 },
                 factory = {
                     viewModel.createSystemWidgetView(appWidgetId, info, dark).also {
+                        enableNestedScroll(it)
                         hostView = it
                         onHostedViewReady?.invoke(it)
                     }

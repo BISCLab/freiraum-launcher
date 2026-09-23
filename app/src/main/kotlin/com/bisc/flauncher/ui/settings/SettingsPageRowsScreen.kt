@@ -96,6 +96,7 @@ fun SettingsPageRowsScreen(
     val systemWidgetPickerOpenForPage by viewModel.systemWidgetPickerOpenForPage.collectAsState()
     val pendingBindIntent by viewModel.pendingBindIntent.collectAsState()
     val pendingConfigureIntent by viewModel.pendingConfigureIntent.collectAsState()
+    val widgetRelocationWarningCount by viewModel.widgetRelocationWarningCount.collectAsState()
 
     val rows = rowsByPage[pageId].orEmpty()
     val page = pages.find { it.id == pageId }
@@ -216,6 +217,17 @@ fun SettingsPageRowsScreen(
                 viewModel.addSearchBarRow(pageId)
             },
             onDismiss = { showAddSheet = false }
+        )
+    }
+
+    if (widgetRelocationWarningCount > 0) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissWidgetRelocationWarning() },
+            title = { Text(stringResource(R.string.settings_widget_relocated_title)) },
+            text = { Text(stringResource(R.string.settings_widget_relocated_message)) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.dismissWidgetRelocationWarning() }) { Text(stringResource(R.string.settings_widget_relocated_confirm)) }
+            }
         )
     }
 

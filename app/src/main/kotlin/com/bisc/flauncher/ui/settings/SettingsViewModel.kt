@@ -128,13 +128,6 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setQuickOverviewHideStatusBar(hide) }
     }
 
-    val quickOverviewAnimationEnabled: StateFlow<Boolean> =
-        repository.quickOverviewAnimationEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
-
-    fun setQuickOverviewAnimationEnabled(enabled: Boolean) {
-        viewModelScope.launch { repository.setQuickOverviewAnimationEnabled(enabled) }
-    }
-
     val folderHideStatusBar: StateFlow<Boolean> =
         repository.folderHideStatusBar.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 

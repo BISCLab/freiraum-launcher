@@ -116,13 +116,6 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[DOCK_MATCH_WIDGET_CORNERS_KEY] = enabled }
     }
 
-    /** Opt-in: quick overview opens/closes instantly by default, this switches on the slide/fade animation. */
-    val quickOverviewAnimationEnabled: Flow<Boolean> = dataStore.data.map { it[QUICK_OVERVIEW_ANIMATION_ENABLED_KEY] ?: false }
-
-    suspend fun setQuickOverviewAnimationEnabled(enabled: Boolean) {
-        dataStore.edit { it[QUICK_OVERVIEW_ANIMATION_ENABLED_KEY] = enabled }
-    }
-
     // ---- Text search ----
 
     val searchShowAzIndex: Flow<Boolean> = dataStore.data.map { it[SEARCH_SHOW_AZ_INDEX_KEY] ?: true }
@@ -623,7 +616,6 @@ class SettingsRepository @Inject constructor(
         private val DOCK_DOUBLE_TAP_ACTION_KEY = stringPreferencesKey("dock_double_tap_action")
         private val CHARGING_ANIMATION_COLOR_KEY = intPreferencesKey("charging_animation_color")
         private val DOCK_MATCH_WIDGET_CORNERS_KEY = booleanPreferencesKey("dock_match_widget_corners")
-        private val QUICK_OVERVIEW_ANIMATION_ENABLED_KEY = booleanPreferencesKey("quick_overview_animation_enabled_v2")
         private val CHARGING_ANIMATION_ENABLED_KEY = booleanPreferencesKey("charging_animation_enabled")
         private val SEARCH_SHOW_AZ_INDEX_KEY = booleanPreferencesKey("search_show_az_index")
         private val SEARCH_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("search_hide_status_bar")

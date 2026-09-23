@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 /** Pages, page rows and apps-row entries, including seeding of the default pages. */
 class PageContentRepository @Inject constructor(
@@ -76,7 +77,13 @@ class PageContentRepository @Inject constructor(
 
     suspend fun addPage(): Long {
         val next = (pageDao.maxOrderIndex() ?: -1) + 1
-        return pageDao.insert(LauncherPage(orderIndex = next))
+        val newId = pageDao.insert(LauncherPage(orderIndex = next))
+        // A brand new page's own background otherwise defaults to plain white until the user picks
+        // one, which is jarring (e.g. behind a widget added right away) — start it looking like home.
+        pageDao.getHomePage()?.let { home ->
+            settingsRepository.setPageBackgroundConfig(newId, settingsRepository.pageBackgroundConfig(home.id).first())
+        }
+        return newId
     }
 
     suspend fun removePageIfEmpty(page: LauncherPage): Boolean {
@@ -127,11 +134,54 @@ class PageContentRepository @Inject constructor(
         return rowDao.insert(row)
     }
 
-    suspend fun addSearchBarRow(pageId: Long): Long {
+    /** Returns how many SYSTEM_WIDGET rows on [pageId] had to be relocated to a new page as a result — see [relocateOversizedWidgetsForDock]. */
+    suspend fun addSearchBarRow(pageId: Long): Int {
         val next = (rowDao.maxOrderIndex(pageId) ?: -1) + 1
         var row = PageRow(pageId = pageId, orderIndex = next, type = PageRowType.SEARCH_BAR, borderEnabled = true)
         presetSearchBarAppearance()?.let { row = row.withAppearance(it) }
-        return rowDao.insert(row)
+        rowDao.insert(row)
+        return relocateOversizedWidgetsForDock(pageId).size
+    }
+
+    /**
+     * A dock reserves noticeably more bottom space than an empty page does, so a SYSTEM_WIDGET row sized
+     * up to the (larger) no-dock max before the dock existed can now overlap it — exactly the scenario
+     * that has caused real widget-process crashes when [ui.home.PagedRows] then has to squeeze it abruptly
+     * at render time. Rather than let that happen, any such row is moved to a fresh page outright.
+     */
+    private suspend fun relocateOversizedWidgetsForDock(pageId: Long): List<PageRow> {
+        val rows = rowDao.getForPage(pageId)
+        if (rows.none { it.type == PageRowType.SEARCH_BAR }) return emptyList()
+        val dm = context.resources.displayMetrics
+        val density = androidx.compose.ui.unit.Density(dm.density)
+        val maxPx = com.bisc.flauncher.ui.home.safeSystemWidgetMaxHeightPx(
+            pageHasDock = true,
+            screenWidthPx = dm.widthPixels,
+            screenHeightPx = dm.heightPixels,
+            densityValue = dm.density,
+            statusBarPx = systemInsetPx("status_bar_height"),
+            navigationBarPx = systemInsetPx("navigation_bar_height")
+        )
+        val offending = rows.filter { row ->
+            if (row.type != PageRowType.SYSTEM_WIDGET) return@filter false
+            val heightPx = row.heightPx ?: with(density) {
+                (com.bisc.flauncher.ui.home.PageRowDimens.rowUnitHeight * row.spanY).toPx().roundToInt()
+            }
+            heightPx > maxPx
+        }
+        if (offending.isEmpty()) return emptyList()
+        val newPageId = addPage()
+        var nextOrder = (rowDao.maxOrderIndex(newPageId) ?: -1) + 1
+        offending.forEach { row ->
+            rowDao.update(row.copy(pageId = newPageId, orderIndex = nextOrder))
+            nextOrder++
+        }
+        return offending
+    }
+
+    private fun systemInsetPx(name: String): Int {
+        val resId = context.resources.getIdentifier(name, "dimen", "android")
+        return if (resId > 0) context.resources.getDimensionPixelSize(resId) else 0
     }
 
     suspend fun setRowSpanY(row: PageRow, spanY: Int) {

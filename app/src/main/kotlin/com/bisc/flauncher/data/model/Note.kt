@@ -17,7 +17,8 @@ data class Note(
     val content: String = "",
     val type: NoteType = NoteType.FREITEXT,
     val items: List<ChecklistItem> = emptyList(),
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = System.currentTimeMillis(),
+    val orderIndex: Int = 0
 )
 
 /** Splits note text into checklist items, one per non-blank line. */
