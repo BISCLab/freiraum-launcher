@@ -204,12 +204,8 @@ fun SettingsPreference(
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (leading != null) {
-                leading()
-            } else {
-                Box(modifier = Modifier.width(24.dp))
-            }
-            Column(modifier = Modifier.padding(start = 16.dp).weight(1f)) {
+            leading?.invoke()
+            Column(modifier = Modifier.padding(start = if (leading != null) 16.dp else 0.dp).weight(1f)) {
                 Text(title, style = MaterialTheme.typography.titleMedium.copy(fontFamily = titleFontFamily ?: MaterialTheme.typography.titleMedium.fontFamily))
                 if (summary != null) {
                     Text(

@@ -105,12 +105,20 @@ fun ColorPickerControls(
                 .clip(RoundedCornerShape(12.dp))
                 .background(hueColor)
                 .pointerInput(Unit) {
-                    detectDragGestures { change, _ ->
-                        change.consume()
-                        saturation = (change.position.x / size.width).coerceIn(0f, 1f)
-                        value = (1f - change.position.y / size.height).coerceIn(0f, 1f)
-                        updateFromHsv()
-                    }
+                    // onColorChange only fires once the drag ends, not per pointer-move frame — each
+                    // call flows into a settings write that rewrites the whole shared preferences
+                    // file, so doing that continuously while dragging is what made this picker (and
+                    // anything using it — every color in the app) feel severely laggy. The marker and
+                    // swatch above still track the drag live since they read the local hue/saturation/
+                    // value state directly, not onColorChange's result.
+                    detectDragGestures(
+                        onDragEnd = { updateFromHsv() },
+                        onDrag = { change, _ ->
+                            change.consume()
+                            saturation = (change.position.x / size.width).coerceIn(0f, 1f)
+                            value = (1f - change.position.y / size.height).coerceIn(0f, 1f)
+                        }
+                    )
                 }
                 .pointerInput(Unit) {
                     detectTapGestures { offset ->
@@ -138,11 +146,13 @@ fun ColorPickerControls(
                 .clip(RoundedCornerShape(14.dp))
                 .background(hueBrush)
                 .pointerInput(Unit) {
-                    detectDragGestures { change, _ ->
-                        change.consume()
-                        hue = ((change.position.x / size.width).coerceIn(0f, 1f)) * 360f
-                        updateFromHsv()
-                    }
+                    detectDragGestures(
+                        onDragEnd = { updateFromHsv() },
+                        onDrag = { change, _ ->
+                            change.consume()
+                            hue = ((change.position.x / size.width).coerceIn(0f, 1f)) * 360f
+                        }
+                    )
                 }
                 .pointerInput(Unit) {
                     detectTapGestures { offset ->

@@ -2,6 +2,7 @@ package com.bisc.flauncher.ui.settings
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -26,6 +27,7 @@ fun SettingsAppOverviewScreen(navController: NavController, onBack: () -> Unit, 
     val listBackground by remember(pageId) { viewModel.pageBackgroundConfig(pageId ?: -1L) }.collectAsState(initial = BackgroundConfig())
     val listAppearance by viewModel.appListContentAppearance.collectAsState()
     val surfaceIsDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(listAppearance, listBackground)
+    val hideStatusBar by remember(pageId) { viewModel.pageHideStatusBar(pageId ?: -1L) }.collectAsState(initial = false)
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_app_overview), navController = navController, onBack = onBack) {
         Text(
@@ -34,13 +36,21 @@ fun SettingsAppOverviewScreen(navController: NavController, onBack: () -> Unit, 
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 4.dp)
         )
-        pageId?.let {
+        pageId?.let { id ->
             SettingsPreferenceGroup {
                 SettingsPreference(
                     icon = null,
                     title = layerBackgroundLabel(1, R.string.settings_layer_surface_screen),
                     onClick = { showBackgroundSheet = true },
                     trailing = null
+                )
+            }
+            SettingsPreferenceGroup {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_statusbar_hide_page),
+                    onClick = { viewModel.setPageHideStatusBar(id, !hideStatusBar) },
+                    trailing = { Switch(checked = hideStatusBar, onCheckedChange = { viewModel.setPageHideStatusBar(id, it) }) }
                 )
             }
         }

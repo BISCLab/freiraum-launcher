@@ -228,7 +228,11 @@ class SettingsRepository @Inject constructor(
             ?: AppListDisplayMode.FULLSCREEN
     }
 
-    val appListContentAppearance: Flow<ElementAppearance> = elementAppearanceFor("app_list_content", ElementAppearance(borderEnabled = true))
+    // Unlike the other Layer-2 elements above, this one paints as a full-screen fill (not a bounded
+    // card) whenever the app list is in fullscreen mode — fullscreen mode is itself the app's own
+    // default, so an opaque default here silently hid every Layer-1 background/image behind it.
+    val appListContentAppearance: Flow<ElementAppearance> =
+        elementAppearanceFor("app_list_content", ElementAppearance(borderEnabled = true, opacity = 0f))
 
     // ---- Presets, page backgrounds, sidebar ----
 
@@ -341,12 +345,12 @@ class SettingsRepository @Inject constructor(
     }
 
     /** One-shot command: hides the status bar on every screen (quick overview, search, folders, every page). */
-    suspend fun hideStatusBarEverywhere(pageIds: List<Long>) {
+    suspend fun setStatusBarHiddenEverywhere(pageIds: List<Long>, hidden: Boolean) {
         dataStore.edit { prefs ->
-            prefs[QUICK_OVERVIEW_HIDE_STATUS_BAR_KEY] = true
-            prefs[SEARCH_HIDE_STATUS_BAR_KEY] = true
-            prefs[FOLDER_HIDE_STATUS_BAR_KEY] = true
-            pageIds.forEach { prefs[pageHideStatusBarKey(it)] = true }
+            prefs[QUICK_OVERVIEW_HIDE_STATUS_BAR_KEY] = hidden
+            prefs[SEARCH_HIDE_STATUS_BAR_KEY] = hidden
+            prefs[FOLDER_HIDE_STATUS_BAR_KEY] = hidden
+            pageIds.forEach { prefs[pageHideStatusBarKey(it)] = hidden }
         }
     }
 

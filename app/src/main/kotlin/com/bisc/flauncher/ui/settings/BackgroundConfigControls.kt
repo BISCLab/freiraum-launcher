@@ -1,17 +1,11 @@
 package com.bisc.flauncher.ui.settings
 
-import android.app.WallpaperManager
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.outlined.Wallpaper
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.material3.TextButton
 import com.bisc.flauncher.ui.home.dock.rememberBackgroundBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -38,7 +32,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -70,22 +63,17 @@ fun BackgroundConfigSection(
     var showLayerHelp by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var offerSystemPath by remember { mutableStateOf<String?>(null) }
     val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
         if (uri != null) {
             scope.launch {
                 val path = withContext(Dispatchers.IO) { BackgroundImageStore.save(context, uri, imageKey) }
-                if (path != null) {
-                    onConfigChange(config.withImage(path))
-                    offerSystemPath = path
-                }
+                if (path != null) onConfigChange(config.withImage(path))
             }
         }
     }
     val pickBundled = { wallpaper: BundledWallpaper ->
         BackgroundImageStore.delete(context, imageKey)
         onConfigChange(config.withImage(wallpaper.path))
-        offerSystemPath = wallpaper.path
     }
     val launchImagePicker = {
         pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
@@ -162,94 +150,74 @@ fun BackgroundConfigSection(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             BundledWallpaper.entries.forEach { wallpaper ->
-                val selected = imageSelected && config.imagePath == wallpaper.path
-                val shape = RoundedCornerShape(12.dp)
-                Column(
-                    modifier = Modifier.width(96.dp).clip(shape).clickable { pickBundled(wallpaper) },
-                    horizontalAlignment = Alignment.CenterHorizontally
+                WallpaperCard(
+                    selected = imageSelected && config.imagePath == wallpaper.path,
+                    label = stringResource(wallpaper.label),
+                    onClick = { pickBundled(wallpaper) }
                 ) {
-                    Box {
-                        Image(
-                            painter = painterResource(wallpaper.drawable),
-                            contentDescription = stringResource(wallpaper.label),
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(width = 96.dp, height = 170.dp)
-                                .clip(shape)
-                                .border(
-                                    if (selected) 3.dp else 1.dp,
-                                    if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-                                    shape
-                                )
-                        )
-                        if (selected) {
-                            Icon(
-                                Icons.Filled.CheckCircle,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.align(Alignment.TopEnd).padding(6.dp).size(22.dp)
-                                    .background(MaterialTheme.colorScheme.surface, CircleShape)
-                            )
-                        }
-                    }
-                    Text(
-                        stringResource(wallpaper.label),
-                        style = MaterialTheme.typography.labelSmall,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 4.dp)
+                    Image(
+                        painter = painterResource(wallpaper.drawable),
+                        contentDescription = stringResource(wallpaper.label),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.matchParentSize()
                     )
                 }
             }
-        }
-        if (imageSelected && config.imagePath != null) {
-            SettingsPreference(
-                icon = Icons.Outlined.Wallpaper,
-                title = stringResource(R.string.settings_background_system_row),
-                onClick = { launchSystemWallpaper(context, config.imagePath) }
-            )
+            // The picked image lands here as its own preview card, bordered/checked the same way as
+            // the bundled ones once selected — previously this only showed as a tiny 24x36 thumbnail
+            // in the row below, easy to miss and giving no real feedback that a pick had worked.
+            val customSelected = imageSelected && customImagePath != null
+            WallpaperCard(
+                selected = customSelected,
+                label = stringResource(R.string.settings_background_source_custom_image),
+                onClick = {
+                    if (customImagePath != null && !customSelected) onConfigChange(config.withImage(customImagePath))
+                    else launchImagePicker()
+                }
+            ) {
+                if (customImagePath != null) {
+                    val bitmap = rememberBackgroundBitmap(customImagePath)
+                    if (bitmap != null) Image(bitmap, null, contentScale = ContentScale.Crop, modifier = Modifier.matchParentSize())
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Filled.Add, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            }
         }
     }
 
     SettingsPreferenceGroup(title = stringResource(R.string.settings_background_opacity_label)) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-            Text(
-                stringResource(R.string.settings_background_opacity_value, (config.opacity * 100).roundToInt()),
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Slider(
-                value = config.opacity,
-                onValueChange = { onConfigChange(config.copy(opacity = it)) },
-                valueRange = 0f..1f
-            )
-        }
+        SettledSlider(
+            value = config.opacity,
+            onSettled = { onConfigChange(config.copy(opacity = it)) },
+            valueRange = 0f..1f,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            label = { live ->
+                Text(
+                    stringResource(R.string.settings_background_opacity_value, (live * 100).roundToInt()),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        )
     }
 
     SettingsPreferenceGroup(title = stringResource(R.string.settings_background_darken_label)) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-            Text(
-                stringResource(R.string.settings_background_darken_value, (config.darken * 100).roundToInt()),
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Slider(
-                value = config.darken,
-                onValueChange = { onConfigChange(config.copy(darken = it)) },
-                valueRange = 0f..1f
-            )
-        }
-    }
-
-    offerSystemPath?.let { path ->
-        AlertDialog(
-            onDismissRequest = { offerSystemPath = null },
-            title = { Text(stringResource(R.string.settings_background_system_title)) },
-            text = { Text(stringResource(R.string.settings_background_system_text)) },
-            confirmButton = {
-                TextButton(onClick = { offerSystemPath = null; launchSystemWallpaper(context, path) }) {
-                    Text(stringResource(R.string.settings_background_system_confirm))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { offerSystemPath = null }) { Text(stringResource(R.string.settings_background_system_dismiss)) }
+        SettledSlider(
+            value = config.darken,
+            onSettled = { onConfigChange(config.copy(darken = it)) },
+            valueRange = 0f..1f,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            label = { live ->
+                Text(
+                    stringResource(R.string.settings_background_darken_value, (live * 100).roundToInt()),
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         )
     }
@@ -259,17 +227,32 @@ fun BackgroundConfigSection(
     }
 }
 
-/** Opens Android's own wallpaper screen, which asks whether to use the image for home screen, lock screen or both. */
-private fun launchSystemWallpaper(context: Context, path: String) {
-    val uri = BackgroundImageStore.exportForSystem(context, path) ?: return
-    val crop = WallpaperManager.getInstance(context).getCropAndSetWallpaperIntent(uri)
-        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    try {
-        context.startActivity(crop)
-    } catch (_: ActivityNotFoundException) {
-        val attach = Intent(Intent.ACTION_ATTACH_DATA).setDataAndType(uri, "image/jpeg")
-            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        runCatching { context.startActivity(Intent.createChooser(attach, null)) }
+/** One selectable wallpaper option: a 96x170 preview, bordered and checkmarked when [selected]. */
+@Composable
+private fun WallpaperCard(selected: Boolean, label: String, onClick: () -> Unit, content: @Composable androidx.compose.foundation.layout.BoxScope.() -> Unit) {
+    val shape = RoundedCornerShape(12.dp)
+    Column(
+        modifier = Modifier.width(96.dp).clip(shape).clickable(onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(width = 96.dp, height = 170.dp)
+                .clip(shape)
+                .border(if (selected) 3.dp else 1.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline, shape)
+        ) {
+            content()
+            if (selected) {
+                Icon(
+                    Icons.Filled.CheckCircle,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.align(Alignment.TopEnd).padding(6.dp).size(22.dp)
+                        .background(MaterialTheme.colorScheme.surface, CircleShape)
+                )
+            }
+        }
+        Text(label, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
     }
 }
 

@@ -173,10 +173,6 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.setPageHideStatusBar(pageId, hide) }
     }
 
-    fun hideStatusBarEverywhere() {
-        viewModelScope.launch { settingsRepository.hideStatusBarEverywhere(pages.value.map { it.id }) }
-    }
-
     val quickOverviewHideStatusBar: StateFlow<Boolean> =
         settingsRepository.quickOverviewHideStatusBar.stateIn(viewModelScope, SharingStarted.Eagerly, true)
 

@@ -35,9 +35,24 @@ import com.bisc.flauncher.ui.home.LocalSurfaceIsDarkLoading
  * paging, the page-swipe pager) at all — they just sit there inert while the ancestor eats every drag.
  * Turning it on lets Android's nested-scroll protocol arbitrate properly, exactly like any other
  * nested scrollable. (Same fix used by Kvaesitso's launcher for this exact problem.)
+ *
+ * A one-time walk at widget-creation time isn't enough: many widgets re-apply a fresh RemoteViews
+ * tree later on (e.g. right after [android.appwidget.AppWidgetHostView.updateAppWidgetSize] or a
+ * color-resource change), which swaps in brand new child views that never went through this walk —
+ * silently undoing the fix. A [ViewGroup.OnHierarchyChangeListener] on every container (except
+ * [AbsListView] itself, which recycles row views constantly and doesn't need re-walking for that)
+ * re-runs this on whatever gets added, so a later re-apply is caught too.
  */
 private fun enableNestedScroll(view: View) {
     if (view is ViewGroup) {
+        if (view !is AbsListView) {
+            view.setOnHierarchyChangeListener(object : ViewGroup.OnHierarchyChangeListener {
+                override fun onChildViewAdded(parent: View, child: View) {
+                    enableNestedScroll(child)
+                }
+                override fun onChildViewRemoved(parent: View, child: View) = Unit
+            })
+        }
         for (child in view.iterator()) enableNestedScroll(child)
     }
     if (view is AbsListView || view is ScrollView) view.isNestedScrollingEnabled = true
@@ -82,6 +97,11 @@ fun SystemWidgetView(
         // sat there while the ancestor consumed the whole drag. enableNestedScroll() below turns that
         // on. A hand-rolled interception layer here was tried before and made things worse.
         val density = LocalDensity.current
+        // Recreating the host view when dark/light changes (rather than nudging the existing one) is
+        // what actually gets most third-party widgets to repaint in the right theme — see the comment
+        // on SystemWidgetHostManager.createHostView. That did bring back an occasional blank/white
+        // flash right when it happens (e.g. first swipe onto a widget's page), but a widget stuck in
+        // the wrong theme permanently is worse than that.
         androidx.compose.runtime.key(dark) {
             var hostView by remember { mutableStateOf<AppWidgetHostView?>(null) }
             AndroidView(

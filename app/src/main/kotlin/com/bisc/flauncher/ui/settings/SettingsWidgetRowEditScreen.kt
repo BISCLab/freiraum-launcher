@@ -2,6 +2,7 @@ package com.bisc.flauncher.ui.settings
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
@@ -81,7 +82,7 @@ fun SettingsWidgetRowEditScreen(
     val isBuiltIn = row.type == PageRowType.WIDGET
     val minSpan = if (isBuiltIn) WidgetKind.minSpan(row.payload) else 1
     // A page with its own dock reserves noticeably more space at the bottom than one without, so it
-    // fits roughly one fewer row before the exact, position-aware clip in PagedRows would kick in anyway.
+    // fits roughly one fewer row before page-overflow rebalancing would move the rest to a new page.
     val pageHasDock = rowsByPage[pageId].orEmpty().any { it.type == PageRowType.SEARCH_BAR }
     val maxSpan = if (isBuiltIn) WidgetKind.maxSpan(row.payload) else if (pageHasDock) 6 else 8
 
@@ -89,14 +90,21 @@ fun SettingsWidgetRowEditScreen(
         (isBuiltIn && row.payload != WidgetKind.CLOCK && row.payload != WidgetKind.SPACER)
 
     // Same dock-aware rule as the coarse maxSpan above, but in exact pixels for the fine stepper.
-    // This is a page-level approximation (it doesn't know what other rows sit above this one); the real,
-    // position-aware limit is enforced for real at render time by PagedRows' clip. Mirrors HomeScreen's
-    // actual reserved chrome exactly (real status/nav bar insets, not flat guesses) plus a safety margin,
-    // so this cap is never more generous than what genuinely fits — a too-generous cap here previously let
-    // widgets be sized taller than the screen, which is what caused real overflow/crashes.
+    // This is a page-level approximation (it doesn't know what other rows sit above this one, which
+    // page-overflow rebalancing accounts for separately when this row no longer fits alongside them).
+    // Mirrors HomeScreen's actual reserved chrome exactly (real status/nav bar insets, not flat
+    // guesses) plus a safety margin, so this cap is never more generous than what genuinely fits — a
+    // too-generous cap here previously let widgets be sized taller than the screen, which is what
+    // caused real overflow/crashes now that a page never scrolls to compensate.
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
-    val statusBarInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    // A display cutout (punch-hole camera) can be taller than the plain status bar inset alone on some
+    // devices, which under-reserved this cap's top chrome and is exactly what let a widget be sized
+    // taller than what actually fits there — same fix FolderView already applies for the same reason.
+    val statusBarInset = maxOf(
+        WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
+        WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
+    )
     val navigationBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val heightPxRange = remember(pageHasDock, configuration.screenWidthDp, configuration.screenHeightDp, density, statusBarInset, navigationBarInset) {
         with(density) {

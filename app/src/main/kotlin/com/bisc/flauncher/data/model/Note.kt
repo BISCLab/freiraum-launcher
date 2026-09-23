@@ -18,7 +18,10 @@ data class Note(
     val type: NoteType = NoteType.FREITEXT,
     val items: List<ChecklistItem> = emptyList(),
     val updatedAt: Long = System.currentTimeMillis(),
-    val orderIndex: Int = 0
+    val orderIndex: Int = 0,
+    // Only affects the Notes widget's own grid; the note stays visible everywhere else (quick
+    // overview, search, …) — this is a display filter, not a delete.
+    val hiddenInWidget: Boolean = false
 )
 
 /** Splits note text into checklist items, one per non-blank line. */

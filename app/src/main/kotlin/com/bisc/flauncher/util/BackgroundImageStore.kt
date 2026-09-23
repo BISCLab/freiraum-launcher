@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.core.content.FileProvider
 import com.bisc.flauncher.data.model.BundledWallpaper
 import java.io.File
 
@@ -20,15 +19,6 @@ object BackgroundImageStore {
             writeToStore(context, bitmap, key)
         }.getOrNull()
     }
-
-    /** Writes the image behind [path] to a cache file the system wallpaper picker can read through the FileProvider. */
-    fun exportForSystem(context: Context, path: String): Uri? = runCatching {
-        val bitmap = decodeFull(context, path)!!
-        val dir = File(context.cacheDir, "share").apply { mkdirs() }
-        val file = File(dir, "wallpaper.jpg")
-        file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 95, it) }
-        FileProvider.getUriForFile(context, "${context.packageName}.files", file)
-    }.getOrNull()
 
     private fun decodeFull(context: Context, path: String): Bitmap? =
         BundledWallpaper.fromPath(path)?.let { BitmapFactory.decodeResource(context.resources, it.drawable) }

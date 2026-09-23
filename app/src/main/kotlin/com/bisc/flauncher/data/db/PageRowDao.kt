@@ -16,6 +16,9 @@ interface PageRowDao {
     @Query("SELECT * FROM page_rows WHERE pageId = :pageId ORDER BY orderIndex")
     suspend fun getForPage(pageId: Long): List<PageRow>
 
+    @Query("SELECT * FROM page_rows WHERE id = :id")
+    suspend fun getById(id: Long): PageRow?
+
     @Query("SELECT COUNT(*) FROM page_rows WHERE pageId = :pageId")
     suspend fun countForPage(pageId: Long): Int
 
