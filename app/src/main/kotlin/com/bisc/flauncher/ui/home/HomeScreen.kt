@@ -11,6 +11,7 @@ import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -37,6 +38,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -64,6 +66,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -94,6 +97,7 @@ import com.bisc.flauncher.data.model.ContactInfo
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.SidebarCategoryViewMode
+import com.bisc.flauncher.ui.home.dock.SidebarEntryType
 import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.settings.Handedness
@@ -121,6 +125,13 @@ import com.bisc.flauncher.util.launchSettingsShortcut
 import com.bisc.flauncher.util.openContact
 import com.bisc.flauncher.util.openWebsite
 import kotlinx.coroutines.launch
+
+/** Bundles the per-invocation args of the movable quick-overview panel content (see [HomeScreen]). */
+private data class OverviewPanelParams(
+    val entry: SidebarEntryType,
+    val dock: com.bisc.flauncher.ui.home.dock.ScaledDock,
+    val shape: androidx.compose.ui.graphics.Shape
+)
 
 /** Hosts the paged home screen ([PageRowsColumn] per page). */
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -152,6 +163,7 @@ fun HomeScreen(
     val calculatorResult by viewModel.calculatorResult.collectAsState()
     val contactResults by viewModel.contactResults.collectAsState()
     val contactsPermissionGranted by viewModel.contactsPermissionGranted.collectAsState()
+    val hasShortcutHostPermission by viewModel.hasShortcutHostPermission.collectAsState()
     val folders by viewModel.folders.collectAsState()
     val folderItemsByFolder by viewModel.folderItemsByFolder.collectAsState()
     val openFolderPath by viewModel.openFolderPath.collectAsState()
@@ -437,37 +449,17 @@ fun HomeScreen(
 
         Column(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
             val overviewPivotX = if (handedness == Handedness.LEFT) 0.12f else 0.88f
-            AnimatedVisibility(
-                visible = overviewEntry != null && !folderOpen,
-                enter = expandVertically(animationSpec = tween(120), expandFrom = Alignment.Bottom) +
-                    scaleIn(animationSpec = tween(120), initialScale = 0.94f, transformOrigin = TransformOrigin(overviewPivotX, 1f)) +
-                    fadeIn(tween(90)),
-                exit = shrinkVertically(animationSpec = tween(220), shrinkTowards = Alignment.Bottom) +
-                    scaleOut(animationSpec = tween(220), targetScale = 0.94f, transformOrigin = TransformOrigin(overviewPivotX, 1f)) +
-                    fadeOut(tween(160))
-            ) {
-                val currentOverviewEntry = lastOverviewEntry
-                if (currentOverviewEntry != null) {
-                BoxWithConstraints(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = DockDimens.horizontalMargin)
-                        .then(
-                            if (immersiveSearch) {
-                                Modifier
-                                    .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top))
-                                    .padding(top = 16.dp)
-                            } else {
-                                Modifier.statusBarsPadding()
-                            }
-                        )
-                        .padding(bottom = if (pinnedSearchBarRow != null) DockDimens.contentGap else DockDimens.bottomMargin),
-                    contentAlignment = Alignment.BottomCenter
-                ) {
-                    val d = com.bisc.flauncher.ui.home.dock.dockDimens(maxWidth)
-                    val availableHeight = (if (pinnedSearchBarRow != null) maxHeight - pinnedDockFootprint else maxHeight)
-                        .coerceAtLeast(200.dp)
-                    val panelShape = RoundedCornerShape(d.cornerRadius)
+
+            // The whole rail+category panel is defined once here via movableContentOf and *moved*
+            // (never disposed+rebuilt) between the always-alive zero-size holder below (while hidden)
+            // and the animated visible slot (while open). Without this, AnimatedVisibility disposes
+            // its content once its exit animation finishes, so composing the whole panel from scratch
+            // used to happen again on *every* open, even a reopen of the same, already-seen category.
+            // The very first claim happens at startup inside the zero-size holder, so even the first
+            // open of the session doesn't pay that cost either.
+            val overviewPanelContent = remember {
+                movableContentOf<OverviewPanelParams> { params ->
+                    val currentOverviewEntry = params.entry
                     val sidebarViewMode by remember(currentOverviewEntry) { viewModel.sidebarCategoryViewMode(currentOverviewEntry) }
                         .collectAsState(initial = SidebarCategoryViewMode.LIST)
                     val sidebarShowAddRow by remember(currentOverviewEntry) { viewModel.sidebarCategoryShowAddRow(currentOverviewEntry) }
@@ -485,7 +477,7 @@ fun HomeScreen(
                         savedMapTargets = savedMapTargets,
                         pinnedWebsites = pinnedWebsites,
                         pinnedShortcuts = pinnedShortcuts,
-                        hasShortcutPermission = remember(currentOverviewEntry) { viewModel.hasShortcutHostPermission() },
+                        hasShortcutPermission = hasShortcutHostPermission,
                         viewMode = sidebarViewMode,
                         showAddRow = sidebarShowAddRow,
                         loadIcon = viewModel::loadIcon,
@@ -559,12 +551,66 @@ fun HomeScreen(
                             onNavigateToSettings()
                         },
                         panelAppearance = sidebarPanelAppearance,
-                        shape = panelShape,
+                        shape = params.shape,
                         handedness = handedness,
-                        dock = d,
-                        modifier = Modifier.width(d.pillWidth).height(availableHeight)
+                        dock = params.dock,
+                        modifier = Modifier.fillMaxSize()
                     ) }
                 }
+            }
+
+            // BoxWithConstraints sits *outside* the AnimatedVisibility, and the AnimatedVisibility
+            // below gets a fixed width/height instead of sizing to its content — expandVertically
+            // would otherwise force a full remeasure (a subcompose pass, since BoxWithConstraints is
+            // backed by SubcomposeLayout) on every single animation frame, which used to make opening
+            // the quick overview feel choppy compared to text search's own, already pre-sized overlay.
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = DockDimens.horizontalMargin)
+                    .then(
+                        if (immersiveSearch) {
+                            Modifier
+                                .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top))
+                                .padding(top = 16.dp)
+                        } else {
+                            Modifier.statusBarsPadding()
+                        }
+                    )
+                    .padding(bottom = if (pinnedSearchBarRow != null) DockDimens.contentGap else DockDimens.bottomMargin),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                val d = com.bisc.flauncher.ui.home.dock.dockDimens(maxWidth)
+                val availableHeight = (if (pinnedSearchBarRow != null) maxHeight - pinnedDockFootprint else maxHeight)
+                    .coerceAtLeast(200.dp)
+                val panelShape = RoundedCornerShape(d.cornerRadius)
+
+                val overviewVisibleState = remember { MutableTransitionState(false) }
+                overviewVisibleState.targetState = overviewEntry != null && !folderOpen
+
+                androidx.compose.animation.AnimatedVisibility(
+                    visibleState = overviewVisibleState,
+                    enter = expandVertically(animationSpec = tween(120), expandFrom = Alignment.Bottom) +
+                        scaleIn(animationSpec = tween(120), initialScale = 0.94f, transformOrigin = TransformOrigin(overviewPivotX, 1f)) +
+                        fadeIn(tween(90)),
+                    exit = shrinkVertically(animationSpec = tween(220), shrinkTowards = Alignment.Bottom) +
+                        scaleOut(animationSpec = tween(220), targetScale = 0.94f, transformOrigin = TransformOrigin(overviewPivotX, 1f)) +
+                        fadeOut(tween(160)),
+                    modifier = Modifier.width(d.pillWidth).height(availableHeight)
+                ) {
+                    val currentOverviewEntry = lastOverviewEntry
+                    if (currentOverviewEntry != null) {
+                        overviewPanelContent(OverviewPanelParams(currentOverviewEntry, d, panelShape))
+                    }
+                }
+
+                // Only claims the content once the exit animation is fully finished (not merely
+                // targeting hidden), so it's never composed in the visible slot above and here at the
+                // same time.
+                if (!overviewVisibleState.currentState && overviewVisibleState.isIdle) {
+                    Box(Modifier.size(0.dp)) {
+                        overviewPanelContent(OverviewPanelParams(lastOverviewEntry ?: SidebarEntryType.APPS, d, panelShape))
+                    }
                 }
             }
             if (pinnedSearchBarRow != null) {
