@@ -1,6 +1,10 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material3.AlertDialog
@@ -38,7 +42,7 @@ import com.bisc.flauncher.data.model.clockTimeAction
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.PageRowDimens
 import com.bisc.flauncher.ui.home.WidgetSizeEditor
-import com.bisc.flauncher.ui.home.dock.DockDimens
+import com.bisc.flauncher.ui.home.safeSystemWidgetMaxHeightPx
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 import com.bisc.flauncher.util.captureViewBitmap
 import kotlin.math.roundToInt
@@ -86,23 +90,25 @@ fun SettingsWidgetRowEditScreen(
 
     // Same dock-aware rule as the coarse maxSpan above, but in exact pixels for the fine stepper.
     // This is a page-level approximation (it doesn't know what other rows sit above this one); the real,
-    // position-aware limit is enforced for real at render time by PagedRows' clip, so it's fine if this
-    // is occasionally a bit generous.
+    // position-aware limit is enforced for real at render time by PagedRows' clip. Mirrors HomeScreen's
+    // actual reserved chrome exactly (real status/nav bar insets, not flat guesses) plus a safety margin,
+    // so this cap is never more generous than what genuinely fits — a too-generous cap here previously let
+    // widgets be sized taller than the screen, which is what caused real overflow/crashes.
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
-    val heightPxRange = remember(pageHasDock, configuration.screenWidthDp, configuration.screenHeightDp, density) {
-        val screenWidthDp = configuration.screenWidthDp.dp
-        val screenHeightDp = configuration.screenHeightDp.dp
-        val innerWidth = (screenWidthDp - DockDimens.horizontalMargin * 2).coerceAtLeast(0.dp)
-        val dockFootprint = DockDimens.scaled(innerWidth)
-            .let { it.barHeight + DockDimens.topMargin + DockDimens.bottomMargin } + DockDimens.contentGap
-        val topChrome = 16.dp
-        val bottomReserve = if (pageHasDock) PageRowDimens.rowSpacing else DockDimens.bottomMargin
-        val reservedAbove = topChrome + (if (pageHasDock) dockFootprint else 16.dp)
-        val viewportHeightDp = (screenHeightDp - reservedAbove - bottomReserve).coerceAtLeast(PageRowDimens.rowUnitHeight)
+    val statusBarInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val navigationBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val heightPxRange = remember(pageHasDock, configuration.screenWidthDp, configuration.screenHeightDp, density, statusBarInset, navigationBarInset) {
         with(density) {
             val minPx = PageRowDimens.rowUnitHeight.toPx().roundToInt()
-            val maxPx = viewportHeightDp.toPx().roundToInt()
+            val maxPx = safeSystemWidgetMaxHeightPx(
+                pageHasDock = pageHasDock,
+                screenWidthPx = configuration.screenWidthDp.dp.toPx().roundToInt(),
+                screenHeightPx = configuration.screenHeightDp.dp.toPx().roundToInt(),
+                densityValue = density.density,
+                statusBarPx = statusBarInset.toPx().roundToInt(),
+                navigationBarPx = navigationBarInset.toPx().roundToInt()
+            )
             minPx..maxOf(maxPx, minPx)
         }
     }

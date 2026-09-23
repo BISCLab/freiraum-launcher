@@ -20,6 +20,8 @@
     <string name="folder_move_done">Done</string>
     <string name="folder_move_left">Move left</string>
     <string name="folder_move_right">Move right</string>
+    <string name="folder_move_up">Move up</string>
+    <string name="folder_move_down">Move down</string>
     <string name="folder_add_subfolder">Folder</string>
 
     <string name="sidebar_apps">Apps</string>
@@ -338,6 +340,9 @@
     <string name="settings_widgets_edit_title">Edit widget</string>
     <string name="settings_search_bar_edit_title">Edit dock</string>
     <string name="settings_dock_row_edit_hint">Background, quick-launch icons and tap actions of the dock are edited under Settings > Dock.</string>
+    <string name="settings_widget_relocated_title">Widget moved to a new page</string>
+    <string name="settings_widget_relocated_message">This page\'s widget was too tall to fit alongside the dock you just added, which can crash some widgets — it was moved to a new page automatically so it keeps working.</string>
+    <string name="settings_widget_relocated_confirm">OK</string>
     <string name="settings_widgets_corner_shape_label">Corner shape</string>
     <string name="settings_widgets_corner_shape_square">Square</string>
     <string name="settings_widgets_corner_shape_rounded">Rounded</string>
@@ -404,9 +409,7 @@
     <string name="settings_statusbar_hide_all">Hide everywhere</string>
     <string name="settings_statusbar_hide_all_summary">Turns the status bar off on every page, quick overview, text search and folders. You can turn it back on individually per screen afterwards. A swipe down from the top edge always shows it briefly.</string>
     <string name="settings_statusbar_hide_page">Hide status bar</string>
-    <string name="settings_statusbar_hide_quick_search">Hide in quick overview</string>
-    <string name="settings_quick_overview_animation_label">Animate opening</string>
-    <string name="settings_quick_overview_animation_summary">Off by default so quick overview opens and closes instantly. Turn on for a short slide/fade animation instead.</string>
+    <string name="settings_statusbar_hide_quick_search">Hide status bar in quick overview</string>
     <string name="settings_folder_hide_status_bar">Hide status bar in folders</string>
     <string name="settings_folder_hide_dock">Hide dock in folders</string>
     <string name="settings_folder_hide_dock_summary">Off by default, so the floating dock stays visible while a folder is open.</string>

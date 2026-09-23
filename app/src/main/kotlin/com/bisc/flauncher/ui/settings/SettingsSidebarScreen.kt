@@ -77,7 +77,6 @@ fun SettingsSidebarScreen(navController: NavController, onBack: () -> Unit, view
     var showBackdropSheet by remember { mutableStateOf(false) }
     val quickOverviewBackground by viewModel.quickOverviewBackground.collectAsState()
     val quickHideStatusBar by viewModel.quickOverviewHideStatusBar.collectAsState()
-    val quickOverviewAnimationEnabled by viewModel.quickOverviewAnimationEnabled.collectAsState()
     var showCreateFolderDialog by remember { mutableStateOf(false) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_search_overview), navController = navController, onBack = onBack) {
@@ -143,13 +142,6 @@ fun SettingsSidebarScreen(navController: NavController, onBack: () -> Unit, view
                 title = stringResource(R.string.settings_statusbar_hide_quick_search),
                 onClick = { viewModel.setQuickOverviewHideStatusBar(!quickHideStatusBar) },
                 trailing = { Switch(checked = quickHideStatusBar, onCheckedChange = viewModel::setQuickOverviewHideStatusBar) }
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_quick_overview_animation_label),
-                info = stringResource(R.string.settings_quick_overview_animation_summary),
-                onClick = { viewModel.setQuickOverviewAnimationEnabled(!quickOverviewAnimationEnabled) },
-                trailing = { Switch(checked = quickOverviewAnimationEnabled, onCheckedChange = viewModel::setQuickOverviewAnimationEnabled) }
             )
         }
     }

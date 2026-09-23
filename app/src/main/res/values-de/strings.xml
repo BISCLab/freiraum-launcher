@@ -19,6 +19,8 @@
     <string name="folder_move_done">Fertig</string>
     <string name="folder_move_left">Nach links verschieben</string>
     <string name="folder_move_right">Nach rechts verschieben</string>
+    <string name="folder_move_up">Nach oben verschieben</string>
+    <string name="folder_move_down">Nach unten verschieben</string>
     <string name="folder_add_subfolder">Ordner</string>
 
     <string name="sidebar_apps">Apps</string>
@@ -337,6 +339,9 @@
     <string name="settings_widgets_edit_title">Widget bearbeiten</string>
     <string name="settings_search_bar_edit_title">Dock bearbeiten</string>
     <string name="settings_dock_row_edit_hint">Hintergrund, Schnellstartsymbole und Tippaktionen des Docks werden unter Einstellungen > Dock bearbeitet.</string>
+    <string name="settings_widget_relocated_title">Widget auf neue Seite verschoben</string>
+    <string name="settings_widget_relocated_message">Das Widget auf dieser Seite war zu hoch, um zusammen mit dem gerade hinzugefügten Dock zu passen — das kann bei manchen Widgets zu Abstürzen führen. Es wurde automatisch auf eine neue Seite verschoben, damit es weiter funktioniert.</string>
+    <string name="settings_widget_relocated_confirm">OK</string>
     <string name="settings_widgets_corner_shape_label">Eckenform</string>
     <string name="settings_widgets_corner_shape_square">Eckig</string>
     <string name="settings_widgets_corner_shape_rounded">Abgerundet</string>
@@ -403,9 +408,7 @@
     <string name="settings_statusbar_hide_all">Überall ausblenden</string>
     <string name="settings_statusbar_hide_all_summary">Schaltet die Statusleiste auf jeder Seite, der Schnellübersicht, der Textsuche und in Ordnern aus. Danach kann sie pro Bildschirm einzeln wieder eingeschaltet werden. Wischen vom oberen Rand zeigt sie immer kurzzeitig an.</string>
     <string name="settings_statusbar_hide_page">Statusleiste ausblenden</string>
-    <string name="settings_statusbar_hide_quick_search">In der Schnellübersicht ausblenden</string>
-    <string name="settings_quick_overview_animation_label">Öffnen animieren</string>
-    <string name="settings_quick_overview_animation_summary">Standardmäßig aus, damit die Schnellübersicht sofort auf- und zugeht. Einschalten für eine kurze Wisch-/Überblend-Animation.</string>
+    <string name="settings_statusbar_hide_quick_search">Statusleiste in der Schnellübersicht ausblenden</string>
     <string name="settings_folder_hide_status_bar">Statusleiste in Ordnern ausblenden</string>
     <string name="settings_folder_hide_dock">Dock in Ordnern ausblenden</string>
     <string name="settings_folder_hide_dock_summary">Standardmäßig aus, sodass das schwebende Dock sichtbar bleibt, während ein Ordner geöffnet ist.</string>

@@ -9,8 +9,6 @@ import android.app.Activity
 import android.content.ComponentName
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -178,7 +176,6 @@ fun HomeScreen(
     val quickLaunchSlots by viewModel.quickLaunchSlots.collectAsState()
     val dockSingleTapAction by viewModel.dockSingleTapAction.collectAsState()
     val dockDoubleTapAction by viewModel.dockDoubleTapAction.collectAsState()
-    val quickOverviewAnimationEnabled by viewModel.quickOverviewAnimationEnabled.collectAsState()
     val chargingAnimationEnabled by viewModel.chargingAnimationEnabled.collectAsState()
     val chargingAnimationColor by viewModel.chargingAnimationColor.collectAsState()
     val searchOverlayBackground by viewModel.searchOverlayBackground.collectAsState()
@@ -428,10 +425,11 @@ fun HomeScreen(
         val pinnedDockFootprint = DockDimens.scaled((screenWidth - DockDimens.horizontalMargin * 2).coerceAtLeast(0.dp))
             .let { it.barHeight + DockDimens.topMargin + DockDimens.bottomMargin }
 
+        // Matches text search's own open/close timing exactly, so both feel equally instant.
         AnimatedVisibility(
             visible = overviewEntry != null && !folderOpen,
-            enter = if (quickOverviewAnimationEnabled) fadeIn(tween(70)) else EnterTransition.None,
-            exit = if (quickOverviewAnimationEnabled) fadeOut(tween(60)) else ExitTransition.None,
+            enter = fadeIn(tween(120)),
+            exit = fadeOut(tween(160)),
             modifier = Modifier.fillMaxSize()
         ) {
             BackgroundFill(quickOverviewBackground, Modifier.fillMaxSize())
@@ -441,20 +439,12 @@ fun HomeScreen(
             val overviewPivotX = if (handedness == Handedness.LEFT) 0.12f else 0.88f
             AnimatedVisibility(
                 visible = overviewEntry != null && !folderOpen,
-                enter = if (quickOverviewAnimationEnabled) {
-                    expandVertically(animationSpec = tween(80), expandFrom = Alignment.Bottom) +
-                        scaleIn(animationSpec = tween(80), initialScale = 0.97f, transformOrigin = TransformOrigin(overviewPivotX, 1f)) +
-                        fadeIn(tween(60))
-                } else {
-                    EnterTransition.None
-                },
-                exit = if (quickOverviewAnimationEnabled) {
-                    shrinkVertically(animationSpec = tween(70), shrinkTowards = Alignment.Bottom) +
-                        scaleOut(animationSpec = tween(70), targetScale = 0.97f, transformOrigin = TransformOrigin(overviewPivotX, 1f)) +
-                        fadeOut(tween(50))
-                } else {
-                    ExitTransition.None
-                }
+                enter = expandVertically(animationSpec = tween(120), expandFrom = Alignment.Bottom) +
+                    scaleIn(animationSpec = tween(120), initialScale = 0.94f, transformOrigin = TransformOrigin(overviewPivotX, 1f)) +
+                    fadeIn(tween(90)),
+                exit = shrinkVertically(animationSpec = tween(220), shrinkTowards = Alignment.Bottom) +
+                    scaleOut(animationSpec = tween(220), targetScale = 0.94f, transformOrigin = TransformOrigin(overviewPivotX, 1f)) +
+                    fadeOut(tween(160))
             ) {
                 val currentOverviewEntry = lastOverviewEntry
                 if (currentOverviewEntry != null) {
@@ -516,6 +506,7 @@ fun HomeScreen(
                         onSaveNote = viewModel::saveNote,
                         onDeleteNote = viewModel::deleteNote,
                         onCreateNote = viewModel::createNote,
+                        onReorderNotes = viewModel::reorderNotes,
                         onMapTargetClick = { target ->
                             launchMapTarget(context, target)
                             viewModel.closeOverview()

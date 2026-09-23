@@ -96,6 +96,7 @@ fun SidebarOverviewPanel(
     onSaveNote: (Note) -> Unit,
     onDeleteNote: (Note) -> Unit,
     onCreateNote: ((Long) -> Unit) -> Unit,
+    onReorderNotes: (List<Note>) -> Unit,
     onMapTargetClick: (SavedMapTarget) -> Unit,
     onRemoveMapTarget: (SavedMapTarget) -> Unit,
     onAddMapTargetClick: () -> Unit,
@@ -164,6 +165,7 @@ fun SidebarOverviewPanel(
                         onSaveNote = onSaveNote,
                         onDeleteNote = onDeleteNote,
                         onCreateNote = onCreateNote,
+                        onReorderNotes = onReorderNotes,
                         onMapTargetClick = onMapTargetClick,
                         onRemoveMapTarget = onRemoveMapTarget,
                         onAddMapTargetClick = onAddMapTargetClick,
@@ -181,7 +183,8 @@ fun SidebarOverviewPanel(
                         onRemoveContact = onRemoveContact,
                         onAddContactClick = onAddContactClick,
                         onContactsPermissionResult = onContactsPermissionResult,
-                        loadContactPhoto = loadContactPhoto
+                        loadContactPhoto = loadContactPhoto,
+                        dock = dock
                     )
                 }
             }

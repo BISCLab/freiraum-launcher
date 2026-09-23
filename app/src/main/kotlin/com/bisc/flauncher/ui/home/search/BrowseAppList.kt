@@ -130,7 +130,8 @@ fun BrowseAppList(
     handedness: Handedness,
     accentColor: Int,
     edgeInset: Dp = DockDimens.horizontalMargin,
-    layout: AppListLayout = AppListLayout.LIST
+    layout: AppListLayout = AppListLayout.LIST,
+    iconSize: Dp = TILE_ICON_SIZE
 ) {
     val scrub = remember { BrowseScrubState() }
     val gridState = rememberLazyGridState()
@@ -201,7 +202,7 @@ fun BrowseAppList(
                     Box(modifier = Modifier.graphicsLayer { alpha = if (index in highlight.value) 1f else othersAlpha.value }) {
                         when (item) {
                             is BrowseItem.Header -> BrowseSectionHeader(item.letter, headerLetterAppearance, handedness, 0.dp)
-                            is BrowseItem.Row -> AppTile(item.app, loadIcon) { onAppClick(item.app) }
+                            is BrowseItem.Row -> AppTile(item.app, loadIcon, iconSize) { onAppClick(item.app) }
                         }
                     }
                 }
@@ -220,7 +221,7 @@ fun BrowseAppList(
                     Box(modifier = Modifier.graphicsLayer { alpha = if (index in highlight.value) 1f else othersAlpha.value }) {
                         when (item) {
                             is BrowseItem.Header -> BrowseSectionHeader(item.letter, headerLetterAppearance, handedness, edgeInset)
-                            is BrowseItem.Row -> AppBrowseRow(item.app, loadIcon, handedness, edgeInset) { onAppClick(item.app) }
+                            is BrowseItem.Row -> AppBrowseRow(item.app, loadIcon, handedness, edgeInset, iconSize) { onAppClick(item.app) }
                         }
                     }
                 }
@@ -307,7 +308,7 @@ private val TILE_MIN_WIDTH = 78.dp
 private val TILE_ICON_SIZE = 56.dp
 
 @Composable
-private fun AppTile(app: AppInfo, loadIcon: (ComponentName) -> ImageBitmap?, onClick: () -> Unit) {
+private fun AppTile(app: AppInfo, loadIcon: (ComponentName) -> ImageBitmap?, iconSize: Dp, onClick: () -> Unit) {
     val bitmap = rememberAppIcon(app.componentName, loadIcon)
     Column(
         modifier = Modifier
@@ -316,7 +317,7 @@ private fun AppTile(app: AppInfo, loadIcon: (ComponentName) -> ImageBitmap?, onC
             .padding(horizontal = 2.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(modifier = Modifier.size(TILE_ICON_SIZE)) {
+        Box(modifier = Modifier.size(iconSize)) {
             if (bitmap != null) Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.fillMaxSize())
         }
         Text(
@@ -410,7 +411,7 @@ private fun ScrubMagnifier(label: String, verticalFraction: Float, handedness: H
 }
 
 @Composable
-private fun AppBrowseRow(app: AppInfo, loadIcon: (ComponentName) -> ImageBitmap?, handedness: Handedness, edgeInset: Dp, onClick: () -> Unit) {
+private fun AppBrowseRow(app: AppInfo, loadIcon: (ComponentName) -> ImageBitmap?, handedness: Handedness, edgeInset: Dp, iconSize: Dp, onClick: () -> Unit) {
     val bitmap = rememberAppIcon(app.componentName, loadIcon)
     val isLeft = handedness == Handedness.LEFT
     Row(
@@ -428,7 +429,7 @@ private fun AppBrowseRow(app: AppInfo, loadIcon: (ComponentName) -> ImageBitmap?
     ) {
         val icon = @Composable {
             if (bitmap != null) {
-                Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(40.dp))
+                Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(iconSize))
             }
         }
         val label = @Composable { Text(app.label) }

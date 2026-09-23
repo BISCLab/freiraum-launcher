@@ -7,6 +7,7 @@ import android.content.ComponentName
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,19 +21,27 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -81,12 +90,11 @@ import kotlinx.coroutines.delay
 private val OVERVIEW_LIST_CONTENT_PADDING = PaddingValues(vertical = 8.dp)
 private val OVERVIEW_ROW_HEIGHT_MIN = 44.dp
 private const val OVERVIEW_GRID_COLUMNS = 3
-private val OVERVIEW_LIST_ICON_SIZE = 28.dp
-private val OVERVIEW_GRID_ICON_SIZE = 52.dp
+private val OVERVIEW_LIST_ICON_SIZE = 36.dp
 
-/** Grid mode has room for a bigger icon than a list row does. */
-private fun overviewIconSize(viewMode: SidebarCategoryViewMode) =
-    if (viewMode == SidebarCategoryViewMode.GRID) OVERVIEW_GRID_ICON_SIZE else OVERVIEW_LIST_ICON_SIZE
+/** Grid mode uses exactly the dock's own icon size; list mode gets a smaller, but still roomier, size. */
+private fun overviewIconSize(viewMode: SidebarCategoryViewMode, dock: ScaledDock) =
+    if (viewMode == SidebarCategoryViewMode.GRID) dock.iconSize else OVERVIEW_LIST_ICON_SIZE
 
 internal fun overviewRowHeight(availableHeight: Dp, appCount: Int): Dp {
     if (appCount <= 0) return OVERVIEW_ROW_HEIGHT_MIN
@@ -120,6 +128,7 @@ fun OverviewContent(
     onSaveNote: (Note) -> Unit,
     onDeleteNote: (Note) -> Unit,
     onCreateNote: ((Long) -> Unit) -> Unit,
+    onReorderNotes: (List<Note>) -> Unit,
     onMapTargetClick: (SavedMapTarget) -> Unit,
     onRemoveMapTarget: (SavedMapTarget) -> Unit,
     onAddMapTargetClick: () -> Unit,
@@ -137,29 +146,30 @@ fun OverviewContent(
     onRemoveContact: (PinnedContact) -> Unit,
     onAddContactClick: () -> Unit,
     onContactsPermissionResult: (Boolean) -> Unit,
-    loadContactPhoto: suspend (Long, String?) -> ImageBitmap?
+    loadContactPhoto: suspend (Long, String?) -> ImageBitmap?,
+    dock: ScaledDock
 ) {
     when (entry) {
         SidebarEntryType.APPS -> SidebarAppsOverviewContent(
-            installedApps, sidebarPinnedApps, loadIcon, onAppClick, onAddSidebarAppsClick, onRemoveSidebarApp, viewMode, showAddRow, rowHeight
+            installedApps, sidebarPinnedApps, loadIcon, onAppClick, onAddSidebarAppsClick, onRemoveSidebarApp, viewMode, showAddRow, rowHeight, dock
         )
         SidebarEntryType.PAGES -> PagesOverviewContent(pages, onPageClick, rowHeight)
         SidebarEntryType.FOLDERS -> FoldersOverviewContent(
-            folders, folderItemsByFolder, loadIcon, loadPackIcon, onFolderClick, onAddFolderClick, viewMode, showAddRow, rowHeight
+            folders, folderItemsByFolder, loadIcon, loadPackIcon, onFolderClick, onAddFolderClick, viewMode, showAddRow, rowHeight, dock
         )
-        SidebarEntryType.NOTES -> NotesOverviewContent(notes, onSaveNote, onDeleteNote, onCreateNote, rowHeight)
+        SidebarEntryType.NOTES -> NotesOverviewContent(notes, onSaveNote, onDeleteNote, onCreateNote, onReorderNotes, rowHeight)
         SidebarEntryType.WEBSITES -> WebsitesOverviewContent(
-            pinnedWebsites, onWebsiteClick, onRemoveWebsite, onAddWebsiteClick, viewMode, showAddRow, rowHeight
+            pinnedWebsites, onWebsiteClick, onRemoveWebsite, onAddWebsiteClick, viewMode, showAddRow, rowHeight, dock
         )
         SidebarEntryType.MAPS -> MapsOverviewContent(
-            savedMapTargets, onMapTargetClick, onRemoveMapTarget, onAddMapTargetClick, viewMode, showAddRow, rowHeight
+            savedMapTargets, onMapTargetClick, onRemoveMapTarget, onAddMapTargetClick, viewMode, showAddRow, rowHeight, dock
         )
         SidebarEntryType.SHORTCUTS -> ShortcutsOverviewContent(
-            pinnedShortcuts, hasShortcutPermission, onShortcutClick, onRemoveShortcut, onAddShortcutClick, viewMode, showAddRow, rowHeight
+            pinnedShortcuts, hasShortcutPermission, onShortcutClick, onRemoveShortcut, onAddShortcutClick, viewMode, showAddRow, rowHeight, dock
         )
         SidebarEntryType.CONTACTS -> ContactsOverviewContent(
             pinnedContacts, hasContactsPermission, onContactClick, onRemoveContact, onAddContactClick, onContactsPermissionResult,
-            loadContactPhoto, viewMode, showAddRow, rowHeight
+            loadContactPhoto, viewMode, showAddRow, rowHeight, dock
         )
     }
 }
@@ -193,13 +203,14 @@ private fun SidebarAppsOverviewContent(
     onRemove: (SidebarPinnedApp) -> Unit,
     viewMode: SidebarCategoryViewMode,
     showAddRow: Boolean,
-    rowHeight: Dp
+    rowHeight: Dp,
+    dock: ScaledDock
 ) {
     val appsByComponent = remember(installedApps) { installedApps.associateBy { it.componentName } }
     val onAppClickLatest by rememberUpdatedState(onAppClick)
     val onRemoveLatest by rememberUpdatedState(onRemove)
     val loadIconLatest by rememberUpdatedState(loadIcon)
-    val iconSize = overviewIconSize(viewMode)
+    val iconSize = overviewIconSize(viewMode, dock)
     val entries = remember(pinnedApps, appsByComponent, iconSize) {
         pinnedApps.map { pinned ->
             val componentName = ComponentName.unflattenFromString(pinned.componentName)
@@ -222,6 +233,7 @@ private fun SidebarAppsOverviewContent(
         entries = entries,
         rowHeight = rowHeight,
         viewMode = viewMode,
+        cellSize = iconSize,
         emptyLabelRes = R.string.sidebar_apps_empty,
         addLabelRes = R.string.sidebar_apps_add.takeIf { showAddRow },
         onAddClick = onAddAppsClick.takeIf { showAddRow }
@@ -256,12 +268,13 @@ private fun FoldersOverviewContent(
     onAddFolderClick: () -> Unit,
     viewMode: SidebarCategoryViewMode,
     showAddRow: Boolean,
-    rowHeight: Dp
+    rowHeight: Dp,
+    dock: ScaledDock
 ) {
     val onFolderClickLatest by rememberUpdatedState(onFolderClick)
     val loadIconLatest by rememberUpdatedState(loadIcon)
     val loadPackIconLatest by rememberUpdatedState(loadPackIcon)
-    val iconSize = overviewIconSize(viewMode)
+    val iconSize = overviewIconSize(viewMode, dock)
     val entries = remember(folders, folderItemsByFolder, iconSize) {
         folders.map { folder ->
             CategoryEntry(
@@ -284,6 +297,7 @@ private fun FoldersOverviewContent(
         entries = entries,
         rowHeight = rowHeight,
         viewMode = viewMode,
+        cellSize = iconSize,
         emptyLabelRes = R.string.folder_overview_empty,
         addLabelRes = R.string.folder_add.takeIf { showAddRow },
         onAddClick = onAddFolderClick.takeIf { showAddRow }
@@ -296,10 +310,22 @@ private fun NotesOverviewContent(
     onSaveNote: (Note) -> Unit,
     onDeleteNote: (Note) -> Unit,
     onCreateNote: ((Long) -> Unit) -> Unit,
+    onReorderNotes: (List<Note>) -> Unit,
     rowHeight: Dp
 ) {
     var expandedNoteId by remember { mutableStateOf<Long?>(null) }
     var editingNoteId by remember { mutableStateOf<Long?>(null) }
+    var menuForNoteId by remember { mutableStateOf<Long?>(null) }
+    var movingNoteId by remember { mutableStateOf<Long?>(null) }
+
+    fun moveBy(delta: Int) {
+        val from = notes.indexOfFirst { it.id == movingNoteId }
+        val to = (from + delta).coerceIn(0, notes.lastIndex)
+        if (from < 0 || from == to) return
+        val reordered = notes.toMutableList().apply { add(to, removeAt(from)) }
+        onReorderNotes(reordered)
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxWidth().fillMaxHeight(),
         contentPadding = OVERVIEW_LIST_CONTENT_PADDING
@@ -316,6 +342,8 @@ private fun NotesOverviewContent(
                 note = note,
                 expanded = expandedNoteId == note.id,
                 editing = editingNoteId == note.id,
+                selected = note.id == movingNoteId,
+                menuExpanded = note.id == menuForNoteId,
                 onToggleExpand = {
                     editingNoteId = null
                     expandedNoteId = if (expandedNoteId == note.id) null else note.id
@@ -328,15 +356,42 @@ private fun NotesOverviewContent(
                     if (expandedNoteId == note.id) expandedNoteId = null
                     if (editingNoteId == note.id) editingNoteId = null
                 },
+                onLongClick = { menuForNoteId = note.id },
+                onDismissMenu = { menuForNoteId = null },
+                onRequestMove = { menuForNoteId = null; movingNoteId = note.id },
                 rowHeight = rowHeight
             )
         }
-        item(key = "add_note") {
-            AddRow(
-                labelRes = R.string.sidebar_notes_add,
-                onClick = { onCreateNote { id -> expandedNoteId = id; editingNoteId = id } },
-                rowHeight = rowHeight
-            )
+        if (movingNoteId != null) {
+            item(key = "move_controls") {
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(rowHeight).padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { moveBy(-1) }) {
+                        Icon(Icons.Filled.KeyboardArrowUp, contentDescription = stringResource(R.string.folder_move_up))
+                    }
+                    Text(
+                        stringResource(R.string.folder_move_hint),
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
+                    )
+                    TextButton(onClick = { movingNoteId = null }) { Text(stringResource(R.string.folder_move_done)) }
+                    IconButton(onClick = { moveBy(1) }) {
+                        Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.folder_move_down))
+                    }
+                }
+            }
+        } else {
+            item(key = "add_note") {
+                AddRow(
+                    labelRes = R.string.sidebar_notes_add,
+                    onClick = { onCreateNote { id -> expandedNoteId = id; editingNoteId = id } },
+                    rowHeight = rowHeight
+                )
+            }
         }
     }
 }
@@ -346,20 +401,40 @@ private fun NoteOverviewItem(
     note: Note,
     expanded: Boolean,
     editing: Boolean,
+    selected: Boolean,
+    menuExpanded: Boolean,
     onToggleExpand: () -> Unit,
     onEdit: () -> Unit,
     onDoneEditing: () -> Unit,
     onSave: (Note) -> Unit,
     onDelete: () -> Unit,
+    onLongClick: () -> Unit,
+    onDismissMenu: () -> Unit,
+    onRequestMove: () -> Unit,
     rowHeight: Dp
 ) {
     var confirmingDelete by remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth()) {
+        Box {
+            DropdownMenu(expanded = menuExpanded, onDismissRequest = onDismissMenu) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.folder_item_move)) },
+                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.CompareArrows, contentDescription = null) },
+                    onClick = onRequestMove
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.folder_item_remove)) },
+                    leadingIcon = { Icon(Icons.Filled.DeleteOutline, contentDescription = null) },
+                    onClick = { onDismissMenu(); confirmingDelete = true }
+                )
+            }
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(rowHeight)
-                .combinedClickable(onClick = onToggleExpand, onLongClick = { confirmingDelete = true })
+                .then(if (selected) Modifier.background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)) else Modifier)
+                .combinedClickable(onClick = onToggleExpand, onLongClick = onLongClick)
                 .padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -463,11 +538,12 @@ private fun WebsitesOverviewContent(
     onAddWebsiteClick: () -> Unit,
     viewMode: SidebarCategoryViewMode,
     showAddRow: Boolean,
-    rowHeight: Dp
+    rowHeight: Dp,
+    dock: ScaledDock
 ) {
     val onClickLatest by rememberUpdatedState(onWebsiteClick)
     val onRemoveLatest by rememberUpdatedState(onRemoveWebsite)
-    val iconSize = overviewIconSize(viewMode)
+    val iconSize = overviewIconSize(viewMode, dock)
     val entries = remember(websites, iconSize) {
         websites.map { website ->
             CategoryEntry(
@@ -483,6 +559,7 @@ private fun WebsitesOverviewContent(
         entries = entries,
         rowHeight = rowHeight,
         viewMode = viewMode,
+        cellSize = iconSize,
         emptyLabelRes = R.string.sidebar_websites_empty,
         addLabelRes = R.string.sidebar_website_add.takeIf { showAddRow },
         onAddClick = onAddWebsiteClick.takeIf { showAddRow }
@@ -497,11 +574,12 @@ private fun MapsOverviewContent(
     onAddClick: () -> Unit,
     viewMode: SidebarCategoryViewMode,
     showAddRow: Boolean,
-    rowHeight: Dp
+    rowHeight: Dp,
+    dock: ScaledDock
 ) {
     val onClickLatest by rememberUpdatedState(onTargetClick)
     val onRemoveLatest by rememberUpdatedState(onRemoveTarget)
-    val iconSize = overviewIconSize(viewMode)
+    val iconSize = overviewIconSize(viewMode, dock)
     val entries = remember(targets, iconSize) {
         targets.map { target ->
             CategoryEntry(
@@ -517,6 +595,7 @@ private fun MapsOverviewContent(
         entries = entries,
         rowHeight = rowHeight,
         viewMode = viewMode,
+        cellSize = iconSize,
         emptyLabelRes = R.string.sidebar_maps_empty,
         addLabelRes = R.string.sidebar_maps_add.takeIf { showAddRow },
         onAddClick = onAddClick.takeIf { showAddRow }
@@ -532,7 +611,8 @@ private fun ShortcutsOverviewContent(
     onAddClick: () -> Unit,
     viewMode: SidebarCategoryViewMode,
     showAddRow: Boolean,
-    rowHeight: Dp
+    rowHeight: Dp,
+    dock: ScaledDock
 ) {
     if (!hasPermission) {
         WholeRowsLazyColumn(rowHeight = rowHeight) {
@@ -549,7 +629,7 @@ private fun ShortcutsOverviewContent(
     }
     val onClickLatest by rememberUpdatedState(onShortcutClick)
     val onRemoveLatest by rememberUpdatedState(onRemoveShortcut)
-    val iconSize = overviewIconSize(viewMode)
+    val iconSize = overviewIconSize(viewMode, dock)
     val entries = remember(shortcuts, iconSize) {
         shortcuts.map { shortcut ->
             CategoryEntry(
@@ -565,6 +645,7 @@ private fun ShortcutsOverviewContent(
         entries = entries,
         rowHeight = rowHeight,
         viewMode = viewMode,
+        cellSize = iconSize,
         emptyLabelRes = R.string.sidebar_shortcuts_empty,
         addLabelRes = R.string.sidebar_shortcuts_add.takeIf { showAddRow },
         onAddClick = onAddClick.takeIf { showAddRow }
@@ -582,7 +663,8 @@ private fun ContactsOverviewContent(
     loadContactPhoto: suspend (Long, String?) -> ImageBitmap?,
     viewMode: SidebarCategoryViewMode,
     showAddRow: Boolean,
-    rowHeight: Dp
+    rowHeight: Dp,
+    dock: ScaledDock
 ) {
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -611,7 +693,7 @@ private fun ContactsOverviewContent(
     val onClickLatest by rememberUpdatedState(onContactClick)
     val onRemoveLatest by rememberUpdatedState(onRemoveContact)
     val loadPhotoLatest by rememberUpdatedState(loadContactPhoto)
-    val iconSize = overviewIconSize(viewMode)
+    val iconSize = overviewIconSize(viewMode, dock)
     val entries = remember(contacts, iconSize) {
         contacts.map { contact ->
             CategoryEntry(
@@ -634,6 +716,7 @@ private fun ContactsOverviewContent(
         entries = entries,
         rowHeight = rowHeight,
         viewMode = viewMode,
+        cellSize = iconSize,
         emptyLabelRes = R.string.sidebar_contacts_empty,
         addLabelRes = R.string.sidebar_contacts_add.takeIf { showAddRow },
         onAddClick = onAddContactClick.takeIf { showAddRow }
@@ -666,6 +749,7 @@ private fun CategoryOverviewList(
     entries: List<CategoryEntry>,
     rowHeight: Dp,
     viewMode: SidebarCategoryViewMode,
+    cellSize: Dp,
     emptyLabelRes: Int?,
     addLabelRes: Int?,
     onAddClick: (() -> Unit)?
@@ -688,7 +772,7 @@ private fun CategoryOverviewList(
                 item(key = "add") { AddRow(labelRes = addLabelRes, onClick = onAddClick, rowHeight = rowHeight) }
             }
         }
-        SidebarCategoryViewMode.GRID -> CategoryGrid(entries, emptyLabelRes, addLabelRes, onAddClick) { entry -> pendingRemoval = entry }
+        SidebarCategoryViewMode.GRID -> CategoryGrid(entries, cellSize, emptyLabelRes, addLabelRes, onAddClick) { entry -> pendingRemoval = entry }
     }
     pendingRemoval?.let { entry ->
         ConfirmRemoveDialog(
@@ -723,40 +807,49 @@ private fun CategoryListRow(entry: CategoryEntry, rowHeight: Dp, onRequestRemove
 @Composable
 private fun CategoryGrid(
     entries: List<CategoryEntry>,
+    cellSize: Dp,
     emptyLabelRes: Int?,
     addLabelRes: Int?,
     onAddClick: (() -> Unit)?,
     onRequestRemove: (CategoryEntry) -> Unit
 ) {
     val rows = entries.chunked(OVERVIEW_GRID_COLUMNS)
-    LazyColumn(modifier = Modifier.fillMaxWidth(), contentPadding = OVERVIEW_LIST_CONTENT_PADDING) {
-        if (entries.isEmpty() && emptyLabelRes != null) {
-            item(key = "empty") {
-                Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                    Text(stringResource(emptyLabelRes), color = LocalContentColor.current.copy(alpha = 0.5f))
-                }
-            }
-        }
-        items(rows, key = { row -> row.first().key }) { row ->
-            Row(modifier = Modifier.fillMaxWidth()) {
-                repeat(OVERVIEW_GRID_COLUMNS) { slot ->
-                    Box(modifier = Modifier.weight(1f)) {
-                        row.getOrNull(slot)?.let { entry -> CategoryGridCell(entry, onRequestRemove = { onRequestRemove(entry) }) }
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        // The gap between cells and from the outer edges to the first/last cell is the same value,
+        // so the row reads as evenly spaced rather than each cell just centering itself in a slice.
+        val gap = ((maxWidth - cellSize * OVERVIEW_GRID_COLUMNS) / (OVERVIEW_GRID_COLUMNS + 1)).coerceAtLeast(4.dp)
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(vertical = 8.dp, horizontal = gap)
+        ) {
+            if (entries.isEmpty() && emptyLabelRes != null) {
+                item(key = "empty") {
+                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                        Text(stringResource(emptyLabelRes), color = LocalContentColor.current.copy(alpha = 0.5f))
                     }
                 }
             }
-        }
-        if (addLabelRes != null && onAddClick != null) {
-            item(key = "add") {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .noRippleClickable(onClick = onAddClick)
-                        .padding(vertical = 12.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(Icons.Filled.Add, contentDescription = null, tint = LocalContentColor.current.copy(alpha = 0.7f))
-                    Text(stringResource(addLabelRes), color = LocalContentColor.current.copy(alpha = 0.7f))
+            items(rows, key = { row -> row.first().key }) { row ->
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(gap)) {
+                    repeat(OVERVIEW_GRID_COLUMNS) { slot ->
+                        Box(modifier = Modifier.width(cellSize)) {
+                            row.getOrNull(slot)?.let { entry -> CategoryGridCell(entry, cellSize, onRequestRemove = { onRequestRemove(entry) }) }
+                        }
+                    }
+                }
+            }
+            if (addLabelRes != null && onAddClick != null) {
+                item(key = "add") {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .noRippleClickable(onClick = onAddClick)
+                            .padding(vertical = 12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(Icons.Filled.Add, contentDescription = null, tint = LocalContentColor.current.copy(alpha = 0.7f))
+                        Text(stringResource(addLabelRes), color = LocalContentColor.current.copy(alpha = 0.7f))
+                    }
                 }
             }
         }
@@ -764,12 +857,12 @@ private fun CategoryGrid(
 }
 
 @Composable
-private fun CategoryGridCell(entry: CategoryEntry, onRequestRemove: () -> Unit) {
+private fun CategoryGridCell(entry: CategoryEntry, cellSize: Dp, onRequestRemove: () -> Unit) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
+            .width(cellSize)
             .combinedClickable(onClick = entry.onClick, onLongClick = entry.onRemove?.let { { onRequestRemove() } })
-            .padding(vertical = 8.dp, horizontal = 6.dp),
+            .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         entry.icon()

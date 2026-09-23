@@ -144,10 +144,6 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.setDockMatchWidgetCorners(enabled) }
     }
 
-    fun setQuickOverviewAnimationEnabled(enabled: Boolean) {
-        viewModelScope.launch { settingsRepository.setQuickOverviewAnimationEnabled(enabled) }
-    }
-
     val chargingAnimationColor: StateFlow<Int> =
         settingsRepository.chargingAnimationColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF34D058.toInt())
 
@@ -169,9 +165,6 @@ class HomeViewModel @Inject constructor(
 
     val searchAlphabetRailAppearance: StateFlow<ElementAppearance?> =
         settingsRepository.searchAlphabetRailAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
-    val quickOverviewAnimationEnabled: StateFlow<Boolean> =
-        settingsRepository.quickOverviewAnimationEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     fun pageHideStatusBar(pageId: Long): Flow<Boolean> = settingsRepository.pageHideStatusBar(pageId)
 
@@ -549,6 +542,10 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { onCreated(noteRepository.save(Note())) }
     }
 
+    fun reorderNotes(ordered: List<Note>) {
+        viewModelScope.launch { noteRepository.reorder(ordered) }
+    }
+
     fun addMapTarget(label: String, lat: Double, lon: Double, address: String = "") {
         viewModelScope.launch { mapsRepository.add(label, lat, lon, address) }
     }
@@ -803,7 +800,18 @@ class HomeViewModel @Inject constructor(
     }
 
     fun addSearchBarRow(pageId: Long) {
-        viewModelScope.launch { pageContentRepository.addSearchBarRow(pageId) }
+        viewModelScope.launch {
+            val relocated = pageContentRepository.addSearchBarRow(pageId)
+            if (relocated > 0) _widgetRelocationWarningCount.value = relocated
+        }
+    }
+
+    /** Non-zero while the "widget(s) moved to a new page" warning from [addSearchBarRow] should be shown. */
+    val widgetRelocationWarningCount: StateFlow<Int> get() = _widgetRelocationWarningCount
+    private val _widgetRelocationWarningCount = MutableStateFlow(0)
+
+    fun dismissWidgetRelocationWarning() {
+        _widgetRelocationWarningCount.value = 0
     }
 
     fun setRowSpanY(row: PageRow, spanY: Int) {

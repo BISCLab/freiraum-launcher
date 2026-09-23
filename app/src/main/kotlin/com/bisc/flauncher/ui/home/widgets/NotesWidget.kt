@@ -2,7 +2,7 @@ package com.bisc.flauncher.ui.home.widgets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,14 +15,19 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -65,6 +70,8 @@ fun NotesWidget(
     val notes by viewModel.notes.collectAsState()
     var editingNote by remember { mutableStateOf<Note?>(null) }
     var showEditor by remember { mutableStateOf(false) }
+    var menuForNoteId by remember { mutableStateOf<Long?>(null) }
+    var movingNoteId by remember { mutableStateOf<Long?>(null) }
 
     val rows = spanY.coerceAtLeast(1)
     val perPage = rows * COLUMNS
@@ -73,21 +80,51 @@ fun NotesWidget(
     // Same automatic black/white the rest of the app uses so the grid lines read against any background.
     val gridLineColor = resolveElementColors(appearance).borderColor
 
+    fun moveBy(delta: Int) {
+        val from = notes.indexOfFirst { it.id == movingNoteId }
+        val to = (from + delta).coerceIn(0, notes.lastIndex)
+        if (from < 0 || from == to) return
+        val reordered = notes.toMutableList().apply { add(to, removeAt(from)) }
+        viewModel.reorderNotes(reordered)
+    }
+
     WidgetCard(modifier = modifier, appearance = appearance, cornerStyle = cornerStyle, horizontalMargin = horizontalMargin, contentPadding = 0.dp) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(Icons.Filled.EditNote, contentDescription = null, tint = LocalContentColor.current.copy(alpha = 0.8f), modifier = Modifier.padding(end = 8.dp))
-                Text(stringResource(R.string.widget_notes_title), style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
-                IconButton(onClick = { editingNote = null; showEditor = true }, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.widget_notes_add), modifier = Modifier.size(18.dp))
+            if (movingNoteId != null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { moveBy(-1) }, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.folder_move_left), modifier = Modifier.size(18.dp))
+                    }
+                    Text(
+                        stringResource(R.string.folder_move_hint),
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
+                    )
+                    TextButton(onClick = { movingNoteId = null }) { Text(stringResource(R.string.folder_move_done)) }
+                    IconButton(onClick = { moveBy(1) }, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = stringResource(R.string.folder_move_right), modifier = Modifier.size(18.dp))
+                    }
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Filled.EditNote, contentDescription = null, tint = LocalContentColor.current.copy(alpha = 0.8f), modifier = Modifier.padding(end = 8.dp))
+                    Text(stringResource(R.string.widget_notes_title), style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+                    IconButton(onClick = { editingNote = null; showEditor = true }, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.widget_notes_add), modifier = Modifier.size(18.dp))
+                    }
                 }
             }
             if (notes.isEmpty()) {
                 Row(
-                    modifier = Modifier.fillMaxSize().clickable { editingNote = null; showEditor = true }.padding(horizontal = 12.dp),
+                    modifier = Modifier.fillMaxSize().combinedClickable(onClick = { editingNote = null; showEditor = true }).padding(horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(stringResource(R.string.widget_notes_empty), color = LocalContentColor.current.copy(alpha = 0.7f))
@@ -105,10 +142,17 @@ fun NotesWidget(
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 repeat(COLUMNS) { c ->
+                                    val cellNote = pageNotes.getOrNull(r * COLUMNS + c)
                                     NoteCell(
-                                        note = pageNotes.getOrNull(r * COLUMNS + c),
+                                        note = cellNote,
                                         borderColor = gridLineColor,
+                                        selected = cellNote?.id != null && cellNote.id == movingNoteId,
+                                        enabled = movingNoteId == null,
+                                        menuExpanded = cellNote?.id != null && cellNote.id == menuForNoteId,
                                         onClick = { note -> editingNote = note; showEditor = true },
+                                        onLongClick = { note -> menuForNoteId = note.id },
+                                        onDismissMenu = { menuForNoteId = null },
+                                        onRequestMove = { note -> menuForNoteId = null; movingNoteId = note.id },
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
@@ -134,19 +178,40 @@ fun NotesWidget(
 }
 
 @Composable
-private fun NoteCell(note: Note?, borderColor: Color, onClick: (Note?) -> Unit, modifier: Modifier = Modifier) {
+private fun NoteCell(
+    note: Note?,
+    borderColor: Color,
+    selected: Boolean,
+    enabled: Boolean,
+    menuExpanded: Boolean,
+    onClick: (Note?) -> Unit,
+    onLongClick: (Note) -> Unit,
+    onDismissMenu: () -> Unit,
+    onRequestMove: (Note) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val shape = RoundedCornerShape(10.dp)
     Box(
         modifier = modifier
             .fillMaxSize()
             .clip(shape)
-            .background(LocalContentColor.current.copy(alpha = 0.05f), shape)
-            .border(1.dp, borderColor, shape)
-            .clickable(enabled = note != null) { onClick(note) }
+            .background(
+                if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else LocalContentColor.current.copy(alpha = 0.05f),
+                shape
+            )
+            .border(if (selected) 2.dp else 1.dp, if (selected) MaterialTheme.colorScheme.primary else borderColor, shape)
+            .combinedClickable(
+                enabled = note != null && enabled,
+                onClick = { onClick(note) },
+                onLongClick = note?.let { { onLongClick(it) } }
+            )
             .padding(6.dp),
         contentAlignment = Alignment.Center
     ) {
         if (note != null) {
+            DropdownMenu(expanded = menuExpanded, onDismissRequest = onDismissMenu) {
+                DropdownMenuItem(text = { Text(stringResource(R.string.folder_item_move)) }, onClick = { onRequestMove(note) })
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (note.type == NoteType.CHECKLISTE) {
                     Icon(
