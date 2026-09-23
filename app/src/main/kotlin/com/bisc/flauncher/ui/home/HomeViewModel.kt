@@ -86,6 +86,7 @@ import com.bisc.flauncher.util.launchWebSearch
 import com.bisc.flauncher.util.looksLikeCalculatorExpression
 import com.bisc.flauncher.util.looksLikeEmail
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -441,6 +442,12 @@ class HomeViewModel @Inject constructor(
     private val _contactsPermissionGranted = MutableStateFlow(contactsRepository.hasPermission())
     val contactsPermissionGranted: StateFlow<Boolean> = _contactsPermissionGranted.asStateFlow()
 
+    // hasShortcutHostPermission() is a real Binder call to system_server; reading it here once (at
+    // startup) instead of synchronously on every quick-overview open keeps that IPC off the opening
+    // animation's frames, where an occasional slow call was enough to cause a visible stutter.
+    private val _hasShortcutHostPermission = MutableStateFlow(shortcutRepository.hasPermission())
+    val hasShortcutHostPermission: StateFlow<Boolean> = _hasShortcutHostPermission.asStateFlow()
+
     // ---- Content data: folders, notes, places, websites, shortcuts ----
 
     val folders: StateFlow<List<Folder>> =
@@ -580,8 +587,6 @@ class HomeViewModel @Inject constructor(
     fun sidebarCategoryShowAddRow(entry: SidebarEntryType): Flow<Boolean> =
         settingsRepository.sidebarCategoryShowAddRow(entry.name)
 
-    fun hasShortcutHostPermission(): Boolean = shortcutRepository.hasPermission()
-
     fun loadShortcutIcon(info: ShortcutInfo) = shortcutRepository.loadIcon(info)
 
     fun openShortcutAppPicker() {
@@ -710,6 +715,9 @@ class HomeViewModel @Inject constructor(
 
     fun openOverview(entry: SidebarEntryType = _overviewEntry.value ?: SidebarEntryType.APPS) {
         _overviewEntry.value = entry
+        // Off the main thread and not awaited: keeps the cached value from going stale (e.g. after a
+        // default-launcher change) without making the open animation wait on it.
+        viewModelScope.launch(Dispatchers.Default) { _hasShortcutHostPermission.value = shortcutRepository.hasPermission() }
     }
 
     fun selectSidebarEntry(entry: SidebarEntryType) {

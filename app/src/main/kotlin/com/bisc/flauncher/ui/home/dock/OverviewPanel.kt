@@ -87,10 +87,12 @@ import com.bisc.flauncher.ui.home.NoteTypeToggle
 import com.bisc.flauncher.ui.theme.noRippleClickable
 import kotlinx.coroutines.delay
 
-private val OVERVIEW_LIST_CONTENT_PADDING = PaddingValues(vertical = 8.dp)
-private val OVERVIEW_ROW_HEIGHT_MIN = 44.dp
+// Matches the 20.dp horizontal inset every list row applies to its own content, so the gap to the
+// top edge reads the same as the gap to the left edge instead of looking cramped above/below.
+private val OVERVIEW_LIST_CONTENT_PADDING = PaddingValues(vertical = 20.dp)
+private val OVERVIEW_ROW_HEIGHT_MIN = 48.dp
 private const val OVERVIEW_GRID_COLUMNS = 3
-private val OVERVIEW_LIST_ICON_SIZE = 36.dp
+private val OVERVIEW_LIST_ICON_SIZE = 40.dp
 
 /** Grid mode uses exactly the dock's own icon size; list mode gets a smaller, but still roomier, size. */
 private fun overviewIconSize(viewMode: SidebarCategoryViewMode, dock: ScaledDock) =
@@ -817,10 +819,11 @@ private fun CategoryGrid(
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         // The gap between cells and from the outer edges to the first/last cell is the same value,
         // so the row reads as evenly spaced rather than each cell just centering itself in a slice.
+        // Also used as the top/bottom inset so the gap to the top edge matches the gap to the left edge.
         val gap = ((maxWidth - cellSize * OVERVIEW_GRID_COLUMNS) / (OVERVIEW_GRID_COLUMNS + 1)).coerceAtLeast(4.dp)
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(vertical = 8.dp, horizontal = gap)
+            contentPadding = PaddingValues(vertical = gap, horizontal = gap)
         ) {
             if (entries.isEmpty() && emptyLabelRes != null) {
                 item(key = "empty") {
