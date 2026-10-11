@@ -409,6 +409,11 @@ fun HomeScreen(
                     // scrolling, all of it — not just the one swipe this was meant to fix. Back to only
                     // keeping the immediate neighbor pre-warmed, matching how Pager is meant to be used.
                     beyondViewportPageCount = 1,
+                    // Discreet Launcher has exactly one home screen, no horizontal paging to further
+                    // pages — swiping away from home is disabled to match. The multi-page system itself
+                    // (pages data, PageRowsColumn, Settings -> Pages) is untouched and still reachable
+                    // through Settings; this only removes the swipe gesture as a way to leave home.
+                    userScrollEnabled = false,
                     modifier = Modifier.fillMaxSize()
                 ) { pageIndex ->
                     val page = pages.getOrNull(pageIndex)
