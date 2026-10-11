@@ -4,12 +4,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Geometry of the dock — a direct, proportionally-scaled port of the user's Figma dock redesign
- * ("Ohne Namen" file, `dock-bar` frame, 390dp reference width): every dimension below is the measured
- * Figma value at that reference width, and [scaled] multiplies all of them by the same factor so the
- * whole dock scales together exactly like the Figma frame would at a different width, rather than icons
- * staying a fixed size while only the pill stretches. See [DockPillShape] for the pill's own silhouette,
- * which reuses Figma's actual path data (not a hand-approximated shape) scaled the same way.
+ * Geometry of the dock — a proportionally-scaled port of the user's Figma dock redesign ("Ohne Namen"
+ * file, `dock-bar` frame, 390dp reference width): every dimension below is the measured Figma value at
+ * that reference width, and [scaled] multiplies all of them by the same factor so the whole dock scales
+ * together exactly like the Figma frame would at a different width, rather than icons staying a fixed
+ * size while only the pill stretches. [barHeight] is the *flat* bar height — icons/orb both center on it
+ * via plain `Alignment.Center`, since [DockPillShape]'s own hill-extra padding is symmetric top/bottom
+ * (see that class's doc comment for why `Alignment.Center` still lands on the bar's own middle despite
+ * the Box being taller than the flat bar to make room for the hill).
  */
 object DockDimens {
     val horizontalMargin = 6.dp
@@ -18,12 +20,12 @@ object DockDimens {
 
     val contentGap = 8.dp
 
-    // Figma reference, all at the 390dp pill width — see DockPillShape for how these map onto the path's
-    // own coordinate space (icons/orb both center on the path's y=46, which is also the exact vertical
-    // center of its 92dp bounding box, so Alignment.Center "just works" with no extra offset math).
+    // Figma reference, all at the 390dp pill width. referenceBarHeight (71dp) is the pill's flat-sided
+    // height measured directly off Figma's own rendered PNG — not the silhouette path's full 92dp
+    // bounding box, which includes the hump's overflow above/below the flat region.
     private const val REFERENCE_PILL_WIDTH = 390f
     private val referencePillWidth = REFERENCE_PILL_WIDTH.dp
-    val referenceBarHeight = 92.dp
+    val referenceBarHeight = 71.dp
     private val referenceInnerHorizontalPadding = 8.dp
     private val referenceItemGap = 15.5.dp
     private val referenceIconSize = 60.dp
