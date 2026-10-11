@@ -155,7 +155,6 @@ fun HomeScreen(
     val openFolderPath by viewModel.openFolderPath.collectAsState()
     val folderOpen = openFolderPath.isNotEmpty()
     val folderHideStatusBar by viewModel.folderHideStatusBar.collectAsState()
-    val folderHideDock by viewModel.folderHideDock.collectAsState()
     val quickHideStatusBar by viewModel.quickOverviewHideStatusBar.collectAsState()
     val notes by viewModel.notes.collectAsState()
     val savedMapTargets by viewModel.savedMapTargets.collectAsState()
@@ -444,14 +443,11 @@ fun HomeScreen(
                         val pageRows = rowsByPage[page.id].orEmpty()
                         val pinnedSearchBarRow = pageRows.lastOrNull()?.takeIf { it.type == PageRowType.SEARCH_BAR }
                         val withoutPinnedSearchBar = if (pinnedSearchBarRow != null) pageRows.dropLast(1) else pageRows
-                        // Home starts empty by design — widget rows only render there once the user opts
-                        // in via Settings, matching Kvaesitso's "enable widgets on home screen" switch.
-                        // Other pages always show their widgets regardless of this toggle.
-                        val inlineRows = if (page.isHome && !homeScreenWidgetsEnabled) {
-                            withoutPinnedSearchBar.filterNot { it.type == PageRowType.WIDGET || it.type == PageRowType.SYSTEM_WIDGET }
-                        } else {
-                            withoutPinnedSearchBar
-                        }
+                        // Home starts genuinely empty by design, Discreet-Launcher-style — no row content
+                        // at all (widgets or otherwise) until the user opts in via Settings. Existing rows
+                        // on home aren't deleted, just not rendered; turning the toggle on reveals them
+                        // again. Other pages always show their full row content regardless of this toggle.
+                        val showRowContent = !page.isHome || homeScreenWidgetsEnabled
                         val reservedForDock = DockDimens.scaled(innerWidth)
                             .let { it.barHeight + DockDimens.topMargin + DockDimens.bottomMargin } + DockDimens.contentGap
                         val pageBackgroundConfigOrNull by remember(page.id) { viewModel.pageBackgroundConfig(page.id) }.collectAsState(initial = null)
@@ -476,11 +472,11 @@ fun HomeScreen(
                                 if (pinnedSearchBarRow != null) Modifier.padding(bottom = reservedForDock)
                                 else Modifier.navigationBarsPadding().padding(bottom = 16.dp)
                             )
-                        run { CompositionLocalProvider(
+                        if (showRowContent) { CompositionLocalProvider(
                             LocalSurfaceIsDark provides pageSurfaceIsDark,
                             LocalSurfaceIsDarkLoading provides (loadedPageBackgroundConfig == null)
                         ) { PageRowsColumn(
-                                rows = inlineRows,
+                                rows = withoutPinnedSearchBar,
                                 entriesByRow = appEntriesByRow,
                                 folders = folders,
                                 folderItemsByFolder = folderItemsByFolder,
@@ -697,26 +693,11 @@ fun HomeScreen(
                     }
                 }
             }
-            if (pinnedSearchBarRow != null) {
-                val dockAlpha by animateFloatAsState(
-                    targetValue = if ((searchOpen && searchKeyboardType == SearchKeyboardType.SYSTEM) || (folderOpen && folderHideDock)) 0f else 1f,
-                    animationSpec = tween(200),
-                    label = "dockAlpha"
-                )
-                SearchBar(
-                    modifier = Modifier.graphicsLayer { alpha = dockAlpha },
-                    onHubTap = { viewModel.executeDockTapAction(com.bisc.flauncher.data.model.DockTapAction.FULL_SEARCH) },
-                    onHubSwipeUp = viewModel::openAppList,
-                    onHubCategorySearch = { viewModel.executeDockTapAction(com.bisc.flauncher.data.model.DockTapAction.QUICK_OVERVIEW) },
-                    handedness = handedness,
-                    iconShape = iconShape,
-                    appearance = pinnedSearchBarRow.appearance(),
-                    accentColor = Color(accentColor),
-                    quickLaunchSlots = quickLaunchSlots,
-                    loadQuickLaunchIcon = viewModel::loadIcon,
-                    onQuickLaunchClick = { componentName -> launchApp(context, componentName) }
-                )
-            }
+            // Dock is deactivated for now, pending the new Figma-designed version — removed from this
+            // render path entirely (not just hidden) rather than left wired up. SearchBar.kt and the
+            // dockDimens/pinnedSearchBarRow sizing math above are untouched and still drive the Apps
+            // panel's layout (it reserves the same footprint so its position doesn't jump once the dock
+            // comes back); only the actual dock composable call is gone. Recoverable from git history.
         }
     }
 
