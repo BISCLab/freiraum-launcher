@@ -86,7 +86,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.GridItemType
-import com.bisc.flauncher.data.model.HomeGesture
 import com.bisc.flauncher.data.model.Note
 import com.bisc.flauncher.data.model.ContactInfo
 import com.bisc.flauncher.data.model.PageRow
@@ -421,23 +420,12 @@ fun HomeScreen(
                     // space) is read from LocalConfiguration instead, which costs nothing to recompute.
                     val innerWidth = (LocalConfiguration.current.screenWidthDp.dp - DockDimens.horizontalMargin * 2).coerceAtLeast(0.dp)
                     Box(
-                        // Restricted to the home page only — recognizing these on every page meant a
-                        // swipe-up from e.g. page 2 could open the app overview, and closing it again left
-                        // you wherever the pager already was instead of back on home, which read as a bug
-                        // ("closing app overview drops me on page 1 instead of home"). Home is the one page
-                        // guaranteed to be where the user actually started from.
-                        modifier = Modifier.fillMaxSize().then(
-                            if (page?.isHome == true) {
-                                Modifier.detectHomeGestures(
-                                    onLongPress = { viewModel.executeGestureAction(HomeGesture.LONG_PRESS, context, openPageById, openSettingsFromGesture) },
-                                    onDoubleTap = { viewModel.executeGestureAction(HomeGesture.DOUBLE_TAP, context, openPageById, openSettingsFromGesture) },
-                                    onSwipeUp = { viewModel.executeGestureAction(HomeGesture.SWIPE_UP, context, openPageById, openSettingsFromGesture) },
-                                    onSwipeDown = { viewModel.executeGestureAction(HomeGesture.SWIPE_DOWN, context, openPageById, openSettingsFromGesture) }
-                                )
-                            } else {
-                                Modifier
-                            }
-                        )
+                        // Home-screen background gestures (long-press/double-tap/swipe-up/swipe-down via
+                        // detectHomeGestures) are deliberately not wired up right now — being rebuilt from
+                        // a clean slate as part of the new Apps-panel gesture. The GestureAction model,
+                        // SettingsRepository fields and SettingsGesturesScreen are untouched and still
+                        // configurable; nothing on this Box currently triggers them.
+                        modifier = Modifier.fillMaxSize()
                     ) {
                     if (page != null) {
                         val pageRows = rowsByPage[page.id].orEmpty()
