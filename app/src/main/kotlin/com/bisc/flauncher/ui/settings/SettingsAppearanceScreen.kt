@@ -33,6 +33,7 @@ fun SettingsAppearanceScreen(
     val chargingColor by viewModel.chargingAnimationColor.collectAsState()
     val statusBarHiddenEverywhere by viewModel.statusBarHiddenEverywhere.collectAsState()
     val homeScreenWidgetsEnabled by viewModel.homeScreenWidgetsEnabled.collectAsState()
+    val favoritesBottomBorderEnabled by viewModel.favoritesBottomBorderEnabled.collectAsState()
     var confirmingPreset by remember { mutableStateOf<DesignPreset?>(null) }
     val context = androidx.compose.ui.platform.LocalContext.current
     var pendingImport by remember { mutableStateOf<android.net.Uri?>(null) }
@@ -56,6 +57,15 @@ fun SettingsAppearanceScreen(
                 onClick = { viewModel.setHomeScreenWidgetsEnabled(!homeScreenWidgetsEnabled) },
                 trailing = {
                     Switch(checked = homeScreenWidgetsEnabled, onCheckedChange = { viewModel.setHomeScreenWidgetsEnabled(it) })
+                }
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_favorites_bottom_border),
+                info = stringResource(R.string.settings_favorites_bottom_border_summary),
+                onClick = { viewModel.setFavoritesBottomBorderEnabled(!favoritesBottomBorderEnabled) },
+                trailing = {
+                    Switch(checked = favoritesBottomBorderEnabled, onCheckedChange = { viewModel.setFavoritesBottomBorderEnabled(it) })
                 }
             )
         }

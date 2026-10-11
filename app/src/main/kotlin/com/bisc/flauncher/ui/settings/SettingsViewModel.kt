@@ -403,6 +403,13 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setHomeScreenWidgetsEnabled(enabled) }
     }
 
+    val favoritesBottomBorderEnabled: StateFlow<Boolean> =
+        repository.favoritesBottomBorderEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun setFavoritesBottomBorderEnabled(enabled: Boolean) {
+        viewModelScope.launch { repository.setFavoritesBottomBorderEnabled(enabled) }
+    }
+
     val activeDesignPreset: StateFlow<DesignPreset?> =
         repository.activeDesignPreset.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 

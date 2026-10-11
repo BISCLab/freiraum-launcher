@@ -379,6 +379,8 @@
     <string name="settings_homescreen_label">Home screen</string>
     <string name="settings_homescreen_widgets_enabled">Enable widgets on home screen</string>
     <string name="settings_homescreen_widgets_enabled_summary">Off by default — the home screen stays empty besides the dock. Turn on to add widgets like the clock.</string>
+    <string name="settings_favorites_bottom_border">Apps panel bottom border</string>
+    <string name="settings_favorites_bottom_border_summary">Off by default. A thin line along the bottom edge of the Apps panel, where it meets the dimmed home screen.</string>
     <string name="favorites_popup_title">Apps</string>
     <string name="shortcut_settings">Settings</string>
     <string name="shortcut_settings_long">FLauncher settings</string>

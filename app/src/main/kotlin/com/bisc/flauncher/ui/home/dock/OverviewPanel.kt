@@ -63,6 +63,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -124,6 +126,11 @@ internal fun overviewRowHeight(availableHeight: Dp, appCount: Int): Dp {
  * [androidx.compose.foundation.layout.statusBarsPadding] here — that resolves to zero the instant the
  * status bar is hidden (the home screen's default), which left content starting flush under the camera
  * cutout. The caller already tracks a *cached* max(status bar, cutout) inset that survives hiding.
+ *
+ * No border on the top/left/right edges ever — [appearance] is always rendered with borderEnabled
+ * forced off regardless of what's stored, since a border drawn by [DockPanelSurface] would trace all four
+ * sides of [shape] and there's no way to ask it for just one. [showBottomBorder] draws a separate,
+ * deliberately bottom-only line instead, off by default.
  */
 @Composable
 fun FavoritesPopup(
@@ -136,9 +143,23 @@ fun FavoritesPopup(
     shape: Shape,
     dock: ScaledDock,
     topContentInset: Dp = 0.dp,
+    showBottomBorder: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    DockPanelSurface(appearance = appearance, shape = shape, modifier = modifier) {
+    val borderColor = resolveElementColors(appearance).borderColor
+    DockPanelSurface(
+        appearance = appearance.copy(borderEnabled = false),
+        shape = shape,
+        modifier = modifier.then(
+            if (showBottomBorder) {
+                Modifier.drawBehind {
+                    drawLine(borderColor, Offset(0f, size.height), Offset(size.width, size.height), strokeWidth = 1.dp.toPx())
+                }
+            } else {
+                Modifier
+            }
+        )
+    ) {
         BoxWithConstraints(modifier = Modifier.fillMaxSize().padding(top = topContentInset)) {
             val rowHeight = remember(pinnedApps.size, maxHeight) {
                 overviewRowHeight(maxHeight, ((pinnedApps.size + OVERVIEW_GRID_COLUMNS - 1) / OVERVIEW_GRID_COLUMNS).coerceAtLeast(1))

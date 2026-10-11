@@ -379,6 +379,8 @@
     <string name="settings_homescreen_label">Homescreen</string>
     <string name="settings_homescreen_widgets_enabled">Widgets auf dem Homescreen aktivieren</string>
     <string name="settings_homescreen_widgets_enabled_summary">Standardmäßig aus — der Homescreen bleibt bis auf das Dock leer. Einschalten, um Widgets wie die Uhr hinzuzufügen.</string>
+    <string name="settings_favorites_bottom_border">Unterer Rand des Apps-Panels</string>
+    <string name="settings_favorites_bottom_border_summary">Standardmäßig aus. Eine dünne Linie am unteren Rand des Apps-Panels, dort wo es auf den abgedunkelten Homescreen trifft.</string>
     <string name="favorites_popup_title">Apps</string>
     <string name="shortcut_settings">Einstellungen</string>
     <string name="shortcut_settings_long">FLauncher-Einstellungen</string>
