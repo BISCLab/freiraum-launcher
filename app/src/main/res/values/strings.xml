@@ -427,6 +427,13 @@
     <string name="settings_dock_tap_action_search">Text search</string>
     <string name="settings_dock_widget_corners">Widget corner radius</string>
     <string name="settings_dock_widget_corners_summary">Dock and its surfaces use the corner radius of the widgets instead of the pill shape.</string>
+    <string name="settings_dock_style_label">Dock style</string>
+    <string name="settings_dock_style_plain">Plain</string>
+    <string name="settings_dock_style_aurora">Aurora (glass)</string>
+    <string name="settings_dock_orb_design_label">Orb design</string>
+    <string name="settings_dock_orb_design_default">Default</string>
+    <string name="settings_dock_orb_design_leaf">Leaf</string>
+    <string name="settings_dock_orb_design_dew">Dew</string>
 
     <string name="settings_section_search_overview">Quick overview</string>
     <string name="settings_card_search_overview_subtitle">Sidebar order, categories, background</string>

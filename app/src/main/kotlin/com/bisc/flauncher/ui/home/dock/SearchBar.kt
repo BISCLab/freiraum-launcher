@@ -36,18 +36,13 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.RoundRect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalDensity
@@ -57,36 +52,30 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import kotlin.math.PI
 import kotlin.math.abs
-import kotlin.math.cos
 import kotlin.math.roundToInt
-import kotlin.math.sin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VectorConverter
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.data.settings.IconShape
 
 /**
- * Dock: one continuous pill of 4 quick-launch icons with the Hub orb overlapping its top edge, centered
- * — fused into the same surface rather than floating above a cutout. The pill itself follows [appearance]
- * (white/black by theme by default, same per-row customization — color, opacity, border — every other
- * dock-style row already has); the orb is always tinted with [accentColor], independently. Tap the orb to
- * open the expert (full text) search; drag up to open the app list; drag either left or right to open the
- * category search (the sidebar overview panel) — [handedness] no longer picks a side for this, both
- * directions do the same thing for now, kept as a parameter for a future "right drag does something
- * else" assignment.
+ * Dock: a near-edge-to-edge pill (see [DockDimens]) with 4 quick-launch icons and the Hub orb spaced
+ * evenly across it, direct from the user's Figma redesign — not the old content-sized, narrow-margin pill.
+ * The pill's own silhouette ([dockStyle]: [DockStyle.PLAIN] flat squircle icons, or [DockStyle.AURORA]
+ * translucent circular icons plus a soft rainbow glow at the edge) follows [appearance] for its fill/
+ * border, same per-row customization every other dock-style row already has. The orb is drawn by
+ * [DockOrbArt] per [orbDesign] — a pluggable, Figma-exact visual independent of [appearance]/[accentColor].
+ * Tap the orb to open the expert (full text) search; drag up to open the app list; drag either left or
+ * right to open the category search (the sidebar overview panel) — [handedness] no longer picks a side
+ * for this, both directions do the same thing for now, kept as a parameter for a future "right drag does
+ * something else" assignment.
  */
 @Composable
 fun SearchBar(
@@ -98,6 +87,8 @@ fun SearchBar(
     iconShape: IconShape = IconShape.ROUNDED_SQUARE,
     appearance: ElementAppearance = ElementAppearance(),
     accentColor: Color = Color(0xFF3B82F6),
+    dockStyle: DockStyle = DockStyle.PLAIN,
+    orbDesign: DockOrbDesign = DockOrbDesign.DEFAULT,
     quickLaunchSlots: List<QuickLaunchSlot> = defaultQuickLaunchSlots,
     loadQuickLaunchIcon: (ComponentName) -> ImageBitmap? = { null },
     onQuickLaunchClick: (ComponentName) -> Unit = {}
@@ -115,7 +106,9 @@ fun SearchBar(
         contentAlignment = Alignment.Center
     ) {
         val d = dockDimens(maxWidth)
-        val itemShape = when (iconShape) {
+        val isAurora = dockStyle == DockStyle.AURORA
+        val iconSize = if (isAurora) d.auroraIconSize else d.iconSize
+        val itemShape = if (isAurora) CircleShape else when (iconShape) {
             IconShape.CIRCLE -> CircleShape
             IconShape.ROUNDED_SQUARE -> RoundedCornerShape(d.iconCornerRadius)
         }
@@ -127,14 +120,18 @@ fun SearchBar(
             val bitmap = remember(slot.componentName) { slot.componentName?.let(loadQuickLaunchIcon) }
             Box(
                 modifier = Modifier
-                    .size(d.iconSize)
+                    .size(iconSize)
                     .clip(itemShape)
                     .background(if (bitmap == null) slot.placeholderTint else Color.Transparent)
+                    .then(
+                        if (isAurora) Modifier.border(1.dp, Color.White.copy(alpha = 0.6f), itemShape)
+                        else Modifier
+                    )
                     .clickable(onClick = { slot.componentName?.let(onQuickLaunchClick) }),
                 contentAlignment = Alignment.Center
             ) {
                 if (bitmap != null) {
-                    Image(bitmap = bitmap, contentDescription = slot.label, modifier = Modifier.size(d.iconSize))
+                    Image(bitmap = bitmap, contentDescription = slot.label, modifier = Modifier.size(iconSize))
                 } else {
                     Icon(imageVector = slot.placeholderIcon, contentDescription = null, tint = Color.White)
                 }
@@ -143,108 +140,57 @@ fun SearchBar(
 
         val dragOffset = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
         val pressScale = remember { Animatable(1f) }
-        val orbitAngle by rememberInfiniteTransition(label = "hubOrbit").animateFloat(
-            initialValue = 0f,
-            targetValue = (2 * PI).toFloat(),
-            animationSpec = infiniteRepeatable(tween(7000, easing = LinearEasing)),
-            label = "hubOrbitAngle"
-        )
 
-        // The orb is sized larger than the bar is tall, and its center sits exactly on the bar's own
-        // center — both axes, not perched above it — so simply centering it already leaves it breaking
-        // out symmetrically above and below. The bar and the orb are drawn as ONE path (RoundRect union
-        // Circle), so the orb genuinely widens the dock's own silhouette right where it sits, instead of
-        // a separate piece merely overlapping it. No glow, no extra ring — just the fused shape and the
-        // orb's own glossy fill marking it as the special one.
-        Box(modifier = Modifier.width(d.pillWidth).height(d.hubSize)) {
+        Box(modifier = Modifier.width(d.pillWidth).height(d.barHeight)) {
             Canvas(modifier = Modifier.fillMaxSize()) {
-                val barTop = (d.hubSize - d.barHeight).toPx() / 2f
-                val barHeightPx = d.barHeight.toPx()
-                val hubRadius = (d.hubSize.toPx() / 2f) * pressScale.value
-                val hubCenter = Offset(size.width / 2f, size.height / 2f) + dragOffset.value
-                val cr = CornerRadius(d.cornerRadius.toPx())
-                val barPath = Path().apply {
-                    addRoundRect(
-                        RoundRect(
-                            rect = Rect(0f, barTop, size.width, barTop + barHeightPx),
-                            topLeft = cr,
-                            topRight = cr,
-                            bottomRight = cr,
-                            bottomLeft = cr
+                val hillPath = if (isAurora) DockBarShapes.auroraHillPath else DockBarShapes.plainHillPath
+                val viewBoxWidth = if (isAurora) DockBarShapes.AURORA_VIEWBOX_WIDTH else DockBarShapes.PLAIN_VIEWBOX_WIDTH
+                val viewBoxHeight = if (isAurora) DockBarShapes.AURORA_VIEWBOX_HEIGHT else DockBarShapes.PLAIN_VIEWBOX_HEIGHT
+                val scaleX = size.width / viewBoxWidth
+                val scaleY = size.height / viewBoxHeight
+                scale(scaleX = scaleX, scaleY = scaleY, pivot = Offset.Zero) {
+                    drawPath(hillPath, brush = colors.background, alpha = colors.backgroundAlpha)
+                    if (appearance.borderEnabled) {
+                        drawPath(hillPath, color = colors.borderColor, style = Stroke(width = colors.borderWidth.toPx() / scaleX))
+                    }
+                    if (isAurora) {
+                        // Simplified from Figma's separate aurora-edge/underglow assets (which overhang the
+                        // pill and carry their own blur filter) down to one soft rainbow ring traced right
+                        // along the pill's own edge — visually reads the same "glowing glass dock" without
+                        // chasing a second asset's exact overhang and offset.
+                        val glow = Brush.linearGradient(
+                            0f to Color(0xFF1AF0FF), 0.55f to Color(0xFFA14AFF), 1f to Color(0xFFFF4DBD),
+                            start = Offset(0f, viewBoxHeight / 2f), end = Offset(viewBoxWidth, viewBoxHeight / 2f)
                         )
-                    )
+                        drawPath(hillPath, brush = glow, alpha = 0.55f, style = Stroke(width = 2.4f / scaleX))
+                    }
                 }
-                val orbPath = Path().apply { addOval(Rect(center = hubCenter, radius = hubRadius)) }
-                val fused = Path().apply { op(barPath, orbPath, PathOperation.Union) }
-
-                drawPath(fused, brush = colors.background, alpha = colors.backgroundAlpha)
-                if (appearance.borderEnabled) {
-                    drawPath(fused, color = colors.borderColor, style = Stroke(width = colors.borderWidth.toPx()))
-                }
-                // The orb's own finish: mostly a pearly white sphere with the accent color only as a tint
-                // at the rim and in its glow — not a solid saturated ball — plus a small bright spark that
-                // slowly orbits the surface instead of a literal icon, for a "quietly alive" read rather
-                // than a specific function being printed on it.
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.White, lerp(Color.White, accentColor, 0.3f), lerp(accentColor, Color.Black, 0.35f)),
-                        center = hubCenter + Offset(-hubRadius * 0.32f, -hubRadius * 0.38f),
-                        radius = hubRadius * 1.2f
-                    ),
-                    radius = hubRadius,
-                    center = hubCenter
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        0f to Color.Transparent,
-                        0.68f to Color.Transparent,
-                        1f to lerp(accentColor, Color.Black, 0.2f).copy(alpha = 0.35f),
-                        center = hubCenter,
-                        radius = hubRadius
-                    ),
-                    radius = hubRadius,
-                    center = hubCenter
-                )
-                drawOval(
-                    color = Color.White.copy(alpha = 0.55f),
-                    topLeft = hubCenter + Offset(-hubRadius * 0.5f, -hubRadius * 0.7f),
-                    size = Size(hubRadius * 0.5f, hubRadius * 0.3f)
-                )
-                val sparkAngle = orbitAngle
-                val sparkCenter = hubCenter + Offset(cos(sparkAngle) * hubRadius * 0.52f, sin(sparkAngle) * hubRadius * 0.52f)
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(alpha = 0.9f), Color.White.copy(alpha = 0f)),
-                        center = sparkCenter,
-                        radius = hubRadius * 0.22f
-                    ),
-                    radius = hubRadius * 0.22f,
-                    center = sparkCenter
-                )
             }
             Row(
                 modifier = Modifier
                     .align(Alignment.Center)
                     .width(d.pillWidth)
-                    .height(d.barHeight)
                     .padding(horizontal = d.innerHorizontalPadding),
+                horizontalArrangement = Arrangement.spacedBy(d.itemSpacing),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                leftSlots.forEachIndexed { index, slot ->
-                    if (index > 0) Spacer(modifier = Modifier.width(d.itemSpacing))
-                    QuickLaunchIcon(slot)
-                }
-                Spacer(modifier = Modifier.width(d.hubGap))
+                leftSlots.forEach { slot -> QuickLaunchIcon(slot) }
                 Spacer(modifier = Modifier.width(d.hubSize))
-                Spacer(modifier = Modifier.width(d.hubGap))
-                rightSlots.forEachIndexed { index, slot ->
-                    if (index > 0) Spacer(modifier = Modifier.width(d.itemSpacing))
-                    QuickLaunchIcon(slot)
-                }
+                rightSlots.forEach { slot -> QuickLaunchIcon(slot) }
             }
-            // Invisible hit-target matching the orb's drawn position exactly (same center as the Canvas
-            // above). No icon on it by design — the orb reads as one mysterious, multi-purpose control,
-            // not a labeled search button — but it keeps its accessibility description.
+            // The orb's own art, independent of the pill's appearance/style — see [DockOrbArt]. Drag
+            // feedback (tracking the finger, a press-dip) is applied as a graphics layer on top of it.
+            DockOrbArt(
+                design = orbDesign,
+                size = d.hubSize,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .offset { IntOffset(dragOffset.value.x.roundToInt(), dragOffset.value.y.roundToInt()) }
+                    .graphicsLayer { scaleX = pressScale.value; scaleY = pressScale.value }
+            )
+            // Invisible hit-target matching the orb's drawn position exactly. No icon on it by design — the
+            // orb reads as one mysterious, multi-purpose control, not a labeled search button — but it
+            // keeps its accessibility description.
             val hubDescription = stringResource(R.string.dock_search_hint)
             Box(
                 modifier = Modifier

@@ -105,6 +105,8 @@ import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.BackgroundFill
 import com.bisc.flauncher.ui.home.dock.DockDimens
+import com.bisc.flauncher.ui.home.dock.DockStyle
+import com.bisc.flauncher.ui.home.dock.DockOrbDesign
 import com.bisc.flauncher.ui.home.dock.FavoritesPopup
 import com.bisc.flauncher.ui.home.dock.ResolvedSidebarItem
 import com.bisc.flauncher.ui.home.dock.SearchBar
@@ -189,6 +191,9 @@ fun HomeScreen(
     val sidebarPanelAppearance by viewModel.sidebarPanelAppearance.collectAsState()
     val favoritesBottomBorderEnabled by viewModel.favoritesBottomBorderEnabled.collectAsState()
     val favoritesGroupDividersEnabled by viewModel.favoritesGroupDividersEnabled.collectAsState()
+    val dockStyle by viewModel.dockStyle.collectAsState()
+    val dockOrbDesign by viewModel.dockOrbDesign.collectAsState()
+    val folderHideDock by viewModel.folderHideDock.collectAsState()
     val folderCardAppearance by viewModel.folderCardAppearance.collectAsState()
     val keyboardAppearance by viewModel.keyboardAppearance.collectAsState()
     val searchResultCardAppearance by viewModel.searchResultCardAppearance.collectAsState()
@@ -514,6 +519,33 @@ fun HomeScreen(
                     }
                     }
                 }
+            }
+        }
+
+        // The dock floats as its own layer outside the pager, not stacked into the scrolling page content
+        // — it stays put across page changes and isn't affected by homeScreenWidgetsEnabled. Its pill
+        // appearance/border still comes from the home page's own pinned SEARCH_BAR row (same per-row
+        // customization every other dock-style row has); dockStyle/dockOrbDesign are independent, global
+        // dock settings. Placed before the search/app-list overlays below so those naturally cover it when
+        // open; folderHideDock keeps the existing "hide the dock while a folder is open" behavior.
+        val homeDockRow = pages.find { it.isHome }
+            ?.let { rowsByPage[it.id] }
+            ?.find { it.type == PageRowType.SEARCH_BAR }
+        if (homeDockRow != null && !(folderOpen && folderHideDock)) {
+            Box(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
+                SearchBar(
+                    onHubTap = { viewModel.executeDockTapAction(com.bisc.flauncher.data.model.DockTapAction.FULL_SEARCH) },
+                    onHubSwipeUp = viewModel::openAppList,
+                    onHubCategorySearch = { viewModel.executeDockTapAction(com.bisc.flauncher.data.model.DockTapAction.QUICK_OVERVIEW) },
+                    handedness = handedness,
+                    iconShape = iconShape,
+                    appearance = homeDockRow.appearance(),
+                    dockStyle = dockStyle,
+                    orbDesign = dockOrbDesign,
+                    quickLaunchSlots = quickLaunchSlots,
+                    loadQuickLaunchIcon = viewModel::loadIcon,
+                    onQuickLaunchClick = { componentName -> launchApp(context, componentName) }
+                )
             }
         }
 
