@@ -31,7 +31,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.Alignment
-import com.bisc.flauncher.data.model.AppInfo
 import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.data.model.SearchEngine
 import com.bisc.flauncher.data.model.SearchKeyboardType
@@ -70,7 +69,8 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
             runCatching { context.packageManager.getApplicationLabel(context.packageManager.getApplicationInfo(pkg, 0)).toString() }.getOrNull()
         }
     }
-    val searchOverlayBackground by viewModel.searchOverlayBackground.collectAsState()
+    val searchOverlayBackgroundOverride by viewModel.searchOverlayBackgroundOverride.collectAsState()
+    val globalBackground by viewModel.globalBackground.collectAsState()
     val keyboardAppearance by viewModel.keyboardAppearance.collectAsState()
     val resultCardAppearance by viewModel.searchResultCardAppearance.collectAsState()
     val engine by viewModel.searchEngine.collectAsState()
@@ -309,10 +309,11 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            BackgroundConfigSection(
-                imageKey = "search_overlay",
-                config = searchOverlayBackground,
-                onConfigChange = viewModel::setSearchOverlayBackground
+            BackgroundOverrideSection(
+                override = searchOverlayBackgroundOverride,
+                global = globalBackground,
+                onUseGlobal = viewModel::clearSearchOverlayBackground,
+                onCustomColor = viewModel::setSearchOverlayBackground
             )
         }
         SearchElementSheet.KEYBOARD -> SettingsEditPage(

@@ -32,7 +32,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -58,8 +57,6 @@ import com.bisc.flauncher.data.model.ClockStyle
 import com.bisc.flauncher.data.model.ClockTimeFormat
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
-import com.bisc.flauncher.data.model.ElementAppearance
-import com.bisc.flauncher.data.model.LauncherPageKind
 import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.model.appearance
@@ -186,12 +183,14 @@ fun SettingsPageRowsScreen(
     }
 
     if (showBackgroundSheet) {
-        val pageBackgroundConfig by remember(pageId) { viewModel.pageBackgroundConfig(pageId) }.collectAsState(initial = BackgroundConfig())
+        val pageBackgroundOverride by remember(pageId) { viewModel.pageBackgroundOverride(pageId) }.collectAsState(initial = null)
+        val globalBackground by viewModel.globalBackground.collectAsState()
         SettingsEditPage(title = layerBackgroundLabel(1, R.string.settings_layer_surface_screen), onDismiss = { showBackgroundSheet = false }) {
-            BackgroundConfigSection(
-                imageKey = "page_$pageId",
-                config = pageBackgroundConfig,
-                onConfigChange = { viewModel.setPageBackgroundConfig(pageId, it) }
+            BackgroundOverrideSection(
+                override = pageBackgroundOverride,
+                global = globalBackground,
+                onUseGlobal = { viewModel.clearPageBackgroundConfig(pageId) },
+                onCustomColor = { viewModel.setPageBackgroundConfig(pageId, it) }
             )
         }
     }

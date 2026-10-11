@@ -37,11 +37,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -64,9 +62,11 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -78,12 +78,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import kotlin.math.ceil
-import kotlin.math.floor
 import com.bisc.flauncher.data.model.SearchKeyboardType
 import com.bisc.flauncher.util.setStatusBarHidden
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -91,7 +87,6 @@ import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.GridItemType
 import com.bisc.flauncher.data.model.HomeGesture
-import com.bisc.flauncher.data.model.LauncherPageKind
 import com.bisc.flauncher.data.model.Note
 import com.bisc.flauncher.data.model.ContactInfo
 import com.bisc.flauncher.data.model.PageRow
@@ -162,7 +157,6 @@ fun HomeScreen(
     val folderOpen = openFolderPath.isNotEmpty()
     val folderHideStatusBar by viewModel.folderHideStatusBar.collectAsState()
     val folderHideDock by viewModel.folderHideDock.collectAsState()
-    val dockSearchButtonAppearance by viewModel.dockSearchButtonAppearance.collectAsState()
     val quickHideStatusBar by viewModel.quickOverviewHideStatusBar.collectAsState()
     val notes by viewModel.notes.collectAsState()
     val savedMapTargets by viewModel.savedMapTargets.collectAsState()
@@ -178,8 +172,6 @@ fun HomeScreen(
     val iconShape by viewModel.iconShape.collectAsState()
     val railAppearance by viewModel.searchAlphabetRailAppearance.collectAsState()
     val quickLaunchSlots by viewModel.quickLaunchSlots.collectAsState()
-    val dockSingleTapAction by viewModel.dockSingleTapAction.collectAsState()
-    val dockDoubleTapAction by viewModel.dockDoubleTapAction.collectAsState()
     val chargingAnimationEnabled by viewModel.chargingAnimationEnabled.collectAsState()
     val chargingAnimationColor by viewModel.chargingAnimationColor.collectAsState()
     val searchOverlayBackground by viewModel.searchOverlayBackground.collectAsState()
@@ -295,10 +287,15 @@ fun HomeScreen(
     var addNewMapTargetForFolderId by remember { mutableStateOf<Long?>(null) }
     var addNewWebsiteForFolderId by remember { mutableStateOf<Long?>(null) }
 
+    // See the background-crossfade layer below for why this exists: a stable, append-only cache instead
+    // of re-subscribing a Flow every time a page's role (lower/upper) in the crossfade changes.
+    val pageBackgroundCache = remember { mutableStateMapOf<Long, BackgroundConfig>() }
+
+    val homeIndex = pages.indexOfFirst { it.isHome }.coerceAtLeast(0)
+
     var didInitialPageScroll by remember { mutableStateOf(false) }
     LaunchedEffect(pages) {
         if (!didInitialPageScroll && pages.isNotEmpty()) {
-            val homeIndex = pages.indexOfFirst { it.isHome }.coerceAtLeast(0)
             if (pagerState.currentPage != homeIndex) pagerState.scrollToPage(homeIndex)
             didInitialPageScroll = true
         }
@@ -307,6 +304,17 @@ fun HomeScreen(
     val openPageById: (Long) -> Unit = { pageId ->
         val index = pages.indexOfFirst { it.id == pageId }
         if (index >= 0) coroutineScope.launch { pagerState.animateScrollToPage(index) }
+    }
+    // The one place "go back to home" is defined — closes every overlay and, crucially, also scrolls
+    // the pager itself back to home. Closing an overlay alone used to leave the pager wherever it
+    // already was, which is how the system home gesture (and back-swiping out of search/app overview)
+    // could silently strand you on a non-home page instead of actually going home.
+    val returnHome: () -> Unit = {
+        viewModel.closeSearch()
+        viewModel.closeAppList()
+        viewModel.closeOverview()
+        viewModel.closeAllFolders()
+        if (pagerState.currentPage != homeIndex) coroutineScope.launch { pagerState.animateScrollToPage(homeIndex) }
     }
     val openSettingsFromGesture: () -> Unit = {
         viewModel.closeOverview()
@@ -337,32 +345,70 @@ fun HomeScreen(
                 // Layer 1 used to live *inside* each page's pager slot, so it physically slid along with
                 // that page's content — fine when neighboring pages share the same background, but a hard,
                 // sudden seam wherever two pages carry genuinely different images/colors (you'd see both
-                // full images sliding edge-to-edge). Pulled out here as one shared layer behind the pager,
-                // crossfading between the settling and target page's background based on the pager's own
-                // continuous drag position, so the backdrop dissolves smoothly while the content on top
-                // still slides normally — the effect the user asked for without giving up per-page Ebene 1.
-                val continuousPage = pagerState.currentPage + pagerState.currentPageOffsetFraction
-                val lowerIndex = floor(continuousPage).toInt().coerceIn(0, pages.lastIndex)
-                val upperIndex = ceil(continuousPage).toInt().coerceIn(0, pages.lastIndex)
-                val crossfadeFraction = (continuousPage - lowerIndex).coerceIn(0f, 1f)
+                // full images sliding edge-to-edge). Pulled out here as one shared layer behind the pager.
+                //
+                // Backgrounds are read from pageBackgroundCache (filled below, per page slot) rather than
+                // each collecting their own Flow — a page's background is fetched once and cached, then
+                // just read back instantly regardless of how the transition logic below uses it.
+                //
+                // Frame-by-frame capture of an actual swipe (see git history for the two failed attempts
+                // this replaced) confirmed the background has to track the *same* continuous position the
+                // pager itself uses to lay out content — anything that waits for a discrete "arrived" or
+                // "committed" signal (currentPage, targetPage) either lags behind the content's own motion
+                // (a visible two-stage "content slides, then bg flashes in afterward") or over-fires on
+                // every direction change during an indecisive drag (targetPage changes many times per
+                // gesture, restarting a keyed animation each time). Reading currentPageOffsetFraction
+                // directly, every frame, with no intermediate Animatable/LaunchedEffect, guarantees the
+                // background is always exactly where the pager itself says the transition currently is.
+                //
+                // Frozen to the settled page alone whenever an overlay (app overview, search, quick
+                // overview) covers the pager — a page reported flickering to a neighbor's background
+                // specifically while leaving the app overview, and the pager underneath keeps existing
+                // (composed, not disposed) the whole time an overlay sits on top of it, so anything that
+                // nudged its position while hidden would only become visible right as that overlay's own
+                // exit fade reveals it again. There's never a legitimate reason to crossfade while nothing
+                // of the pager is even visible, so this sidesteps that class of bug outright rather than
+                // chasing down whatever specifically causes the position to move while covered.
+                //
+                // Gated on pageContentAlpha, not the raw overlayHidesPage boolean — the boolean flips the
+                // instant an overlay is told to close, but the overlay's own exit animation (its fadeOut
+                // + slideOutVertically) keeps it visually on screen, gradually revealing the pager
+                // underneath, for another 110-200ms after that. Unfreezing on the boolean alone reactivated
+                // live crossfade math *during* that reveal instead of after it — exactly the window where
+                // a transient glitch would read as "clearer"/more noticeable than the same thing happening
+                // behind an instant cut (e.g. the system back gesture, which visually swaps far more
+                // abruptly and gives a glitch nowhere near as much exposed time to be seen).
+                val lowerIndex: Int
+                val upperIndex: Int
+                val crossfadeFraction: Float
+                if (overlayHidesPage || pageContentAlpha < 0.999f) {
+                    lowerIndex = pagerState.currentPage.coerceIn(0, pages.lastIndex)
+                    upperIndex = lowerIndex
+                    crossfadeFraction = 0f
+                } else {
+                    val continuousPage = pagerState.currentPage + pagerState.currentPageOffsetFraction
+                    lowerIndex = kotlin.math.floor(continuousPage).toInt().coerceIn(0, pages.lastIndex)
+                    upperIndex = kotlin.math.ceil(continuousPage).toInt().coerceIn(0, pages.lastIndex)
+                    crossfadeFraction = (continuousPage - lowerIndex).coerceIn(0f, 1f)
+                }
                 val lowerPageId = pages.getOrNull(lowerIndex)?.id
                 val upperPageId = pages.getOrNull(upperIndex)?.id
-                val lowerBackground by remember(lowerPageId) { viewModel.pageBackgroundConfig(lowerPageId ?: -1L) }
-                    .collectAsState(initial = BackgroundConfig())
+                val lowerBackground = lowerPageId?.let { pageBackgroundCache[it] } ?: BackgroundConfig()
                 BackgroundFill(lowerBackground, Modifier.fillMaxSize())
                 if (upperPageId != null && upperPageId != lowerPageId && crossfadeFraction > 0f) {
-                    val upperBackground by remember(upperPageId) { viewModel.pageBackgroundConfig(upperPageId) }
-                        .collectAsState(initial = BackgroundConfig())
+                    val upperBackground = pageBackgroundCache[upperPageId] ?: BackgroundConfig()
                     BackgroundFill(upperBackground, Modifier.fillMaxSize().graphicsLayer { alpha = crossfadeFraction })
                 }
 
                 HorizontalPager(
                     state = pagerState,
-                    // Composes the page directly left/right of the current one ahead of time, while idle,
-                    // instead of only once the user actually starts dragging onto it — that first-ever
-                    // composition of a widget-heavy page (own or external widgets alike) is what causes the
-                    // one-time hitch on a page's first visit; pre-warming its neighbors moves that cost to
-                    // before the swipe instead of during it.
+                    // Was (pages.size - 1) — every page composed all the time, specifically to stop home
+                    // from being disposed/recomposed from scratch when returning to it from a page 2+
+                    // away. That traded a narrow, occasional hitch for a permanently heavier composition
+                    // (every external widget host alive on every page, all the time), and that's what
+                    // actually made *everything* feel worse afterward — the app-list transition, general
+                    // scrolling, all of it — not just the one swipe this was meant to fix. Back to only
+                    // keeping the immediate neighbor pre-warmed, matching how Pager is meant to be used.
                     beyondViewportPageCount = 1,
                     modifier = Modifier.fillMaxSize()
                 ) { pageIndex ->
@@ -400,6 +446,9 @@ fun HomeScreen(
                         val reservedForDock = DockDimens.scaled(innerWidth)
                             .let { it.barHeight + DockDimens.topMargin + DockDimens.bottomMargin } + DockDimens.contentGap
                         val pageBackgroundConfigOrNull by remember(page.id) { viewModel.pageBackgroundConfig(page.id) }.collectAsState(initial = null)
+                        LaunchedEffect(page.id, pageBackgroundConfigOrNull) {
+                            pageBackgroundConfigOrNull?.let { pageBackgroundCache[page.id] = it }
+                        }
                         val loadedPageBackgroundConfig = pageBackgroundConfigOrNull
                         // Null (not yet loaded from disk) until proven otherwise, so a hosted system widget
                         // never mounts guessing at dark/light and then gets stuck once the real value arrives.
@@ -436,11 +485,13 @@ fun HomeScreen(
                                 onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) },
                                 handedness = handedness,
                                 iconShape = iconShape,
-                                onSearchBarTap = { viewModel.executeDockTapAction(dockSingleTapAction) },
-                                onSearchBarDoubleTap = { viewModel.executeDockTapAction(dockDoubleTapAction) },
+                                onSearchBarTap = { viewModel.executeDockTapAction(com.bisc.flauncher.data.model.DockTapAction.FULL_SEARCH) },
+                                onSearchBarDoubleTap = { viewModel.executeDockTapAction(com.bisc.flauncher.data.model.DockTapAction.QUICK_OVERVIEW) },
+                                onSearchBarSwipeUp = viewModel::openAppList,
                                 quickLaunchSlots = quickLaunchSlots,
                                 loadQuickLaunchIcon = viewModel::loadIcon,
                                 onQuickLaunchClick = { componentName -> launchApp(context, componentName) },
+                                accentColor = Color(accentColor),
                                 modifier = contentModifier.graphicsLayer { alpha = pageContentAlpha }
                             ) } }
                     }
@@ -645,12 +696,13 @@ fun HomeScreen(
                 )
                 SearchBar(
                     modifier = Modifier.graphicsLayer { alpha = dockAlpha },
-                    onSingleTap = { viewModel.executeDockTapAction(dockSingleTapAction) },
-                    onDoubleTap = { viewModel.executeDockTapAction(dockDoubleTapAction) },
+                    onHubTap = { viewModel.executeDockTapAction(com.bisc.flauncher.data.model.DockTapAction.FULL_SEARCH) },
+                    onHubSwipeUp = viewModel::openAppList,
+                    onHubCategorySearch = { viewModel.executeDockTapAction(com.bisc.flauncher.data.model.DockTapAction.QUICK_OVERVIEW) },
                     handedness = handedness,
                     iconShape = iconShape,
                     appearance = pinnedSearchBarRow.appearance(),
-                    searchButtonAppearance = dockSearchButtonAppearance,
+                    accentColor = Color(accentColor),
                     quickLaunchSlots = quickLaunchSlots,
                     loadQuickLaunchIcon = viewModel::loadIcon,
                     onQuickLaunchClick = { componentName -> launchApp(context, componentName) }
@@ -659,21 +711,34 @@ fun HomeScreen(
         }
     }
 
-    BackHandler(enabled = appListOpen && !searchOpen) { viewModel.closeAppList() }
-    BackHandler(enabled = searchOpen) { viewModel.closeSearch() }
-    LaunchedEffect(homeButtonPressCount) { if (appListOpen) viewModel.closeAppList() }
+    // All three cover the same "classic back-swipe/home gesture always lands you on the actual home
+    // screen" contract: from either search surface, from plain app overview, and from any other page
+    // with nothing open on top — not just closing whatever overlay happens to be up while leaving the
+    // pager wherever it already was.
+    BackHandler(enabled = appListOpen && !searchOpen) { returnHome() }
+    BackHandler(enabled = searchOpen) { returnHome() }
+    BackHandler(enabled = !appListOpen && !searchOpen && !folderOpen && pagerState.currentPage != homeIndex) { returnHome() }
+    LaunchedEffect(homeButtonPressCount) { if (homeButtonPressCount > 0) returnHome() }
     AnimatedVisibility(
         visible = appListOpen,
         modifier = Modifier.fillMaxSize(),
         enter = fadeIn(tween(110)) + slideInVertically(animationSpec = tween(130)) { it / 8 },
         exit = fadeOut(tween(110)) + slideOutVertically(animationSpec = tween(130)) { it / 8 }
     ) {
+        // Pulling out of the app overview this way used to only call closeAppList() — it never touched
+        // the pager, so it could silently leave you on whatever page the pager happened to already be on
+        // instead of home, exactly like the system-back path did before returnHome() was introduced.
+        // rememberUpdatedState (not a plain closure over returnHome) because this connection object is
+        // remembered once via `viewModel` and must keep calling the *current* returnHome — which closes
+        // over pagerState/homeIndex/pages that are only valid for the composition that created them —
+        // rather than whatever stale one existed the first time this was built.
+        val currentReturnHome = rememberUpdatedState(returnHome)
         val pullDownToClose = remember(viewModel) {
             object : androidx.compose.ui.input.nestedscroll.NestedScrollConnection {
                 private var pulled = 0f
                 override fun onPostScroll(consumed: androidx.compose.ui.geometry.Offset, available: androidx.compose.ui.geometry.Offset, source: androidx.compose.ui.input.nestedscroll.NestedScrollSource): androidx.compose.ui.geometry.Offset {
                     pulled = if (available.y > 0f && source == androidx.compose.ui.input.nestedscroll.NestedScrollSource.UserInput) pulled + available.y else 0f
-                    if (pulled > 260f) { pulled = 0f; viewModel.closeAppList() }
+                    if (pulled > 260f) { pulled = 0f; currentReturnHome.value() }
                     return androidx.compose.ui.geometry.Offset.Zero
                 }
             }

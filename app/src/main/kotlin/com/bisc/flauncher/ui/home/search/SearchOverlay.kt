@@ -2,7 +2,6 @@ package com.bisc.flauncher.ui.home.search
 
 import com.bisc.flauncher.util.matchesWordStart
 import android.content.ComponentName
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi

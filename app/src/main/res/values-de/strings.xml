@@ -2,9 +2,6 @@
 <resources>
     <string name="app_name">FLauncher</string>
 
-    <string name="accessibility_service_label">FLauncher-Gestenaktionen</string>
-    <string name="accessibility_service_description">Ermöglicht den Gesten des FLaunchers, den Bildschirm zu sperren, die zuletzt verwendeten Apps oder das Ausschaltmenü zu öffnen, sofern eine dieser Aktionen unter Einstellungen > Gesten zugewiesen ist. Bildschirminhalte werden nicht gelesen, es erfolgt kein Netzwerkzugriff. Ausgeführt wird ausschließlich die zugewiesene Systemaktion.</string>
-
     <string name="home_menu_settings">Einstellungen</string>
 
     <string name="folder_icon_auto">App-Vorschau als Symbol verwenden</string>
@@ -228,8 +225,6 @@
     <string name="settings_permissions_contacts_purpose">Kontakte suchen und anheften.</string>
     <string name="settings_permissions_notifications">Benachrichtigungszugriff</string>
     <string name="settings_permissions_notifications_purpose">Aktuelle Wiedergabe im Musik-Widget.</string>
-    <string name="settings_permissions_accessibility">Bedienungshilfe-Dienst</string>
-    <string name="settings_permissions_accessibility_purpose">Gesten für Bildschirmsperre, zuletzt verwendete Apps und Ausschaltmenü.</string>
     <string name="settings_default_launcher_description">FLauncher als Standard-Launcher festlegen.</string>
     <string name="settings_default_launcher_already_set">FLauncher ist der Standard-Launcher.</string>
 
@@ -274,11 +269,12 @@
     <string name="settings_folder_icon_pack_search">Symbole suchen</string>
     <string name="settings_folder_icon_pack_no_results">Keine passenden Symbole</string>
 
-    <string name="wallpaper_light">Heller Hintergrund</string>
-    <string name="wallpaper_dark">Dunkler Hintergrund</string>
-    <string name="settings_background_bundled_label">Mitgelieferte Hintergründe</string>
     <string name="settings_background_source_custom_image">Eigenes Bild</string>
     <string name="settings_background_source_color">Farbe</string>
+    <string name="settings_background_use_global">Globaler Hintergrund</string>
+    <string name="settings_background_use_global_summary">Derselbe Hintergrund überall, einmal unter Erscheinungsbild eingestellt.</string>
+    <string name="settings_section_global_background">Hintergrund</string>
+    <string name="settings_card_global_background_subtitle">Ein Hintergrundbild oder eine Farbe für jeden Bildschirm</string>
     <string name="settings_background_opacity_label">Deckkraft</string>
     <string name="settings_background_opacity_value">%1$d%%</string>
     <string name="settings_background_darken_label">Abdunkeln</string>
@@ -286,7 +282,6 @@
 
     <string name="settings_section_gestures">Gesten</string>
     <string name="settings_card_gestures_subtitle">Langes Drücken, Doppeltippen, Wischgesten, Home-Taste</string>
-    <string name="settings_gestures_locked_summary">Erfordert den Bedienungshilfen-Dienst. Zum Aktivieren tippen.</string>
     <string name="settings_gesture_long_press">Langes Drücken</string>
     <string name="settings_gesture_double_tap">Doppeltippen</string>
     <string name="settings_gesture_swipe_up">Nach oben wischen</string>
@@ -300,9 +295,6 @@
     <string name="settings_gesture_action_settings">Einstellungen öffnen</string>
     <string name="settings_gesture_action_notifications">Benachrichtigungen öffnen</string>
     <string name="settings_gesture_action_quick_settings">Schnelleinstellungen öffnen</string>
-    <string name="settings_gesture_action_screen_lock">Bildschirm sperren</string>
-    <string name="settings_gesture_action_recents">Zuletzt verwendete Apps</string>
-    <string name="settings_gesture_action_power_menu">Ausschaltmenü</string>
 
     <string name="settings_section_pages">Seiten</string>
     <string name="settings_section_app_overview">App-Übersicht</string>
@@ -313,6 +305,8 @@
     <string name="settings_pages_page">Seite %1$d</string>
     <string name="settings_pages_add">Seite hinzufügen</string>
     <string name="settings_pages_remove">Seite entfernen</string>
+    <string name="settings_pages_rename">Seite umbenennen</string>
+    <string name="settings_pages_rename_hint">Seitenname</string>
 
     <string name="settings_rows_title">Zeilen</string>
     <string name="settings_rows_empty">Keine Zeilen auf dieser Seite. Über „Zeile hinzufügen“ ein Widget oder eine App-Zeile ergänzen.</string>
@@ -471,7 +465,6 @@
     <string name="settings_search_include_ai">KI-App</string>
     <string name="search_command_ai">%1$s fragen: %2$s</string>
     <string name="search_action_home">Startbildschirm</string>
-    <string name="settings_search_ai_label">Persönliche KI-App</string>
     <string name="settings_search_ai_title">KI-App</string>
     <string name="settings_search_ai_none">Keine ausgewählt</string>
     <string name="settings_search_ai_pick">KI-App auswählen</string>
@@ -503,7 +496,6 @@
     <string name="settings_search_maps_pick">Karten-App auswählen</string>
     <string name="settings_search_engine_custom_url_row">Eigene Such-URL</string>
     <string name="settings_search_engine_custom_url_unset">Nicht festgelegt</string>
-    <string name="settings_search_engine_custom_howto">So gibst du eine eigene URL ein</string>
     <string name="settings_search_engine_custom_info" formatted="false">Schreibe %s an die Stelle des Suchbegriffs, zum Beispiel https://www.google.com/search?q=%s. Ohne %s wird der Begriff als ?q= angehängt, ein fehlendes https:// wird automatisch ergänzt.</string>
 
     <string name="picker_widget_clock">Uhr</string>

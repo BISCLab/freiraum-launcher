@@ -95,6 +95,24 @@ private val MIGRATION_33_34 = object : Migration(33, 34) {
     }
 }
 
+private val MIGRATION_34_35 = object : Migration(34, 35) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE notes ADD COLUMN orderIndex INTEGER NOT NULL DEFAULT 0")
+    }
+}
+
+private val MIGRATION_35_36 = object : Migration(35, 36) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE notes ADD COLUMN hiddenInWidget INTEGER NOT NULL DEFAULT 0")
+    }
+}
+
+private val MIGRATION_36_37 = object : Migration(36, 37) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE launcher_pages ADD COLUMN name TEXT")
+    }
+}
+
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "flauncher_settings")
 
 @Module
@@ -108,7 +126,14 @@ object AppModule {
     @Singleton
     fun provideDatabase(@ApplicationContext ctx: Context): FLauncherDatabase =
         Room.databaseBuilder(ctx, FLauncherDatabase::class.java, "flauncher.db")
-            .addMigrations(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34)
+            .addMigrations(
+                MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33,
+                MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36, MIGRATION_36_37
+            )
+            // Only a last resort now for jumps with no migration path above (e.g. a much older install
+            // skipping several versions at once, or a version older than 27). Every future version bump
+            // needs its own explicit Migration added here — that's what actually keeps people's pages,
+            // widgets and settings intact across an update instead of silently wiping them.
             .fallbackToDestructiveMigration(dropAllTables = true)
             .build()
 

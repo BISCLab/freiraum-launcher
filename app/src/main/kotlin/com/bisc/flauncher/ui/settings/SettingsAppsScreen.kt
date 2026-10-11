@@ -27,10 +27,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import kotlin.math.roundToInt
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -54,8 +52,6 @@ import androidx.navigation.NavController
 import com.bisc.flauncher.R
 import com.bisc.flauncher.ui.theme.noRippleClickable
 import com.bisc.flauncher.data.model.AppInfo
-import com.bisc.flauncher.data.model.AppListDisplayMode
-import com.bisc.flauncher.data.model.AppListLayout
 import com.bisc.flauncher.data.model.AppOverride
 import com.bisc.flauncher.data.model.IconPackInfo
 import com.bisc.flauncher.data.model.RevealMode

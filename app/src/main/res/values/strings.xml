@@ -2,10 +2,6 @@
 <resources>
     <string name="app_name">FLauncher</string>
 
-    
-    <string name="accessibility_service_label">FLauncher gesture actions</string>
-    <string name="accessibility_service_description">Allows the FLauncher gestures to lock the screen, open recent apps or open the power menu, when one of these actions is assigned under Settings > Gestures. Screen content is not read and no network access is used. Only the assigned system action is performed.</string>
-
     <string name="home_menu_settings">Settings</string>
 
     <string name="folder_icon_auto">Use app preview as icon</string>
@@ -229,8 +225,6 @@
     <string name="settings_permissions_contacts_purpose">Searching and pinning contacts.</string>
     <string name="settings_permissions_notifications">Notification access</string>
     <string name="settings_permissions_notifications_purpose">Current playback in the music widget.</string>
-    <string name="settings_permissions_accessibility">Accessibility service</string>
-    <string name="settings_permissions_accessibility_purpose">Gestures for screen lock, recent apps and power menu.</string>
     <string name="settings_default_launcher_description">Set FLauncher as the default launcher.</string>
     <string name="settings_default_launcher_already_set">FLauncher is the default launcher.</string>
 
@@ -266,11 +260,12 @@
     <string name="settings_folder_icon_pack_search">Search icons</string>
     <string name="settings_folder_icon_pack_no_results">No matching icons</string>
 
-    <string name="wallpaper_light">Light wallpaper</string>
-    <string name="wallpaper_dark">Dark wallpaper</string>
-    <string name="settings_background_bundled_label">Bundled wallpapers</string>
     <string name="settings_background_source_custom_image">Custom image</string>
     <string name="settings_background_source_color">Color</string>
+    <string name="settings_background_use_global">Global background</string>
+    <string name="settings_background_use_global_summary">The same background used everywhere, set once in Appearance.</string>
+    <string name="settings_section_global_background">Background</string>
+    <string name="settings_card_global_background_subtitle">One background image or color for every screen</string>
     <string name="settings_background_opacity_label">Opacity</string>
     <string name="settings_background_opacity_value">%1$d%%</string>
     <string name="settings_background_darken_label">Darken</string>
@@ -287,7 +282,6 @@
 
     <string name="settings_section_gestures">Gestures</string>
     <string name="settings_card_gestures_subtitle">Long press, double tap, swipes, home button</string>
-    <string name="settings_gestures_locked_summary">Requires the accessibility service. Tap to enable.</string>
     <string name="settings_gesture_long_press">Long press</string>
     <string name="settings_gesture_double_tap">Double tap</string>
     <string name="settings_gesture_swipe_up">Swipe up</string>
@@ -301,9 +295,6 @@
     <string name="settings_gesture_action_settings">Open settings</string>
     <string name="settings_gesture_action_notifications">Open notifications</string>
     <string name="settings_gesture_action_quick_settings">Open quick settings</string>
-    <string name="settings_gesture_action_screen_lock">Lock screen</string>
-    <string name="settings_gesture_action_recents">Recent apps</string>
-    <string name="settings_gesture_action_power_menu">Power menu</string>
 
     <string name="settings_section_pages">Pages</string>
     <string name="settings_section_app_overview">App overview</string>
@@ -314,6 +305,8 @@
     <string name="settings_pages_page">Page %1$d</string>
     <string name="settings_pages_add">Add page</string>
     <string name="settings_pages_remove">Remove page</string>
+    <string name="settings_pages_rename">Rename page</string>
+    <string name="settings_pages_rename_hint">Page name</string>
 
     <string name="settings_rows_title">Rows</string>
     <string name="settings_rows_empty">No rows on this page. Use “Add row” to add a widget or an apps row.</string>
@@ -472,7 +465,6 @@
     <string name="settings_search_include_ai">AI app</string>
     <string name="search_command_ai">Ask %1$s: %2$s</string>
     <string name="search_action_home">Home</string>
-    <string name="settings_search_ai_label">Personal AI app</string>
     <string name="settings_search_ai_title">AI app</string>
     <string name="settings_search_ai_none">None selected</string>
     <string name="settings_search_ai_pick">Choose AI app</string>
@@ -504,7 +496,6 @@
     <string name="settings_search_maps_pick">Choose maps app</string>
     <string name="settings_search_engine_custom_url_row">Custom search URL</string>
     <string name="settings_search_engine_custom_url_unset">Not set</string>
-    <string name="settings_search_engine_custom_howto">How to enter your own URL</string>
     <string name="settings_search_engine_custom_info" formatted="false">Write %s where the search term belongs, for example https://www.google.com/search?q=%s. Without %s the term is appended as ?q=, and a missing https:// is added automatically.</string>
 
     <string name="picker_widget_clock">Clock</string>

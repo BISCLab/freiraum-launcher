@@ -79,6 +79,7 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
     return when (entry.destination.route) {
         "settings" -> stringResource(R.string.settings_title)
         "settings/appearance" -> stringResource(R.string.settings_section_appearance)
+        "settings/appearance/background" -> stringResource(R.string.settings_section_global_background)
         "settings/dock" -> stringResource(R.string.settings_section_dock)
         "settings/dock/overview" -> stringResource(R.string.settings_section_search_overview)
         "settings/dock/full" -> stringResource(R.string.settings_section_search_full)

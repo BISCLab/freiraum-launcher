@@ -8,7 +8,7 @@ import com.bisc.flauncher.data.db.PageRowDao
 import com.bisc.flauncher.data.model.AppRowEntry
 import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.BackgroundSource
-import com.bisc.flauncher.data.model.BundledWallpaper
+import com.bisc.flauncher.data.model.ColorFill
 import com.bisc.flauncher.data.model.DesignPresetValues
 import com.bisc.flauncher.data.model.GestureAction
 import com.bisc.flauncher.data.model.GridConstants
@@ -22,7 +22,7 @@ import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.data.model.withAppearance
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.settings.SettingsRepository
-import com.bisc.flauncher.util.BackgroundImageStore
+import com.bisc.flauncher.ui.theme.ThemePreference
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -47,9 +47,9 @@ class PageContentRepository @Inject constructor(
     val appRowEntries: Flow<List<AppRowEntry>> = entryDao.observeAll()
 
     suspend fun ensureSeeded() {
+        ensureGlobalBackgroundSeeded()
         val existingHome = pageDao.getHomePage()
         val homeId = existingHome?.id ?: pageDao.insert(LauncherPage(orderIndex = 0, isHome = true)).also { newHomeId ->
-            seedDefaultHomeBackground(newHomeId)
             settingsRepository.setPageHideStatusBar(newHomeId, true)
         }
         if (rowDao.countForPage(homeId) == 0) {
@@ -78,18 +78,31 @@ class PageContentRepository @Inject constructor(
         pageDao.getAllOnce().filter { it.kind == LauncherPageKind.ROWS }.forEach { rebalancePageOverflow(it.id) }
     }
 
-    private suspend fun seedDefaultHomeBackground(homeId: Long) {
-        settingsRepository.setPageBackgroundConfig(homeId, BackgroundConfig(source = BackgroundSource.IMAGE, imagePath = BundledWallpaper.LIGHT.path))
+    /** Every page/surface falls back to this when it has no color override of its own. */
+    private suspend fun ensureGlobalBackgroundSeeded() {
+        if (!settingsRepository.hasGlobalBackground()) {
+            settingsRepository.setGlobalBackground(BackgroundConfig(source = BackgroundSource.COLOR, fill = ColorFill(color = defaultBackgroundColor())))
+        }
+    }
+
+    /** Plain black in dark mode, plain white in light mode — no bundled wallpaper is shipped anymore. */
+    private suspend fun defaultBackgroundColor(): Int {
+        val isDark = when (settingsRepository.theme.first()) {
+            ThemePreference.DARK -> true
+            ThemePreference.LIGHT -> false
+            ThemePreference.SYSTEM ->
+                context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
+                    android.content.res.Configuration.UI_MODE_NIGHT_YES
+        }
+        return if (isDark) android.graphics.Color.BLACK else android.graphics.Color.WHITE
     }
 
     suspend fun addPage(): Long {
         val next = (pageDao.maxOrderIndex() ?: -1) + 1
         val newId = pageDao.insert(LauncherPage(orderIndex = next))
-        // A brand new page's own background otherwise defaults to plain white until the user picks
-        // one, which is jarring (e.g. behind a widget added right away) — start it looking like home.
-        pageDao.getHomePage()?.let { home ->
-            settingsRepository.setPageBackgroundConfig(newId, settingsRepository.pageBackgroundConfig(home.id).first())
-        }
+        // No per-page background to seed anymore — a page with no override of its own just falls back
+        // to the global background automatically, which is exactly what every fresh page should look
+        // like (matches home) until the user deliberately picks its own color.
         // Hidden status bar is the app-wide default now; a page that silently defaulted to *shown*
         // is exactly the kind of per-page mismatch that made switching to it visibly jump/settle.
         settingsRepository.setPageHideStatusBar(newId, true)
@@ -107,6 +120,11 @@ class PageContentRepository @Inject constructor(
         ordered.forEachIndexed { index, page ->
             if (page.orderIndex != index) pageDao.update(page.copy(orderIndex = index))
         }
+    }
+
+    suspend fun renamePage(pageId: Long, name: String?) {
+        val page = pageDao.getById(pageId) ?: return
+        pageDao.update(page.copy(name = name?.trim()?.takeIf { it.isNotEmpty() }))
     }
 
     private suspend fun nextRowOrderIndex(pageId: Long): Int {

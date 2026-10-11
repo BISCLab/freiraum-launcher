@@ -20,7 +20,12 @@ import com.bisc.flauncher.ui.theme.FontPreference
 import com.bisc.flauncher.ui.theme.ThemePreference
 
 @Composable
-fun SettingsAppearanceScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsAppearanceScreen(
+    navController: NavController,
+    onBack: () -> Unit,
+    onNavigate: (String) -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
     val theme by viewModel.theme.collectAsState()
     val fontPreference by viewModel.fontPreference.collectAsState()
     val handedness by viewModel.handedness.collectAsState()
@@ -42,6 +47,15 @@ fun SettingsAppearanceScreen(navController: NavController, onBack: () -> Unit, v
     ) { uri -> if (uri != null) pendingImport = uri }
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_appearance), navController = navController, onBack = onBack) {
+        SettingsPreferenceGroup {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_section_global_background),
+                summary = stringResource(R.string.settings_card_global_background_subtitle),
+                onClick = { onNavigate("appearance/background") },
+                trailing = null
+            )
+        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_design_presets_label)) {
             SettingsPreference(
                 icon = null,

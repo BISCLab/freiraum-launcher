@@ -6,23 +6,34 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import com.bisc.flauncher.data.model.BundledWallpaper
 import java.io.File
 
 /** Storage of background images in app-private files, with an in-memory cache. */
 object BackgroundImageStore {
-    private const val MAX_DIMENSION = 1440
+    // Was 1440 — bigger than most phones actually need (portrait screens are commonly ~1080-1200px
+    // wide) and, more importantly, bigger than it needs to be for what this is used for: two of these
+    // get alpha-blended over each other for ~220ms during a page-background crossfade. A flat color
+    // costs Skia essentially nothing to blend; a large decoded photo bitmap is real per-frame GPU/CPU
+    // work, and that gap — invisible for solid colors, real for custom images — matches exactly what
+    // was reported (color-to-color transitions stayed smooth, image transitions kept flickering no
+    // matter how the crossfade's own timing logic was rewritten). Smaller source bitmaps blend cheaper.
+    private const val MAX_DIMENSION = 1080
 
     fun save(context: Context, uri: Uri, key: String): String? {
         return runCatching {
             val bitmap = decodeSampled(context, uri) ?: return null
-            writeToStore(context, bitmap, key)
+            val path = writeToStore(context, bitmap, key)
+            // The freshly-picked bitmap is right here in memory — caching it under its final path now
+            // means the very first time a page with this background renders, it already has both the
+            // image and its luminance (used to decide icon/widget contrast) instead of showing blank
+            // until an async decode-from-disk finishes. That blank-then-pop-in was the flicker seen when
+            // switching between pages with different, just-picked custom backgrounds.
+            cache(path, bitmap)
+            path
         }.getOrNull()
     }
 
-    private fun decodeFull(context: Context, path: String): Bitmap? =
-        BundledWallpaper.fromPath(path)?.let { BitmapFactory.decodeResource(context.resources, it.drawable) }
-            ?: BitmapFactory.decodeFile(path)
+    private fun decodeFull(path: String): Bitmap? = BitmapFactory.decodeFile(path)
 
     private fun writeToStore(context: Context, bitmap: Bitmap, key: String): String {
         val dir = backgroundsDir(context)
@@ -32,9 +43,14 @@ object BackgroundImageStore {
         file.outputStream().use { out ->
             bitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)
         }
-        bitmap.recycle()
         filesOf(context, key).filter { it != file }.forEach { it.delete() }
         return file.absolutePath
+    }
+
+    private fun cache(path: String, bitmap: Bitmap) {
+        val key = cacheKey(path)
+        luminanceCache[key] = averageLuminance(bitmap)
+        bitmapCache.put(key, bitmap.asImageBitmap())
     }
 
     private val bitmapCache = android.util.LruCache<String, ImageBitmap>(
@@ -52,7 +68,7 @@ object BackgroundImageStore {
     fun load(context: Context, path: String): ImageBitmap? {
         val key = cacheKey(path)
         bitmapCache.get(key)?.let { return it }
-        val bitmap = runCatching { decodeFull(context, path) }.getOrNull() ?: return null
+        val bitmap = runCatching { decodeFull(path) }.getOrNull() ?: return null
         luminanceCache[key] = averageLuminance(bitmap)
         return bitmap.asImageBitmap().also { bitmapCache.put(key, it) }
     }
@@ -78,8 +94,12 @@ object BackgroundImageStore {
 
     private fun decodeSampled(context: Context, uri: Uri): Bitmap? {
         val boundsOptions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        // decodeStream() always returns null in inJustDecodeBounds mode by design (it only fills
+        // outWidth/outHeight) — the `?: return null` below has to key off whether the stream actually
+        // opened, not off decodeStream's return value, or this bails out on every single image.
         context.contentResolver.openInputStream(uri)?.use { input ->
             BitmapFactory.decodeStream(input, null, boundsOptions)
+            true
         } ?: return null
 
         var sampleSize = 1

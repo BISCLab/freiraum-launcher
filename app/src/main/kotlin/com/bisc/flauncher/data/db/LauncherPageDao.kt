@@ -16,6 +16,9 @@ interface LauncherPageDao {
     @Query("SELECT * FROM launcher_pages ORDER BY orderIndex")
     suspend fun getAllOnce(): List<LauncherPage>
 
+    @Query("SELECT * FROM launcher_pages WHERE id = :id")
+    suspend fun getById(id: Long): LauncherPage?
+
     @Query("SELECT * FROM launcher_pages WHERE isHome = 1 LIMIT 1")
     suspend fun getHomePage(): LauncherPage?
 

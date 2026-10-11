@@ -10,7 +10,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.dp
 import com.bisc.flauncher.data.model.ElementAppearance
 
 /** Shared card shell for the Sidebar overview's floating panels and the Folder card. */

@@ -16,9 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import com.bisc.flauncher.data.model.BundledWallpaper
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -52,7 +50,7 @@ import com.bisc.flauncher.util.BackgroundImageStore
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-/** Editor for a layer 1 background: bundled wallpaper, custom image, color, opacity and darkening. */
+/** Editor for the single global layer 1 background shared by every surface: image, color, opacity, darkening. */
 @Composable
 fun BackgroundConfigSection(
     imageKey: String,
@@ -71,14 +69,10 @@ fun BackgroundConfigSection(
             }
         }
     }
-    val pickBundled = { wallpaper: BundledWallpaper ->
-        BackgroundImageStore.delete(context, imageKey)
-        onConfigChange(config.withImage(wallpaper.path))
-    }
     val launchImagePicker = {
         pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
-    val customImagePath = config.imagePath?.takeIf { BundledWallpaper.fromPath(it) == null }
+    val customImagePath = config.imagePath
     val imageSelected = config.source == BackgroundSource.IMAGE
 
     SettingsPreferenceGroup(
@@ -144,28 +138,13 @@ fun BackgroundConfigSection(
         }
     }
 
-    SettingsPreferenceGroup(title = stringResource(R.string.settings_background_bundled_label)) {
+    SettingsPreferenceGroup(title = stringResource(R.string.settings_background_source_custom_image)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            BundledWallpaper.entries.forEach { wallpaper ->
-                WallpaperCard(
-                    selected = imageSelected && config.imagePath == wallpaper.path,
-                    label = stringResource(wallpaper.label),
-                    onClick = { pickBundled(wallpaper) }
-                ) {
-                    Image(
-                        painter = painterResource(wallpaper.drawable),
-                        contentDescription = stringResource(wallpaper.label),
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.matchParentSize()
-                    )
-                }
-            }
-            // The picked image lands here as its own preview card, bordered/checked the same way as
-            // the bundled ones once selected — previously this only showed as a tiny 24x36 thumbnail
-            // in the row below, easy to miss and giving no real feedback that a pick had worked.
+            // A large, bordered/checkmarked preview card — feedback that a pick actually worked,
+            // instead of just the tiny 24x36 thumbnail in the row above.
             val customSelected = imageSelected && customImagePath != null
             WallpaperCard(
                 selected = customSelected,
@@ -220,6 +199,113 @@ fun BackgroundConfigSection(
                 )
             }
         )
+    }
+
+    if (showLayerHelp) {
+        LayerExplainerSheet(onDismiss = { showLayerHelp = false })
+    }
+}
+
+/**
+ * Editor for one surface's layer 1 when it can only ever be "the shared global background" or "my own
+ * color" — no per-surface image anymore (see SettingsRepository.backgroundOverrideFor for why: a custom
+ * image only ever flickered against *another* custom image, never against a color or the already-
+ * GPU-resident global image, so images only live at the global level now).
+ */
+@Composable
+fun BackgroundOverrideSection(
+    override: BackgroundConfig?,
+    global: BackgroundConfig,
+    onUseGlobal: () -> Unit,
+    onCustomColor: (BackgroundConfig) -> Unit
+) {
+    var showLayerHelp by remember { mutableStateOf(false) }
+    val usesGlobal = override == null
+    val current = override ?: BackgroundConfig(source = BackgroundSource.COLOR)
+
+    SettingsPreferenceGroup(
+        title = layerBackgroundLabel(1, R.string.settings_layer_surface_screen),
+        onInfoClick = { showLayerHelp = true }
+    ) {
+        SettingsPreference(
+            icon = null,
+            title = stringResource(R.string.settings_background_use_global),
+            summary = stringResource(R.string.settings_background_use_global_summary),
+            leading = {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .background(if (global.source == BackgroundSource.COLOR) global.fill.asBrush() else androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.surfaceVariant))
+                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                ) {
+                    if (global.source == BackgroundSource.IMAGE) {
+                        val bitmap = rememberBackgroundBitmap(global.imagePath)
+                        if (bitmap != null) Image(bitmap, null, contentScale = ContentScale.Crop, modifier = Modifier.matchParentSize())
+                    }
+                }
+            },
+            onClick = onUseGlobal,
+            trailing = { RadioButton(selected = usesGlobal, onClick = onUseGlobal) }
+        )
+        SettingsPreference(
+            icon = null,
+            title = stringResource(R.string.settings_background_source_color),
+            leading = {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .background(current.fill.asBrush())
+                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                )
+            },
+            onClick = { onCustomColor(current.copy(source = BackgroundSource.COLOR)) },
+            trailing = {
+                RadioButton(
+                    selected = !usesGlobal,
+                    onClick = { onCustomColor(current.copy(source = BackgroundSource.COLOR)) }
+                )
+            }
+        )
+        if (!usesGlobal) {
+            ColorFillPickerContent(
+                fill = current.fill,
+                onFillChange = { fill -> onCustomColor(current.copy(fill = fill)) },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+        }
+    }
+
+    if (!usesGlobal) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_opacity_label)) {
+            SettledSlider(
+                value = current.opacity,
+                onSettled = { onCustomColor(current.copy(opacity = it)) },
+                valueRange = 0f..1f,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                label = { live ->
+                    Text(
+                        stringResource(R.string.settings_background_opacity_value, (live * 100).roundToInt()),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            )
+        }
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_darken_label)) {
+            SettledSlider(
+                value = current.darken,
+                onSettled = { onCustomColor(current.copy(darken = it)) },
+                valueRange = 0f..1f,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                label = { live ->
+                    Text(
+                        stringResource(R.string.settings_background_darken_value, (live * 100).roundToInt()),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            )
+        }
     }
 
     if (showLayerHelp) {

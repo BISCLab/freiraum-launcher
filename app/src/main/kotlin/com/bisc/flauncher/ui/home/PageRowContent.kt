@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Shortcut
@@ -82,10 +81,12 @@ fun PageRowContent(
     iconShape: IconShape = IconShape.ROUNDED_SQUARE,
     onSearchBarTap: () -> Unit = {},
     onSearchBarDoubleTap: () -> Unit = {},
+    onSearchBarSwipeUp: () -> Unit = {},
     quickLaunchSlots: List<QuickLaunchSlot> = defaultQuickLaunchSlots,
     loadQuickLaunchIcon: (ComponentName) -> ImageBitmap? = { null },
     onQuickLaunchClick: (ComponentName) -> Unit = {},
-    onSystemWidgetViewReady: ((android.view.View) -> Unit)? = null
+    onSystemWidgetViewReady: ((android.view.View) -> Unit)? = null,
+    accentColor: Color = Color(0xFF3B82F6)
 ) {
     when (row.type) {
         PageRowType.WIDGET -> {
@@ -102,6 +103,7 @@ fun PageRowContent(
                         dateFormat = row.clockDateFormat,
                         showNextAlarm = row.clockShowNextAlarm,
                         alignment = row.clockAlignment,
+                        customInk = row.appearance().contentColor?.let { Color(it) },
                         onDateClick = row.clockDateAction().takeIf { it.type != GestureActionType.NONE }?.let { action -> { onExecuteAction(action) } },
                         onTimeClick = row.clockTimeAction().takeIf { it.type != GestureActionType.NONE }?.let { action -> { onExecuteAction(action) } }
                     )
@@ -149,11 +151,13 @@ fun PageRowContent(
         }
         PageRowType.SEARCH_BAR -> {
             SearchBar(
-                onSingleTap = onSearchBarTap,
-                onDoubleTap = onSearchBarDoubleTap,
+                onHubTap = onSearchBarTap,
+                onHubSwipeUp = onSearchBarSwipeUp,
+                onHubCategorySearch = onSearchBarDoubleTap,
                 handedness = handedness,
                 iconShape = iconShape,
                 appearance = row.appearance(),
+                accentColor = accentColor,
                 quickLaunchSlots = quickLaunchSlots,
                 loadQuickLaunchIcon = loadQuickLaunchIcon,
                 onQuickLaunchClick = onQuickLaunchClick

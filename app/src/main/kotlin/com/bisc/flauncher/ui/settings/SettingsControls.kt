@@ -268,7 +268,7 @@ private fun autoTextSeed(appearance: ElementAppearance): Int {
 }
 
 @Composable
-private fun AutomaticColorPicker(title: String, custom: Int?, automaticSeed: Int, onChange: (Int?) -> Unit) {
+fun AutomaticColorPicker(title: String, custom: Int?, automaticSeed: Int, onChange: (Int?) -> Unit) {
     ColorPickerSection(
         title = title,
         summary = if (custom == null) stringResource(R.string.settings_element_color_auto_hint) else null,

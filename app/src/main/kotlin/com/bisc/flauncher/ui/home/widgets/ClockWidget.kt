@@ -1,6 +1,10 @@
 package com.bisc.flauncher.ui.home.widgets
 
 import android.app.AlarmManager
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,11 +25,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.core.content.ContextCompat
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,7 +56,6 @@ import com.bisc.flauncher.data.model.ClockTimeFormat
 import com.bisc.flauncher.ui.home.LocalSurfaceIsDark
 import kotlin.math.cos
 import kotlin.math.sin
-import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -75,16 +79,34 @@ fun ClockWidget(
     timeFormat: String = ClockTimeFormat.SYSTEM,
     dateFormat: String = "",
     showNextAlarm: Boolean = false,
+    customInk: Color? = null,
     onDateClick: (() -> Unit)? = null,
     onTimeClick: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     var now by remember { mutableStateOf(LocalDateTime.now()) }
-    LaunchedEffect(Unit) {
-        while (true) {
-            now = LocalDateTime.now()
-            delay(1000L * (60 - now.second).coerceAtLeast(1))
+    // Was a self-driven delay() loop re-arming itself for the next minute boundary — correct on paper,
+    // but a coroutine delay like that is exactly the kind of background work Android defers/throttles
+    // under Doze, so after the screen had been off for a while the clock could sit on a stale time until
+    // the delayed resume eventually caught up. ACTION_TIME_TICK is the same system broadcast the real
+    // lock screen clock relies on: delivered once a minute while the screen is actually on, immune to
+    // Doze since the system itself wakes it, and re-registering (and resyncing immediately) every time
+    // this composable re-enters composition also catches the screen-just-turned-on case before the next
+    // tick even arrives.
+    DisposableEffect(Unit) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(receiverContext: Context, intent: Intent) {
+                now = LocalDateTime.now()
+            }
         }
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_TIME_TICK)
+            addAction(Intent.ACTION_TIME_CHANGED)
+            addAction(Intent.ACTION_TIMEZONE_CHANGED)
+        }
+        ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+        now = LocalDateTime.now()
+        onDispose { context.unregisterReceiver(receiver) }
     }
 
     val locale = LocalConfiguration.current.locales.get(0)
@@ -115,7 +137,7 @@ fun ClockWidget(
     }
 
     val surfaceDark = LocalSurfaceIsDark.current ?: (MaterialTheme.colorScheme.background.luminance() < 0.5f)
-    val ink = if (surfaceDark) Color.White else ClockInkOnLight
+    val ink = customInk ?: (if (surfaceDark) Color.White else ClockInkOnLight)
     val shadow = if (surfaceDark) Shadow(Color.Black.copy(alpha = 0.6f), blurRadius = 8f)
     else Shadow(Color.White.copy(alpha = 0.35f), blurRadius = 6f)
     val dateModifier = if (onDateClick != null) Modifier.clickable(onClick = onDateClick) else Modifier

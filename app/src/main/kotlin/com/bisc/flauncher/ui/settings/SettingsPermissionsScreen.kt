@@ -32,7 +32,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
 import com.bisc.flauncher.util.DefaultLauncherUtil
-import com.bisc.flauncher.util.GlobalActionsAccessibilityService
 
 /** Status and grant actions for all permissions and system settings the launcher uses. */
 @Composable
@@ -49,7 +48,6 @@ fun SettingsPermissionsScreen(navController: NavController, onBack: () -> Unit, 
     val isDefault = refreshTick.let { DefaultLauncherUtil.isDefaultLauncher(context) }
     val contacts = refreshTick.let { ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED }
     val notifications = refreshTick.let { NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName) }
-    val accessibility = refreshTick.let { GlobalActionsAccessibilityService.isEnabledInSystemSettings(context) }
     val shortcuts = refreshTick.let { viewModel.hasShortcutHostPermission() }
 
     val openAppDetails = {
@@ -120,12 +118,6 @@ fun SettingsPermissionsScreen(navController: NavController, onBack: () -> Unit, 
                 purpose = stringResource(R.string.settings_permissions_notifications_purpose),
                 granted = notifications,
                 onClick = { context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) }
-            )
-            PermissionRow(
-                title = stringResource(R.string.settings_permissions_accessibility),
-                purpose = stringResource(R.string.settings_permissions_accessibility_purpose),
-                granted = accessibility,
-                onClick = { context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
             )
         }
     }
