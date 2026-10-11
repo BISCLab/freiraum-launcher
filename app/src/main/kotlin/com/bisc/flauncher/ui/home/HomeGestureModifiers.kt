@@ -1,6 +1,7 @@
 package com.bisc.flauncher.ui.home
 
 import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -85,4 +86,43 @@ fun Modifier.detectHomeGestures(
         .pointerInput(Unit) {
             detectTapGestures(onLongPress = { currentOnLongPress.value() }, onDoubleTap = { currentOnDoubleTap.value() })
         }
+}
+
+/**
+ * Notification-shade-style trigger for the Apps panel: a down press has to actually *start* within
+ * [topBandHeight] of the screen's top edge, then drag down past the threshold. Gated on the down
+ * position (not just "any downward drag anywhere") so it can't be confused with a normal downward drag
+ * that starts lower on the page, and so it never competes with [detectHomeGestures] or any widget's own
+ * gestures living further down the page. Only consumes the pointer once the swipe actually commits —
+ * before that, a tap on whatever's in that top strip (e.g. a clock widget placed at the very top) still
+ * goes through untouched.
+ */
+@Composable
+fun Modifier.detectTopEdgeSwipeDown(
+    onSwipeDown: () -> Unit,
+    topBandHeight: androidx.compose.ui.unit.Dp = 48.dp
+): Modifier {
+    val density = LocalDensity.current
+    val topBandPx = remember(density, topBandHeight) { with(density) { topBandHeight.toPx() } }
+    val thresholdPx = remember(density) { with(density) { 36.dp.toPx() } }
+    val currentOnSwipeDown = rememberUpdatedState(onSwipeDown)
+    return this.pointerInput(topBandPx, thresholdPx) {
+        awaitEachGesture {
+            val down = awaitFirstDown(pass = PointerEventPass.Main)
+            if (down.position.y > topBandPx) return@awaitEachGesture
+            var accumulated = 0f
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Main)
+                val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                if (!change.pressed) break
+                if (change.isConsumed) continue
+                accumulated += change.positionChange().y
+                if (accumulated >= thresholdPx) {
+                    change.consume()
+                    currentOnSwipeDown.value()
+                    break
+                }
+            }
+        }
+    }
 }

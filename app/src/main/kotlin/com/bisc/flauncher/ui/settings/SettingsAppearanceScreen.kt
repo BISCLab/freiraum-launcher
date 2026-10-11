@@ -32,6 +32,7 @@ fun SettingsAppearanceScreen(
     val chargingAnimation by viewModel.chargingAnimationEnabled.collectAsState()
     val chargingColor by viewModel.chargingAnimationColor.collectAsState()
     val statusBarHiddenEverywhere by viewModel.statusBarHiddenEverywhere.collectAsState()
+    val homeScreenWidgetsEnabled by viewModel.homeScreenWidgetsEnabled.collectAsState()
     var confirmingPreset by remember { mutableStateOf<DesignPreset?>(null) }
     val context = androidx.compose.ui.platform.LocalContext.current
     var pendingImport by remember { mutableStateOf<android.net.Uri?>(null) }
@@ -47,6 +48,17 @@ fun SettingsAppearanceScreen(
     ) { uri -> if (uri != null) pendingImport = uri }
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_appearance), navController = navController, onBack = onBack) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_homescreen_label)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_homescreen_widgets_enabled),
+                info = stringResource(R.string.settings_homescreen_widgets_enabled_summary),
+                onClick = { viewModel.setHomeScreenWidgetsEnabled(!homeScreenWidgetsEnabled) },
+                trailing = {
+                    Switch(checked = homeScreenWidgetsEnabled, onCheckedChange = { viewModel.setHomeScreenWidgetsEnabled(it) })
+                }
+            )
+        }
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,

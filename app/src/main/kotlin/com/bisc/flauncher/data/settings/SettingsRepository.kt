@@ -101,6 +101,15 @@ class SettingsRepository @Inject constructor(
 
     private fun folderShowAddRowKey(folderId: Long) = booleanPreferencesKey("folder_show_add_row_$folderId")
 
+    // Off by default — the home screen starts empty (just the dock) and stays that way until the user
+    // deliberately opts into widgets there, matching Kvaesitso's "enable widgets on home screen" switch.
+    // Other pages are unaffected; this only gates what renders on the page with isHome == true.
+    val homeScreenWidgetsEnabled: Flow<Boolean> = dataStore.data.map { it[HOME_SCREEN_WIDGETS_ENABLED_KEY] ?: false }
+
+    suspend fun setHomeScreenWidgetsEnabled(enabled: Boolean) {
+        dataStore.edit { it[HOME_SCREEN_WIDGETS_ENABLED_KEY] = enabled }
+    }
+
     val chargingAnimationColor: Flow<Int> = dataStore.data.map { it[CHARGING_ANIMATION_COLOR_KEY] ?: 0xFF34D058.toInt() }
 
     suspend fun setChargingAnimationColor(color: Int) {
@@ -648,6 +657,7 @@ class SettingsRepository @Inject constructor(
         private val DOCK_MATCH_WIDGET_CORNERS_KEY = booleanPreferencesKey("dock_match_widget_corners")
         private val CHARGING_ANIMATION_ENABLED_KEY = booleanPreferencesKey("charging_animation_enabled")
         private val SEARCH_SHOW_AZ_INDEX_KEY = booleanPreferencesKey("search_show_az_index")
+        private val HOME_SCREEN_WIDGETS_ENABLED_KEY = booleanPreferencesKey("home_screen_widgets_enabled")
         private val SEARCH_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("search_hide_status_bar")
         private val SEARCH_ENGINE_KEY = stringPreferencesKey("search_engine")
         private val SEARCH_ENGINE_CUSTOM_URL_KEY = stringPreferencesKey("search_engine_custom_url")
