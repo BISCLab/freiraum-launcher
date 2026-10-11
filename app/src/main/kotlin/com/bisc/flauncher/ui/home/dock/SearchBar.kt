@@ -65,10 +65,11 @@ import com.bisc.flauncher.data.settings.IconShape
 /**
  * Dock: a pill of quick-launch icons, proportionally scaled from the Figma reference (see [DockDimens])
  * with the Hub orb nested into it, centered. The pill's own silhouette — rising into a shallow, smooth
- * hill on both its top and bottom edge around the orb — is [DockPillShape], Figma's own vector path
- * reused as a real Compose [androidx.compose.ui.graphics.Shape] (not a hand-approximated RoundRect/circle
- * or RoundRect/ellipse union — two earlier attempts at both read as noticeably less polished than the
- * real thing). Using a real [Shape] also means the pill gets a genuine native drop shadow via
+ * hill on both its top and bottom edge around the orb, with genuinely fully-round (semicircular) ends —
+ * is [DockPillShape], a real Compose [androidx.compose.ui.graphics.Shape] built as a RoundRect union
+ * Ellipse (not Figma's own exported corners, which curve to full radius over a shorter run than the bar's
+ * own half-height and so read as softly rounded but not *fully* round — a deliberate departure from the
+ * literal export). Using a real [Shape] also means the pill gets a genuine native drop shadow via
  * [androidx.compose.ui.draw.shadow] instead of a hand-drawn approximation. The pill follows [appearance]
  * for its own fill/border, same per-row customization every other dock-style row already has. The orb's
  * own art is drawn by [DockOrbArt] — currently always [DockOrbDesign.DEFAULT]; the type stays pluggable
@@ -134,7 +135,8 @@ fun SearchBar(
         val dragOffset = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
         val pressScale = remember { Animatable(1f) }
 
-        Box(modifier = Modifier.width(d.pillWidth).height(d.barHeight)) {
+        val boxHeight = d.barHeight * (1f + DockPillShape.HILL_EXTRA_FRACTION * 2f)
+        Box(modifier = Modifier.width(d.pillWidth).height(boxHeight)) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
