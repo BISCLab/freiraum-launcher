@@ -535,12 +535,6 @@ fun HomeScreen(
         // Charging animation above the pages, below overlays and dock.
         ChargingGlow(enabled = chargingAnimationEnabled, color = Color(chargingAnimationColor))
 
-        val currentPageRows = pages.getOrNull(pagerState.currentPage)?.let { rowsByPage[it.id] }.orEmpty()
-        val pinnedSearchBarRow = currentPageRows.lastOrNull()?.takeIf { it.type == PageRowType.SEARCH_BAR }
-        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-        val pinnedDockFootprint = DockDimens.scaled((screenWidth - DockDimens.horizontalMargin * 2).coerceAtLeast(0.dp))
-            .let { it.barHeight + DockDimens.topMargin + DockDimens.bottomMargin }
-
         // Matches text search's own open/close timing exactly, so both feel equally instant.
         AnimatedVisibility(
             visible = overviewEntry != null && !folderOpen,
@@ -551,93 +545,61 @@ fun HomeScreen(
             BackgroundFill(quickOverviewBackground, Modifier.fillMaxSize())
         }
 
-        Column(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
-            val overviewPivotX = if (handedness == Handedness.LEFT) 0.12f else 0.88f
+        // Discreet Launcher's Apps panel is a box that slides down from the very top edge of the
+        // screen — full width, not the bottom-anchored, dock-pill-width panel this used to reuse from
+        // when the only way in was a drag on the (now-deactivated) Hub button. Bottom corners rounded,
+        // top corners square since the panel is visually attached to the screen's own top edge.
+        //
+        // BoxWithConstraints sits *outside* the AnimatedVisibility, and the AnimatedVisibility below
+        // gets a fixed width/height instead of sizing to its content — expandVertically would otherwise
+        // force a full remeasure (a subcompose pass, since BoxWithConstraints is backed by
+        // SubcomposeLayout) on every single animation frame, which used to make opening the panel feel
+        // choppy compared to text search's own, already pre-sized overlay.
+        BoxWithConstraints(modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth()) {
+            val d = com.bisc.flauncher.ui.home.dock.dockDimens(maxWidth)
+            val panelHeight = (maxHeight * 0.55f).coerceIn(280.dp, 520.dp)
+            val panelShape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 28.dp, bottomEnd = 28.dp)
 
-            // BoxWithConstraints sits *outside* the AnimatedVisibility, and the AnimatedVisibility
-            // below gets a fixed width/height instead of sizing to its content — expandVertically
-            // would otherwise force a full remeasure (a subcompose pass, since BoxWithConstraints is
-            // backed by SubcomposeLayout) on every single animation frame, which used to make opening
-            // the quick overview feel choppy compared to text search's own, already pre-sized overlay.
-            //
-            // A previous version of this also kept the panel composed permanently (movableContentOf,
-            // moved between a hidden zero-size holder and this visible slot) to avoid rebuilding it on
-            // every open. That made *unrelated* screens (app overview, background sliders) noticeably
-            // laggier — an always-mounted panel recomposing on every change to any of the many lists it
-            // reads (apps, folders, notes, …) competed for frame time even while fully closed — so it's
-            // back to disposing normally. The plain-composition cost turned out not to be the actual
-            // cause of the felt delay anyway; that was the single/double-tap timing fixed separately.
-            BoxWithConstraints(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = DockDimens.horizontalMargin)
-                    .then(
-                        if (immersiveSearch) {
-                            Modifier
-                                .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top))
-                                .padding(top = 16.dp)
-                        } else {
-                            Modifier.statusBarsPadding()
-                        }
-                    )
-                    .padding(bottom = if (pinnedSearchBarRow != null) DockDimens.contentGap else DockDimens.bottomMargin),
-                contentAlignment = Alignment.BottomCenter
+            AnimatedVisibility(
+                visible = overviewEntry != null && !folderOpen,
+                enter = expandVertically(animationSpec = tween(160), expandFrom = Alignment.Top) + fadeIn(tween(100)),
+                exit = shrinkVertically(animationSpec = tween(200), shrinkTowards = Alignment.Top) + fadeOut(tween(150)),
+                modifier = Modifier.fillMaxWidth().height(panelHeight)
             ) {
-                val d = com.bisc.flauncher.ui.home.dock.dockDimens(maxWidth)
-                val availableHeight = (if (pinnedSearchBarRow != null) maxHeight - pinnedDockFootprint else maxHeight)
-                    .coerceAtLeast(200.dp)
-                val panelShape = RoundedCornerShape(d.cornerRadius)
+                val currentOverviewEntry = lastOverviewEntry
+                if (currentOverviewEntry != null) {
+                    val sidebarViewMode by remember(currentOverviewEntry) { viewModel.sidebarCategoryViewMode(currentOverviewEntry) }
+                        .collectAsState(initial = SidebarCategoryViewMode.LIST)
+                    val sidebarShowAddRow by remember(currentOverviewEntry) { viewModel.sidebarCategoryShowAddRow(currentOverviewEntry) }
+                        .collectAsState(initial = true)
 
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = overviewEntry != null && !folderOpen,
-                    enter = expandVertically(animationSpec = tween(120), expandFrom = Alignment.Bottom) +
-                        scaleIn(animationSpec = tween(120), initialScale = 0.94f, transformOrigin = TransformOrigin(overviewPivotX, 1f)) +
-                        fadeIn(tween(90)),
-                    exit = shrinkVertically(animationSpec = tween(220), shrinkTowards = Alignment.Bottom) +
-                        scaleOut(animationSpec = tween(220), targetScale = 0.94f, transformOrigin = TransformOrigin(overviewPivotX, 1f)) +
-                        fadeOut(tween(160)),
-                    modifier = Modifier.width(d.pillWidth).height(availableHeight)
-                ) {
-                    val currentOverviewEntry = lastOverviewEntry
-                    if (currentOverviewEntry != null) {
-                        val sidebarViewMode by remember(currentOverviewEntry) { viewModel.sidebarCategoryViewMode(currentOverviewEntry) }
-                            .collectAsState(initial = SidebarCategoryViewMode.LIST)
-                        val sidebarShowAddRow by remember(currentOverviewEntry) { viewModel.sidebarCategoryShowAddRow(currentOverviewEntry) }
-                            .collectAsState(initial = true)
-
-                        // Discreet Launcher's own favorites popup, not the old multi-category rail panel
-                        // (SidebarOverviewPanel) — see FavoritesPopup's doc comment. Only the APPS category
-                        // is meaningful here now; folders/notes/maps/etc. browsing stays available via
-                        // Settings/the full app list, not this popup.
-                        FavoritesPopup(
-                            installedApps = browsableApps,
-                            pinnedApps = sidebarPinnedApps,
-                            loadIcon = viewModel::loadIcon,
-                            onAppClick = { app ->
-                                launchApp(context, app.componentName)
-                                viewModel.closeOverview()
-                            },
-                            onAddAppsClick = { showAddSidebarAppsChooser = true },
-                            onRemoveApp = viewModel::removeSidebarApp,
-                            onSettingsClick = {
-                                viewModel.closeOverview()
-                                onNavigateToSettings()
-                            },
-                            viewMode = sidebarViewMode,
-                            showAddRow = sidebarShowAddRow,
-                            appearance = sidebarPanelAppearance,
-                            shape = panelShape,
-                            dock = d,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
+                    // Discreet Launcher's own favorites popup, not the old multi-category rail panel
+                    // (SidebarOverviewPanel) — see FavoritesPopup's doc comment. Only the APPS category
+                    // is meaningful here now; folders/notes/maps/etc. browsing stays available via
+                    // Settings/the full app list, not this popup.
+                    FavoritesPopup(
+                        installedApps = browsableApps,
+                        pinnedApps = sidebarPinnedApps,
+                        loadIcon = viewModel::loadIcon,
+                        onAppClick = { app ->
+                            launchApp(context, app.componentName)
+                            viewModel.closeOverview()
+                        },
+                        onAddAppsClick = { showAddSidebarAppsChooser = true },
+                        onRemoveApp = viewModel::removeSidebarApp,
+                        onSettingsClick = {
+                            viewModel.closeOverview()
+                            onNavigateToSettings()
+                        },
+                        viewMode = sidebarViewMode,
+                        showAddRow = sidebarShowAddRow,
+                        appearance = sidebarPanelAppearance,
+                        shape = panelShape,
+                        dock = d,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
             }
-            // Dock is deactivated for now, pending the new Figma-designed version — removed from this
-            // render path entirely (not just hidden) rather than left wired up. SearchBar.kt and the
-            // dockDimens/pinnedSearchBarRow sizing math above are untouched and still drive the Apps
-            // panel's layout (it reserves the same footprint so its position doesn't jump once the dock
-            // comes back); only the actual dock composable call is gone. Recoverable from git history.
         }
     }
 
