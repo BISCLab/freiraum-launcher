@@ -4,65 +4,56 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Geometry of the dock, scaled to the available width. Proportions are a direct port of the user's Figma
- * dock redesign ("Ohne Namen" file, `dock-bar` frame, 390dp reference width): a near-edge-to-edge pill
- * (just [horizontalMargin] of breathing room, not the old 22dp inset) with 4 quick-launch icons and the
- * Hub orb spaced evenly across its full width — see [DockBarShapes] for the pill's own silhouette path,
- * drawn from the same reference and scaled by [ScaledDock.scale].
+ * Geometry of the dock. Icon and orb sizes are deliberately *fixed* (not scaled by screen width) — the
+ * same approach iOS's own dock and most real launchers use: a comfortable, constant touch-target size on
+ * every device, phone or tablet, rather than icons ballooning on a wide screen or shrinking on a narrow
+ * one. Only the pill's own width and the gaps between its icons flex to fill whatever space is actually
+ * available (see [scaled]), which is what makes this responsive across screen sizes in the first place.
  */
 object DockDimens {
-    // Figma's own dock sits ~6dp from the screen edge; a few dp more here keeps the pill from touching the
-    // display cutout/rounded corners on narrower phones, while still reading as "edge to edge" like the
-    // reference, not the old 22dp pill-in-the-middle look.
-    val horizontalMargin = 10.dp
+    val horizontalMargin = 12.dp
     val topMargin = 0.dp
-    val bottomMargin = 56.dp
+    val bottomMargin = 48.dp
 
     val contentGap = 8.dp
 
-    // Figma reference, all at the 390dp pill width: 8dp padding from each pill edge to the first/last
-    // icon, then one uniform 15.5dp gap between every adjacent element (icon-icon or icon-orb) — the orb
-    // takes the center slot rather than being dropped on top of the bar. Icons are a 60dp "squircle"
-    // (19dp corner radius — deliberately short of a true circle); the orb is 72dp, i.e. *smaller* than the
-    // bar's own 92dp bounding height, so it reads as nested into the pill's shallow central hill rather
-    // than a huge ball perched above it.
-    private const val REFERENCE_PILL_WIDTH = 390f
-    private val referencePillWidth = REFERENCE_PILL_WIDTH.dp
-    // The hill silhouette's path data (DockBarShapes) is 92 units tall overall, but that includes the
-    // central hump rising above (and dipping below) the pill's own flat sides — measured directly off
-    // Figma's rendered reference PNG (not the frame bounds, which turned out to include clipped-off
-    // overflow): the flat region itself is 71 units tall (native y 10.5..81.5 in the silhouette path),
-    // and icons/orb both center on that same band. 71 is therefore the real "pill thickness" used for
-    // icon/orb sizing and layout; SearchBar's Canvas still draws the *full* 92-unit path (so the hump
-    // overflows above/below this box, uncropped) just shifted so the flat region lines up with it.
-    private val referenceBarHeight = 71.dp
-    private val referenceInnerHorizontalPadding = 8.dp
-    private val referenceItemGap = 15.5.dp
-    private val referenceIconSize = 60.dp
-    private val referenceIconCornerRadius = 19.dp
-    private val referenceHubSize = 72.dp
+    // Fixed sizes. The orb is noticeably larger than a quick-launch icon — it's the one special control —
+    // and larger than the bar itself, so unioning its circle into the bar's own rounded-rect silhouette
+    // (see SearchBar's Canvas draw) naturally produces a shallow "crown" around it instead of a flat top.
+    val iconSize = 56.dp
+    val iconCornerRadius = 18.dp
+    private val barVerticalPadding = 10.dp
+    val barHeight = iconSize + barVerticalPadding * 2
+    val cornerRadius = barHeight / 2
+    val hubSize = 88.dp
+    val innerHorizontalPadding = 14.dp
 
-    // The aurora/glass dock style scales its icons up slightly (64dp reference) and makes them fully
-    // circular rather than squircles — see AURORA_VIEWBOX in DockBarShapes for the matching pill body.
-    private val referenceAuroraIconSize = 64.dp
+    // The aurora/glass dock style's icons are circular rather than squircle, and a touch larger.
+    val auroraIconSize = 60.dp
+
+    private const val SIDE_ICON_COUNT = 4
+    private val minItemGap = 10.dp
 
     fun scaled(availableWidth: Dp): ScaledDock {
-        val scale = (availableWidth / referencePillWidth).coerceIn(0.85f, 1.6f)
+        val contentWidth = iconSize * SIDE_ICON_COUNT + hubSize
+        val naturalGap = (availableWidth - innerHorizontalPadding * 2 - contentWidth) / SIDE_ICON_COUNT
+        val gap = if (naturalGap > minItemGap) naturalGap else minItemGap
+        val pillWidth = (contentWidth + innerHorizontalPadding * 2 + gap * SIDE_ICON_COUNT).coerceAtMost(availableWidth)
         return ScaledDock(
-            scale = scale,
-            pillWidth = availableWidth,
-            barHeight = referenceBarHeight * scale,
-            cornerRadius = (referenceBarHeight / 2) * scale,
-            innerHorizontalPadding = referenceInnerHorizontalPadding * scale,
-            innerVerticalPadding = 14.dp * scale,
-            itemSpacing = referenceItemGap * scale,
-            hubGap = referenceItemGap * scale,
-            iconSize = referenceIconSize * scale,
-            buttonSize = referenceHubSize * scale,
-            iconCornerRadius = referenceIconCornerRadius * scale,
-            buttonSlotWidth = referenceHubSize * scale + referenceItemGap * 2 * scale,
-            hubSize = referenceHubSize * scale,
-            auroraIconSize = referenceAuroraIconSize * scale
+            scale = 1f,
+            pillWidth = pillWidth,
+            barHeight = barHeight,
+            cornerRadius = cornerRadius,
+            innerHorizontalPadding = innerHorizontalPadding,
+            innerVerticalPadding = barVerticalPadding,
+            itemSpacing = gap,
+            hubGap = gap,
+            iconSize = iconSize,
+            buttonSize = hubSize,
+            iconCornerRadius = iconCornerRadius,
+            buttonSlotWidth = hubSize + gap * 2,
+            hubSize = hubSize,
+            auroraIconSize = auroraIconSize
         )
     }
 }
