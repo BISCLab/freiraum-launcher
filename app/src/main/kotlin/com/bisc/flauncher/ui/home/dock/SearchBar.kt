@@ -72,17 +72,19 @@ import com.bisc.flauncher.data.settings.IconShape
 /**
  * Dock: a pill of fixed-size quick-launch icons (see [DockDimens] — sizes are constant across screens,
  * only the pill's width and icon spacing flex to fill the available width, the same responsive approach
- * iOS's own dock uses) with the Hub orb overlapping its top edge, centered. The pill and the orb's circle
- * are drawn as one fused path (RoundRect union Circle) so the orb genuinely widens the dock's own
- * silhouette into a shallow crown right where it sits, rather than a separate shape merely overlapping it.
- * The pill's look ([dockStyle]: [DockStyle.PLAIN] flat squircle icons, or [DockStyle.AURORA] translucent
- * circular icons plus a soft rainbow glow at the edge) follows [appearance] for its own fill/border, same
- * per-row customization every other dock-style row already has. The orb's own art is drawn by
- * [DockOrbArt] per [orbDesign] — a pluggable visual independent of [appearance]/[accentColor]. Tap the orb
- * to open the expert (full text) search; drag up to open the app list; drag either left or right to open
- * the category search (the sidebar overview panel) — [handedness] no longer picks a side for this, both
- * directions do the same thing for now, kept as a parameter for a future "right drag does something else"
- * assignment.
+ * iOS's own dock uses) with the Hub orb nested into it, centered. The pill's own silhouette rises into a
+ * shallow, smooth hill on both its top and bottom edge around the orb — drawn as a RoundRect unioned with
+ * a wide, short ellipse (not a raw circle, and not hand-tuned bezier control points — both turned out
+ * fragile; a wide ellipse's own curvature gives a reliably soft, continuous bump with no manual tuning).
+ * The pill follows [appearance] for its own fill/border and [fullyRounded] for how rounded its own ends
+ * are (fully round "stadium" ends by default, or a smaller fixed radius for visible-but-soft corners),
+ * same per-row customization every other dock-style row already has. The orb's own art is drawn by
+ * [DockOrbArt] — currently always [DockOrbDesign.DEFAULT]; the type stays pluggable (other designs exist
+ * in [DockOrbDesigns], just not exposed as a picker right now — see that file's doc comment) for later.
+ * Tap the orb to open the expert (full text) search; drag up to open the app list; drag either left or
+ * right to open the category search (the sidebar overview panel) — [handedness] no longer picks a side
+ * for this, both directions do the same thing for now, kept as a parameter for a future "right drag does
+ * something else" assignment.
  */
 @Composable
 fun SearchBar(
@@ -94,8 +96,7 @@ fun SearchBar(
     iconShape: IconShape = IconShape.ROUNDED_SQUARE,
     appearance: ElementAppearance = ElementAppearance(),
     accentColor: Color = Color(0xFF3B82F6),
-    dockStyle: DockStyle = DockStyle.PLAIN,
-    orbDesign: DockOrbDesign = DockOrbDesign.DEFAULT,
+    fullyRounded: Boolean = true,
     quickLaunchSlots: List<QuickLaunchSlot> = defaultQuickLaunchSlots,
     loadQuickLaunchIcon: (ComponentName) -> ImageBitmap? = { null },
     onQuickLaunchClick: (ComponentName) -> Unit = {}
@@ -113,9 +114,7 @@ fun SearchBar(
         contentAlignment = Alignment.Center
     ) {
         val d = dockDimens(maxWidth)
-        val isAurora = dockStyle == DockStyle.AURORA
-        val iconSize = if (isAurora) d.auroraIconSize else d.iconSize
-        val itemShape = if (isAurora) CircleShape else when (iconShape) {
+        val itemShape = when (iconShape) {
             IconShape.CIRCLE -> CircleShape
             IconShape.ROUNDED_SQUARE -> RoundedCornerShape(d.iconCornerRadius)
         }
@@ -127,18 +126,14 @@ fun SearchBar(
             val bitmap = remember(slot.componentName) { slot.componentName?.let(loadQuickLaunchIcon) }
             Box(
                 modifier = Modifier
-                    .size(iconSize)
+                    .size(d.iconSize)
                     .clip(itemShape)
                     .background(if (bitmap == null) slot.placeholderTint else Color.Transparent)
-                    .then(
-                        if (isAurora) Modifier.border(1.dp, Color.White.copy(alpha = 0.6f), itemShape)
-                        else Modifier
-                    )
                     .clickable(onClick = { slot.componentName?.let(onQuickLaunchClick) }),
                 contentAlignment = Alignment.Center
             ) {
                 if (bitmap != null) {
-                    Image(bitmap = bitmap, contentDescription = slot.label, modifier = Modifier.size(iconSize))
+                    Image(bitmap = bitmap, contentDescription = slot.label, modifier = Modifier.size(d.iconSize))
                 } else {
                     Icon(imageVector = slot.placeholderIcon, contentDescription = null, tint = Color.White)
                 }
@@ -148,35 +143,38 @@ fun SearchBar(
         val dragOffset = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
         val pressScale = remember { Animatable(1f) }
 
-        // The orb's circle is taller than the bar, and both share the same center — so this Box is sized
-        // to the orb's own height (the tallest element) and the bar is drawn vertically centered inside
-        // it; simply centering everything within this box already leaves the orb breaking out above and
-        // below symmetrically, with no separate offset math needed.
-        Box(modifier = Modifier.width(d.pillWidth).height(d.hubSize)) {
+        Box(modifier = Modifier.width(d.pillWidth).height(d.barHeight + 64.dp)) {
             Canvas(modifier = Modifier.fillMaxSize()) {
-                val barTop = (d.hubSize - d.barHeight).toPx() / 2f
                 val barHeightPx = d.barHeight.toPx()
-                val hubRadius = (d.hubSize.toPx() / 2f) * pressScale.value
-                val hubCenter = Offset(size.width / 2f, size.height / 2f) + dragOffset.value
-                val cr = CornerRadius(d.cornerRadius.toPx())
+                val barTop = (size.height - barHeightPx) / 2f
+                val cornerPx = if (fullyRounded) barHeightPx / 2f else 20.dp.toPx()
+                val hubCenter = Offset(size.width / 2f + dragOffset.value.x, size.height / 2f)
+                val cr = CornerRadius(cornerPx)
                 val barPath = Path().apply {
                     addRoundRect(RoundRect(Rect(0f, barTop, size.width, barTop + barHeightPx), cr, cr, cr, cr))
                 }
-                val orbPath = Path().apply { addOval(Rect(center = hubCenter, radius = hubRadius)) }
-                val fused = Path().apply { op(barPath, orbPath, PathOperation.Union) }
-
-                drawPath(fused, brush = colors.background, alpha = colors.backgroundAlpha)
-                if (appearance.borderEnabled) {
-                    drawPath(fused, color = colors.borderColor, style = Stroke(width = colors.borderWidth.toPx()))
-                }
-                if (isAurora) {
-                    // A soft rainbow glow traced along the fused silhouette's own edge — reads as a
-                    // "glowing glass dock" without a second overhanging glow asset to position.
-                    val glow = Brush.linearGradient(
-                        0f to Color(0xFF1AF0FF), 0.55f to Color(0xFFA14AFF), 1f to Color(0xFFFF4DBD),
-                        start = Offset(0f, size.height / 2f), end = Offset(size.width, size.height / 2f)
+                // A slightly wide ellipse rather than a plain circle: just enough wider than it is tall
+                // that the union reads as a soft, localized dome around the orb instead of a ball with a
+                // sharp seam — but still a contained bump, not wide enough to flatten into the pill's own
+                // silhouette (an easy mistake: too wide and the "hill" swallows the whole bar instead of
+                // sitting on it).
+                val hillRadiusY = (barHeightPx / 2f + 15.dp.toPx()) * pressScale.value
+                val hillRadiusX = hillRadiusY * 1.18f
+                val hillPath = Path().apply {
+                    addOval(
+                        Rect(
+                            left = hubCenter.x - hillRadiusX,
+                            top = hubCenter.y - hillRadiusY,
+                            right = hubCenter.x + hillRadiusX,
+                            bottom = hubCenter.y + hillRadiusY
+                        )
                     )
-                    drawPath(fused, brush = glow, alpha = 0.55f, style = Stroke(width = 2.4.dp.toPx()))
+                }
+                val pillPath = Path().apply { op(barPath, hillPath, PathOperation.Union) }
+
+                drawPath(pillPath, brush = colors.background, alpha = colors.backgroundAlpha)
+                if (appearance.borderEnabled) {
+                    drawPath(pillPath, color = colors.borderColor, style = Stroke(width = colors.borderWidth.toPx()))
                 }
             }
             Row(
@@ -191,10 +189,10 @@ fun SearchBar(
                 Spacer(modifier = Modifier.width(d.hubSize))
                 rightSlots.forEach { slot -> QuickLaunchIcon(slot) }
             }
-            // The orb's own art, independent of the pill's appearance/style — see [DockOrbArt]. Drag
-            // feedback (tracking the finger, a press-dip) is applied as a graphics layer on top of it.
+            // The orb's own art, independent of the pill's appearance — see [DockOrbArt]. Drag feedback
+            // (tracking the finger, a press-dip) is applied as a graphics layer on top of it.
             DockOrbArt(
-                design = orbDesign,
+                design = DockOrbDesign.DEFAULT,
                 size = d.hubSize,
                 modifier = Modifier
                     .align(Alignment.Center)

@@ -142,18 +142,11 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.setDockMatchWidgetCorners(enabled) }
     }
 
-    val dockStyle: StateFlow<com.bisc.flauncher.ui.home.dock.DockStyle> =
-        settingsRepository.dockStyle.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.home.dock.DockStyle.PLAIN)
+    val dockFullyRounded: StateFlow<Boolean> =
+        settingsRepository.dockFullyRounded.stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
-    fun setDockStyle(style: com.bisc.flauncher.ui.home.dock.DockStyle) {
-        viewModelScope.launch { settingsRepository.setDockStyle(style) }
-    }
-
-    val dockOrbDesign: StateFlow<com.bisc.flauncher.ui.home.dock.DockOrbDesign> =
-        settingsRepository.dockOrbDesign.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.home.dock.DockOrbDesign.DEFAULT)
-
-    fun setDockOrbDesign(design: com.bisc.flauncher.ui.home.dock.DockOrbDesign) {
-        viewModelScope.launch { settingsRepository.setDockOrbDesign(design) }
+    fun setDockFullyRounded(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.setDockFullyRounded(enabled) }
     }
 
     val chargingAnimationColor: StateFlow<Int> =

@@ -105,8 +105,6 @@ import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.BackgroundFill
 import com.bisc.flauncher.ui.home.dock.DockDimens
-import com.bisc.flauncher.ui.home.dock.DockStyle
-import com.bisc.flauncher.ui.home.dock.DockOrbDesign
 import com.bisc.flauncher.ui.home.dock.FavoritesPopup
 import com.bisc.flauncher.ui.home.dock.ResolvedSidebarItem
 import com.bisc.flauncher.ui.home.dock.SearchBar
@@ -191,8 +189,7 @@ fun HomeScreen(
     val sidebarPanelAppearance by viewModel.sidebarPanelAppearance.collectAsState()
     val favoritesBottomBorderEnabled by viewModel.favoritesBottomBorderEnabled.collectAsState()
     val favoritesGroupDividersEnabled by viewModel.favoritesGroupDividersEnabled.collectAsState()
-    val dockStyle by viewModel.dockStyle.collectAsState()
-    val dockOrbDesign by viewModel.dockOrbDesign.collectAsState()
+    val dockFullyRounded by viewModel.dockFullyRounded.collectAsState()
     val folderHideDock by viewModel.folderHideDock.collectAsState()
     val folderCardAppearance by viewModel.folderCardAppearance.collectAsState()
     val keyboardAppearance by viewModel.keyboardAppearance.collectAsState()
@@ -442,13 +439,15 @@ fun HomeScreen(
                         // a clean slate as part of the new Apps-panel gesture. The GestureAction model,
                         // SettingsRepository fields and SettingsGesturesScreen are untouched and still
                         // configurable; nothing on this Box currently triggers them. The one gesture that
-                        // IS live: a notification-shade-style swipe down from the very top edge opens the
-                        // Apps panel (the sidebar's APPS category) — restricted to the home page only, same
-                        // reasoning as the old detectHomeGestures restriction (closing it should always
-                        // land you back on the page you actually started from).
+                        // IS live: a downward drag starting anywhere on the home page opens the Apps panel
+                        // (the sidebar's APPS category) — restricted to the home page only, same reasoning
+                        // as the old detectHomeGestures restriction (closing it should always land you back
+                        // on the page you actually started from). The dock's own orb sits above this page
+                        // in z-order with its own gesture detector, so a touch starting on the orb itself
+                        // never reaches this one — see detectSwipeDownAnywhere's doc comment.
                         modifier = Modifier.fillMaxSize().then(
                             if (page?.isHome == true) {
-                                Modifier.detectTopEdgeSwipeDown(
+                                Modifier.detectSwipeDownAnywhere(
                                     onSwipeDown = { viewModel.openOverview(com.bisc.flauncher.ui.home.dock.SidebarEntryType.APPS) }
                                 )
                             } else {
@@ -525,9 +524,9 @@ fun HomeScreen(
         // The dock floats as its own layer outside the pager, not stacked into the scrolling page content
         // — it stays put across page changes and isn't affected by homeScreenWidgetsEnabled. Its pill
         // appearance/border still comes from the home page's own pinned SEARCH_BAR row (same per-row
-        // customization every other dock-style row has); dockStyle/dockOrbDesign are independent, global
-        // dock settings. Placed before the search/app-list overlays below so those naturally cover it when
-        // open; folderHideDock keeps the existing "hide the dock while a folder is open" behavior.
+        // customization every other dock-style row has); dockFullyRounded is a separate, global dock
+        // setting. Placed before the search/app-list overlays below so those naturally cover it when open;
+        // folderHideDock keeps the existing "hide the dock while a folder is open" behavior.
         val homeDockRow = pages.find { it.isHome }
             ?.let { rowsByPage[it.id] }
             ?.find { it.type == PageRowType.SEARCH_BAR }
@@ -540,8 +539,7 @@ fun HomeScreen(
                     handedness = handedness,
                     iconShape = iconShape,
                     appearance = homeDockRow.appearance(),
-                    dockStyle = dockStyle,
-                    orbDesign = dockOrbDesign,
+                    fullyRounded = dockFullyRounded,
                     quickLaunchSlots = quickLaunchSlots,
                     loadQuickLaunchIcon = viewModel::loadIcon,
                     onQuickLaunchClick = { componentName -> launchApp(context, componentName) }
