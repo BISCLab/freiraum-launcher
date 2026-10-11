@@ -142,13 +142,6 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.setDockMatchWidgetCorners(enabled) }
     }
 
-    val dockFullyRounded: StateFlow<Boolean> =
-        settingsRepository.dockFullyRounded.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-
-    fun setDockFullyRounded(enabled: Boolean) {
-        viewModelScope.launch { settingsRepository.setDockFullyRounded(enabled) }
-    }
-
     val chargingAnimationColor: StateFlow<Int> =
         settingsRepository.chargingAnimationColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF34D058.toInt())
 
