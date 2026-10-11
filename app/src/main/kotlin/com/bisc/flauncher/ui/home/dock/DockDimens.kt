@@ -3,56 +3,65 @@ package com.bisc.flauncher.ui.home.dock
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/** Geometry of the dock, scaled to the available width. */
+/**
+ * Geometry of the dock, scaled to the available width. Proportions are a direct port of the user's Figma
+ * dock redesign ("Ohne Namen" file, `dock-bar` frame, 390dp reference width): a near-edge-to-edge pill
+ * (just [horizontalMargin] of breathing room, not the old 22dp inset) with 4 quick-launch icons and the
+ * Hub orb spaced evenly across its full width — see [DockBarShapes] for the pill's own silhouette path,
+ * drawn from the same reference and scaled by [ScaledDock.scale].
+ */
 object DockDimens {
-    // Visible breathing room from the screen edges, not an edge-to-edge bar.
-    val horizontalMargin = 22.dp
+    // Figma's own dock sits ~6dp from the screen edge; a few dp more here keeps the pill from touching the
+    // display cutout/rounded corners on narrower phones, while still reading as "edge to edge" like the
+    // reference, not the old 22dp pill-in-the-middle look.
+    val horizontalMargin = 10.dp
     val topMargin = 0.dp
     val bottomMargin = 56.dp
 
     val contentGap = 8.dp
 
-    // One continuous pill whose own silhouette bulges around the Hub orb — a real union of the bar shape
-    // and the orb's circle, not two independent layers that merely overlap. The orb's center sits exactly
-    // on the bar's own center, both axes — not perched on top of it — and the orb is deliberately larger
-    // than the bar is tall, so centering it still leaves it clearly, symmetrically breaking out above and
-    // below: it widens the dock through its own size, not through being offset upward. A shorter bar also
-    // makes its own rounded ends read as nearly full semicircles instead of a long flat-sided capsule.
-    // Icons pair up tight to each other (referencePairGap) and leave generous, clearly-wider room around
-    // the orb (referenceHubGap) so the grouping itself signals "these four are equivalent, that one is
-    // special" — and the orb stays a clear accent, not the dominant element.
-    private val referenceBarHeight = 80.dp
-    private val referenceCornerRadius = referenceBarHeight / 2
-    private val referenceInnerHorizontalPadding = 18.dp
-    private val referenceInnerVerticalPadding = 14.dp
-    private val referencePairGap = 12.dp
-    private val referenceHubGap = 22.dp
-    private val referenceIconSize = 52.dp
-    private val referenceIconCornerRadius = 22.dp
-    private val referenceHubSize = 116.dp
+    // Figma reference, all at the 390dp pill width: 8dp padding from each pill edge to the first/last
+    // icon, then one uniform 15.5dp gap between every adjacent element (icon-icon or icon-orb) — the orb
+    // takes the center slot rather than being dropped on top of the bar. Icons are a 60dp "squircle"
+    // (19dp corner radius — deliberately short of a true circle); the orb is 72dp, i.e. *smaller* than the
+    // bar's own 92dp bounding height, so it reads as nested into the pill's shallow central hill rather
+    // than a huge ball perched above it.
+    private const val REFERENCE_PILL_WIDTH = 390f
+    private val referencePillWidth = REFERENCE_PILL_WIDTH.dp
+    private val referenceBarHeight = DockBarShapes.PLAIN_VIEWBOX_HEIGHT.dp
+    private val referenceInnerHorizontalPadding = 8.dp
+    private val referenceItemGap = 15.5.dp
+    private val referenceIconSize = 60.dp
+    private val referenceIconCornerRadius = 19.dp
+    private val referenceHubSize = 72.dp
 
-    private val referencePillWidth =
-        referenceInnerHorizontalPadding * 2 + referenceIconSize * 4 + referencePairGap * 2 + referenceHubGap * 2 + referenceHubSize
+    // The aurora/glass dock style scales its icons up slightly (64dp reference) and makes them fully
+    // circular rather than squircles — see AURORA_VIEWBOX in DockBarShapes for the matching pill body.
+    private val referenceAuroraIconSize = 64.dp
 
     fun scaled(availableWidth: Dp): ScaledDock {
-        val scale = (availableWidth / referencePillWidth).coerceIn(0.85f, 1.4f)
+        val scale = (availableWidth / referencePillWidth).coerceIn(0.85f, 1.6f)
         return ScaledDock(
             scale = scale,
-            pillWidth = referencePillWidth * scale,
+            pillWidth = availableWidth,
             barHeight = referenceBarHeight * scale,
-            cornerRadius = referenceCornerRadius * scale,
+            cornerRadius = (referenceBarHeight / 2) * scale,
             innerHorizontalPadding = referenceInnerHorizontalPadding * scale,
-            innerVerticalPadding = referenceInnerVerticalPadding * scale,
-            itemSpacing = referencePairGap * scale,
-            hubGap = referenceHubGap * scale,
+            innerVerticalPadding = 14.dp * scale,
+            itemSpacing = referenceItemGap * scale,
+            hubGap = referenceItemGap * scale,
             iconSize = referenceIconSize * scale,
             buttonSize = referenceHubSize * scale,
             iconCornerRadius = referenceIconCornerRadius * scale,
-            buttonSlotWidth = referenceHubSize * scale + referenceHubGap * 2 * scale,
-            hubSize = referenceHubSize * scale
+            buttonSlotWidth = referenceHubSize * scale + referenceItemGap * 2 * scale,
+            hubSize = referenceHubSize * scale,
+            auroraIconSize = referenceAuroraIconSize * scale
         )
     }
 }
+
+/** Which look the dock pill itself uses; the orb design ([DockOrbDesign]) is chosen independently. */
+enum class DockStyle { PLAIN, AURORA }
 
 /** Corner radius of the Layer-2 widgets/cards (see WidgetCard). */
 val WidgetCornerRadius = 20.dp
@@ -82,5 +91,6 @@ data class ScaledDock(
     val buttonSize: Dp,
     val iconCornerRadius: Dp,
     val buttonSlotWidth: Dp,
-    val hubSize: Dp
+    val hubSize: Dp,
+    val auroraIconSize: Dp = iconSize
 )

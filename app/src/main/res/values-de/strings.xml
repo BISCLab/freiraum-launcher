@@ -427,6 +427,13 @@
     <string name="settings_dock_tap_action_search">Textsuche</string>
     <string name="settings_dock_widget_corners">Ecken wie Widgets</string>
     <string name="settings_dock_widget_corners_summary">Dock und zugehörige Flächen verwenden den Eckenradius der Widgets statt der Kapselform.</string>
+    <string name="settings_dock_style_label">Dock-Stil</string>
+    <string name="settings_dock_style_plain">Schlicht</string>
+    <string name="settings_dock_style_aurora">Aurora (Glas)</string>
+    <string name="settings_dock_orb_design_label">Orb-Design</string>
+    <string name="settings_dock_orb_design_default">Standard</string>
+    <string name="settings_dock_orb_design_leaf">Blatt</string>
+    <string name="settings_dock_orb_design_dew">Tautropfen</string>
 
     <string name="settings_section_search_overview">Schnellübersicht</string>
     <string name="settings_card_search_overview_subtitle">Reihenfolge der Seitenleiste, Kategorien, Hintergrund</string>

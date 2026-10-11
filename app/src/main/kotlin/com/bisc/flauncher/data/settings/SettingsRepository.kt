@@ -141,6 +141,26 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[DOCK_MATCH_WIDGET_CORNERS_KEY] = enabled }
     }
 
+    /** The dock pill's own look — flat squircle icons, or the translucent circular + glow "aurora" style. */
+    val dockStyle: Flow<com.bisc.flauncher.ui.home.dock.DockStyle> = dataStore.data.map { prefs ->
+        prefs[DOCK_STYLE_KEY]?.let { runCatching { com.bisc.flauncher.ui.home.dock.DockStyle.valueOf(it) }.getOrNull() }
+            ?: com.bisc.flauncher.ui.home.dock.DockStyle.PLAIN
+    }
+
+    suspend fun setDockStyle(style: com.bisc.flauncher.ui.home.dock.DockStyle) {
+        dataStore.edit { it[DOCK_STYLE_KEY] = style.name }
+    }
+
+    /** Which visual the dock's central orb uses — independent of [dockStyle]. */
+    val dockOrbDesign: Flow<com.bisc.flauncher.ui.home.dock.DockOrbDesign> = dataStore.data.map { prefs ->
+        prefs[DOCK_ORB_DESIGN_KEY]?.let { runCatching { com.bisc.flauncher.ui.home.dock.DockOrbDesign.valueOf(it) }.getOrNull() }
+            ?: com.bisc.flauncher.ui.home.dock.DockOrbDesign.DEFAULT
+    }
+
+    suspend fun setDockOrbDesign(design: com.bisc.flauncher.ui.home.dock.DockOrbDesign) {
+        dataStore.edit { it[DOCK_ORB_DESIGN_KEY] = design.name }
+    }
+
     // ---- Text search ----
 
     val searchShowAzIndex: Flow<Boolean> = dataStore.data.map { it[SEARCH_SHOW_AZ_INDEX_KEY] ?: true }
@@ -672,6 +692,8 @@ class SettingsRepository @Inject constructor(
         private val DOCK_DOUBLE_TAP_ACTION_KEY = stringPreferencesKey("dock_double_tap_action")
         private val CHARGING_ANIMATION_COLOR_KEY = intPreferencesKey("charging_animation_color")
         private val DOCK_MATCH_WIDGET_CORNERS_KEY = booleanPreferencesKey("dock_match_widget_corners")
+        private val DOCK_STYLE_KEY = stringPreferencesKey("dock_style")
+        private val DOCK_ORB_DESIGN_KEY = stringPreferencesKey("dock_orb_design")
         private val CHARGING_ANIMATION_ENABLED_KEY = booleanPreferencesKey("charging_animation_enabled")
         private val SEARCH_SHOW_AZ_INDEX_KEY = booleanPreferencesKey("search_show_az_index")
         private val HOME_SCREEN_WIDGETS_ENABLED_KEY = booleanPreferencesKey("home_screen_widgets_enabled")
