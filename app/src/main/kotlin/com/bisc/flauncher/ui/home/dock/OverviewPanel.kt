@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -38,10 +39,12 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -49,6 +52,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -69,6 +73,7 @@ import com.bisc.flauncher.R
 import com.bisc.flauncher.ui.home.ConfirmRemoveDialog
 import com.bisc.flauncher.ui.home.NoteEditIconButton
 import com.bisc.flauncher.data.model.AppInfo
+import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.Folder
 import com.bisc.flauncher.data.model.FolderItem
 import com.bisc.flauncher.data.model.LauncherPage
@@ -104,6 +109,69 @@ internal fun overviewRowHeight(availableHeight: Dp, appCount: Int): Dp {
     if (appCount <= 0) return OVERVIEW_ROW_HEIGHT_MIN
     val verticalPadding = OVERVIEW_LIST_CONTENT_PADDING.calculateTopPadding() + OVERVIEW_LIST_CONTENT_PADDING.calculateBottomPadding()
     return ((availableHeight - verticalPadding) / appCount).coerceAtLeast(OVERVIEW_ROW_HEIGHT_MIN)
+}
+
+/**
+ * Discreet Launcher's actual favorites popup is dead simple: a thin header (title + a settings
+ * shortcut) and a single grid of pinned apps underneath — no category rail, no tab-switching between
+ * apps/folders/notes/etc. This is that, reusing [SidebarAppsOverviewContent] for the grid itself.
+ * [SidebarOverviewPanel] (the fuller multi-category rail panel) stays in the codebase untouched — not
+ * what opens on the swipe-down gesture anymore, but still there, git-recoverable, for later use as a
+ * "browse everything" surface if that's wanted down the line.
+ */
+@Composable
+fun FavoritesPopup(
+    installedApps: List<AppInfo>,
+    pinnedApps: List<SidebarPinnedApp>,
+    loadIcon: (ComponentName) -> ImageBitmap?,
+    onAppClick: (AppInfo) -> Unit,
+    onAddAppsClick: () -> Unit,
+    onRemoveApp: (SidebarPinnedApp) -> Unit,
+    onSettingsClick: () -> Unit,
+    viewMode: SidebarCategoryViewMode,
+    showAddRow: Boolean,
+    appearance: ElementAppearance,
+    shape: Shape,
+    dock: ScaledDock,
+    modifier: Modifier = Modifier
+) {
+    DockPanelSurface(appearance = appearance, shape = shape, modifier = modifier) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Row(
+                modifier = Modifier.fillMaxWidth().height(40.dp).padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.favorites_popup_title),
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.labelLarge
+                )
+                IconButton(onClick = onSettingsClick, modifier = Modifier.size(28.dp)) {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = stringResource(R.string.shortcut_settings),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+            HorizontalDivider(color = LocalContentColor.current.copy(alpha = 0.12f))
+            BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                val rowHeight = remember(pinnedApps.size, maxHeight) { overviewRowHeight(maxHeight, pinnedApps.size) }
+                SidebarAppsOverviewContent(
+                    installedApps = installedApps,
+                    pinnedApps = pinnedApps,
+                    loadIcon = loadIcon,
+                    onAppClick = onAppClick,
+                    onAddAppsClick = onAddAppsClick,
+                    onRemove = onRemoveApp,
+                    viewMode = viewMode,
+                    showAddRow = showAddRow,
+                    rowHeight = rowHeight,
+                    dock = dock
+                )
+            }
+        }
+    }
 }
 
 /** The category content shown on the content side of [SidebarOverviewPanel]. */
