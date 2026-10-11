@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -121,9 +120,10 @@ internal fun overviewRowHeight(availableHeight: Dp, appCount: Int): Dp {
  * what opens on the swipe-down gesture anymore, but still there, git-recoverable, for later use as a
  * "browse everything" surface if that's wanted down the line.
  *
- * Content starts below [androidx.compose.foundation.layout.statusBarsPadding] even though the home
- * screen typically hides the status bar — the space it would occupy stays reserved so the grid doesn't
- * start flush against the physical top edge/camera cutout.
+ * [topContentInset] reserves space for the status bar/camera cutout, passed in rather than computed with
+ * [androidx.compose.foundation.layout.statusBarsPadding] here — that resolves to zero the instant the
+ * status bar is hidden (the home screen's default), which left content starting flush under the camera
+ * cutout. The caller already tracks a *cached* max(status bar, cutout) inset that survives hiding.
  */
 @Composable
 fun FavoritesPopup(
@@ -135,10 +135,11 @@ fun FavoritesPopup(
     appearance: ElementAppearance,
     shape: Shape,
     dock: ScaledDock,
+    topContentInset: Dp = 0.dp,
     modifier: Modifier = Modifier
 ) {
     DockPanelSurface(appearance = appearance, shape = shape, modifier = modifier) {
-        BoxWithConstraints(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
+        BoxWithConstraints(modifier = Modifier.fillMaxSize().padding(top = topContentInset)) {
             val rowHeight = remember(pinnedApps.size, maxHeight) {
                 overviewRowHeight(maxHeight, ((pinnedApps.size + OVERVIEW_GRID_COLUMNS - 1) / OVERVIEW_GRID_COLUMNS).coerceAtLeast(1))
             }
