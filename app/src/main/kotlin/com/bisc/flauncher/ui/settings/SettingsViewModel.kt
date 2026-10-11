@@ -410,6 +410,13 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setFavoritesBottomBorderEnabled(enabled) }
     }
 
+    val favoritesGroupDividersEnabled: StateFlow<Boolean> =
+        repository.favoritesGroupDividersEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun setFavoritesGroupDividersEnabled(enabled: Boolean) {
+        viewModelScope.launch { repository.setFavoritesGroupDividersEnabled(enabled) }
+    }
+
     val activeDesignPreset: StateFlow<DesignPreset?> =
         repository.activeDesignPreset.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 

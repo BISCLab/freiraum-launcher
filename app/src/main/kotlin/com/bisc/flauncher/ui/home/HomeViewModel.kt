@@ -228,6 +228,9 @@ class HomeViewModel @Inject constructor(
     val favoritesBottomBorderEnabled: StateFlow<Boolean> =
         settingsRepository.favoritesBottomBorderEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    val favoritesGroupDividersEnabled: StateFlow<Boolean> =
+        settingsRepository.favoritesGroupDividersEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
     val sidebarPanelAppearance: StateFlow<ElementAppearance> =
         settingsRepository.sidebarPanelAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
 
