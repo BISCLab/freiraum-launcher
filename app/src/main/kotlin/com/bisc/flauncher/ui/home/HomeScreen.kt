@@ -181,6 +181,7 @@ fun HomeScreen(
     val appListShowSearchButton by viewModel.appListShowSearchButton.collectAsState()
     val appListContentAppearance by viewModel.appListContentAppearance.collectAsState()
     val accentColor by viewModel.accentColor.collectAsState()
+    val homeScreenWidgetsEnabled by viewModel.homeScreenWidgetsEnabled.collectAsState()
     val sidebarPanelAppearance by viewModel.sidebarPanelAppearance.collectAsState()
     val folderCardAppearance by viewModel.folderCardAppearance.collectAsState()
     val keyboardAppearance by viewModel.keyboardAppearance.collectAsState()
@@ -424,13 +425,33 @@ fun HomeScreen(
                         // detectHomeGestures) are deliberately not wired up right now — being rebuilt from
                         // a clean slate as part of the new Apps-panel gesture. The GestureAction model,
                         // SettingsRepository fields and SettingsGesturesScreen are untouched and still
-                        // configurable; nothing on this Box currently triggers them.
-                        modifier = Modifier.fillMaxSize()
+                        // configurable; nothing on this Box currently triggers them. The one gesture that
+                        // IS live: a notification-shade-style swipe down from the very top edge opens the
+                        // Apps panel (the sidebar's APPS category) — restricted to the home page only, same
+                        // reasoning as the old detectHomeGestures restriction (closing it should always
+                        // land you back on the page you actually started from).
+                        modifier = Modifier.fillMaxSize().then(
+                            if (page?.isHome == true) {
+                                Modifier.detectTopEdgeSwipeDown(
+                                    onSwipeDown = { viewModel.openOverview(com.bisc.flauncher.ui.home.dock.SidebarEntryType.APPS) }
+                                )
+                            } else {
+                                Modifier
+                            }
+                        )
                     ) {
                     if (page != null) {
                         val pageRows = rowsByPage[page.id].orEmpty()
                         val pinnedSearchBarRow = pageRows.lastOrNull()?.takeIf { it.type == PageRowType.SEARCH_BAR }
-                        val inlineRows = if (pinnedSearchBarRow != null) pageRows.dropLast(1) else pageRows
+                        val withoutPinnedSearchBar = if (pinnedSearchBarRow != null) pageRows.dropLast(1) else pageRows
+                        // Home starts empty by design — widget rows only render there once the user opts
+                        // in via Settings, matching Kvaesitso's "enable widgets on home screen" switch.
+                        // Other pages always show their widgets regardless of this toggle.
+                        val inlineRows = if (page.isHome && !homeScreenWidgetsEnabled) {
+                            withoutPinnedSearchBar.filterNot { it.type == PageRowType.WIDGET || it.type == PageRowType.SYSTEM_WIDGET }
+                        } else {
+                            withoutPinnedSearchBar
+                        }
                         val reservedForDock = DockDimens.scaled(innerWidth)
                             .let { it.barHeight + DockDimens.topMargin + DockDimens.bottomMargin } + DockDimens.contentGap
                         val pageBackgroundConfigOrNull by remember(page.id) { viewModel.pageBackgroundConfig(page.id) }.collectAsState(initial = null)
@@ -706,6 +727,11 @@ fun HomeScreen(
     BackHandler(enabled = appListOpen && !searchOpen) { returnHome() }
     BackHandler(enabled = searchOpen) { returnHome() }
     BackHandler(enabled = !appListOpen && !searchOpen && !folderOpen && pagerState.currentPage != homeIndex) { returnHome() }
+    // Was missing entirely before — back while the Apps panel (sidebar overview) was open fell through
+    // past the activity and out of the app instead of just closing the panel. Easy to miss while it was
+    // only reachable via the dock's drag gesture; much more noticeable now that a notification-shade-style
+    // swipe down opens it, since a physical/gesture back press is the expected way to dismiss that.
+    BackHandler(enabled = overviewEntry != null) { viewModel.closeOverview() }
     LaunchedEffect(homeButtonPressCount) { if (homeButtonPressCount > 0) returnHome() }
     AnimatedVisibility(
         visible = appListOpen,

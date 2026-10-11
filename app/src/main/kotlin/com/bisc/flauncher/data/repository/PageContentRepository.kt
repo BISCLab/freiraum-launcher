@@ -52,17 +52,11 @@ class PageContentRepository @Inject constructor(
         val homeId = existingHome?.id ?: pageDao.insert(LauncherPage(orderIndex = 0, isHome = true)).also { newHomeId ->
             settingsRepository.setPageHideStatusBar(newHomeId, true)
         }
+        // Home starts with just the dock — no clock, no widgets. Widgets (the clock included) only
+        // appear once the user opts in via "Widgets auf dem Homescreen aktivieren" in Settings, matching
+        // the Discreet Launcher "empty home screen" principle this app is built on.
         if (rowDao.countForPage(homeId) == 0) {
-            rowDao.insert(
-                PageRow(
-                    pageId = homeId,
-                    orderIndex = 0,
-                    type = PageRowType.WIDGET,
-                    payload = WidgetKind.CLOCK,
-                    spanY = WidgetKind.defaultSpan(WidgetKind.CLOCK)
-                )
-            )
-            rowDao.insert(PageRow(pageId = homeId, orderIndex = 1, type = PageRowType.SEARCH_BAR, borderEnabled = true))
+            rowDao.insert(PageRow(pageId = homeId, orderIndex = 0, type = PageRowType.SEARCH_BAR, borderEnabled = true))
         }
 
         if (pageDao.getAppOverviewPage() == null) {

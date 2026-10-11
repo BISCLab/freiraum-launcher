@@ -376,6 +376,9 @@
     <string name="settings_map_city_hint">Ort / Stadt</string>
     <string name="settings_map_country_hint">Land</string>
     <string name="settings_statusbar_label">Statusleiste</string>
+    <string name="settings_homescreen_label">Homescreen</string>
+    <string name="settings_homescreen_widgets_enabled">Widgets auf dem Homescreen aktivieren</string>
+    <string name="settings_homescreen_widgets_enabled_summary">Standardmäßig aus — der Homescreen bleibt bis auf das Dock leer. Einschalten, um Widgets wie die Uhr hinzuzufügen.</string>
     <string name="shortcut_settings">Einstellungen</string>
     <string name="shortcut_settings_long">FLauncher-Einstellungen</string>
     <string name="settings_apps_row_new_folder">Neuer Ordner</string>

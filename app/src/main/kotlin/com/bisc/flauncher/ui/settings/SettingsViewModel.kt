@@ -396,6 +396,13 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setChargingAnimationEnabled(enabled) }
     }
 
+    val homeScreenWidgetsEnabled: StateFlow<Boolean> =
+        repository.homeScreenWidgetsEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun setHomeScreenWidgetsEnabled(enabled: Boolean) {
+        viewModelScope.launch { repository.setHomeScreenWidgetsEnabled(enabled) }
+    }
+
     val activeDesignPreset: StateFlow<DesignPreset?> =
         repository.activeDesignPreset.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 

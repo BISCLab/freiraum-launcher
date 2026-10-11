@@ -222,6 +222,9 @@ class HomeViewModel @Inject constructor(
     val accentColor: StateFlow<Int> =
         settingsRepository.accentColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF3B82F6.toInt())
 
+    val homeScreenWidgetsEnabled: StateFlow<Boolean> =
+        settingsRepository.homeScreenWidgetsEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
     val sidebarPanelAppearance: StateFlow<ElementAppearance> =
         settingsRepository.sidebarPanelAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
 
