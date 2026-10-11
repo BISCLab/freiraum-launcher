@@ -47,7 +47,6 @@ fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavig
     val doubleTapAction by viewModel.dockDoubleTapAction.collectAsState()
     val matchWidgetCorners by viewModel.dockMatchWidgetCorners.collectAsState()
     val searchButtonAppearance by viewModel.dockSearchButtonAppearance.collectAsState()
-    val dockFullyRounded by viewModel.dockFullyRounded.collectAsState()
     val pages by viewModel.pages.collectAsState()
     val rowsByPage by viewModel.rowsByPage.collectAsState()
     val homePage = pages.find { it.isHome }
@@ -94,16 +93,6 @@ fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavig
                     trailing = null
                 )
             }
-        }
-
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_dock_fully_rounded),
-                info = stringResource(R.string.settings_dock_fully_rounded_summary),
-                onClick = { viewModel.setDockFullyRounded(!dockFullyRounded) },
-                trailing = { Switch(checked = dockFullyRounded, onCheckedChange = viewModel::setDockFullyRounded) }
-            )
         }
 
         SettingsPreferenceGroup(title = stringResource(R.string.settings_dock_tap_actions_label)) {

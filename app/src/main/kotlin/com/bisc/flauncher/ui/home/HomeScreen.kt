@@ -189,7 +189,6 @@ fun HomeScreen(
     val sidebarPanelAppearance by viewModel.sidebarPanelAppearance.collectAsState()
     val favoritesBottomBorderEnabled by viewModel.favoritesBottomBorderEnabled.collectAsState()
     val favoritesGroupDividersEnabled by viewModel.favoritesGroupDividersEnabled.collectAsState()
-    val dockFullyRounded by viewModel.dockFullyRounded.collectAsState()
     val folderHideDock by viewModel.folderHideDock.collectAsState()
     val folderCardAppearance by viewModel.folderCardAppearance.collectAsState()
     val keyboardAppearance by viewModel.keyboardAppearance.collectAsState()
@@ -524,9 +523,9 @@ fun HomeScreen(
         // The dock floats as its own layer outside the pager, not stacked into the scrolling page content
         // — it stays put across page changes and isn't affected by homeScreenWidgetsEnabled. Its pill
         // appearance/border still comes from the home page's own pinned SEARCH_BAR row (same per-row
-        // customization every other dock-style row has); dockFullyRounded is a separate, global dock
-        // setting. Placed before the search/app-list overlays below so those naturally cover it when open;
-        // folderHideDock keeps the existing "hide the dock while a folder is open" behavior.
+        // customization every other dock-style row has). Placed before the search/app-list overlays below
+        // so those naturally cover it when open; folderHideDock keeps the existing "hide the dock while a
+        // folder is open" behavior.
         val homeDockRow = pages.find { it.isHome }
             ?.let { rowsByPage[it.id] }
             ?.find { it.type == PageRowType.SEARCH_BAR }
@@ -539,7 +538,6 @@ fun HomeScreen(
                     handedness = handedness,
                     iconShape = iconShape,
                     appearance = homeDockRow.appearance(),
-                    fullyRounded = dockFullyRounded,
                     quickLaunchSlots = quickLaunchSlots,
                     loadQuickLaunchIcon = viewModel::loadIcon,
                     onQuickLaunchClick = { componentName -> launchApp(context, componentName) }

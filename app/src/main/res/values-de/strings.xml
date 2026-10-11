@@ -427,8 +427,6 @@
     <string name="settings_dock_tap_action_search">Textsuche</string>
     <string name="settings_dock_widget_corners">Ecken wie Widgets</string>
     <string name="settings_dock_widget_corners_summary">Dock und zugehörige Flächen verwenden den Eckenradius der Widgets statt der Kapselform.</string>
-    <string name="settings_dock_fully_rounded">Enden komplett rund</string>
-    <string name="settings_dock_fully_rounded_summary">An: komplett runde Kapselenden. Aus: kleinere, sichtbare Ecken.</string>
 
     <string name="settings_section_search_overview">Schnellübersicht</string>
     <string name="settings_card_search_overview_subtitle">Reihenfolge der Seitenleiste, Kategorien, Hintergrund</string>

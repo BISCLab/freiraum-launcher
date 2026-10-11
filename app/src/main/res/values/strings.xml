@@ -427,8 +427,6 @@
     <string name="settings_dock_tap_action_search">Text search</string>
     <string name="settings_dock_widget_corners">Widget corner radius</string>
     <string name="settings_dock_widget_corners_summary">Dock and its surfaces use the corner radius of the widgets instead of the pill shape.</string>
-    <string name="settings_dock_fully_rounded">Fully rounded ends</string>
-    <string name="settings_dock_fully_rounded_summary">On: fully rounded stadium ends. Off: smaller, visible corners.</string>
 
     <string name="settings_section_search_overview">Quick overview</string>
     <string name="settings_card_search_overview_subtitle">Sidebar order, categories, background</string>

@@ -141,13 +141,6 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[DOCK_MATCH_WIDGET_CORNERS_KEY] = enabled }
     }
 
-    /** The dock pill's own end-cap style — fully rounded "stadium" ends by default, or a smaller fixed radius. */
-    val dockFullyRounded: Flow<Boolean> = dataStore.data.map { it[DOCK_FULLY_ROUNDED_KEY] ?: true }
-
-    suspend fun setDockFullyRounded(enabled: Boolean) {
-        dataStore.edit { it[DOCK_FULLY_ROUNDED_KEY] = enabled }
-    }
-
     // ---- Text search ----
 
     val searchShowAzIndex: Flow<Boolean> = dataStore.data.map { it[SEARCH_SHOW_AZ_INDEX_KEY] ?: true }
@@ -679,7 +672,6 @@ class SettingsRepository @Inject constructor(
         private val DOCK_DOUBLE_TAP_ACTION_KEY = stringPreferencesKey("dock_double_tap_action")
         private val CHARGING_ANIMATION_COLOR_KEY = intPreferencesKey("charging_animation_color")
         private val DOCK_MATCH_WIDGET_CORNERS_KEY = booleanPreferencesKey("dock_match_widget_corners")
-        private val DOCK_FULLY_ROUNDED_KEY = booleanPreferencesKey("dock_fully_rounded")
         private val CHARGING_ANIMATION_ENABLED_KEY = booleanPreferencesKey("charging_animation_enabled")
         private val SEARCH_SHOW_AZ_INDEX_KEY = booleanPreferencesKey("search_show_az_index")
         private val HOME_SCREEN_WIDGETS_ENABLED_KEY = booleanPreferencesKey("home_screen_widgets_enabled")

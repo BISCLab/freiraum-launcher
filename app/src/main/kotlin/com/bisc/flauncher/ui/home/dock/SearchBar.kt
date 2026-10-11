@@ -1,7 +1,6 @@
 package com.bisc.flauncher.ui.home.dock
 
 import android.content.ComponentName
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
@@ -36,16 +35,10 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.RoundRect
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathOperation
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
@@ -70,21 +63,20 @@ import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.data.settings.IconShape
 
 /**
- * Dock: a pill of fixed-size quick-launch icons (see [DockDimens] — sizes are constant across screens,
- * only the pill's width and icon spacing flex to fill the available width, the same responsive approach
- * iOS's own dock uses) with the Hub orb nested into it, centered. The pill's own silhouette rises into a
- * shallow, smooth hill on both its top and bottom edge around the orb — drawn as a RoundRect unioned with
- * a wide, short ellipse (not a raw circle, and not hand-tuned bezier control points — both turned out
- * fragile; a wide ellipse's own curvature gives a reliably soft, continuous bump with no manual tuning).
- * The pill follows [appearance] for its own fill/border and [fullyRounded] for how rounded its own ends
- * are (fully round "stadium" ends by default, or a smaller fixed radius for visible-but-soft corners),
- * same per-row customization every other dock-style row already has. The orb's own art is drawn by
- * [DockOrbArt] — currently always [DockOrbDesign.DEFAULT]; the type stays pluggable (other designs exist
- * in [DockOrbDesigns], just not exposed as a picker right now — see that file's doc comment) for later.
- * Tap the orb to open the expert (full text) search; drag up to open the app list; drag either left or
- * right to open the category search (the sidebar overview panel) — [handedness] no longer picks a side
- * for this, both directions do the same thing for now, kept as a parameter for a future "right drag does
- * something else" assignment.
+ * Dock: a pill of quick-launch icons, proportionally scaled from the Figma reference (see [DockDimens])
+ * with the Hub orb nested into it, centered. The pill's own silhouette — rising into a shallow, smooth
+ * hill on both its top and bottom edge around the orb — is [DockPillShape], Figma's own vector path
+ * reused as a real Compose [androidx.compose.ui.graphics.Shape] (not a hand-approximated RoundRect/circle
+ * or RoundRect/ellipse union — two earlier attempts at both read as noticeably less polished than the
+ * real thing). Using a real [Shape] also means the pill gets a genuine native drop shadow via
+ * [androidx.compose.ui.draw.shadow] instead of a hand-drawn approximation. The pill follows [appearance]
+ * for its own fill/border, same per-row customization every other dock-style row already has. The orb's
+ * own art is drawn by [DockOrbArt] — currently always [DockOrbDesign.DEFAULT]; the type stays pluggable
+ * (other designs exist in [DockOrbDesigns], just not exposed as a picker right now — see that file's doc
+ * comment) for later. Tap the orb to open the expert (full text) search; drag up to open the app list;
+ * drag either left or right to open the category search (the sidebar overview panel) — [handedness] no
+ * longer picks a side for this, both directions do the same thing for now, kept as a parameter for a
+ * future "right drag does something else" assignment.
  */
 @Composable
 fun SearchBar(
@@ -96,7 +88,6 @@ fun SearchBar(
     iconShape: IconShape = IconShape.ROUNDED_SQUARE,
     appearance: ElementAppearance = ElementAppearance(),
     accentColor: Color = Color(0xFF3B82F6),
-    fullyRounded: Boolean = true,
     quickLaunchSlots: List<QuickLaunchSlot> = defaultQuickLaunchSlots,
     loadQuickLaunchIcon: (ComponentName) -> ImageBitmap? = { null },
     onQuickLaunchClick: (ComponentName) -> Unit = {}
@@ -143,40 +134,28 @@ fun SearchBar(
         val dragOffset = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
         val pressScale = remember { Animatable(1f) }
 
-        Box(modifier = Modifier.width(d.pillWidth).height(d.barHeight + 64.dp)) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val barHeightPx = d.barHeight.toPx()
-                val barTop = (size.height - barHeightPx) / 2f
-                val cornerPx = if (fullyRounded) barHeightPx / 2f else 20.dp.toPx()
-                val hubCenter = Offset(size.width / 2f + dragOffset.value.x, size.height / 2f)
-                val cr = CornerRadius(cornerPx)
-                val barPath = Path().apply {
-                    addRoundRect(RoundRect(Rect(0f, barTop, size.width, barTop + barHeightPx), cr, cr, cr, cr))
-                }
-                // A slightly wide ellipse rather than a plain circle: just enough wider than it is tall
-                // that the union reads as a soft, localized dome around the orb instead of a ball with a
-                // sharp seam — but still a contained bump, not wide enough to flatten into the pill's own
-                // silhouette (an easy mistake: too wide and the "hill" swallows the whole bar instead of
-                // sitting on it).
-                val hillRadiusY = (barHeightPx / 2f + 15.dp.toPx()) * pressScale.value
-                val hillRadiusX = hillRadiusY * 1.18f
-                val hillPath = Path().apply {
-                    addOval(
-                        Rect(
-                            left = hubCenter.x - hillRadiusX,
-                            top = hubCenter.y - hillRadiusY,
-                            right = hubCenter.x + hillRadiusX,
-                            bottom = hubCenter.y + hillRadiusY
-                        )
+        Box(modifier = Modifier.width(d.pillWidth).height(d.barHeight)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .shadow(elevation = 10.dp, shape = DockPillShape, clip = false)
+                    .then(
+                        if (colors.backgroundAlpha > 0f) {
+                            Modifier
+                                .clip(DockPillShape)
+                                .background(colors.background, alpha = colors.backgroundAlpha)
+                        } else {
+                            Modifier
+                        }
                     )
-                }
-                val pillPath = Path().apply { op(barPath, hillPath, PathOperation.Union) }
-
-                drawPath(pillPath, brush = colors.background, alpha = colors.backgroundAlpha)
-                if (appearance.borderEnabled) {
-                    drawPath(pillPath, color = colors.borderColor, style = Stroke(width = colors.borderWidth.toPx()))
-                }
-            }
+                    .then(
+                        if (appearance.borderEnabled) {
+                            Modifier.border(colors.borderWidth, colors.borderColor, DockPillShape)
+                        } else {
+                            Modifier
+                        }
+                    )
+            )
             Row(
                 modifier = Modifier
                     .align(Alignment.Center)
