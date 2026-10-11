@@ -535,14 +535,18 @@ fun HomeScreen(
         // Charging animation above the pages, below overlays and dock.
         ChargingGlow(enabled = chargingAnimationEnabled, color = Color(chargingAnimationColor))
 
-        // Matches text search's own open/close timing exactly, so both feel equally instant.
+        // Dims the actual home screen behind the Apps panel instead of replacing it outright — the old
+        // BackgroundFill(quickOverviewBackground, ...) here painted over the *entire* screen with a flat
+        // backdrop color, which is why the home screen visually vanished (replaced by white/whatever that
+        // background resolved to) every time the panel opened. A scrim keeps the real home screen (and
+        // its wallpaper) visible but dimmed underneath, like a standard modal backdrop.
         AnimatedVisibility(
             visible = overviewEntry != null && !folderOpen,
             enter = fadeIn(tween(120)),
             exit = fadeOut(tween(160)),
             modifier = Modifier.fillMaxSize()
         ) {
-            BackgroundFill(quickOverviewBackground, Modifier.fillMaxSize())
+            Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.45f)))
         }
 
         // Discreet Launcher's Apps panel is a box that slides down from the very top edge of the
@@ -557,8 +561,11 @@ fun HomeScreen(
         // choppy compared to text search's own, already pre-sized overlay.
         BoxWithConstraints(modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth()) {
             val d = com.bisc.flauncher.ui.home.dock.dockDimens(maxWidth)
-            val panelHeight = (maxHeight * 0.55f).coerceIn(280.dp, 520.dp)
             val panelShape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 28.dp, bottomEnd = 28.dp)
+            // Sized to how many rows of 5 the pinned apps actually need, not a flat fraction of the
+            // screen — a flat fraction left a large dead empty area below a handful of icons.
+            val pinnedRows = ((sidebarPinnedApps.size + 4) / 5).coerceAtLeast(1)
+            val panelHeight = (104.dp * pinnedRows + 40.dp).coerceIn(140.dp, maxHeight * 0.75f)
 
             AnimatedVisibility(
                 visible = overviewEntry != null && !folderOpen,
@@ -566,39 +573,24 @@ fun HomeScreen(
                 exit = shrinkVertically(animationSpec = tween(200), shrinkTowards = Alignment.Top) + fadeOut(tween(150)),
                 modifier = Modifier.fillMaxWidth().height(panelHeight)
             ) {
-                val currentOverviewEntry = lastOverviewEntry
-                if (currentOverviewEntry != null) {
-                    val sidebarViewMode by remember(currentOverviewEntry) { viewModel.sidebarCategoryViewMode(currentOverviewEntry) }
-                        .collectAsState(initial = SidebarCategoryViewMode.LIST)
-                    val sidebarShowAddRow by remember(currentOverviewEntry) { viewModel.sidebarCategoryShowAddRow(currentOverviewEntry) }
-                        .collectAsState(initial = true)
-
-                    // Discreet Launcher's own favorites popup, not the old multi-category rail panel
-                    // (SidebarOverviewPanel) — see FavoritesPopup's doc comment. Only the APPS category
-                    // is meaningful here now; folders/notes/maps/etc. browsing stays available via
-                    // Settings/the full app list, not this popup.
-                    FavoritesPopup(
-                        installedApps = browsableApps,
-                        pinnedApps = sidebarPinnedApps,
-                        loadIcon = viewModel::loadIcon,
-                        onAppClick = { app ->
-                            launchApp(context, app.componentName)
-                            viewModel.closeOverview()
-                        },
-                        onAddAppsClick = { showAddSidebarAppsChooser = true },
-                        onRemoveApp = viewModel::removeSidebarApp,
-                        onSettingsClick = {
-                            viewModel.closeOverview()
-                            onNavigateToSettings()
-                        },
-                        viewMode = sidebarViewMode,
-                        showAddRow = sidebarShowAddRow,
-                        appearance = sidebarPanelAppearance,
-                        shape = panelShape,
-                        dock = d,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+                // Discreet Launcher's own favorites popup, not the old multi-category rail panel
+                // (SidebarOverviewPanel) — see FavoritesPopup's doc comment. No header, no settings
+                // shortcut, no inline add-row — managing favorites happens through Settings -> Home
+                // screen instead.
+                FavoritesPopup(
+                    installedApps = browsableApps,
+                    pinnedApps = sidebarPinnedApps,
+                    loadIcon = viewModel::loadIcon,
+                    onAppClick = { app ->
+                        launchApp(context, app.componentName)
+                        viewModel.closeOverview()
+                    },
+                    onRemoveApp = viewModel::removeSidebarApp,
+                    appearance = sidebarPanelAppearance,
+                    shape = panelShape,
+                    dock = d,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
         }
     }
