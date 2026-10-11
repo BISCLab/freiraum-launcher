@@ -87,6 +87,15 @@ class SettingsRepository @Inject constructor(
         prefs[ACCENT_COLOR_KEY] ?: DEFAULT_ACCENT_COLOR
     }
 
+    // Off by default — the Apps panel has no border anywhere by design (flush/seamless on the top/left/
+    // right edges that are always square); this is the one optional exception, a thin line along just the
+    // bottom edge where the panel meets the dimmed home screen.
+    val favoritesBottomBorderEnabled: Flow<Boolean> = dataStore.data.map { it[FAVORITES_BOTTOM_BORDER_ENABLED_KEY] ?: false }
+
+    suspend fun setFavoritesBottomBorderEnabled(enabled: Boolean) {
+        dataStore.edit { it[FAVORITES_BOTTOM_BORDER_ENABLED_KEY] = enabled }
+    }
+
     val dockSingleTapAction: Flow<DockTapAction> = dataStore.data.map { prefs ->
         prefs[DOCK_SINGLE_TAP_ACTION_KEY]?.let { runCatching { DockTapAction.valueOf(it) }.getOrNull() }
             ?: DockTapAction.QUICK_OVERVIEW
@@ -658,6 +667,7 @@ class SettingsRepository @Inject constructor(
         private val CHARGING_ANIMATION_ENABLED_KEY = booleanPreferencesKey("charging_animation_enabled")
         private val SEARCH_SHOW_AZ_INDEX_KEY = booleanPreferencesKey("search_show_az_index")
         private val HOME_SCREEN_WIDGETS_ENABLED_KEY = booleanPreferencesKey("home_screen_widgets_enabled")
+        private val FAVORITES_BOTTOM_BORDER_ENABLED_KEY = booleanPreferencesKey("favorites_bottom_border_enabled")
         private val SEARCH_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("search_hide_status_bar")
         private val SEARCH_ENGINE_KEY = stringPreferencesKey("search_engine")
         private val SEARCH_ENGINE_CUSTOM_URL_KEY = stringPreferencesKey("search_engine_custom_url")

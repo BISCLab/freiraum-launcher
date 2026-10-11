@@ -183,6 +183,7 @@ fun HomeScreen(
     val accentColor by viewModel.accentColor.collectAsState()
     val homeScreenWidgetsEnabled by viewModel.homeScreenWidgetsEnabled.collectAsState()
     val sidebarPanelAppearance by viewModel.sidebarPanelAppearance.collectAsState()
+    val favoritesBottomBorderEnabled by viewModel.favoritesBottomBorderEnabled.collectAsState()
     val folderCardAppearance by viewModel.folderCardAppearance.collectAsState()
     val keyboardAppearance by viewModel.keyboardAppearance.collectAsState()
     val searchResultCardAppearance by viewModel.searchResultCardAppearance.collectAsState()
@@ -561,10 +562,9 @@ fun HomeScreen(
         // choppy compared to text search's own, already pre-sized overlay.
         BoxWithConstraints(modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth()) {
             val d = com.bisc.flauncher.ui.home.dock.dockDimens(maxWidth)
-            // Square on all sides by default — flush and seamless against the screen's own edges, no
-            // rounding anywhere unless later made an adjustable setting. Not RoundedCornerShape.Zero
-            // directly so a future per-corner setting has an obvious single line to change.
-            val panelShape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 0.dp, bottomEnd = 0.dp)
+            // Top square — flush and seamless against the screen's own top edge, no gap at the device's
+            // rounded corners. Bottom stays rounded (the panel's "resting" edge, not attached to anything).
+            val panelShape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 28.dp, bottomEnd = 28.dp)
             // Sized to how many rows of 5 the pinned apps actually need, not a flat fraction of the
             // screen — a flat fraction left a large dead empty area below a handful of icons. At least 2
             // rows' worth even with nothing pinned yet, so the empty state still reads as a real panel.
@@ -593,6 +593,7 @@ fun HomeScreen(
                     appearance = sidebarPanelAppearance,
                     shape = panelShape,
                     dock = d,
+                    showBottomBorder = favoritesBottomBorderEnabled,
                     // The same cached max(status bar, cutout) inset the page content below uses — stays
                     // correct even though the home page normally hides its status bar, unlike a plain
                     // statusBarsPadding() which would collapse to zero in that case and leave the grid
