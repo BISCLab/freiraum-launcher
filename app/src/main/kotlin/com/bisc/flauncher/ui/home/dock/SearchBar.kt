@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
@@ -144,25 +145,34 @@ fun SearchBar(
         Box(modifier = Modifier.width(d.pillWidth).height(d.barHeight)) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val hillPath = if (isAurora) DockBarShapes.auroraHillPath else DockBarShapes.plainHillPath
-                val viewBoxWidth = if (isAurora) DockBarShapes.AURORA_VIEWBOX_WIDTH else DockBarShapes.PLAIN_VIEWBOX_WIDTH
-                val viewBoxHeight = if (isAurora) DockBarShapes.AURORA_VIEWBOX_HEIGHT else DockBarShapes.PLAIN_VIEWBOX_HEIGHT
-                val scaleX = size.width / viewBoxWidth
-                val scaleY = size.height / viewBoxHeight
-                scale(scaleX = scaleX, scaleY = scaleY, pivot = Offset.Zero) {
-                    drawPath(hillPath, brush = colors.background, alpha = colors.backgroundAlpha)
-                    if (appearance.borderEnabled) {
-                        drawPath(hillPath, color = colors.borderColor, style = Stroke(width = colors.borderWidth.toPx() / scaleX))
-                    }
-                    if (isAurora) {
-                        // Simplified from Figma's separate aurora-edge/underglow assets (which overhang the
-                        // pill and carry their own blur filter) down to one soft rainbow ring traced right
-                        // along the pill's own edge — visually reads the same "glowing glass dock" without
-                        // chasing a second asset's exact overhang and offset.
-                        val glow = Brush.linearGradient(
-                            0f to Color(0xFF1AF0FF), 0.55f to Color(0xFFA14AFF), 1f to Color(0xFFFF4DBD),
-                            start = Offset(0f, viewBoxHeight / 2f), end = Offset(viewBoxWidth, viewBoxHeight / 2f)
-                        )
-                        drawPath(hillPath, brush = glow, alpha = 0.55f, style = Stroke(width = 2.4f / scaleX))
+                val nativeWidth = if (isAurora) DockBarShapes.AURORA_VIEWBOX_WIDTH else DockBarShapes.PLAIN_VIEWBOX_WIDTH
+                val nativeHeight = if (isAurora) DockBarShapes.AURORA_VIEWBOX_HEIGHT else DockBarShapes.PLAIN_VIEWBOX_HEIGHT
+                // Both styles' path data is drawn (or, for aurora, fit by Figma itself) into a 390x92 box;
+                // `s` is pixels-per-fit-unit, and scaleX/Y additionally map aurora's own larger native
+                // coordinate space down into that same 390x92 fit box. The Canvas/Box here is only
+                // [DockDimens]'s 71-unit flat-region tall, not the full 92 — so the shift below (10.5,
+                // where the flat region starts) lines the flat sides up with this box while the hump
+                // overflows above/below it uncropped, matching the measured Figma reference exactly.
+                val s = size.width / DockBarShapes.PLAIN_VIEWBOX_WIDTH
+                val scaleX = s * (DockBarShapes.PLAIN_VIEWBOX_WIDTH / nativeWidth)
+                val scaleY = s * (92f / nativeHeight)
+                translate(top = -10.5f * s) {
+                    scale(scaleX = scaleX, scaleY = scaleY, pivot = Offset.Zero) {
+                        drawPath(hillPath, brush = colors.background, alpha = colors.backgroundAlpha)
+                        if (appearance.borderEnabled) {
+                            drawPath(hillPath, color = colors.borderColor, style = Stroke(width = colors.borderWidth.toPx() / scaleX))
+                        }
+                        if (isAurora) {
+                            // Simplified from Figma's separate aurora-edge/underglow assets (which
+                            // overhang the pill and carry their own blur filter) down to one soft rainbow
+                            // ring traced right along the pill's own edge — visually reads the same
+                            // "glowing glass dock" without chasing a second asset's exact overhang.
+                            val glow = Brush.linearGradient(
+                                0f to Color(0xFF1AF0FF), 0.55f to Color(0xFFA14AFF), 1f to Color(0xFFFF4DBD),
+                                start = Offset(0f, nativeHeight / 2f), end = Offset(nativeWidth, nativeHeight / 2f)
+                            )
+                            drawPath(hillPath, brush = glow, alpha = 0.55f, style = Stroke(width = 2.4f / scaleX))
+                        }
                     }
                 }
             }

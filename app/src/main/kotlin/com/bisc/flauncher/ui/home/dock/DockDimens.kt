@@ -28,7 +28,14 @@ object DockDimens {
     // than a huge ball perched above it.
     private const val REFERENCE_PILL_WIDTH = 390f
     private val referencePillWidth = REFERENCE_PILL_WIDTH.dp
-    private val referenceBarHeight = DockBarShapes.PLAIN_VIEWBOX_HEIGHT.dp
+    // The hill silhouette's path data (DockBarShapes) is 92 units tall overall, but that includes the
+    // central hump rising above (and dipping below) the pill's own flat sides — measured directly off
+    // Figma's rendered reference PNG (not the frame bounds, which turned out to include clipped-off
+    // overflow): the flat region itself is 71 units tall (native y 10.5..81.5 in the silhouette path),
+    // and icons/orb both center on that same band. 71 is therefore the real "pill thickness" used for
+    // icon/orb sizing and layout; SearchBar's Canvas still draws the *full* 92-unit path (so the hump
+    // overflows above/below this box, uncropped) just shifted so the flat region lines up with it.
+    private val referenceBarHeight = 71.dp
     private val referenceInnerHorizontalPadding = 8.dp
     private val referenceItemGap = 15.5.dp
     private val referenceIconSize = 60.dp

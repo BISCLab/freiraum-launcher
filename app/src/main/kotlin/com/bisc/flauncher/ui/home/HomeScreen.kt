@@ -609,7 +609,17 @@ fun HomeScreen(
             exit = fadeOut(tween(160)),
             modifier = Modifier.fillMaxSize()
         ) {
-            Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.45f)))
+            // Tapping the dimmed area outside the panel closes it, same as tapping outside any modal.
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.45f))
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = viewModel::closeOverview
+                    )
+            )
         }
 
         // Discreet Launcher's Apps panel is a box that slides down from the very top edge of the
