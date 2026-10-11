@@ -100,7 +100,11 @@ fun Modifier.detectHomeGestures(
 @Composable
 fun Modifier.detectTopEdgeSwipeDown(
     onSwipeDown: () -> Unit,
-    topBandHeight: androidx.compose.ui.unit.Dp = 48.dp
+    // Generous on purpose: a real finger swipe "from the top" rarely starts within a few dp of the
+    // actual edge, and with nothing else living in this area on an empty home screen there's nothing
+    // for a wide zone to steal touches from. 48dp (not much more than the status bar itself) measured
+    // precisely via adb in testing but was never going to be reliably hit by an actual swipe gesture.
+    topBandHeight: androidx.compose.ui.unit.Dp = 160.dp
 ): Modifier {
     val density = LocalDensity.current
     val topBandPx = remember(density, topBandHeight) { with(density) { topBandHeight.toPx() } }
