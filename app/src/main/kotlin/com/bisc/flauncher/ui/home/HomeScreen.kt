@@ -101,6 +101,7 @@ import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.BackgroundFill
 import com.bisc.flauncher.ui.home.dock.DockDimens
+import com.bisc.flauncher.ui.home.dock.FavoritesPopup
 import com.bisc.flauncher.ui.home.dock.ResolvedSidebarItem
 import com.bisc.flauncher.ui.home.dock.SearchBar
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
@@ -604,97 +605,31 @@ fun HomeScreen(
                         val sidebarShowAddRow by remember(currentOverviewEntry) { viewModel.sidebarCategoryShowAddRow(currentOverviewEntry) }
                             .collectAsState(initial = true)
 
-                        CompositionLocalProvider(com.bisc.flauncher.ui.home.search.LocalRailAppearance provides railAppearance) { SidebarOverviewPanel(
-                            entry = currentOverviewEntry,
-                            items = sidebarItems,
-                            pages = pages,
+                        // Discreet Launcher's own favorites popup, not the old multi-category rail panel
+                        // (SidebarOverviewPanel) — see FavoritesPopup's doc comment. Only the APPS category
+                        // is meaningful here now; folders/notes/maps/etc. browsing stays available via
+                        // Settings/the full app list, not this popup.
+                        FavoritesPopup(
                             installedApps = browsableApps,
-                            sidebarPinnedApps = sidebarPinnedApps,
-                            folders = folders,
-                            folderItemsByFolder = folderItemsByFolder,
-                            notes = notes,
-                            savedMapTargets = savedMapTargets,
-                            pinnedWebsites = pinnedWebsites,
-                            pinnedShortcuts = pinnedShortcuts,
-                            hasShortcutPermission = hasShortcutHostPermission,
-                            viewMode = sidebarViewMode,
-                            showAddRow = sidebarShowAddRow,
+                            pinnedApps = sidebarPinnedApps,
                             loadIcon = viewModel::loadIcon,
-                            loadPackIcon = viewModel::loadPackIcon,
                             onAppClick = { app ->
                                 launchApp(context, app.componentName)
                                 viewModel.closeOverview()
                             },
-                            onPageClick = { page ->
-                                val index = pages.indexOf(page)
-                                if (index >= 0) {
-                                    coroutineScope.launch { pagerState.animateScrollToPage(index) }
-                                }
-                                viewModel.closeOverview()
-                            },
-                            onFolderClick = { folder -> viewModel.openFolder(folder.id) },
-                            onAddFolderClick = { showFolderCreator = true },
-                            onSaveNote = viewModel::saveNote,
-                            onDeleteNote = viewModel::deleteNote,
-                            onCreateNote = viewModel::createNote,
-                            onReorderNotes = viewModel::reorderNotes,
-                            onMapTargetClick = { target ->
-                                launchMapTarget(context, target)
-                                viewModel.closeOverview()
-                            },
-                            onRemoveMapTarget = viewModel::removeMapTarget,
-                            onAddMapTargetClick = { showAddMapTargetDialog = true },
-                            onWebsiteClick = { website ->
-                                openWebsite(context, website)
-                                viewModel.closeOverview()
-                            },
-                            onRemoveWebsite = viewModel::removeWebsite,
-                            onAddWebsiteClick = { showAddWebsiteDialog = true },
-                            onShortcutClick = { shortcut ->
-                                viewModel.launchShortcut(shortcut)
-                                viewModel.closeOverview()
-                            },
-                            onRemoveShortcut = viewModel::unpinShortcut,
-                            onAddShortcutClick = viewModel::openShortcutAppPicker,
-                            onAddSidebarAppsClick = { showAddSidebarAppsChooser = true },
-                            onRemoveSidebarApp = viewModel::removeSidebarApp,
-                            pinnedContacts = pinnedContacts,
-                            hasContactsPermission = contactsPermissionGranted,
-                            onContactClick = { pinned ->
-                                openContact(context, ContactInfo(pinned.contactId, pinned.lookupKey, pinned.displayName, pinned.photoUri))
-                                viewModel.closeOverview()
-                            },
-                            onRemoveContact = viewModel::unpinContact,
-                            onAddContactClick = viewModel::openContactPicker,
-                            onContactsPermissionResult = viewModel::onContactsPermissionResult,
-                            loadContactPhoto = viewModel::loadContactPhoto,
-                            onSidebarItemClick = { item ->
-                                when (item) {
-                                    is ResolvedSidebarItem.Category -> viewModel.selectSidebarEntry(item.entryType)
-                                    is ResolvedSidebarItem.App -> {
-                                        launchApp(context, item.app.componentName)
-                                        viewModel.closeOverview()
-                                    }
-                                    is ResolvedSidebarItem.Shortcut -> {
-                                        viewModel.launchShortcut(item.shortcut)
-                                        viewModel.closeOverview()
-                                    }
-                                    is ResolvedSidebarItem.MapTarget -> {
-                                        launchMapTarget(context, item.target)
-                                        viewModel.closeOverview()
-                                    }
-                                }
-                            },
+                            onAddAppsClick = { showAddSidebarAppsChooser = true },
+                            onRemoveApp = viewModel::removeSidebarApp,
                             onSettingsClick = {
                                 viewModel.closeOverview()
                                 onNavigateToSettings()
                             },
-                            panelAppearance = sidebarPanelAppearance,
+                            viewMode = sidebarViewMode,
+                            showAddRow = sidebarShowAddRow,
+                            appearance = sidebarPanelAppearance,
                             shape = panelShape,
-                            handedness = handedness,
                             dock = d,
                             modifier = Modifier.fillMaxSize()
-                        ) }
+                        )
                     }
                 }
             }
