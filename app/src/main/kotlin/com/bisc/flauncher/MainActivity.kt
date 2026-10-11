@@ -7,13 +7,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -111,7 +111,7 @@ class MainActivity : ComponentActivity() {
                 com.bisc.flauncher.ui.home.dock.LocalDockCornerRadius provides (if (dockMatchWidgetCorners) com.bisc.flauncher.ui.home.dock.WidgetCornerRadius else null)
             ) {
             FLauncherTheme(themePreference = theme, fontPreference = font) {
-                Surface(modifier = Modifier.fillMaxSize(), color = Color.Transparent) {
+                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     NavHost(navController = navController, startDestination = "home") {
                         composable("home") {
                             HomeScreen(
@@ -127,7 +127,14 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("settings/appearance") {
-                            SettingsAppearanceScreen(navController = navController, onBack = { navController.popBackStack() })
+                            SettingsAppearanceScreen(
+                                navController = navController,
+                                onBack = { navController.popBackStack() },
+                                onNavigate = { route -> navController.navigate("settings/$route") }
+                            )
+                        }
+                        composable("settings/appearance/background") {
+                            com.bisc.flauncher.ui.settings.SettingsGlobalBackgroundScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable("settings/dock") {
                             SettingsDockScreen(

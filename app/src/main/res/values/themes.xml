@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- windowShowWallpaper draws the system wallpaper behind the transparent home screen. -->
+    <!-- Layer 1 is mandatory on every page now — there's no case where showing the raw system
+         wallpaper behind us is wanted, and doing so meant any brief gap in our own rendering (an
+         async image load, a page/background transition) let the system wallpaper flash through
+         instead of our own background. A solid windowBackground (not transparent) closes that gap
+         at the window level too, so there's never a truly empty frame before Compose paints. -->
     <style name="Theme.FLauncher" parent="android:Theme.Material.NoActionBar">
-        <item name="android:windowShowWallpaper">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowShowWallpaper">false</item>
+        <item name="android:windowBackground">@android:color/black</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>

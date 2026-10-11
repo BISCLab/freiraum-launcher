@@ -1,7 +1,6 @@
 package com.bisc.flauncher.ui.home
 
 import com.bisc.flauncher.util.matchesWordStart
-import android.accessibilityservice.AccessibilityService
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
@@ -9,7 +8,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ShortcutInfo
-import android.os.Build
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -74,7 +72,6 @@ import androidx.compose.runtime.snapshotFlow
 import com.bisc.flauncher.util.AppIconLoader
 import com.bisc.flauncher.util.BackgroundImageStore
 import com.bisc.flauncher.util.ContactPhotoLoader
-import com.bisc.flauncher.util.GlobalActionsAccessibilityService
 import com.bisc.flauncher.util.SystemActionsUtil
 import com.bisc.flauncher.util.SystemWidgetHostManager
 import com.bisc.flauncher.util.evaluateCalculatorExpression
@@ -193,11 +190,22 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.resetDockSearchButtonAppearance() }
     }
 
+    // One global Layer 1 shared by every surface — pages, app overview, both search surfaces — with an
+    // optional per-surface color-only override falling back to it. See SettingsRepository for why images
+    // are global-only now (a color-to-(cached) global-image crossfade never showed the flicker a
+    // custom-image-to-custom-image one did).
+    val globalBackground: StateFlow<BackgroundConfig> =
+        settingsRepository.globalBackground.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig())
+
     val searchOverlayBackground: StateFlow<BackgroundConfig> =
-        settingsRepository.searchOverlayBackground.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig(opacity = 0f))
+        combine(settingsRepository.searchOverlayBackgroundOverride, settingsRepository.globalBackground) { override, global ->
+            override ?: global
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig())
 
     val quickOverviewBackground: StateFlow<BackgroundConfig> =
-        settingsRepository.quickOverviewBackground.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig(opacity = 0f))
+        combine(settingsRepository.quickOverviewBackgroundOverride, settingsRepository.globalBackground) { override, global ->
+            override ?: global
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig())
 
     val appListDisplayMode: StateFlow<AppListDisplayMode> =
         settingsRepository.appListDisplayMode.stateIn(viewModelScope, SharingStarted.Eagerly, AppListDisplayMode.FULLSCREEN)
@@ -251,11 +259,6 @@ class HomeViewModel @Inject constructor(
             GestureActionType.SETTINGS -> onOpenSettings()
             GestureActionType.NOTIFICATIONS -> SystemActionsUtil.expandNotifications(context)
             GestureActionType.QUICK_SETTINGS -> SystemActionsUtil.expandQuickSettings(context)
-            GestureActionType.SCREEN_LOCK -> if (Build.VERSION.SDK_INT >= 28) {
-                GlobalActionsAccessibilityService.performGlobalActionOrFalse(AccessibilityService.GLOBAL_ACTION_LOCK_SCREEN)
-            }
-            GestureActionType.RECENTS -> GlobalActionsAccessibilityService.performGlobalActionOrFalse(AccessibilityService.GLOBAL_ACTION_RECENTS)
-            GestureActionType.POWER_MENU -> GlobalActionsAccessibilityService.performGlobalActionOrFalse(AccessibilityService.GLOBAL_ACTION_POWER_DIALOG)
         }
     }
 
@@ -510,7 +513,12 @@ class HomeViewModel @Inject constructor(
     init {
         viewModelScope.launch { pageContentRepository.ensureSeeded() }
         viewModelScope.launch { sidebarRepository.ensureSeeded() }
-        viewModelScope.launch { _installedApps.value = installedAppsRepository.getLaunchableApps() }
+        viewModelScope.launch {
+            _installedApps.value = installedAppsRepository.getLaunchableApps()
+            installedAppsRepository.packageChanges().collectLatest {
+                _installedApps.value = installedAppsRepository.getLaunchableApps()
+            }
+        }
         viewModelScope.launch {
             snapshotFlow { appIconLoader.revision }
                 .combine(_installedApps) { _, apps -> apps }
@@ -785,14 +793,27 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun pageBackgroundConfig(pageId: Long): Flow<BackgroundConfig> = settingsRepository.pageBackgroundConfig(pageId)
+    fun pageBackgroundConfig(pageId: Long): Flow<BackgroundConfig> =
+        combine(settingsRepository.pageBackgroundOverride(pageId), settingsRepository.globalBackground) { override, global ->
+            override ?: global
+        }
+
+    fun pageBackgroundOverride(pageId: Long): Flow<BackgroundConfig?> = settingsRepository.pageBackgroundOverride(pageId)
 
     fun setPageBackgroundConfig(pageId: Long, config: BackgroundConfig) {
         viewModelScope.launch { settingsRepository.setPageBackgroundConfig(pageId, config) }
     }
 
+    fun clearPageBackgroundConfig(pageId: Long) {
+        viewModelScope.launch { settingsRepository.clearPageBackgroundConfig(pageId) }
+    }
+
     fun reorderPages(ordered: List<LauncherPage>) {
         viewModelScope.launch { pageContentRepository.reorderPages(ordered) }
+    }
+
+    fun renamePage(pageId: Long, name: String?) {
+        viewModelScope.launch { pageContentRepository.renamePage(pageId, name) }
     }
 
     fun addWidgetRow(pageId: Long, kind: String, spanY: Int) {

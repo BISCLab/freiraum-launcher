@@ -13,5 +13,6 @@ data class LauncherPage(
     val orderIndex: Int,
     val isHome: Boolean = false,
     val isAppOverview: Boolean = false,
-    val kind: LauncherPageKind = LauncherPageKind.ROWS
+    val kind: LauncherPageKind = LauncherPageKind.ROWS,
+    val name: String? = null
 )

@@ -66,7 +66,6 @@ import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Place
-import android.content.pm.ShortcutInfo
 import com.bisc.flauncher.ui.home.FolderIcon
 import com.bisc.flauncher.ui.home.dock.AddMapTargetDialog
 import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog

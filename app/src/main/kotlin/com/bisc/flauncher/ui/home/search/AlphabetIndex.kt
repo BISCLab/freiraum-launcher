@@ -27,7 +27,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.ui.graphics.luminance
 import com.bisc.flauncher.data.model.ElementFillMode
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.settings.Handedness

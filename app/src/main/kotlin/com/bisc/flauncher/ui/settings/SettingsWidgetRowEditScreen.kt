@@ -165,6 +165,18 @@ fun SettingsWidgetRowEditScreen(
                     RadioPreference(clockAlignmentLabel(alignment), alignment, row.clockAlignment, { viewModel.setRowClockAlignment(row, it) })
                 }
             }
+            // The clock isn't a card like the other built-in widgets (no fill/border/corner-shape), so
+            // it skips ElementAppearanceSection entirely — but its text still reads row.appearance()
+            // .contentColor at render time (ClockWidget's customInk), so this one field is exposed
+            // directly instead. "Automatic" still means what ClockWidget actually falls back to when
+            // unset: contrast-matched to whatever's behind it, not a fixed color, hence the plain white
+            // seed here is only a preview swatch, not the real automatic behavior.
+            AutomaticColorPicker(
+                title = stringResource(R.string.settings_element_text_color_label),
+                custom = row.appearance().contentColor,
+                automaticSeed = android.graphics.Color.WHITE,
+                onChange = { viewModel.setRowAppearance(row, row.appearance().copy(contentColor = it)) }
+            )
             SettingsPreferenceGroup(title = stringResource(R.string.settings_clock_actions_label)) {
                 SettingsPreference(
                     icon = null,

@@ -8,7 +8,7 @@ enum class DesignPreset { LIGHT, DARK }
 data class DesignPresetValues(
     val theme: ThemePreference,
     val accentColor: Int,
-    val wallpaper: BundledWallpaper,
+    val backgroundColor: Int,
     val cardAppearance: ElementAppearance,
     val rowAppearance: ElementAppearance,
     val searchBarAppearance: ElementAppearance
@@ -23,15 +23,18 @@ data class DesignPresetValues(
             DesignPreset.LIGHT -> DesignPresetValues(
                 theme = ThemePreference.LIGHT,
                 accentColor = BRAND_GREEN,
-                wallpaper = BundledWallpaper.LIGHT,
+                backgroundColor = android.graphics.Color.WHITE,
                 cardAppearance = ElementAppearance(fill = ColorFill(color = LIGHT_SURFACE), borderEnabled = true),
-                rowAppearance = ElementAppearance(fill = ColorFill(color = LIGHT_SURFACE), borderEnabled = false),
+                // Widgets and the dock both get a border in the light preset — the clock is exempt in
+                // practice regardless of this value, since ClockWidget has no card/border of its own to
+                // draw in the first place (it only ever reads its appearance for text color).
+                rowAppearance = ElementAppearance(fill = ColorFill(color = LIGHT_SURFACE), borderEnabled = true),
                 searchBarAppearance = ElementAppearance(fill = ColorFill(color = LIGHT_SURFACE), borderEnabled = true)
             )
             DesignPreset.DARK -> DesignPresetValues(
                 theme = ThemePreference.DARK,
                 accentColor = BRAND_GREEN,
-                wallpaper = BundledWallpaper.DARK,
+                backgroundColor = android.graphics.Color.BLACK,
                 cardAppearance = ElementAppearance(fill = ColorFill(color = DARK_SURFACE), borderEnabled = true),
                 rowAppearance = ElementAppearance(fill = ColorFill(color = DARK_SURFACE), borderEnabled = false),
                 searchBarAppearance = ElementAppearance(fill = ColorFill(color = DARK_SURFACE), borderEnabled = true)

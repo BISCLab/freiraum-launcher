@@ -3,13 +3,14 @@ package com.bisc.flauncher.ui.home.dock
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import com.bisc.flauncher.data.model.BackgroundConfig
@@ -29,6 +30,15 @@ fun BackgroundFill(config: BackgroundConfig, modifier: Modifier = Modifier) {
                 Box(Modifier.matchParentSize().background(config.fill.asBrush(), alpha = alpha))
             }
             BackgroundSource.IMAGE -> {
+                // Fading the image out (opacity < 1) used to reveal whatever happened to sit behind this
+                // whole composable — nothing in particular, since there's no second background config to
+                // fall back to at the image level. A plain white/black backing that matches the current
+                // theme is what dimming a wallpaper looks like on a normal phone, so that's what fades in
+                // as the image fades out, instead of an arbitrary transparent gap.
+                if (alpha < 1f) {
+                    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+                    Box(Modifier.matchParentSize().background(if (isDark) Color.Black else Color.White))
+                }
                 val bitmap = rememberBackgroundBitmap(config.imagePath)
                 if (bitmap != null) {
                     Image(

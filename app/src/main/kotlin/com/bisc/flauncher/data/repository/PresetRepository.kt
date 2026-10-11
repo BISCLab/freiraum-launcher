@@ -5,6 +5,7 @@ import com.bisc.flauncher.data.db.FolderItemDao
 import com.bisc.flauncher.data.db.PageRowDao
 import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.BackgroundSource
+import com.bisc.flauncher.data.model.ColorFill
 import com.bisc.flauncher.data.model.DesignPreset
 import com.bisc.flauncher.data.model.DesignPresetValues
 import com.bisc.flauncher.data.model.PageRowType
@@ -33,10 +34,26 @@ class PresetRepository @Inject constructor(
         settingsRepository.setKeyboardAppearance(values.cardAppearance)
         settingsRepository.setSearchResultCardAppearance(values.cardAppearance)
         settingsRepository.setAppListContentAppearance(values.cardAppearance)
+        // These three are "Layer 3, null means auto light/dark" overrides — a customization made under
+        // one preset (e.g. a dark-mode-tuned dock search button) otherwise survives switching presets
+        // untouched, silently breaking contrast against the new preset's background (e.g. a light icon
+        // stuck on the new light dock). Applying a preset resets them back to automatic so the preset
+        // is actually a coherent, fully-consistent look rather than "everything except whatever you'd
+        // customized before".
+        settingsRepository.resetSearchAlphabetRailAppearance()
+        settingsRepository.resetDockSearchButtonAppearance()
+        settingsRepository.resetAppListSearchButtonAppearance()
 
+        // One shared global background now, not a same-color override stamped onto every page — clearing
+        // every per-surface override here means they actually go back to tracking the global background
+        // going forward (matching what "applying a coherent preset" should mean), instead of each still
+        // carrying its own now-redundant copy of the same color.
+        settingsRepository.setGlobalBackground(BackgroundConfig(source = BackgroundSource.COLOR, fill = ColorFill(color = values.backgroundColor)))
+        settingsRepository.clearSearchOverlayBackground()
+        settingsRepository.clearQuickOverviewBackground()
         pageContentRepository.allPages.first().forEach { page ->
             BackgroundImageStore.delete(context, "page_${page.id}")
-            settingsRepository.setPageBackgroundConfig(page.id, BackgroundConfig(source = BackgroundSource.IMAGE, imagePath = values.wallpaper.path))
+            settingsRepository.clearPageBackgroundConfig(page.id)
         }
 
         val rows = pageRowDao.observeAll().first().map { row ->

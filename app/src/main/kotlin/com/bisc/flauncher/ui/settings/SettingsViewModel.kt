@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -286,11 +287,14 @@ class SettingsViewModel @Inject constructor(
     val searchResultCardAppearance: StateFlow<ElementAppearance> =
         repository.searchResultCardAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
 
-    val searchOverlayBackground: StateFlow<BackgroundConfig> =
-        repository.searchOverlayBackground.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig(opacity = 0f))
+    val globalBackground: StateFlow<BackgroundConfig> =
+        repository.globalBackground.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig())
 
-    val quickOverviewBackground: StateFlow<BackgroundConfig> =
-        repository.quickOverviewBackground.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig(opacity = 0f))
+    val searchOverlayBackgroundOverride: StateFlow<BackgroundConfig?> =
+        repository.searchOverlayBackgroundOverride.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val quickOverviewBackgroundOverride: StateFlow<BackgroundConfig?> =
+        repository.quickOverviewBackgroundOverride.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val searchShowAzIndex: StateFlow<Boolean> =
         repository.searchShowAzIndex.stateIn(viewModelScope, SharingStarted.Eagerly, true)
@@ -487,7 +491,12 @@ class SettingsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch { _iconPacks.value = iconPackRepository.installedIconPacks() }
-        viewModelScope.launch { _installedApps.value = installedAppsRepository.getLaunchableApps() }
+        viewModelScope.launch {
+            _installedApps.value = installedAppsRepository.getLaunchableApps()
+            installedAppsRepository.packageChanges().collectLatest {
+                _installedApps.value = installedAppsRepository.getLaunchableApps()
+            }
+        }
     }
 
     fun setTheme(theme: ThemePreference) {
@@ -518,12 +527,24 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setFolderCardAppearance(appearance) }
     }
 
+    fun setGlobalBackground(config: BackgroundConfig) {
+        viewModelScope.launch { repository.setGlobalBackground(config) }
+    }
+
     fun setSearchOverlayBackground(config: BackgroundConfig) {
         viewModelScope.launch { repository.setSearchOverlayBackground(config) }
     }
 
+    fun clearSearchOverlayBackground() {
+        viewModelScope.launch { repository.clearSearchOverlayBackground() }
+    }
+
     fun setQuickOverviewBackground(config: BackgroundConfig) {
         viewModelScope.launch { repository.setQuickOverviewBackground(config) }
+    }
+
+    fun clearQuickOverviewBackground() {
+        viewModelScope.launch { repository.clearQuickOverviewBackground() }
     }
 
     fun setKeyboardAppearance(appearance: ElementAppearance) {

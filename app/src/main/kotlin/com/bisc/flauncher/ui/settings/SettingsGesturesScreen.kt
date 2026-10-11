@@ -1,7 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
 import android.content.ComponentName
-import android.content.Intent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -11,20 +10,15 @@ import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.AppInfo
@@ -32,16 +26,13 @@ import com.bisc.flauncher.data.model.GestureAction
 import com.bisc.flauncher.data.model.GestureActionType
 import com.bisc.flauncher.data.model.HomeGesture
 import com.bisc.flauncher.data.model.LauncherPage
-import com.bisc.flauncher.data.model.requiresAccessibilityService
 import com.bisc.flauncher.ui.pageLabel
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
-import com.bisc.flauncher.util.GlobalActionsAccessibilityService
 
 /** One row per [HomeGesture], each bindable to any [GestureActionType]. */
 @Composable
 fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val context = LocalContext.current
     val gestureActions by viewModel.gestureActions.collectAsState()
     // Unfiltered — a gesture already bound to an app keeps showing its.
     val labeledApps by viewModel.labeledApps.collectAsState()
@@ -56,38 +47,16 @@ fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, vie
     var pickingPageFor by remember { mutableStateOf<HomeGesture?>(null) }
     var pendingShortcutGesture by remember { mutableStateOf<HomeGesture?>(null) }
 
-    var accessibilityEnabled by remember { mutableStateOf(GlobalActionsAccessibilityService.isEnabledInSystemSettings(context)) }
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                accessibilityEnabled = GlobalActionsAccessibilityService.isEnabledInSystemSettings(context)
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
-
     SettingsSubScreen(title = stringResource(R.string.settings_section_gestures), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
             HomeGesture.entries.forEach { gesture ->
                 val action = gestureActions[gesture] ?: GestureAction.NONE
-                val locked = action.type.requiresAccessibilityService() && !accessibilityEnabled
-                if (locked) {
-                    SettingsPreference(
-                        icon = gestureIcon(gesture),
-                        title = gestureLabel(gesture),
-                        summary = stringResource(R.string.settings_gestures_locked_summary),
-                        onClick = { context.startActivity(Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
-                    )
-                } else {
-                    SettingsPreference(
-                        icon = gestureIcon(gesture),
-                        title = gestureLabel(gesture),
-                        summary = gestureActionSummary(action, pages, labeledApps),
-                        onClick = { editingGesture = gesture }
-                    )
-                }
+                SettingsPreference(
+                    icon = gestureIcon(gesture),
+                    title = gestureLabel(gesture),
+                    summary = gestureActionSummary(action, pages, labeledApps),
+                    onClick = { editingGesture = gesture }
+                )
             }
         }
     }
@@ -219,9 +188,6 @@ internal fun gestureActionTypeLabel(type: GestureActionType): String = when (typ
     GestureActionType.SETTINGS -> stringResource(R.string.settings_gesture_action_settings)
     GestureActionType.NOTIFICATIONS -> stringResource(R.string.settings_gesture_action_notifications)
     GestureActionType.QUICK_SETTINGS -> stringResource(R.string.settings_gesture_action_quick_settings)
-    GestureActionType.SCREEN_LOCK -> stringResource(R.string.settings_gesture_action_screen_lock)
-    GestureActionType.RECENTS -> stringResource(R.string.settings_gesture_action_recents)
-    GestureActionType.POWER_MENU -> stringResource(R.string.settings_gesture_action_power_menu)
 }
 
 @Composable

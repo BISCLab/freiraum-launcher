@@ -59,12 +59,14 @@ fun SettingsAppOverviewScreen(navController: NavController, onBack: () -> Unit, 
 
     val id = pageId
     if (showBackgroundSheet && id != null) {
-        val background by remember(id) { viewModel.pageBackgroundConfig(id) }.collectAsState(initial = BackgroundConfig())
+        val override by remember(id) { viewModel.pageBackgroundOverride(id) }.collectAsState(initial = null)
+        val globalBackground by viewModel.globalBackground.collectAsState()
         SettingsEditPage(title = layerBackgroundLabel(1, R.string.settings_layer_surface_screen), onDismiss = { showBackgroundSheet = false }) {
-            BackgroundConfigSection(
-                imageKey = "page_$id",
-                config = background,
-                onConfigChange = { viewModel.setPageBackgroundConfig(id, it) }
+            BackgroundOverrideSection(
+                override = override,
+                global = globalBackground,
+                onUseGlobal = { viewModel.clearPageBackgroundConfig(id) },
+                onCustomColor = { viewModel.setPageBackgroundConfig(id, it) }
             )
         }
     }

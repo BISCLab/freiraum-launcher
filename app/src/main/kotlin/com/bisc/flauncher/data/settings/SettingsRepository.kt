@@ -33,6 +33,7 @@ import com.bisc.flauncher.ui.theme.FontPreference
 import com.bisc.flauncher.ui.theme.ThemePreference
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -74,11 +75,9 @@ class SettingsRepository @Inject constructor(
 
     val folderCardAppearance: Flow<ElementAppearance> = elementAppearanceFor("folder_card", ElementAppearance(borderEnabled = true))
 
-    val searchOverlayBackground: Flow<BackgroundConfig> =
-        backgroundConfigFor("search_overlay", BackgroundConfig(opacity = 0f))
+    val searchOverlayBackgroundOverride: Flow<BackgroundConfig?> = backgroundOverrideFor("search_overlay")
 
-    val quickOverviewBackground: Flow<BackgroundConfig> =
-        backgroundConfigFor("quick_overview", BackgroundConfig(opacity = 0f))
+    val quickOverviewBackgroundOverride: Flow<BackgroundConfig?> = backgroundOverrideFor("quick_overview")
 
     val keyboardAppearance: Flow<ElementAppearance> = elementAppearanceFor("keyboard_background", ElementAppearance(borderEnabled = true))
 
@@ -240,8 +239,7 @@ class SettingsRepository @Inject constructor(
         prefs[ACTIVE_DESIGN_PRESET_KEY]?.let { runCatching { DesignPreset.valueOf(it) }.getOrNull() }
     }
 
-    fun pageBackgroundConfig(pageId: Long): Flow<BackgroundConfig> =
-        backgroundConfigFor(pageKey(pageId), BackgroundConfig())
+    fun pageBackgroundOverride(pageId: Long): Flow<BackgroundConfig?> = backgroundOverrideFor(pageKey(pageId))
 
     fun sidebarCategoryViewMode(categoryKey: String): Flow<SidebarCategoryViewMode> = dataStore.data.map { prefs ->
         prefs[sidebarViewModeKey(categoryKey)]?.let { runCatching { SidebarCategoryViewMode.valueOf(it) }.getOrNull() }
@@ -263,25 +261,60 @@ class SettingsRepository @Inject constructor(
     private fun sidebarViewModeKey(categoryKey: String) = stringPreferencesKey("sidebar_${categoryKey}_view_mode")
     private fun sidebarShowAddRowKey(categoryKey: String) = booleanPreferencesKey("sidebar_${categoryKey}_show_add_row")
 
+    private fun readBackgroundConfig(prefs: Preferences, key: String, default: BackgroundConfig): BackgroundConfig = BackgroundConfig(
+        source = prefs[backgroundSourceKey(key)]?.let { runCatching { BackgroundSource.valueOf(it) }.getOrNull() }
+            ?: default.source,
+        fill = ColorFill(
+            mode = prefs[backgroundFillModeKey(key)]?.let { runCatching { FillMode.valueOf(it) }.getOrNull() }
+                ?: default.fill.mode,
+            color = prefs[backgroundColorKey(key)] ?: default.fill.color,
+            secondaryColor = prefs[backgroundSecondaryColorKey(key)] ?: default.fill.secondaryColor,
+            direction = prefs[backgroundDirectionKey(key)]?.let { runCatching { GradientDirection.valueOf(it) }.getOrNull() }
+                ?: default.fill.direction
+        ),
+        imagePath = prefs[backgroundImagePathKey(key)],
+        opacity = (prefs[backgroundOpacityKey(key)] ?: default.opacity).coerceIn(0f, 1f),
+        darken = (prefs[backgroundDarkenKey(key)] ?: default.darken).coerceIn(0f, 1f)
+    )
+
     private fun backgroundConfigFor(key: String, default: BackgroundConfig): Flow<BackgroundConfig> = dataStore.data.map { prefs ->
-        BackgroundConfig(
-            source = prefs[backgroundSourceKey(key)]?.let { runCatching { BackgroundSource.valueOf(it) }.getOrNull() }
-                ?: default.source,
-            fill = ColorFill(
-                mode = prefs[backgroundFillModeKey(key)]?.let { runCatching { FillMode.valueOf(it) }.getOrNull() }
-                    ?: default.fill.mode,
-                color = prefs[backgroundColorKey(key)] ?: default.fill.color,
-                secondaryColor = prefs[backgroundSecondaryColorKey(key)] ?: default.fill.secondaryColor,
-                direction = prefs[backgroundDirectionKey(key)]?.let { runCatching { GradientDirection.valueOf(it) }.getOrNull() }
-                    ?: default.fill.direction
-            ),
-            imagePath = prefs[backgroundImagePathKey(key)],
-            opacity = (prefs[backgroundOpacityKey(key)] ?: default.opacity).coerceIn(0f, 1f),
-            darken = (prefs[backgroundDarkenKey(key)] ?: default.darken).coerceIn(0f, 1f)
-        )
+        readBackgroundConfig(prefs, key, default)
+    }
+
+    // Null exactly when this surface has never been given its own explicit background — the surface
+    // then falls back to the single global background instead. Same "null means untouched, fall back to
+    // the shared default" shape already used for dockSearchButtonAppearance etc., just applied to layer 1
+    // now that per-surface *images* went away in favor of one global image with only a per-surface color
+    // override remaining (a color-to-color or color-to-(cached, already GPU-resident) global-image
+    // crossfade never showed the flicker a custom-image-to-custom-image one did).
+    private fun backgroundOverrideFor(key: String): Flow<BackgroundConfig?> = dataStore.data.map { prefs ->
+        if (prefs[backgroundSourceKey(key)] == null) null else readBackgroundConfig(prefs, key, BackgroundConfig())
+    }
+
+    private suspend fun clearBackgroundConfigFor(key: String) {
+        dataStore.edit { prefs ->
+            prefs.remove(backgroundSourceKey(key))
+            prefs.remove(backgroundColorKey(key))
+            prefs.remove(backgroundSecondaryColorKey(key))
+            prefs.remove(backgroundFillModeKey(key))
+            prefs.remove(backgroundDirectionKey(key))
+            prefs.remove(backgroundImagePathKey(key))
+            prefs.remove(backgroundOpacityKey(key))
+            prefs.remove(backgroundDarkenKey(key))
+        }
     }
 
     private fun pageKey(pageId: Long) = "page_$pageId"
+
+    // ---- Layer 1: one global background shared by every surface (pages, app overview, both search
+    // surfaces), with an optional per-surface color-only override. See backgroundOverrideFor above for
+    // why images are global-only now.
+
+    val globalBackground: Flow<BackgroundConfig> = backgroundConfigFor(GLOBAL_BACKGROUND_KEY, BackgroundConfig())
+
+    suspend fun setGlobalBackground(config: BackgroundConfig) = setBackgroundConfigFor(GLOBAL_BACKGROUND_KEY, config)
+
+    suspend fun hasGlobalBackground(): Boolean = dataStore.data.map { it[backgroundSourceKey(GLOBAL_BACKGROUND_KEY)] != null }.first()
 
     // ---- Gestures ----
 
@@ -401,7 +434,11 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setSearchOverlayBackground(config: BackgroundConfig) = setBackgroundConfigFor("search_overlay", config)
 
+    suspend fun clearSearchOverlayBackground() = clearBackgroundConfigFor("search_overlay")
+
     suspend fun setQuickOverviewBackground(config: BackgroundConfig) = setBackgroundConfigFor("quick_overview", config)
+
+    suspend fun clearQuickOverviewBackground() = clearBackgroundConfigFor("quick_overview")
 
     suspend fun setKeyboardAppearance(appearance: ElementAppearance) = setElementAppearanceFor("keyboard_background", appearance)
 
@@ -556,19 +593,7 @@ class SettingsRepository @Inject constructor(
     suspend fun setPageBackgroundConfig(pageId: Long, config: BackgroundConfig) =
         setBackgroundConfigFor(pageKey(pageId), config)
 
-    suspend fun clearPageBackgroundConfig(pageId: Long) {
-        val key = pageKey(pageId)
-        dataStore.edit { prefs ->
-            prefs.remove(backgroundSourceKey(key))
-            prefs.remove(backgroundColorKey(key))
-            prefs.remove(backgroundSecondaryColorKey(key))
-            prefs.remove(backgroundFillModeKey(key))
-            prefs.remove(backgroundDirectionKey(key))
-            prefs.remove(backgroundImagePathKey(key))
-            prefs.remove(backgroundOpacityKey(key))
-            prefs.remove(backgroundDarkenKey(key))
-        }
-    }
+    suspend fun clearPageBackgroundConfig(pageId: Long) = clearBackgroundConfigFor(pageKey(pageId))
 
     private suspend fun setBackgroundConfigFor(key: String, config: BackgroundConfig) {
         dataStore.edit { prefs ->
@@ -605,6 +630,7 @@ class SettingsRepository @Inject constructor(
     private fun gesturePayloadKey(gesture: HomeGesture) = stringPreferencesKey("gesture_${gesture.name}_payload")
 
     companion object {
+        private const val GLOBAL_BACKGROUND_KEY = "global"
         private val DEFAULT_ACCENT_COLOR = 0xFF3B82F6.toInt()
 
         private val THEME_KEY = stringPreferencesKey("theme")

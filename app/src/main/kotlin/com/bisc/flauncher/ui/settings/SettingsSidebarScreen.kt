@@ -49,7 +49,6 @@ import com.bisc.flauncher.R
 import com.bisc.flauncher.ui.theme.noRippleClickable
 import com.bisc.flauncher.data.model.SidebarIconOption
 import com.bisc.flauncher.data.model.SidebarCategoryViewMode
-import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.ui.home.dock.AddMapTargetDialog
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.ResolvedSidebarItem
@@ -75,7 +74,8 @@ fun SettingsSidebarScreen(navController: NavController, onBack: () -> Unit, view
     var showMapTargetDialog by remember { mutableStateOf(false) }
     var showPanelSheet by remember { mutableStateOf(false) }
     var showBackdropSheet by remember { mutableStateOf(false) }
-    val quickOverviewBackground by viewModel.quickOverviewBackground.collectAsState()
+    val quickOverviewBackgroundOverride by viewModel.quickOverviewBackgroundOverride.collectAsState()
+    val globalBackground by viewModel.globalBackground.collectAsState()
     val quickHideStatusBar by viewModel.quickOverviewHideStatusBar.collectAsState()
     var showCreateFolderDialog by remember { mutableStateOf(false) }
 
@@ -156,10 +156,11 @@ fun SettingsSidebarScreen(navController: NavController, onBack: () -> Unit, view
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            BackgroundConfigSection(
-                imageKey = "quick_overview",
-                config = quickOverviewBackground,
-                onConfigChange = viewModel::setQuickOverviewBackground
+            BackgroundOverrideSection(
+                override = quickOverviewBackgroundOverride,
+                global = globalBackground,
+                onUseGlobal = viewModel::clearQuickOverviewBackground,
+                onCustomColor = viewModel::setQuickOverviewBackground
             )
         }
     }
