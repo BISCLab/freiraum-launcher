@@ -33,8 +33,6 @@ import com.bisc.flauncher.data.model.ElementFillMode
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.ui.home.HomeViewModel
-import com.bisc.flauncher.ui.home.dock.DockOrbDesign
-import com.bisc.flauncher.ui.home.dock.DockStyle
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 import com.bisc.flauncher.ui.home.dock.resolveElementColors
 import com.bisc.flauncher.ui.theme.SearchButtonBorderColor
@@ -49,8 +47,7 @@ fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavig
     val doubleTapAction by viewModel.dockDoubleTapAction.collectAsState()
     val matchWidgetCorners by viewModel.dockMatchWidgetCorners.collectAsState()
     val searchButtonAppearance by viewModel.dockSearchButtonAppearance.collectAsState()
-    val dockStyle by viewModel.dockStyle.collectAsState()
-    val dockOrbDesign by viewModel.dockOrbDesign.collectAsState()
+    val dockFullyRounded by viewModel.dockFullyRounded.collectAsState()
     val pages by viewModel.pages.collectAsState()
     val rowsByPage by viewModel.rowsByPage.collectAsState()
     val homePage = pages.find { it.isHome }
@@ -60,8 +57,6 @@ fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavig
     var showBackgroundSheet by remember { mutableStateOf(false) }
     var showSearchButtonSheet by remember { mutableStateOf(false) }
     var pickingTapAction by remember { mutableStateOf<DockTap?>(null) }
-    var pickingDockStyle by remember { mutableStateOf(false) }
-    var pickingOrbDesign by remember { mutableStateOf(false) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_dock), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup(title = stringResource(R.string.settings_dock_slots_label)) {
@@ -104,17 +99,10 @@ fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavig
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
-                title = stringResource(R.string.settings_dock_style_label),
-                summary = dockStyleLabel(dockStyle),
-                onClick = { pickingDockStyle = true },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_dock_orb_design_label),
-                summary = dockOrbDesignLabel(dockOrbDesign),
-                onClick = { pickingOrbDesign = true },
-                trailing = null
+                title = stringResource(R.string.settings_dock_fully_rounded),
+                info = stringResource(R.string.settings_dock_fully_rounded_summary),
+                onClick = { viewModel.setDockFullyRounded(!dockFullyRounded) },
+                trailing = { Switch(checked = dockFullyRounded, onCheckedChange = viewModel::setDockFullyRounded) }
             )
         }
 
@@ -214,42 +202,6 @@ fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavig
         )
     }
 
-    if (pickingDockStyle) {
-        ModalBottomSheetPicker(onDismiss = { pickingDockStyle = false }) {
-            DockStyle.entries.forEach { style ->
-                RadioPreference(dockStyleLabel(style), style, dockStyle, { viewModel.setDockStyle(it); pickingDockStyle = false })
-            }
-        }
-    }
-
-    if (pickingOrbDesign) {
-        ModalBottomSheetPicker(onDismiss = { pickingOrbDesign = false }) {
-            DockOrbDesign.entries.forEach { design ->
-                RadioPreference(dockOrbDesignLabel(design), design, dockOrbDesign, { viewModel.setDockOrbDesign(it); pickingOrbDesign = false })
-            }
-        }
-    }
-}
-
-@Composable
-private fun dockStyleLabel(style: DockStyle): String = when (style) {
-    DockStyle.PLAIN -> stringResource(R.string.settings_dock_style_plain)
-    DockStyle.AURORA -> stringResource(R.string.settings_dock_style_aurora)
-}
-
-@Composable
-private fun dockOrbDesignLabel(design: DockOrbDesign): String = when (design) {
-    DockOrbDesign.DEFAULT -> stringResource(R.string.settings_dock_orb_design_default)
-    DockOrbDesign.LEAF -> stringResource(R.string.settings_dock_orb_design_leaf)
-    DockOrbDesign.DEW -> stringResource(R.string.settings_dock_orb_design_dew)
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ModalBottomSheetPicker(onDismiss: () -> Unit, content: @Composable () -> Unit) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(modifier = Modifier.padding(vertical = 8.dp)) { content() }
-    }
 }
 
 /** A starting point for the search button editor that matches its current automatic light/dark look. */

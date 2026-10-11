@@ -17,19 +17,17 @@ object DockDimens {
 
     val contentGap = 8.dp
 
-    // Fixed sizes. The orb is noticeably larger than a quick-launch icon — it's the one special control —
-    // and larger than the bar itself, so unioning its circle into the bar's own rounded-rect silhouette
-    // (see SearchBar's Canvas draw) naturally produces a shallow "crown" around it instead of a flat top.
+    // Fixed sizes. The orb is a touch larger than a quick-launch icon — the one special control — but
+    // deliberately kept close to the bar's own height rather than oversized: the "poking out" look comes
+    // from the pill's own silhouette rising into two shallow hand-drawn hills, above and below the orb
+    // (see SearchBar's Canvas draw), not from the orb's circle simply being huge and overlapping the bar.
     val iconSize = 56.dp
     val iconCornerRadius = 18.dp
     private val barVerticalPadding = 10.dp
     val barHeight = iconSize + barVerticalPadding * 2
     val cornerRadius = barHeight / 2
-    val hubSize = 88.dp
+    val hubSize = 72.dp
     val innerHorizontalPadding = 14.dp
-
-    // The aurora/glass dock style's icons are circular rather than squircle, and a touch larger.
-    val auroraIconSize = 60.dp
 
     private const val SIDE_ICON_COUNT = 4
     private val minItemGap = 10.dp
@@ -52,14 +50,10 @@ object DockDimens {
             buttonSize = hubSize,
             iconCornerRadius = iconCornerRadius,
             buttonSlotWidth = hubSize + gap * 2,
-            hubSize = hubSize,
-            auroraIconSize = auroraIconSize
+            hubSize = hubSize
         )
     }
 }
-
-/** Which look the dock pill itself uses; the orb design ([DockOrbDesign]) is chosen independently. */
-enum class DockStyle { PLAIN, AURORA }
 
 /** Corner radius of the Layer-2 widgets/cards (see WidgetCard). */
 val WidgetCornerRadius = 20.dp
@@ -89,6 +83,5 @@ data class ScaledDock(
     val buttonSize: Dp,
     val iconCornerRadius: Dp,
     val buttonSlotWidth: Dp,
-    val hubSize: Dp,
-    val auroraIconSize: Dp = iconSize
+    val hubSize: Dp
 )

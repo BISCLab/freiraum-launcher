@@ -89,31 +89,25 @@ fun Modifier.detectHomeGestures(
 }
 
 /**
- * Notification-shade-style trigger for the Apps panel: a down press has to actually *start* within
- * [topBandHeight] of the screen's top edge, then drag down past the threshold. Gated on the down
- * position (not just "any downward drag anywhere") so it can't be confused with a normal downward drag
- * that starts lower on the page, and so it never competes with [detectHomeGestures] or any widget's own
- * gestures living further down the page. Only consumes the pointer once the swipe actually commits —
- * before that, a tap on whatever's in that top strip (e.g. a clock widget placed at the very top) still
- * goes through untouched.
+ * Opens the Apps panel on a downward drag starting *anywhere* on the home page background — not just a
+ * notification-shade-style strip at the very top edge (the original, narrower version of this). The Hub
+ * orb sits in its own overlay above the page in z-order with its own gesture detector on its own hit-
+ * target, so a touch starting on the orb never reaches this one — Compose hit-tests to the topmost
+ * consumer at a point, and the orb's Box is drawn after (on top of) the page content. Reads at
+ * [PointerEventPass.Main], same reasoning as [detectHomeGestures]'s own doc comment: any actual widget
+ * living on the page gets first claim on the touch via its own Main-pass turn, deeper in the tree, before
+ * this (an ancestor) sees it, so a real widget drag/scroll still wins outright. Only consumes the pointer
+ * once the swipe actually commits — before that, a tap on whatever's under the finger goes through
+ * untouched.
  */
 @Composable
-fun Modifier.detectTopEdgeSwipeDown(
-    onSwipeDown: () -> Unit,
-    // Generous on purpose: a real finger swipe "from the top" rarely starts within a few dp of the
-    // actual edge, and with nothing else living in this area on an empty home screen there's nothing
-    // for a wide zone to steal touches from. 48dp (not much more than the status bar itself) measured
-    // precisely via adb in testing but was never going to be reliably hit by an actual swipe gesture.
-    topBandHeight: androidx.compose.ui.unit.Dp = 160.dp
-): Modifier {
+fun Modifier.detectSwipeDownAnywhere(onSwipeDown: () -> Unit): Modifier {
     val density = LocalDensity.current
-    val topBandPx = remember(density, topBandHeight) { with(density) { topBandHeight.toPx() } }
     val thresholdPx = remember(density) { with(density) { 36.dp.toPx() } }
     val currentOnSwipeDown = rememberUpdatedState(onSwipeDown)
-    return this.pointerInput(topBandPx, thresholdPx) {
+    return this.pointerInput(thresholdPx) {
         awaitEachGesture {
             val down = awaitFirstDown(pass = PointerEventPass.Main)
-            if (down.position.y > topBandPx) return@awaitEachGesture
             var accumulated = 0f
             while (true) {
                 val event = awaitPointerEvent(PointerEventPass.Main)
