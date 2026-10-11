@@ -96,6 +96,14 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[FAVORITES_BOTTOM_BORDER_ENABLED_KEY] = enabled }
     }
 
+    // Off by default — a thin horizontal divider between the apps/folders/shortcuts groups in the Apps
+    // panel's grid, only drawn between groups that actually have at least one entry.
+    val favoritesGroupDividersEnabled: Flow<Boolean> = dataStore.data.map { it[FAVORITES_GROUP_DIVIDERS_ENABLED_KEY] ?: false }
+
+    suspend fun setFavoritesGroupDividersEnabled(enabled: Boolean) {
+        dataStore.edit { it[FAVORITES_GROUP_DIVIDERS_ENABLED_KEY] = enabled }
+    }
+
     val dockSingleTapAction: Flow<DockTapAction> = dataStore.data.map { prefs ->
         prefs[DOCK_SINGLE_TAP_ACTION_KEY]?.let { runCatching { DockTapAction.valueOf(it) }.getOrNull() }
             ?: DockTapAction.QUICK_OVERVIEW
@@ -668,6 +676,7 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_SHOW_AZ_INDEX_KEY = booleanPreferencesKey("search_show_az_index")
         private val HOME_SCREEN_WIDGETS_ENABLED_KEY = booleanPreferencesKey("home_screen_widgets_enabled")
         private val FAVORITES_BOTTOM_BORDER_ENABLED_KEY = booleanPreferencesKey("favorites_bottom_border_enabled")
+        private val FAVORITES_GROUP_DIVIDERS_ENABLED_KEY = booleanPreferencesKey("favorites_group_dividers_enabled")
         private val SEARCH_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("search_hide_status_bar")
         private val SEARCH_ENGINE_KEY = stringPreferencesKey("search_engine")
         private val SEARCH_ENGINE_CUSTOM_URL_KEY = stringPreferencesKey("search_engine_custom_url")

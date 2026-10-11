@@ -188,6 +188,7 @@ fun HomeScreen(
     val homeScreenWidgetsEnabled by viewModel.homeScreenWidgetsEnabled.collectAsState()
     val sidebarPanelAppearance by viewModel.sidebarPanelAppearance.collectAsState()
     val favoritesBottomBorderEnabled by viewModel.favoritesBottomBorderEnabled.collectAsState()
+    val favoritesGroupDividersEnabled by viewModel.favoritesGroupDividersEnabled.collectAsState()
     val folderCardAppearance by viewModel.folderCardAppearance.collectAsState()
     val keyboardAppearance by viewModel.keyboardAppearance.collectAsState()
     val searchResultCardAppearance by viewModel.searchResultCardAppearance.collectAsState()
@@ -594,10 +595,11 @@ fun HomeScreen(
             // Top square — flush and seamless against the screen's own top edge, no gap at the device's
             // rounded corners. Bottom stays rounded (the panel's "resting" edge, not attached to anything).
             val panelShape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 28.dp, bottomEnd = 28.dp)
-            // Sized to how many rows of 5 the pinned apps actually need, not a flat fraction of the
-            // screen — a flat fraction left a large dead empty area below a handful of icons. At least 2
-            // rows' worth even with nothing pinned yet, so the empty state still reads as a real panel.
-            val pinnedRows = ((sidebarPinnedApps.size + 4) / 5).coerceAtLeast(2)
+            // Sized to how many rows of 5 the pinned apps + folders actually need, not a flat fraction of
+            // the screen — a flat fraction left a large dead empty area below a handful of icons. At
+            // least 2 rows' worth even with nothing to show yet, so the empty state still reads as a
+            // real panel.
+            val pinnedRows = ((sidebarPinnedApps.size + folders.size + 4) / 5).coerceAtLeast(2)
             val panelHeight = (104.dp * pinnedRows + 40.dp).coerceIn(140.dp, maxHeight * 0.75f)
 
             AnimatedVisibility(
@@ -613,16 +615,21 @@ fun HomeScreen(
                 FavoritesPopup(
                     installedApps = browsableApps,
                     pinnedApps = sidebarPinnedApps,
+                    folders = folders,
+                    folderItemsByFolder = folderItemsByFolder,
                     loadIcon = viewModel::loadIcon,
+                    loadPackIcon = viewModel::loadPackIcon,
                     onAppClick = { app ->
                         launchApp(context, app.componentName)
                         viewModel.closeOverview()
                     },
+                    onFolderClick = { folder -> viewModel.openFolder(folder.id) },
                     onRemoveApp = viewModel::removeSidebarApp,
                     appearance = sidebarPanelAppearance,
                     shape = panelShape,
                     dock = d,
                     showBottomBorder = favoritesBottomBorderEnabled,
+                    showGroupDividers = favoritesGroupDividersEnabled,
                     // The same cached max(status bar, cutout) inset the page content below uses — stays
                     // correct even though the home page normally hides its status bar, unlike a plain
                     // statusBarsPadding() which would collapse to zero in that case and leave the grid

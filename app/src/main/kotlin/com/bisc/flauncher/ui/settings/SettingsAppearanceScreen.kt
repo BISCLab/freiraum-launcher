@@ -34,6 +34,7 @@ fun SettingsAppearanceScreen(
     val statusBarHiddenEverywhere by viewModel.statusBarHiddenEverywhere.collectAsState()
     val homeScreenWidgetsEnabled by viewModel.homeScreenWidgetsEnabled.collectAsState()
     val favoritesBottomBorderEnabled by viewModel.favoritesBottomBorderEnabled.collectAsState()
+    val favoritesGroupDividersEnabled by viewModel.favoritesGroupDividersEnabled.collectAsState()
     var confirmingPreset by remember { mutableStateOf<DesignPreset?>(null) }
     val context = androidx.compose.ui.platform.LocalContext.current
     var pendingImport by remember { mutableStateOf<android.net.Uri?>(null) }
@@ -66,6 +67,15 @@ fun SettingsAppearanceScreen(
                 onClick = { viewModel.setFavoritesBottomBorderEnabled(!favoritesBottomBorderEnabled) },
                 trailing = {
                     Switch(checked = favoritesBottomBorderEnabled, onCheckedChange = { viewModel.setFavoritesBottomBorderEnabled(it) })
+                }
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_favorites_group_dividers),
+                info = stringResource(R.string.settings_favorites_group_dividers_summary),
+                onClick = { viewModel.setFavoritesGroupDividersEnabled(!favoritesGroupDividersEnabled) },
+                trailing = {
+                    Switch(checked = favoritesGroupDividersEnabled, onCheckedChange = { viewModel.setFavoritesGroupDividersEnabled(it) })
                 }
             )
         }

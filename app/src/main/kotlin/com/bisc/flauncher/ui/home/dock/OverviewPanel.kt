@@ -26,6 +26,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
@@ -114,13 +118,17 @@ internal fun overviewRowHeight(availableHeight: Dp, appCount: Int): Dp {
 }
 
 /**
- * Discreet Launcher's actual favorites popup is dead simple: just a grid of pinned apps, nothing else —
- * no title, no settings shortcut, no inline "add" row. Managing favorites and settings both happen
- * through the launcher's own Settings -> Home screen, not inline in this popup. Reuses
- * [SidebarAppsOverviewContent] for the grid itself (icon loading, removal, sizing) rather than rebuilding
- * it. [SidebarOverviewPanel] (the fuller multi-category rail panel) stays in the codebase untouched — not
- * what opens on the swipe-down gesture anymore, but still there, git-recoverable, for later use as a
- * "browse everything" surface if that's wanted down the line.
+ * Discreet Launcher's actual favorites popup is dead simple: just a grid, nothing else — no title, no
+ * settings shortcut, no inline "add"/"create" row anywhere. Managing favorites, creating folders and
+ * launcher settings in general all happen through Settings -> Dock (folder creation already lived there,
+ * `showCreateFolderDialog` in SettingsSidebarScreen.kt) rather than inline in this popup.
+ *
+ * Shows pinned apps and *every* folder (folders aren't individually "pinnable" the way apps are — they're
+ * a global concept, same as the old multi-category Sidebar's own Folders tab just listed all of them) in
+ * one merged grid, apps first. [showGroupDividers] draws a thin line between the two groups when both are
+ * non-empty; off by default. [SidebarOverviewPanel] (the fuller multi-category rail panel) stays in the
+ * codebase untouched — not what opens on the swipe-down gesture anymore, but still there, git-recoverable,
+ * for later use as a "browse everything" surface if that's wanted down the line.
  *
  * [topContentInset] reserves space for the status bar/camera cutout, passed in rather than computed with
  * [androidx.compose.foundation.layout.statusBarsPadding] here — that resolves to zero the instant the
@@ -136,14 +144,19 @@ internal fun overviewRowHeight(availableHeight: Dp, appCount: Int): Dp {
 fun FavoritesPopup(
     installedApps: List<AppInfo>,
     pinnedApps: List<SidebarPinnedApp>,
+    folders: List<Folder>,
+    folderItemsByFolder: Map<Long, List<FolderItem>>,
     loadIcon: (ComponentName) -> ImageBitmap?,
+    loadPackIcon: (String, String) -> ImageBitmap?,
     onAppClick: (AppInfo) -> Unit,
+    onFolderClick: (Folder) -> Unit,
     onRemoveApp: (SidebarPinnedApp) -> Unit,
     appearance: ElementAppearance,
     shape: Shape,
     dock: ScaledDock,
     topContentInset: Dp = 0.dp,
     showBottomBorder: Boolean = false,
+    showGroupDividers: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val borderColor = resolveElementColors(appearance).borderColor
@@ -160,23 +173,89 @@ fun FavoritesPopup(
             }
         )
     ) {
-        BoxWithConstraints(modifier = Modifier.fillMaxSize().padding(top = topContentInset)) {
-            val rowHeight = remember(pinnedApps.size, maxHeight) {
-                overviewRowHeight(maxHeight, ((pinnedApps.size + OVERVIEW_GRID_COLUMNS - 1) / OVERVIEW_GRID_COLUMNS).coerceAtLeast(1))
+        val appsByComponent = remember(installedApps) { installedApps.associateBy { it.componentName } }
+        val iconSize = dock.iconSize
+        val appEntries = remember(pinnedApps, appsByComponent) {
+            pinnedApps.map { pinned ->
+                val componentName = ComponentName.unflattenFromString(pinned.componentName)
+                val app = componentName?.let { appsByComponent[it] }
+                CategoryEntry(
+                    key = "app_${pinned.id}",
+                    label = app?.label ?: pinned.componentName,
+                    onClick = { app?.let(onAppClick) },
+                    onRemove = { onRemoveApp(pinned) },
+                    icon = {
+                        val bitmap = rememberAppIcon(componentName, loadIcon)
+                        if (bitmap != null) Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(iconSize))
+                    }
+                )
             }
-            SidebarAppsOverviewContent(
-                installedApps = installedApps,
-                pinnedApps = pinnedApps,
-                loadIcon = loadIcon,
-                onAppClick = onAppClick,
-                onAddAppsClick = {},
-                onRemove = onRemoveApp,
-                viewMode = SidebarCategoryViewMode.GRID,
-                showAddRow = false,
-                rowHeight = rowHeight,
-                dock = dock
-            )
         }
+        val folderEntries = remember(folders, folderItemsByFolder) {
+            folders.map { folder ->
+                CategoryEntry(
+                    key = "folder_${folder.id}",
+                    label = folder.name,
+                    onClick = { onFolderClick(folder) },
+                    icon = {
+                        FolderIcon(
+                            folder = folder,
+                            previewItems = folderItemsByFolder[folder.id].orEmpty(),
+                            loadIcon = loadIcon,
+                            loadPackIcon = loadPackIcon,
+                            modifier = Modifier.size(iconSize)
+                        )
+                    }
+                )
+            }
+        }
+        FavoritesMergedGrid(
+            groups = listOf(appEntries, folderEntries),
+            cellSize = iconSize,
+            showDividers = showGroupDividers,
+            modifier = Modifier.fillMaxSize().padding(top = topContentInset)
+        )
+    }
+}
+
+/**
+ * Apps and folders laid out as one continuous grid rather than [CategoryGrid]'s per-category LazyColumn
+ * (nesting two of those here would mean two independently-scrolling, unboundedheight lists competing for
+ * space — not what "one grid" means). [LazyVerticalGrid] handles this cleanly: each group's entries are
+ * regular grid items, and a full-width divider between non-empty groups is just one more item spanning
+ * every column via [GridItemSpan]. Empty groups contribute nothing, including no stray divider.
+ */
+@Composable
+private fun FavoritesMergedGrid(groups: List<List<CategoryEntry>>, cellSize: Dp, showDividers: Boolean, modifier: Modifier = Modifier) {
+    var pendingRemoval by remember { mutableStateOf<CategoryEntry?>(null) }
+    val nonEmptyGroups = remember(groups) { groups.filter { it.isNotEmpty() } }
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(OVERVIEW_GRID_COLUMNS),
+        modifier = modifier,
+        contentPadding = PaddingValues(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        nonEmptyGroups.forEachIndexed { groupIndex, group ->
+            gridItems(group, key = { it.key }) { entry ->
+                CategoryGridCell(entry, cellSize, onRequestRemove = { pendingRemoval = entry })
+            }
+            if (showDividers && groupIndex < nonEmptyGroups.lastIndex) {
+                item(key = "divider_$groupIndex", span = { GridItemSpan(maxLineSpan) }) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        color = LocalContentColor.current.copy(alpha = 0.15f)
+                    )
+                }
+            }
+        }
+    }
+    pendingRemoval?.let { entry ->
+        ConfirmRemoveDialog(
+            label = entry.label,
+            onConfirm = { entry.onRemove?.invoke(); pendingRemoval = null },
+            onDismiss = { pendingRemoval = null }
+        )
     }
 }
 
