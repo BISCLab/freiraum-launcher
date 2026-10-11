@@ -36,13 +36,16 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
@@ -67,16 +70,19 @@ import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.data.settings.IconShape
 
 /**
- * Dock: a near-edge-to-edge pill (see [DockDimens]) with 4 quick-launch icons and the Hub orb spaced
- * evenly across it, direct from the user's Figma redesign — not the old content-sized, narrow-margin pill.
- * The pill's own silhouette ([dockStyle]: [DockStyle.PLAIN] flat squircle icons, or [DockStyle.AURORA]
- * translucent circular icons plus a soft rainbow glow at the edge) follows [appearance] for its fill/
- * border, same per-row customization every other dock-style row already has. The orb is drawn by
- * [DockOrbArt] per [orbDesign] — a pluggable, Figma-exact visual independent of [appearance]/[accentColor].
- * Tap the orb to open the expert (full text) search; drag up to open the app list; drag either left or
- * right to open the category search (the sidebar overview panel) — [handedness] no longer picks a side
- * for this, both directions do the same thing for now, kept as a parameter for a future "right drag does
- * something else" assignment.
+ * Dock: a pill of fixed-size quick-launch icons (see [DockDimens] — sizes are constant across screens,
+ * only the pill's width and icon spacing flex to fill the available width, the same responsive approach
+ * iOS's own dock uses) with the Hub orb overlapping its top edge, centered. The pill and the orb's circle
+ * are drawn as one fused path (RoundRect union Circle) so the orb genuinely widens the dock's own
+ * silhouette into a shallow crown right where it sits, rather than a separate shape merely overlapping it.
+ * The pill's look ([dockStyle]: [DockStyle.PLAIN] flat squircle icons, or [DockStyle.AURORA] translucent
+ * circular icons plus a soft rainbow glow at the edge) follows [appearance] for its own fill/border, same
+ * per-row customization every other dock-style row already has. The orb's own art is drawn by
+ * [DockOrbArt] per [orbDesign] — a pluggable visual independent of [appearance]/[accentColor]. Tap the orb
+ * to open the expert (full text) search; drag up to open the app list; drag either left or right to open
+ * the category search (the sidebar overview panel) — [handedness] no longer picks a side for this, both
+ * directions do the same thing for now, kept as a parameter for a future "right drag does something else"
+ * assignment.
  */
 @Composable
 fun SearchBar(
@@ -142,38 +148,35 @@ fun SearchBar(
         val dragOffset = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
         val pressScale = remember { Animatable(1f) }
 
-        Box(modifier = Modifier.width(d.pillWidth).height(d.barHeight)) {
+        // The orb's circle is taller than the bar, and both share the same center — so this Box is sized
+        // to the orb's own height (the tallest element) and the bar is drawn vertically centered inside
+        // it; simply centering everything within this box already leaves the orb breaking out above and
+        // below symmetrically, with no separate offset math needed.
+        Box(modifier = Modifier.width(d.pillWidth).height(d.hubSize)) {
             Canvas(modifier = Modifier.fillMaxSize()) {
-                val hillPath = if (isAurora) DockBarShapes.auroraHillPath else DockBarShapes.plainHillPath
-                val nativeWidth = if (isAurora) DockBarShapes.AURORA_VIEWBOX_WIDTH else DockBarShapes.PLAIN_VIEWBOX_WIDTH
-                val nativeHeight = if (isAurora) DockBarShapes.AURORA_VIEWBOX_HEIGHT else DockBarShapes.PLAIN_VIEWBOX_HEIGHT
-                // Both styles' path data is drawn (or, for aurora, fit by Figma itself) into a 390x92 box;
-                // `s` is pixels-per-fit-unit, and scaleX/Y additionally map aurora's own larger native
-                // coordinate space down into that same 390x92 fit box. The Canvas/Box here is only
-                // [DockDimens]'s 71-unit flat-region tall, not the full 92 — so the shift below (10.5,
-                // where the flat region starts) lines the flat sides up with this box while the hump
-                // overflows above/below it uncropped, matching the measured Figma reference exactly.
-                val s = size.width / DockBarShapes.PLAIN_VIEWBOX_WIDTH
-                val scaleX = s * (DockBarShapes.PLAIN_VIEWBOX_WIDTH / nativeWidth)
-                val scaleY = s * (92f / nativeHeight)
-                translate(top = -10.5f * s) {
-                    scale(scaleX = scaleX, scaleY = scaleY, pivot = Offset.Zero) {
-                        drawPath(hillPath, brush = colors.background, alpha = colors.backgroundAlpha)
-                        if (appearance.borderEnabled) {
-                            drawPath(hillPath, color = colors.borderColor, style = Stroke(width = colors.borderWidth.toPx() / scaleX))
-                        }
-                        if (isAurora) {
-                            // Simplified from Figma's separate aurora-edge/underglow assets (which
-                            // overhang the pill and carry their own blur filter) down to one soft rainbow
-                            // ring traced right along the pill's own edge — visually reads the same
-                            // "glowing glass dock" without chasing a second asset's exact overhang.
-                            val glow = Brush.linearGradient(
-                                0f to Color(0xFF1AF0FF), 0.55f to Color(0xFFA14AFF), 1f to Color(0xFFFF4DBD),
-                                start = Offset(0f, nativeHeight / 2f), end = Offset(nativeWidth, nativeHeight / 2f)
-                            )
-                            drawPath(hillPath, brush = glow, alpha = 0.55f, style = Stroke(width = 2.4f / scaleX))
-                        }
-                    }
+                val barTop = (d.hubSize - d.barHeight).toPx() / 2f
+                val barHeightPx = d.barHeight.toPx()
+                val hubRadius = (d.hubSize.toPx() / 2f) * pressScale.value
+                val hubCenter = Offset(size.width / 2f, size.height / 2f) + dragOffset.value
+                val cr = CornerRadius(d.cornerRadius.toPx())
+                val barPath = Path().apply {
+                    addRoundRect(RoundRect(Rect(0f, barTop, size.width, barTop + barHeightPx), cr, cr, cr, cr))
+                }
+                val orbPath = Path().apply { addOval(Rect(center = hubCenter, radius = hubRadius)) }
+                val fused = Path().apply { op(barPath, orbPath, PathOperation.Union) }
+
+                drawPath(fused, brush = colors.background, alpha = colors.backgroundAlpha)
+                if (appearance.borderEnabled) {
+                    drawPath(fused, color = colors.borderColor, style = Stroke(width = colors.borderWidth.toPx()))
+                }
+                if (isAurora) {
+                    // A soft rainbow glow traced along the fused silhouette's own edge — reads as a
+                    // "glowing glass dock" without a second overhanging glow asset to position.
+                    val glow = Brush.linearGradient(
+                        0f to Color(0xFF1AF0FF), 0.55f to Color(0xFFA14AFF), 1f to Color(0xFFFF4DBD),
+                        start = Offset(0f, size.height / 2f), end = Offset(size.width, size.height / 2f)
+                    )
+                    drawPath(fused, brush = glow, alpha = 0.55f, style = Stroke(width = 2.4.dp.toPx()))
                 }
             }
             Row(

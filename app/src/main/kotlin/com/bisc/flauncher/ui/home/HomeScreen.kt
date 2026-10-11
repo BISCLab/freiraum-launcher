@@ -573,31 +573,6 @@ fun HomeScreen(
         // Charging animation above the pages, below overlays and dock.
         ChargingGlow(enabled = chargingAnimationEnabled, color = Color(chargingAnimationColor))
 
-        // TEMPORARY: with the dock deactivated and the Apps panel's own settings shortcut removed,
-        // there is currently no way at all to reach Settings from the home screen — a real gap, not a
-        // deliberate design choice. This is a stopgap (bottom-right, opens Settings directly) until a
-        // proper access path exists; remove once one does. A plain Material icon rather than the app's
-        // own launcher icon — that's an adaptive-icon XML, which Compose's painterResource can't load
-        // directly (only vector drawables and rasterized PNG/JPG/WEBP), not worth solving for something
-        // temporary.
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 20.dp, bottom = 20.dp)
-                .size(52.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.White.copy(alpha = 0.9f))
-                .clickable(onClick = onNavigateToSettings),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Settings,
-                contentDescription = stringResource(R.string.shortcut_settings),
-                tint = Color.Black,
-                modifier = Modifier.size(28.dp)
-            )
-        }
-
         // Dims the actual home screen behind the Apps panel instead of replacing it outright — the old
         // BackgroundFill(quickOverviewBackground, ...) here painted over the *entire* screen with a flat
         // backdrop color, which is why the home screen visually vanished (replaced by white/whatever that
@@ -641,8 +616,13 @@ fun HomeScreen(
             // the screen — a flat fraction left a large dead empty area below a handful of icons. At
             // least 2 rows' worth even with nothing to show yet, so the empty state still reads as a
             // real panel.
+            // Grows with how many rows of 5 the pinned apps + folders actually need, all the way up to
+            // the full available height if there's enough content — not capped to a flat fraction of the
+            // screen, which used to leave content cut off with no way to tell more existed below it. The
+            // grid itself is still genuinely scrollable (with a fade hint, see FavoritesMergedGrid) for
+            // whenever this estimate undershoots the real content height.
             val pinnedRows = ((sidebarPinnedApps.size + folders.size + 4) / 5).coerceAtLeast(2)
-            val panelHeight = (104.dp * pinnedRows + 40.dp).coerceIn(140.dp, maxHeight * 0.75f)
+            val panelHeight = (104.dp * pinnedRows + 96.dp).coerceIn(140.dp, maxHeight)
 
             AnimatedVisibility(
                 visible = overviewEntry != null && !folderOpen,
@@ -667,6 +647,7 @@ fun HomeScreen(
                     },
                     onFolderClick = { folder -> viewModel.openFolder(folder.id) },
                     onRemoveApp = viewModel::removeSidebarApp,
+                    onOpenSettings = { viewModel.closeOverview(); onNavigateToSettings() },
                     appearance = sidebarPanelAppearance,
                     shape = panelShape,
                     dock = d,

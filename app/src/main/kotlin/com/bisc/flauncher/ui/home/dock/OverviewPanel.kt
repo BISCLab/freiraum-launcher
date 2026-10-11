@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,6 +30,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -59,6 +61,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,6 +73,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -97,6 +101,8 @@ import com.bisc.flauncher.ui.pageLabel
 import com.bisc.flauncher.ui.home.FolderIcon
 import com.bisc.flauncher.ui.home.NoteContentEditor
 import com.bisc.flauncher.ui.home.NoteTypeToggle
+import com.bisc.flauncher.ui.home.search.fadeBackgroundToBottom
+import com.bisc.flauncher.ui.home.search.fadeListTop
 import com.bisc.flauncher.ui.theme.noRippleClickable
 import kotlinx.coroutines.delay
 
@@ -151,6 +157,7 @@ fun FavoritesPopup(
     onAppClick: (AppInfo) -> Unit,
     onFolderClick: (Folder) -> Unit,
     onRemoveApp: (SidebarPinnedApp) -> Unit,
+    onOpenSettings: () -> Unit,
     appearance: ElementAppearance,
     shape: Shape,
     dock: ScaledDock,
@@ -213,6 +220,7 @@ fun FavoritesPopup(
             groups = listOf(appEntries, folderEntries),
             cellSize = iconSize,
             showDividers = showGroupDividers,
+            onOpenSettings = onOpenSettings,
             modifier = Modifier.fillMaxSize().padding(top = topContentInset)
         )
     }
@@ -223,15 +231,38 @@ fun FavoritesPopup(
  * (nesting two of those here would mean two independently-scrolling, unboundedheight lists competing for
  * space — not what "one grid" means). [LazyVerticalGrid] handles this cleanly: each group's entries are
  * regular grid items, and a full-width divider between non-empty groups is just one more item spanning
- * every column via [GridItemSpan]. Empty groups contribute nothing, including no stray divider.
+ * every column via [GridItemSpan]. Empty groups contribute nothing, including no stray divider. A
+ * full-width "Settings" row is appended after everything else — this popup has no header or inline
+ * add-row of its own (see [FavoritesPopup]'s doc comment), so this is the only way back into Settings
+ * from the home screen; it scrolls with the rest of the grid rather than floating separately.
+ *
+ * The grid already fills whatever height its caller gives it (see the panel-height estimate in
+ * HomeScreen.kt) and is natively scrollable; what it was missing was any visual cue that there's more
+ * to scroll to — [fadeListTop]/[fadeBackgroundToBottom] (the same fade treatment [BrowseAppList] uses)
+ * fixes that instead of an abrupt hard clip at the bottom edge.
  */
 @Composable
-private fun FavoritesMergedGrid(groups: List<List<CategoryEntry>>, cellSize: Dp, showDividers: Boolean, modifier: Modifier = Modifier) {
+private fun FavoritesMergedGrid(
+    groups: List<List<CategoryEntry>>,
+    cellSize: Dp,
+    showDividers: Boolean,
+    onOpenSettings: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     var pendingRemoval by remember { mutableStateOf<CategoryEntry?>(null) }
     val nonEmptyGroups = remember(groups) { groups.filter { it.isNotEmpty() } }
+    val gridState = rememberLazyGridState()
+    val canScrollDown by remember { derivedStateOf { gridState.canScrollForward } }
+    val topFadeHeight = 48.dp
+    val topFadePx = with(LocalDensity.current) { topFadeHeight.toPx() }
     LazyVerticalGrid(
+        state = gridState,
         columns = GridCells.Fixed(OVERVIEW_GRID_COLUMNS),
-        modifier = modifier,
+        modifier = modifier
+            .then(if (canScrollDown) Modifier.fadeBackgroundToBottom(0.86f, 1f) else Modifier)
+            .fadeListTop(topFadeHeight) {
+                if (gridState.firstVisibleItemIndex > 0) 1f else (gridState.firstVisibleItemScrollOffset / topFadePx).coerceIn(0f, 1f)
+            },
         contentPadding = PaddingValues(16.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -247,6 +278,20 @@ private fun FavoritesMergedGrid(groups: List<List<CategoryEntry>>, cellSize: Dp,
                         color = LocalContentColor.current.copy(alpha = 0.15f)
                     )
                 }
+            }
+        }
+        item(key = "open_settings", span = { GridItemSpan(maxLineSpan) }) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp)
+                    .noRippleClickable(onClick = onOpenSettings),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(imageVector = Icons.Filled.Settings, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = stringResource(R.string.shortcut_settings))
             }
         }
     }
