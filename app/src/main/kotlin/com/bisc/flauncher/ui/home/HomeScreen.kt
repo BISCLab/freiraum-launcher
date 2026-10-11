@@ -20,7 +20,9 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,6 +47,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.MusicNote
@@ -71,6 +74,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
@@ -535,6 +539,31 @@ fun HomeScreen(
 
         // Charging animation above the pages, below overlays and dock.
         ChargingGlow(enabled = chargingAnimationEnabled, color = Color(chargingAnimationColor))
+
+        // TEMPORARY: with the dock deactivated and the Apps panel's own settings shortcut removed,
+        // there is currently no way at all to reach Settings from the home screen — a real gap, not a
+        // deliberate design choice. This is a stopgap (bottom-right, opens Settings directly) until a
+        // proper access path exists; remove once one does. A plain Material icon rather than the app's
+        // own launcher icon — that's an adaptive-icon XML, which Compose's painterResource can't load
+        // directly (only vector drawables and rasterized PNG/JPG/WEBP), not worth solving for something
+        // temporary.
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 20.dp, bottom = 20.dp)
+                .size(52.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color.White.copy(alpha = 0.9f))
+                .clickable(onClick = onNavigateToSettings),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Settings,
+                contentDescription = stringResource(R.string.shortcut_settings),
+                tint = Color.Black,
+                modifier = Modifier.size(28.dp)
+            )
+        }
 
         // Dims the actual home screen behind the Apps panel instead of replacing it outright — the old
         // BackgroundFill(quickOverviewBackground, ...) here painted over the *entire* screen with a flat
