@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -98,7 +99,7 @@ import kotlinx.coroutines.delay
 // top edge reads the same as the gap to the left edge instead of looking cramped above/below.
 private val OVERVIEW_LIST_CONTENT_PADDING = PaddingValues(vertical = 20.dp)
 private val OVERVIEW_ROW_HEIGHT_MIN = 48.dp
-private const val OVERVIEW_GRID_COLUMNS = 3
+private const val OVERVIEW_GRID_COLUMNS = 5
 private val OVERVIEW_LIST_ICON_SIZE = 40.dp
 
 /** Grid mode uses exactly the dock's own icon size; list mode gets a smaller, but still roomier, size. */
@@ -112,12 +113,17 @@ internal fun overviewRowHeight(availableHeight: Dp, appCount: Int): Dp {
 }
 
 /**
- * Discreet Launcher's actual favorites popup is dead simple: a thin header (title + a settings
- * shortcut) and a single grid of pinned apps underneath — no category rail, no tab-switching between
- * apps/folders/notes/etc. This is that, reusing [SidebarAppsOverviewContent] for the grid itself.
- * [SidebarOverviewPanel] (the fuller multi-category rail panel) stays in the codebase untouched — not
+ * Discreet Launcher's actual favorites popup is dead simple: just a grid of pinned apps, nothing else —
+ * no title, no settings shortcut, no inline "add" row. Managing favorites and settings both happen
+ * through the launcher's own Settings -> Home screen, not inline in this popup. Reuses
+ * [SidebarAppsOverviewContent] for the grid itself (icon loading, removal, sizing) rather than rebuilding
+ * it. [SidebarOverviewPanel] (the fuller multi-category rail panel) stays in the codebase untouched — not
  * what opens on the swipe-down gesture anymore, but still there, git-recoverable, for later use as a
  * "browse everything" surface if that's wanted down the line.
+ *
+ * Content starts below [androidx.compose.foundation.layout.statusBarsPadding] even though the home
+ * screen typically hides the status bar — the space it would occupy stays reserved so the grid doesn't
+ * start flush against the physical top edge/camera cutout.
  */
 @Composable
 fun FavoritesPopup(
@@ -125,51 +131,29 @@ fun FavoritesPopup(
     pinnedApps: List<SidebarPinnedApp>,
     loadIcon: (ComponentName) -> ImageBitmap?,
     onAppClick: (AppInfo) -> Unit,
-    onAddAppsClick: () -> Unit,
     onRemoveApp: (SidebarPinnedApp) -> Unit,
-    onSettingsClick: () -> Unit,
-    viewMode: SidebarCategoryViewMode,
-    showAddRow: Boolean,
     appearance: ElementAppearance,
     shape: Shape,
     dock: ScaledDock,
     modifier: Modifier = Modifier
 ) {
     DockPanelSurface(appearance = appearance, shape = shape, modifier = modifier) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier.fillMaxWidth().height(40.dp).padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.favorites_popup_title),
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.labelLarge
-                )
-                IconButton(onClick = onSettingsClick, modifier = Modifier.size(28.dp)) {
-                    Icon(
-                        imageVector = Icons.Filled.Settings,
-                        contentDescription = stringResource(R.string.shortcut_settings),
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+        BoxWithConstraints(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
+            val rowHeight = remember(pinnedApps.size, maxHeight) {
+                overviewRowHeight(maxHeight, ((pinnedApps.size + OVERVIEW_GRID_COLUMNS - 1) / OVERVIEW_GRID_COLUMNS).coerceAtLeast(1))
             }
-            HorizontalDivider(color = LocalContentColor.current.copy(alpha = 0.12f))
-            BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                val rowHeight = remember(pinnedApps.size, maxHeight) { overviewRowHeight(maxHeight, pinnedApps.size) }
-                SidebarAppsOverviewContent(
-                    installedApps = installedApps,
-                    pinnedApps = pinnedApps,
-                    loadIcon = loadIcon,
-                    onAppClick = onAppClick,
-                    onAddAppsClick = onAddAppsClick,
-                    onRemove = onRemoveApp,
-                    viewMode = viewMode,
-                    showAddRow = showAddRow,
-                    rowHeight = rowHeight,
-                    dock = dock
-                )
-            }
+            SidebarAppsOverviewContent(
+                installedApps = installedApps,
+                pinnedApps = pinnedApps,
+                loadIcon = loadIcon,
+                onAppClick = onAppClick,
+                onAddAppsClick = {},
+                onRemove = onRemoveApp,
+                viewMode = SidebarCategoryViewMode.GRID,
+                showAddRow = false,
+                rowHeight = rowHeight,
+                dock = dock
+            )
         }
     }
 }
