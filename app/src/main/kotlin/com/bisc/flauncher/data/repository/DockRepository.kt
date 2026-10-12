@@ -10,17 +10,18 @@ import javax.inject.Inject
 class DockRepository @Inject constructor(private val dao: DockSlotDao) {
     val slots: Flow<List<DockSlot>> = dao.observeAll()
 
-    /** Fresh-install default: both power buttons (immediately useful) plus 4 empty app slots to invite
-     *  the user to fill in — mirrors the old fixed-4-slots dock's own "Not set" placeholder invitation. */
+    /** Fresh-install default: both power buttons (immediately useful) plus 3 empty app slots to invite
+     *  the user to fill in — exactly [com.bisc.flauncher.ui.home.dock.DockDimens.REFERENCE_SLOT_COUNT]
+     *  slots total, so the default dock arrives already "full" at its default fixed width instead of
+     *  looking sparse inside it. */
     suspend fun ensureSeeded() {
         if (dao.count() > 0) return
         val defaults = listOf(
             DockSlot(slotIndex = 0, type = "APP"),
             DockSlot(slotIndex = 1, type = "APP"),
             DockSlot(slotIndex = 2, type = "APP"),
-            DockSlot(slotIndex = 3, type = "APP"),
-            DockSlot(slotIndex = 4, type = "POWER_BUTTON", powerButtonAction = DockPowerButtonAction.TEXT_SEARCH.name),
-            DockSlot(slotIndex = 5, type = "POWER_BUTTON", powerButtonAction = DockPowerButtonAction.CATEGORY_SEARCH.name)
+            DockSlot(slotIndex = 3, type = "POWER_BUTTON", powerButtonAction = DockPowerButtonAction.TEXT_SEARCH.name),
+            DockSlot(slotIndex = 4, type = "POWER_BUTTON", powerButtonAction = DockPowerButtonAction.CATEGORY_SEARCH.name)
         )
         defaults.forEach { dao.upsert(it) }
     }

@@ -115,7 +115,10 @@ class MainActivity : ComponentActivity() {
                     NavHost(navController = navController, startDestination = "home") {
                         composable("home") {
                             HomeScreen(
-                                onNavigateToSettings = { navController.navigate("settings") },
+                                onNavigateToSettings = { editSlot ->
+                                    if (editSlot != null) navController.navigate("settings/dock?editSlot=$editSlot")
+                                    else navController.navigate("settings")
+                                },
                                 homeButtonPressCount = homeButtonPressCount
                             )
                         }
@@ -136,11 +139,16 @@ class MainActivity : ComponentActivity() {
                         composable("settings/appearance/background") {
                             com.bisc.flauncher.ui.settings.SettingsGlobalBackgroundScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
-                        composable("settings/dock") {
+                        composable(
+                            "settings/dock?editSlot={editSlot}",
+                            arguments = listOf(navArgument("editSlot") { type = NavType.IntType; defaultValue = -1 })
+                        ) { backStackEntry ->
+                            val editSlot = backStackEntry.arguments?.getInt("editSlot")?.takeIf { it >= 0 }
                             SettingsDockScreen(
                                 navController = navController,
                                 onBack = { navController.popBackStack() },
-                                onNavigate = { route -> navController.navigate("settings/$route") }
+                                onNavigate = { route -> navController.navigate("settings/$route") },
+                                initialEditSlot = editSlot
                             )
                         }
                         composable("settings/dock/overview") {

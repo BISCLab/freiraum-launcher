@@ -17,7 +17,7 @@ enum class DockCornerStyle {
     val radius: Dp
         get() = when (this) {
             SHARP -> 0.dp
-            ROUNDED -> 20.dp
+            ROUNDED -> 32.dp
             FULLY_ROUND -> 999.dp
         }
 }

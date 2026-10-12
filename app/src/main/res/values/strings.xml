@@ -432,6 +432,9 @@
     <string name="settings_dock_corner_style_sharp">Sharp</string>
     <string name="settings_dock_corner_style_rounded">Rounded</string>
     <string name="settings_dock_corner_style_fully_round">Fully round</string>
+    <string name="settings_dock_width_mode_label">Dock width</string>
+    <string name="settings_dock_width_mode_fixed">Fixed (fits 5 icons)</string>
+    <string name="settings_dock_width_mode_grow">Grows with icons</string>
 
     <string name="settings_section_search_overview">Quick overview</string>
     <string name="settings_card_search_overview_subtitle">Sidebar order, categories, background</string>

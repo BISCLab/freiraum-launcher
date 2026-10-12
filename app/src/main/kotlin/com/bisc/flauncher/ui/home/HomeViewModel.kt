@@ -143,6 +143,15 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.setDockCornerStyle(style) }
     }
 
+    val dockWidthMode: StateFlow<com.bisc.flauncher.ui.home.dock.DockWidthMode> =
+        settingsRepository.dockWidthMode.stateIn(
+            viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.home.dock.DockWidthMode.FIXED
+        )
+
+    fun setDockWidthMode(mode: com.bisc.flauncher.ui.home.dock.DockWidthMode) {
+        viewModelScope.launch { settingsRepository.setDockWidthMode(mode) }
+    }
+
     val chargingAnimationColor: StateFlow<Int> =
         settingsRepository.chargingAnimationColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF34D058.toInt())
 
