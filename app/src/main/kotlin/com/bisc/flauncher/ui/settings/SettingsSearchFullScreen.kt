@@ -2,6 +2,7 @@ package com.bisc.flauncher.ui.settings
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.OutlinedTextField
@@ -26,44 +27,46 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.data.model.SearchEngine
-import com.bisc.flauncher.data.model.SearchKeyboardType
+import com.bisc.flauncher.ui.home.search.defaultColor
 import com.bisc.flauncher.ui.home.search.icon
 import com.bisc.flauncher.ui.home.search.settingsLabelRes
 
 private enum class SearchElementSheet { SEARCH_APPEARANCE, KEYBOARD }
 
-/** Settings for the text search: backgrounds, keyboard, categories and search engine. */
+/** Settings for the text search: appearance, keyboard behavior, categories (with per-category
+ *  color), search engine and "open with" (browser/maps/AI). The custom in-app keyboard was
+ *  removed — search always uses the system keyboard now, see [com.bisc.flauncher.ui.home.search.SearchInputBar]. */
 @Composable
 fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val hideStatusBar by viewModel.searchHideStatusBar.collectAsState()
-    val showNumberRow by viewModel.searchKeyboardShowNumberRow.collectAsState()
-    val keyboardHaptics by viewModel.searchKeyboardHaptics.collectAsState()
-    val keyboardLayout by viewModel.searchKeyboardLayout.collectAsState()
-    val keyboardSparks by viewModel.searchKeyboardSparks.collectAsState()
-    val sparkColor by viewModel.searchKeyboardSparkColor.collectAsState()
+    val keyboardAutoOpen by viewModel.searchKeyboardAutoOpen.collectAsState()
     val included by viewModel.searchIncluded.collectAsState()
     val categoryOrder by viewModel.searchCategoryOrder.collectAsState()
+    val categoryColors by viewModel.categoryColors.collectAsState()
     val aiAppPackage by viewModel.searchAiApp.collectAsState()
-    val keyboardType by viewModel.searchKeyboardType.collectAsState()
     val installedApps by viewModel.browsableApps.collectAsState()
     var aiPickerOpen by remember { mutableStateOf(false) }
     var browserPickerOpen by remember { mutableStateOf(false) }
     var mapsPickerOpen by remember { mutableStateOf(false) }
+    var pickingColorFor by remember { mutableStateOf<SearchCategory?>(null) }
     val browserPackage by viewModel.searchBrowserApp.collectAsState()
     val mapsPackage by viewModel.searchMapsApp.collectAsState()
     val defaultLabel = stringResource(R.string.settings_search_open_with_default)
     fun appLabel(pkg: String?): String = pkg?.let {
         runCatching { context.packageManager.getApplicationLabel(context.packageManager.getApplicationInfo(it, 0)).toString() }.getOrNull()
     } ?: defaultLabel
-    val custom = keyboardType == SearchKeyboardType.CUSTOM
     val aiAppLabel = remember(aiAppPackage) {
         aiAppPackage?.let { pkg ->
             runCatching { context.packageManager.getApplicationLabel(context.packageManager.getApplicationInfo(pkg, 0)).toString() }.getOrNull()
@@ -71,7 +74,6 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
     }
     val keyboardAppearance by viewModel.keyboardAppearance.collectAsState()
     val searchAppearance by viewModel.searchAppearance.collectAsState()
-    val keyboardAutoOpen by viewModel.searchKeyboardAutoOpen.collectAsState()
     val engine by viewModel.searchEngine.collectAsState()
     val savedCustomUrl by viewModel.searchEngineCustomUrl.collectAsState()
     // Typing goes through local state; the stored value arrives too late and would swallow characters.
@@ -98,18 +100,7 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
             )
         }
 
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_search_keyboard_type_label)) {
-            RadioPreference(stringResource(R.string.settings_search_keyboard_type_custom), SearchKeyboardType.CUSTOM, keyboardType, viewModel::setSearchKeyboardType)
-            RadioPreference(stringResource(R.string.settings_search_keyboard_type_system), SearchKeyboardType.SYSTEM, keyboardType, viewModel::setSearchKeyboardType)
-            if (!custom) {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_search_keyboard_type_system_howto),
-                    info = stringResource(R.string.settings_search_keyboard_type_system_info),
-                    onClick = {},
-                    trailing = null
-                )
-            }
+        SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_search_keyboard_auto_open),
@@ -117,57 +108,12 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
                 onClick = { viewModel.setSearchKeyboardAutoOpen(!keyboardAutoOpen) },
                 trailing = { Switch(checked = keyboardAutoOpen, onCheckedChange = viewModel::setSearchKeyboardAutoOpen) }
             )
-        }
-
-        if (custom) {
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_search_keyboard_layout_label)) {
-                RadioPreference(stringResource(R.string.settings_search_keyboard_layout_qwerty), com.bisc.flauncher.data.model.KeyboardLayout.QWERTY, keyboardLayout, viewModel::setSearchKeyboardLayout)
-                RadioPreference(stringResource(R.string.settings_search_keyboard_layout_qwertz), com.bisc.flauncher.data.model.KeyboardLayout.QWERTZ, keyboardLayout, viewModel::setSearchKeyboardLayout)
-            }
-        }
-
-        SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_search_hide_status_bar),
                 info = stringResource(R.string.settings_search_hide_status_bar_summary),
                 onClick = { viewModel.setSearchHideStatusBar(!hideStatusBar) },
                 trailing = { Switch(checked = hideStatusBar, onCheckedChange = viewModel::setSearchHideStatusBar) }
-            )
-            if (custom) {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_search_keyboard_haptics),
-                    info = stringResource(R.string.settings_search_keyboard_haptics_summary),
-                    infoAction = stringResource(R.string.touch_feedback_hint_open) to { openSoundSettings(context) },
-                    onClick = { viewModel.setSearchKeyboardHaptics(!keyboardHaptics) },
-                    trailing = { Switch(checked = keyboardHaptics, onCheckedChange = viewModel::setSearchKeyboardHaptics) }
-                )
-            }
-            if (custom) {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_search_keyboard_sparks),
-                    info = stringResource(R.string.settings_search_keyboard_sparks_summary),
-                    onClick = { viewModel.setSearchKeyboardSparks(!keyboardSparks) },
-                    trailing = { Switch(checked = keyboardSparks, onCheckedChange = viewModel::setSearchKeyboardSparks) }
-                )
-            }
-            if (custom) {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_search_keyboard_show_number_row),
-                    info = stringResource(R.string.settings_search_keyboard_show_number_row_summary),
-                    onClick = { viewModel.setSearchKeyboardShowNumberRow(!showNumberRow) },
-                    trailing = { Switch(checked = showNumberRow, onCheckedChange = viewModel::setSearchKeyboardShowNumberRow) }
-                )
-            }
-        }
-        if (custom && keyboardSparks) {
-            ColorPickerSection(
-                title = stringResource(R.string.settings_search_keyboard_spark_color),
-                color = sparkColor,
-                onColorChange = viewModel::setSearchKeyboardSparkColor
             )
         }
 
@@ -184,16 +130,32 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
                 key = { it },
                 onReorder = viewModel::setSearchCategoryOrder
             ) { category ->
+                val color = categoryColors[category]?.let { Color(it) } ?: category.defaultColor
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Icon(category.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Icon(
+                        category.icon,
+                        contentDescription = null,
+                        tint = color,
+                        modifier = Modifier.size(28.dp).clip(CircleShape).clickable { pickingColorFor = category }.padding(2.dp)
+                    )
                     Text(stringResource(category.settingsLabelRes), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                     Switch(checked = category in included, onCheckedChange = { viewModel.setSearchIncluded(category, it) })
                 }
             }
+        }
+
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_search_tools_label)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_search_tools_info_title),
+                info = stringResource(R.string.settings_search_tools_info_summary),
+                onClick = {},
+                trailing = null
+            )
         }
 
         SettingsPreferenceGroup(title = stringResource(R.string.settings_search_engine_label)) {
@@ -321,6 +283,19 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
             )
         }
         null -> Unit
+    }
+
+    pickingColorFor?.let { category ->
+        val current = categoryColors[category]?.let { Color(it) } ?: category.defaultColor
+        SettingsEditPage(
+            title = stringResource(category.settingsLabelRes),
+            onDismiss = { pickingColorFor = null }
+        ) {
+            ColorPickerControls(
+                color = current,
+                onColorChange = { viewModel.setCategoryColor(category, it.toArgb()) }
+            )
+        }
     }
 }
 

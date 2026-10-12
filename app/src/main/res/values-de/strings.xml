@@ -482,6 +482,12 @@
     <string name="settings_search_include_ai">KI-App</string>
     <string name="search_command_ai">%1$s fragen: %2$s</string>
     <string name="search_action_home">Startbildschirm</string>
+    <string name="contact_action_call">Anrufen</string>
+    <string name="contact_action_message">Nachricht</string>
+    <string name="contact_action_whatsapp">WhatsApp</string>
+    <string name="contact_action_telegram">Telegram</string>
+    <string name="contact_action_open_in_contacts">In Kontakte-App öffnen</string>
+    <string name="contact_action_no_number">Keine Telefonnummer für diesen Kontakt.</string>
     <string name="settings_search_ai_title">KI-App</string>
     <string name="settings_search_ai_none">Keine ausgewählt</string>
     <string name="settings_search_ai_pick">KI-App auswählen</string>
@@ -495,6 +501,9 @@
     <string name="settings_search_keyboard_type_system_info">Nutzt die in Android eingerichtete Tastatur, z. B. mit Vorschlägen oder eigenem Layout. Die Ergebnisse passen sich dem Platz darüber an, und die Zurück-Geste führt zum Startbildschirm.</string>
     <string name="settings_search_categories_order_title">Reihenfolge und Standardsuche</string>
     <string name="settings_search_categories_label">Suchkategorien</string>
+    <string name="settings_search_tools_label">Werkzeuge</string>
+    <string name="settings_search_tools_info_title">Taschenrechner und Einheiten-Umrechner</string>
+    <string name="settings_search_tools_info_summary">Gib einen Ausdruck (z. B. "12 * 7") oder eine Umrechnung (z. B. "10 km to mi") in die Suche ein, um das Ergebnis direkt zu sehen — keine Einstellung nötig, funktioniert automatisch.</string>
     <string name="settings_search_include_apps">Apps</string>
     <string name="settings_search_include_contacts">Kontakte</string>
     <string name="settings_search_include_settings">Einstellungsverknüpfungen</string>

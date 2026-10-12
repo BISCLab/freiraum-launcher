@@ -5,12 +5,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Sizing for the full-text search screen (keyboard, system search field) — deliberately independent
- * from the dock's own DockDimens. Search used to derive every one of these numbers from the dock's
- * pill width/corner radius, which tied its look to however the dock happened to be sized/configured;
- * search is now a standalone, optional feature with its own footprint: nearly full screen width (a
- * bit wider than the dock pill, closer to the swipe-down Apps panel's own margin) and its own,
- * generous corner rounding.
+ * Sizing for the full-text search screen — deliberately independent from the dock's own
+ * DockDimens, search is a standalone, optional feature with its own footprint. [referenceWidth]
+ * is numerically copied from the dock's own default fixed width (`DockDimens.widthForSlotCount(5)`
+ * = 392dp) purely as a convenient starting value picked at build time — not a live binding to the
+ * dock (search redesign round 2 was explicit about this: "nur zum Programmieren... damit nicht
+ * weiter verknüpft"). Only the search field/category bar and the result cards use this width; the
+ * keyboard-frame strip is deliberately edge-to-edge instead (see [SearchOverlay]).
  */
 object SearchDimens {
     val horizontalMargin = 16.dp
@@ -21,6 +22,7 @@ object SearchDimens {
     val iconSize = 46.dp
     val iconCornerRadius = 14.dp
     val itemSpacing = 10.dp
+    val referenceWidth = 392.dp
 }
 
 /** One resolved snapshot of [SearchDimens] for a given available width. */
@@ -36,4 +38,5 @@ data class ScaledSearch(
 )
 
 @Composable
-fun searchDimens(availableWidth: Dp): ScaledSearch = ScaledSearch(pillWidth = availableWidth)
+fun searchDimens(availableWidth: Dp): ScaledSearch =
+    ScaledSearch(pillWidth = SearchDimens.referenceWidth.coerceAtMost(availableWidth))

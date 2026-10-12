@@ -36,7 +36,6 @@ import com.bisc.flauncher.data.model.RevealMode
 import com.bisc.flauncher.data.model.SavedMapTarget
 import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.data.model.SearchEngine
-import com.bisc.flauncher.data.model.SearchKeyboardType
 import com.bisc.flauncher.util.launchAiApp
 import com.bisc.flauncher.data.model.SidebarCategoryViewMode
 import com.bisc.flauncher.data.model.SidebarPinnedApp
@@ -441,16 +440,6 @@ class HomeViewModel @Inject constructor(
         settingsRepository.searchShowAzIndex.stateIn(viewModelScope, SharingStarted.Eagerly, true)
     val searchHideStatusBar: StateFlow<Boolean> =
         settingsRepository.searchHideStatusBar.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-    val searchKeyboardHaptics: StateFlow<Boolean> =
-        settingsRepository.searchKeyboardHaptics.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-    val searchKeyboardSparks: StateFlow<Boolean> =
-        settingsRepository.searchKeyboardSparks.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-    val searchKeyboardSparkColor: StateFlow<Int> =
-        settingsRepository.searchKeyboardSparkColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF34D058.toInt())
-    val searchKeyboardLayout: StateFlow<com.bisc.flauncher.data.model.KeyboardLayout> =
-        settingsRepository.searchKeyboardLayout.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.data.model.KeyboardLayout.QWERTY)
-    val searchKeyboardShowNumberRow: StateFlow<Boolean> =
-        settingsRepository.searchKeyboardShowNumberRow.stateIn(viewModelScope, SharingStarted.Eagerly, true)
     private val searchEngine: StateFlow<SearchEngine> =
         settingsRepository.searchEngine.stateIn(viewModelScope, SharingStarted.Eagerly, SearchEngine.DUCKDUCKGO)
     private val searchEngineCustomUrl: StateFlow<String> =
@@ -460,10 +449,17 @@ class HomeViewModel @Inject constructor(
         settingsRepository.searchIncluded.stateIn(viewModelScope, SharingStarted.Eagerly, SearchCategory.entries.toSet())
     val searchCategoryOrder: StateFlow<List<SearchCategory>> =
         settingsRepository.searchCategoryOrder.stateIn(viewModelScope, SharingStarted.Eagerly, SearchCategory.entries)
+
+    /** Per-category icon color overrides (null entries fall back to [com.bisc.flauncher.ui.home.search.defaultColor]). */
+    val categoryColors: StateFlow<Map<SearchCategory, Int?>> =
+        combine(SearchCategory.entries.map { c -> settingsRepository.categoryColor(c).map { color -> c to color } }) { pairs -> pairs.toMap() }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+
+    fun setCategoryColor(category: SearchCategory, color: Int) {
+        viewModelScope.launch { settingsRepository.setCategoryColor(category, color) }
+    }
     val searchAiApp: StateFlow<String?> =
         settingsRepository.searchAiApp.stateIn(viewModelScope, SharingStarted.Eagerly, null)
-    val searchKeyboardType: StateFlow<SearchKeyboardType> =
-        settingsRepository.searchKeyboardType.stateIn(viewModelScope, SharingStarted.Eagerly, SearchKeyboardType.CUSTOM)
 
     /** The one category the results are narrowed to, or null to search every category enabled in the settings. */
     private val _searchFilter = MutableStateFlow<SearchCategory?>(null)
@@ -516,6 +512,10 @@ class HomeViewModel @Inject constructor(
                 null
             }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val converterResult: StateFlow<String?> =
+        _searchQuery.map { query -> com.bisc.flauncher.util.tryConvert(query) }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val _contactResults = MutableStateFlow<List<ContactInfo>>(emptyList())
     val contactResults: StateFlow<List<ContactInfo>> = _contactResults.asStateFlow()

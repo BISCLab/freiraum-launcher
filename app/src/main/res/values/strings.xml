@@ -482,6 +482,12 @@
     <string name="settings_search_include_ai">AI app</string>
     <string name="search_command_ai">Ask %1$s: %2$s</string>
     <string name="search_action_home">Home</string>
+    <string name="contact_action_call">Call</string>
+    <string name="contact_action_message">Message</string>
+    <string name="contact_action_whatsapp">WhatsApp</string>
+    <string name="contact_action_telegram">Telegram</string>
+    <string name="contact_action_open_in_contacts">Open in Contacts app</string>
+    <string name="contact_action_no_number">No phone number for this contact.</string>
     <string name="settings_search_ai_title">AI app</string>
     <string name="settings_search_ai_none">None selected</string>
     <string name="settings_search_ai_pick">Choose AI app</string>
@@ -495,6 +501,9 @@
     <string name="settings_search_keyboard_type_system_info">Uses the keyboard set up in Android, for example with suggestions or your own layout. The results fit the space above it, and the back gesture returns to the home screen.</string>
     <string name="settings_search_categories_order_title">Order and default search</string>
     <string name="settings_search_categories_label">Search categories</string>
+    <string name="settings_search_tools_label">Tools</string>
+    <string name="settings_search_tools_info_title">Calculator and unit converter</string>
+    <string name="settings_search_tools_info_summary">Type an expression (e.g. "12 * 7") or a conversion (e.g. "10 km to mi") into search to see the result inline — no settings needed, they just work.</string>
     <string name="settings_search_include_apps">Apps</string>
     <string name="settings_search_include_contacts">Contacts</string>
     <string name="settings_search_include_settings">Settings shortcuts</string>

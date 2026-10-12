@@ -13,9 +13,27 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.SearchCategory
+
+/** Default icon color per category, used everywhere a category's icon appears unless the user
+ *  overrides it (see [SettingsRepository.categoryColor]/[HomeViewModel.categoryColors]). */
+val SearchCategory.defaultColor: Color
+    get() = when (this) {
+        SearchCategory.APPS -> Color(0xFF4F86F7)
+        SearchCategory.FOLDERS -> Color(0xFFFF8A65)
+        SearchCategory.CONTACTS -> Color(0xFF34A853)
+        SearchCategory.SETTINGS -> Color(0xFF9AA0A6)
+        SearchCategory.NOTES -> Color(0xFFFBBC05)
+        SearchCategory.WEBSITES -> Color(0xFFA142F4)
+        SearchCategory.PLACES -> Color(0xFFEA4335)
+        SearchCategory.SHORTCUTS -> Color(0xFF26A69A)
+        SearchCategory.EMAIL -> Color(0xFF5C6BC0)
+        SearchCategory.WEB -> Color(0xFF00ACC1)
+        SearchCategory.AI -> Color(0xFFEC407A)
+    }
 
 val SearchCategory.icon: ImageVector
     get() = when (this) {

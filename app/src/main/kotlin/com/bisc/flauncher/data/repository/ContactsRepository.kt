@@ -7,6 +7,7 @@ import android.provider.ContactsContract
 import androidx.core.content.ContextCompat
 import com.bisc.flauncher.data.db.PinnedContactDao
 import com.bisc.flauncher.data.model.ContactInfo
+import com.bisc.flauncher.data.model.ContactPhoneNumber
 import com.bisc.flauncher.data.model.PinnedContact
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -65,6 +66,7 @@ class ContactsRepository @Inject constructor(
                 }
             }
 
+            attachPhoneNumbers(results)
             results.values.toList()
         }
     }
@@ -81,6 +83,40 @@ class ContactsRepository @Inject constructor(
                 "${ContactsContract.Contacts.DISPLAY_NAME_PRIMARY} ASC LIMIT $MAX_LISTED"
             )?.use { cursor -> readContacts(cursor, results) }
             results.values.toList()
+        }
+    }
+
+    /** Fills in [ContactInfo.phoneNumbers] for an already-built result set, one batched query
+     *  instead of one per contact — result sets here are search-sized (<=20), so this stays cheap. */
+    private fun attachPhoneNumbers(results: MutableMap<Long, ContactInfo>) {
+        if (results.isEmpty()) return
+        val placeholders = results.keys.joinToString(",") { "?" }
+        val numbersByContact = mutableMapOf<Long, MutableList<ContactPhoneNumber>>()
+        context.contentResolver.query(
+            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+            arrayOf(
+                ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+                ContactsContract.CommonDataKinds.Phone.NUMBER,
+                ContactsContract.CommonDataKinds.Phone.TYPE,
+                ContactsContract.CommonDataKinds.Phone.LABEL
+            ),
+            "${ContactsContract.CommonDataKinds.Phone.CONTACT_ID} IN ($placeholders)",
+            results.keys.map { it.toString() }.toTypedArray(),
+            null
+        )?.use { cursor ->
+            val idIndex = cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)
+            val numberIndex = cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER)
+            val typeIndex = cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.TYPE)
+            val labelIndex = cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.LABEL)
+            while (cursor.moveToNext()) {
+                val contactId = cursor.getLong(idIndex)
+                val number = cursor.getString(numberIndex) ?: continue
+                numbersByContact.getOrPut(contactId) { mutableListOf() }
+                    .add(ContactPhoneNumber(number, cursor.getInt(typeIndex), cursor.getString(labelIndex)))
+            }
+        }
+        numbersByContact.forEach { (id, numbers) ->
+            results[id]?.let { results[id] = it.copy(phoneNumbers = numbers) }
         }
     }
 

@@ -83,7 +83,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowInsetsControllerCompat
-import com.bisc.flauncher.data.model.SearchKeyboardType
 import com.bisc.flauncher.util.setStatusBarHidden
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bisc.flauncher.R
@@ -204,16 +203,12 @@ fun HomeScreen(
     val searchIndexShowRailBar by viewModel.searchIndexShowRailBar.collectAsState()
     val searchHeaderLetterAppearance by viewModel.searchHeaderLetterAppearance.collectAsState()
     val searchAlphabetLetterAppearance by viewModel.searchAlphabetLetterAppearance.collectAsState()
-    val searchKeyboardShowNumberRow by viewModel.searchKeyboardShowNumberRow.collectAsState()
-    val searchKeyboardLayout by viewModel.searchKeyboardLayout.collectAsState()
-    val searchKeyboardType by viewModel.searchKeyboardType.collectAsState()
     val searchCategoryOrder by viewModel.searchCategoryOrder.collectAsState()
     val activeSearchCategories by viewModel.activeSearchCategories.collectAsState()
     val searchFilter by viewModel.searchFilter.collectAsState()
     val searchAiApp by viewModel.searchAiApp.collectAsState()
-    val searchKeyboardSparks by viewModel.searchKeyboardSparks.collectAsState()
-    val searchKeyboardSparkColor by viewModel.searchKeyboardSparkColor.collectAsState()
-    val searchKeyboardHaptics by viewModel.searchKeyboardHaptics.collectAsState()
+    val categoryColors by viewModel.categoryColors.collectAsState()
+    val converterResult by viewModel.converterResult.collectAsState()
 
     val pagerState = rememberPagerState(pageCount = { pages.size.coerceAtLeast(1) })
 
@@ -281,6 +276,7 @@ fun HomeScreen(
         controller?.isAppearanceLightStatusBars = !lightIcons
         onDispose { controller?.isAppearanceLightStatusBars = !appThemeDark }
     }
+    var contactActionsFor by remember { mutableStateOf<com.bisc.flauncher.data.model.ContactInfo?>(null) }
     var editingNote by remember { mutableStateOf<Note?>(null) }
     var showNoteEditor by remember { mutableStateOf(false) }
     var showAddMapTargetDialog by remember { mutableStateOf(false) }
@@ -769,6 +765,7 @@ fun HomeScreen(
             query = searchQuery,
             appResults = searchResults,
             calculatorResult = calculatorResult,
+            converterResult = converterResult,
             contactResults = contactResults,
             noteResults = noteResults,
             websiteResults = websiteResults,
@@ -780,29 +777,19 @@ fun HomeScreen(
             categoryOrder = searchCategoryOrder,
             activeCategories = activeSearchCategories,
             categoryFilter = searchFilter,
+            categoryColors = categoryColors,
             aiAppPackage = searchAiApp,
             onToggleFilter = viewModel::toggleSearchFilter,
-            keyboardType = searchKeyboardType,
             keyboardAutoOpen = searchKeyboardAutoOpen,
             appearance = searchAppearance,
             keyboardAppearance = keyboardAppearance,
-            showKeyboardNumberRow = searchKeyboardShowNumberRow,
-            keyboardLayout = searchKeyboardLayout,
-            keyboardSparks = searchKeyboardSparks,
-            keyboardSparkColor = Color(searchKeyboardSparkColor),
-            keyboardHaptics = searchKeyboardHaptics,
-            handedness = handedness,
-            iconShape = iconShape,
             loadIcon = viewModel::loadIcon,
             onQueryChange = viewModel::updateSearchQuery,
             onAppClick = { app ->
                 launchApp(context, app.componentName)
                 viewModel.closeSearch()
             },
-            onContactClick = { contact ->
-                openContact(context, contact)
-                viewModel.closeSearch()
-            },
+            onContactClick = { contact -> contactActionsFor = contact },
             onSettingsShortcutClick = { shortcut ->
                 launchSettingsShortcut(context, shortcut)
                 viewModel.closeSearch()
@@ -834,6 +821,14 @@ fun HomeScreen(
             onMapsCommand = { viewModel.runMapsCommand(context) },
             onEmailCommand = { viewModel.runEmailCommand(context) },
             onAiCommand = { viewModel.runAiCommand(context) }
+        )
+    }
+
+    contactActionsFor?.let { contact ->
+        com.bisc.flauncher.ui.home.search.ContactActionsSheet(
+            contact = contact,
+            loadPhoto = viewModel::loadContactPhoto,
+            onDismiss = { contactActionsFor = null }
         )
     }
 

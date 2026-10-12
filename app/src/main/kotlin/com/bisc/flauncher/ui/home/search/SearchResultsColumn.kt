@@ -3,12 +3,8 @@ package com.bisc.flauncher.ui.home.search
 import com.bisc.flauncher.ui.home.rememberAppIcon
 import android.content.ComponentName
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,10 +13,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bookmark
@@ -32,7 +28,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.automirrored.filled.Shortcut
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -45,7 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
@@ -54,26 +49,29 @@ import androidx.compose.ui.unit.dp
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.AppInfo
 import com.bisc.flauncher.data.model.ContactInfo
+import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.Note
 import com.bisc.flauncher.data.model.PinnedShortcut
 import com.bisc.flauncher.data.model.PinnedWebsite
 import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.data.model.SettingsShortcut
+import com.bisc.flauncher.ui.home.dock.DockPanelSurface
 import com.bisc.flauncher.ui.theme.noRippleClickable
 import com.bisc.flauncher.util.looksLikeEmail
 import androidx.compose.ui.res.stringResource
 
 private const val APP_GRID_COLUMNS = 4
 private const val APP_GRID_COLLAPSED_ROWS = 2
-private val FILTER_CHIP_SIZE = 36.dp
-private val FILTER_CHIP_GAP = 6.dp
+private const val SECTION_COLLAPSED_LIMIT = 3
+private val CARD_GAP = 10.dp
 
-/** Search results grouped by category, with filter chips. */
+/** Search results, one rounded card per category (Quick-Search-style), stacked with a small gap. */
 @Composable
 fun SearchResultsColumn(
     query: String,
-    appResults: List<AppInfo>,
     calculatorResult: String?,
+    converterResult: String?,
+    appResults: List<AppInfo>,
     contactResults: List<ContactInfo>,
     settingsResults: List<SettingsShortcut>,
     noteResults: List<Note>,
@@ -84,9 +82,9 @@ fun SearchResultsColumn(
     contactsPermissionGranted: Boolean,
     order: List<SearchCategory>,
     active: Set<SearchCategory>,
-    filter: SearchCategory?,
     aiAppLabel: String?,
-    onToggleFilter: (SearchCategory) -> Unit,
+    cardAppearance: ElementAppearance,
+    categoryColors: Map<SearchCategory, Int?>,
     loadIcon: (ComponentName) -> ImageBitmap?,
     onAppClick: (AppInfo) -> Unit,
     onContactClick: (ContactInfo) -> Unit,
@@ -103,7 +101,11 @@ fun SearchResultsColumn(
     onCalculatorResultClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var appsExpanded by remember(query) { mutableStateOf(false) }
+    var expandedCategories by remember(query) { mutableStateOf(emptySet<SearchCategory>()) }
+    fun isExpanded(category: SearchCategory) = category in expandedCategories
+    fun toggleExpanded(category: SearchCategory) {
+        expandedCategories = if (isExpanded(category)) expandedCategories - category else expandedCategories + category
+    }
 
     val shownAppResults = if (SearchCategory.APPS in active) appResults else emptyList()
     val shownContactResults = if (SearchCategory.CONTACTS in active && contactsPermissionGranted) contactResults else emptyList()
@@ -116,258 +118,170 @@ fun SearchResultsColumn(
     val showWeb = SearchCategory.WEB in active && query.isNotBlank()
     val showMaps = SearchCategory.PLACES in active && query.isNotBlank()
     val showAi = SearchCategory.AI in active && aiAppLabel != null && query.isNotBlank()
-
+    val showEmail = SearchCategory.EMAIL in active && looksLikeEmail(query)
     val hasDirectResults = shownAppResults.isNotEmpty() || shownContactResults.isNotEmpty() || shownSettingsResults.isNotEmpty() ||
         shownNoteResults.isNotEmpty() || shownWebsiteResults.isNotEmpty() || shownShortcutResults.isNotEmpty() ||
         shownFolderResults.isNotEmpty() || shownMapTargetResults.isNotEmpty()
-    val showEmail = SearchCategory.EMAIL in active && looksLikeEmail(query)
 
-    var needsDivider = false
-    fun LazyListScope.divider() {
-        if (needsDivider) item { HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp)) }
-        needsDivider = true
-    }
+    fun categoryColor(category: SearchCategory): Color = categoryColors[category]?.let { Color(it) } ?: category.defaultColor
 
-    Column(modifier = modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        val d = searchDimens(maxWidth)
         LazyColumn(
-            modifier = Modifier.weight(1f).fillMaxWidth(),
-            contentPadding = PaddingValues(vertical = 12.dp)
+            modifier = Modifier.width(d.pillWidth).fillMaxSize(),
+            contentPadding = PaddingValues(vertical = 4.dp),
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(CARD_GAP)
         ) {
-                if (calculatorResult != null) {
-                    divider()
-                    item {
-                        CalculatorResultRow(
-                            expression = query,
-                            result = calculatorResult,
-                            onClick = { onCalculatorResultClick(calculatorResult) }
-                        )
+            if (calculatorResult != null) {
+                item {
+                    ResultCard(cardAppearance) {
+                        CalculatorResultRow(expression = query, result = calculatorResult, onClick = { onCalculatorResultClick(calculatorResult) })
                     }
                 }
-
-                order.forEach { category ->
-                    when (category) {
-                        SearchCategory.APPS -> {
-                            if (shownAppResults.isNotEmpty()) {
-                                divider()
-                                item { SectionTitle(stringResource(R.string.search_section_apps)) }
-                                item {
-                                    AppTileGrid(
-                                        apps = shownAppResults,
-                                        expanded = appsExpanded,
-                                        loadIcon = loadIcon,
-                                        onAppClick = onAppClick,
-                                        onToggleExpand = { appsExpanded = !appsExpanded }
-                                    )
-                                }
-                            }
-                        }
-                        SearchCategory.FOLDERS -> {
-                            if (shownFolderResults.isNotEmpty()) {
-                                divider()
-                                item { SectionTitle(stringResource(R.string.search_section_folders)) }
-                                items(shownFolderResults) { folder ->
-                                    ResultRow(
-                                        leading = { Icon(Icons.Filled.Folder, contentDescription = null, modifier = Modifier.size(28.dp)) },
-                                        title = folder.name,
-                                        onClick = { onFolderClick(folder) }
-                                    )
-                                }
-                            }
-
-                        }
-                        SearchCategory.CONTACTS -> {
-                            if (shownContactResults.isNotEmpty()) {
-                                divider()
-                                item { SectionTitle(stringResource(R.string.search_section_contacts)) }
-                                items(shownContactResults) { contact ->
-                                    ResultRow(
-                                        leading = { Icon(Icons.Filled.Person, contentDescription = null, modifier = Modifier.size(28.dp)) },
-                                        title = contact.displayName,
-                                        onClick = { onContactClick(contact) }
-                                    )
-                                }
-                            }
-
-                        }
-                        SearchCategory.SETTINGS -> {
-                            if (shownSettingsResults.isNotEmpty()) {
-                                divider()
-                                item { SectionTitle(stringResource(R.string.search_section_settings)) }
-                                items(shownSettingsResults) { shortcut ->
-                                    ResultRow(
-                                        leading = { Icon(Icons.Filled.Search, contentDescription = null, modifier = Modifier.size(28.dp)) },
-                                        title = stringResource(shortcut.labelRes),
-                                        onClick = { onSettingsShortcutClick(shortcut) }
-                                    )
-                                }
-                            }
-
-                        }
-                        SearchCategory.NOTES -> {
-                            if (shownNoteResults.isNotEmpty()) {
-                                divider()
-                                item { SectionTitle(stringResource(R.string.search_section_notes)) }
-                                items(shownNoteResults) { note ->
-                                    ResultRow(
-                                        leading = { Icon(Icons.Filled.EditNote, contentDescription = null, modifier = Modifier.size(28.dp)) },
-                                        title = note.title,
-                                        onClick = { onNoteClick(note) }
-                                    )
-                                }
-                            }
-                        }
-                        SearchCategory.WEBSITES -> {
-                            if (shownWebsiteResults.isNotEmpty()) {
-                                divider()
-                                item { SectionTitle(stringResource(R.string.search_section_websites)) }
-                                items(shownWebsiteResults) { website ->
-                                    ResultRow(
-                                        leading = { Icon(Icons.Filled.Bookmark, contentDescription = null, modifier = Modifier.size(28.dp)) },
-                                        title = website.label,
-                                        onClick = { onWebsiteClick(website) }
-                                    )
-                                }
-                            }
-                        }
-                        SearchCategory.PLACES -> {
-                            if (shownMapTargetResults.isNotEmpty()) {
-                                divider()
-                                item { SectionTitle(stringResource(R.string.search_section_places)) }
-                                items(shownMapTargetResults) { target ->
-                                    ResultRow(
-                                        leading = { Icon(Icons.Filled.Place, contentDescription = null, modifier = Modifier.size(28.dp)) },
-                                        title = target.label,
-                                        subtitle = target.address.takeIf { it.isNotBlank() },
-                                        onClick = { onMapTargetClick(target) }
-                                    )
-                                }
-                            }
-
-                            if (showMaps) {
-                                divider()
-                                item {
-                                    CommandRow(
-                                        icon = Icons.Filled.Place,
-                                        text = stringResource(R.string.search_command_maps, query),
-                                        prominent = false,
-                                        onClick = onMapsCommand
-                                    )
-                                }
-                            }
-                        }
-                        SearchCategory.SHORTCUTS -> {
-                            if (shownShortcutResults.isNotEmpty()) {
-                                divider()
-                                item { SectionTitle(stringResource(R.string.search_section_shortcuts)) }
-                                items(shownShortcutResults) { shortcut ->
-                                    ResultRow(
-                                        leading = { Icon(Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, modifier = Modifier.size(28.dp)) },
-                                        title = shortcut.label,
-                                        onClick = { onShortcutClick(shortcut) }
-                                    )
-                                }
-                            }
-
-                        }
-                        SearchCategory.EMAIL -> {
-                            if (showEmail) {
-                                divider()
-                                item {
-                                    CommandRow(
-                                        icon = Icons.Filled.Mail,
-                                        text = stringResource(R.string.search_command_email, query),
-                                        prominent = !hasDirectResults,
-                                        onClick = onEmailCommand
-                                    )
-                                }
-                            }
-                        }
-                        SearchCategory.WEB -> {
-                            if (showWeb) {
-                                divider()
-                                item {
-                                    CommandRow(
-                                        icon = Icons.Filled.Language,
-                                        text = stringResource(R.string.search_command_web, query),
-                                        prominent = !hasDirectResults && !showEmail,
-                                        onClick = onWebCommand
-                                    )
-                                }
-                            }
-                        }
-                        SearchCategory.AI -> {
-                            if (showAi) {
-                                divider()
-                                item {
-                                    CommandRow(
-                                        icon = SearchCategory.AI.icon,
-                                        text = stringResource(R.string.search_command_ai, aiAppLabel.orEmpty(), query),
-                                        prominent = !hasDirectResults && !showEmail && !showWeb,
-                                        onClick = onAiCommand
-                                    )
-                                }
-                            }
-                        }
+            }
+            if (converterResult != null) {
+                item {
+                    ResultCard(cardAppearance) {
+                        CalculatorResultRow(expression = query, result = converterResult, onClick = {})
                     }
                 }
             }
 
-        HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp))
-        SearchFilterRow(
-            categories = order.filter { it != SearchCategory.AI || aiAppLabel != null },
-            selected = filter,
-            onSelect = onToggleFilter
-        )
-    }
-}
-
-@Composable
-private fun SearchFilterRow(categories: List<SearchCategory>, selected: SearchCategory?, onSelect: (SearchCategory) -> Unit) {
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp)) {
-        val fits = maxWidth >= FILTER_CHIP_SIZE * categories.size + FILTER_CHIP_GAP * (categories.size - 1)
-        Row(
-            modifier = Modifier.fillMaxWidth().then(if (fits) Modifier else Modifier.horizontalScroll(rememberScrollState())),
-            horizontalArrangement = if (fits) Arrangement.SpaceEvenly else Arrangement.spacedBy(FILTER_CHIP_GAP),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            categories.forEach { category ->
-                FilterChip(
-                    icon = category.icon,
-                    contentDescription = stringResource(category.filterLabelRes),
-                    selected = category == selected,
-                    anySelected = selected != null,
-                    onClick = { onSelect(category) }
-                )
+            order.forEach { category ->
+                when (category) {
+                    SearchCategory.APPS -> if (shownAppResults.isNotEmpty()) {
+                        item {
+                            ResultCard(cardAppearance) {
+                                SectionTitle(stringResource(R.string.search_section_apps), categoryColor(category))
+                                AppTileGrid(
+                                    apps = shownAppResults,
+                                    expanded = isExpanded(category),
+                                    loadIcon = loadIcon,
+                                    onAppClick = onAppClick,
+                                    onToggleExpand = { toggleExpanded(category) }
+                                )
+                            }
+                        }
+                    }
+                    SearchCategory.FOLDERS -> sectionCard(category, shownFolderResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { folder ->
+                        ResultRow(leading = { Icon(Icons.Filled.Folder, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = folder.name, onClick = { onFolderClick(folder) })
+                    }
+                    SearchCategory.CONTACTS -> sectionCard(category, shownContactResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { contact ->
+                        ResultRow(leading = { Icon(Icons.Filled.Person, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = contact.displayName, onClick = { onContactClick(contact) })
+                    }
+                    SearchCategory.SETTINGS -> sectionCard(category, shownSettingsResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { shortcut ->
+                        ResultRow(leading = { Icon(Icons.Filled.Search, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = stringResource(shortcut.labelRes), onClick = { onSettingsShortcutClick(shortcut) })
+                    }
+                    SearchCategory.NOTES -> sectionCard(category, shownNoteResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { note ->
+                        ResultRow(leading = { Icon(Icons.Filled.EditNote, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = note.title, onClick = { onNoteClick(note) })
+                    }
+                    SearchCategory.WEBSITES -> sectionCard(category, shownWebsiteResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { website ->
+                        ResultRow(leading = { Icon(Icons.Filled.Bookmark, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = website.label, onClick = { onWebsiteClick(website) })
+                    }
+                    SearchCategory.PLACES -> {
+                        sectionCard(category, shownMapTargetResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { target ->
+                            ResultRow(
+                                leading = { Icon(Icons.Filled.Place, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) },
+                                title = target.label,
+                                subtitle = target.address.takeIf { it.isNotBlank() },
+                                onClick = { onMapTargetClick(target) }
+                            )
+                        }
+                        if (showMaps) {
+                            item {
+                                ResultCard(cardAppearance) {
+                                    CommandRow(icon = Icons.Filled.Place, color = categoryColor(category), text = stringResource(R.string.search_command_maps, query), prominent = false, onClick = onMapsCommand)
+                                }
+                            }
+                        }
+                    }
+                    SearchCategory.SHORTCUTS -> sectionCard(category, shownShortcutResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { shortcut ->
+                        ResultRow(leading = { Icon(Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = shortcut.label, onClick = { onShortcutClick(shortcut) })
+                    }
+                    SearchCategory.EMAIL -> if (showEmail) {
+                        item {
+                            ResultCard(cardAppearance) {
+                                CommandRow(icon = Icons.Filled.Mail, color = categoryColor(category), text = stringResource(R.string.search_command_email, query), prominent = !hasDirectResults, onClick = onEmailCommand)
+                            }
+                        }
+                    }
+                    SearchCategory.WEB -> if (showWeb) {
+                        item {
+                            ResultCard(cardAppearance) {
+                                CommandRow(icon = Icons.Filled.Language, color = categoryColor(category), text = stringResource(R.string.search_command_web, query), prominent = !hasDirectResults && !showEmail, onClick = onWebCommand)
+                            }
+                        }
+                    }
+                    SearchCategory.AI -> if (showAi) {
+                        item {
+                            ResultCard(cardAppearance) {
+                                CommandRow(icon = SearchCategory.AI.icon, color = categoryColor(category), text = stringResource(R.string.search_command_ai, aiAppLabel.orEmpty(), query), prominent = !hasDirectResults && !showEmail && !showWeb, onClick = onAiCommand)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 }
 
+/** One category's section as its own card: title + up to [SECTION_COLLAPSED_LIMIT] rows + a "More" toggle. */
+private fun <T> androidx.compose.foundation.lazy.LazyListScope.sectionCard(
+    category: SearchCategory,
+    results: List<T>,
+    color: Color,
+    cardAppearance: ElementAppearance,
+    expanded: Boolean,
+    onToggleExpand: () -> Unit,
+    row: @Composable (T) -> Unit
+) {
+    if (results.isEmpty()) return
+    item {
+        ResultCard(cardAppearance) {
+            SectionTitle(stringResource(category.sectionTitleRes), color)
+            val shown = if (expanded || results.size <= SECTION_COLLAPSED_LIMIT) results else results.take(SECTION_COLLAPSED_LIMIT)
+            shown.forEach { row(it) }
+            if (results.size > SECTION_COLLAPSED_LIMIT) {
+                TextButton(onClick = onToggleExpand) {
+                    Text(stringResource(if (expanded) R.string.search_show_less else R.string.search_show_all))
+                }
+            }
+        }
+    }
+}
+
+private val SearchCategory.sectionTitleRes: Int
+    get() = when (this) {
+        SearchCategory.APPS -> R.string.search_section_apps
+        SearchCategory.FOLDERS -> R.string.search_section_folders
+        SearchCategory.CONTACTS -> R.string.search_section_contacts
+        SearchCategory.SETTINGS -> R.string.search_section_settings
+        SearchCategory.NOTES -> R.string.search_section_notes
+        SearchCategory.WEBSITES -> R.string.search_section_websites
+        SearchCategory.PLACES -> R.string.search_section_places
+        SearchCategory.SHORTCUTS -> R.string.search_section_shortcuts
+        SearchCategory.EMAIL -> R.string.search_section_apps
+        SearchCategory.WEB -> R.string.search_section_apps
+        SearchCategory.AI -> R.string.search_section_apps
+    }
+
 @Composable
-private fun FilterChip(icon: ImageVector, contentDescription: String, selected: Boolean, anySelected: Boolean, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(FILTER_CHIP_SIZE)
-            .clip(CircleShape)
-            .background(LocalContentColor.current.copy(alpha = if (selected) 0.16f else 0f))
-            .noRippleClickable(onClick = onClick),
-        contentAlignment = Alignment.Center
+private fun ResultCard(appearance: ElementAppearance, content: @Composable () -> Unit) {
+    DockPanelSurface(
+        appearance = appearance,
+        shape = RoundedCornerShape(SearchDimens.cornerRadius),
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Icon(
-            icon,
-            contentDescription = contentDescription,
-            tint = LocalContentColor.current.copy(alpha = if (selected) 0.95f else if (anySelected) 0.4f else 0.7f),
-            modifier = Modifier.size(20.dp)
-        )
+        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) { content() }
     }
 }
 
 @Composable
-private fun SectionTitle(text: String) {
+private fun SectionTitle(text: String, color: Color) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelMedium,
-        color = LocalContentColor.current.copy(alpha = 0.7f),
+        color = color,
         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp)
     )
 }
@@ -477,7 +391,7 @@ private fun CalculatorResultRow(expression: String, result: String, onClick: () 
 }
 
 @Composable
-private fun CommandRow(icon: ImageVector, text: String, prominent: Boolean, onClick: () -> Unit) {
+private fun CommandRow(icon: ImageVector, color: Color, text: String, prominent: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -489,11 +403,7 @@ private fun CommandRow(icon: ImageVector, text: String, prominent: Boolean, onCl
             modifier = Modifier.size(36.dp),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                icon,
-                contentDescription = null,
-                tint = if (prominent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Icon(icon, contentDescription = null, tint = color)
         }
         Text(
             text = text,
