@@ -74,13 +74,14 @@ class SettingsRepository @Inject constructor(
 
     val folderCardAppearance: Flow<ElementAppearance> = elementAppearanceFor("folder_card", ElementAppearance(borderEnabled = true))
 
-    val searchOverlayBackgroundOverride: Flow<BackgroundConfig?> = backgroundOverrideFor("search_overlay")
-
     val quickOverviewBackgroundOverride: Flow<BackgroundConfig?> = backgroundOverrideFor("quick_overview")
 
     val keyboardAppearance: Flow<ElementAppearance> = elementAppearanceFor("keyboard_background", ElementAppearance(borderEnabled = true))
 
-    val searchResultCardAppearance: Flow<ElementAppearance> = elementAppearanceFor("search_result_card", ElementAppearance(borderEnabled = true))
+    /** The text search screen's single, full-bleed appearance — covers both the backdrop and the
+     *  results, which now float directly on it instead of sitting in a separate card (see the search
+     *  redesign: the screen has no more layered boxes, just one themed fill behind everything). */
+    val searchAppearance: Flow<ElementAppearance> = elementAppearanceFor("search_appearance", ElementAppearance())
 
     val accentColor: Flow<Int> = dataStore.data.map { prefs ->
         prefs[ACCENT_COLOR_KEY] ?: DEFAULT_ACCENT_COLOR
@@ -174,6 +175,14 @@ class SettingsRepository @Inject constructor(
     }
 
     val searchKeyboardHaptics: Flow<Boolean> = dataStore.data.map { it[SEARCH_KEYBOARD_HAPTICS_KEY] ?: true }
+
+    /** Whether the keyboard (custom or system) shows itself immediately when search opens, vs. staying
+     *  collapsed/unfocused until the user taps the input field — applies to both [SearchKeyboardType]s. */
+    val searchKeyboardAutoOpen: Flow<Boolean> = dataStore.data.map { it[SEARCH_KEYBOARD_AUTO_OPEN_KEY] ?: true }
+
+    suspend fun setSearchKeyboardAutoOpen(enabled: Boolean) {
+        dataStore.edit { it[SEARCH_KEYBOARD_AUTO_OPEN_KEY] = enabled }
+    }
 
     val searchEngine: Flow<SearchEngine> = dataStore.data.map { prefs ->
         prefs[SEARCH_ENGINE_KEY]?.let { runCatching { SearchEngine.valueOf(it) }.getOrNull() }
@@ -454,17 +463,13 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setFolderCardAppearance(appearance: ElementAppearance) = setElementAppearanceFor("folder_card", appearance)
 
-    suspend fun setSearchOverlayBackground(config: BackgroundConfig) = setBackgroundConfigFor("search_overlay", config)
-
-    suspend fun clearSearchOverlayBackground() = clearBackgroundConfigFor("search_overlay")
-
     suspend fun setQuickOverviewBackground(config: BackgroundConfig) = setBackgroundConfigFor("quick_overview", config)
 
     suspend fun clearQuickOverviewBackground() = clearBackgroundConfigFor("quick_overview")
 
     suspend fun setKeyboardAppearance(appearance: ElementAppearance) = setElementAppearanceFor("keyboard_background", appearance)
 
-    suspend fun setSearchResultCardAppearance(appearance: ElementAppearance) = setElementAppearanceFor("search_result_card", appearance)
+    suspend fun setSearchAppearance(appearance: ElementAppearance) = setElementAppearanceFor("search_appearance", appearance)
 
     private fun elementAppearanceFor(prefix: String, default: ElementAppearance, defaultFillColor: Int? = null): Flow<ElementAppearance> =
         dataStore.data.map { prefs -> readElementAppearance(prefs, prefix, default, defaultFillColor) }
@@ -679,6 +684,7 @@ class SettingsRepository @Inject constructor(
         private fun searchIncludeKey(storageKey: String) = booleanPreferencesKey("search_include_$storageKey")
         private val SEARCH_KEYBOARD_SHOW_NUMBER_ROW_KEY = booleanPreferencesKey("search_keyboard_show_number_row")
         private val SEARCH_KEYBOARD_HAPTICS_KEY = booleanPreferencesKey("search_keyboard_haptics")
+        private val SEARCH_KEYBOARD_AUTO_OPEN_KEY = booleanPreferencesKey("search_keyboard_auto_open")
         private val SEARCH_INDEX_SHOW_RAIL_BAR_KEY = booleanPreferencesKey("search_index_show_rail_bar")
         private const val RAIL_PREFIX = "search_alphabet_rail"
         private val APP_LIST_DISPLAY_MODE_KEY = stringPreferencesKey("app_list_display_mode")

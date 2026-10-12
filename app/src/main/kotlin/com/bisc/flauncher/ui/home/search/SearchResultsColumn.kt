@@ -47,7 +47,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -60,7 +59,6 @@ import com.bisc.flauncher.data.model.PinnedShortcut
 import com.bisc.flauncher.data.model.PinnedWebsite
 import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.data.model.SettingsShortcut
-import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.ui.theme.noRippleClickable
 import com.bisc.flauncher.util.looksLikeEmail
 import androidx.compose.ui.res.stringResource
@@ -103,8 +101,6 @@ fun SearchResultsColumn(
     onEmailCommand: () -> Unit,
     onAiCommand: () -> Unit,
     onCalculatorResultClick: (String) -> Unit,
-    cardAppearance: ElementAppearance,
-    shape: Shape,
     modifier: Modifier = Modifier
 ) {
     var appsExpanded by remember(query) { mutableStateOf(false) }
@@ -132,12 +128,11 @@ fun SearchResultsColumn(
         needsDivider = true
     }
 
-    SearchResultsPanel(appearance = cardAppearance, shape = shape, modifier = modifier) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            LazyColumn(
-                modifier = Modifier.weight(1f).fillMaxWidth(),
-                contentPadding = PaddingValues(vertical = 12.dp)
-            ) {
+    Column(modifier = modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+            contentPadding = PaddingValues(vertical = 12.dp)
+        ) {
                 if (calculatorResult != null) {
                     divider()
                     item {
@@ -317,13 +312,12 @@ fun SearchResultsColumn(
                 }
             }
 
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp))
-            SearchFilterRow(
-                categories = order.filter { it != SearchCategory.AI || aiAppLabel != null },
-                selected = filter,
-                onSelect = onToggleFilter
-            )
-        }
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp))
+        SearchFilterRow(
+            categories = order.filter { it != SearchCategory.AI || aiAppLabel != null },
+            selected = filter,
+            onSelect = onToggleFilter
+        )
     }
 }
 

@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.data.settings.IconShape
-import com.bisc.flauncher.ui.home.dock.ScaledDock
 
 /** The keyboard's own bottom action row. */
 @Composable
@@ -40,7 +39,7 @@ fun KeyboardActionBar(
     showingNumbersPage: Boolean,
     handedness: Handedness,
     iconShape: IconShape,
-    d: ScaledDock,
+    d: ScaledSearch,
     background: Color,
     border: Color,
     dividerColor: Color,

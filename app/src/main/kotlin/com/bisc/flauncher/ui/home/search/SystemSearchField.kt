@@ -42,11 +42,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.ElementAppearance
-import com.bisc.flauncher.ui.home.dock.DockDimens
-import com.bisc.flauncher.ui.home.dock.dockDimens
 import com.bisc.flauncher.ui.home.dock.resolveElementColors
 
-/** Search field for the system keyboard: takes focus on entering and opens the keyboard right away. */
+/** Search field for the system keyboard. With [autoOpen], it takes focus and opens the keyboard right
+ *  away; otherwise it waits for the user to tap it (the field's own default tap-to-focus handles that,
+ *  no extra wiring needed). */
 @Composable
 fun SystemSearchField(
     query: String,
@@ -56,6 +56,7 @@ fun SystemSearchField(
     onHome: () -> Unit,
     appearance: ElementAppearance,
     bottomMargin: Dp,
+    autoOpen: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val colors = resolveElementColors(appearance)
@@ -67,17 +68,19 @@ fun SystemSearchField(
         if (query != value.text) value = TextFieldValue(query, TextRange(query.length))
     }
     LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-        keyboard?.show()
+        if (autoOpen) {
+            focusRequester.requestFocus()
+            keyboard?.show()
+        }
     }
 
     BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = DockDimens.horizontalMargin, end = DockDimens.horizontalMargin, bottom = bottomMargin),
+            .padding(start = SearchDimens.horizontalMargin, end = SearchDimens.horizontalMargin, bottom = bottomMargin),
         contentAlignment = Alignment.Center
     ) {
-        val d = dockDimens(maxWidth)
+        val d = searchDimens(maxWidth)
         val shape = RoundedCornerShape(d.cornerRadius)
         CompositionLocalProvider(LocalContentColor provides colors.contentColor) {
             Row(

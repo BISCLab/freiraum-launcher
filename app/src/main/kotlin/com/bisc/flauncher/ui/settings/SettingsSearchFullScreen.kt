@@ -37,7 +37,7 @@ import com.bisc.flauncher.data.model.SearchKeyboardType
 import com.bisc.flauncher.ui.home.search.icon
 import com.bisc.flauncher.ui.home.search.settingsLabelRes
 
-private enum class SearchElementSheet { SEARCH_BACKGROUND, KEYBOARD, RESULT_CARDS }
+private enum class SearchElementSheet { SEARCH_APPEARANCE, KEYBOARD }
 
 /** Settings for the text search: backgrounds, keyboard, categories and search engine. */
 @Composable
@@ -69,10 +69,9 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
             runCatching { context.packageManager.getApplicationLabel(context.packageManager.getApplicationInfo(pkg, 0)).toString() }.getOrNull()
         }
     }
-    val searchOverlayBackgroundOverride by viewModel.searchOverlayBackgroundOverride.collectAsState()
-    val globalBackground by viewModel.globalBackground.collectAsState()
     val keyboardAppearance by viewModel.keyboardAppearance.collectAsState()
-    val resultCardAppearance by viewModel.searchResultCardAppearance.collectAsState()
+    val searchAppearance by viewModel.searchAppearance.collectAsState()
+    val keyboardAutoOpen by viewModel.searchKeyboardAutoOpen.collectAsState()
     val engine by viewModel.searchEngine.collectAsState()
     val savedCustomUrl by viewModel.searchEngineCustomUrl.collectAsState()
     // Typing goes through local state; the stored value arrives too late and would swallow characters.
@@ -86,21 +85,15 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
         SettingsPreferenceGroup(title = stringResource(R.string.settings_search_appearance_label)) {
             SettingsPreference(
                 icon = null,
-                title = layerBackgroundLabel(1, R.string.settings_layer_surface_search),
-                info = stringResource(R.string.settings_search_overlay_summary),
-                onClick = { openSheet = SearchElementSheet.SEARCH_BACKGROUND },
+                title = layerBackgroundLabel(2, R.string.settings_layer_surface_search),
+                info = stringResource(R.string.settings_search_appearance_summary),
+                onClick = { openSheet = SearchElementSheet.SEARCH_APPEARANCE },
                 trailing = null
             )
             SettingsPreference(
                 icon = null,
                 title = layerBackgroundLabel(2, R.string.settings_layer_surface_keyboard),
                 onClick = { openSheet = SearchElementSheet.KEYBOARD },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = null,
-                title = layerBackgroundLabel(2, R.string.settings_layer_surface_result_card),
-                onClick = { openSheet = SearchElementSheet.RESULT_CARDS },
                 trailing = null
             )
         }
@@ -117,6 +110,13 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
                     trailing = null
                 )
             }
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_search_keyboard_auto_open),
+                info = stringResource(R.string.settings_search_keyboard_auto_open_summary),
+                onClick = { viewModel.setSearchKeyboardAutoOpen(!keyboardAutoOpen) },
+                trailing = { Switch(checked = keyboardAutoOpen, onCheckedChange = viewModel::setSearchKeyboardAutoOpen) }
+            )
         }
 
         if (custom) {
@@ -300,20 +300,14 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
     }
 
     when (openSheet) {
-        SearchElementSheet.SEARCH_BACKGROUND -> SettingsEditPage(
-            title = layerBackgroundLabel(1, R.string.settings_layer_surface_search),
+        SearchElementSheet.SEARCH_APPEARANCE -> SettingsEditPage(
+            title = layerBackgroundLabel(2, R.string.settings_layer_surface_search),
             onDismiss = { openSheet = null }
         ) {
-            Text(
-                stringResource(R.string.settings_overlay_backdrop_explainer),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            BackgroundOverrideSection(
-                override = searchOverlayBackgroundOverride,
-                global = globalBackground,
-                onUseGlobal = viewModel::clearSearchOverlayBackground,
-                onCustomColor = viewModel::setSearchOverlayBackground
+            ElementAppearanceSection(
+                appearance = searchAppearance,
+                onAppearanceChange = viewModel::setSearchAppearance,
+                styleGroupTitle = layerBackgroundLabel(2, R.string.settings_layer_surface_search)
             )
         }
         SearchElementSheet.KEYBOARD -> SettingsEditPage(
@@ -324,16 +318,6 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
                 appearance = keyboardAppearance,
                 onAppearanceChange = viewModel::setKeyboardAppearance,
                 styleGroupTitle = layerBackgroundLabel(2, R.string.settings_layer_surface_keyboard)
-            )
-        }
-        SearchElementSheet.RESULT_CARDS -> SettingsEditPage(
-            title = layerBackgroundLabel(2, R.string.settings_layer_surface_result_card),
-            onDismiss = { openSheet = null }
-        ) {
-            ElementAppearanceSection(
-                appearance = resultCardAppearance,
-                onAppearanceChange = viewModel::setSearchResultCardAppearance,
-                styleGroupTitle = layerBackgroundLabel(2, R.string.settings_layer_surface_result_card)
             )
         }
         null -> Unit

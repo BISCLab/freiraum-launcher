@@ -45,7 +45,6 @@ import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.KeyboardLayout
 import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.data.settings.IconShape
-import com.bisc.flauncher.ui.home.dock.DockDimens
 import com.bisc.flauncher.ui.home.dock.resolveElementColors
 
 private const val ROW_1 = "qwertyuiop"
@@ -93,6 +92,7 @@ fun CustomKeyboard(
     handedness: Handedness,
     iconShape: IconShape,
     appearance: ElementAppearance = ElementAppearance(),
+    autoOpen: Boolean = true,
     hapticsEnabled: Boolean = true,
     sparksEnabled: Boolean = true,
     sparkColor: Color = Color(0xFF34D058),
@@ -110,15 +110,19 @@ fun CustomKeyboard(
     val onSpace: () -> Unit = { tick(); onSpace() }
     val onHome: () -> Unit = { tick(); onHome() }
     var showingNumbersPage by remember { mutableStateOf(false) }
+    // Seeded from autoOpen once per search session, not re-synced if the setting changes later — see
+    // SearchDimens/searchKeyboardAutoOpen: when false, the keyboard starts collapsed to just the input
+    // pill and expands on tap, instead of showing the full key grid immediately.
+    var expanded by remember { mutableStateOf(autoOpen) }
     val colors = resolveElementColors(appearance)
 
     BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = DockDimens.horizontalMargin, end = DockDimens.horizontalMargin, bottom = DockDimens.bottomMargin),
+            .padding(start = SearchDimens.horizontalMargin, end = SearchDimens.horizontalMargin, bottom = SearchDimens.bottomMargin),
         contentAlignment = Alignment.Center
     ) {
-        val d = com.bisc.flauncher.ui.home.dock.dockDimens(maxWidth)
+        val d = searchDimens(maxWidth)
         val keyShape = RoundedCornerShape(d.cornerRadius)
 
         CompositionLocalProvider(LocalContentColor provides colors.contentColor) {
@@ -149,8 +153,10 @@ fun CustomKeyboard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = CONTENT_INSET, end = CONTENT_INSET, top = CONTENT_INSET)
+                    .then(if (!expanded) Modifier.clickable { expanded = true } else Modifier)
             )
 
+            if (expanded) {
             Column(
                 modifier = Modifier.padding(start = CONTENT_INSET, end = CONTENT_INSET),
                 verticalArrangement = Arrangement.spacedBy(ROW_GAP)
@@ -206,6 +212,7 @@ fun CustomKeyboard(
                     top = ROW_GAP
                 )
             )
+            }
         }
         if (sparksEnabled) KeySparkOverlay(sparks, sparkColor, Modifier.matchParentSize())
         }

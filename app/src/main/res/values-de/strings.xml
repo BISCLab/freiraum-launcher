@@ -189,9 +189,8 @@
     <string name="settings_layer_surface_quick_overview">Schnellübersicht</string>
     <string name="settings_quick_overview_backdrop_summary">Vollbildhintergrund hinter der Schnellübersicht. Verhält sich wie ein Ebene-1-Hintergrund, ein Bild ist wählbar. Standardmäßig transparent.</string>
     <string name="settings_overlay_backdrop_explainer">Der Hintergrund füllt den gesamten Bildschirm hinter der Ansicht und verhält sich daher wie ein Ebene-1-Hintergrund. Neben Seiten akzeptieren nur diese Hintergründe ein Bild. Darüberliegende Flächen (Ergebnisse, Tastatur, Seitenleiste) bleiben Ebene-2-Elemente mit eigenem Hintergrund.</string>
-    <string name="settings_search_overlay_summary">Vollbildhintergrund hinter der Textsuche. Verhält sich wie ein Ebene-1-Hintergrund, ein Bild ist wählbar. Standardmäßig transparent.</string>
+    <string name="settings_search_appearance_summary">Das Erscheinungsbild des gesamten Suchbildschirms — Hintergrund und Ergebnisse schweben direkt darauf, keine separaten Karten mehr.</string>
     <string name="settings_layer_surface_keyboard">Tastatur</string>
-    <string name="settings_layer_surface_result_card">Suchergebnisse</string>
     <string name="settings_layer_surface_app_list">App-Liste</string>
     <string name="settings_layer_surface_widget">Widget</string>
     <string name="settings_layer_surface_apps_row">App-Zeile</string>
@@ -477,6 +476,8 @@
     <string name="settings_search_keyboard_haptics_summary">Kurze Vibration bei jedem Tastendruck über das Berührungsfeedback von Android. Erfordert Einstellungen > Ton &amp; Vibration > Vibration &amp; Haptik > Berührungsfeedback (bei manchen Geräten unter Vibrationsstärke).</string>
     <string name="settings_search_keyboard_show_number_row">Zahlenreihe immer anzeigen</string>
     <string name="settings_search_keyboard_show_number_row_summary">Aus: Zahlen sind über die 123-Taste erreichbar.</string>
+    <string name="settings_search_keyboard_auto_open">Tastatur automatisch öffnen</string>
+    <string name="settings_search_keyboard_auto_open_summary">Aus: Die Suche öffnet nur mit dem Eingabefeld; antippen zeigt die Tastatur.</string>
     <string name="search_filter_ai">KI-App</string>
     <string name="settings_search_include_ai">KI-App</string>
     <string name="search_command_ai">%1$s fragen: %2$s</string>
