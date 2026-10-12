@@ -7,11 +7,10 @@ import androidx.compose.ui.unit.dp
  * Geometry of the dock — a proportionally-scaled port of the user's Figma dock redesign ("Ohne Namen"
  * file, `dock-bar` frame, 390dp reference width): every dimension below is the measured Figma value at
  * that reference width, and [scaled] multiplies all of them by the same factor so the whole dock scales
- * together exactly like the Figma frame would at a different width, rather than icons staying a fixed
- * size while only the pill stretches. [barHeight] is the *flat* bar height — icons/orb both center on it
- * via plain `Alignment.Center`, since [DockPillShape]'s own hill-extra padding is symmetric top/bottom
- * (see that class's doc comment for why `Alignment.Center` still lands on the bar's own middle despite
- * the Box being taller than the flat bar to make room for the hill).
+ * together exactly like the Figma frame would at a different width. The bar is now a flat, uniform row —
+ * every slot (app or power button) the same size — with no special center element, so there's no longer a
+ * separate "hub" size/gap to track; see [DockCornerStyle]/[LocalDockCornerRadius] for the bar's own corner
+ * radius, which is a user choice rather than a Figma-derived constant.
  */
 object DockDimens {
     val horizontalMargin = 6.dp
@@ -20,34 +19,32 @@ object DockDimens {
 
     val contentGap = 8.dp
 
-    // Figma reference, all at the 390dp pill width. referenceBarHeight (71dp) is the pill's flat-sided
-    // height measured directly off Figma's own rendered PNG — not the silhouette path's full 92dp
-    // bounding box, which includes the hump's overflow above/below the flat region.
+    // Figma reference, all at the 390dp pill width.
     private const val REFERENCE_PILL_WIDTH = 390f
     private val referencePillWidth = REFERENCE_PILL_WIDTH.dp
-    val referenceBarHeight = 71.dp
-    private val referenceInnerHorizontalPadding = 8.dp
-    private val referenceItemGap = 15.5.dp
-    private val referenceIconSize = 60.dp
-    private val referenceIconCornerRadius = 19.dp
-    private val referenceHubSize = 72.dp
+    private val referenceBarHeight = 84.dp
+    private val referenceInnerHorizontalPadding = 12.dp
+    private val referenceIconSize = 56.dp
+    private val referenceIconCornerRadius = 16.dp
 
     fun scaled(availableWidth: Dp): ScaledDock {
         val scale = (availableWidth / referencePillWidth).coerceIn(0.85f, 1.6f)
+        val iconSize = referenceIconSize * scale
+        val barHeight = referenceBarHeight * scale
         return ScaledDock(
             scale = scale,
             pillWidth = availableWidth,
-            barHeight = referenceBarHeight * scale,
-            cornerRadius = (referenceBarHeight / 2) * scale,
+            barHeight = barHeight,
+            cornerRadius = DockCornerStyle.ROUNDED.radius,
             innerHorizontalPadding = referenceInnerHorizontalPadding * scale,
-            innerVerticalPadding = 14.dp * scale,
-            itemSpacing = referenceItemGap * scale,
-            hubGap = referenceItemGap * scale,
-            iconSize = referenceIconSize * scale,
-            buttonSize = referenceHubSize * scale,
+            iconSize = iconSize,
             iconCornerRadius = referenceIconCornerRadius * scale,
-            buttonSlotWidth = referenceHubSize * scale + referenceItemGap * 2 * scale,
-            hubSize = referenceHubSize * scale
+            // Kept for the other dock-matched surfaces that size themselves off these (the keyboard's own
+            // action bar/buttons, the app-list overlay's floating search button) — there's no more special
+            // "hub" button to derive them from, so they just alias to the now-uniform icon size/padding.
+            buttonSize = iconSize,
+            itemSpacing = referenceInnerHorizontalPadding * scale,
+            innerVerticalPadding = ((barHeight - iconSize) / 2).coerceAtLeast(0.dp)
         )
     }
 }
@@ -73,12 +70,9 @@ data class ScaledDock(
     val barHeight: Dp,
     val cornerRadius: Dp,
     val innerHorizontalPadding: Dp,
-    val innerVerticalPadding: Dp,
-    val itemSpacing: Dp,
-    val hubGap: Dp,
     val iconSize: Dp,
-    val buttonSize: Dp,
     val iconCornerRadius: Dp,
-    val buttonSlotWidth: Dp,
-    val hubSize: Dp
+    val buttonSize: Dp = iconSize,
+    val itemSpacing: Dp = innerHorizontalPadding,
+    val innerVerticalPadding: Dp = 0.dp
 )

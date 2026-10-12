@@ -1,17 +1,19 @@
 package com.bisc.flauncher.ui.settings
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,63 +21,87 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
-import com.bisc.flauncher.data.model.ColorFill
-import com.bisc.flauncher.data.model.DockTapAction
-import com.bisc.flauncher.data.model.ElementAppearance
-import com.bisc.flauncher.data.model.ElementFillMode
+import com.bisc.flauncher.data.model.DockPowerButtonAction
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.ui.home.HomeViewModel
+import com.bisc.flauncher.ui.home.dock.DockCornerStyle
+import com.bisc.flauncher.ui.home.dock.DockSlotUi
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
-import com.bisc.flauncher.ui.home.dock.resolveElementColors
-import com.bisc.flauncher.ui.theme.SearchButtonBorderColor
-import com.bisc.flauncher.ui.theme.SearchButtonSurfaceColor
+import com.bisc.flauncher.ui.home.dock.defaultIcon
 
-/** Everything about the dock pill, consolidated in one place. */
+/**
+ * Everything about the dock, consolidated in one place. The dock is a flexible-length list of slots now
+ * (no more fixed 4) — each either a pinned app or a power button (a destination like text search, replacing
+ * what the old single Hub orb used to dispatch by gesture). Per-slot background/icon color overrides exist
+ * in the data model ([HomeViewModel.setDockSlotColors]) but aren't exposed here yet — this screen covers
+ * add/remove/reorder/assign, the bar's own background (Layer 2, same per-row appearance every dock-style
+ * row has) and its corner style.
+ */
 @Composable
 fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val quickLaunchSlots by viewModel.quickLaunchSlots.collectAsState()
+    val dockSlots by viewModel.dockSlots.collectAsState()
     val browsableApps by viewModel.browsableApps.collectAsState()
-    val singleTapAction by viewModel.dockSingleTapAction.collectAsState()
-    val doubleTapAction by viewModel.dockDoubleTapAction.collectAsState()
-    val matchWidgetCorners by viewModel.dockMatchWidgetCorners.collectAsState()
-    val searchButtonAppearance by viewModel.dockSearchButtonAppearance.collectAsState()
+    val cornerStyle by viewModel.dockCornerStyle.collectAsState()
     val pages by viewModel.pages.collectAsState()
     val rowsByPage by viewModel.rowsByPage.collectAsState()
     val homePage = pages.find { it.isHome }
     val dockRow = homePage?.let { rowsByPage[it.id] }?.find { it.type == PageRowType.SEARCH_BAR }
 
-    var pickingSlotIndex by remember { mutableStateOf<Int?>(null) }
+    var pickingAppForSlot by remember { mutableStateOf<Int?>(null) }
+    var pickingPowerButtonForSlot by remember { mutableStateOf<Int?>(null) }
+    var addingPowerButton by remember { mutableStateOf(false) }
     var showBackgroundSheet by remember { mutableStateOf(false) }
-    var showSearchButtonSheet by remember { mutableStateOf(false) }
-    var pickingTapAction by remember { mutableStateOf<DockTap?>(null) }
+    var pickingCornerStyle by remember { mutableStateOf(false) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_dock), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup(title = stringResource(R.string.settings_dock_slots_label)) {
-            quickLaunchSlots.forEach { slot ->
+            dockSlots.forEach { slot ->
                 SettingsPreference(
                     icon = null,
                     title = stringResource(R.string.settings_dock_slot_title, slot.index + 1),
-                    summary = slot.label ?: stringResource(R.string.settings_dock_slot_not_set),
-                    onClick = { pickingSlotIndex = slot.index },
-                    trailing = if (slot.componentName != null) {
-                        {
-                            IconButton(onClick = { viewModel.setDockSlot(slot.index, null) }) {
-                                Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.settings_dock_slot_clear))
+                    summary = dockSlotSummary(slot),
+                    onClick = {
+                        when (slot) {
+                            is DockSlotUi.App -> pickingAppForSlot = slot.index
+                            is DockSlotUi.PowerButton -> pickingPowerButtonForSlot = slot.index
+                        }
+                    },
+                    trailing = {
+                        Row {
+                            IconButton(onClick = { viewModel.moveDockSlot(slot.index, -1) }) {
+                                Icon(Icons.Filled.KeyboardArrowUp, contentDescription = stringResource(R.string.settings_dock_slot_move_up))
+                            }
+                            IconButton(onClick = { viewModel.moveDockSlot(slot.index, 1) }) {
+                                Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.settings_dock_slot_move_down))
+                            }
+                            IconButton(onClick = { viewModel.removeDockSlot(slot.index) }) {
+                                Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.settings_dock_slot_remove))
                             }
                         }
-                    } else {
-                        null
                     }
                 )
             }
+        }
+
+        SettingsPreferenceGroup {
+            SettingsPreference(
+                icon = Icons.Filled.Add,
+                title = stringResource(R.string.settings_dock_add_app_slot),
+                onClick = viewModel::addDockAppSlot,
+                trailing = null
+            )
+            SettingsPreference(
+                icon = Icons.Filled.Add,
+                title = stringResource(R.string.settings_dock_add_power_button_slot),
+                onClick = { addingPowerButton = true },
+                trailing = null
+            )
         }
 
         if (dockRow != null) {
@@ -88,26 +114,12 @@ fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavig
                 )
                 SettingsPreference(
                     icon = null,
-                    title = layerBackgroundLabel(3, R.string.settings_layer_surface_search_button),
-                    onClick = { showSearchButtonSheet = true },
+                    title = stringResource(R.string.settings_dock_corner_style_label),
+                    summary = dockCornerStyleLabel(cornerStyle),
+                    onClick = { pickingCornerStyle = true },
                     trailing = null
                 )
             }
-        }
-
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_dock_tap_actions_label)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_dock_single_tap_label),
-                summary = dockTapActionLabel(singleTapAction),
-                onClick = { pickingTapAction = DockTap.SINGLE }
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_dock_double_tap_label),
-                summary = dockTapActionLabel(doubleTapAction),
-                onClick = { pickingTapAction = DockTap.DOUBLE }
-            )
         }
 
         SettingsPreferenceGroup {
@@ -126,15 +138,35 @@ fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavig
         }
     }
 
-    pickingSlotIndex?.let { index ->
+    pickingAppForSlot?.let { index ->
         ShortcutSourceAppSheet(
             apps = browsableApps,
             loadIcon = viewModel::loadIcon,
             onAppSelected = { app ->
-                viewModel.setDockSlot(index, app.componentName)
-                pickingSlotIndex = null
+                viewModel.setDockAppSlot(index, app.componentName)
+                pickingAppForSlot = null
             },
-            onDismiss = { pickingSlotIndex = null }
+            onDismiss = { pickingAppForSlot = null }
+        )
+    }
+
+    pickingPowerButtonForSlot?.let { index ->
+        PowerButtonActionSheet(
+            onSelected = { action ->
+                viewModel.setDockPowerButtonSlot(index, action)
+                pickingPowerButtonForSlot = null
+            },
+            onDismiss = { pickingPowerButtonForSlot = null }
+        )
+    }
+
+    if (addingPowerButton) {
+        PowerButtonActionSheet(
+            onSelected = { action ->
+                viewModel.addDockPowerButtonSlot(action)
+                addingPowerButton = false
+            },
+            onDismiss = { addingPowerButton = false }
         )
     }
 
@@ -146,92 +178,64 @@ fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavig
                 onAppearanceChange = { appearance -> viewModel.setRowAppearance(dockRow, appearance) },
                 styleGroupTitle = layerLabel
             )
-            SettingsPreferenceGroup {
+        }
+    }
+
+    if (pickingCornerStyle) {
+        DockCornerStyleSheet(
+            current = cornerStyle,
+            onSelected = { style -> viewModel.setDockCornerStyle(style); pickingCornerStyle = false },
+            onDismiss = { pickingCornerStyle = false }
+        )
+    }
+}
+
+@Composable
+private fun dockSlotSummary(slot: DockSlotUi): String = when (slot) {
+    is DockSlotUi.App -> slot.label ?: stringResource(R.string.settings_dock_slot_not_set)
+    is DockSlotUi.PowerButton -> dockPowerButtonActionLabel(slot.action)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PowerButtonActionSheet(onSelected: (DockPowerButtonAction) -> Unit, onDismiss: () -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(modifier = Modifier.padding(vertical = 8.dp)) {
+            DockPowerButtonAction.entries.forEach { action ->
                 SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_dock_widget_corners),
-                    info = stringResource(R.string.settings_dock_widget_corners_summary),
-                    onClick = { viewModel.setDockMatchWidgetCorners(!matchWidgetCorners) },
-                    trailing = { Switch(checked = matchWidgetCorners, onCheckedChange = viewModel::setDockMatchWidgetCorners) }
+                    icon = action.defaultIcon(),
+                    title = dockPowerButtonActionLabel(action),
+                    onClick = { onSelected(action) },
+                    trailing = null
                 )
             }
         }
     }
-
-    if (showSearchButtonSheet && dockRow != null) {
-        val layerLabel = layerBackgroundLabel(3, R.string.settings_layer_surface_search_button)
-        SettingsEditPage(title = layerLabel, onDismiss = { showSearchButtonSheet = false }) {
-            ElementAppearanceSection(
-                appearance = searchButtonAppearance ?: automaticSearchButtonAppearance(dockRow.appearance()),
-                onAppearanceChange = viewModel::setDockSearchButtonAppearance,
-                styleGroupTitle = layerLabel
-            )
-            if (searchButtonAppearance != null) {
-                SettingsPreferenceGroup {
-                    SettingsPreference(
-                        icon = null,
-                        title = stringResource(R.string.settings_element_color_reset),
-                        onClick = viewModel::resetDockSearchButtonAppearance,
-                        trailing = null
-                    )
-                }
-            }
-        }
-    }
-
-    pickingTapAction?.let { which ->
-        val current = if (which == DockTap.SINGLE) singleTapAction else doubleTapAction
-        DockTapActionSheet(
-            current = current,
-            onSelected = { action ->
-                if (which == DockTap.SINGLE) viewModel.setDockSingleTapAction(action) else viewModel.setDockDoubleTapAction(action)
-                pickingTapAction = null
-            },
-            onDismiss = { pickingTapAction = null }
-        )
-    }
-
 }
-
-/** A starting point for the search button editor that matches its current automatic light/dark look. */
-@Composable
-private fun automaticSearchButtonAppearance(dockAppearance: ElementAppearance): ElementAppearance {
-    val surfaceDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
-    val dockColors = resolveElementColors(dockAppearance, surfaceDark)
-    val usesLightDetailing = dockAppearance.fillMode != ElementFillMode.NONE && dockColors.solidBackground.luminance() > 0.5f
-    return if (usesLightDetailing) {
-        ElementAppearance(
-            fill = ColorFill(color = SearchButtonSurfaceColor.toArgb()),
-            borderEnabled = true,
-            borderColor = SearchButtonBorderColor.toArgb(),
-            contentColor = SearchButtonBorderColor.copy(alpha = 0.8f).toArgb()
-        )
-    } else {
-        ElementAppearance(
-            fill = ColorFill(color = dockColors.contentColor.toArgb()),
-            opacity = 0.12f,
-            contentColor = dockColors.contentColor.toArgb()
-        )
-    }
-}
-
-private enum class DockTap { SINGLE, DOUBLE }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DockTapActionSheet(current: DockTapAction, onSelected: (DockTapAction) -> Unit, onDismiss: () -> Unit) {
+private fun DockCornerStyleSheet(current: DockCornerStyle, onSelected: (DockCornerStyle) -> Unit, onDismiss: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(modifier = Modifier.padding(vertical = 8.dp)) {
-            DockTapAction.entries.forEach { action ->
-                RadioPreference(dockTapActionLabel(action), action, current, onSelected)
+            DockCornerStyle.entries.forEach { style ->
+                RadioPreference(dockCornerStyleLabel(style), style, current, onSelected)
             }
         }
     }
 }
 
 @Composable
-private fun dockTapActionLabel(action: DockTapAction): String = when (action) {
-    DockTapAction.NONE -> stringResource(R.string.settings_dock_tap_action_none)
-    DockTapAction.QUICK_OVERVIEW -> stringResource(R.string.settings_dock_tap_action_overview)
-    DockTapAction.FULL_SEARCH -> stringResource(R.string.settings_dock_tap_action_search)
+private fun dockPowerButtonActionLabel(action: DockPowerButtonAction): String = when (action) {
+    DockPowerButtonAction.TEXT_SEARCH -> stringResource(R.string.settings_dock_power_button_text_search)
+    DockPowerButtonAction.CATEGORY_SEARCH -> stringResource(R.string.settings_dock_power_button_category_search)
+    DockPowerButtonAction.APP_DRAWER -> stringResource(R.string.settings_dock_power_button_app_drawer)
+    DockPowerButtonAction.APP_LIST -> stringResource(R.string.settings_dock_power_button_app_list)
+}
+
+@Composable
+private fun dockCornerStyleLabel(style: DockCornerStyle): String = when (style) {
+    DockCornerStyle.SHARP -> stringResource(R.string.settings_dock_corner_style_sharp)
+    DockCornerStyle.ROUNDED -> stringResource(R.string.settings_dock_corner_style_rounded)
+    DockCornerStyle.FULLY_ROUND -> stringResource(R.string.settings_dock_corner_style_fully_round)
 }

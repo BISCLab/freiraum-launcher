@@ -174,7 +174,7 @@ fun HomeScreen(
     val availableShortcuts by viewModel.availableShortcuts.collectAsState()
     val iconShape by viewModel.iconShape.collectAsState()
     val railAppearance by viewModel.searchAlphabetRailAppearance.collectAsState()
-    val quickLaunchSlots by viewModel.quickLaunchSlots.collectAsState()
+    val dockSlots by viewModel.dockSlots.collectAsState()
     val chargingAnimationEnabled by viewModel.chargingAnimationEnabled.collectAsState()
     val chargingAnimationColor by viewModel.chargingAnimationColor.collectAsState()
     val searchOverlayBackground by viewModel.searchOverlayBackground.collectAsState()
@@ -505,12 +505,6 @@ fun HomeScreen(
                                 onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) },
                                 handedness = handedness,
                                 iconShape = iconShape,
-                                onSearchBarTap = { viewModel.executeDockTapAction(com.bisc.flauncher.data.model.DockTapAction.FULL_SEARCH) },
-                                onSearchBarDoubleTap = { viewModel.executeDockTapAction(com.bisc.flauncher.data.model.DockTapAction.QUICK_OVERVIEW) },
-                                onSearchBarSwipeUp = viewModel::openAppList,
-                                quickLaunchSlots = quickLaunchSlots,
-                                loadQuickLaunchIcon = viewModel::loadIcon,
-                                onQuickLaunchClick = { componentName -> launchApp(context, componentName) },
                                 accentColor = Color(accentColor),
                                 modifier = contentModifier.graphicsLayer { alpha = pageContentAlpha }
                             ) } }
@@ -530,17 +524,18 @@ fun HomeScreen(
             ?.let { rowsByPage[it.id] }
             ?.find { it.type == PageRowType.SEARCH_BAR }
         if (homeDockRow != null && !(folderOpen && folderHideDock)) {
+            // Corner style comes from LocalDockCornerRadius, provided app-wide in MainActivity from the
+            // user's dockCornerStyle setting — same composition local every other dock-matched surface
+            // (the search keyboard's action bar, etc.) already reads via dockDimens().
             Box(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
                 SearchBar(
-                    onHubTap = { viewModel.executeDockTapAction(com.bisc.flauncher.data.model.DockTapAction.FULL_SEARCH) },
-                    onHubSwipeUp = viewModel::openAppList,
-                    onHubCategorySearch = { viewModel.executeDockTapAction(com.bisc.flauncher.data.model.DockTapAction.QUICK_OVERVIEW) },
-                    handedness = handedness,
+                    slots = dockSlots,
+                    onAppClick = { componentName -> launchApp(context, componentName) },
+                    onUnsetAppClick = { onNavigateToSettings() },
+                    onPowerButtonClick = viewModel::executeDockPowerButton,
                     iconShape = iconShape,
                     appearance = homeDockRow.appearance(),
-                    quickLaunchSlots = quickLaunchSlots,
-                    loadQuickLaunchIcon = viewModel::loadIcon,
-                    onQuickLaunchClick = { componentName -> launchApp(context, componentName) }
+                    loadQuickLaunchIcon = viewModel::loadIcon
                 )
             }
         }

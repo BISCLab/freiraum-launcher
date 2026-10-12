@@ -415,18 +415,23 @@
 
     <string name="settings_section_dock">Dock</string>
     <string name="settings_card_dock_subtitle">Schnellstartsymbole, Hintergrund, Tippaktionen, Ecken</string>
-    <string name="settings_dock_slots_label">Schnellstartsymbole</string>
+    <string name="settings_dock_slots_label">Dock-Plätze</string>
     <string name="settings_dock_slot_title">Platz %1$d</string>
     <string name="settings_dock_slot_not_set">Nicht festgelegt</string>
     <string name="settings_dock_slot_clear">Platz leeren</string>
-    <string name="settings_dock_tap_actions_label">Tippaktionen</string>
-    <string name="settings_dock_single_tap_label">Einfaches Tippen</string>
-    <string name="settings_dock_double_tap_label">Doppeltippen</string>
-    <string name="settings_dock_tap_action_none">Keine Aktion</string>
-    <string name="settings_dock_tap_action_overview">Schnellübersicht</string>
-    <string name="settings_dock_tap_action_search">Textsuche</string>
-    <string name="settings_dock_widget_corners">Ecken wie Widgets</string>
-    <string name="settings_dock_widget_corners_summary">Dock und zugehörige Flächen verwenden den Eckenradius der Widgets statt der Kapselform.</string>
+    <string name="settings_dock_slot_move_up">Nach oben</string>
+    <string name="settings_dock_slot_move_down">Nach unten</string>
+    <string name="settings_dock_slot_remove">Platz entfernen</string>
+    <string name="settings_dock_add_app_slot">App hinzufügen</string>
+    <string name="settings_dock_add_power_button_slot">Power-Button hinzufügen</string>
+    <string name="settings_dock_power_button_text_search">Volltextsuche</string>
+    <string name="settings_dock_power_button_category_search">Kategoriesuche</string>
+    <string name="settings_dock_power_button_app_drawer">App-Drawer (Raster)</string>
+    <string name="settings_dock_power_button_app_list">App-Liste</string>
+    <string name="settings_dock_corner_style_label">Eckenstil</string>
+    <string name="settings_dock_corner_style_sharp">Eckig</string>
+    <string name="settings_dock_corner_style_rounded">Abgerundet</string>
+    <string name="settings_dock_corner_style_fully_round">Komplett rund</string>
 
     <string name="settings_section_search_overview">Schnellübersicht</string>
     <string name="settings_card_search_overview_subtitle">Reihenfolge der Seitenleiste, Kategorien, Hintergrund</string>

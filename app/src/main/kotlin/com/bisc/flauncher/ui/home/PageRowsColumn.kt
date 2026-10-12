@@ -19,8 +19,6 @@ import com.bisc.flauncher.data.model.PinnedWebsite
 import com.bisc.flauncher.data.model.SavedMapTarget
 import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.data.settings.IconShape
-import com.bisc.flauncher.ui.home.dock.QuickLaunchSlot
-import com.bisc.flauncher.ui.home.dock.defaultQuickLaunchSlots
 
 /**
  * One page's content: [rows] (already sorted by orderIndex) stacked top to bottom, no scrolling — a
@@ -44,12 +42,6 @@ fun PageRowsColumn(
     onExecuteAction: (GestureAction) -> Unit = {},
     handedness: Handedness = Handedness.RIGHT,
     iconShape: IconShape = IconShape.ROUNDED_SQUARE,
-    onSearchBarTap: () -> Unit = {},
-    onSearchBarDoubleTap: () -> Unit = {},
-    onSearchBarSwipeUp: () -> Unit = {},
-    quickLaunchSlots: List<QuickLaunchSlot> = defaultQuickLaunchSlots,
-    loadQuickLaunchIcon: (ComponentName) -> ImageBitmap? = { null },
-    onQuickLaunchClick: (ComponentName) -> Unit = {},
     accentColor: Color = Color(0xFF3B82F6),
     modifier: Modifier = Modifier
 ) {
@@ -74,12 +66,6 @@ fun PageRowsColumn(
                     onExecuteAction = onExecuteAction,
                     handedness = handedness,
                     iconShape = iconShape,
-                    onSearchBarTap = onSearchBarTap,
-                    onSearchBarDoubleTap = onSearchBarDoubleTap,
-                    onSearchBarSwipeUp = onSearchBarSwipeUp,
-                    quickLaunchSlots = quickLaunchSlots,
-                    loadQuickLaunchIcon = loadQuickLaunchIcon,
-                    onQuickLaunchClick = onQuickLaunchClick,
                     accentColor = accentColor
                 )
             }

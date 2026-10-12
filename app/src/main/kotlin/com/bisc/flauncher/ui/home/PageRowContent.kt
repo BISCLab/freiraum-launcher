@@ -49,9 +49,6 @@ import com.bisc.flauncher.data.model.clockTimeAction
 import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.data.settings.IconShape
 import com.bisc.flauncher.ui.home.dock.DockDimens
-import com.bisc.flauncher.ui.home.dock.QuickLaunchSlot
-import com.bisc.flauncher.ui.home.dock.SearchBar
-import com.bisc.flauncher.ui.home.dock.defaultQuickLaunchSlots
 import com.bisc.flauncher.ui.home.widgets.ClockWidget
 import com.bisc.flauncher.ui.home.widgets.MusicWidget
 import com.bisc.flauncher.ui.home.widgets.NotesWidget
@@ -79,12 +76,6 @@ fun PageRowContent(
     onExecuteAction: (GestureAction) -> Unit = {},
     handedness: Handedness = Handedness.RIGHT,
     iconShape: IconShape = IconShape.ROUNDED_SQUARE,
-    onSearchBarTap: () -> Unit = {},
-    onSearchBarDoubleTap: () -> Unit = {},
-    onSearchBarSwipeUp: () -> Unit = {},
-    quickLaunchSlots: List<QuickLaunchSlot> = defaultQuickLaunchSlots,
-    loadQuickLaunchIcon: (ComponentName) -> ImageBitmap? = { null },
-    onQuickLaunchClick: (ComponentName) -> Unit = {},
     onSystemWidgetViewReady: ((android.view.View) -> Unit)? = null,
     accentColor: Color = Color(0xFF3B82F6)
 ) {
@@ -149,20 +140,11 @@ fun PageRowContent(
                 onShortcutClick = onShortcutClick
             )
         }
-        PageRowType.SEARCH_BAR -> {
-            SearchBar(
-                onHubTap = onSearchBarTap,
-                onHubSwipeUp = onSearchBarSwipeUp,
-                onHubCategorySearch = onSearchBarDoubleTap,
-                handedness = handedness,
-                iconShape = iconShape,
-                appearance = row.appearance(),
-                accentColor = accentColor,
-                quickLaunchSlots = quickLaunchSlots,
-                loadQuickLaunchIcon = loadQuickLaunchIcon,
-                onQuickLaunchClick = onQuickLaunchClick
-            )
-        }
+        // The dock never actually renders inline as a row — HomeScreen strips this row out before handing
+        // the rest to PageRowsColumn and renders the floating dock itself, directly, as its own layer
+        // outside the pager (see HomeScreen's own SearchBar call). This row only still exists as a marker
+        // carrying the dock's own per-row appearance (row.appearance()); PageRowType must stay exhaustive.
+        PageRowType.SEARCH_BAR -> Unit
     }
 }
 
