@@ -196,11 +196,6 @@ class HomeViewModel @Inject constructor(
     val globalBackground: StateFlow<BackgroundConfig> =
         settingsRepository.globalBackground.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig())
 
-    val searchOverlayBackground: StateFlow<BackgroundConfig> =
-        combine(settingsRepository.searchOverlayBackgroundOverride, settingsRepository.globalBackground) { override, global ->
-            override ?: global
-        }.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig())
-
     val quickOverviewBackground: StateFlow<BackgroundConfig> =
         combine(settingsRepository.quickOverviewBackgroundOverride, settingsRepository.globalBackground) { override, global ->
             override ?: global
@@ -239,8 +234,11 @@ class HomeViewModel @Inject constructor(
     val keyboardAppearance: StateFlow<ElementAppearance> =
         settingsRepository.keyboardAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
 
-    val searchResultCardAppearance: StateFlow<ElementAppearance> =
-        settingsRepository.searchResultCardAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
+    val searchAppearance: StateFlow<ElementAppearance> =
+        settingsRepository.searchAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance())
+
+    val searchKeyboardAutoOpen: StateFlow<Boolean> =
+        settingsRepository.searchKeyboardAutoOpen.stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     // ---- Gestures ----
 

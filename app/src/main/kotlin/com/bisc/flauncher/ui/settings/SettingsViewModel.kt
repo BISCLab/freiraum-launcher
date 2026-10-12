@@ -284,14 +284,14 @@ class SettingsViewModel @Inject constructor(
     val keyboardAppearance: StateFlow<ElementAppearance> =
         repository.keyboardAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
 
-    val searchResultCardAppearance: StateFlow<ElementAppearance> =
-        repository.searchResultCardAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
+    val searchAppearance: StateFlow<ElementAppearance> =
+        repository.searchAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance())
+
+    val searchKeyboardAutoOpen: StateFlow<Boolean> =
+        repository.searchKeyboardAutoOpen.stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     val globalBackground: StateFlow<BackgroundConfig> =
         repository.globalBackground.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig())
-
-    val searchOverlayBackgroundOverride: StateFlow<BackgroundConfig?> =
-        repository.searchOverlayBackgroundOverride.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val quickOverviewBackgroundOverride: StateFlow<BackgroundConfig?> =
         repository.quickOverviewBackgroundOverride.stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -558,14 +558,6 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setGlobalBackground(config) }
     }
 
-    fun setSearchOverlayBackground(config: BackgroundConfig) {
-        viewModelScope.launch { repository.setSearchOverlayBackground(config) }
-    }
-
-    fun clearSearchOverlayBackground() {
-        viewModelScope.launch { repository.clearSearchOverlayBackground() }
-    }
-
     fun setQuickOverviewBackground(config: BackgroundConfig) {
         viewModelScope.launch { repository.setQuickOverviewBackground(config) }
     }
@@ -578,8 +570,12 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setKeyboardAppearance(appearance) }
     }
 
-    fun setSearchResultCardAppearance(appearance: ElementAppearance) {
-        viewModelScope.launch { repository.setSearchResultCardAppearance(appearance) }
+    fun setSearchAppearance(appearance: ElementAppearance) {
+        viewModelScope.launch { repository.setSearchAppearance(appearance) }
+    }
+
+    fun setSearchKeyboardAutoOpen(enabled: Boolean) {
+        viewModelScope.launch { repository.setSearchKeyboardAutoOpen(enabled) }
     }
 
     fun setAccentColor(argb: Int) {

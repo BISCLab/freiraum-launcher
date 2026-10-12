@@ -2,6 +2,8 @@ package com.bisc.flauncher.ui.home.search
 
 import com.bisc.flauncher.util.matchesWordStart
 import android.content.ComponentName
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -20,8 +22,9 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -48,13 +51,17 @@ import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.data.model.SearchKeyboardType
 import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.data.settings.IconShape
-import com.bisc.flauncher.data.model.BackgroundConfig
-import com.bisc.flauncher.ui.home.dock.BackgroundFill
-import com.bisc.flauncher.ui.home.dock.DockDimens
+import com.bisc.flauncher.ui.home.dock.resolveElementColors
 
 private val RESULTS_KEYBOARD_GAP = 12.dp
 
-/** Full-screen search reached by double-tapping the dock, full-bleed top to bottom. */
+/**
+ * Full-screen search, decoupled from the dock — reachable from a dock power button, a gesture, or
+ * (later) a standalone icon, and fully optional/ignorable if none of those is configured. The whole
+ * screen shares one flat [appearance]: no more separate backdrop/results-card layers — result rows
+ * float directly on it. The keyboard (custom or system) keeps its own [keyboardAppearance] since it's
+ * a visually distinct element, but is sized via [SearchDimens], not the dock's geometry.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SearchOverlay(
@@ -68,9 +75,8 @@ fun SearchOverlay(
     folderResults: List<com.bisc.flauncher.data.model.Folder> = emptyList(),
     mapTargetResults: List<com.bisc.flauncher.data.model.SavedMapTarget> = emptyList(),
     contactsPermissionGranted: Boolean,
-    backdrop: BackgroundConfig,
+    appearance: ElementAppearance,
     keyboardAppearance: ElementAppearance,
-    searchResultCardAppearance: ElementAppearance,
     statusBarHidden: Boolean,
     categoryOrder: List<SearchCategory>,
     activeCategories: Set<SearchCategory>,
@@ -78,6 +84,7 @@ fun SearchOverlay(
     aiAppPackage: String?,
     onToggleFilter: (SearchCategory) -> Unit,
     keyboardType: SearchKeyboardType,
+    keyboardAutoOpen: Boolean,
     showKeyboardNumberRow: Boolean,
     keyboardLayout: com.bisc.flauncher.data.model.KeyboardLayout = com.bisc.flauncher.data.model.KeyboardLayout.QWERTY,
     keyboardHaptics: Boolean = true,
@@ -124,149 +131,151 @@ fun SearchOverlay(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        BackgroundFill(backdrop, Modifier.fillMaxSize())
+    val colors = resolveElementColors(appearance)
 
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxSize()
-                // Even with the status bar logically hidden, real hardware still has a physical camera cutout/notch.
-                .then(
-                    if (statusBarHidden) {
-                        Modifier
-                            .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top))
-                            .padding(top = 16.dp)
-                    } else {
-                        Modifier.statusBarsPadding()
-                    }
-                )
-        ) {
-            val innerWidth = (maxWidth - DockDimens.horizontalMargin * 2).coerceAtLeast(0.dp)
-            val panelShape = RoundedCornerShape(com.bisc.flauncher.ui.home.dock.dockDimens(innerWidth).cornerRadius)
-
-            var keyboardHeightPx by remember { mutableIntStateOf(0) }
-            val density = LocalDensity.current
-            val keyboardBottomInset = with(density) { keyboardHeightPx.toDp() } + RESULTS_KEYBOARD_GAP
-
-            if (keyboardType == SearchKeyboardType.SYSTEM) {
-                // The results take whatever height is left above the system keyboard; hiding it (back gesture) leaves the search.
-                val imeVisible = WindowInsets.isImeVisible
-                var imeWasShown by remember { mutableStateOf(false) }
-                LaunchedEffect(imeVisible) {
-                    if (imeVisible) imeWasShown = true else if (imeWasShown) onHome()
-                }
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
-                ) {
-            SearchResultsColumn(
-                query = query,
-                appResults = appResults,
-                calculatorResult = calculatorResult,
-                contactResults = contactResults,
-                settingsResults = settingsResults,
-                noteResults = noteResults,
-                websiteResults = websiteResults,
-                shortcutResults = shortcutResults,
-                folderResults = folderResults,
-                mapTargetResults = mapTargetResults,
-                contactsPermissionGranted = contactsPermissionGranted,
-                order = categoryOrder,
-                active = activeCategories,
-                filter = categoryFilter,
-                aiAppLabel = aiAppLabel,
-                onToggleFilter = onToggleFilter,
-                loadIcon = loadIcon,
-                onAppClick = onAppClick,
-                onContactClick = onContactClick,
-                onSettingsShortcutClick = onSettingsShortcutClick,
-                onNoteClick = onNoteClick,
-                onFolderClick = onFolderClick,
-                onMapTargetClick = onMapTargetClick,
-                onWebsiteClick = onWebsiteClick,
-                onShortcutClick = onShortcutClick,
-                onWebCommand = onWebCommand,
-                onMapsCommand = onMapsCommand,
-                onEmailCommand = onEmailCommand,
-                onAiCommand = onAiCommand,
-                onCalculatorResultClick = { result -> onQueryChange(result) },
-                cardAppearance = searchResultCardAppearance,
-                shape = panelShape,
-                modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = DockDimens.horizontalMargin).padding(bottom = RESULTS_KEYBOARD_GAP)
-            )
-                    SystemSearchField(
-                        query = query,
-                        placeholder = stringResource(R.string.search_field_hint),
-                        onQueryChange = onQueryChange,
-                        onSubmit = { appResults.firstOrNull()?.let(onAppClick) ?: onWebCommand() },
-                        onHome = onHome,
-                        appearance = keyboardAppearance,
-                        bottomMargin = if (imeVisible) 8.dp else DockDimens.bottomMargin
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.background, alpha = colors.backgroundAlpha)
+            .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor) else Modifier)
+    ) {
+        CompositionLocalProvider(LocalContentColor provides colors.contentColor) {
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxSize()
+                    // Even with the status bar logically hidden, real hardware still has a physical camera cutout/notch.
+                    .then(
+                        if (statusBarHidden) {
+                            Modifier
+                                .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top))
+                                .padding(top = 16.dp)
+                        } else {
+                            Modifier.statusBarsPadding()
+                        }
                     )
+            ) {
+                var keyboardHeightPx by remember { mutableIntStateOf(0) }
+                val density = LocalDensity.current
+                val keyboardBottomInset = with(density) { keyboardHeightPx.toDp() } + RESULTS_KEYBOARD_GAP
+
+                if (keyboardType == SearchKeyboardType.SYSTEM) {
+                    // The results take whatever height is left above the system keyboard; hiding it (back gesture) leaves the search.
+                    val imeVisible = WindowInsets.isImeVisible
+                    var imeWasShown by remember { mutableStateOf(false) }
+                    LaunchedEffect(imeVisible) {
+                        if (imeVisible) imeWasShown = true else if (imeWasShown) onHome()
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
+                    ) {
+                        SearchResultsColumn(
+                            query = query,
+                            appResults = appResults,
+                            calculatorResult = calculatorResult,
+                            contactResults = contactResults,
+                            settingsResults = settingsResults,
+                            noteResults = noteResults,
+                            websiteResults = websiteResults,
+                            shortcutResults = shortcutResults,
+                            folderResults = folderResults,
+                            mapTargetResults = mapTargetResults,
+                            contactsPermissionGranted = contactsPermissionGranted,
+                            order = categoryOrder,
+                            active = activeCategories,
+                            filter = categoryFilter,
+                            aiAppLabel = aiAppLabel,
+                            onToggleFilter = onToggleFilter,
+                            loadIcon = loadIcon,
+                            onAppClick = onAppClick,
+                            onContactClick = onContactClick,
+                            onSettingsShortcutClick = onSettingsShortcutClick,
+                            onNoteClick = onNoteClick,
+                            onFolderClick = onFolderClick,
+                            onMapTargetClick = onMapTargetClick,
+                            onWebsiteClick = onWebsiteClick,
+                            onShortcutClick = onShortcutClick,
+                            onWebCommand = onWebCommand,
+                            onMapsCommand = onMapsCommand,
+                            onEmailCommand = onEmailCommand,
+                            onAiCommand = onAiCommand,
+                            onCalculatorResultClick = { result -> onQueryChange(result) },
+                            modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = SearchDimens.horizontalMargin).padding(bottom = RESULTS_KEYBOARD_GAP)
+                        )
+                        SystemSearchField(
+                            query = query,
+                            placeholder = stringResource(R.string.search_field_hint),
+                            onQueryChange = onQueryChange,
+                            onSubmit = { appResults.firstOrNull()?.let(onAppClick) ?: onWebCommand() },
+                            onHome = onHome,
+                            appearance = keyboardAppearance,
+                            autoOpen = keyboardAutoOpen,
+                            bottomMargin = if (imeVisible) 8.dp else SearchDimens.bottomMargin
+                        )
+                    }
+                    return@BoxWithConstraints
                 }
-                return@BoxWithConstraints
+
+                SearchResultsColumn(
+                    query = query,
+                    appResults = appResults,
+                    calculatorResult = calculatorResult,
+                    contactResults = contactResults,
+                    settingsResults = settingsResults,
+                    noteResults = noteResults,
+                    websiteResults = websiteResults,
+                    shortcutResults = shortcutResults,
+                    folderResults = folderResults,
+                    mapTargetResults = mapTargetResults,
+                    contactsPermissionGranted = contactsPermissionGranted,
+                    order = categoryOrder,
+                    active = activeCategories,
+                    filter = categoryFilter,
+                    aiAppLabel = aiAppLabel,
+                    onToggleFilter = onToggleFilter,
+                    loadIcon = loadIcon,
+                    onAppClick = onAppClick,
+                    onContactClick = onContactClick,
+                    onSettingsShortcutClick = onSettingsShortcutClick,
+                    onNoteClick = onNoteClick,
+                    onFolderClick = onFolderClick,
+                    onMapTargetClick = onMapTargetClick,
+                    onWebsiteClick = onWebsiteClick,
+                    onShortcutClick = onShortcutClick,
+                    onWebCommand = onWebCommand,
+                    onMapsCommand = onMapsCommand,
+                    onEmailCommand = onEmailCommand,
+                    onAiCommand = onAiCommand,
+                    onCalculatorResultClick = { result -> onQueryChange(result) },
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .fillMaxWidth()
+                        .padding(horizontal = SearchDimens.horizontalMargin)
+                        .padding(bottom = keyboardBottomInset)
+                )
+
+                CustomKeyboard(
+                    query = query,
+                    placeholder = stringResource(R.string.search_field_hint),
+                    onKeyPress = { char -> onQueryChange(query + char) },
+                    onBackspace = { if (query.isNotEmpty()) onQueryChange(query.dropLast(1)) },
+                    onSpace = { onQueryChange("$query ") },
+                    onHome = onHome,
+                    showNumberRow = showKeyboardNumberRow,
+                    layout = keyboardLayout,
+                    hapticsEnabled = keyboardHaptics,
+                    sparksEnabled = keyboardSparks,
+                    sparkColor = keyboardSparkColor,
+                    handedness = handedness,
+                    iconShape = iconShape,
+                    appearance = keyboardAppearance,
+                    autoOpen = keyboardAutoOpen,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .onGloballyPositioned { coordinates -> keyboardHeightPx = coordinates.size.height }
+                )
             }
-
-            SearchResultsColumn(
-                query = query,
-                appResults = appResults,
-                calculatorResult = calculatorResult,
-                contactResults = contactResults,
-                settingsResults = settingsResults,
-                noteResults = noteResults,
-                websiteResults = websiteResults,
-                shortcutResults = shortcutResults,
-                folderResults = folderResults,
-                mapTargetResults = mapTargetResults,
-                contactsPermissionGranted = contactsPermissionGranted,
-                order = categoryOrder,
-                active = activeCategories,
-                filter = categoryFilter,
-                aiAppLabel = aiAppLabel,
-                onToggleFilter = onToggleFilter,
-                loadIcon = loadIcon,
-                onAppClick = onAppClick,
-                onContactClick = onContactClick,
-                onSettingsShortcutClick = onSettingsShortcutClick,
-                onNoteClick = onNoteClick,
-                onFolderClick = onFolderClick,
-                onMapTargetClick = onMapTargetClick,
-                onWebsiteClick = onWebsiteClick,
-                onShortcutClick = onShortcutClick,
-                onWebCommand = onWebCommand,
-                onMapsCommand = onMapsCommand,
-                onEmailCommand = onEmailCommand,
-                onAiCommand = onAiCommand,
-                onCalculatorResultClick = { result -> onQueryChange(result) },
-                cardAppearance = searchResultCardAppearance,
-                shape = panelShape,
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .fillMaxWidth()
-                    .padding(horizontal = DockDimens.horizontalMargin)
-                    .padding(bottom = keyboardBottomInset)
-            )
-
-            CustomKeyboard(
-                query = query,
-                placeholder = stringResource(R.string.search_field_hint),
-                onKeyPress = { char -> onQueryChange(query + char) },
-                onBackspace = { if (query.isNotEmpty()) onQueryChange(query.dropLast(1)) },
-                onSpace = { onQueryChange("$query ") },
-                onHome = onHome,
-                showNumberRow = showKeyboardNumberRow,
-                layout = keyboardLayout,
-                hapticsEnabled = keyboardHaptics,
-                sparksEnabled = keyboardSparks,
-                sparkColor = keyboardSparkColor,
-                handedness = handedness,
-                iconShape = iconShape,
-                appearance = keyboardAppearance,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .onGloballyPositioned { coordinates -> keyboardHeightPx = coordinates.size.height }
-            )
         }
     }
 }

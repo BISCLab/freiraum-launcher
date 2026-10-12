@@ -189,9 +189,8 @@
     <string name="settings_layer_surface_quick_overview">Quick overview</string>
     <string name="settings_quick_overview_backdrop_summary">Full-screen background behind the quick overview. Behaves like a layer 1 background, so an image can be selected. Transparent by default.</string>
     <string name="settings_overlay_backdrop_explainer">The background covers the whole screen behind the overlay and therefore behaves like a layer 1 background. Besides pages, only these backgrounds accept an image. Surfaces on top (results, keyboard, sidebar) remain layer 2 elements with their own backgrounds.</string>
-    <string name="settings_search_overlay_summary">Full-screen background behind the text search. Behaves like a layer 1 background, so an image can be selected. Transparent by default.</string>
+    <string name="settings_search_appearance_summary">The whole search screen\'s look — background and results float directly on it, no separate cards.</string>
     <string name="settings_layer_surface_keyboard">Keyboard</string>
-    <string name="settings_layer_surface_result_card">Search results</string>
     <string name="settings_layer_surface_app_list">App list</string>
     <string name="settings_layer_surface_widget">Widget</string>
     <string name="settings_layer_surface_apps_row">Apps row</string>
@@ -477,6 +476,8 @@
     <string name="settings_search_keyboard_haptics_summary">Short vibration on each key press via Android touch feedback. Requires Settings > Sound &amp; vibration > Vibration &amp; haptics > Touch feedback to be enabled (on some devices under vibration strength).</string>
     <string name="settings_search_keyboard_show_number_row">Always show number row</string>
     <string name="settings_search_keyboard_show_number_row_summary">Off: numbers are reached through the 123 key.</string>
+    <string name="settings_search_keyboard_auto_open">Open keyboard automatically</string>
+    <string name="settings_search_keyboard_auto_open_summary">Off: search opens with just the input field; tap it to show the keyboard.</string>
     <string name="search_filter_ai">AI app</string>
     <string name="settings_search_include_ai">AI app</string>
     <string name="search_command_ai">Ask %1$s: %2$s</string>

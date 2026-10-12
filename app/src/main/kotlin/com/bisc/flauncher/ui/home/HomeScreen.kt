@@ -177,7 +177,8 @@ fun HomeScreen(
     val dockWidthMode by viewModel.dockWidthMode.collectAsState()
     val chargingAnimationEnabled by viewModel.chargingAnimationEnabled.collectAsState()
     val chargingAnimationColor by viewModel.chargingAnimationColor.collectAsState()
-    val searchOverlayBackground by viewModel.searchOverlayBackground.collectAsState()
+    val searchAppearance by viewModel.searchAppearance.collectAsState()
+    val searchKeyboardAutoOpen by viewModel.searchKeyboardAutoOpen.collectAsState()
     val quickOverviewBackground by viewModel.quickOverviewBackground.collectAsState()
     val appListDisplayMode by viewModel.appListDisplayMode.collectAsState()
     val appListLayout by viewModel.appListLayout.collectAsState()
@@ -192,7 +193,6 @@ fun HomeScreen(
     val folderHideDock by viewModel.folderHideDock.collectAsState()
     val folderCardAppearance by viewModel.folderCardAppearance.collectAsState()
     val keyboardAppearance by viewModel.keyboardAppearance.collectAsState()
-    val searchResultCardAppearance by viewModel.searchResultCardAppearance.collectAsState()
     val sidebarItems by viewModel.sidebarItems.collectAsState()
     val searchShowAzIndex by viewModel.searchShowAzIndex.collectAsState()
     val searchHideStatusBar by viewModel.searchHideStatusBar.collectAsState()
@@ -257,16 +257,22 @@ fun HomeScreen(
     }
     val currentPageBackground by remember(currentPageId) { viewModel.pageBackgroundConfig(currentPageId) }
         .collectAsState(initial = BackgroundConfig())
-    val statusBarBackdrop = when {
-        searchOpen -> searchOverlayBackground
-        appListOpen -> appOverviewBackground
-        overviewEntry != null && !folderOpen -> quickOverviewBackground
-        else -> currentPageBackground
+    // Search has no separate page-level backdrop any more (see searchAppearance) — its own single
+    // full-bleed ElementAppearance is the "fill" layer here, blended against the current page's
+    // background behind it exactly like any other translucent/glass surface would be.
+    val backdropDark = if (searchOpen) {
+        com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(searchAppearance, currentPageBackground)
+    } else {
+        val statusBarBackdrop = when {
+            appListOpen -> appOverviewBackground
+            overviewEntry != null && !folderOpen -> quickOverviewBackground
+            else -> currentPageBackground
+        }
+        com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(
+            com.bisc.flauncher.data.model.ElementAppearance(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE),
+            statusBarBackdrop
+        )
     }
-    val backdropDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(
-        com.bisc.flauncher.data.model.ElementAppearance(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE),
-        statusBarBackdrop
-    )
     val appThemeDark = androidx.compose.material3.MaterialTheme.colorScheme.background.luminance() < 0.5f
     val lightIcons = folderOpen || backdropDark
     DisposableEffect(lightIcons, appThemeDark) {
@@ -777,9 +783,9 @@ fun HomeScreen(
             aiAppPackage = searchAiApp,
             onToggleFilter = viewModel::toggleSearchFilter,
             keyboardType = searchKeyboardType,
-            backdrop = searchOverlayBackground,
+            keyboardAutoOpen = searchKeyboardAutoOpen,
+            appearance = searchAppearance,
             keyboardAppearance = keyboardAppearance,
-            searchResultCardAppearance = searchResultCardAppearance,
             showKeyboardNumberRow = searchKeyboardShowNumberRow,
             keyboardLayout = searchKeyboardLayout,
             keyboardSparks = searchKeyboardSparks,
