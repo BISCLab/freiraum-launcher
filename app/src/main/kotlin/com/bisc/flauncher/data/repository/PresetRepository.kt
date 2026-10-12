@@ -41,7 +41,6 @@ class PresetRepository @Inject constructor(
         // is actually a coherent, fully-consistent look rather than "everything except whatever you'd
         // customized before".
         settingsRepository.resetSearchAlphabetRailAppearance()
-        settingsRepository.resetDockSearchButtonAppearance()
         settingsRepository.resetAppListSearchButtonAppearance()
 
         // One shared global background now, not a same-color override stamped onto every page — clearing

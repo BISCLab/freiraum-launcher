@@ -16,7 +16,6 @@ import com.bisc.flauncher.data.model.BackgroundSource
 import com.bisc.flauncher.data.model.ColorFill
 import com.bisc.flauncher.data.model.DesignPreset
 import com.bisc.flauncher.data.model.DesignPresetValues
-import com.bisc.flauncher.data.model.DockTapAction
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.ElementFillMode
 import com.bisc.flauncher.data.model.FillMode
@@ -104,14 +103,14 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[FAVORITES_GROUP_DIVIDERS_ENABLED_KEY] = enabled }
     }
 
-    val dockSingleTapAction: Flow<DockTapAction> = dataStore.data.map { prefs ->
-        prefs[DOCK_SINGLE_TAP_ACTION_KEY]?.let { runCatching { DockTapAction.valueOf(it) }.getOrNull() }
-            ?: DockTapAction.QUICK_OVERVIEW
+    /** How rounded the dock bar's own corners are — replaces the old orb-era "match widget corners" toggle. */
+    val dockCornerStyle: Flow<com.bisc.flauncher.ui.home.dock.DockCornerStyle> = dataStore.data.map { prefs ->
+        prefs[DOCK_CORNER_STYLE_KEY]?.let { runCatching { com.bisc.flauncher.ui.home.dock.DockCornerStyle.valueOf(it) }.getOrNull() }
+            ?: com.bisc.flauncher.ui.home.dock.DockCornerStyle.ROUNDED
     }
 
-    val dockDoubleTapAction: Flow<DockTapAction> = dataStore.data.map { prefs ->
-        prefs[DOCK_DOUBLE_TAP_ACTION_KEY]?.let { runCatching { DockTapAction.valueOf(it) }.getOrNull() }
-            ?: DockTapAction.FULL_SEARCH
+    suspend fun setDockCornerStyle(style: com.bisc.flauncher.ui.home.dock.DockCornerStyle) {
+        dataStore.edit { it[DOCK_CORNER_STYLE_KEY] = style.name }
     }
 
     fun folderShowAddRow(folderId: Long): Flow<Boolean> = dataStore.data.map { it[folderShowAddRowKey(folderId)] ?: true }
@@ -135,11 +134,6 @@ class SettingsRepository @Inject constructor(
 
     val chargingAnimationEnabled: Flow<Boolean> = dataStore.data.map { it[CHARGING_ANIMATION_ENABLED_KEY] ?: true }
 
-    val dockMatchWidgetCorners: Flow<Boolean> = dataStore.data.map { it[DOCK_MATCH_WIDGET_CORNERS_KEY] ?: false }
-
-    suspend fun setDockMatchWidgetCorners(enabled: Boolean) {
-        dataStore.edit { it[DOCK_MATCH_WIDGET_CORNERS_KEY] = enabled }
-    }
 
     // ---- Text search ----
 
@@ -441,14 +435,6 @@ class SettingsRepository @Inject constructor(
 
     suspend fun resetSearchAlphabetRailAppearance() = resetElementAppearanceFor(RAIL_PREFIX)
 
-    /** Layer 3: the dock's search (magnifying glass) button. Null keeps the automatic light/dark look. */
-    val dockSearchButtonAppearance: Flow<ElementAppearance?> =
-        customElementAppearanceFor(SEARCH_BUTTON_PREFIX, ElementAppearance(borderEnabled = true))
-
-    suspend fun setDockSearchButtonAppearance(appearance: ElementAppearance) = setElementAppearanceFor(SEARCH_BUTTON_PREFIX, appearance)
-
-    suspend fun resetDockSearchButtonAppearance() = resetElementAppearanceFor(SEARCH_BUTTON_PREFIX)
-
     val appListSearchButtonAppearance: Flow<ElementAppearance?> =
         customElementAppearanceFor("app_list_search_button", ElementAppearance(borderEnabled = true))
 
@@ -538,13 +524,6 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[ACCENT_COLOR_KEY] = argb }
     }
 
-    suspend fun setDockSingleTapAction(action: DockTapAction) {
-        dataStore.edit { it[DOCK_SINGLE_TAP_ACTION_KEY] = action.name }
-    }
-
-    suspend fun setDockDoubleTapAction(action: DockTapAction) {
-        dataStore.edit { it[DOCK_DOUBLE_TAP_ACTION_KEY] = action.name }
-    }
 
     suspend fun setFolderShowAddRow(folderId: Long, show: Boolean) {
         dataStore.edit { it[folderShowAddRowKey(folderId)] = show }
@@ -668,10 +647,8 @@ class SettingsRepository @Inject constructor(
         private val FOLDER_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("folder_hide_status_bar")
         private val FOLDER_HIDE_DOCK_KEY = booleanPreferencesKey("folder_hide_dock")
         private val ACCENT_COLOR_KEY = intPreferencesKey("accent_color")
-        private val DOCK_SINGLE_TAP_ACTION_KEY = stringPreferencesKey("dock_single_tap_action")
-        private val DOCK_DOUBLE_TAP_ACTION_KEY = stringPreferencesKey("dock_double_tap_action")
         private val CHARGING_ANIMATION_COLOR_KEY = intPreferencesKey("charging_animation_color")
-        private val DOCK_MATCH_WIDGET_CORNERS_KEY = booleanPreferencesKey("dock_match_widget_corners")
+        private val DOCK_CORNER_STYLE_KEY = stringPreferencesKey("dock_corner_style")
         private val CHARGING_ANIMATION_ENABLED_KEY = booleanPreferencesKey("charging_animation_enabled")
         private val SEARCH_SHOW_AZ_INDEX_KEY = booleanPreferencesKey("search_show_az_index")
         private val HOME_SCREEN_WIDGETS_ENABLED_KEY = booleanPreferencesKey("home_screen_widgets_enabled")
@@ -693,7 +670,6 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_KEYBOARD_HAPTICS_KEY = booleanPreferencesKey("search_keyboard_haptics")
         private val SEARCH_INDEX_SHOW_RAIL_BAR_KEY = booleanPreferencesKey("search_index_show_rail_bar")
         private const val RAIL_PREFIX = "search_alphabet_rail"
-        private const val SEARCH_BUTTON_PREFIX = "dock_search_button"
         private val APP_LIST_DISPLAY_MODE_KEY = stringPreferencesKey("app_list_display_mode")
         private val APP_LIST_LAYOUT_KEY = stringPreferencesKey("app_list_layout")
         private val APP_LIST_SHOW_SEARCH_BUTTON_KEY = booleanPreferencesKey("app_list_show_search_button")

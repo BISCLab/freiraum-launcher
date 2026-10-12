@@ -92,7 +92,7 @@ class MainActivity : ComponentActivity() {
                     if (route == null || !route.startsWith("settings")) navController.navigate("settings")
                 }
             }
-            val dockMatchWidgetCorners by settingsVm.dockMatchWidgetCorners.collectAsState()
+            val dockCornerStyle by settingsVm.dockCornerStyle.collectAsState()
 
             val darkTheme = when (theme) {
                 com.bisc.flauncher.ui.theme.ThemePreference.DARK -> true
@@ -108,7 +108,7 @@ class MainActivity : ComponentActivity() {
             }
             androidx.compose.runtime.CompositionLocalProvider(
                 com.bisc.flauncher.ui.home.LocalAppIconLoader provides appIconLoader,
-                com.bisc.flauncher.ui.home.dock.LocalDockCornerRadius provides (if (dockMatchWidgetCorners) com.bisc.flauncher.ui.home.dock.WidgetCornerRadius else null)
+                com.bisc.flauncher.ui.home.dock.LocalDockCornerRadius provides dockCornerStyle.radius
             ) {
             FLauncherTheme(themePreference = theme, fontPreference = font) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {

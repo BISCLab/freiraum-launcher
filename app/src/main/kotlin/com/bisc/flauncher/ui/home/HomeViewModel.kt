@@ -63,11 +63,15 @@ import com.bisc.flauncher.data.repository.WebsiteRepository
 import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.data.settings.IconShape
 import com.bisc.flauncher.data.settings.SettingsRepository
-import com.bisc.flauncher.ui.home.dock.QuickLaunchSlot
+import com.bisc.flauncher.ui.home.dock.DockSlotUi
 import com.bisc.flauncher.ui.home.dock.ResolvedSidebarItem
 import com.bisc.flauncher.ui.home.dock.SidebarEntryType
-import com.bisc.flauncher.ui.home.dock.defaultQuickLaunchSlots
+import com.bisc.flauncher.ui.home.dock.UNSET_APP_SLOT_COLOR
+import com.bisc.flauncher.ui.home.dock.defaultColor
 import com.bisc.flauncher.ui.home.dock.resolveSidebarItems
+import com.bisc.flauncher.data.model.DockPowerButtonAction
+import com.bisc.flauncher.data.model.DockSlot
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.snapshotFlow
 import com.bisc.flauncher.util.AppIconLoader
 import com.bisc.flauncher.util.BackgroundImageStore
@@ -91,6 +95,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -129,17 +134,13 @@ class HomeViewModel @Inject constructor(
     val handedness: StateFlow<Handedness> =
         settingsRepository.handedness.stateIn(viewModelScope, SharingStarted.Eagerly, Handedness.RIGHT)
 
-    val dockSingleTapAction: StateFlow<DockTapAction> =
-        settingsRepository.dockSingleTapAction.stateIn(viewModelScope, SharingStarted.Eagerly, DockTapAction.QUICK_OVERVIEW)
+    val dockCornerStyle: StateFlow<com.bisc.flauncher.ui.home.dock.DockCornerStyle> =
+        settingsRepository.dockCornerStyle.stateIn(
+            viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.home.dock.DockCornerStyle.ROUNDED
+        )
 
-    val dockDoubleTapAction: StateFlow<DockTapAction> =
-        settingsRepository.dockDoubleTapAction.stateIn(viewModelScope, SharingStarted.Eagerly, DockTapAction.FULL_SEARCH)
-
-    val dockMatchWidgetCorners: StateFlow<Boolean> =
-        settingsRepository.dockMatchWidgetCorners.stateIn(viewModelScope, SharingStarted.Eagerly, false)
-
-    fun setDockMatchWidgetCorners(enabled: Boolean) {
-        viewModelScope.launch { settingsRepository.setDockMatchWidgetCorners(enabled) }
+    fun setDockCornerStyle(style: com.bisc.flauncher.ui.home.dock.DockCornerStyle) {
+        viewModelScope.launch { settingsRepository.setDockCornerStyle(style) }
     }
 
     val chargingAnimationColor: StateFlow<Int> =
@@ -178,17 +179,6 @@ class HomeViewModel @Inject constructor(
 
     val folderHideDock: StateFlow<Boolean> =
         settingsRepository.folderHideDock.stateIn(viewModelScope, SharingStarted.Eagerly, false)
-
-    val dockSearchButtonAppearance: StateFlow<ElementAppearance?> =
-        settingsRepository.dockSearchButtonAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
-    fun setDockSearchButtonAppearance(appearance: ElementAppearance) {
-        viewModelScope.launch { settingsRepository.setDockSearchButtonAppearance(appearance) }
-    }
-
-    fun resetDockSearchButtonAppearance() {
-        viewModelScope.launch { settingsRepository.resetDockSearchButtonAppearance() }
-    }
 
     // One global Layer 1 shared by every surface — pages, app overview, both search surfaces — with an
     // optional per-surface color-only override falling back to it. See SettingsRepository for why images
@@ -309,26 +299,102 @@ class HomeViewModel @Inject constructor(
 
     // ---- Dock ----
 
-    val quickLaunchSlots: StateFlow<List<QuickLaunchSlot>> =
+    val dockSlots: StateFlow<List<DockSlotUi>> =
         combine(dockRepository.slots, labeledApps) { dbSlots, apps ->
-            val byIndex = dbSlots.associateBy { it.slotIndex }
-            defaultQuickLaunchSlots.map { placeholder ->
-                val saved = byIndex[placeholder.index]?.componentName?.let(ComponentName::unflattenFromString)
-                val app = saved?.let { cn -> apps.find { it.componentName == cn } }
-                if (app != null) placeholder.copy(componentName = app.componentName, label = app.label) else placeholder
+            dbSlots.sortedBy { it.slotIndex }.map { dbSlot ->
+                if (dbSlot.type == "POWER_BUTTON") {
+                    val action = dbSlot.powerButtonAction
+                        ?.let { runCatching { DockPowerButtonAction.valueOf(it) }.getOrNull() }
+                        ?: DockPowerButtonAction.TEXT_SEARCH
+                    DockSlotUi.PowerButton(
+                        index = dbSlot.slotIndex,
+                        action = action,
+                        backgroundColor = dbSlot.backgroundColor?.let { Color(it) } ?: action.defaultColor(),
+                        iconColor = dbSlot.iconColor?.let { Color(it) } ?: Color.White
+                    )
+                } else {
+                    val componentName = dbSlot.componentName?.let(ComponentName::unflattenFromString)
+                    val app = componentName?.let { cn -> apps.find { it.componentName == cn } }
+                    DockSlotUi.App(
+                        index = dbSlot.slotIndex,
+                        componentName = app?.componentName,
+                        label = app?.label,
+                        backgroundColor = dbSlot.backgroundColor?.let { Color(it) } ?: UNSET_APP_SLOT_COLOR,
+                        iconColor = dbSlot.iconColor?.let { Color(it) } ?: Color.White
+                    )
+                }
             }
-        }.stateIn(viewModelScope, SharingStarted.Eagerly, defaultQuickLaunchSlots)
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    fun setDockSlot(index: Int, componentName: ComponentName?) {
-        viewModelScope.launch { dockRepository.setSlot(index, componentName?.flattenToString()) }
+    private val currentDbSlots get() = dockRepository.slots
+
+    fun setDockAppSlot(index: Int, componentName: ComponentName?) {
+        viewModelScope.launch {
+            val slots = currentDbSlots.first().toMutableList()
+            val existing = slots.indexOfFirst { it.slotIndex == index }
+            val updated = DockSlot(slotIndex = index, type = "APP", componentName = componentName?.flattenToString())
+            if (existing >= 0) slots[existing] = updated else slots.add(updated)
+            dockRepository.setSlots(slots)
+        }
     }
 
-    fun setDockSingleTapAction(action: DockTapAction) {
-        viewModelScope.launch { settingsRepository.setDockSingleTapAction(action) }
+    fun setDockPowerButtonSlot(index: Int, action: DockPowerButtonAction) {
+        viewModelScope.launch {
+            val slots = currentDbSlots.first().toMutableList()
+            val existing = slots.indexOfFirst { it.slotIndex == index }
+            val updated = DockSlot(slotIndex = index, type = "POWER_BUTTON", powerButtonAction = action.name)
+            if (existing >= 0) slots[existing] = updated else slots.add(updated)
+            dockRepository.setSlots(slots)
+        }
     }
 
-    fun setDockDoubleTapAction(action: DockTapAction) {
-        viewModelScope.launch { settingsRepository.setDockDoubleTapAction(action) }
+    fun setDockSlotColors(index: Int, backgroundColor: Int?, iconColor: Int?) {
+        viewModelScope.launch {
+            val slots = currentDbSlots.first().toMutableList()
+            val existingIndex = slots.indexOfFirst { it.slotIndex == index }
+            if (existingIndex < 0) return@launch
+            slots[existingIndex] = slots[existingIndex].copy(backgroundColor = backgroundColor, iconColor = iconColor)
+            dockRepository.setSlots(slots)
+        }
+    }
+
+    fun addDockAppSlot() {
+        viewModelScope.launch {
+            val slots = currentDbSlots.first()
+            dockRepository.setSlots(slots + DockSlot(slotIndex = slots.size, type = "APP"))
+        }
+    }
+
+    fun addDockPowerButtonSlot(action: DockPowerButtonAction) {
+        viewModelScope.launch { dockRepository.addPowerButtonSlot(action, currentDbSlots.first()) }
+    }
+
+    fun removeDockSlot(index: Int) {
+        viewModelScope.launch {
+            val slots = currentDbSlots.first().filterNot { it.slotIndex == index }
+            dockRepository.setSlots(slots)
+        }
+    }
+
+    fun moveDockSlot(index: Int, delta: Int) {
+        viewModelScope.launch {
+            val slots = currentDbSlots.first().sortedBy { it.slotIndex }.toMutableList()
+            val from = slots.indexOfFirst { it.slotIndex == index }
+            val to = (from + delta).coerceIn(0, slots.lastIndex)
+            if (from < 0 || from == to) return@launch
+            val item = slots.removeAt(from)
+            slots.add(to, item)
+            dockRepository.setSlots(slots)
+        }
+    }
+
+    fun executeDockPowerButton(action: DockPowerButtonAction) {
+        when (action) {
+            DockPowerButtonAction.TEXT_SEARCH -> openSearch()
+            DockPowerButtonAction.CATEGORY_SEARCH -> openOverview(SidebarEntryType.APPS)
+            DockPowerButtonAction.APP_DRAWER -> { viewModelScope.launch { settingsRepository.setAppListLayout(AppListLayout.TILES) }; openAppList() }
+            DockPowerButtonAction.APP_LIST -> { viewModelScope.launch { settingsRepository.setAppListLayout(AppListLayout.LIST) }; openAppList() }
+        }
     }
 
     fun resolveLabel(componentName: ComponentName): String {
@@ -522,6 +588,7 @@ class HomeViewModel @Inject constructor(
     init {
         viewModelScope.launch { pageContentRepository.ensureSeeded() }
         viewModelScope.launch { sidebarRepository.ensureSeeded() }
+        viewModelScope.launch { dockRepository.ensureSeeded() }
         viewModelScope.launch {
             _installedApps.value = installedAppsRepository.getLaunchableApps()
             installedAppsRepository.packageChanges().collectLatest {
