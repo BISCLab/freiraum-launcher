@@ -20,13 +20,11 @@ import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.ElementFillMode
 import com.bisc.flauncher.data.model.FillMode
 import com.bisc.flauncher.data.model.GestureAction
-import com.bisc.flauncher.data.model.KeyboardLayout
 import com.bisc.flauncher.data.model.GradientDirection
 import com.bisc.flauncher.data.model.GestureActionType
 import com.bisc.flauncher.data.model.HomeGesture
 import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.data.model.SearchEngine
-import com.bisc.flauncher.data.model.SearchKeyboardType
 import com.bisc.flauncher.data.model.SidebarCategoryViewMode
 import com.bisc.flauncher.ui.theme.FontPreference
 import com.bisc.flauncher.ui.theme.ThemePreference
@@ -152,32 +150,8 @@ class SettingsRepository @Inject constructor(
 
     val searchHideStatusBar: Flow<Boolean> = dataStore.data.map { it[SEARCH_HIDE_STATUS_BAR_KEY] ?: true }
 
-    val searchKeyboardShowNumberRow: Flow<Boolean> = dataStore.data.map { it[SEARCH_KEYBOARD_SHOW_NUMBER_ROW_KEY] ?: true }
-
-    val searchKeyboardLayout: Flow<KeyboardLayout> = dataStore.data.map { prefs ->
-        prefs[SEARCH_KEYBOARD_LAYOUT_KEY]?.let { runCatching { KeyboardLayout.valueOf(it) }.getOrNull() } ?: KeyboardLayout.QWERTY
-    }
-
-    suspend fun setSearchKeyboardLayout(layout: KeyboardLayout) {
-        dataStore.edit { it[SEARCH_KEYBOARD_LAYOUT_KEY] = layout.name }
-    }
-
-    val searchKeyboardSparks: Flow<Boolean> = dataStore.data.map { it[SEARCH_KEYBOARD_SPARKS_KEY] ?: true }
-
-    suspend fun setSearchKeyboardSparks(enabled: Boolean) {
-        dataStore.edit { it[SEARCH_KEYBOARD_SPARKS_KEY] = enabled }
-    }
-
-    val searchKeyboardSparkColor: Flow<Int> = dataStore.data.map { it[SEARCH_KEYBOARD_SPARK_COLOR_KEY] ?: 0xFF34D058.toInt() }
-
-    suspend fun setSearchKeyboardSparkColor(color: Int) {
-        dataStore.edit { it[SEARCH_KEYBOARD_SPARK_COLOR_KEY] = color }
-    }
-
-    val searchKeyboardHaptics: Flow<Boolean> = dataStore.data.map { it[SEARCH_KEYBOARD_HAPTICS_KEY] ?: true }
-
-    /** Whether the keyboard (custom or system) shows itself immediately when search opens, vs. staying
-     *  collapsed/unfocused until the user taps the input field — applies to both [SearchKeyboardType]s. */
+    /** Whether the system keyboard shows itself immediately when search opens, vs. staying
+     *  unfocused until the user taps the input field. */
     val searchKeyboardAutoOpen: Flow<Boolean> = dataStore.data.map { it[SEARCH_KEYBOARD_AUTO_OPEN_KEY] ?: true }
 
     suspend fun setSearchKeyboardAutoOpen(enabled: Boolean) {
@@ -218,6 +192,17 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[SEARCH_CATEGORY_ORDER_KEY] = order.joinToString(",") { c -> c.name } }
     }
 
+    /** Per-category icon color override, used everywhere a [SearchCategory]'s icon appears (the
+     *  search filter row, each result card's header, the category reorder list in settings) — null
+     *  means "use [com.bisc.flauncher.ui.home.search.defaultColor]". */
+    fun categoryColor(category: SearchCategory): Flow<Int?> = dataStore.data.map { it[categoryColorKey(category)] }
+
+    suspend fun setCategoryColor(category: SearchCategory, color: Int) {
+        dataStore.edit { it[categoryColorKey(category)] = color }
+    }
+
+    private fun categoryColorKey(category: SearchCategory) = intPreferencesKey("category_color_${category.storageKey}")
+
     val searchAiApp: Flow<String?> = dataStore.data.map { it[SEARCH_AI_APP_KEY] }
 
     suspend fun setSearchAiApp(packageName: String?) {
@@ -235,15 +220,6 @@ class SettingsRepository @Inject constructor(
     suspend fun setSearchMapsApp(packageName: String?) {
         dataStore.edit { if (packageName == null) it.remove(SEARCH_MAPS_APP_KEY) else it[SEARCH_MAPS_APP_KEY] = packageName }
     }
-
-    val searchKeyboardType: Flow<SearchKeyboardType> = dataStore.data.map { prefs ->
-        prefs[SEARCH_KEYBOARD_TYPE_KEY]?.let { runCatching { SearchKeyboardType.valueOf(it) }.getOrNull() } ?: SearchKeyboardType.CUSTOM
-    }
-
-    suspend fun setSearchKeyboardType(type: SearchKeyboardType) {
-        dataStore.edit { it[SEARCH_KEYBOARD_TYPE_KEY] = type.name }
-    }
-
 
     val searchIndexShowRailBar: Flow<Boolean> = dataStore.data.map { it[SEARCH_INDEX_SHOW_RAIL_BAR_KEY] ?: true }
 
@@ -561,14 +537,6 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[SEARCH_HIDE_STATUS_BAR_KEY] = hide }
     }
 
-    suspend fun setSearchKeyboardHaptics(enabled: Boolean) {
-        dataStore.edit { it[SEARCH_KEYBOARD_HAPTICS_KEY] = enabled }
-    }
-
-    suspend fun setSearchKeyboardShowNumberRow(show: Boolean) {
-        dataStore.edit { it[SEARCH_KEYBOARD_SHOW_NUMBER_ROW_KEY] = show }
-    }
-
     suspend fun setSearchEngine(engine: SearchEngine) {
         dataStore.edit { it[SEARCH_ENGINE_KEY] = engine.name }
     }
@@ -673,17 +641,11 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("search_hide_status_bar")
         private val SEARCH_ENGINE_KEY = stringPreferencesKey("search_engine")
         private val SEARCH_ENGINE_CUSTOM_URL_KEY = stringPreferencesKey("search_engine_custom_url")
-        private val SEARCH_KEYBOARD_SPARKS_KEY = booleanPreferencesKey("search_keyboard_sparks")
-        private val SEARCH_KEYBOARD_SPARK_COLOR_KEY = intPreferencesKey("search_keyboard_spark_color")
-        private val SEARCH_KEYBOARD_LAYOUT_KEY = stringPreferencesKey("search_keyboard_layout")
-        private val SEARCH_KEYBOARD_TYPE_KEY = stringPreferencesKey("search_keyboard_type")
         private val SEARCH_CATEGORY_ORDER_KEY = stringPreferencesKey("search_category_order")
         private val SEARCH_AI_APP_KEY = stringPreferencesKey("search_ai_app")
         private val SEARCH_BROWSER_APP_KEY = stringPreferencesKey("search_browser_app")
         private val SEARCH_MAPS_APP_KEY = stringPreferencesKey("search_maps_app")
         private fun searchIncludeKey(storageKey: String) = booleanPreferencesKey("search_include_$storageKey")
-        private val SEARCH_KEYBOARD_SHOW_NUMBER_ROW_KEY = booleanPreferencesKey("search_keyboard_show_number_row")
-        private val SEARCH_KEYBOARD_HAPTICS_KEY = booleanPreferencesKey("search_keyboard_haptics")
         private val SEARCH_KEYBOARD_AUTO_OPEN_KEY = booleanPreferencesKey("search_keyboard_auto_open")
         private val SEARCH_INDEX_SHOW_RAIL_BAR_KEY = booleanPreferencesKey("search_index_show_rail_bar")
         private const val RAIL_PREFIX = "search_alphabet_rail"

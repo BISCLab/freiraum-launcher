@@ -17,7 +17,6 @@ import com.bisc.flauncher.data.model.LauncherPage
 import com.bisc.flauncher.data.model.RevealMode
 import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.data.model.SearchEngine
-import com.bisc.flauncher.data.model.SearchKeyboardType
 import com.bisc.flauncher.data.model.SidebarCategoryViewMode
 import com.bisc.flauncher.data.model.DesignPreset
 import com.bisc.flauncher.data.model.ElementAppearance
@@ -300,41 +299,19 @@ class SettingsViewModel @Inject constructor(
         repository.searchShowAzIndex.stateIn(viewModelScope, SharingStarted.Eagerly, true)
     val searchHideStatusBar: StateFlow<Boolean> =
         repository.searchHideStatusBar.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-    val searchKeyboardSparks: StateFlow<Boolean> =
-        repository.searchKeyboardSparks.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-
-    fun setSearchKeyboardSparks(enabled: Boolean) {
-        viewModelScope.launch { repository.setSearchKeyboardSparks(enabled) }
-    }
-
-    val searchKeyboardSparkColor: StateFlow<Int> =
-        repository.searchKeyboardSparkColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF34D058.toInt())
-
-    fun setSearchKeyboardSparkColor(color: Int) {
-        viewModelScope.launch { repository.setSearchKeyboardSparkColor(color) }
-    }
-
-    val searchKeyboardLayout: StateFlow<com.bisc.flauncher.data.model.KeyboardLayout> =
-        repository.searchKeyboardLayout.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.data.model.KeyboardLayout.QWERTY)
-
-    fun setSearchKeyboardLayout(layout: com.bisc.flauncher.data.model.KeyboardLayout) {
-        viewModelScope.launch { repository.setSearchKeyboardLayout(layout) }
-    }
-
-    val searchKeyboardShowNumberRow: StateFlow<Boolean> =
-        repository.searchKeyboardShowNumberRow.stateIn(viewModelScope, SharingStarted.Eagerly, true)
     val searchIncluded: StateFlow<Set<SearchCategory>> =
         repository.searchIncluded.stateIn(viewModelScope, SharingStarted.Eagerly, SearchCategory.entries.toSet())
     val searchCategoryOrder: StateFlow<List<SearchCategory>> =
         repository.searchCategoryOrder.stateIn(viewModelScope, SharingStarted.Eagerly, SearchCategory.entries)
+    val categoryColors: StateFlow<Map<SearchCategory, Int?>> =
+        combine(SearchCategory.entries.map { c -> repository.categoryColor(c).map { color -> c to color } }) { pairs -> pairs.toMap() }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
     val searchAiApp: StateFlow<String?> =
         repository.searchAiApp.stateIn(viewModelScope, SharingStarted.Eagerly, null)
     val searchBrowserApp: StateFlow<String?> =
         repository.searchBrowserApp.stateIn(viewModelScope, SharingStarted.Eagerly, null)
     val searchMapsApp: StateFlow<String?> =
         repository.searchMapsApp.stateIn(viewModelScope, SharingStarted.Eagerly, null)
-    val searchKeyboardType: StateFlow<SearchKeyboardType> =
-        repository.searchKeyboardType.stateIn(viewModelScope, SharingStarted.Eagerly, SearchKeyboardType.CUSTOM)
     val searchEngine: StateFlow<SearchEngine> =
         repository.searchEngine.stateIn(viewModelScope, SharingStarted.Eagerly, SearchEngine.DUCKDUCKGO)
     val searchEngineCustomUrl: StateFlow<String> =
@@ -598,6 +575,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setSearchCategoryOrder(order) }
     }
 
+    fun setCategoryColor(category: SearchCategory, color: Int) {
+        viewModelScope.launch { repository.setCategoryColor(category, color) }
+    }
+
     fun setSearchAiApp(packageName: String?) {
         viewModelScope.launch { repository.setSearchAiApp(packageName) }
     }
@@ -610,27 +591,12 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setSearchMapsApp(packageName) }
     }
 
-    fun setSearchKeyboardType(type: SearchKeyboardType) {
-        viewModelScope.launch { repository.setSearchKeyboardType(type) }
-    }
-
     fun setSearchEngine(engine: SearchEngine) {
         viewModelScope.launch { repository.setSearchEngine(engine) }
     }
 
     fun setSearchEngineCustomUrl(url: String) {
         viewModelScope.launch { repository.setSearchEngineCustomUrl(url) }
-    }
-
-    val searchKeyboardHaptics: StateFlow<Boolean> =
-        repository.searchKeyboardHaptics.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-
-    fun setSearchKeyboardHaptics(enabled: Boolean) {
-        viewModelScope.launch { repository.setSearchKeyboardHaptics(enabled) }
-    }
-
-    fun setSearchKeyboardShowNumberRow(show: Boolean) {
-        viewModelScope.launch { repository.setSearchKeyboardShowNumberRow(show) }
     }
 
     fun setSearchIndexShowRailBar(show: Boolean) {
