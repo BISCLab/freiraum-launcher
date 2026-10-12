@@ -33,8 +33,9 @@ import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.settings.IconShape
 
 /**
- * Dock: a flat row of uniform squircle buttons — every slot the exact same size and shape whether it's a
- * pinned app or a power button, proportionally scaled from the Figma reference (see [DockDimens]). There
+ * Dock: a flat row of uniform squircle buttons — every slot the exact same fixed size and shape whether
+ * it's a pinned app or a power button (see [DockDimens]). The bar itself is either pinned to a fixed
+ * 5-slot width or grows with the actual slot count, per [widthMode] (see [DockWidthMode]). There
  * is no longer a special "Hub orb" with its own gesture vocabulary (tap/swipe/drag); that whole control
  * was replaced by [DockSlotUi.PowerButton] slots — plain, single-purpose buttons the user places
  * (text search, category search, app drawer, app list, ...) alongside their pinned apps, in whatever
@@ -53,6 +54,7 @@ fun SearchBar(
     modifier: Modifier = Modifier,
     iconShape: IconShape = IconShape.ROUNDED_SQUARE,
     appearance: ElementAppearance = ElementAppearance(),
+    widthMode: DockWidthMode = DockWidthMode.FIXED,
     loadQuickLaunchIcon: (ComponentName) -> ImageBitmap? = { null }
 ) {
     val colors = resolveElementColors(appearance)
@@ -67,7 +69,7 @@ fun SearchBar(
             ),
         contentAlignment = Alignment.Center
     ) {
-        val d = dockDimens(maxWidth)
+        val d = dockDimens(maxWidth).let { it.copy(pillWidth = DockDimens.pillWidth(slots.size, widthMode, maxWidth)) }
         val itemShape = when (iconShape) {
             IconShape.CIRCLE -> CircleShape
             IconShape.ROUNDED_SQUARE -> RoundedCornerShape(d.iconCornerRadius)

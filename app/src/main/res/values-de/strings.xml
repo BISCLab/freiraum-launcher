@@ -432,6 +432,9 @@
     <string name="settings_dock_corner_style_sharp">Eckig</string>
     <string name="settings_dock_corner_style_rounded">Abgerundet</string>
     <string name="settings_dock_corner_style_fully_round">Komplett rund</string>
+    <string name="settings_dock_width_mode_label">Dock-Breite</string>
+    <string name="settings_dock_width_mode_fixed">Fest (Platz für 5 Icons)</string>
+    <string name="settings_dock_width_mode_grow">Wächst mit Icons</string>
 
     <string name="settings_section_search_overview">Schnellübersicht</string>
     <string name="settings_card_search_overview_subtitle">Reihenfolge der Seitenleiste, Kategorien, Hintergrund</string>

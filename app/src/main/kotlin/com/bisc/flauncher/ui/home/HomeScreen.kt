@@ -78,7 +78,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -128,7 +127,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onNavigateToSettings: () -> Unit,
+    onNavigateToSettings: (editDockSlot: Int?) -> Unit,
     homeButtonPressCount: Int = 0,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -175,6 +174,7 @@ fun HomeScreen(
     val iconShape by viewModel.iconShape.collectAsState()
     val railAppearance by viewModel.searchAlphabetRailAppearance.collectAsState()
     val dockSlots by viewModel.dockSlots.collectAsState()
+    val dockWidthMode by viewModel.dockWidthMode.collectAsState()
     val chargingAnimationEnabled by viewModel.chargingAnimationEnabled.collectAsState()
     val chargingAnimationColor by viewModel.chargingAnimationColor.collectAsState()
     val searchOverlayBackground by viewModel.searchOverlayBackground.collectAsState()
@@ -325,7 +325,7 @@ fun HomeScreen(
     }
     val openSettingsFromGesture: () -> Unit = {
         viewModel.closeOverview()
-        onNavigateToSettings()
+        onNavigateToSettings(null)
     }
 
     // Whether *any* level of the folder stack is open.
@@ -429,9 +429,7 @@ fun HomeScreen(
                     // and subcomposing every page's full widget content (each with its own state, icon
                     // loading, etc.) on first entering the pager's composition range is what made swiping
                     // onto a widget-heavy page feel janky, regardless of whether the widgets were external
-                    // or built-in. The one thing this used maxWidth for (innerWidth, for the dock's reserved
-                    // space) is read from LocalConfiguration instead, which costs nothing to recompute.
-                    val innerWidth = (LocalConfiguration.current.screenWidthDp.dp - DockDimens.horizontalMargin * 2).coerceAtLeast(0.dp)
+                    // or built-in.
                     Box(
                         // Home-screen background gestures (long-press/double-tap/swipe-up/swipe-down via
                         // detectHomeGestures) are deliberately not wired up right now — being rebuilt from
@@ -463,8 +461,7 @@ fun HomeScreen(
                         // on home aren't deleted, just not rendered; turning the toggle on reveals them
                         // again. Other pages always show their full row content regardless of this toggle.
                         val showRowContent = !page.isHome || homeScreenWidgetsEnabled
-                        val reservedForDock = DockDimens.scaled(innerWidth)
-                            .let { it.barHeight + DockDimens.topMargin + DockDimens.bottomMargin } + DockDimens.contentGap
+                        val reservedForDock = DockDimens.barHeight + DockDimens.topMargin + DockDimens.bottomMargin + DockDimens.contentGap
                         val pageBackgroundConfigOrNull by remember(page.id) { viewModel.pageBackgroundConfig(page.id) }.collectAsState(initial = null)
                         LaunchedEffect(page.id, pageBackgroundConfigOrNull) {
                             pageBackgroundConfigOrNull?.let { pageBackgroundCache[page.id] = it }
@@ -531,10 +528,11 @@ fun HomeScreen(
                 SearchBar(
                     slots = dockSlots,
                     onAppClick = { componentName -> launchApp(context, componentName) },
-                    onUnsetAppClick = { onNavigateToSettings() },
+                    onUnsetAppClick = { index -> onNavigateToSettings(index) },
                     onPowerButtonClick = viewModel::executeDockPowerButton,
                     iconShape = iconShape,
                     appearance = homeDockRow.appearance(),
+                    widthMode = dockWidthMode,
                     loadQuickLaunchIcon = viewModel::loadIcon
                 )
             }
@@ -638,7 +636,7 @@ fun HomeScreen(
                     },
                     onFolderClick = { folder -> viewModel.openFolder(folder.id) },
                     onRemoveApp = viewModel::removeSidebarApp,
-                    onOpenSettings = { viewModel.closeOverview(); onNavigateToSettings() },
+                    onOpenSettings = { viewModel.closeOverview(); onNavigateToSettings(null) },
                     appearance = sidebarPanelAppearance,
                     shape = panelShape,
                     dock = d,

@@ -15,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +33,7 @@ import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.dock.DockCornerStyle
 import com.bisc.flauncher.ui.home.dock.DockSlotUi
+import com.bisc.flauncher.ui.home.dock.DockWidthMode
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 import com.bisc.flauncher.ui.home.dock.defaultIcon
 
@@ -44,10 +46,17 @@ import com.bisc.flauncher.ui.home.dock.defaultIcon
  * row has) and its corner style.
  */
 @Composable
-fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+fun SettingsDockScreen(
+    navController: NavController,
+    onBack: () -> Unit,
+    onNavigate: (String) -> Unit,
+    initialEditSlot: Int? = null,
+    viewModel: HomeViewModel = hiltViewModel()
+) {
     val dockSlots by viewModel.dockSlots.collectAsState()
     val browsableApps by viewModel.browsableApps.collectAsState()
     val cornerStyle by viewModel.dockCornerStyle.collectAsState()
+    val widthMode by viewModel.dockWidthMode.collectAsState()
     val pages by viewModel.pages.collectAsState()
     val rowsByPage by viewModel.rowsByPage.collectAsState()
     val homePage = pages.find { it.isHome }
@@ -58,6 +67,23 @@ fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavig
     var addingPowerButton by remember { mutableStateOf(false) }
     var showBackgroundSheet by remember { mutableStateOf(false) }
     var pickingCornerStyle by remember { mutableStateOf(false) }
+    var pickingWidthMode by remember { mutableStateOf(false) }
+
+    // Deep link from the home-screen dock's "+" (see HomeScreen's onUnsetAppClick): jump straight into
+    // this slot's picker instead of just landing on the dock screen. Guarded so it only fires once — the
+    // slot list keeps changing after the pick (the whole point), which would otherwise reopen it forever.
+    var consumedInitialEditSlot by remember { mutableStateOf(false) }
+    LaunchedEffect(dockSlots) {
+        if (!consumedInitialEditSlot && initialEditSlot != null) {
+            dockSlots.find { it.index == initialEditSlot }?.let { slot ->
+                consumedInitialEditSlot = true
+                when (slot) {
+                    is DockSlotUi.App -> pickingAppForSlot = slot.index
+                    is DockSlotUi.PowerButton -> pickingPowerButtonForSlot = slot.index
+                }
+            }
+        }
+    }
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_dock), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup(title = stringResource(R.string.settings_dock_slots_label)) {
@@ -117,6 +143,13 @@ fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavig
                     title = stringResource(R.string.settings_dock_corner_style_label),
                     summary = dockCornerStyleLabel(cornerStyle),
                     onClick = { pickingCornerStyle = true },
+                    trailing = null
+                )
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_dock_width_mode_label),
+                    summary = dockWidthModeLabel(widthMode),
+                    onClick = { pickingWidthMode = true },
                     trailing = null
                 )
             }
@@ -188,6 +221,14 @@ fun SettingsDockScreen(navController: NavController, onBack: () -> Unit, onNavig
             onDismiss = { pickingCornerStyle = false }
         )
     }
+
+    if (pickingWidthMode) {
+        DockWidthModeSheet(
+            current = widthMode,
+            onSelected = { mode -> viewModel.setDockWidthMode(mode); pickingWidthMode = false },
+            onDismiss = { pickingWidthMode = false }
+        )
+    }
 }
 
 @Composable
@@ -238,4 +279,22 @@ private fun dockCornerStyleLabel(style: DockCornerStyle): String = when (style) 
     DockCornerStyle.SHARP -> stringResource(R.string.settings_dock_corner_style_sharp)
     DockCornerStyle.ROUNDED -> stringResource(R.string.settings_dock_corner_style_rounded)
     DockCornerStyle.FULLY_ROUND -> stringResource(R.string.settings_dock_corner_style_fully_round)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DockWidthModeSheet(current: DockWidthMode, onSelected: (DockWidthMode) -> Unit, onDismiss: () -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(modifier = Modifier.padding(vertical = 8.dp)) {
+            DockWidthMode.entries.forEach { mode ->
+                RadioPreference(dockWidthModeLabel(mode), mode, current, onSelected)
+            }
+        }
+    }
+}
+
+@Composable
+private fun dockWidthModeLabel(mode: DockWidthMode): String = when (mode) {
+    DockWidthMode.FIXED -> stringResource(R.string.settings_dock_width_mode_fixed)
+    DockWidthMode.GROW -> stringResource(R.string.settings_dock_width_mode_grow)
 }
