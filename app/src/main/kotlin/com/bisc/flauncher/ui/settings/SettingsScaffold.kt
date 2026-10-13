@@ -81,8 +81,10 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
         "settings/appearance" -> stringResource(R.string.settings_section_appearance)
         "settings/appearance/background" -> stringResource(R.string.settings_section_global_background)
         "settings/dock" -> stringResource(R.string.settings_section_dock)
+        "settings/dock/slots?editSlot={editSlot}" -> stringResource(R.string.settings_dock_slots_label)
+        "settings/dock/appearance" -> stringResource(R.string.settings_dock_appearance_label)
         "settings/dock/overview" -> stringResource(R.string.settings_section_search_overview)
-        "settings/dock/full" -> stringResource(R.string.settings_section_search_full)
+        "settings/search" -> stringResource(R.string.settings_section_search_full)
         "settings/pages" -> stringResource(R.string.settings_section_pages)
         "settings/pages/{pageId}" -> {
             val viewModel: HomeViewModel = hiltViewModel(entry)
@@ -91,6 +93,7 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
             val page = pages.find { it.id == pageId }
             page?.let { pageLabel(it, pages) } ?: stringResource(R.string.settings_rows_title)
         }
+        "settings/pages/{pageId}/icon" -> stringResource(R.string.settings_page_icon_title)
         "settings/pages/{pageId}/rows/{rowId}" -> {
             val viewModel: HomeViewModel = hiltViewModel(entry)
             val rowsByPage by viewModel.rowsByPage.collectAsState()

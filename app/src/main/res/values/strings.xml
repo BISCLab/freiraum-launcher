@@ -181,6 +181,7 @@
     <string name="settings_element_border_label">Border</string>
 
     <string name="settings_layer_background_title">Layer %1$d · %2$s</string>
+    <string name="settings_dock_background_label">Background</string>
     <string name="settings_layer_surface_screen">Screen</string>
     <string name="settings_layer_surface_dock">Dock</string>
     <string name="settings_layer_surface_sidebar">Sidebar</string>
@@ -301,11 +302,20 @@
     <string name="settings_card_pages_subtitle">Widgets, app rows, backgrounds</string>
     <string name="settings_pages_home">Home screen</string>
     <string name="settings_pages_app_overview">App overview</string>
+    <string name="settings_pages_search">Text search</string>
     <string name="settings_pages_page">Page %1$d</string>
     <string name="settings_pages_add">Add page</string>
     <string name="settings_pages_remove">Remove page</string>
     <string name="settings_pages_rename">Rename page</string>
     <string name="settings_pages_rename_hint">Page name</string>
+    <string name="settings_page_icon_title">Icon</string>
+    <string name="settings_page_icon_symbol_label">Symbol</string>
+    <string name="settings_page_icon_background_color">Background color</string>
+    <string name="settings_page_icon_symbol_color">Symbol color</string>
+    <string name="settings_page_icon_glyph_search">Search</string>
+    <string name="settings_page_icon_glyph_app_drawer">App drawer</string>
+    <string name="settings_page_icon_glyph_app_list">App list</string>
+    <string name="settings_page_icon_glyph_widget_page">Widget page</string>
 
     <string name="settings_rows_title">Rows</string>
     <string name="settings_rows_empty">No rows on this page. Use “Add row” to add a widget or an apps row.</string>
@@ -413,8 +423,11 @@
     <string name="settings_folder_creator_create">Create</string>
 
     <string name="settings_section_dock">Dock</string>
-    <string name="settings_card_dock_subtitle">Slots, power buttons, background, corners</string>
-    <string name="settings_dock_slots_label">Dock slots</string>
+    <string name="settings_card_dock_subtitle">Slots, appearance</string>
+    <string name="settings_dock_slots_label">Slots</string>
+    <string name="settings_dock_slots_summary">%1$d of %2$d slots used</string>
+    <string name="settings_dock_slots_at_cap">Remove a slot to add another (max %1$d)</string>
+    <string name="settings_dock_appearance_label">Appearance</string>
     <string name="settings_dock_slot_title">Slot %1$d</string>
     <string name="settings_dock_slot_not_set">Not set</string>
     <string name="settings_dock_slot_clear">Clear slot</string>
@@ -422,11 +435,7 @@
     <string name="settings_dock_slot_move_down">Move down</string>
     <string name="settings_dock_slot_remove">Remove slot</string>
     <string name="settings_dock_add_app_slot">Add app</string>
-    <string name="settings_dock_add_power_button_slot">Add power button</string>
-    <string name="settings_dock_power_button_text_search">Text search</string>
-    <string name="settings_dock_power_button_category_search">Category search</string>
-    <string name="settings_dock_power_button_app_drawer">App drawer (grid)</string>
-    <string name="settings_dock_power_button_app_list">App list</string>
+    <string name="settings_dock_add_page_slot">Link a page</string>
     <string name="settings_dock_corner_style_label">Corner style</string>
     <string name="settings_dock_corner_style_sharp">Sharp</string>
     <string name="settings_dock_corner_style_rounded">Rounded</string>

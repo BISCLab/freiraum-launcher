@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.bisc.flauncher.data.model.LauncherPage
+import com.bisc.flauncher.data.model.LauncherPageKind
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -24,6 +25,9 @@ interface LauncherPageDao {
 
     @Query("SELECT * FROM launcher_pages WHERE isAppOverview = 1 LIMIT 1")
     suspend fun getAppOverviewPage(): LauncherPage?
+
+    @Query("SELECT * FROM launcher_pages WHERE kind = :kind LIMIT 1")
+    suspend fun getByKind(kind: LauncherPageKind): LauncherPage?
 
     @Query("SELECT MAX(orderIndex) FROM launcher_pages")
     suspend fun maxOrderIndex(): Int?

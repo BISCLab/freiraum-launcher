@@ -531,7 +531,13 @@ fun HomeScreen(
                     slots = dockSlots,
                     onAppClick = { componentName -> launchApp(context, componentName) },
                     onUnsetAppClick = { index -> onNavigateToSettings(index) },
-                    onPowerButtonClick = viewModel::executeDockPowerButton,
+                    onPageLinkClick = { link ->
+                        when (link.pageKind) {
+                            com.bisc.flauncher.data.model.LauncherPageKind.ROWS -> link.pageId?.let(openPageById)
+                            com.bisc.flauncher.data.model.LauncherPageKind.APP_LIST -> viewModel.openAppList()
+                            com.bisc.flauncher.data.model.LauncherPageKind.SEARCH -> viewModel.openSearch()
+                        }
+                    },
                     iconShape = iconShape,
                     appearance = homeDockRow.appearance(),
                     widthMode = dockWidthMode,
