@@ -251,11 +251,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    /** Every [HomeGesture] currently spent toggling some row's Dock visibility — see
-     *  [com.bisc.flauncher.data.repository.PageContentRepository.dockClaimedGestures]. */
-    val dockClaimedGestures: StateFlow<Set<HomeGesture>> =
-        pageContentRepository.dockClaimedGestures.stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
-
     fun setGestureAction(gesture: HomeGesture, action: GestureAction) {
         viewModelScope.launch { settingsRepository.setGestureAction(gesture, action) }
     }
@@ -944,14 +939,6 @@ class HomeViewModel @Inject constructor(
 
     fun setRowDockVisibilityMode(row: PageRow, mode: com.bisc.flauncher.data.model.DockVisibilityMode) {
         viewModelScope.launch { pageContentRepository.setRowDockVisibilityMode(row, mode) }
-    }
-
-    fun setRowDockToggleGesture(row: PageRow, gesture: HomeGesture?) {
-        viewModelScope.launch { pageContentRepository.setRowDockToggleGesture(row, gesture) }
-    }
-
-    fun setRowDockShowDragHandle(row: PageRow, show: Boolean) {
-        viewModelScope.launch { pageContentRepository.setRowDockShowDragHandle(row, show) }
     }
 
     fun addNewMapTargetToRow(pageRowId: Long, label: String, lat: Double, lon: Double, address: String = "") {

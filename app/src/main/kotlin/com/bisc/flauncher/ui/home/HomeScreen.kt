@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
@@ -45,6 +46,8 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
@@ -92,7 +95,7 @@ import com.bisc.flauncher.data.model.Note
 import com.bisc.flauncher.data.model.ContactInfo
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
-import com.bisc.flauncher.data.model.dockToggleGesture
+import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.data.model.SidebarCategoryViewMode
 import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.data.model.WidgetKind
@@ -104,9 +107,13 @@ import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.BackgroundFill
 import com.bisc.flauncher.ui.home.dock.DockDimens
+import com.bisc.flauncher.ui.home.dock.DockPanelSurface
+import com.bisc.flauncher.ui.home.dock.EdgeNotch
 import com.bisc.flauncher.ui.home.dock.FavoritesPopup
+import com.bisc.flauncher.ui.home.dock.NotchEdge
 import com.bisc.flauncher.ui.home.dock.ResolvedSidebarItem
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
+import com.bisc.flauncher.ui.home.dock.resolveElementColors
 import com.bisc.flauncher.ui.home.search.AppOverviewContent
 import com.bisc.flauncher.ui.home.search.automaticRailAppearance
 import com.bisc.flauncher.ui.home.search.SearchOverlay
@@ -311,10 +318,9 @@ fun HomeScreen(
         }
     }
 
-    // Hoisted above the pager (rather than declared down where the dock itself renders) so the home
-    // page's gesture detector below and the dock's own rendering block further down share one
-    // dockExpanded state — a GESTURE_TOGGLE binding needs to flip the exact state the dock reads to
-    // decide whether it's showing.
+    // Hoisted above the pager (rather than declared down where the dock itself renders) so the
+    // gesture-detector Box below (home-screen background taps) and the dock's own rendering block
+    // further down share one dockExpanded state.
     val homeDockRow = pages.find { it.isHome }
         ?.let { rowsByPage[it.id] }
         ?.find { it.type == PageRowType.SEARCH_BAR }
@@ -323,7 +329,7 @@ fun HomeScreen(
     // Favorites popup this look mirrors. Resets to its mode's own starting state whenever the
     // row id or the mode itself changes (e.g. the user just switched modes in Settings).
     var dockExpanded by remember(homeDockRow?.id, dockVisibilityMode) {
-        mutableStateOf(dockVisibilityMode != com.bisc.flauncher.data.model.DockVisibilityMode.GESTURE_TOGGLE)
+        mutableStateOf(dockVisibilityMode != com.bisc.flauncher.data.model.DockVisibilityMode.MANUAL)
     }
     val isOnHomePage = pagerState.currentPage == homeIndex
     LaunchedEffect(dockVisibilityMode, isOnHomePage) {
@@ -334,7 +340,6 @@ fun HomeScreen(
         }
     }
     val dockCanCollapse = dockVisibilityMode != com.bisc.flauncher.data.model.DockVisibilityMode.ALWAYS_VISIBLE
-    val dockToggleGesture = homeDockRow?.let { if (dockVisibilityMode == com.bisc.flauncher.data.model.DockVisibilityMode.GESTURE_TOGGLE) it.dockToggleGesture() else null }
 
     val openPageById: (Long) -> Unit = { pageId ->
         val index = pages.indexOfFirst { it.id == pageId }
@@ -473,32 +478,16 @@ fun HomeScreen(
                         // The 4 rebindable HomeGestures (long-press/double-tap/swipe-up/swipe-down),
                         // restricted to the home page only — closing an overlay they open always lands
                         // you back on the page you actually started the gesture from (returnHome does
-                        // the actual closing/scrolling). A gesture the Dock itself has claimed to
-                        // toggle its own visibility (dockToggleGesture, only set under GESTURE_TOGGLE)
-                        // takes priority over the global binding for that same gesture — the two are
-                        // mutually exclusive by construction (SettingsGesturesScreen greys out a
-                        // gesture the Dock already owns), but this still only ever dispatches to one.
-                        // The dock's own orb sits above this page in z-order with its own gesture
-                        // detector, so a touch starting on the orb itself never reaches this one.
+                        // the actual closing/scrolling). No longer involved in opening/closing the
+                        // Dock or the Favorites popup at all — those are now a dedicated drag notch
+                        // (see EdgeNotch) instead of competing for one of these 4 slots.
                         modifier = Modifier.fillMaxSize().then(
                             if (page?.isHome == true) {
                                 Modifier.detectHomeGestures(
-                                    onLongPress = {
-                                        if (dockToggleGesture == com.bisc.flauncher.data.model.HomeGesture.LONG_PRESS) dockExpanded = !dockExpanded
-                                        else viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.LONG_PRESS, context, openPageById, openSettingsFromGesture)
-                                    },
-                                    onDoubleTap = {
-                                        if (dockToggleGesture == com.bisc.flauncher.data.model.HomeGesture.DOUBLE_TAP) dockExpanded = !dockExpanded
-                                        else viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.DOUBLE_TAP, context, openPageById, openSettingsFromGesture)
-                                    },
-                                    onSwipeUp = {
-                                        if (dockToggleGesture == com.bisc.flauncher.data.model.HomeGesture.SWIPE_UP) dockExpanded = !dockExpanded
-                                        else viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.SWIPE_UP, context, openPageById, openSettingsFromGesture)
-                                    },
-                                    onSwipeDown = {
-                                        if (dockToggleGesture == com.bisc.flauncher.data.model.HomeGesture.SWIPE_DOWN) dockExpanded = !dockExpanded
-                                        else viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.SWIPE_DOWN, context, openPageById, openSettingsFromGesture)
-                                    }
+                                    onLongPress = { viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.LONG_PRESS, context, openPageById, openSettingsFromGesture) },
+                                    onDoubleTap = { viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.DOUBLE_TAP, context, openPageById, openSettingsFromGesture) },
+                                    onSwipeUp = { viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.SWIPE_UP, context, openPageById, openSettingsFromGesture) },
+                                    onSwipeDown = { viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.SWIPE_DOWN, context, openPageById, openSettingsFromGesture) }
                                 )
                             } else {
                                 Modifier
@@ -514,7 +503,9 @@ fun HomeScreen(
                         // on home aren't deleted, just not rendered; turning the toggle on reveals them
                         // again. Other pages always show their full row content regardless of this toggle.
                         val showRowContent = !page.isHome || homeScreenWidgetsEnabled
-                        val reservedForDock = DockDimens.barHeight + DockDimens.topMargin + DockDimens.bottomMargin + DockDimens.contentGap
+                        // Flush to the screen's bottom edge now (no floating margin of its own), so
+                        // content reserves the panel's own height plus the system nav bar inset below it.
+                        val reservedForDock = DockDimens.barHeight + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + DockDimens.contentGap
                         val pageBackgroundConfigOrNull by remember(page.id) { viewModel.pageBackgroundConfig(page.id) }.collectAsState(initial = null)
                         LaunchedEffect(page.id, pageBackgroundConfigOrNull) {
                             pageBackgroundConfigOrNull?.let { pageBackgroundCache[page.id] = it }
@@ -566,28 +557,54 @@ fun HomeScreen(
             }
         }
 
-        // The dock floats as its own layer outside the pager, not stacked into the scrolling page content
-        // — it stays put across page changes and isn't affected by homeScreenWidgetsEnabled. It's the
-        // home page's own pinned SEARCH_BAR row, rendered in pill mode — same AppRowEntry/PillRow
-        // machinery any ordinary App row uses, just floated here instead of stacked inline (see
-        // PageRowContent's SEARCH_BAR case). Placed before the search/app-list overlays below so those
-        // naturally cover it when open; folderHideDock keeps the existing "hide the dock while a folder
-        // is open" behavior.
+        // The dock is a bottom-anchored, full-width panel flush with the screen's own bottom edge —
+        // the home page's own pinned SEARCH_BAR row, laid out full-width inside a DockPanelSurface
+        // instead of floating as its own pill (that look is now exclusive to an ordinary *inline*
+        // pillMode row, see PillRow). Mirrors FavoritesPopup's own shape/border treatment, just
+        // upside down: rounded only at the top (flush/square at the bottom), a border only on the
+        // top edge (the row's own borderEnabled column now means exactly that for this row), and —
+        // instead of a plain tap-reveal strip — a proper EdgeNotch to pull it open by hand. Placed
+        // before the search/app-list overlays below so those naturally cover it when open;
+        // folderHideDock keeps the existing "hide the dock while a folder is open" behavior.
         if (homeDockRow != null && !(folderOpen && folderHideDock)) {
-            Column(
-                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+            // Tapping the open background collapses the dock, same as tapping outside any modal —
+            // only live while there's actually something to collapse back to.
+            if (dockExpanded && dockCanCollapse) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { dockExpanded = false }
+                )
+            }
+            val dockAppearance = homeDockRow.appearance()
+            val dockShape = if (homeDockRow.cornerStyle == WidgetCornerStyle.SQUARE) {
+                RoundedCornerShape(0.dp)
+            } else {
+                RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+            }
+            val dockBorderColor = resolveElementColors(dockAppearance).borderColor
+            androidx.compose.animation.AnimatedVisibility(
+                visible = dockExpanded,
+                enter = fadeIn(tween(160)) + androidx.compose.animation.expandVertically(tween(200), expandFrom = Alignment.Bottom),
+                exit = fadeOut(tween(140)) + androidx.compose.animation.shrinkVertically(tween(180), shrinkTowards = Alignment.Bottom),
+                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
             ) {
-                if (dockExpanded && dockCanCollapse && homeDockRow.dockShowDragHandle) {
-                    DockDragHandle(pointingDown = true, onClick = { dockExpanded = false })
-                }
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = dockExpanded,
-                    enter = fadeIn(tween(160)) + androidx.compose.animation.expandVertically(tween(200), expandFrom = Alignment.Bottom),
-                    exit = fadeOut(tween(140)) + androidx.compose.animation.shrinkVertically(tween(180), shrinkTowards = Alignment.Bottom)
+                DockPanelSurface(
+                    appearance = dockAppearance.copy(borderEnabled = false),
+                    shape = dockShape,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(
+                            if (dockAppearance.borderEnabled) {
+                                Modifier.drawBehind {
+                                    drawLine(dockBorderColor, Offset(0f, 0f), Offset(size.width, 0f), strokeWidth = 1.dp.toPx())
+                                }
+                            } else {
+                                Modifier
+                            }
+                        )
                 ) {
-                    PillRow(
-                        row = homeDockRow,
+                    PillRowEntries(
                         entries = appEntriesByRow[homeDockRow.id].orEmpty(),
                         folders = folders,
                         folderItemsByFolder = folderItemsByFolder,
@@ -597,22 +614,27 @@ fun HomeScreen(
                         loadIcon = viewModel::loadIcon,
                         loadPackIcon = viewModel::loadPackIcon,
                         resolveLabel = resolveLabel,
-                        iconShape = iconShape,
+                        itemShape = pillItemShape(iconShape),
                         onFolderClick = viewModel::openFolder,
                         onShortcutClick = viewModel::launchFolderShortcut,
                         onOpenPageLink = onOpenPageLink,
-                        onAddEmptySlot = { addingAppToDockRowId = homeDockRow.id }
+                        onAddEmptySlot = { addingAppToDockRowId = homeDockRow.id },
+                        maxEntries = homeDockRow.pillMaxEntries,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = DockDimens.innerHorizontalPadding, vertical = DockDimens.innerVerticalPadding)
+                            .navigationBarsPadding()
                     )
                 }
-                if (!dockExpanded && dockCanCollapse) {
-                    Box(
-                        modifier = Modifier
-                            .padding(bottom = DockDimens.bottomMargin)
-                            .size(width = 56.dp, height = 10.dp)
-                            .clip(RoundedCornerShape(percent = 50))
-                            .background(Color.White.copy(alpha = 0.35f))
-                            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { dockExpanded = true }
-                    )
+            }
+            if (dockCanCollapse) {
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = !dockExpanded,
+                    enter = fadeIn(tween(160)),
+                    exit = fadeOut(tween(120)),
+                    modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
+                ) {
+                    EdgeNotch(edge = NotchEdge.BOTTOM, appearance = dockAppearance, onOpen = { dockExpanded = true })
                 }
             }
         }

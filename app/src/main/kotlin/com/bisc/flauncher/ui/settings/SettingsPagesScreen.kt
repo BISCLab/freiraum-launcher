@@ -86,7 +86,6 @@ fun SettingsPagesScreen(
 ) {
     val allPages by viewModel.allPages.collectAsState()
     val gestureActions by viewModel.gestureActions.collectAsState()
-    val dockClaimedGestures by viewModel.dockClaimedGestures.collectAsState()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -151,7 +150,7 @@ fun SettingsPagesScreen(
 
     pickingInvocationForPage?.let { page ->
         val current = gestureForPage(page.id)
-        val taken = (gestureActions.filterValues { it.type != GestureActionType.NONE }.keys + dockClaimedGestures) - setOfNotNull(current)
+        val taken = gestureActions.filterValues { it.type != GestureActionType.NONE }.keys - setOfNotNull(current)
         PageInvocationPickerSheet(
             current = current,
             takenGestures = taken,

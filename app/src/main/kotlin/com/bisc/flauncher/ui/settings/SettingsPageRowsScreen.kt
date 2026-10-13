@@ -60,7 +60,6 @@ import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.model.appearance
-import com.bisc.flauncher.data.model.dockToggleGesture
 import com.bisc.flauncher.ui.pageLabel
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.SystemWidgetPickerSheet
@@ -96,8 +95,6 @@ fun SettingsPageRowsScreen(
     val pendingBindIntent by viewModel.pendingBindIntent.collectAsState()
     val pendingConfigureIntent by viewModel.pendingConfigureIntent.collectAsState()
     val widgetRelocationWarningCount by viewModel.widgetRelocationWarningCount.collectAsState()
-    val gestureActions by viewModel.gestureActions.collectAsState()
-    val dockClaimedGestures by viewModel.dockClaimedGestures.collectAsState()
 
     val rows = rowsByPage[pageId].orEmpty()
     val page = pages.find { it.id == pageId }
@@ -276,12 +273,6 @@ fun SettingsPageRowsScreen(
                 onAppearanceChange = { appearance -> viewModel.setRowAppearance(row, appearance) },
                 onPillModeChange = { enabled -> viewModel.setRowPillMode(row, enabled) },
                 onDockVisibilityModeChange = { mode -> viewModel.setRowDockVisibilityMode(row, mode) },
-                // Already spent elsewhere: bound to a real GestureAction, or claimed by a different
-                // row's own dock toggle — this row's own current pick stays excluded/selectable.
-                takenGestures = (gestureActions.filterValues { it.type != com.bisc.flauncher.data.model.GestureActionType.NONE }.keys + dockClaimedGestures) -
-                    setOfNotNull(row.dockToggleGesture()),
-                onDockToggleGestureChange = { gesture -> viewModel.setRowDockToggleGesture(row, gesture) },
-                onDockShowDragHandleChange = { show -> viewModel.setRowDockShowDragHandle(row, show) },
                 onAddApp = { app -> viewModel.addAppEntryToRow(row.id, app) },
                 onAddExistingFolder = { folderId -> viewModel.addExistingFolderToRow(row.id, folderId) },
                 onCreateFolder = { name -> viewModel.createFolderInRow(row.id, name) },

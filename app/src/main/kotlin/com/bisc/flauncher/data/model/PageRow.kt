@@ -56,15 +56,10 @@ data class PageRow(
     val pillMode: Boolean = false,
     val pillWidthMode: DockWidthMode = DockWidthMode.FIXED,
     val pillMaxEntries: Int = 5,
-    // Only meaningful for the pinned dock row (type == SEARCH_BAR) — see HomeScreen's floating dock
-    // Box for the expand/collapse rendering these drive.
-    val dockVisibilityMode: DockVisibilityMode = DockVisibilityMode.ALWAYS_VISIBLE,
-    val dockToggleGestureType: String? = null,
-    val dockShowDragHandle: Boolean = false
+    // Only meaningful for the pinned dock row (type == SEARCH_BAR) — see HomeScreen's dock panel Box
+    // for the expand/collapse rendering this drives.
+    val dockVisibilityMode: DockVisibilityMode = DockVisibilityMode.ALWAYS_VISIBLE
 )
-
-/** Reads this row's stored dock-toggle gesture, if any — only meaningful with [PageRow.dockVisibilityMode] == [DockVisibilityMode.GESTURE_TOGGLE]. */
-fun PageRow.dockToggleGesture(): HomeGesture? = dockToggleGestureType?.let { runCatching { HomeGesture.valueOf(it) }.getOrNull() }
 
 /** Reads the stored date-tap action of a clock row as a [GestureAction]. */
 fun PageRow.clockDateAction(): GestureAction =

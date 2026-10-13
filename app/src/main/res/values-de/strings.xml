@@ -184,11 +184,8 @@
     <string name="settings_dock_background_label">Hintergrund</string>
     <string name="settings_dock_visibility_label">Sichtbarkeit</string>
     <string name="settings_dock_visibility_always">Immer sichtbar</string>
-    <string name="settings_dock_visibility_gesture">Mit Geste aufklappen</string>
+    <string name="settings_dock_visibility_manual">Mit der Nase aufziehen</string>
     <string name="settings_dock_visibility_auto">Automatisch beim Ankommen</string>
-    <string name="settings_dock_toggle_gesture_label">Geste</string>
-    <string name="settings_dock_show_drag_handle_label">Ziehgriff</string>
-    <string name="settings_dock_show_drag_handle_summary">Eine kleine Nase über dem Dock, um es per Hand auf- oder zuzuziehen</string>
     <string name="settings_layer_surface_screen">Bildschirm</string>
     <string name="settings_layer_surface_sidebar">Seitenleiste</string>
     <string name="settings_layer_surface_folder">Ordner</string>
@@ -298,7 +295,6 @@
     <string name="settings_gesture_action_settings">Einstellungen öffnen</string>
     <string name="settings_gesture_action_notifications">Benachrichtigungen öffnen</string>
     <string name="settings_gesture_action_quick_settings">Schnelleinstellungen öffnen</string>
-    <string name="settings_gesture_used_by_dock">Wird vom Dock verwendet</string>
     <string name="settings_gesture_already_used">Bereits anderweitig verwendet</string>
 
     <string name="settings_section_pages">Seiten</string>

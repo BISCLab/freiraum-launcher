@@ -31,9 +31,7 @@ import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.PagePickerSheet
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
-/** One row per [HomeGesture], each bindable to any [GestureActionType] — except a gesture the Dock
- *  has itself claimed to toggle its own visibility (see [AppsRowEditSheet]'s own gesture picker),
- *  which shows disabled here instead so the same gesture can never silently do two different things. */
+/** One row per [HomeGesture], each bindable to any [GestureActionType]. */
 @Composable
 fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val gestureActions by viewModel.gestureActions.collectAsState()
@@ -41,7 +39,6 @@ fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, vie
     val labeledApps by viewModel.labeledApps.collectAsState()
     val browsableApps by viewModel.browsableApps.collectAsState()
     val allPages by viewModel.allPages.collectAsState()
-    val dockClaimedGestures by viewModel.dockClaimedGestures.collectAsState()
     val shortcutAppPickerOpen by viewModel.shortcutAppPickerOpen.collectAsState()
     val shortcutPickerForApp by viewModel.shortcutPickerForApp.collectAsState()
     val availableShortcuts by viewModel.availableShortcuts.collectAsState()
@@ -54,14 +51,12 @@ fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, vie
     SettingsSubScreen(title = stringResource(R.string.settings_section_gestures), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
             HomeGesture.entries.forEach { gesture ->
-                val claimedByDock = gesture in dockClaimedGestures
                 val action = gestureActions[gesture] ?: GestureAction.NONE
                 SettingsPreference(
                     icon = gestureIcon(gesture),
                     title = gestureLabel(gesture),
-                    summary = if (claimedByDock) stringResource(R.string.settings_gesture_used_by_dock) else gestureActionSummary(action, allPages, labeledApps),
-                    enabled = !claimedByDock,
-                    onClick = { if (!claimedByDock) editingGesture = gesture }
+                    summary = gestureActionSummary(action, allPages, labeledApps),
+                    onClick = { editingGesture = gesture }
                 )
             }
         }
