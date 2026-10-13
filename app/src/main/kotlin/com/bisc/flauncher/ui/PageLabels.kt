@@ -12,8 +12,9 @@ fun pageLabel(page: LauncherPage, pages: List<LauncherPage>): String = page.name
     page.isHome -> stringResource(R.string.settings_pages_home)
     page.isAppOverview -> stringResource(R.string.settings_pages_app_overview)
     page.kind == LauncherPageKind.SEARCH -> stringResource(R.string.settings_pages_search)
+    page.kind == LauncherPageKind.SIDEBAR -> stringResource(R.string.settings_pages_sidebar)
     else -> {
-        val number = pages.filterNot { it.isHome || it.isAppOverview || it.kind == LauncherPageKind.SEARCH }.indexOf(page) + 1
+        val number = pages.filterNot { it.isHome || it.isAppOverview || it.kind == LauncherPageKind.SEARCH || it.kind == LauncherPageKind.SIDEBAR }.indexOf(page) + 1
         stringResource(R.string.settings_pages_page, number)
     }
 }

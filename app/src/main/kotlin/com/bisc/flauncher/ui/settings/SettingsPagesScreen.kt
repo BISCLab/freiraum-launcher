@@ -72,7 +72,7 @@ fun SettingsPagesScreen(
                     val glyph = page.iconGlyph?.let { runCatching { PageIconGlyph.valueOf(it) }.getOrNull() } ?: PageIconGlyph.forPageKind(page.kind)
                     val bg = page.iconBackgroundColor?.let { Color(it) } ?: glyph.defaultColor()
                     val tint = page.iconColor?.let { Color(it) } ?: Color.White
-                    val removable = !page.isHome && !page.isAppOverview && page.kind != LauncherPageKind.SEARCH
+                    val removable = !page.isHome && !page.isAppOverview && page.kind != LauncherPageKind.SEARCH && page.kind != LauncherPageKind.SIDEBAR
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()

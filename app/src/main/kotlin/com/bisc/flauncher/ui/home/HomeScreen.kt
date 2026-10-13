@@ -106,7 +106,6 @@ import com.bisc.flauncher.ui.home.dock.DockDimens
 import com.bisc.flauncher.ui.home.dock.FavoritesPopup
 import com.bisc.flauncher.ui.home.dock.ResolvedSidebarItem
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
-import com.bisc.flauncher.ui.home.dock.SidebarOverviewPanel
 import com.bisc.flauncher.ui.home.search.AppOverviewContent
 import com.bisc.flauncher.ui.home.search.automaticRailAppearance
 import com.bisc.flauncher.ui.home.search.SearchOverlay
@@ -322,6 +321,7 @@ fun HomeScreen(
             com.bisc.flauncher.data.model.LauncherPageKind.ROWS -> openPageById(pageId)
             com.bisc.flauncher.data.model.LauncherPageKind.APP_LIST -> viewModel.openAppList()
             com.bisc.flauncher.data.model.LauncherPageKind.SEARCH -> viewModel.openSearch()
+            com.bisc.flauncher.data.model.LauncherPageKind.SIDEBAR -> viewModel.openOverview()
         }
     }
     var addingAppToDockRowId by remember { mutableStateOf<Long?>(null) }

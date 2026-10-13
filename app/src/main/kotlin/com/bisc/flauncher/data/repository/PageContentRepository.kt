@@ -82,6 +82,17 @@ class PageContentRepository @Inject constructor(
             settingsRepository.setPageHideStatusBar(searchId, true)
         }
 
+        // Same autonomous-singleton pattern again — the Favorites/Quick-overview panel used to be
+        // reachable only via a hardcoded swipe-down gesture (still the case for now); as a real page
+        // it's also placeable in a dock slot like Search/App overview, just not linked there by
+        // default (the swipe-down path already reaches it without needing a dock slot too).
+        if (pageDao.getByKind(LauncherPageKind.SIDEBAR) == null) {
+            val sidebarId = pageDao.insert(
+                LauncherPage(orderIndex = (pageDao.maxOrderIndex() ?: -1) + 1, kind = LauncherPageKind.SIDEBAR)
+            )
+            settingsRepository.setPageHideStatusBar(sidebarId, true)
+        }
+
         // Fresh-install default: the dock arrives already linking to the two singleton pages, so it
         // doesn't look sparse — mirrors the pre-merge DockRepository's own default seed. Only runs once
         // (dockRowId already had zero entries at that point), never re-applied once the user has
@@ -131,7 +142,7 @@ class PageContentRepository @Inject constructor(
     }
 
     suspend fun removePageIfEmpty(page: LauncherPage): Boolean {
-        if (page.isHome || page.isAppOverview || page.kind == LauncherPageKind.SEARCH) return false
+        if (page.isHome || page.isAppOverview || page.kind == LauncherPageKind.SEARCH || page.kind == LauncherPageKind.SIDEBAR) return false
         if (rowDao.countForPage(page.id) > 0) return false
         pageDao.delete(page)
         return true

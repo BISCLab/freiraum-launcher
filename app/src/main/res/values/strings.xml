@@ -308,6 +308,7 @@
     <string name="settings_pages_home">Home screen</string>
     <string name="settings_pages_app_overview">App overview</string>
     <string name="settings_pages_search">Text search</string>
+    <string name="settings_pages_sidebar">Quick overview</string>
     <string name="settings_pages_page">Page %1$d</string>
     <string name="settings_pages_add">Add page</string>
     <string name="settings_pages_remove">Remove page</string>
