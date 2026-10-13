@@ -632,7 +632,7 @@ fun HomeScreen(
                     visible = !dockExpanded,
                     enter = fadeIn(tween(160)),
                     exit = fadeOut(tween(120)),
-                    modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
+                    modifier = Modifier.align(Alignment.BottomCenter)
                 ) {
                     EdgeNotch(edge = NotchEdge.BOTTOM, appearance = dockAppearance, onOpen = { dockExpanded = true })
                 }
@@ -751,6 +751,19 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxSize()
                 )
             }
+        }
+
+        // Mirrors the Dock's own EdgeNotch exactly, just flipped to the top edge — the Favorites
+        // popup no longer opens via a rebindable gesture (SWIPE_DOWN used to default to it, see
+        // PageContentRepository.ensureSeeded's comment on that), only by tapping or dragging this.
+        // Home-page-only, same restriction the old swipe-down gesture already had.
+        AnimatedVisibility(
+            visible = overviewEntry == null && !folderOpen && isOnHomePage,
+            enter = fadeIn(tween(160)),
+            exit = fadeOut(tween(120)),
+            modifier = Modifier.align(Alignment.TopCenter)
+        ) {
+            EdgeNotch(edge = NotchEdge.TOP, appearance = sidebarPanelAppearance, onOpen = { viewModel.openOverview() })
         }
     }
 
