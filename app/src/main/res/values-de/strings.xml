@@ -311,6 +311,9 @@
     <string name="settings_pages_sidebar">Schnellübersicht</string>
     <string name="settings_pages_page">Seite %1$d</string>
     <string name="settings_pages_add">Seite hinzufügen</string>
+    <string name="settings_pages_other_label">Weitere Seiten</string>
+    <string name="settings_pages_add_template_label">Ausgangspunkt</string>
+    <string name="settings_pages_add_template_blank">Leere Seite</string>
     <string name="settings_pages_remove">Seite entfernen</string>
     <string name="settings_pages_rename">Seite umbenennen</string>
     <string name="settings_pages_rename_hint">Seitenname</string>

@@ -749,6 +749,11 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { pageContentRepository.addPage() }
     }
 
+    /** Suspends until the new page's id is known, so the caller (the carousel's own "+" tiles) can
+     *  navigate straight to it rather than firing-and-forgetting like [addPage] does. */
+    suspend fun addPageInDirection(direction: com.bisc.flauncher.data.model.PageDirection): Long =
+        pageContentRepository.addPageInDirection(direction)
+
     fun removePage(context: Context, page: LauncherPage) {
         viewModelScope.launch {
             if (pageContentRepository.removePageIfEmpty(page)) {

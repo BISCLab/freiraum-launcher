@@ -2,28 +2,44 @@ package com.bisc.flauncher.ui.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,23 +47,31 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.LauncherPage
 import com.bisc.flauncher.data.model.LauncherPageKind
+import com.bisc.flauncher.data.model.PageDirection
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.dock.PageIconGlyph
 import com.bisc.flauncher.ui.home.dock.PageIconGlyphImage
 import com.bisc.flauncher.ui.home.dock.defaultColor
 import com.bisc.flauncher.ui.pageLabel
+import kotlinx.coroutines.launch
 
-/** Every page — including the singleton App overview/Search pages, no longer hidden/implicit —
- *  drag-reorderable (reordering only really applies to the swipeable ROWS pages; the two
- *  singletons just sort wherever their seed order put them). Tapping a page opens the settings
- *  that match its kind: a ROWS page's own rows editor, or the dedicated App overview/Search
- *  screens for those two. */
+/**
+ * Two distinct groups, no longer one flat drag-reorderable list: a horizontal carousel preview of
+ * the swipeable ROWS pages (Home always centered, a "+" ghost tile on each end to add a page in
+ * that direction), and below it a plain list of the pages that don't swipe at all (App overview,
+ * Text search, Quick overview — autonomous singletons, reachable by link/gesture rather than by
+ * paging). The old flat list let you drag a singleton tile in among the swipeable ones with no
+ * real effect on the pager (which only ever reads the ROWS subset) — this split makes that
+ * distinction visible instead of silently cosmetic.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsPagesScreen(
     navController: NavController,
@@ -56,61 +80,68 @@ fun SettingsPagesScreen(
     onOpenIcon: (Long) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val pages by viewModel.allPages.collectAsState()
+    val allPages by viewModel.allPages.collectAsState()
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    val rowsPages = remember(allPages) { allPages.filter { it.kind == LauncherPageKind.ROWS }.sortedBy { it.orderIndex } }
+    val otherPages = remember(allPages) { allPages.filter { it.kind != LauncherPageKind.ROWS } }
+
     var renamingPage by remember { mutableStateOf<LauncherPage?>(null) }
+    var pickingTemplateForDirection by remember { mutableStateOf<PageDirection?>(null) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_pages), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup {
-            if (pages.isNotEmpty()) {
-                ReorderableList(
-                    items = pages,
-                    key = { it.id },
-                    onReorder = { reordered -> viewModel.reorderPages(reordered) }
-                ) { page ->
-                    val label = pageLabel(page, pages)
-                    val glyph = page.iconGlyph?.let { runCatching { PageIconGlyph.valueOf(it) }.getOrNull() } ?: PageIconGlyph.forPageKind(page.kind)
-                    val bg = page.iconBackgroundColor?.let { Color(it) } ?: glyph.defaultColor()
-                    val tint = page.iconColor?.let { Color(it) } ?: Color.White
-                    val removable = !page.isHome && !page.isAppOverview && page.kind != LauncherPageKind.SEARCH && page.kind != LauncherPageKind.SIDEBAR
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onOpenPage(page) },
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        PagesCarousel(
+            pages = rowsPages,
+            onTileClick = onOpenPage,
+            onEditIcon = { page -> onOpenIcon(page.id) },
+            onRename = { page -> renamingPage = page },
+            onRemove = { page -> viewModel.removePage(context, page) },
+            onAddLeft = { pickingTemplateForDirection = PageDirection.LEFT },
+            onAddRight = { pickingTemplateForDirection = PageDirection.RIGHT }
+        )
+
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_pages_other_label)) {
+            otherPages.forEach { page ->
+                val label = pageLabel(page, allPages)
+                val glyph = page.iconGlyph?.let { runCatching { PageIconGlyph.valueOf(it) }.getOrNull() } ?: PageIconGlyph.forPageKind(page.kind)
+                val bg = page.iconBackgroundColor?.let { Color(it) } ?: glyph.defaultColor()
+                val tint = page.iconColor?.let { Color(it) } ?: Color.White
+                Row(
+                    modifier = Modifier.fillMaxWidth().clickable { onOpenPage(page) },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        modifier = Modifier.size(32.dp).clip(RoundedCornerShape(10.dp)).background(bg).clickable { onOpenIcon(page.id) },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(bg)
-                                .clickable { onOpenIcon(page.id) },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(18.dp))
-                        }
-                        Text(label, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                        IconButton(onClick = { renamingPage = page }) {
-                            Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.settings_pages_rename))
-                        }
-                        if (removable) {
-                            IconButton(onClick = { viewModel.removePage(context, page) }) {
-                                Icon(Icons.Filled.DeleteOutline, contentDescription = stringResource(R.string.settings_pages_remove))
-                            }
-                        }
+                        PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(18.dp))
+                    }
+                    Text(label, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                    IconButton(onClick = { renamingPage = page }) {
+                        Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.settings_pages_rename))
                     }
                 }
             }
         }
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = Icons.Filled.Add,
-                title = stringResource(R.string.settings_pages_add),
-                onClick = viewModel::addPage,
-                trailing = null
-            )
-        }
+    }
+
+    pickingTemplateForDirection?.let { direction ->
+        PageTemplatePickerSheet(
+            onBlankPageSelected = {
+                coroutineScope.launch {
+                    val newId = viewModel.addPageInDirection(direction)
+                    pickingTemplateForDirection = null
+                    // Built directly from the returned id rather than looked up in `allPages` — that
+                    // state won't have recomposed with the new row yet at this exact point, and
+                    // onOpenPage only ever reads .id/.kind for routing (see MainActivity's dispatch),
+                    // so a minimal synthetic object is both correct and simpler than waiting on it.
+                    onOpenPage(LauncherPage(id = newId, orderIndex = 0, kind = LauncherPageKind.ROWS))
+                }
+            },
+            onDismiss = { pickingTemplateForDirection = null }
+        )
     }
 
     renamingPage?.let { page ->
@@ -136,5 +167,147 @@ fun SettingsPagesScreen(
                 TextButton(onClick = { renamingPage = null }) { Text(stringResource(R.string.widget_notes_cancel)) }
             }
         )
+    }
+}
+
+private val CAROUSEL_TILE_SIZE = 64.dp
+
+@Composable
+private fun PagesCarousel(
+    pages: List<LauncherPage>,
+    onTileClick: (LauncherPage) -> Unit,
+    onEditIcon: (LauncherPage) -> Unit,
+    onRename: (LauncherPage) -> Unit,
+    onRemove: (LauncherPage) -> Unit,
+    onAddLeft: () -> Unit,
+    onAddRight: () -> Unit
+) {
+    val homeIndex = pages.indexOfFirst { it.isHome }.coerceAtLeast(0)
+    val listState = rememberLazyListState()
+    var didInitialScroll by remember { mutableStateOf(false) }
+    LaunchedEffect(pages.size) {
+        if (!didInitialScroll && pages.isNotEmpty()) {
+            // +1 for the leading "+" ghost tile ahead of the page tiles.
+            listState.scrollToItem((homeIndex + 1).coerceAtMost((pages.size + 1).coerceAtLeast(0)))
+            didInitialScroll = true
+        }
+    }
+    LazyRow(
+        state = listState,
+        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp)
+    ) {
+        item { GhostTile(onClick = onAddLeft) }
+        items(pages, key = { it.id }) { page ->
+            PageTile(
+                page = page,
+                pages = pages,
+                onClick = { onTileClick(page) },
+                onEditIcon = { onEditIcon(page) },
+                onRename = { onRename(page) },
+                onRemove = { onRemove(page) }
+            )
+        }
+        item { GhostTile(onClick = onAddRight) }
+    }
+}
+
+@Composable
+private fun PageTile(
+    page: LauncherPage,
+    pages: List<LauncherPage>,
+    onClick: () -> Unit,
+    onEditIcon: () -> Unit,
+    onRename: () -> Unit,
+    onRemove: () -> Unit
+) {
+    val label = pageLabel(page, pages)
+    val glyph = page.iconGlyph?.let { runCatching { PageIconGlyph.valueOf(it) }.getOrNull() } ?: PageIconGlyph.forPageKind(page.kind)
+    val bg = page.iconBackgroundColor?.let { Color(it) } ?: glyph.defaultColor()
+    val tint = page.iconColor?.let { Color(it) } ?: Color.White
+    var menuExpanded by remember { mutableStateOf(false) }
+    Box {
+        Column(
+            modifier = Modifier
+                .width(76.dp)
+                .combinedClickable(onClick = onClick, onLongClick = { menuExpanded = true })
+                .padding(vertical = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier.size(CAROUSEL_TILE_SIZE).clip(RoundedCornerShape(18.dp)).background(bg),
+                contentAlignment = Alignment.Center
+            ) {
+                PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(32.dp))
+            }
+            Spacer(Modifier.height(6.dp))
+            Text(
+                label,
+                style = MaterialTheme.typography.labelMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+        }
+        DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.settings_page_icon_title)) },
+                leadingIcon = { Icon(Icons.Filled.Palette, contentDescription = null) },
+                onClick = { onEditIcon(); menuExpanded = false }
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.settings_pages_rename)) },
+                leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
+                onClick = { onRename(); menuExpanded = false }
+            )
+            if (!page.isHome) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.settings_pages_remove)) },
+                    leadingIcon = { Icon(Icons.Filled.DeleteOutline, contentDescription = null) },
+                    onClick = { onRemove(); menuExpanded = false }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun GhostTile(onClick: () -> Unit) {
+    Column(
+        modifier = Modifier.width(76.dp).clickable(onClick = onClick).padding(vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(CAROUSEL_TILE_SIZE)
+                .clip(RoundedCornerShape(18.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.settings_pages_add), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Spacer(Modifier.height(6.dp))
+        Text("", style = MaterialTheme.typography.labelMedium)
+    }
+}
+
+/** Step 1 of adding a carousel page: which kind to start from. Only one real option today ("blank
+ *  page", matching the old [HomeViewModel.addPage] behavior), but kept as its own step/sheet so
+ *  more starting templates can be added later without reshuffling the call site. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PageTemplatePickerSheet(onBlankPageSelected: () -> Unit, onDismiss: () -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_pages_add_template_label)) {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_pages_add_template_blank),
+                    onClick = onBlankPageSelected,
+                    trailing = null
+                )
+            }
+        }
     }
 }

@@ -15,6 +15,7 @@ import com.bisc.flauncher.data.model.GridConstants
 import com.bisc.flauncher.data.model.GridItemType
 import com.bisc.flauncher.data.model.LauncherPage
 import com.bisc.flauncher.data.model.LauncherPageKind
+import com.bisc.flauncher.data.model.PageDirection
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
@@ -138,6 +139,35 @@ class PageContentRepository @Inject constructor(
         // Hidden status bar is the app-wide default now; a page that silently defaulted to *shown*
         // is exactly the kind of per-page mismatch that made switching to it visibly jump/settle.
         settingsRepository.setPageHideStatusBar(newId, true)
+        return newId
+    }
+
+    /**
+     * Adds a new ROWS page immediately to the left or right of Home **within the ROWS subset only**
+     * — the carousel's own "+" tiles. Unlike [reorderPages] (a plain positional reindex over
+     * whatever list it's handed, which is exactly what let the old flat Pages list cosmetically
+     * "reorder" the singleton App-overview/Search/Sidebar tiles relative to swipeable pages without
+     * that having any real effect on the pager, since the pager filters to ROWS before use), this
+     * renumbers every page from scratch: ROWS pages in their new relative order first (the new page
+     * inserted at [direction]'s position relative to Home), then every non-ROWS singleton appended
+     * after, each keeping its own prior relative order among themselves. Avoids a collision-prone
+     * localized index shift — page counts are small, a full stable re-sort is cheap and simple.
+     */
+    suspend fun addPageInDirection(direction: PageDirection): Long {
+        val all = pageDao.getAllOnce()
+        val rowsOnly = all.filter { it.kind == LauncherPageKind.ROWS }
+        val nonRows = all.filter { it.kind != LauncherPageKind.ROWS }
+        val homePos = rowsOnly.indexOfFirst { it.isHome }.coerceAtLeast(0)
+        val insertPos = if (direction == PageDirection.LEFT) homePos else homePos + 1
+
+        val newId = pageDao.insert(LauncherPage(orderIndex = 0))
+        settingsRepository.setPageHideStatusBar(newId, true)
+        val newPage = pageDao.getById(newId) ?: return newId
+
+        val newRowsOrder = rowsOnly.toMutableList().apply { add(insertPos, newPage) }
+        (newRowsOrder + nonRows).forEachIndexed { index, page ->
+            if (page.orderIndex != index) pageDao.update(page.copy(orderIndex = index))
+        }
         return newId
     }
 
