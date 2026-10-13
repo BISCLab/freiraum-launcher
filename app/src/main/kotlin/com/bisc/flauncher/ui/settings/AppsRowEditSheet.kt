@@ -61,7 +61,6 @@ import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PinnedWebsite
 import com.bisc.flauncher.data.model.SavedMapTarget
 import com.bisc.flauncher.data.model.appearance
-import com.bisc.flauncher.data.model.dockToggleGesture
 import com.bisc.flauncher.ui.home.FolderIcon
 import com.bisc.flauncher.ui.home.dock.PageIconGlyph
 import com.bisc.flauncher.ui.home.dock.PageIconGlyphImage
@@ -88,11 +87,6 @@ fun AppsRowEditSheet(
     onAppearanceChange: (ElementAppearance) -> Unit,
     onPillModeChange: (Boolean) -> Unit,
     onDockVisibilityModeChange: (com.bisc.flauncher.data.model.DockVisibilityMode) -> Unit = {},
-    // Gestures already spent elsewhere (bound to a real GestureAction, or claimed by a different
-    // row's own dock toggle) — excludes this row's own current gesture, which must stay selectable.
-    takenGestures: Set<com.bisc.flauncher.data.model.HomeGesture> = emptySet(),
-    onDockToggleGestureChange: (com.bisc.flauncher.data.model.HomeGesture?) -> Unit = {},
-    onDockShowDragHandleChange: (Boolean) -> Unit = {},
     onAddApp: (AppInfo) -> Unit,
     onAddExistingFolder: (folderId: Long) -> Unit,
     onCreateFolder: (name: String) -> Unit,
@@ -125,35 +119,12 @@ fun AppsRowEditSheet(
 
             if (isDock) {
                 val visibilityMode = row.dockVisibilityMode
+                // MANUAL and AUTO_EXPAND_ON_ARRIVAL both start collapsed and show the same edge notch
+                // to reopen (see HomeScreen's dock panel Box) — no gesture to assign and no separate
+                // "show drag handle" toggle any more, the notch itself always is the handle.
                 SettingsPreferenceGroup(title = stringResource(R.string.settings_dock_visibility_label)) {
                     com.bisc.flauncher.data.model.DockVisibilityMode.entries.forEach { mode ->
                         RadioPreference(dockVisibilityModeLabel(mode), mode, visibilityMode, onDockVisibilityModeChange)
-                    }
-                }
-                if (visibilityMode == com.bisc.flauncher.data.model.DockVisibilityMode.GESTURE_TOGGLE) {
-                    SettingsPreferenceGroup(title = stringResource(R.string.settings_dock_toggle_gesture_label)) {
-                        com.bisc.flauncher.data.model.HomeGesture.entries.forEach { gesture ->
-                            val taken = gesture in takenGestures
-                            RadioPreference(
-                                label = gestureLabel(gesture),
-                                value = gesture,
-                                selected = row.dockToggleGesture(),
-                                onSelect = { onDockToggleGestureChange(gesture) },
-                                enabled = !taken,
-                                summary = if (taken) stringResource(R.string.settings_gesture_already_used) else null
-                            )
-                        }
-                    }
-                }
-                if (visibilityMode != com.bisc.flauncher.data.model.DockVisibilityMode.ALWAYS_VISIBLE) {
-                    SettingsPreferenceGroup {
-                        SettingsPreference(
-                            icon = null,
-                            title = stringResource(R.string.settings_dock_show_drag_handle_label),
-                            summary = stringResource(R.string.settings_dock_show_drag_handle_summary),
-                            onClick = { onDockShowDragHandleChange(!row.dockShowDragHandle) },
-                            trailing = { Switch(checked = row.dockShowDragHandle, onCheckedChange = onDockShowDragHandleChange) }
-                        )
                     }
                 }
             }
@@ -288,7 +259,7 @@ fun AppsRowEditSheet(
 @Composable
 private fun dockVisibilityModeLabel(mode: com.bisc.flauncher.data.model.DockVisibilityMode): String = when (mode) {
     com.bisc.flauncher.data.model.DockVisibilityMode.ALWAYS_VISIBLE -> stringResource(R.string.settings_dock_visibility_always)
-    com.bisc.flauncher.data.model.DockVisibilityMode.GESTURE_TOGGLE -> stringResource(R.string.settings_dock_visibility_gesture)
+    com.bisc.flauncher.data.model.DockVisibilityMode.MANUAL -> stringResource(R.string.settings_dock_visibility_manual)
     com.bisc.flauncher.data.model.DockVisibilityMode.AUTO_EXPAND_ON_ARRIVAL -> stringResource(R.string.settings_dock_visibility_auto)
 }
 

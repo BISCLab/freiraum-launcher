@@ -405,9 +405,6 @@ class SettingsViewModel @Inject constructor(
             HomeGesture.entries.zip(actions.toList()).toMap()
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
-    val dockClaimedGestures: StateFlow<Set<HomeGesture>> =
-        pageContentRepository.dockClaimedGestures.stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
-
     private val _installedApps = MutableStateFlow<List<AppInfo>>(emptyList())
     val installedApps: StateFlow<List<AppInfo>> = _installedApps.asStateFlow()
 

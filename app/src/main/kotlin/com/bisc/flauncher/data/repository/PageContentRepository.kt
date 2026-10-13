@@ -10,8 +10,6 @@ import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.BackgroundSource
 import com.bisc.flauncher.data.model.ColorFill
 import com.bisc.flauncher.data.model.DesignPresetValues
-import com.bisc.flauncher.data.model.DockVisibilityMode
-import com.bisc.flauncher.data.model.dockToggleGesture
 import com.bisc.flauncher.data.model.GestureAction
 import com.bisc.flauncher.data.model.GestureActionType
 import com.bisc.flauncher.data.model.GridConstants
@@ -52,15 +50,6 @@ class PageContentRepository @Inject constructor(
     val rows: Flow<List<PageRow>> = rowDao.observeAll()
     val appRowEntries: Flow<List<AppRowEntry>> = entryDao.observeAll()
 
-    /** Every [HomeGesture] currently spent toggling some row's Dock visibility — consumed by the
-     *  gesture pickers (Settings -> Gestures, the Dock's own toggle-gesture picker) so the same
-     *  gesture can't silently be bound to two different things at once. */
-    val dockClaimedGestures: Flow<Set<HomeGesture>> = rows.map { list ->
-        list.filter { it.dockVisibilityMode == DockVisibilityMode.GESTURE_TOGGLE }
-            .mapNotNull { it.dockToggleGesture() }
-            .toSet()
-    }
-
     suspend fun ensureSeeded() {
         ensureGlobalBackgroundSeeded()
         val existingHome = pageDao.getHomePage()
@@ -70,14 +59,16 @@ class PageContentRepository @Inject constructor(
         // Home starts with just the dock — no clock, no widgets. Widgets (the clock included) only
         // appear once the user opts in via "Widgets auf dem Homescreen aktivieren" in Settings, matching
         // the Discreet Launcher "empty home screen" principle this app is built on. The dock row's own
-        // entries are plain AppRowEntry rows, same table/machinery as any other apps row. Its default
-        // fill mirrors the Favorites popup's own look (white-on-light/black-on-dark via the same
-        // defaultBackgroundColor() helper) but at reduced opacity, matching the "leicht transparent"
-        // look asked for — a genuinely new seed value, not shared with any existing preset.
+        // entries are plain AppRowEntry rows, same table/machinery as any other apps row. Unlike the
+        // Favorites popup (which matches the page's own light/dark mode), the dock deliberately
+        // INVERTS it by default — black-on-light/white-on-dark — so it reads as its own distinct
+        // surface against the page behind it; borderEnabled here now means "show the top edge line"
+        // (the dock panel is flush with the screen's bottom edge, so only that one edge can have a
+        // border at all — see the dock panel rendering in HomeScreen.kt).
         val dockRowId = rowDao.getForPage(homeId).find { it.type == PageRowType.SEARCH_BAR }?.id
             ?: rowDao.insert(
                 PageRow(pageId = homeId, orderIndex = 0, type = PageRowType.SEARCH_BAR, borderEnabled = true)
-                    .withAppearance(ElementAppearance(fill = ColorFill(color = defaultBackgroundColor()), opacity = 0.85f, borderEnabled = true))
+                    .withAppearance(ElementAppearance(fill = ColorFill(color = invertedBackgroundColor()), opacity = 0.85f, borderEnabled = true))
             )
 
         if (pageDao.getAppOverviewPage() == null) {
@@ -159,6 +150,11 @@ class PageContentRepository @Inject constructor(
         }
         return if (isDark) android.graphics.Color.BLACK else android.graphics.Color.WHITE
     }
+
+    /** The opposite of [defaultBackgroundColor] — for surfaces that want to read as a distinct layer
+     *  against the page instead of blending into it (the dock panel's own default fill). */
+    private suspend fun invertedBackgroundColor(): Int =
+        if (defaultBackgroundColor() == android.graphics.Color.BLACK) android.graphics.Color.WHITE else android.graphics.Color.BLACK
 
     suspend fun addPage(): Long {
         val next = (pageDao.maxOrderIndex() ?: -1) + 1
@@ -495,14 +491,6 @@ class PageContentRepository @Inject constructor(
 
     suspend fun setRowDockVisibilityMode(row: PageRow, mode: com.bisc.flauncher.data.model.DockVisibilityMode) {
         rowDao.update(row.copy(dockVisibilityMode = mode))
-    }
-
-    suspend fun setRowDockToggleGesture(row: PageRow, gesture: com.bisc.flauncher.data.model.HomeGesture?) {
-        rowDao.update(row.copy(dockToggleGestureType = gesture?.name))
-    }
-
-    suspend fun setRowDockShowDragHandle(row: PageRow, show: Boolean) {
-        rowDao.update(row.copy(dockShowDragHandle = show))
     }
 
     suspend fun removeEntry(entry: AppRowEntry) {

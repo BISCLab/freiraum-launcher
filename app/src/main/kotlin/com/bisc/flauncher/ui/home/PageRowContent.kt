@@ -19,10 +19,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Shortcut
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Icon
@@ -34,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -373,6 +371,14 @@ private fun PageLinkCell(page: LauncherPage?, pages: List<LauncherPage>, onClick
     }
 }
 
+/** Per-icon clip shape for a pill-style row — shared by [PillRow] and the Dock's own flush panel in
+ *  HomeScreen.kt, which lays [PillRowEntries] out directly rather than through [PillRow]. */
+@Composable
+fun pillItemShape(iconShape: IconShape): Shape = when (iconShape) {
+    IconShape.CIRCLE -> CircleShape
+    IconShape.ROUNDED_SQUARE -> RoundedCornerShape(DockDimens.iconCornerRadius)
+}
+
 /**
  * A single non-wrapping line of entries (no per-cell text labels — matches the old dock's uniform
  * squircle-button look), for any row with [PageRow.pillMode] set — the dock being the one instance
@@ -403,7 +409,6 @@ fun PillRow(
     onAddEmptySlot: ((Int) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val colors = resolveElementColors(row.appearance())
     BoxWithConstraints(
         modifier = modifier
@@ -418,10 +423,7 @@ fun PillRow(
     ) {
         val displayedCount = if (onAddEmptySlot != null) maxOf(entries.size, row.pillMaxEntries) else entries.size
         val pillWidth = DockDimens.pillWidth(displayedCount, row.pillWidthMode, maxWidth)
-        val itemShape = when (iconShape) {
-            IconShape.CIRCLE -> CircleShape
-            IconShape.ROUNDED_SQUARE -> RoundedCornerShape(DockDimens.iconCornerRadius)
-        }
+        val itemShape = pillItemShape(iconShape)
         val barShape = remember(row.cornerStyle) {
             if (row.cornerStyle == WidgetCornerStyle.SQUARE) RoundedCornerShape(0.dp) else RoundedCornerShape(percent = 50)
         }
@@ -430,7 +432,6 @@ fun PillRow(
             modifier = Modifier
                 .width(pillWidth)
                 .height(DockDimens.barHeight)
-                .shadow(elevation = 10.dp, shape = barShape, clip = false)
                 .then(
                     if (colors.backgroundAlpha > 0f) Modifier.clip(barShape).background(colors.background, alpha = colors.backgroundAlpha)
                     else Modifier
@@ -439,125 +440,145 @@ fun PillRow(
                     if (row.appearance().borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor, barShape) else Modifier
                 )
         ) {
-            Row(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .fillMaxWidth()
-                    .padding(horizontal = DockDimens.innerHorizontalPadding),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                entries.forEach { entry ->
-                    key(entry.id) {
-                        Box(modifier = Modifier.size(DockDimens.iconSize).clip(itemShape), contentAlignment = Alignment.Center) {
-                            when (entry.type) {
-                                GridItemType.APP -> {
-                                    val componentName = remember(entry.payload) { ComponentName.unflattenFromString(entry.payload) }
-                                    val bitmap = rememberAppIcon(componentName, loadIcon)
-                                    val label = componentName?.let(resolveLabel).orEmpty()
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .background(if (bitmap == null) UNSET_APP_SLOT_COLOR else Color.Transparent)
-                                            .clickable(enabled = componentName != null) { componentName?.let { launchApp(context, it) } },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        if (bitmap != null) Image(bitmap = bitmap, contentDescription = label, modifier = Modifier.size(DockDimens.iconSize))
-                                        else Icon(imageVector = unsetAppSlotIcon, contentDescription = null, tint = Color.White)
-                                    }
-                                }
-                                GridItemType.FOLDER -> {
-                                    val folderId = remember(entry.payload) { entry.payload.toLongOrNull() }
-                                    val folder = folders.find { it.id == folderId }
-                                    val previewItems = folderId?.let { folderItemsByFolder[it] }.orEmpty()
-                                    FolderIcon(
-                                        folder = folder,
-                                        previewItems = previewItems,
-                                        loadIcon = loadIcon,
-                                        loadPackIcon = loadPackIcon,
-                                        modifier = Modifier.fillMaxSize().clickable { folderId?.let(onFolderClick) }
-                                    )
-                                }
-                                GridItemType.SHORTCUT -> {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize().background(UNSET_APP_SLOT_COLOR).clickable { onShortcutClick(entry.payload) },
-                                        contentAlignment = Alignment.Center
-                                    ) { Icon(imageVector = Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, tint = Color.White) }
-                                }
-                                GridItemType.MAP_TARGET -> {
-                                    val targetId = remember(entry.payload) { entry.payload.toLongOrNull() }
-                                    val target = savedMapTargets.find { it.id == targetId }
-                                    Box(
-                                        modifier = Modifier.fillMaxSize().background(UNSET_APP_SLOT_COLOR)
-                                            .clickable(enabled = target != null) { target?.let { launchMapTarget(context, it) } },
-                                        contentAlignment = Alignment.Center
-                                    ) { Icon(imageVector = Icons.Filled.Place, contentDescription = null, tint = Color.White) }
-                                }
-                                GridItemType.WEBSITE -> {
-                                    val websiteId = remember(entry.payload) { entry.payload.toLongOrNull() }
-                                    val website = pinnedWebsites.find { it.id == websiteId }
-                                    Box(
-                                        modifier = Modifier.fillMaxSize().background(UNSET_APP_SLOT_COLOR)
-                                            .clickable(enabled = website != null) { website?.let { openWebsite(context, it) } },
-                                        contentAlignment = Alignment.Center
-                                    ) { Icon(imageVector = Icons.Filled.Language, contentDescription = null, tint = Color.White) }
-                                }
-                                GridItemType.PAGE -> {
-                                    val pageId = remember(entry.payload) { entry.payload.toLongOrNull() }
-                                    val page = pages.find { it.id == pageId }
-                                    val glyph = page?.iconGlyph?.let { name -> runCatching { PageIconGlyph.valueOf(name) }.getOrNull() }
-                                        ?: page?.let { PageIconGlyph.forPageKind(it.kind) } ?: PageIconGlyph.WIDGET_PAGE
-                                    val background = page?.iconBackgroundColor?.let { Color(it) } ?: glyph.defaultColor()
-                                    val tint = page?.iconColor?.let { Color(it) } ?: Color.White
-                                    Box(
-                                        modifier = Modifier.fillMaxSize().background(background)
-                                            .clickable(enabled = page != null) { page?.let { onOpenPageLink(it.id, it.kind) } },
-                                        contentAlignment = Alignment.Center
-                                    ) { PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(DockDimens.iconSize * 0.55f)) }
-                                }
-                                GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Unit
-                            }
-                        }
-                    }
-                }
-                if (onAddEmptySlot != null) {
-                    repeat((row.pillMaxEntries - entries.size).coerceAtLeast(0)) { offset ->
-                        val slotIndex = entries.size + offset
-                        key("empty_$slotIndex") {
-                            Box(
-                                modifier = Modifier
-                                    .size(DockDimens.iconSize)
-                                    .clip(itemShape)
-                                    .background(UNSET_APP_SLOT_COLOR)
-                                    .clickable { onAddEmptySlot(slotIndex) },
-                                contentAlignment = Alignment.Center
-                            ) { Icon(imageVector = unsetAppSlotIcon, contentDescription = null, tint = Color.White) }
-                        }
-                    }
-                }
-            }
+            PillRowEntries(
+                entries = entries,
+                folders = folders,
+                folderItemsByFolder = folderItemsByFolder,
+                savedMapTargets = savedMapTargets,
+                pinnedWebsites = pinnedWebsites,
+                pages = pages,
+                loadIcon = loadIcon,
+                loadPackIcon = loadPackIcon,
+                resolveLabel = resolveLabel,
+                itemShape = itemShape,
+                onFolderClick = onFolderClick,
+                onShortcutClick = onShortcutClick,
+                onOpenPageLink = onOpenPageLink,
+                onAddEmptySlot = onAddEmptySlot,
+                maxEntries = row.pillMaxEntries,
+                modifier = Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = DockDimens.innerHorizontalPadding)
+            )
         }
     }
 }
 
-/** A small notch above a collapsible dock, tapped to manually expand/collapse it — the user-facing
- *  alternative to [PageRow.dockToggleGesture] for when [PageRow.dockShowDragHandle] is on. */
+/** The actual row of icon cells shared by [PillRow] (the floating/inline pill bar) and the Dock's own
+ *  flush bottom panel in HomeScreen.kt — extracted so the panel can lay these out full-width inside
+ *  its own [com.bisc.flauncher.ui.home.dock.DockPanelSurface] shell instead of [PillRow]'s pill-shaped
+ *  bar Box. */
 @Composable
-fun DockDragHandle(pointingDown: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .padding(bottom = 4.dp)
-            .size(width = 40.dp, height = 24.dp)
-            .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
-            .background(Color.White.copy(alpha = 0.35f))
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
+fun PillRowEntries(
+    entries: List<AppRowEntry>,
+    folders: List<Folder>,
+    folderItemsByFolder: Map<Long, List<FolderItem>>,
+    savedMapTargets: List<SavedMapTarget>,
+    pinnedWebsites: List<PinnedWebsite>,
+    pages: List<LauncherPage>,
+    loadIcon: (ComponentName) -> ImageBitmap?,
+    loadPackIcon: (String, String) -> ImageBitmap? = { _, _ -> null },
+    resolveLabel: (ComponentName) -> String = { "" },
+    itemShape: Shape,
+    onFolderClick: (Long) -> Unit = {},
+    onShortcutClick: (String) -> Unit = {},
+    onOpenPageLink: (Long, LauncherPageKind) -> Unit = { _, _ -> },
+    onAddEmptySlot: ((Int) -> Unit)?,
+    maxEntries: Int,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = if (pointingDown) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp,
-            contentDescription = null,
-            tint = Color.White
-        )
+        entries.forEach { entry ->
+            key(entry.id) {
+                Box(modifier = Modifier.size(DockDimens.iconSize).clip(itemShape), contentAlignment = Alignment.Center) {
+                    when (entry.type) {
+                        GridItemType.APP -> {
+                            val componentName = remember(entry.payload) { ComponentName.unflattenFromString(entry.payload) }
+                            val bitmap = rememberAppIcon(componentName, loadIcon)
+                            val label = componentName?.let(resolveLabel).orEmpty()
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(if (bitmap == null) UNSET_APP_SLOT_COLOR else Color.Transparent)
+                                    .clickable(enabled = componentName != null) { componentName?.let { launchApp(context, it) } },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (bitmap != null) Image(bitmap = bitmap, contentDescription = label, modifier = Modifier.size(DockDimens.iconSize))
+                                else Icon(imageVector = unsetAppSlotIcon, contentDescription = null, tint = Color.White)
+                            }
+                        }
+                        GridItemType.FOLDER -> {
+                            val folderId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                            val folder = folders.find { it.id == folderId }
+                            val previewItems = folderId?.let { folderItemsByFolder[it] }.orEmpty()
+                            FolderIcon(
+                                folder = folder,
+                                previewItems = previewItems,
+                                loadIcon = loadIcon,
+                                loadPackIcon = loadPackIcon,
+                                modifier = Modifier.fillMaxSize().clickable { folderId?.let(onFolderClick) }
+                            )
+                        }
+                        GridItemType.SHORTCUT -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize().background(UNSET_APP_SLOT_COLOR).clickable { onShortcutClick(entry.payload) },
+                                contentAlignment = Alignment.Center
+                            ) { Icon(imageVector = Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, tint = Color.White) }
+                        }
+                        GridItemType.MAP_TARGET -> {
+                            val targetId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                            val target = savedMapTargets.find { it.id == targetId }
+                            Box(
+                                modifier = Modifier.fillMaxSize().background(UNSET_APP_SLOT_COLOR)
+                                    .clickable(enabled = target != null) { target?.let { launchMapTarget(context, it) } },
+                                contentAlignment = Alignment.Center
+                            ) { Icon(imageVector = Icons.Filled.Place, contentDescription = null, tint = Color.White) }
+                        }
+                        GridItemType.WEBSITE -> {
+                            val websiteId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                            val website = pinnedWebsites.find { it.id == websiteId }
+                            Box(
+                                modifier = Modifier.fillMaxSize().background(UNSET_APP_SLOT_COLOR)
+                                    .clickable(enabled = website != null) { website?.let { openWebsite(context, it) } },
+                                contentAlignment = Alignment.Center
+                            ) { Icon(imageVector = Icons.Filled.Language, contentDescription = null, tint = Color.White) }
+                        }
+                        GridItemType.PAGE -> {
+                            val pageId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                            val page = pages.find { it.id == pageId }
+                            val glyph = page?.iconGlyph?.let { name -> runCatching { PageIconGlyph.valueOf(name) }.getOrNull() }
+                                ?: page?.let { PageIconGlyph.forPageKind(it.kind) } ?: PageIconGlyph.WIDGET_PAGE
+                            val background = page?.iconBackgroundColor?.let { Color(it) } ?: glyph.defaultColor()
+                            val tint = page?.iconColor?.let { Color(it) } ?: Color.White
+                            Box(
+                                modifier = Modifier.fillMaxSize().background(background)
+                                    .clickable(enabled = page != null) { page?.let { onOpenPageLink(it.id, it.kind) } },
+                                contentAlignment = Alignment.Center
+                            ) { PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(DockDimens.iconSize * 0.55f)) }
+                        }
+                        GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Unit
+                    }
+                }
+            }
+        }
+        if (onAddEmptySlot != null) {
+            repeat((maxEntries - entries.size).coerceAtLeast(0)) { offset ->
+                val slotIndex = entries.size + offset
+                key("empty_$slotIndex") {
+                    Box(
+                        modifier = Modifier
+                            .size(DockDimens.iconSize)
+                            .clip(itemShape)
+                            .background(UNSET_APP_SLOT_COLOR)
+                            .clickable { onAddEmptySlot(slotIndex) },
+                        contentAlignment = Alignment.Center
+                    ) { Icon(imageVector = unsetAppSlotIcon, contentDescription = null, tint = Color.White) }
+                }
+            }
+        }
     }
 }
 
