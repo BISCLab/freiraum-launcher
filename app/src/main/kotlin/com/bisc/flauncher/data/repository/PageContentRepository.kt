@@ -107,13 +107,10 @@ class PageContentRepository @Inject constructor(
                 settingsRepository.setGestureAction(HomeGesture.SWIPE_UP, GestureAction(GestureActionType.PAGE, appOverview.id.toString()))
             }
         }
-        // Preserves today's hardcoded swipe-down-opens-overview behavior, now flowing through the
-        // real, configurable gesture system instead of a special-cased detector.
-        if (!settingsRepository.isGestureConfigured(HomeGesture.SWIPE_DOWN)) {
-            pageDao.getByKind(LauncherPageKind.SIDEBAR)?.let { sidebar ->
-                settingsRepository.setGestureAction(HomeGesture.SWIPE_DOWN, GestureAction(GestureActionType.PAGE, sidebar.id.toString()))
-            }
-        }
+        // No more default SWIPE_DOWN -> Sidebar binding — the Favorites popup now opens exclusively
+        // via its own EdgeNotch (see HomeScreen's top notch Box), same as the Dock. A user can still
+        // bind a gesture to it manually (it's just another PAGE-type GestureAction target), but
+        // nothing does that automatically any more.
 
         // Fresh-install default: the dock arrives already linking to the two singleton pages, so it
         // doesn't look sparse — mirrors the pre-merge DockRepository's own default seed. Only runs once
