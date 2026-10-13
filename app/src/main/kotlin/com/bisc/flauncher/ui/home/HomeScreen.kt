@@ -92,6 +92,7 @@ import com.bisc.flauncher.data.model.Note
 import com.bisc.flauncher.data.model.ContactInfo
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
+import com.bisc.flauncher.data.model.dockToggleGesture
 import com.bisc.flauncher.data.model.SidebarCategoryViewMode
 import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.data.model.WidgetKind
@@ -310,6 +311,31 @@ fun HomeScreen(
         }
     }
 
+    // Hoisted above the pager (rather than declared down where the dock itself renders) so the home
+    // page's gesture detector below and the dock's own rendering block further down share one
+    // dockExpanded state — a GESTURE_TOGGLE binding needs to flip the exact state the dock reads to
+    // decide whether it's showing.
+    val homeDockRow = pages.find { it.isHome }
+        ?.let { rowsByPage[it.id] }
+        ?.find { it.type == PageRowType.SEARCH_BAR }
+    val dockVisibilityMode = homeDockRow?.dockVisibilityMode ?: com.bisc.flauncher.data.model.DockVisibilityMode.ALWAYS_VISIBLE
+    // Ephemeral UI state only, deliberately not persisted — same ephemeral character as the
+    // Favorites popup this look mirrors. Resets to its mode's own starting state whenever the
+    // row id or the mode itself changes (e.g. the user just switched modes in Settings).
+    var dockExpanded by remember(homeDockRow?.id, dockVisibilityMode) {
+        mutableStateOf(dockVisibilityMode != com.bisc.flauncher.data.model.DockVisibilityMode.GESTURE_TOGGLE)
+    }
+    val isOnHomePage = pagerState.currentPage == homeIndex
+    LaunchedEffect(dockVisibilityMode, isOnHomePage) {
+        if (dockVisibilityMode == com.bisc.flauncher.data.model.DockVisibilityMode.AUTO_EXPAND_ON_ARRIVAL && isOnHomePage) {
+            dockExpanded = true
+            kotlinx.coroutines.delay(2500)
+            dockExpanded = false
+        }
+    }
+    val dockCanCollapse = dockVisibilityMode != com.bisc.flauncher.data.model.DockVisibilityMode.ALWAYS_VISIBLE
+    val dockToggleGesture = homeDockRow?.let { if (dockVisibilityMode == com.bisc.flauncher.data.model.DockVisibilityMode.GESTURE_TOGGLE) it.dockToggleGesture() else null }
+
     val openPageById: (Long) -> Unit = { pageId ->
         val index = pages.indexOfFirst { it.id == pageId }
         if (index >= 0) coroutineScope.launch { pagerState.animateScrollToPage(index) }
@@ -444,21 +470,35 @@ fun HomeScreen(
                     // onto a widget-heavy page feel janky, regardless of whether the widgets were external
                     // or built-in.
                     Box(
-                        // Home-screen background gestures (long-press/double-tap/swipe-up/swipe-down via
-                        // detectHomeGestures) are deliberately not wired up right now — being rebuilt from
-                        // a clean slate as part of the new Apps-panel gesture. The GestureAction model,
-                        // SettingsRepository fields and SettingsGesturesScreen are untouched and still
-                        // configurable; nothing on this Box currently triggers them. The one gesture that
-                        // IS live: a downward drag starting anywhere on the home page opens the Apps panel
-                        // (the sidebar's APPS category) — restricted to the home page only, same reasoning
-                        // as the old detectHomeGestures restriction (closing it should always land you back
-                        // on the page you actually started from). The dock's own orb sits above this page
-                        // in z-order with its own gesture detector, so a touch starting on the orb itself
-                        // never reaches this one — see detectSwipeDownAnywhere's doc comment.
+                        // The 4 rebindable HomeGestures (long-press/double-tap/swipe-up/swipe-down),
+                        // restricted to the home page only — closing an overlay they open always lands
+                        // you back on the page you actually started the gesture from (returnHome does
+                        // the actual closing/scrolling). A gesture the Dock itself has claimed to
+                        // toggle its own visibility (dockToggleGesture, only set under GESTURE_TOGGLE)
+                        // takes priority over the global binding for that same gesture — the two are
+                        // mutually exclusive by construction (SettingsGesturesScreen greys out a
+                        // gesture the Dock already owns), but this still only ever dispatches to one.
+                        // The dock's own orb sits above this page in z-order with its own gesture
+                        // detector, so a touch starting on the orb itself never reaches this one.
                         modifier = Modifier.fillMaxSize().then(
                             if (page?.isHome == true) {
-                                Modifier.detectSwipeDownAnywhere(
-                                    onSwipeDown = { viewModel.openOverview(com.bisc.flauncher.ui.home.dock.SidebarEntryType.APPS) }
+                                Modifier.detectHomeGestures(
+                                    onLongPress = {
+                                        if (dockToggleGesture == com.bisc.flauncher.data.model.HomeGesture.LONG_PRESS) dockExpanded = !dockExpanded
+                                        else viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.LONG_PRESS, context, openPageById, openSettingsFromGesture)
+                                    },
+                                    onDoubleTap = {
+                                        if (dockToggleGesture == com.bisc.flauncher.data.model.HomeGesture.DOUBLE_TAP) dockExpanded = !dockExpanded
+                                        else viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.DOUBLE_TAP, context, openPageById, openSettingsFromGesture)
+                                    },
+                                    onSwipeUp = {
+                                        if (dockToggleGesture == com.bisc.flauncher.data.model.HomeGesture.SWIPE_UP) dockExpanded = !dockExpanded
+                                        else viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.SWIPE_UP, context, openPageById, openSettingsFromGesture)
+                                    },
+                                    onSwipeDown = {
+                                        if (dockToggleGesture == com.bisc.flauncher.data.model.HomeGesture.SWIPE_DOWN) dockExpanded = !dockExpanded
+                                        else viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.SWIPE_DOWN, context, openPageById, openSettingsFromGesture)
+                                    }
                                 )
                             } else {
                                 Modifier
@@ -533,31 +573,12 @@ fun HomeScreen(
         // PageRowContent's SEARCH_BAR case). Placed before the search/app-list overlays below so those
         // naturally cover it when open; folderHideDock keeps the existing "hide the dock while a folder
         // is open" behavior.
-        val homeDockRow = pages.find { it.isHome }
-            ?.let { rowsByPage[it.id] }
-            ?.find { it.type == PageRowType.SEARCH_BAR }
         if (homeDockRow != null && !(folderOpen && folderHideDock)) {
-            val visibilityMode = homeDockRow.dockVisibilityMode
-            // Ephemeral UI state only, deliberately not persisted — same ephemeral character as the
-            // Favorites popup this look mirrors. Resets to its mode's own starting state whenever the
-            // row id or the mode itself changes (e.g. the user just switched modes in Settings).
-            var dockExpanded by remember(homeDockRow.id, visibilityMode) {
-                mutableStateOf(visibilityMode != com.bisc.flauncher.data.model.DockVisibilityMode.GESTURE_TOGGLE)
-            }
-            val isOnHomePage = pagerState.currentPage == homeIndex
-            LaunchedEffect(visibilityMode, isOnHomePage) {
-                if (visibilityMode == com.bisc.flauncher.data.model.DockVisibilityMode.AUTO_EXPAND_ON_ARRIVAL && isOnHomePage) {
-                    dockExpanded = true
-                    kotlinx.coroutines.delay(2500)
-                    dockExpanded = false
-                }
-            }
-            val canCollapse = visibilityMode != com.bisc.flauncher.data.model.DockVisibilityMode.ALWAYS_VISIBLE
             Column(
                 modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (dockExpanded && canCollapse && homeDockRow.dockShowDragHandle) {
+                if (dockExpanded && dockCanCollapse && homeDockRow.dockShowDragHandle) {
                     DockDragHandle(pointingDown = true, onClick = { dockExpanded = false })
                 }
                 androidx.compose.animation.AnimatedVisibility(
@@ -583,7 +604,7 @@ fun HomeScreen(
                         onAddEmptySlot = { addingAppToDockRowId = homeDockRow.id }
                     )
                 }
-                if (!dockExpanded && canCollapse) {
+                if (!dockExpanded && dockCanCollapse) {
                     Box(
                         modifier = Modifier
                             .padding(bottom = DockDimens.bottomMargin)

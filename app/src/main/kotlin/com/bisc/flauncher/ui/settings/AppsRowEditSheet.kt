@@ -88,6 +88,9 @@ fun AppsRowEditSheet(
     onAppearanceChange: (ElementAppearance) -> Unit,
     onPillModeChange: (Boolean) -> Unit,
     onDockVisibilityModeChange: (com.bisc.flauncher.data.model.DockVisibilityMode) -> Unit = {},
+    // Gestures already spent elsewhere (bound to a real GestureAction, or claimed by a different
+    // row's own dock toggle) — excludes this row's own current gesture, which must stay selectable.
+    takenGestures: Set<com.bisc.flauncher.data.model.HomeGesture> = emptySet(),
     onDockToggleGestureChange: (com.bisc.flauncher.data.model.HomeGesture?) -> Unit = {},
     onDockShowDragHandleChange: (Boolean) -> Unit = {},
     onAddApp: (AppInfo) -> Unit,
@@ -130,7 +133,15 @@ fun AppsRowEditSheet(
                 if (visibilityMode == com.bisc.flauncher.data.model.DockVisibilityMode.GESTURE_TOGGLE) {
                     SettingsPreferenceGroup(title = stringResource(R.string.settings_dock_toggle_gesture_label)) {
                         com.bisc.flauncher.data.model.HomeGesture.entries.forEach { gesture ->
-                            RadioPreference(gestureLabel(gesture), gesture, row.dockToggleGesture(), { onDockToggleGestureChange(gesture) })
+                            val taken = gesture in takenGestures
+                            RadioPreference(
+                                label = gestureLabel(gesture),
+                                value = gesture,
+                                selected = row.dockToggleGesture(),
+                                onSelect = { onDockToggleGestureChange(gesture) },
+                                enabled = !taken,
+                                summary = if (taken) stringResource(R.string.settings_gesture_already_used) else null
+                            )
                         }
                     }
                 }

@@ -44,6 +44,7 @@ import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.PageRowDimens
 import com.bisc.flauncher.ui.home.WidgetSizeEditor
 import com.bisc.flauncher.ui.home.safeSystemWidgetMaxHeightPx
+import com.bisc.flauncher.ui.home.dock.PagePickerSheet
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 import com.bisc.flauncher.util.captureViewBitmap
 import kotlin.math.roundToInt
@@ -60,7 +61,7 @@ fun SettingsWidgetRowEditScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val rowsByPage by viewModel.rowsByPage.collectAsState()
-    val pages by viewModel.pages.collectAsState()
+    val allPages by viewModel.allPages.collectAsState()
     val browsableApps by viewModel.browsableApps.collectAsState()
     val row = rowsByPage[pageId]?.find { it.id == rowId }
 
@@ -181,13 +182,13 @@ fun SettingsWidgetRowEditScreen(
                 SettingsPreference(
                     icon = null,
                     title = stringResource(R.string.settings_clock_date_action),
-                    summary = gestureActionSummary(row.clockDateAction(), pages, browsableApps),
+                    summary = gestureActionSummary(row.clockDateAction(), allPages, browsableApps),
                     onClick = { pickingActionTypeFor = ClockActionSlot.DATE }
                 )
                 SettingsPreference(
                     icon = null,
                     title = stringResource(R.string.settings_clock_time_action),
-                    summary = gestureActionSummary(row.clockTimeAction(), pages, browsableApps),
+                    summary = gestureActionSummary(row.clockTimeAction(), allPages, browsableApps),
                     onClick = { pickingActionTypeFor = ClockActionSlot.TIME }
                 )
             }
@@ -270,7 +271,7 @@ fun SettingsWidgetRowEditScreen(
 
     pickingPageFor?.let { slot ->
         PagePickerSheet(
-            pages = pages,
+            pages = allPages,
             onPageSelected = { page ->
                 applyClockAction(slot, GestureAction(GestureActionType.PAGE, page.id.toString()))
                 pickingPageFor = null

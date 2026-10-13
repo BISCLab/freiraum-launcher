@@ -28,16 +28,20 @@ import com.bisc.flauncher.data.model.HomeGesture
 import com.bisc.flauncher.data.model.LauncherPage
 import com.bisc.flauncher.ui.pageLabel
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
+import com.bisc.flauncher.ui.home.dock.PagePickerSheet
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
-/** One row per [HomeGesture], each bindable to any [GestureActionType]. */
+/** One row per [HomeGesture], each bindable to any [GestureActionType] — except a gesture the Dock
+ *  has itself claimed to toggle its own visibility (see [AppsRowEditSheet]'s own gesture picker),
+ *  which shows disabled here instead so the same gesture can never silently do two different things. */
 @Composable
 fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val gestureActions by viewModel.gestureActions.collectAsState()
     // Unfiltered — a gesture already bound to an app keeps showing its.
     val labeledApps by viewModel.labeledApps.collectAsState()
     val browsableApps by viewModel.browsableApps.collectAsState()
-    val pages by viewModel.pages.collectAsState()
+    val allPages by viewModel.allPages.collectAsState()
+    val dockClaimedGestures by viewModel.dockClaimedGestures.collectAsState()
     val shortcutAppPickerOpen by viewModel.shortcutAppPickerOpen.collectAsState()
     val shortcutPickerForApp by viewModel.shortcutPickerForApp.collectAsState()
     val availableShortcuts by viewModel.availableShortcuts.collectAsState()
@@ -50,12 +54,14 @@ fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, vie
     SettingsSubScreen(title = stringResource(R.string.settings_section_gestures), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
             HomeGesture.entries.forEach { gesture ->
+                val claimedByDock = gesture in dockClaimedGestures
                 val action = gestureActions[gesture] ?: GestureAction.NONE
                 SettingsPreference(
                     icon = gestureIcon(gesture),
                     title = gestureLabel(gesture),
-                    summary = gestureActionSummary(action, pages, labeledApps),
-                    onClick = { editingGesture = gesture }
+                    summary = if (claimedByDock) stringResource(R.string.settings_gesture_used_by_dock) else gestureActionSummary(action, allPages, labeledApps),
+                    enabled = !claimedByDock,
+                    onClick = { if (!claimedByDock) editingGesture = gesture }
                 )
             }
         }
@@ -94,7 +100,7 @@ fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, vie
 
     pickingPageFor?.let { gesture ->
         PagePickerSheet(
-            pages = pages,
+            pages = allPages,
             onPageSelected = { page ->
                 viewModel.setGestureAction(gesture, GestureAction(GestureActionType.PAGE, page.id.toString()))
                 pickingPageFor = null
@@ -146,22 +152,6 @@ internal fun GestureActionTypeSheet(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal fun PagePickerSheet(
-    pages: List<LauncherPage>,
-    onPageSelected: (LauncherPage) -> Unit,
-    onDismiss: () -> Unit
-) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(modifier = Modifier.padding(vertical = 8.dp)) {
-            pages.forEach { page ->
-                SettingsPreference(icon = null, title = pageLabel(page, pages), onClick = { onPageSelected(page) }, trailing = null)
-            }
-        }
-    }
-}
-
 internal fun gestureIcon(gesture: HomeGesture) = when (gesture) {
     HomeGesture.LONG_PRESS -> Icons.Filled.TouchApp
     HomeGesture.DOUBLE_TAP -> Icons.Filled.TouchApp
@@ -183,8 +173,6 @@ internal fun gestureActionTypeLabel(type: GestureActionType): String = when (typ
     GestureActionType.APP -> stringResource(R.string.settings_gesture_action_app)
     GestureActionType.SHORTCUT -> stringResource(R.string.settings_gesture_action_shortcut)
     GestureActionType.PAGE -> stringResource(R.string.settings_gesture_action_page)
-    GestureActionType.SEARCH -> stringResource(R.string.settings_gesture_action_search)
-    GestureActionType.APP_LIST -> stringResource(R.string.settings_gesture_action_app_list)
     GestureActionType.SETTINGS -> stringResource(R.string.settings_gesture_action_settings)
     GestureActionType.NOTIFICATIONS -> stringResource(R.string.settings_gesture_action_notifications)
     GestureActionType.QUICK_SETTINGS -> stringResource(R.string.settings_gesture_action_quick_settings)

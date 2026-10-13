@@ -97,14 +97,18 @@ fun <T> RadioPreference(
     value: T,
     selected: T,
     onSelect: (T) -> Unit,
-    font: FontFamily? = null
+    font: FontFamily? = null,
+    enabled: Boolean = true,
+    summary: String? = null
 ) {
     SettingsPreference(
         icon = null,
         title = label,
+        summary = summary,
         titleFontFamily = font,
+        enabled = enabled,
         onClick = { onSelect(value) },
-        trailing = { RadioButton(selected = value == selected, onClick = { onSelect(value) }) }
+        trailing = { RadioButton(selected = value == selected, onClick = { onSelect(value) }, enabled = enabled) }
     )
 }
 

@@ -397,10 +397,16 @@ class SettingsViewModel @Inject constructor(
     val pages: StateFlow<List<LauncherPage>> =
         pageContentRepository.pages.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
+    val allPages: StateFlow<List<LauncherPage>> =
+        pageContentRepository.allPages.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
     val gestureActions: StateFlow<Map<HomeGesture, GestureAction>> =
         combine(HomeGesture.entries.map { repository.gestureAction(it) }) { actions ->
             HomeGesture.entries.zip(actions.toList()).toMap()
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+
+    val dockClaimedGestures: StateFlow<Set<HomeGesture>> =
+        pageContentRepository.dockClaimedGestures.stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
 
     private val _installedApps = MutableStateFlow<List<AppInfo>>(emptyList())
     val installedApps: StateFlow<List<AppInfo>> = _installedApps.asStateFlow()

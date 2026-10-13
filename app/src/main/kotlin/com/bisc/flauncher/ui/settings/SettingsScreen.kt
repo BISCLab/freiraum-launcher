@@ -41,6 +41,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -189,15 +190,16 @@ fun SettingsPreference(
     },
     trailing: (@Composable () -> Unit)? = { ChevronIndicator() },
     info: String? = null,
-    infoAction: Pair<String, () -> Unit>? = null
+    infoAction: Pair<String, () -> Unit>? = null,
+    enabled: Boolean = true
 ) {
     var infoOpen by rememberSaveable { mutableStateOf(false) }
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxWidth().alpha(if (enabled) 1f else 0.5f)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceContainer)
-                .noRippleClickable(onClick = onClick)
+                .then(if (enabled) Modifier.noRippleClickable(onClick = onClick) else Modifier)
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

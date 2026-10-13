@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -52,6 +53,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
+import com.bisc.flauncher.data.model.GestureAction
+import com.bisc.flauncher.data.model.GestureActionType
+import com.bisc.flauncher.data.model.HomeGesture
 import com.bisc.flauncher.data.model.LauncherPage
 import com.bisc.flauncher.data.model.LauncherPageKind
 import com.bisc.flauncher.data.model.PageDirection
@@ -81,14 +85,21 @@ fun SettingsPagesScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val allPages by viewModel.allPages.collectAsState()
+    val gestureActions by viewModel.gestureActions.collectAsState()
+    val dockClaimedGestures by viewModel.dockClaimedGestures.collectAsState()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
     val rowsPages = remember(allPages) { allPages.filter { it.kind == LauncherPageKind.ROWS }.sortedBy { it.orderIndex } }
     val otherPages = remember(allPages) { allPages.filter { it.kind != LauncherPageKind.ROWS } }
 
+    fun gestureForPage(pageId: Long): HomeGesture? = HomeGesture.entries.firstOrNull { gesture ->
+        gestureActions[gesture]?.type == GestureActionType.PAGE && gestureActions[gesture]?.payload?.toLongOrNull() == pageId
+    }
+
     var renamingPage by remember { mutableStateOf<LauncherPage?>(null) }
     var pickingTemplateForDirection by remember { mutableStateOf<PageDirection?>(null) }
+    var pickingInvocationForPage by remember { mutableStateOf<LauncherPage?>(null) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_pages), navController = navController, onBack = onBack) {
         PagesCarousel(
@@ -118,13 +129,39 @@ fun SettingsPagesScreen(
                     ) {
                         PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(18.dp))
                     }
-                    Text(label, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(label, style = MaterialTheme.typography.titleMedium)
+                        val boundGesture = gestureForPage(page.id)
+                        Text(
+                            boundGesture?.let { gestureLabel(it) } ?: stringResource(R.string.settings_pages_invocation_none),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    IconButton(onClick = { pickingInvocationForPage = page }) {
+                        Icon(Icons.Filled.TouchApp, contentDescription = stringResource(R.string.settings_pages_invocation_title))
+                    }
                     IconButton(onClick = { renamingPage = page }) {
                         Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.settings_pages_rename))
                     }
                 }
             }
         }
+    }
+
+    pickingInvocationForPage?.let { page ->
+        val current = gestureForPage(page.id)
+        val taken = (gestureActions.filterValues { it.type != GestureActionType.NONE }.keys + dockClaimedGestures) - setOfNotNull(current)
+        PageInvocationPickerSheet(
+            current = current,
+            takenGestures = taken,
+            onSelect = { gesture ->
+                if (current != null && current != gesture) viewModel.setGestureAction(current, GestureAction.NONE)
+                if (gesture != null) viewModel.setGestureAction(gesture, GestureAction(GestureActionType.PAGE, page.id.toString()))
+                pickingInvocationForPage = null
+            },
+            onDismiss = { pickingInvocationForPage = null }
+        )
     }
 
     pickingTemplateForDirection?.let { direction ->
@@ -289,6 +326,36 @@ private fun GhostTile(onClick: () -> Unit) {
         }
         Spacer(Modifier.height(6.dp))
         Text("", style = MaterialTheme.typography.labelMedium)
+    }
+}
+
+/** Which, if any, of the 4 rebindable [HomeGesture]s jumps straight to this page — the same global
+ *  binding Settings -> Gestures manages, just surfaced from the page's own side. Picking a gesture
+ *  already bound elsewhere isn't offered (see [takenGestures]); picking "None" clears this page's
+ *  current binding, if it has one, without touching anything else. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PageInvocationPickerSheet(
+    current: HomeGesture?,
+    takenGestures: Set<HomeGesture>,
+    onSelect: (HomeGesture?) -> Unit,
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(modifier = Modifier.padding(vertical = 8.dp)) {
+            RadioPreference(stringResource(R.string.settings_pages_invocation_none), null, current, onSelect)
+            HomeGesture.entries.forEach { gesture ->
+                val taken = gesture in takenGestures
+                RadioPreference(
+                    label = gestureLabel(gesture),
+                    value = gesture,
+                    selected = current,
+                    onSelect = onSelect,
+                    enabled = !taken,
+                    summary = if (taken) stringResource(R.string.settings_gesture_already_used) else null
+                )
+            }
+        }
     }
 }
 
