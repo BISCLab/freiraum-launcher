@@ -919,6 +919,18 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { pageContentRepository.setRowPillMode(row, pillMode) }
     }
 
+    fun setRowDockVisibilityMode(row: PageRow, mode: com.bisc.flauncher.data.model.DockVisibilityMode) {
+        viewModelScope.launch { pageContentRepository.setRowDockVisibilityMode(row, mode) }
+    }
+
+    fun setRowDockToggleGesture(row: PageRow, gesture: HomeGesture?) {
+        viewModelScope.launch { pageContentRepository.setRowDockToggleGesture(row, gesture) }
+    }
+
+    fun setRowDockShowDragHandle(row: PageRow, show: Boolean) {
+        viewModelScope.launch { pageContentRepository.setRowDockShowDragHandle(row, show) }
+    }
+
     fun addNewMapTargetToRow(pageRowId: Long, label: String, lat: Double, lon: Double, address: String = "") {
         viewModelScope.launch {
             val targetId = mapsRepository.add(label, lat, lon, address)

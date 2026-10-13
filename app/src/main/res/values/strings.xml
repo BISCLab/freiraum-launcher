@@ -182,6 +182,13 @@
 
     <string name="settings_layer_background_title">Layer %1$d · %2$s</string>
     <string name="settings_dock_background_label">Background</string>
+    <string name="settings_dock_visibility_label">Visibility</string>
+    <string name="settings_dock_visibility_always">Always visible</string>
+    <string name="settings_dock_visibility_gesture">Gesture to expand</string>
+    <string name="settings_dock_visibility_auto">Auto-expand on arrival</string>
+    <string name="settings_dock_toggle_gesture_label">Gesture</string>
+    <string name="settings_dock_show_drag_handle_label">Drag handle</string>
+    <string name="settings_dock_show_drag_handle_summary">A small notch above the dock to pull it open or closed by hand</string>
     <string name="settings_layer_surface_screen">Screen</string>
     <string name="settings_layer_surface_sidebar">Sidebar</string>
     <string name="settings_layer_surface_folder">Folder</string>

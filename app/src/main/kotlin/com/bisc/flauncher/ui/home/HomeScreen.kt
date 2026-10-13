@@ -537,24 +537,62 @@ fun HomeScreen(
             ?.let { rowsByPage[it.id] }
             ?.find { it.type == PageRowType.SEARCH_BAR }
         if (homeDockRow != null && !(folderOpen && folderHideDock)) {
-            Box(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
-                PillRow(
-                    row = homeDockRow,
-                    entries = appEntriesByRow[homeDockRow.id].orEmpty(),
-                    folders = folders,
-                    folderItemsByFolder = folderItemsByFolder,
-                    savedMapTargets = savedMapTargets,
-                    pinnedWebsites = pinnedWebsites,
-                    pages = allPages,
-                    loadIcon = viewModel::loadIcon,
-                    loadPackIcon = viewModel::loadPackIcon,
-                    resolveLabel = resolveLabel,
-                    iconShape = iconShape,
-                    onFolderClick = viewModel::openFolder,
-                    onShortcutClick = viewModel::launchFolderShortcut,
-                    onOpenPageLink = onOpenPageLink,
-                    onAddEmptySlot = { addingAppToDockRowId = homeDockRow.id }
-                )
+            val visibilityMode = homeDockRow.dockVisibilityMode
+            // Ephemeral UI state only, deliberately not persisted — same ephemeral character as the
+            // Favorites popup this look mirrors. Resets to its mode's own starting state whenever the
+            // row id or the mode itself changes (e.g. the user just switched modes in Settings).
+            var dockExpanded by remember(homeDockRow.id, visibilityMode) {
+                mutableStateOf(visibilityMode != com.bisc.flauncher.data.model.DockVisibilityMode.GESTURE_TOGGLE)
+            }
+            val isOnHomePage = pagerState.currentPage == homeIndex
+            LaunchedEffect(visibilityMode, isOnHomePage) {
+                if (visibilityMode == com.bisc.flauncher.data.model.DockVisibilityMode.AUTO_EXPAND_ON_ARRIVAL && isOnHomePage) {
+                    dockExpanded = true
+                    kotlinx.coroutines.delay(2500)
+                    dockExpanded = false
+                }
+            }
+            val canCollapse = visibilityMode != com.bisc.flauncher.data.model.DockVisibilityMode.ALWAYS_VISIBLE
+            Column(
+                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (dockExpanded && canCollapse && homeDockRow.dockShowDragHandle) {
+                    DockDragHandle(pointingDown = true, onClick = { dockExpanded = false })
+                }
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = dockExpanded,
+                    enter = fadeIn(tween(160)) + androidx.compose.animation.expandVertically(tween(200), expandFrom = Alignment.Bottom),
+                    exit = fadeOut(tween(140)) + androidx.compose.animation.shrinkVertically(tween(180), shrinkTowards = Alignment.Bottom)
+                ) {
+                    PillRow(
+                        row = homeDockRow,
+                        entries = appEntriesByRow[homeDockRow.id].orEmpty(),
+                        folders = folders,
+                        folderItemsByFolder = folderItemsByFolder,
+                        savedMapTargets = savedMapTargets,
+                        pinnedWebsites = pinnedWebsites,
+                        pages = allPages,
+                        loadIcon = viewModel::loadIcon,
+                        loadPackIcon = viewModel::loadPackIcon,
+                        resolveLabel = resolveLabel,
+                        iconShape = iconShape,
+                        onFolderClick = viewModel::openFolder,
+                        onShortcutClick = viewModel::launchFolderShortcut,
+                        onOpenPageLink = onOpenPageLink,
+                        onAddEmptySlot = { addingAppToDockRowId = homeDockRow.id }
+                    )
+                }
+                if (!dockExpanded && canCollapse) {
+                    Box(
+                        modifier = Modifier
+                            .padding(bottom = DockDimens.bottomMargin)
+                            .size(width = 56.dp, height = 10.dp)
+                            .clip(RoundedCornerShape(percent = 50))
+                            .background(Color.White.copy(alpha = 0.35f))
+                            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { dockExpanded = true }
+                    )
+                }
             }
         }
 
