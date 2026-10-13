@@ -314,10 +314,18 @@ class SettingsRepository @Inject constructor(
     // ---- Gestures ----
 
     fun gestureAction(gesture: HomeGesture): Flow<GestureAction> = dataStore.data.map { prefs ->
+        // No more hardcoded per-gesture fallback here — this repository has no page-id knowledge,
+        // so the real SWIPE_UP/SWIPE_DOWN defaults (pointing at the App overview/Sidebar pages) are
+        // seeded once, with real ids, by PageContentRepository.ensureSeeded() instead.
         val type = prefs[gestureTypeKey(gesture)]?.let { runCatching { GestureActionType.valueOf(it) }.getOrNull() }
-            ?: if (gesture == HomeGesture.SWIPE_UP) GestureActionType.APP_LIST else GestureActionType.NONE
+            ?: GestureActionType.NONE
         GestureAction(type, prefs[gesturePayloadKey(gesture)])
     }
+
+    /** One-shot check, not a [Flow] — used only by seeding code to decide whether a default binding
+     *  would still be safe to write (i.e. the user hasn't touched this gesture yet). */
+    suspend fun isGestureConfigured(gesture: HomeGesture): Boolean =
+        dataStore.data.first().contains(gestureTypeKey(gesture))
 
     // ---- Setters: general ----
 

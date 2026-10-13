@@ -295,11 +295,11 @@
     <string name="settings_gesture_action_app">Open app</string>
     <string name="settings_gesture_action_shortcut">Run shortcut</string>
     <string name="settings_gesture_action_page">Show page</string>
-    <string name="settings_gesture_action_search">Open text search</string>
-    <string name="settings_gesture_action_app_list">Open app overview</string>
     <string name="settings_gesture_action_settings">Open settings</string>
     <string name="settings_gesture_action_notifications">Open notifications</string>
     <string name="settings_gesture_action_quick_settings">Open quick settings</string>
+    <string name="settings_gesture_used_by_dock">Used by Dock</string>
+    <string name="settings_gesture_already_used">Already used elsewhere</string>
 
     <string name="settings_section_pages">Pages</string>
     <string name="settings_section_app_overview">App overview</string>
@@ -312,6 +312,8 @@
     <string name="settings_pages_page">Page %1$d</string>
     <string name="settings_pages_add">Add page</string>
     <string name="settings_pages_other_label">Other pages</string>
+    <string name="settings_pages_invocation_title">How this page is opened</string>
+    <string name="settings_pages_invocation_none">Not bound to a gesture</string>
     <string name="settings_pages_add_template_label">Start from</string>
     <string name="settings_pages_add_template_blank">Blank page</string>
     <string name="settings_pages_remove">Remove page</string>

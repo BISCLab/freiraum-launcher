@@ -10,9 +10,13 @@ import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.BackgroundSource
 import com.bisc.flauncher.data.model.ColorFill
 import com.bisc.flauncher.data.model.DesignPresetValues
+import com.bisc.flauncher.data.model.DockVisibilityMode
+import com.bisc.flauncher.data.model.dockToggleGesture
 import com.bisc.flauncher.data.model.GestureAction
+import com.bisc.flauncher.data.model.GestureActionType
 import com.bisc.flauncher.data.model.GridConstants
 import com.bisc.flauncher.data.model.GridItemType
+import com.bisc.flauncher.data.model.HomeGesture
 import com.bisc.flauncher.data.model.LauncherPage
 import com.bisc.flauncher.data.model.LauncherPageKind
 import com.bisc.flauncher.data.model.PageDirection
@@ -47,6 +51,15 @@ class PageContentRepository @Inject constructor(
     val searchPageId: Flow<Long?> = allPages.map { list -> list.firstOrNull { it.kind == LauncherPageKind.SEARCH }?.id }
     val rows: Flow<List<PageRow>> = rowDao.observeAll()
     val appRowEntries: Flow<List<AppRowEntry>> = entryDao.observeAll()
+
+    /** Every [HomeGesture] currently spent toggling some row's Dock visibility — consumed by the
+     *  gesture pickers (Settings -> Gestures, the Dock's own toggle-gesture picker) so the same
+     *  gesture can't silently be bound to two different things at once. */
+    val dockClaimedGestures: Flow<Set<HomeGesture>> = rows.map { list ->
+        list.filter { it.dockVisibilityMode == DockVisibilityMode.GESTURE_TOGGLE }
+            .mapNotNull { it.dockToggleGesture() }
+            .toSet()
+    }
 
     suspend fun ensureSeeded() {
         ensureGlobalBackgroundSeeded()
@@ -92,6 +105,23 @@ class PageContentRepository @Inject constructor(
                 LauncherPage(orderIndex = (pageDao.maxOrderIndex() ?: -1) + 1, kind = LauncherPageKind.SIDEBAR)
             )
             settingsRepository.setPageHideStatusBar(sidebarId, true)
+        }
+
+        // Gesture defaults, seeded once with real page ids now that Search/App-overview/Sidebar are
+        // all real pages — SettingsRepository has no page-id knowledge, so it can no longer carry a
+        // hardcoded SWIPE_UP fallback (removed in the same step as the APP_LIST/SEARCH enum values).
+        // Guarded by "nothing configured yet" so this never clobbers a user's own choice.
+        if (!settingsRepository.isGestureConfigured(HomeGesture.SWIPE_UP)) {
+            pageDao.getAppOverviewPage()?.let { appOverview ->
+                settingsRepository.setGestureAction(HomeGesture.SWIPE_UP, GestureAction(GestureActionType.PAGE, appOverview.id.toString()))
+            }
+        }
+        // Preserves today's hardcoded swipe-down-opens-overview behavior, now flowing through the
+        // real, configurable gesture system instead of a special-cased detector.
+        if (!settingsRepository.isGestureConfigured(HomeGesture.SWIPE_DOWN)) {
+            pageDao.getByKind(LauncherPageKind.SIDEBAR)?.let { sidebar ->
+                settingsRepository.setGestureAction(HomeGesture.SWIPE_DOWN, GestureAction(GestureActionType.PAGE, sidebar.id.toString()))
+            }
         }
 
         // Fresh-install default: the dock arrives already linking to the two singleton pages, so it

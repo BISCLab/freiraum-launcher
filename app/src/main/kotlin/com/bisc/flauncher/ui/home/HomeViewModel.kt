@@ -24,6 +24,7 @@ import com.bisc.flauncher.data.model.GestureAction
 import com.bisc.flauncher.data.model.GestureActionType
 import com.bisc.flauncher.data.model.GridItemType
 import com.bisc.flauncher.data.model.HomeGesture
+import com.bisc.flauncher.data.model.LauncherPageKind
 import com.bisc.flauncher.data.model.LauncherPage
 import com.bisc.flauncher.data.model.Note
 import com.bisc.flauncher.data.model.NowPlayingInfo
@@ -233,13 +234,30 @@ class HomeViewModel @Inject constructor(
                 val parts = action.payload?.split("|")
                 if (parts != null && parts.size >= 2) shortcutRepository.launch(parts[0], parts[1])
             }
-            GestureActionType.PAGE -> action.payload?.toLongOrNull()?.let(onOpenPage)
-            GestureActionType.SEARCH -> openSearch()
-            GestureActionType.APP_LIST -> openAppList()
+            // The sole way to reference a page now — ROWS pages jump the pager via onOpenPage,
+            // the singleton overlays (App overview/Search/Sidebar) open their own overlay directly,
+            // same dispatch PageRowContent's onOpenPageLink already does for a dock/apps-row page-link tap.
+            GestureActionType.PAGE -> action.payload?.toLongOrNull()?.let { id ->
+                when (allPages.value.find { it.id == id }?.kind) {
+                    LauncherPageKind.APP_LIST -> openAppList()
+                    LauncherPageKind.SEARCH -> openSearch()
+                    LauncherPageKind.SIDEBAR -> openOverview()
+                    else -> onOpenPage(id)
+                }
+            }
             GestureActionType.SETTINGS -> onOpenSettings()
             GestureActionType.NOTIFICATIONS -> SystemActionsUtil.expandNotifications(context)
             GestureActionType.QUICK_SETTINGS -> SystemActionsUtil.expandQuickSettings(context)
         }
+    }
+
+    /** Every [HomeGesture] currently spent toggling some row's Dock visibility — see
+     *  [com.bisc.flauncher.data.repository.PageContentRepository.dockClaimedGestures]. */
+    val dockClaimedGestures: StateFlow<Set<HomeGesture>> =
+        pageContentRepository.dockClaimedGestures.stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
+
+    fun setGestureAction(gesture: HomeGesture, action: GestureAction) {
+        viewModelScope.launch { settingsRepository.setGestureAction(gesture, action) }
     }
 
     // ---- Pages, rows and installed apps ----

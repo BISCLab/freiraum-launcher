@@ -1,7 +1,6 @@
 package com.bisc.flauncher.ui.home
 
 import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -88,39 +87,3 @@ fun Modifier.detectHomeGestures(
         }
 }
 
-/**
- * Opens the Apps panel on a downward drag starting *anywhere* on the home page background — not just a
- * notification-shade-style strip at the very top edge (the original, narrower version of this). The Hub
- * orb sits in its own overlay above the page in z-order with its own gesture detector on its own hit-
- * target, so a touch starting on the orb never reaches this one — Compose hit-tests to the topmost
- * consumer at a point, and the orb's Box is drawn after (on top of) the page content. Reads at
- * [PointerEventPass.Main], same reasoning as [detectHomeGestures]'s own doc comment: any actual widget
- * living on the page gets first claim on the touch via its own Main-pass turn, deeper in the tree, before
- * this (an ancestor) sees it, so a real widget drag/scroll still wins outright. Only consumes the pointer
- * once the swipe actually commits — before that, a tap on whatever's under the finger goes through
- * untouched.
- */
-@Composable
-fun Modifier.detectSwipeDownAnywhere(onSwipeDown: () -> Unit): Modifier {
-    val density = LocalDensity.current
-    val thresholdPx = remember(density) { with(density) { 36.dp.toPx() } }
-    val currentOnSwipeDown = rememberUpdatedState(onSwipeDown)
-    return this.pointerInput(thresholdPx) {
-        awaitEachGesture {
-            val down = awaitFirstDown(pass = PointerEventPass.Main)
-            var accumulated = 0f
-            while (true) {
-                val event = awaitPointerEvent(PointerEventPass.Main)
-                val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                if (!change.pressed) break
-                if (change.isConsumed) continue
-                accumulated += change.positionChange().y
-                if (accumulated >= thresholdPx) {
-                    change.consume()
-                    currentOnSwipeDown.value()
-                    break
-                }
-            }
-        }
-    }
-}
