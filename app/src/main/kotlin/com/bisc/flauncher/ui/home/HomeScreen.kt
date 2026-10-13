@@ -634,7 +634,7 @@ fun HomeScreen(
                     exit = fadeOut(tween(120)),
                     modifier = Modifier.align(Alignment.BottomCenter)
                 ) {
-                    EdgeNotch(edge = NotchEdge.BOTTOM, appearance = dockAppearance, onOpen = { dockExpanded = true })
+                    EdgeNotch(edge = NotchEdge.BOTTOM, onOpen = { dockExpanded = true })
                 }
             }
         }
@@ -763,7 +763,7 @@ fun HomeScreen(
             exit = fadeOut(tween(120)),
             modifier = Modifier.align(Alignment.TopCenter)
         ) {
-            EdgeNotch(edge = NotchEdge.TOP, appearance = sidebarPanelAppearance, onOpen = { viewModel.openOverview() })
+            EdgeNotch(edge = NotchEdge.TOP, onOpen = { viewModel.openOverview() })
         }
     }
 
