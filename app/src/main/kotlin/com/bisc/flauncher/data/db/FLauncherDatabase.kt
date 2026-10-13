@@ -25,7 +25,7 @@ import com.bisc.flauncher.data.model.SidebarPinnedApp
         PinnedShortcut::class, SidebarItem::class, AppOverride::class, SidebarPinnedApp::class,
         PinnedContact::class
     ],
-    version = 40,
+    version = 41,
     exportSchema = true
 )
 @TypeConverters(Converters::class)

@@ -162,7 +162,7 @@ internal fun PagePickerSheet(
     }
 }
 
-private fun gestureIcon(gesture: HomeGesture) = when (gesture) {
+internal fun gestureIcon(gesture: HomeGesture) = when (gesture) {
     HomeGesture.LONG_PRESS -> Icons.Filled.TouchApp
     HomeGesture.DOUBLE_TAP -> Icons.Filled.TouchApp
     HomeGesture.SWIPE_UP -> Icons.Filled.SwipeUp
@@ -170,7 +170,7 @@ private fun gestureIcon(gesture: HomeGesture) = when (gesture) {
 }
 
 @Composable
-private fun gestureLabel(gesture: HomeGesture): String = when (gesture) {
+internal fun gestureLabel(gesture: HomeGesture): String = when (gesture) {
     HomeGesture.LONG_PRESS -> stringResource(R.string.settings_gesture_long_press)
     HomeGesture.DOUBLE_TAP -> stringResource(R.string.settings_gesture_double_tap)
     HomeGesture.SWIPE_UP -> stringResource(R.string.settings_gesture_swipe_up)

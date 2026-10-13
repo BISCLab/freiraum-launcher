@@ -56,9 +56,15 @@ class PageContentRepository @Inject constructor(
         // Home starts with just the dock — no clock, no widgets. Widgets (the clock included) only
         // appear once the user opts in via "Widgets auf dem Homescreen aktivieren" in Settings, matching
         // the Discreet Launcher "empty home screen" principle this app is built on. The dock row's own
-        // entries are plain AppRowEntry rows, same table/machinery as any other apps row.
+        // entries are plain AppRowEntry rows, same table/machinery as any other apps row. Its default
+        // fill mirrors the Favorites popup's own look (white-on-light/black-on-dark via the same
+        // defaultBackgroundColor() helper) but at reduced opacity, matching the "leicht transparent"
+        // look asked for — a genuinely new seed value, not shared with any existing preset.
         val dockRowId = rowDao.getForPage(homeId).find { it.type == PageRowType.SEARCH_BAR }?.id
-            ?: rowDao.insert(PageRow(pageId = homeId, orderIndex = 0, type = PageRowType.SEARCH_BAR, borderEnabled = true))
+            ?: rowDao.insert(
+                PageRow(pageId = homeId, orderIndex = 0, type = PageRowType.SEARCH_BAR, borderEnabled = true)
+                    .withAppearance(ElementAppearance(fill = ColorFill(color = defaultBackgroundColor()), opacity = 0.85f, borderEnabled = true))
+            )
 
         if (pageDao.getAppOverviewPage() == null) {
             val appOverviewId = pageDao.insert(
@@ -414,6 +420,18 @@ class PageContentRepository @Inject constructor(
 
     suspend fun setRowPillMode(row: PageRow, pillMode: Boolean) {
         rowDao.update(row.copy(pillMode = pillMode))
+    }
+
+    suspend fun setRowDockVisibilityMode(row: PageRow, mode: com.bisc.flauncher.data.model.DockVisibilityMode) {
+        rowDao.update(row.copy(dockVisibilityMode = mode))
+    }
+
+    suspend fun setRowDockToggleGesture(row: PageRow, gesture: com.bisc.flauncher.data.model.HomeGesture?) {
+        rowDao.update(row.copy(dockToggleGestureType = gesture?.name))
+    }
+
+    suspend fun setRowDockShowDragHandle(row: PageRow, show: Boolean) {
+        rowDao.update(row.copy(dockShowDragHandle = show))
     }
 
     suspend fun removeEntry(entry: AppRowEntry) {

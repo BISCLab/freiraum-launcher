@@ -61,6 +61,7 @@ import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PinnedWebsite
 import com.bisc.flauncher.data.model.SavedMapTarget
 import com.bisc.flauncher.data.model.appearance
+import com.bisc.flauncher.data.model.dockToggleGesture
 import com.bisc.flauncher.ui.home.FolderIcon
 import com.bisc.flauncher.ui.home.dock.PageIconGlyph
 import com.bisc.flauncher.ui.home.dock.PageIconGlyphImage
@@ -86,6 +87,9 @@ fun AppsRowEditSheet(
     onColumnsChange: (Int) -> Unit,
     onAppearanceChange: (ElementAppearance) -> Unit,
     onPillModeChange: (Boolean) -> Unit,
+    onDockVisibilityModeChange: (com.bisc.flauncher.data.model.DockVisibilityMode) -> Unit = {},
+    onDockToggleGestureChange: (com.bisc.flauncher.data.model.HomeGesture?) -> Unit = {},
+    onDockShowDragHandleChange: (Boolean) -> Unit = {},
     onAddApp: (AppInfo) -> Unit,
     onAddExistingFolder: (folderId: Long) -> Unit,
     onCreateFolder: (name: String) -> Unit,
@@ -115,6 +119,33 @@ fun AppsRowEditSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(stringResource(R.string.settings_apps_row_edit_title), style = MaterialTheme.typography.titleLarge)
+
+            if (isDock) {
+                val visibilityMode = row.dockVisibilityMode
+                SettingsPreferenceGroup(title = stringResource(R.string.settings_dock_visibility_label)) {
+                    com.bisc.flauncher.data.model.DockVisibilityMode.entries.forEach { mode ->
+                        RadioPreference(dockVisibilityModeLabel(mode), mode, visibilityMode, onDockVisibilityModeChange)
+                    }
+                }
+                if (visibilityMode == com.bisc.flauncher.data.model.DockVisibilityMode.GESTURE_TOGGLE) {
+                    SettingsPreferenceGroup(title = stringResource(R.string.settings_dock_toggle_gesture_label)) {
+                        com.bisc.flauncher.data.model.HomeGesture.entries.forEach { gesture ->
+                            RadioPreference(gestureLabel(gesture), gesture, row.dockToggleGesture(), { onDockToggleGestureChange(gesture) })
+                        }
+                    }
+                }
+                if (visibilityMode != com.bisc.flauncher.data.model.DockVisibilityMode.ALWAYS_VISIBLE) {
+                    SettingsPreferenceGroup {
+                        SettingsPreference(
+                            icon = null,
+                            title = stringResource(R.string.settings_dock_show_drag_handle_label),
+                            summary = stringResource(R.string.settings_dock_show_drag_handle_summary),
+                            onClick = { onDockShowDragHandleChange(!row.dockShowDragHandle) },
+                            trailing = { Switch(checked = row.dockShowDragHandle, onCheckedChange = onDockShowDragHandleChange) }
+                        )
+                    }
+                }
+            }
 
             if (!isDock) {
                 SettingsPreferenceGroup {
@@ -241,6 +272,13 @@ fun AppsRowEditSheet(
             }
         )
     }
+}
+
+@Composable
+private fun dockVisibilityModeLabel(mode: com.bisc.flauncher.data.model.DockVisibilityMode): String = when (mode) {
+    com.bisc.flauncher.data.model.DockVisibilityMode.ALWAYS_VISIBLE -> stringResource(R.string.settings_dock_visibility_always)
+    com.bisc.flauncher.data.model.DockVisibilityMode.GESTURE_TOGGLE -> stringResource(R.string.settings_dock_visibility_gesture)
+    com.bisc.flauncher.data.model.DockVisibilityMode.AUTO_EXPAND_ON_ARRIVAL -> stringResource(R.string.settings_dock_visibility_auto)
 }
 
 @Composable

@@ -21,6 +21,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Shortcut
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Icon
@@ -535,6 +537,27 @@ fun PillRow(
                 }
             }
         }
+    }
+}
+
+/** A small notch above a collapsible dock, tapped to manually expand/collapse it — the user-facing
+ *  alternative to [PageRow.dockToggleGesture] for when [PageRow.dockShowDragHandle] is on. */
+@Composable
+fun DockDragHandle(pointingDown: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .padding(bottom = 4.dp)
+            .size(width = 40.dp, height = 24.dp)
+            .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+            .background(Color.White.copy(alpha = 0.35f))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = if (pointingDown) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp,
+            contentDescription = null,
+            tint = Color.White
+        )
     }
 }
 
