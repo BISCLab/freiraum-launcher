@@ -68,8 +68,9 @@ import com.bisc.flauncher.ui.home.dock.SidebarEntryType
 import com.bisc.flauncher.ui.home.dock.UNSET_APP_SLOT_COLOR
 import com.bisc.flauncher.ui.home.dock.defaultColor
 import com.bisc.flauncher.ui.home.dock.resolveSidebarItems
-import com.bisc.flauncher.data.model.DockPowerButtonAction
+import com.bisc.flauncher.ui.home.dock.PageIconGlyph
 import com.bisc.flauncher.data.model.DockSlot
+import com.bisc.flauncher.data.model.LauncherPageKind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.snapshotFlow
 import com.bisc.flauncher.util.AppIconLoader
@@ -272,6 +273,12 @@ class HomeViewModel @Inject constructor(
     val pages: StateFlow<List<LauncherPage>> =
         pageContentRepository.pages.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
+    /** Every page, including the singleton App overview/Search pages (unlike [pages], which only
+     *  has the swipeable ROWS ones) — used by the Pages settings list so those two are no longer
+     *  hidden/implicit. */
+    val allPages: StateFlow<List<LauncherPage>> =
+        pageContentRepository.allPages.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
     val rowsByPage: StateFlow<Map<Long, List<PageRow>>> =
         pageContentRepository.rows
             .map { rows -> rows.groupBy { it.pageId }.mapValues { (_, v) -> v.sortedBy { it.orderIndex } } }
@@ -306,17 +313,22 @@ class HomeViewModel @Inject constructor(
     // ---- Dock ----
 
     val dockSlots: StateFlow<List<DockSlotUi>> =
-        combine(dockRepository.slots, labeledApps) { dbSlots, apps ->
+        combine(dockRepository.slots, labeledApps, pageContentRepository.allPages) { dbSlots, apps, pages ->
             dbSlots.sortedBy { it.slotIndex }.map { dbSlot ->
-                if (dbSlot.type == "POWER_BUTTON") {
-                    val action = dbSlot.powerButtonAction
-                        ?.let { runCatching { DockPowerButtonAction.valueOf(it) }.getOrNull() }
-                        ?: DockPowerButtonAction.TEXT_SEARCH
-                    DockSlotUi.PowerButton(
+                if (dbSlot.type == "PAGE") {
+                    val page = dbSlot.linkedPageId?.let { id -> pages.find { it.id == id } }
+                    val kind = page?.kind ?: LauncherPageKind.ROWS
+                    val glyph = page?.iconGlyph?.let { name -> runCatching { PageIconGlyph.valueOf(name) }.getOrNull() }
+                        ?: PageIconGlyph.forPageKind(kind)
+                    DockSlotUi.PageLink(
                         index = dbSlot.slotIndex,
-                        action = action,
-                        backgroundColor = dbSlot.backgroundColor?.let { Color(it) } ?: action.defaultColor(),
-                        iconColor = dbSlot.iconColor?.let { Color(it) } ?: Color.White
+                        pageId = page?.id,
+                        pageKind = kind,
+                        glyph = glyph,
+                        backgroundColor = dbSlot.backgroundColor?.let { Color(it) }
+                            ?: page?.iconBackgroundColor?.let { Color(it) } ?: glyph.defaultColor(),
+                        iconColor = dbSlot.iconColor?.let { Color(it) }
+                            ?: page?.iconColor?.let { Color(it) } ?: Color.White
                     )
                 } else {
                     val componentName = dbSlot.componentName?.let(ComponentName::unflattenFromString)
@@ -344,11 +356,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun setDockPowerButtonSlot(index: Int, action: DockPowerButtonAction) {
+    fun setDockPageSlot(index: Int, pageId: Long) {
         viewModelScope.launch {
             val slots = currentDbSlots.first().toMutableList()
             val existing = slots.indexOfFirst { it.slotIndex == index }
-            val updated = DockSlot(slotIndex = index, type = "POWER_BUTTON", powerButtonAction = action.name)
+            val updated = DockSlot(slotIndex = index, type = "PAGE", linkedPageId = pageId)
             if (existing >= 0) slots[existing] = updated else slots.add(updated)
             dockRepository.setSlots(slots)
         }
@@ -367,12 +379,13 @@ class HomeViewModel @Inject constructor(
     fun addDockAppSlot() {
         viewModelScope.launch {
             val slots = currentDbSlots.first()
+            if (slots.size >= DockRepository.MAX_SLOTS) return@launch
             dockRepository.setSlots(slots + DockSlot(slotIndex = slots.size, type = "APP"))
         }
     }
 
-    fun addDockPowerButtonSlot(action: DockPowerButtonAction) {
-        viewModelScope.launch { dockRepository.addPowerButtonSlot(action, currentDbSlots.first()) }
+    fun addDockPageSlot(pageId: Long) {
+        viewModelScope.launch { dockRepository.addPageSlot(pageId, currentDbSlots.first()) }
     }
 
     fun removeDockSlot(index: Int) {
@@ -391,15 +404,6 @@ class HomeViewModel @Inject constructor(
             val item = slots.removeAt(from)
             slots.add(to, item)
             dockRepository.setSlots(slots)
-        }
-    }
-
-    fun executeDockPowerButton(action: DockPowerButtonAction) {
-        when (action) {
-            DockPowerButtonAction.TEXT_SEARCH -> openSearch()
-            DockPowerButtonAction.CATEGORY_SEARCH -> openOverview(SidebarEntryType.APPS)
-            DockPowerButtonAction.APP_DRAWER -> { viewModelScope.launch { settingsRepository.setAppListLayout(AppListLayout.TILES) }; openAppList() }
-            DockPowerButtonAction.APP_LIST -> { viewModelScope.launch { settingsRepository.setAppListLayout(AppListLayout.LIST) }; openAppList() }
         }
     }
 
@@ -593,9 +597,17 @@ class HomeViewModel @Inject constructor(
     private var inFlightSystemWidget: InFlightSystemWidget? = null
 
     init {
-        viewModelScope.launch { pageContentRepository.ensureSeeded() }
+        viewModelScope.launch {
+            pageContentRepository.ensureSeeded()
+            // Dock seeding needs the two auto-seeded singleton pages' real IDs, so it must run after
+            // page seeding completes rather than in its own parallel launch like the line below.
+            val searchPageId = pageContentRepository.searchPageId.first()
+            val appOverviewPageId = pageContentRepository.appOverviewPageId.first()
+            if (searchPageId != null && appOverviewPageId != null) {
+                dockRepository.ensureSeeded(searchPageId, appOverviewPageId)
+            }
+        }
         viewModelScope.launch { sidebarRepository.ensureSeeded() }
-        viewModelScope.launch { dockRepository.ensureSeeded() }
         viewModelScope.launch {
             _installedApps.value = installedAppsRepository.getLaunchableApps()
             installedAppsRepository.packageChanges().collectLatest {
@@ -897,6 +909,10 @@ class HomeViewModel @Inject constructor(
 
     fun renamePage(pageId: Long, name: String?) {
         viewModelScope.launch { pageContentRepository.renamePage(pageId, name) }
+    }
+
+    fun setPageIcon(pageId: Long, glyph: PageIconGlyph?, backgroundColor: Int?, iconColor: Int?) {
+        viewModelScope.launch { pageContentRepository.setPageIcon(pageId, glyph?.name, backgroundColor, iconColor) }
     }
 
     fun addWidgetRow(pageId: Long, kind: String, spanY: Int) {

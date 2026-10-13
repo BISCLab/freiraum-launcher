@@ -25,12 +25,15 @@ import com.bisc.flauncher.ui.settings.SettingsAppearanceScreen
 import com.bisc.flauncher.ui.settings.SettingsAppsScreen
 import com.bisc.flauncher.ui.settings.SettingsPermissionsScreen
 import com.bisc.flauncher.ui.settings.SettingsDockScreen
+import com.bisc.flauncher.ui.settings.SettingsDockSlotsScreen
+import com.bisc.flauncher.ui.settings.SettingsDockAppearanceScreen
 import com.bisc.flauncher.ui.settings.SettingsFolderEditScreen
 import com.bisc.flauncher.ui.settings.SettingsFolderIconScreen
 import com.bisc.flauncher.ui.settings.SettingsFolderScreen
 import com.bisc.flauncher.ui.settings.SettingsGesturesScreen
 import com.bisc.flauncher.ui.settings.SettingsListScreen
 import com.bisc.flauncher.ui.settings.SettingsPageRowsScreen
+import com.bisc.flauncher.ui.settings.SettingsPageIconScreen
 import com.bisc.flauncher.ui.settings.SettingsPagesScreen
 import com.bisc.flauncher.ui.settings.SettingsSearchFullScreen
 import com.bisc.flauncher.ui.settings.SettingsSidebarScreen
@@ -116,7 +119,7 @@ class MainActivity : ComponentActivity() {
                         composable("home") {
                             HomeScreen(
                                 onNavigateToSettings = { editSlot ->
-                                    if (editSlot != null) navController.navigate("settings/dock?editSlot=$editSlot")
+                                    if (editSlot != null) navController.navigate("settings/dock/slots?editSlot=$editSlot")
                                     else navController.navigate("settings")
                                 },
                                 homeButtonPressCount = homeButtonPressCount
@@ -139,29 +142,41 @@ class MainActivity : ComponentActivity() {
                         composable("settings/appearance/background") {
                             com.bisc.flauncher.ui.settings.SettingsGlobalBackgroundScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
+                        composable("settings/dock") {
+                            SettingsDockScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
                         composable(
-                            "settings/dock?editSlot={editSlot}",
+                            "settings/dock/slots?editSlot={editSlot}",
                             arguments = listOf(navArgument("editSlot") { type = NavType.IntType; defaultValue = -1 })
                         ) { backStackEntry ->
                             val editSlot = backStackEntry.arguments?.getInt("editSlot")?.takeIf { it >= 0 }
-                            SettingsDockScreen(
+                            SettingsDockSlotsScreen(
                                 navController = navController,
                                 onBack = { navController.popBackStack() },
-                                onNavigate = { route -> navController.navigate("settings/$route") },
                                 initialEditSlot = editSlot
                             )
+                        }
+                        composable("settings/dock/appearance") {
+                            SettingsDockAppearanceScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable("settings/dock/overview") {
                             SettingsSidebarScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
-                        composable("settings/dock/full") {
+                        composable("settings/search") {
                             SettingsSearchFullScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable("settings/pages") {
                             SettingsPagesScreen(
                                 navController = navController,
                                 onBack = { navController.popBackStack() },
-                                onOpenPage = { pageId -> navController.navigate("settings/pages/$pageId") }
+                                onOpenPage = { page ->
+                                    when (page.kind) {
+                                        com.bisc.flauncher.data.model.LauncherPageKind.ROWS -> navController.navigate("settings/pages/${page.id}")
+                                        com.bisc.flauncher.data.model.LauncherPageKind.APP_LIST -> navController.navigate("settings/app_overview")
+                                        com.bisc.flauncher.data.model.LauncherPageKind.SEARCH -> navController.navigate("settings/search")
+                                    }
+                                },
+                                onOpenIcon = { pageId -> navController.navigate("settings/pages/$pageId/icon") }
                             )
                         }
                         composable(
@@ -175,6 +190,13 @@ class MainActivity : ComponentActivity() {
                                 onBack = { navController.popBackStack() },
                                 onOpenRow = { rowId -> navController.navigate("settings/pages/$pageId/rows/$rowId") }
                             )
+                        }
+                        composable(
+                            "settings/pages/{pageId}/icon",
+                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@composable
+                            SettingsPageIconScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable(
                             "settings/pages/{pageId}/rows/{rowId}",

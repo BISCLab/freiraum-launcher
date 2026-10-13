@@ -43,6 +43,7 @@ class PageContentRepository @Inject constructor(
     val pages: Flow<List<LauncherPage>> = allPages.map { list -> list.filter { it.kind == LauncherPageKind.ROWS } }
 
     val appOverviewPageId: Flow<Long?> = allPages.map { list -> list.firstOrNull { it.kind == LauncherPageKind.APP_LIST }?.id }
+    val searchPageId: Flow<Long?> = allPages.map { list -> list.firstOrNull { it.kind == LauncherPageKind.SEARCH }?.id }
     val rows: Flow<List<PageRow>> = rowDao.observeAll()
     val appRowEntries: Flow<List<AppRowEntry>> = entryDao.observeAll()
 
@@ -64,6 +65,15 @@ class PageContentRepository @Inject constructor(
                 LauncherPage(orderIndex = (pageDao.maxOrderIndex() ?: -1) + 1, isAppOverview = true, kind = LauncherPageKind.APP_LIST)
             )
             settingsRepository.setPageHideStatusBar(appOverviewId, true)
+        }
+
+        // Autonomous singleton, same pattern as the app overview above — exists and works whether or
+        // not any dock slot links to it (unlike the old TEXT_SEARCH power button, which search *was*).
+        if (pageDao.getByKind(LauncherPageKind.SEARCH) == null) {
+            val searchId = pageDao.insert(
+                LauncherPage(orderIndex = (pageDao.maxOrderIndex() ?: -1) + 1, kind = LauncherPageKind.SEARCH)
+            )
+            settingsRepository.setPageHideStatusBar(searchId, true)
         }
 
         // Self-healing check on every start: pages used to scroll, so content sized against that
@@ -104,10 +114,15 @@ class PageContentRepository @Inject constructor(
     }
 
     suspend fun removePageIfEmpty(page: LauncherPage): Boolean {
-        if (page.isHome || page.isAppOverview) return false
+        if (page.isHome || page.isAppOverview || page.kind == LauncherPageKind.SEARCH) return false
         if (rowDao.countForPage(page.id) > 0) return false
         pageDao.delete(page)
         return true
+    }
+
+    suspend fun setPageIcon(pageId: Long, glyph: String?, backgroundColor: Int?, iconColor: Int?) {
+        val page = pageDao.getById(pageId) ?: return
+        pageDao.update(page.copy(iconGlyph = glyph, iconBackgroundColor = backgroundColor, iconColor = iconColor))
     }
 
     suspend fun reorderPages(ordered: List<LauncherPage>) {

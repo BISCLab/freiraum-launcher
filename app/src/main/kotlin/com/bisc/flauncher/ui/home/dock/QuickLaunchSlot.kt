@@ -2,20 +2,18 @@ package com.bisc.flauncher.ui.home.dock
 
 import android.content.ComponentName
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.bisc.flauncher.data.model.DockPowerButtonAction
+import com.bisc.flauncher.data.model.LauncherPageKind
 
 /**
  * One rendered dock slot — resolved from [com.bisc.flauncher.data.model.DockSlot] (DB row: type +
- * componentName/action + optional color overrides) plus live app info. Every slot renders as the exact
- * same uniform squircle button regardless of kind (see [DockDimens]/[SearchBar]) — there's no longer a
- * special "Hub orb"; [PowerButton] slots are what replaced it, each a deliberate single-purpose button.
+ * componentName/linkedPageId + optional color overrides) plus live app/page info. Every slot renders
+ * as the exact same uniform squircle button regardless of kind (see [DockDimens]/[SearchBar]) — there's
+ * no special "Hub orb" or fixed power-button action anymore; a [PageLink] slot just shows whatever
+ * page it's linked to (see [PageIconGlyph]) and opens it on tap — pages are autonomous and look/work
+ * the same whether or not any dock slot links to them.
  */
 sealed interface DockSlotUi {
     val index: Int
@@ -31,9 +29,12 @@ sealed interface DockSlotUi {
         override val iconColor: Color = Color.White
     ) : DockSlotUi
 
-    data class PowerButton(
+    /** [pageId] null means the slot's linked page no longer exists (deleted) — rendered the same as an unset App slot. */
+    data class PageLink(
         override val index: Int,
-        val action: DockPowerButtonAction,
+        val pageId: Long?,
+        val pageKind: LauncherPageKind,
+        val glyph: PageIconGlyph,
         override val backgroundColor: Color,
         override val iconColor: Color = Color.White
     ) : DockSlotUi
@@ -41,20 +42,12 @@ sealed interface DockSlotUi {
 
 val UNSET_APP_SLOT_COLOR = Color(0xFF6B7280)
 
-/** This action's own built-in icon — see [defaultColor] for where the matching accent colors came from. */
-fun DockPowerButtonAction.defaultIcon(): ImageVector = when (this) {
-    DockPowerButtonAction.TEXT_SEARCH -> Icons.Filled.Search
-    DockPowerButtonAction.CATEGORY_SEARCH -> Icons.Filled.GridView
-    DockPowerButtonAction.APP_DRAWER -> Icons.Filled.Apps
-    DockPowerButtonAction.APP_LIST -> Icons.AutoMirrored.Filled.ViewList
-}
-
-/** Default accent color per action — text-search/category-search match the user's Figma dock exactly; app-drawer/app-list are new, picked to stay visually distinct from every other dock color. */
-fun DockPowerButtonAction.defaultColor(): Color = when (this) {
-    DockPowerButtonAction.TEXT_SEARCH -> Color(0xFF1AF0FF)
-    DockPowerButtonAction.CATEGORY_SEARCH -> Color(0xFFA14AFF)
-    DockPowerButtonAction.APP_DRAWER -> Color(0xFF6366F1)
-    DockPowerButtonAction.APP_LIST -> Color(0xFFF43F5E)
+/** Default accent color per glyph — distinct, legible colors for each of the 4 built-in page looks. */
+fun PageIconGlyph.defaultColor(): Color = when (this) {
+    PageIconGlyph.SEARCH -> Color(0xFF1AF0FF)
+    PageIconGlyph.APP_DRAWER -> Color(0xFF6366F1)
+    PageIconGlyph.APP_LIST -> Color(0xFFF43F5E)
+    PageIconGlyph.WIDGET_PAGE -> Color(0xFFA14AFF)
 }
 
 /** Placeholder glyph for an unset App slot — invites the user to tap and assign one. */
