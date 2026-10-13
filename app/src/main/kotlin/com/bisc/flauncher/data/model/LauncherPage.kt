@@ -4,10 +4,13 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /** What a [LauncherPage] renders as its own content. [ROWS] is a normal swipeable pager page;
- *  [APP_LIST]/[SEARCH] are singleton pages (auto-seeded, not deletable) that live in the pages
- *  list for identity/icon/settings purposes but render as their own overlay instead of pager
- *  content — see [com.bisc.flauncher.ui.home.HomeViewModel.openAppList]/`openSearch`. */
-enum class LauncherPageKind { ROWS, APP_LIST, SEARCH }
+ *  [APP_LIST]/[SEARCH]/[SIDEBAR] are singleton pages (auto-seeded, not deletable) that live in the
+ *  pages list for identity/icon/settings purposes but render as their own overlay instead of pager
+ *  content — see [com.bisc.flauncher.ui.home.HomeViewModel.openAppList]/`openSearch`/`openOverview`.
+ *  [SIDEBAR] is the Favorites/Quick-overview panel — previously reachable only via a hardcoded
+ *  swipe-down gesture, now a real page like the other two, placeable in a dock slot or (eventually)
+ *  bound to a configurable gesture same as any other page. */
+enum class LauncherPageKind { ROWS, APP_LIST, SEARCH, SIDEBAR }
 
 /** A home-screen page. [iconGlyph]/[iconBackgroundColor]/[iconColor] control how this page looks
  *  when shown as a dock slot (a dock slot can link to any page) — null means "default for this

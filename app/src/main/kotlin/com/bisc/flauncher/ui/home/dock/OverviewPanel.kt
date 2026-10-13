@@ -126,15 +126,15 @@ internal fun overviewRowHeight(availableHeight: Dp, appCount: Int): Dp {
 /**
  * Discreet Launcher's actual favorites popup is dead simple: just a grid, nothing else — no title, no
  * settings shortcut, no inline "add"/"create" row anywhere. Managing favorites, creating folders and
- * launcher settings in general all happen through Settings -> Dock (folder creation already lived there,
- * `showCreateFolderDialog` in SettingsSidebarScreen.kt) rather than inline in this popup.
+ * launcher settings in general all happen through Settings -> Quick overview (folder creation already
+ * lived there, `showCreateFolderDialog` in SettingsSidebarScreen.kt) rather than inline in this popup.
  *
  * Shows pinned apps and *every* folder (folders aren't individually "pinnable" the way apps are — they're
  * a global concept, same as the old multi-category Sidebar's own Folders tab just listed all of them) in
  * one merged grid, apps first. [showGroupDividers] draws a thin line between the two groups when both are
- * non-empty; off by default. [SidebarOverviewPanel] (the fuller multi-category rail panel) stays in the
- * codebase untouched — not what opens on the swipe-down gesture anymore, but still there, git-recoverable,
- * for later use as a "browse everything" surface if that's wanted down the line.
+ * non-empty; off by default. The older multi-category rail panel this replaced (`SidebarOverviewPanel`,
+ * `Sidebar.kt`/`SidebarLayout.kt`) had zero live call sites left and was removed outright — recoverable
+ * from git history if a "browse everything" surface like it is wanted again later.
  *
  * [topContentInset] reserves space for the status bar/camera cutout, passed in rather than computed with
  * [androidx.compose.foundation.layout.statusBarsPadding] here — that resolves to zero the instant the
@@ -304,7 +304,7 @@ private fun FavoritesMergedGrid(
     }
 }
 
-/** The category content shown on the content side of [SidebarOverviewPanel]. */
+/** The category content shown when a sidebar category (Apps, Folders, Notes, …) is drilled into. */
 @Composable
 fun OverviewContent(
     entry: SidebarEntryType,

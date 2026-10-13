@@ -149,6 +149,7 @@ class MainActivity : ComponentActivity() {
                                         com.bisc.flauncher.data.model.LauncherPageKind.ROWS -> navController.navigate("settings/pages/${page.id}")
                                         com.bisc.flauncher.data.model.LauncherPageKind.APP_LIST -> navController.navigate("settings/app_overview")
                                         com.bisc.flauncher.data.model.LauncherPageKind.SEARCH -> navController.navigate("settings/search")
+                                        com.bisc.flauncher.data.model.LauncherPageKind.SIDEBAR -> navController.navigate("settings/sidebar")
                                     }
                                 },
                                 onOpenIcon = { pageId -> navController.navigate("settings/pages/$pageId/icon") }
