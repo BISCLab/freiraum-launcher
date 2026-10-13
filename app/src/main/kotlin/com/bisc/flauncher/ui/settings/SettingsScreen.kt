@@ -81,16 +81,16 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                     onClick = { onNavigate("appearance") }
                 )
                 SettingsPreference(
-                    icon = Icons.Filled.Dock,
-                    title = stringResource(R.string.settings_section_dock),
-                    summary = stringResource(R.string.settings_card_dock_subtitle),
-                    onClick = { onNavigate("dock") }
-                )
-                SettingsPreference(
                     icon = Icons.Filled.ViewCarousel,
                     title = stringResource(R.string.settings_section_pages),
                     summary = stringResource(R.string.settings_card_pages_subtitle),
                     onClick = { onNavigate("pages") }
+                )
+                SettingsPreference(
+                    icon = Icons.Filled.Dock,
+                    title = stringResource(R.string.settings_section_search_overview),
+                    summary = stringResource(R.string.settings_card_search_overview_subtitle),
+                    onClick = { onNavigate("sidebar") }
                 )
                 SettingsPreference(
                     icon = Icons.Filled.GridView,

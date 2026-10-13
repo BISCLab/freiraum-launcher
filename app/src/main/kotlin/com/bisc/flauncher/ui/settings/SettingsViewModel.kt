@@ -356,15 +356,6 @@ class SettingsViewModel @Inject constructor(
     val appListContentAppearance: StateFlow<ElementAppearance> =
         repository.appListContentAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
 
-    val dockCornerStyle: StateFlow<com.bisc.flauncher.ui.home.dock.DockCornerStyle> =
-        repository.dockCornerStyle.stateIn(
-            viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.home.dock.DockCornerStyle.ROUNDED
-        )
-
-    fun setDockCornerStyle(style: com.bisc.flauncher.ui.home.dock.DockCornerStyle) {
-        viewModelScope.launch { repository.setDockCornerStyle(style) }
-    }
-
     val chargingAnimationColor: StateFlow<Int> =
         repository.chargingAnimationColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF34D058.toInt())
 

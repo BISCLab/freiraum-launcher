@@ -2,10 +2,12 @@ package com.bisc.flauncher.ui.home.dock
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.bisc.flauncher.data.model.DockWidthMode
 
 /**
- * Geometry of the dock. Icon size is fixed — not scaled by screen width — tuned so exactly
- * [REFERENCE_SLOT_COUNT] slots (the default width target) comfortably fill a typical ~400dp-wide phone
+ * Geometry of a single-line/pill row (the dock being the one that floats; any other row can opt into
+ * the same layout). Icon size is fixed — not scaled by screen width — tuned so exactly
+ * [REFERENCE_SLOT_COUNT] entries (the default width target) comfortably fill a typical ~400dp-wide phone
  * screen with icons at a generous, consistent size; see [DockWidthMode] for how the bar's own width is
  * derived from that per-icon size, and [pillWidth]/[widthForSlotCount] for the actual calculation.
  */
@@ -23,6 +25,12 @@ object DockDimens {
     val barHeight = iconSize + innerVerticalPadding * 2
 
     const val REFERENCE_SLOT_COUNT = 5
+
+    /** Fallback corner radius for "dock-matched" surfaces that have no [com.bisc.flauncher.data.model.PageRow]
+     *  of their own to read a real corner style from (the search keyboard's action bar, the app overview's
+     *  window-mode panel, etc.) — the dock bar itself no longer uses this, it reads its own row's
+     *  `cornerStyle` instead (see the pill rendering in PageRowContent.kt). */
+    val defaultCornerRadius = 32.dp
 
     /** Width needed to fit exactly [count] icons at their fixed size, with the bar's own edge padding and inter-icon gaps. */
     fun widthForSlotCount(count: Int): Dp {
@@ -53,7 +61,7 @@ object DockDimens {
     fun scaled(availableWidth: Dp): ScaledDock = ScaledDock(
         pillWidth = pillWidth(REFERENCE_SLOT_COUNT, DockWidthMode.FIXED, availableWidth),
         barHeight = barHeight,
-        cornerRadius = DockCornerStyle.ROUNDED.radius,
+        cornerRadius = defaultCornerRadius,
         innerHorizontalPadding = innerHorizontalPadding,
         iconSize = iconSize,
         iconCornerRadius = iconCornerRadius,
@@ -63,35 +71,24 @@ object DockDimens {
     )
 }
 
-/** Whether the dock bar's width is pinned to [DockDimens.REFERENCE_SLOT_COUNT] slots or grows with the actual slot count. */
-enum class DockWidthMode { FIXED, GROW }
-
 /** Corner radius of the Layer-2 widgets/cards (see WidgetCard). */
 val WidgetCornerRadius = 20.dp
 
-/** When non-null, replaces the scaled pill corner radius of the dock and of every panel that shares its shape. */
-val LocalDockCornerRadius = androidx.compose.runtime.compositionLocalOf<Dp?> { null }
-
-/** Dock dimensions, with the configured corner radius resolved. [availableWidth] is unused for sizing now
- *  (icon size is fixed) but kept so existing callers (the dock itself, the search keyboard, etc.) don't
- *  need to change; [pillWidth] field here is just [availableWidth] passed through for layout padding math
- *  elsewhere — the dock's own actual width comes from [DockDimens.pillWidth] instead, which also needs
- *  the live slot count. */
+/** Dock-matched dimensions for surfaces with no row of their own — see [DockDimens.defaultCornerRadius].
+ *  [availableWidth] is unused for sizing now (icon size is fixed) but kept so existing callers (the
+ *  search keyboard, etc.) don't need to change. */
 @androidx.compose.runtime.Composable
-fun dockDimens(availableWidth: Dp): ScaledDock {
-    val override = LocalDockCornerRadius.current
-    return ScaledDock(
-        pillWidth = availableWidth,
-        barHeight = DockDimens.barHeight,
-        cornerRadius = override ?: DockCornerStyle.ROUNDED.radius,
-        innerHorizontalPadding = DockDimens.innerHorizontalPadding,
-        iconSize = DockDimens.iconSize,
-        iconCornerRadius = DockDimens.iconCornerRadius,
-        buttonSize = DockDimens.iconSize,
-        itemSpacing = DockDimens.itemGap,
-        innerVerticalPadding = DockDimens.innerVerticalPadding
-    )
-}
+fun dockDimens(availableWidth: Dp): ScaledDock = ScaledDock(
+    pillWidth = availableWidth,
+    barHeight = DockDimens.barHeight,
+    cornerRadius = DockDimens.defaultCornerRadius,
+    innerHorizontalPadding = DockDimens.innerHorizontalPadding,
+    iconSize = DockDimens.iconSize,
+    iconCornerRadius = DockDimens.iconCornerRadius,
+    buttonSize = DockDimens.iconSize,
+    itemSpacing = DockDimens.itemGap,
+    innerVerticalPadding = DockDimens.innerVerticalPadding
+)
 
 /** One consistently-resolved snapshot of the dock's dimensions. */
 data class ScaledDock(

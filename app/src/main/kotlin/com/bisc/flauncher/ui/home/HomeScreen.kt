@@ -105,7 +105,6 @@ import com.bisc.flauncher.ui.home.dock.BackgroundFill
 import com.bisc.flauncher.ui.home.dock.DockDimens
 import com.bisc.flauncher.ui.home.dock.FavoritesPopup
 import com.bisc.flauncher.ui.home.dock.ResolvedSidebarItem
-import com.bisc.flauncher.ui.home.dock.SearchBar
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 import com.bisc.flauncher.ui.home.dock.SidebarOverviewPanel
 import com.bisc.flauncher.ui.home.search.AppOverviewContent
@@ -126,7 +125,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onNavigateToSettings: (editDockSlot: Int?) -> Unit,
+    onNavigateToSettings: () -> Unit,
     homeButtonPressCount: Int = 0,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -134,6 +133,10 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val pages by viewModel.pages.collectAsState()
+    // Page-link entries (GridItemType.PAGE, including the dock's own) need the full list to resolve
+    // an icon for the Search/App-overview singletons too — `pages` above is ROWS-only (the pager's own
+    // list), which is why those two always fell back to the generic "unknown page" glyph otherwise.
+    val allPages by viewModel.allPages.collectAsState()
     val rowsByPage by viewModel.rowsByPage.collectAsState()
     val appEntriesByRow by viewModel.appEntriesByRow.collectAsState()
     val browsableApps by viewModel.browsableApps.collectAsState()
@@ -172,8 +175,6 @@ fun HomeScreen(
     val availableShortcuts by viewModel.availableShortcuts.collectAsState()
     val iconShape by viewModel.iconShape.collectAsState()
     val railAppearance by viewModel.searchAlphabetRailAppearance.collectAsState()
-    val dockSlots by viewModel.dockSlots.collectAsState()
-    val dockWidthMode by viewModel.dockWidthMode.collectAsState()
     val chargingAnimationEnabled by viewModel.chargingAnimationEnabled.collectAsState()
     val chargingAnimationColor by viewModel.chargingAnimationColor.collectAsState()
     val searchAppearance by viewModel.searchAppearance.collectAsState()
@@ -314,6 +315,16 @@ fun HomeScreen(
         val index = pages.indexOfFirst { it.id == pageId }
         if (index >= 0) coroutineScope.launch { pagerState.animateScrollToPage(index) }
     }
+    // Shared by every page-link entry (an AppsRowGrid cell, a pill-row cell, the floating dock) —
+    // jumps the pager for a swipeable ROWS page, opens the matching overlay for the two singletons.
+    val onOpenPageLink: (Long, com.bisc.flauncher.data.model.LauncherPageKind) -> Unit = { pageId, kind ->
+        when (kind) {
+            com.bisc.flauncher.data.model.LauncherPageKind.ROWS -> openPageById(pageId)
+            com.bisc.flauncher.data.model.LauncherPageKind.APP_LIST -> viewModel.openAppList()
+            com.bisc.flauncher.data.model.LauncherPageKind.SEARCH -> viewModel.openSearch()
+        }
+    }
+    var addingAppToDockRowId by remember { mutableStateOf<Long?>(null) }
     // The one place "go back to home" is defined — closes every overlay and, crucially, also scrolls
     // the pager itself back to home. Closing an overlay alone used to leave the pager wherever it
     // already was, which is how the system home gesture (and back-swiping out of search/app overview)
@@ -327,7 +338,7 @@ fun HomeScreen(
     }
     val openSettingsFromGesture: () -> Unit = {
         viewModel.closeOverview()
-        onNavigateToSettings(null)
+        onNavigateToSettings()
     }
 
     // Whether *any* level of the folder stack is open.
@@ -496,11 +507,13 @@ fun HomeScreen(
                                 folderItemsByFolder = folderItemsByFolder,
                                 savedMapTargets = savedMapTargets,
                                 pinnedWebsites = pinnedWebsites,
+                                pages = allPages,
                                 loadIcon = viewModel::loadIcon,
                                 loadPackIcon = viewModel::loadPackIcon,
                                 resolveLabel = resolveLabel,
                                 onFolderClick = viewModel::openFolder,
                                 onShortcutClick = viewModel::launchFolderShortcut,
+                                onOpenPageLink = onOpenPageLink,
                                 onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) },
                                 handedness = handedness,
                                 iconShape = iconShape,
@@ -514,34 +527,33 @@ fun HomeScreen(
         }
 
         // The dock floats as its own layer outside the pager, not stacked into the scrolling page content
-        // — it stays put across page changes and isn't affected by homeScreenWidgetsEnabled. Its pill
-        // appearance/border still comes from the home page's own pinned SEARCH_BAR row (same per-row
-        // customization every other dock-style row has). Placed before the search/app-list overlays below
-        // so those naturally cover it when open; folderHideDock keeps the existing "hide the dock while a
-        // folder is open" behavior.
+        // — it stays put across page changes and isn't affected by homeScreenWidgetsEnabled. It's the
+        // home page's own pinned SEARCH_BAR row, rendered in pill mode — same AppRowEntry/PillRow
+        // machinery any ordinary App row uses, just floated here instead of stacked inline (see
+        // PageRowContent's SEARCH_BAR case). Placed before the search/app-list overlays below so those
+        // naturally cover it when open; folderHideDock keeps the existing "hide the dock while a folder
+        // is open" behavior.
         val homeDockRow = pages.find { it.isHome }
             ?.let { rowsByPage[it.id] }
             ?.find { it.type == PageRowType.SEARCH_BAR }
         if (homeDockRow != null && !(folderOpen && folderHideDock)) {
-            // Corner style comes from LocalDockCornerRadius, provided app-wide in MainActivity from the
-            // user's dockCornerStyle setting — same composition local every other dock-matched surface
-            // (the search keyboard's action bar, etc.) already reads via dockDimens().
             Box(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
-                SearchBar(
-                    slots = dockSlots,
-                    onAppClick = { componentName -> launchApp(context, componentName) },
-                    onUnsetAppClick = { index -> onNavigateToSettings(index) },
-                    onPageLinkClick = { link ->
-                        when (link.pageKind) {
-                            com.bisc.flauncher.data.model.LauncherPageKind.ROWS -> link.pageId?.let(openPageById)
-                            com.bisc.flauncher.data.model.LauncherPageKind.APP_LIST -> viewModel.openAppList()
-                            com.bisc.flauncher.data.model.LauncherPageKind.SEARCH -> viewModel.openSearch()
-                        }
-                    },
+                PillRow(
+                    row = homeDockRow,
+                    entries = appEntriesByRow[homeDockRow.id].orEmpty(),
+                    folders = folders,
+                    folderItemsByFolder = folderItemsByFolder,
+                    savedMapTargets = savedMapTargets,
+                    pinnedWebsites = pinnedWebsites,
+                    pages = allPages,
+                    loadIcon = viewModel::loadIcon,
+                    loadPackIcon = viewModel::loadPackIcon,
+                    resolveLabel = resolveLabel,
                     iconShape = iconShape,
-                    appearance = homeDockRow.appearance(),
-                    widthMode = dockWidthMode,
-                    loadQuickLaunchIcon = viewModel::loadIcon
+                    onFolderClick = viewModel::openFolder,
+                    onShortcutClick = viewModel::launchFolderShortcut,
+                    onOpenPageLink = onOpenPageLink,
+                    onAddEmptySlot = { addingAppToDockRowId = homeDockRow.id }
                 )
             }
         }
@@ -644,7 +656,7 @@ fun HomeScreen(
                     },
                     onFolderClick = { folder -> viewModel.openFolder(folder.id) },
                     onRemoveApp = viewModel::removeSidebarApp,
-                    onOpenSettings = { viewModel.closeOverview(); onNavigateToSettings(null) },
+                    onOpenSettings = { viewModel.closeOverview(); onNavigateToSettings() },
                     appearance = sidebarPanelAppearance,
                     shape = panelShape,
                     dock = d,
@@ -973,7 +985,7 @@ fun HomeScreen(
                         GridItemType.WEBSITE -> item.payload.toLongOrNull()
                             ?.let { id -> pinnedWebsites.find { it.id == id } }
                             ?.let { website -> openWebsite(context, website) }
-                        GridItemType.FOLDER, GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Unit
+                        GridItemType.FOLDER, GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE -> Unit
                     }
                     viewModel.closeAllFolders()
                     viewModel.closeOverview()
@@ -1005,6 +1017,18 @@ fun HomeScreen(
                 addingAppToFolderId = null
             },
             onDismiss = { addingAppToFolderId = null }
+        )
+    }
+
+    addingAppToDockRowId?.let { rowId ->
+        ShortcutSourceAppSheet(
+            apps = browsableApps,
+            loadIcon = viewModel::loadIcon,
+            onAppSelected = { app ->
+                viewModel.addAppEntryToRow(rowId, app)
+                addingAppToDockRowId = null
+            },
+            onDismiss = { addingAppToDockRowId = null }
         )
     }
 

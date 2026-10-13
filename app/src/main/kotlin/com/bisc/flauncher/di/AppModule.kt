@@ -16,7 +16,6 @@ import com.bisc.flauncher.data.db.IconPackMappingDao
 import com.bisc.flauncher.data.db.LauncherPageDao
 import com.bisc.flauncher.data.db.NoteDao
 import com.bisc.flauncher.data.db.PageRowDao
-import com.bisc.flauncher.data.db.DockSlotDao
 import com.bisc.flauncher.data.db.PinnedContactDao
 import com.bisc.flauncher.data.db.PinnedShortcutDao
 import com.bisc.flauncher.data.db.PinnedWebsiteDao
@@ -178,7 +177,4 @@ object AppModule {
 
     @Provides
     fun providePinnedContactDao(db: FLauncherDatabase): PinnedContactDao = db.pinnedContactDao()
-
-    @Provides
-    fun provideDockSlotDao(db: FLauncherDatabase): DockSlotDao = db.dockSlotDao()
 }

@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ViewCarousel
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,6 +35,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -54,14 +56,20 @@ import com.bisc.flauncher.data.model.FolderItem
 import com.bisc.flauncher.data.model.GridConstants
 import com.bisc.flauncher.data.model.GridItemType
 import com.bisc.flauncher.data.model.ElementAppearance
+import com.bisc.flauncher.data.model.LauncherPage
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PinnedWebsite
 import com.bisc.flauncher.data.model.SavedMapTarget
 import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.ui.home.FolderIcon
+import com.bisc.flauncher.ui.home.dock.PageIconGlyph
+import com.bisc.flauncher.ui.home.dock.PageIconGlyphImage
+import com.bisc.flauncher.ui.home.dock.PagePickerSheet
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
+import com.bisc.flauncher.ui.home.dock.defaultColor
+import com.bisc.flauncher.ui.pageLabel
 
-/** Editor for one [com.bisc.flauncher.data.model.PageRowType.APPS] row. */
+/** Editor for one [com.bisc.flauncher.data.model.PageRowType.APPS] (or, for the dock, [com.bisc.flauncher.data.model.PageRowType.SEARCH_BAR]) row. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppsRowEditSheet(
@@ -72,24 +80,34 @@ fun AppsRowEditSheet(
     folderItemsByFolder: Map<Long, List<FolderItem>>,
     savedMapTargets: List<SavedMapTarget>,
     pinnedWebsites: List<PinnedWebsite>,
+    pages: List<LauncherPage>,
     loadIcon: (ComponentName) -> ImageBitmap?,
     resolveLabel: (ComponentName) -> String = { "" },
     onColumnsChange: (Int) -> Unit,
     onAppearanceChange: (ElementAppearance) -> Unit,
+    onPillModeChange: (Boolean) -> Unit,
     onAddApp: (AppInfo) -> Unit,
     onAddExistingFolder: (folderId: Long) -> Unit,
     onCreateFolder: (name: String) -> Unit,
     onAddShortcutClick: () -> Unit,
     onAddMapTargetClick: () -> Unit,
     onAddWebsiteClick: () -> Unit,
+    onAddPageLink: (LauncherPage) -> Unit,
     onRemoveEntry: (AppRowEntry) -> Unit,
     onReorderEntries: (List<AppRowEntry>) -> Unit,
+    canRemoveRow: Boolean = true,
     onRemoveRow: () -> Unit,
     onDismiss: () -> Unit
 ) {
     var showAppPicker by remember { mutableStateOf(false) }
     var showFolderCreator by remember { mutableStateOf(false) }
+    var showPagePicker by remember { mutableStateOf(false) }
     var confirmingRemoveRow by remember { mutableStateOf(false) }
+    // The dock row (PageRowType.SEARCH_BAR) always floats as a single-line pill regardless of its
+    // own pillMode column — that flag only matters for an ordinary APPS row opting in. Showing the
+    // toggle (off) and the irrelevant Columns stepper for the dock would be actively misleading.
+    val isDock = row.type == com.bisc.flauncher.data.model.PageRowType.SEARCH_BAR
+    val isPillLayout = row.pillMode || isDock
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
@@ -98,30 +116,44 @@ fun AppsRowEditSheet(
         ) {
             Text(stringResource(R.string.settings_apps_row_edit_title), style = MaterialTheme.typography.titleLarge)
 
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_apps_row_columns_label)) {
-                SettingsPreference(
-                    icon = null,
-                    title = row.columns.toString(),
-                    onClick = {},
-                    trailing = {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            IconButton(
-                                onClick = { onColumnsChange(row.columns - 1) },
-                                enabled = row.columns > GridConstants.MIN_APPS_ROW_COLUMNS
-                            ) { Icon(Icons.Filled.Remove, contentDescription = null) }
-                            IconButton(
-                                onClick = { onColumnsChange(row.columns + 1) },
-                                enabled = row.columns < GridConstants.MAX_APPS_ROW_COLUMNS
-                            ) { Icon(Icons.Filled.Add, contentDescription = null) }
+            if (!isDock) {
+                SettingsPreferenceGroup {
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(R.string.settings_apps_row_pill_mode_label),
+                        summary = stringResource(R.string.settings_apps_row_pill_mode_summary),
+                        onClick = { onPillModeChange(!row.pillMode) },
+                        trailing = { Switch(checked = row.pillMode, onCheckedChange = onPillModeChange) }
+                    )
+                }
+            }
+
+            if (!isPillLayout) {
+                SettingsPreferenceGroup(title = stringResource(R.string.settings_apps_row_columns_label)) {
+                    SettingsPreference(
+                        icon = null,
+                        title = row.columns.toString(),
+                        onClick = {},
+                        trailing = {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                IconButton(
+                                    onClick = { onColumnsChange(row.columns - 1) },
+                                    enabled = row.columns > GridConstants.MIN_APPS_ROW_COLUMNS
+                                ) { Icon(Icons.Filled.Remove, contentDescription = null) }
+                                IconButton(
+                                    onClick = { onColumnsChange(row.columns + 1) },
+                                    enabled = row.columns < GridConstants.MAX_APPS_ROW_COLUMNS
+                                ) { Icon(Icons.Filled.Add, contentDescription = null) }
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
 
             ElementAppearanceSection(
                 appearance = row.appearance(),
                 onAppearanceChange = onAppearanceChange,
-                styleGroupTitle = layerBackgroundLabel(2, R.string.settings_layer_surface_apps_row)
+                styleGroupTitle = stringResource(R.string.settings_dock_background_label)
             )
 
             SettingsPreferenceGroup(title = stringResource(R.string.settings_apps_row_apps_label)) {
@@ -140,6 +172,7 @@ fun AppsRowEditSheet(
                             folderItemsByFolder = folderItemsByFolder,
                             savedMapTargets = savedMapTargets,
                             pinnedWebsites = pinnedWebsites,
+                            pages = pages,
                             loadIcon = loadIcon,
                             resolveLabel = resolveLabel,
                             onRemove = { onRemoveEntry(entry) }
@@ -154,12 +187,23 @@ fun AppsRowEditSheet(
                 SettingsPreference(icon = Icons.AutoMirrored.Filled.Shortcut, title = stringResource(R.string.settings_apps_row_add_shortcut), onClick = onAddShortcutClick, trailing = null)
                 SettingsPreference(icon = Icons.Filled.Place, title = stringResource(R.string.settings_apps_row_add_map_target), onClick = onAddMapTargetClick, trailing = null)
                 SettingsPreference(icon = Icons.Filled.Language, title = stringResource(R.string.settings_apps_row_add_website), onClick = onAddWebsiteClick, trailing = null)
+                SettingsPreference(icon = Icons.Filled.ViewCarousel, title = stringResource(R.string.settings_apps_row_add_page_link), onClick = { showPagePicker = true }, trailing = null)
             }
 
-            SettingsPreferenceGroup {
-                SettingsPreference(icon = Icons.Filled.DeleteOutline, title = stringResource(R.string.settings_rows_remove), onClick = { confirmingRemoveRow = true }, trailing = null)
+            if (canRemoveRow) {
+                SettingsPreferenceGroup {
+                    SettingsPreference(icon = Icons.Filled.DeleteOutline, title = stringResource(R.string.settings_rows_remove), onClick = { confirmingRemoveRow = true }, trailing = null)
+                }
             }
         }
+    }
+
+    if (showPagePicker) {
+        PagePickerSheet(
+            pages = pages,
+            onPageSelected = { page -> onAddPageLink(page); showPagePicker = false },
+            onDismiss = { showPagePicker = false }
+        )
     }
 
     if (showAppPicker) {
@@ -206,6 +250,7 @@ private fun AppRowEntryRow(
     folderItemsByFolder: Map<Long, List<FolderItem>>,
     savedMapTargets: List<SavedMapTarget>,
     pinnedWebsites: List<PinnedWebsite>,
+    pages: List<LauncherPage>,
     loadIcon: (ComponentName) -> ImageBitmap?,
     resolveLabel: (ComponentName) -> String,
     onRemove: () -> Unit
@@ -241,6 +286,14 @@ private fun AppRowEntryRow(
                 val website = pinnedWebsites.find { it.id == websiteId }
                 Icon(Icons.Filled.Language, contentDescription = null, modifier = Modifier.size(28.dp))
                 Text(website?.label.orEmpty(), modifier = Modifier.weight(1f))
+            }
+            GridItemType.PAGE -> {
+                val pageId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                val page = pages.find { it.id == pageId }
+                val glyph = page?.iconGlyph?.let { name -> runCatching { PageIconGlyph.valueOf(name) }.getOrNull() }
+                    ?: page?.let { PageIconGlyph.forPageKind(it.kind) } ?: PageIconGlyph.WIDGET_PAGE
+                PageIconGlyphImage(glyph = glyph, tint = page?.iconColor?.let { androidx.compose.ui.graphics.Color(it) } ?: glyph.defaultColor(), modifier = Modifier.size(28.dp))
+                Text(page?.let { pageLabel(it, pages) }.orEmpty(), modifier = Modifier.weight(1f))
             }
             GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Text("", modifier = Modifier.weight(1f))
         }

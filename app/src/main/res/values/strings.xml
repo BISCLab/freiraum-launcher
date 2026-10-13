@@ -183,7 +183,6 @@
     <string name="settings_layer_background_title">Layer %1$d · %2$s</string>
     <string name="settings_dock_background_label">Background</string>
     <string name="settings_layer_surface_screen">Screen</string>
-    <string name="settings_layer_surface_dock">Dock</string>
     <string name="settings_layer_surface_sidebar">Sidebar</string>
     <string name="settings_layer_surface_folder">Folder</string>
     <string name="settings_layer_surface_search">Text search</string>
@@ -194,7 +193,6 @@
     <string name="settings_layer_surface_keyboard">Keyboard</string>
     <string name="settings_layer_surface_app_list">App list</string>
     <string name="settings_layer_surface_widget">Widget</string>
-    <string name="settings_layer_surface_apps_row">Apps row</string>
     <string name="settings_layer_surface_section_letter">Section letter</string>
     <string name="settings_layer_surface_alphabet_letter">Rail letter</string>
 
@@ -334,8 +332,6 @@
     <string name="settings_rows_save">Save</string>
     <string name="settings_rows_remove">Remove row</string>
     <string name="settings_widgets_edit_title">Edit widget</string>
-    <string name="settings_search_bar_edit_title">Edit dock</string>
-    <string name="settings_dock_row_edit_hint">Background, quick-launch icons and tap actions of the dock are edited under Settings > Dock.</string>
     <string name="settings_widget_relocated_title">Widget moved to a new page</string>
     <string name="settings_widget_relocated_message">This page\'s widget was too tall to fit alongside the dock you just added, which can crash some widgets — it was moved to a new page automatically so it keeps working.</string>
     <string name="settings_widget_relocated_confirm">OK</string>
@@ -378,6 +374,9 @@
     <string name="settings_apps_row_add_shortcut">Add shortcut</string>
     <string name="settings_apps_row_add_map_target">Address</string>
     <string name="settings_apps_row_add_website">Website</string>
+    <string name="settings_apps_row_add_page_link">Link a page</string>
+    <string name="settings_apps_row_pill_mode_label">Single-line layout</string>
+    <string name="settings_apps_row_pill_mode_summary">Entries in one non-wrapping row instead of a grid — used by the dock</string>
     <string name="settings_map_mode_address">Address</string>
     <string name="settings_map_mode_coordinates">Coordinates</string>
     <string name="settings_map_street_hint">Street and number</string>
@@ -421,28 +420,6 @@
     <string name="settings_folder_creator_title">New folder</string>
     <string name="settings_folder_creator_name_hint">Folder name</string>
     <string name="settings_folder_creator_create">Create</string>
-
-    <string name="settings_section_dock">Dock</string>
-    <string name="settings_card_dock_subtitle">Slots, appearance</string>
-    <string name="settings_dock_slots_label">Slots</string>
-    <string name="settings_dock_slots_summary">%1$d of %2$d slots used</string>
-    <string name="settings_dock_slots_at_cap">Remove a slot to add another (max %1$d)</string>
-    <string name="settings_dock_appearance_label">Appearance</string>
-    <string name="settings_dock_slot_title">Slot %1$d</string>
-    <string name="settings_dock_slot_not_set">Not set</string>
-    <string name="settings_dock_slot_clear">Clear slot</string>
-    <string name="settings_dock_slot_move_up">Move up</string>
-    <string name="settings_dock_slot_move_down">Move down</string>
-    <string name="settings_dock_slot_remove">Remove slot</string>
-    <string name="settings_dock_add_app_slot">Add app</string>
-    <string name="settings_dock_add_page_slot">Link a page</string>
-    <string name="settings_dock_corner_style_label">Corner style</string>
-    <string name="settings_dock_corner_style_sharp">Sharp</string>
-    <string name="settings_dock_corner_style_rounded">Rounded</string>
-    <string name="settings_dock_corner_style_fully_round">Fully round</string>
-    <string name="settings_dock_width_mode_label">Dock width</string>
-    <string name="settings_dock_width_mode_fixed">Fixed (fits 5 icons)</string>
-    <string name="settings_dock_width_mode_grow">Grows with icons</string>
 
     <string name="settings_section_search_overview">Quick overview</string>
     <string name="settings_card_search_overview_subtitle">Sidebar order, categories, background</string>

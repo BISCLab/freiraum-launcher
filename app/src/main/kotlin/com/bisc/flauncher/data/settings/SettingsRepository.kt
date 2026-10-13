@@ -102,26 +102,6 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[FAVORITES_GROUP_DIVIDERS_ENABLED_KEY] = enabled }
     }
 
-    /** How rounded the dock bar's own corners are — replaces the old orb-era "match widget corners" toggle. */
-    val dockCornerStyle: Flow<com.bisc.flauncher.ui.home.dock.DockCornerStyle> = dataStore.data.map { prefs ->
-        prefs[DOCK_CORNER_STYLE_KEY]?.let { runCatching { com.bisc.flauncher.ui.home.dock.DockCornerStyle.valueOf(it) }.getOrNull() }
-            ?: com.bisc.flauncher.ui.home.dock.DockCornerStyle.ROUNDED
-    }
-
-    suspend fun setDockCornerStyle(style: com.bisc.flauncher.ui.home.dock.DockCornerStyle) {
-        dataStore.edit { it[DOCK_CORNER_STYLE_KEY] = style.name }
-    }
-
-    /** Whether the dock bar is pinned to a fixed 5-slot width or grows with however many slots are filled. */
-    val dockWidthMode: Flow<com.bisc.flauncher.ui.home.dock.DockWidthMode> = dataStore.data.map { prefs ->
-        prefs[DOCK_WIDTH_MODE_KEY]?.let { runCatching { com.bisc.flauncher.ui.home.dock.DockWidthMode.valueOf(it) }.getOrNull() }
-            ?: com.bisc.flauncher.ui.home.dock.DockWidthMode.FIXED
-    }
-
-    suspend fun setDockWidthMode(mode: com.bisc.flauncher.ui.home.dock.DockWidthMode) {
-        dataStore.edit { it[DOCK_WIDTH_MODE_KEY] = mode.name }
-    }
-
     fun folderShowAddRow(folderId: Long): Flow<Boolean> = dataStore.data.map { it[folderShowAddRowKey(folderId)] ?: true }
 
     private fun folderShowAddRowKey(folderId: Long) = booleanPreferencesKey("folder_show_add_row_$folderId")
@@ -631,8 +611,6 @@ class SettingsRepository @Inject constructor(
         private val FOLDER_HIDE_DOCK_KEY = booleanPreferencesKey("folder_hide_dock")
         private val ACCENT_COLOR_KEY = intPreferencesKey("accent_color")
         private val CHARGING_ANIMATION_COLOR_KEY = intPreferencesKey("charging_animation_color")
-        private val DOCK_CORNER_STYLE_KEY = stringPreferencesKey("dock_corner_style")
-        private val DOCK_WIDTH_MODE_KEY = stringPreferencesKey("dock_width_mode")
         private val CHARGING_ANIMATION_ENABLED_KEY = booleanPreferencesKey("charging_animation_enabled")
         private val SEARCH_SHOW_AZ_INDEX_KEY = booleanPreferencesKey("search_show_az_index")
         private val HOME_SCREEN_WIDGETS_ENABLED_KEY = booleanPreferencesKey("home_screen_widgets_enabled")
