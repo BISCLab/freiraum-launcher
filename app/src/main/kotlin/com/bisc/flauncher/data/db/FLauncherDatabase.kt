@@ -5,7 +5,6 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.bisc.flauncher.data.model.AppOverride
 import com.bisc.flauncher.data.model.AppRowEntry
-import com.bisc.flauncher.data.model.DockSlot
 import com.bisc.flauncher.data.model.Folder
 import com.bisc.flauncher.data.model.FolderItem
 import com.bisc.flauncher.data.model.IconPackMapping
@@ -24,9 +23,9 @@ import com.bisc.flauncher.data.model.SidebarPinnedApp
         LauncherPage::class, PageRow::class, AppRowEntry::class, Folder::class, FolderItem::class,
         Note::class, IconPackMapping::class, SavedMapTarget::class, PinnedWebsite::class,
         PinnedShortcut::class, SidebarItem::class, AppOverride::class, SidebarPinnedApp::class,
-        PinnedContact::class, DockSlot::class
+        PinnedContact::class
     ],
-    version = 39,
+    version = 40,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -45,5 +44,4 @@ abstract class FLauncherDatabase : RoomDatabase() {
     abstract fun appOverrideDao(): AppOverrideDao
     abstract fun sidebarPinnedAppDao(): SidebarPinnedAppDao
     abstract fun pinnedContactDao(): PinnedContactDao
-    abstract fun dockSlotDao(): DockSlotDao
 }

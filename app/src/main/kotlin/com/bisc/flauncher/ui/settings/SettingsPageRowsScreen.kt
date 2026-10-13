@@ -90,6 +90,7 @@ fun SettingsPageRowsScreen(
     val shortcutPickerForApp by viewModel.shortcutPickerForApp.collectAsState()
     val availableShortcuts by viewModel.availableShortcuts.collectAsState()
     val pages by viewModel.pages.collectAsState()
+    val allPages by viewModel.allPages.collectAsState()
     val systemWidgetPickerOpenForPage by viewModel.systemWidgetPickerOpenForPage.collectAsState()
     val pendingBindIntent by viewModel.pendingBindIntent.collectAsState()
     val pendingConfigureIntent by viewModel.pendingConfigureIntent.collectAsState()
@@ -257,7 +258,7 @@ fun SettingsPageRowsScreen(
     editingRow?.let { row ->
         when (row.type) {
             PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET -> Unit
-            PageRowType.APPS -> AppsRowEditSheet(
+            PageRowType.APPS, PageRowType.SEARCH_BAR -> AppsRowEditSheet(
                 row = row,
                 entries = appEntriesByRow[row.id].orEmpty(),
                 installedApps = browsableApps,
@@ -265,10 +266,12 @@ fun SettingsPageRowsScreen(
                 folderItemsByFolder = folderItemsByFolder,
                 savedMapTargets = savedMapTargets,
                 pinnedWebsites = pinnedWebsites,
+                pages = allPages,
                 loadIcon = viewModel::loadIcon,
                 resolveLabel = viewModel::resolveLabel,
                 onColumnsChange = { viewModel.setRowColumns(row, it) },
                 onAppearanceChange = { appearance -> viewModel.setRowAppearance(row, appearance) },
+                onPillModeChange = { enabled -> viewModel.setRowPillMode(row, enabled) },
                 onAddApp = { app -> viewModel.addAppEntryToRow(row.id, app) },
                 onAddExistingFolder = { folderId -> viewModel.addExistingFolderToRow(row.id, folderId) },
                 onCreateFolder = { name -> viewModel.createFolderInRow(row.id, name) },
@@ -278,15 +281,13 @@ fun SettingsPageRowsScreen(
                 },
                 onAddMapTargetClick = { showMapTargetPickerForRow = row.id },
                 onAddWebsiteClick = { showWebsitePickerForRow = row.id },
+                onAddPageLink = { page -> viewModel.addPageLinkEntryToRow(row.id, page.id) },
                 onRemoveEntry = viewModel::removeAppRowEntry,
                 onReorderEntries = viewModel::reorderAppRowEntries,
+                // The home page's own dock row is permanent — same protection the row used to get
+                // from the old, now-merged SearchBarRowEditSheet.
+                canRemoveRow = row.type != PageRowType.SEARCH_BAR || pages.find { it.id == pageId }?.isHome != true,
                 onRemoveRow = { viewModel.removeRow(row); editingRowId = null },
-                onDismiss = { editingRowId = null }
-            )
-            PageRowType.SEARCH_BAR -> SearchBarRowEditSheet(
-                row = row,
-                canRemove = pages.find { it.id == pageId }?.isHome != true,
-                onRemove = { viewModel.removeRow(row); editingRowId = null },
                 onDismiss = { editingRowId = null }
             )
         }
@@ -417,49 +418,6 @@ private fun WidgetSizeSheet(
                 Text(stringResource(R.string.settings_rows_save))
             }
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SearchBarRowEditSheet(
-    row: PageRow,
-    canRemove: Boolean,
-    onRemove: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    var confirmingRemove by remember { mutableStateOf(false) }
-
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Text(stringResource(R.string.settings_search_bar_edit_title), style = MaterialTheme.typography.titleLarge)
-            Text(
-                stringResource(R.string.settings_dock_row_edit_hint),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            if (canRemove) {
-                SettingsPreferenceGroup {
-                    SettingsPreference(icon = Icons.Filled.DeleteOutline, title = stringResource(R.string.settings_rows_remove), onClick = { confirmingRemove = true }, trailing = null)
-                }
-            }
-        }
-    }
-
-    if (confirmingRemove) {
-        AlertDialog(
-            onDismissRequest = { confirmingRemove = false },
-            title = { Text(stringResource(R.string.settings_rows_remove)) },
-            confirmButton = {
-                TextButton(onClick = { confirmingRemove = false; onRemove() }) { Text(stringResource(R.string.settings_rows_remove)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { confirmingRemove = false }) { Text(stringResource(R.string.widget_notes_cancel)) }
-            }
-        )
     }
 }
 

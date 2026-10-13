@@ -55,10 +55,10 @@ class PageContentRepository @Inject constructor(
         }
         // Home starts with just the dock — no clock, no widgets. Widgets (the clock included) only
         // appear once the user opts in via "Widgets auf dem Homescreen aktivieren" in Settings, matching
-        // the Discreet Launcher "empty home screen" principle this app is built on.
-        if (rowDao.countForPage(homeId) == 0) {
-            rowDao.insert(PageRow(pageId = homeId, orderIndex = 0, type = PageRowType.SEARCH_BAR, borderEnabled = true))
-        }
+        // the Discreet Launcher "empty home screen" principle this app is built on. The dock row's own
+        // entries are plain AppRowEntry rows, same table/machinery as any other apps row.
+        val dockRowId = rowDao.getForPage(homeId).find { it.type == PageRowType.SEARCH_BAR }?.id
+            ?: rowDao.insert(PageRow(pageId = homeId, orderIndex = 0, type = PageRowType.SEARCH_BAR, borderEnabled = true))
 
         if (pageDao.getAppOverviewPage() == null) {
             val appOverviewId = pageDao.insert(
@@ -74,6 +74,17 @@ class PageContentRepository @Inject constructor(
                 LauncherPage(orderIndex = (pageDao.maxOrderIndex() ?: -1) + 1, kind = LauncherPageKind.SEARCH)
             )
             settingsRepository.setPageHideStatusBar(searchId, true)
+        }
+
+        // Fresh-install default: the dock arrives already linking to the two singleton pages, so it
+        // doesn't look sparse — mirrors the pre-merge DockRepository's own default seed. Only runs once
+        // (dockRowId already had zero entries at that point), never re-applied once the user has
+        // touched the row themselves.
+        if (entryDao.countForRow(dockRowId) == 0) {
+            val appOverviewId = pageDao.getAppOverviewPage()?.id
+            val searchId = pageDao.getByKind(LauncherPageKind.SEARCH)?.id
+            searchId?.let { entryDao.insert(AppRowEntry(pageRowId = dockRowId, orderIndex = 0, type = GridItemType.PAGE, payload = it.toString())) }
+            appOverviewId?.let { entryDao.insert(AppRowEntry(pageRowId = dockRowId, orderIndex = 1, type = GridItemType.PAGE, payload = it.toString())) }
         }
 
         // Self-healing check on every start: pages used to scroll, so content sized against that
@@ -392,6 +403,17 @@ class PageContentRepository @Inject constructor(
         val id = entryDao.insert(AppRowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.WEBSITE, payload = websiteId.toString()))
         rebalanceForRow(pageRowId)
         return id
+    }
+
+    suspend fun addPageLinkEntry(pageRowId: Long, pageId: Long): Long {
+        val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
+        val id = entryDao.insert(AppRowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.PAGE, payload = pageId.toString()))
+        rebalanceForRow(pageRowId)
+        return id
+    }
+
+    suspend fun setRowPillMode(row: PageRow, pillMode: Boolean) {
+        rowDao.update(row.copy(pillMode = pillMode))
     }
 
     suspend fun removeEntry(entry: AppRowEntry) {

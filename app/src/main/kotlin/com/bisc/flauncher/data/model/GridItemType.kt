@@ -1,4 +1,6 @@
 package com.bisc.flauncher.data.model
 
-/** Kind of content held by an apps-row entry or a folder item. */
-enum class GridItemType { APP, SHORTCUT, MAP_TARGET, WEBSITE, WIDGET, SYSTEM_WIDGET, FOLDER }
+/** Kind of content held by an apps-row entry or a folder item. [PAGE]'s payload is a [LauncherPage.id]
+ *  — a page-link entry, usable in any apps row (including a row in pill/single-line mode, e.g. the
+ *  dock) to open that page on tap. */
+enum class GridItemType { APP, SHORTCUT, MAP_TARGET, WEBSITE, WIDGET, SYSTEM_WIDGET, FOLDER, PAGE }

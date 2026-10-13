@@ -183,7 +183,6 @@
     <string name="settings_layer_background_title">Ebene %1$d · %2$s</string>
     <string name="settings_dock_background_label">Hintergrund</string>
     <string name="settings_layer_surface_screen">Bildschirm</string>
-    <string name="settings_layer_surface_dock">Dock</string>
     <string name="settings_layer_surface_sidebar">Seitenleiste</string>
     <string name="settings_layer_surface_folder">Ordner</string>
     <string name="settings_layer_surface_search">Textsuche</string>
@@ -194,7 +193,6 @@
     <string name="settings_layer_surface_keyboard">Tastatur</string>
     <string name="settings_layer_surface_app_list">App-Liste</string>
     <string name="settings_layer_surface_widget">Widget</string>
-    <string name="settings_layer_surface_apps_row">App-Zeile</string>
     <string name="settings_layer_surface_section_letter">Abschnittsbuchstabe</string>
     <string name="settings_layer_surface_alphabet_letter">Leistenbuchstabe</string>
 
@@ -334,8 +332,6 @@
     <string name="settings_rows_save">Speichern</string>
     <string name="settings_rows_remove">Zeile entfernen</string>
     <string name="settings_widgets_edit_title">Widget bearbeiten</string>
-    <string name="settings_search_bar_edit_title">Dock bearbeiten</string>
-    <string name="settings_dock_row_edit_hint">Hintergrund, Schnellstartsymbole und Tippaktionen des Docks werden unter Einstellungen > Dock bearbeitet.</string>
     <string name="settings_widget_relocated_title">Widget auf neue Seite verschoben</string>
     <string name="settings_widget_relocated_message">Das Widget auf dieser Seite war zu hoch, um zusammen mit dem gerade hinzugefügten Dock zu passen — das kann bei manchen Widgets zu Abstürzen führen. Es wurde automatisch auf eine neue Seite verschoben, damit es weiter funktioniert.</string>
     <string name="settings_widget_relocated_confirm">OK</string>
@@ -378,6 +374,9 @@
     <string name="settings_apps_row_add_shortcut">Verknüpfung hinzufügen</string>
     <string name="settings_apps_row_add_map_target">Adresse</string>
     <string name="settings_apps_row_add_website">Website</string>
+    <string name="settings_apps_row_add_page_link">Seite verlinken</string>
+    <string name="settings_apps_row_pill_mode_label">Einzeiliges Layout</string>
+    <string name="settings_apps_row_pill_mode_summary">Einträge in einer Zeile ohne Umbruch statt im Raster — so wie das Dock</string>
     <string name="settings_map_mode_address">Adresse</string>
     <string name="settings_map_mode_coordinates">Koordinaten</string>
     <string name="settings_map_street_hint">Straße und Hausnummer</string>
@@ -421,28 +420,6 @@
     <string name="settings_folder_creator_title">Neuer Ordner</string>
     <string name="settings_folder_creator_name_hint">Ordnername</string>
     <string name="settings_folder_creator_create">Erstellen</string>
-
-    <string name="settings_section_dock">Dock</string>
-    <string name="settings_card_dock_subtitle">Plätze, Erscheinungsbild</string>
-    <string name="settings_dock_slots_label">Plätze</string>
-    <string name="settings_dock_slots_summary">%1$d von %2$d Plätzen belegt</string>
-    <string name="settings_dock_slots_at_cap">Einen Platz entfernen um einen weiteren hinzuzufügen (max. %1$d)</string>
-    <string name="settings_dock_appearance_label">Erscheinungsbild</string>
-    <string name="settings_dock_slot_title">Platz %1$d</string>
-    <string name="settings_dock_slot_not_set">Nicht festgelegt</string>
-    <string name="settings_dock_slot_clear">Platz leeren</string>
-    <string name="settings_dock_slot_move_up">Nach oben</string>
-    <string name="settings_dock_slot_move_down">Nach unten</string>
-    <string name="settings_dock_slot_remove">Platz entfernen</string>
-    <string name="settings_dock_add_app_slot">App hinzufügen</string>
-    <string name="settings_dock_add_page_slot">Seite verlinken</string>
-    <string name="settings_dock_corner_style_label">Eckenstil</string>
-    <string name="settings_dock_corner_style_sharp">Eckig</string>
-    <string name="settings_dock_corner_style_rounded">Abgerundet</string>
-    <string name="settings_dock_corner_style_fully_round">Komplett rund</string>
-    <string name="settings_dock_width_mode_label">Dock-Breite</string>
-    <string name="settings_dock_width_mode_fixed">Fest (Platz für 5 Icons)</string>
-    <string name="settings_dock_width_mode_grow">Wächst mit Icons</string>
 
     <string name="settings_section_search_overview">Schnellübersicht</string>
     <string name="settings_card_search_overview_subtitle">Reihenfolge der Seitenleiste, Kategorien, Hintergrund</string>

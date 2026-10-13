@@ -24,9 +24,6 @@ import com.bisc.flauncher.ui.home.HomeScreen
 import com.bisc.flauncher.ui.settings.SettingsAppearanceScreen
 import com.bisc.flauncher.ui.settings.SettingsAppsScreen
 import com.bisc.flauncher.ui.settings.SettingsPermissionsScreen
-import com.bisc.flauncher.ui.settings.SettingsDockScreen
-import com.bisc.flauncher.ui.settings.SettingsDockSlotsScreen
-import com.bisc.flauncher.ui.settings.SettingsDockAppearanceScreen
 import com.bisc.flauncher.ui.settings.SettingsFolderEditScreen
 import com.bisc.flauncher.ui.settings.SettingsFolderIconScreen
 import com.bisc.flauncher.ui.settings.SettingsFolderScreen
@@ -95,7 +92,6 @@ class MainActivity : ComponentActivity() {
                     if (route == null || !route.startsWith("settings")) navController.navigate("settings")
                 }
             }
-            val dockCornerStyle by settingsVm.dockCornerStyle.collectAsState()
 
             val darkTheme = when (theme) {
                 com.bisc.flauncher.ui.theme.ThemePreference.DARK -> true
@@ -110,18 +106,14 @@ class MainActivity : ComponentActivity() {
                 onDispose { }
             }
             androidx.compose.runtime.CompositionLocalProvider(
-                com.bisc.flauncher.ui.home.LocalAppIconLoader provides appIconLoader,
-                com.bisc.flauncher.ui.home.dock.LocalDockCornerRadius provides dockCornerStyle.radius
+                com.bisc.flauncher.ui.home.LocalAppIconLoader provides appIconLoader
             ) {
             FLauncherTheme(themePreference = theme, fontPreference = font) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     NavHost(navController = navController, startDestination = "home") {
                         composable("home") {
                             HomeScreen(
-                                onNavigateToSettings = { editSlot ->
-                                    if (editSlot != null) navController.navigate("settings/dock/slots?editSlot=$editSlot")
-                                    else navController.navigate("settings")
-                                },
+                                onNavigateToSettings = { navController.navigate("settings") },
                                 homeButtonPressCount = homeButtonPressCount
                             )
                         }
@@ -142,24 +134,7 @@ class MainActivity : ComponentActivity() {
                         composable("settings/appearance/background") {
                             com.bisc.flauncher.ui.settings.SettingsGlobalBackgroundScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
-                        composable("settings/dock") {
-                            SettingsDockScreen(navController = navController, onBack = { navController.popBackStack() })
-                        }
-                        composable(
-                            "settings/dock/slots?editSlot={editSlot}",
-                            arguments = listOf(navArgument("editSlot") { type = NavType.IntType; defaultValue = -1 })
-                        ) { backStackEntry ->
-                            val editSlot = backStackEntry.arguments?.getInt("editSlot")?.takeIf { it >= 0 }
-                            SettingsDockSlotsScreen(
-                                navController = navController,
-                                onBack = { navController.popBackStack() },
-                                initialEditSlot = editSlot
-                            )
-                        }
-                        composable("settings/dock/appearance") {
-                            SettingsDockAppearanceScreen(navController = navController, onBack = { navController.popBackStack() })
-                        }
-                        composable("settings/dock/overview") {
+                        composable("settings/sidebar") {
                             SettingsSidebarScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable("settings/search") {

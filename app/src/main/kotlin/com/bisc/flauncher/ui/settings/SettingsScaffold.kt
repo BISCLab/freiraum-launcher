@@ -80,10 +80,7 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
         "settings" -> stringResource(R.string.settings_title)
         "settings/appearance" -> stringResource(R.string.settings_section_appearance)
         "settings/appearance/background" -> stringResource(R.string.settings_section_global_background)
-        "settings/dock" -> stringResource(R.string.settings_section_dock)
-        "settings/dock/slots?editSlot={editSlot}" -> stringResource(R.string.settings_dock_slots_label)
-        "settings/dock/appearance" -> stringResource(R.string.settings_dock_appearance_label)
-        "settings/dock/overview" -> stringResource(R.string.settings_section_search_overview)
+        "settings/sidebar" -> stringResource(R.string.settings_section_search_overview)
         "settings/search" -> stringResource(R.string.settings_section_search_full)
         "settings/pages" -> stringResource(R.string.settings_section_pages)
         "settings/pages/{pageId}" -> {

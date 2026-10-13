@@ -14,6 +14,8 @@ import com.bisc.flauncher.data.model.AppRowEntry
 import com.bisc.flauncher.data.model.Folder
 import com.bisc.flauncher.data.model.FolderItem
 import com.bisc.flauncher.data.model.GestureAction
+import com.bisc.flauncher.data.model.LauncherPage
+import com.bisc.flauncher.data.model.LauncherPageKind
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PinnedWebsite
 import com.bisc.flauncher.data.model.SavedMapTarget
@@ -34,11 +36,13 @@ fun PageRowsColumn(
     folderItemsByFolder: Map<Long, List<FolderItem>>,
     savedMapTargets: List<SavedMapTarget> = emptyList(),
     pinnedWebsites: List<PinnedWebsite> = emptyList(),
+    pages: List<LauncherPage> = emptyList(),
     loadIcon: (ComponentName) -> ImageBitmap?,
     loadPackIcon: (String, String) -> ImageBitmap? = { _, _ -> null },
     resolveLabel: (ComponentName) -> String,
     onFolderClick: (Long) -> Unit,
     onShortcutClick: (String) -> Unit = {},
+    onOpenPageLink: (Long, LauncherPageKind) -> Unit = { _, _ -> },
     onExecuteAction: (GestureAction) -> Unit = {},
     handedness: Handedness = Handedness.RIGHT,
     iconShape: IconShape = IconShape.ROUNDED_SQUARE,
@@ -58,11 +62,13 @@ fun PageRowsColumn(
                     folderItemsByFolder = folderItemsByFolder,
                     savedMapTargets = savedMapTargets,
                     pinnedWebsites = pinnedWebsites,
+                    pages = pages,
                     loadIcon = loadIcon,
                     loadPackIcon = loadPackIcon,
                     resolveLabel = resolveLabel,
                     onFolderClick = onFolderClick,
                     onShortcutClick = onShortcutClick,
+                    onOpenPageLink = onOpenPageLink,
                     onExecuteAction = onExecuteAction,
                     handedness = handedness,
                     iconShape = iconShape,

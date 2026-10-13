@@ -248,7 +248,7 @@ private fun folderItemLabel(
     GridItemType.SHORTCUT -> item.payload.split("|").getOrNull(2)?.takeIf { it.isNotBlank() } ?: item.payload.substringBefore('|')
     GridItemType.MAP_TARGET -> savedMapTargets.find { it.id == item.payload.toLongOrNull() }?.label.orEmpty()
     GridItemType.WEBSITE -> pinnedWebsites.find { it.id == item.payload.toLongOrNull() }?.label.orEmpty()
-    GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> ""
+    GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE -> ""
 }
 
 @Composable
@@ -286,7 +286,7 @@ private fun FolderWidgetRow(item: FolderItem) {
                     cornerStyle = item.cornerStyle
                 )
             }
-            GridItemType.APP, GridItemType.SHORTCUT, GridItemType.MAP_TARGET, GridItemType.WEBSITE, GridItemType.FOLDER -> Unit
+            GridItemType.APP, GridItemType.SHORTCUT, GridItemType.MAP_TARGET, GridItemType.WEBSITE, GridItemType.FOLDER, GridItemType.PAGE -> Unit
         }
     }
 }
@@ -378,7 +378,7 @@ private fun FolderContentCell(
                 Spacer(Modifier.height(6.dp))
                 GridLabel(childFolder?.name.orEmpty())
             }
-            GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Unit
+            GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE -> Unit
         }
     }
 }
