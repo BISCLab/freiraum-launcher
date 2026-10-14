@@ -115,6 +115,14 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[HOME_SCREEN_WIDGETS_ENABLED_KEY] = enabled }
     }
 
+    // On by default — whether the Favorites/Quick-overview panel's top EdgeNotch shows on Home at
+    // all. Off hides the entrypoint entirely, same spirit as the Dock row's own per-row enabled flag.
+    val homePanelEnabled: Flow<Boolean> = dataStore.data.map { it[HOME_PANEL_ENABLED_KEY] ?: true }
+
+    suspend fun setHomePanelEnabled(enabled: Boolean) {
+        dataStore.edit { it[HOME_PANEL_ENABLED_KEY] = enabled }
+    }
+
     val chargingAnimationColor: Flow<Int> = dataStore.data.map { it[CHARGING_ANIMATION_COLOR_KEY] ?: 0xFF34D058.toInt() }
 
     suspend fun setChargingAnimationColor(color: Int) {
@@ -624,6 +632,7 @@ class SettingsRepository @Inject constructor(
         private val HOME_SCREEN_WIDGETS_ENABLED_KEY = booleanPreferencesKey("home_screen_widgets_enabled")
         private val FAVORITES_BOTTOM_BORDER_ENABLED_KEY = booleanPreferencesKey("favorites_bottom_border_enabled")
         private val FAVORITES_GROUP_DIVIDERS_ENABLED_KEY = booleanPreferencesKey("favorites_group_dividers_enabled")
+        private val HOME_PANEL_ENABLED_KEY = booleanPreferencesKey("home_panel_enabled")
         private val SEARCH_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("search_hide_status_bar")
         private val SEARCH_ENGINE_KEY = stringPreferencesKey("search_engine")
         private val SEARCH_ENGINE_CUSTOM_URL_KEY = stringPreferencesKey("search_engine_custom_url")

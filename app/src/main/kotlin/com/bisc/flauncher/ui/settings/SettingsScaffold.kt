@@ -90,6 +90,10 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
             val page = pages.find { it.id == pageId }
             page?.let { pageLabel(it, pages) } ?: stringResource(R.string.settings_rows_title)
         }
+        "settings/pages/{pageId}/home" -> stringResource(R.string.settings_pages_home)
+        "settings/pages/{pageId}/home/appearance" -> stringResource(R.string.settings_home_appearance_title)
+        "settings/pages/{pageId}/home/layout" -> stringResource(R.string.settings_home_layout_title)
+        "settings/pages/{pageId}/home/panel" -> stringResource(R.string.settings_home_panel_label)
         "settings/pages/{pageId}/icon" -> stringResource(R.string.settings_page_icon_title)
         "settings/pages/{pageId}/rows/{rowId}" -> {
             val viewModel: HomeViewModel = hiltViewModel(entry)

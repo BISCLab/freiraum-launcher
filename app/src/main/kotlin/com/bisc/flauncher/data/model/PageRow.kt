@@ -61,7 +61,11 @@ data class PageRow(
     // the edge notch) is the actual default now, not ALWAYS_VISIBLE — a home screen that's "empty
     // until you open it" matches the same Discreet Launcher minimalism the rest of Home already
     // follows (see PageContentRepository.ensureSeeded's own comment on Home starting empty).
-    val dockVisibilityMode: DockVisibilityMode = DockVisibilityMode.MANUAL
+    val dockVisibilityMode: DockVisibilityMode = DockVisibilityMode.MANUAL,
+    // Lets a row be switched off without deleting it (and losing its configuration) — currently
+    // only exposed in the UI for the Home screen's own Dock/Panel bookends (see
+    // SettingsHomeLayoutScreen), which are otherwise locked in place and never removable.
+    val enabled: Boolean = true
 )
 
 /** Reads the stored date-tap action of a clock row as a [GestureAction]. */

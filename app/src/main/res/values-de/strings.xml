@@ -302,12 +302,18 @@
     <string name="settings_card_app_overview_subtitle">Layout, Darstellung, Suchbutton</string>
     <string name="settings_card_pages_subtitle">Widgets, App-Zeilen, Hintergründe</string>
     <string name="settings_pages_home">Startbildschirm</string>
+    <string name="settings_home_appearance_title">Erscheinungsbild</string>
+    <string name="settings_home_appearance_subtitle">Hintergrund, Statusleiste</string>
+    <string name="settings_home_layout_title">Aufbau</string>
+    <string name="settings_home_layout_subtitle">Panel, Widgets, Dock</string>
+    <string name="settings_home_panel_label">Panel</string>
     <string name="settings_pages_app_overview">App-Übersicht</string>
     <string name="settings_pages_search">Textsuche</string>
     <string name="settings_pages_sidebar">Schnellübersicht</string>
     <string name="settings_pages_page">Seite %1$d</string>
     <string name="settings_pages_add">Seite hinzufügen</string>
-    <string name="settings_pages_other_label">Weitere Seiten</string>
+    <string name="settings_pages_carousel_label">Karussell</string>
+    <string name="settings_pages_other_label">Funktionsseiten</string>
     <string name="settings_pages_invocation_title">Wie diese Seite aufgerufen wird</string>
     <string name="settings_pages_invocation_none">Keiner Geste zugewiesen</string>
     <string name="settings_pages_add_template_label">Ausgangspunkt</string>
@@ -393,7 +399,6 @@
     <string name="settings_map_city_hint">Ort / Stadt</string>
     <string name="settings_map_country_hint">Land</string>
     <string name="settings_statusbar_label">Statusleiste</string>
-    <string name="settings_homescreen_label">Homescreen</string>
     <string name="settings_homescreen_widgets_enabled">Widgets auf dem Homescreen aktivieren</string>
     <string name="settings_homescreen_widgets_enabled_summary">Standardmäßig aus — der Homescreen bleibt bis auf das Dock leer. Einschalten, um Widgets wie die Uhr hinzuzufügen.</string>
     <string name="settings_favorites_bottom_border">Unterer Rand des Apps-Panels</string>

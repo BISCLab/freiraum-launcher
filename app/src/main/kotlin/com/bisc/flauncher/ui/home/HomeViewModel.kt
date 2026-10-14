@@ -194,11 +194,30 @@ class HomeViewModel @Inject constructor(
     val homeScreenWidgetsEnabled: StateFlow<Boolean> =
         settingsRepository.homeScreenWidgetsEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    fun setHomeScreenWidgetsEnabled(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.setHomeScreenWidgetsEnabled(enabled) }
+    }
+
     val favoritesBottomBorderEnabled: StateFlow<Boolean> =
         settingsRepository.favoritesBottomBorderEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    fun setFavoritesBottomBorderEnabled(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.setFavoritesBottomBorderEnabled(enabled) }
+    }
+
     val favoritesGroupDividersEnabled: StateFlow<Boolean> =
         settingsRepository.favoritesGroupDividersEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun setFavoritesGroupDividersEnabled(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.setFavoritesGroupDividersEnabled(enabled) }
+    }
+
+    val homePanelEnabled: StateFlow<Boolean> =
+        settingsRepository.homePanelEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    fun setHomePanelEnabled(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.setHomePanelEnabled(enabled) }
+    }
 
     val sidebarPanelAppearance: StateFlow<ElementAppearance> =
         settingsRepository.sidebarPanelAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
@@ -939,6 +958,10 @@ class HomeViewModel @Inject constructor(
 
     fun setRowDockVisibilityMode(row: PageRow, mode: com.bisc.flauncher.data.model.DockVisibilityMode) {
         viewModelScope.launch { pageContentRepository.setRowDockVisibilityMode(row, mode) }
+    }
+
+    fun setRowEnabled(row: PageRow, enabled: Boolean) {
+        viewModelScope.launch { pageContentRepository.setRowEnabled(row, enabled) }
     }
 
     fun addNewMapTargetToRow(pageRowId: Long, label: String, lat: Double, lon: Double, address: String = "") {

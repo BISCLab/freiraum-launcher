@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -101,6 +102,7 @@ fun SettingsPagesScreen(
     var pickingInvocationForPage by remember { mutableStateOf<LauncherPage?>(null) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_pages), navController = navController, onBack = onBack) {
+        SettingsGroupLabel(stringResource(R.string.settings_pages_carousel_label))
         PagesCarousel(
             pages = rowsPages,
             onTileClick = onOpenPage,
@@ -206,7 +208,11 @@ fun SettingsPagesScreen(
     }
 }
 
-private val CAROUSEL_TILE_SIZE = 64.dp
+/** Width:height of a real phone screen, not an icon swatch — this is what makes a carousel tile
+ *  read as "a screen" instead of just another app-icon-sized button. */
+private const val SCREEN_ASPECT_RATIO = 0.47f
+private val CAROUSEL_OUTER_PADDING = 16.dp
+private val CAROUSEL_SPACING = 12.dp
 
 @Composable
 private fun PagesCarousel(
@@ -228,24 +234,31 @@ private fun PagesCarousel(
             didInitialScroll = true
         }
     }
-    LazyRow(
-        state = listState,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp)
-    ) {
-        item { GhostTile(onClick = onAddLeft) }
-        items(pages, key = { it.id }) { page ->
-            PageTile(
-                page = page,
-                pages = pages,
-                onClick = { onTileClick(page) },
-                onEditIcon = { onEditIcon(page) },
-                onRename = { onRename(page) },
-                onRemove = { onRemove(page) }
-            )
+    // Sized so exactly 3 tiles (Home plus one ghost "+" on each side, the common case with no
+    // extra pages yet) fill the available width with no sliver of a 4th peeking in — a real
+    // aspect-ratio page preview instead of a small icon-sized square.
+    androidx.compose.foundation.layout.BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val tileWidth = (maxWidth - CAROUSEL_OUTER_PADDING * 2 - CAROUSEL_SPACING * 2) / 3
+        LazyRow(
+            state = listState,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(CAROUSEL_SPACING),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = CAROUSEL_OUTER_PADDING)
+        ) {
+            item { GhostTile(width = tileWidth, onClick = onAddLeft) }
+            items(pages, key = { it.id }) { page ->
+                PageTile(
+                    page = page,
+                    pages = pages,
+                    width = tileWidth,
+                    onClick = { onTileClick(page) },
+                    onEditIcon = { onEditIcon(page) },
+                    onRename = { onRename(page) },
+                    onRemove = { onRemove(page) }
+                )
+            }
+            item { GhostTile(width = tileWidth, onClick = onAddRight) }
         }
-        item { GhostTile(onClick = onAddRight) }
     }
 }
 
@@ -253,6 +266,7 @@ private fun PagesCarousel(
 private fun PageTile(
     page: LauncherPage,
     pages: List<LauncherPage>,
+    width: androidx.compose.ui.unit.Dp,
     onClick: () -> Unit,
     onEditIcon: () -> Unit,
     onRename: () -> Unit,
@@ -266,16 +280,20 @@ private fun PageTile(
     Box {
         Column(
             modifier = Modifier
-                .width(76.dp)
+                .width(width)
                 .combinedClickable(onClick = onClick, onLongClick = { menuExpanded = true })
                 .padding(vertical = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
-                modifier = Modifier.size(CAROUSEL_TILE_SIZE).clip(RoundedCornerShape(18.dp)).background(bg),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(SCREEN_ASPECT_RATIO)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(bg),
                 contentAlignment = Alignment.Center
             ) {
-                PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(32.dp))
+                PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(width * 0.4f))
             }
             Spacer(Modifier.height(6.dp))
             Text(
@@ -283,7 +301,8 @@ private fun PageTile(
                 style = MaterialTheme.typography.labelMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
         }
         DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
@@ -309,19 +328,25 @@ private fun PageTile(
 }
 
 @Composable
-private fun GhostTile(onClick: () -> Unit) {
+private fun GhostTile(width: androidx.compose.ui.unit.Dp, onClick: () -> Unit) {
     Column(
-        modifier = Modifier.width(76.dp).clickable(onClick = onClick).padding(vertical = 4.dp),
+        modifier = Modifier.width(width).clickable(onClick = onClick).padding(vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
-                .size(CAROUSEL_TILE_SIZE)
-                .clip(RoundedCornerShape(18.dp))
+                .fillMaxWidth()
+                .aspectRatio(SCREEN_ASPECT_RATIO)
+                .clip(RoundedCornerShape(20.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.settings_pages_add), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(
+                Icons.Filled.Add,
+                contentDescription = stringResource(R.string.settings_pages_add),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(width * 0.3f)
+            )
         }
         Spacer(Modifier.height(6.dp))
         Text("", style = MaterialTheme.typography.labelMedium)
