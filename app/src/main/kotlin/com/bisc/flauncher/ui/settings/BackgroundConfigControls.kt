@@ -217,15 +217,21 @@ fun BackgroundOverrideSection(
     override: BackgroundConfig?,
     global: BackgroundConfig,
     onUseGlobal: () -> Unit,
-    onCustomColor: (BackgroundConfig) -> Unit
+    onCustomColor: (BackgroundConfig) -> Unit,
+    // Off for callers whose own page is already titled "Background" (Home's own Appearance screen,
+    // for one) — repeating "Layer 1 · Screen" plus a help icon explaining the old Layer 1/2/3 model
+    // right underneath is redundant there. Still on by default for every other caller (a page's row
+    // editor, a folder, etc.) where this section sits alongside other content on a differently-
+    // titled screen and the caption is the only thing saying what it's for.
+    showLayerHeader: Boolean = true
 ) {
     var showLayerHelp by remember { mutableStateOf(false) }
     val usesGlobal = override == null
     val current = override ?: BackgroundConfig(source = BackgroundSource.COLOR)
 
     SettingsPreferenceGroup(
-        title = layerBackgroundLabel(1, R.string.settings_layer_surface_screen),
-        onInfoClick = { showLayerHelp = true }
+        title = if (showLayerHeader) layerBackgroundLabel(1, R.string.settings_layer_surface_screen) else null,
+        onInfoClick = if (showLayerHeader) ({ showLayerHelp = true }) else null
     ) {
         SettingsPreference(
             icon = null,
