@@ -19,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.EditNote
@@ -161,6 +162,7 @@ fun SettingsPageRowsScreen(
                                 when (row.type) {
                                     PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET -> onOpenRow(row.id)
                                     PageRowType.APPS, PageRowType.SEARCH_BAR -> editingRowId = row.id
+                                    PageRowType.PANEL -> Unit
                                 }
                             },
                             verticalAlignment = Alignment.CenterVertically,
@@ -257,7 +259,7 @@ fun SettingsPageRowsScreen(
 
     editingRow?.let { row ->
         when (row.type) {
-            PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET -> Unit
+            PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET, PageRowType.PANEL -> Unit
             PageRowType.APPS, PageRowType.SEARCH_BAR -> AppsRowEditSheet(
                 row = row,
                 entries = appEntriesByRow[row.id].orEmpty(),
@@ -447,6 +449,7 @@ internal fun rowIcon(row: PageRow): ImageVector = when (row.type) {
     PageRowType.SYSTEM_WIDGET -> Icons.Filled.Widgets
     PageRowType.APPS -> Icons.Filled.Apps
     PageRowType.SEARCH_BAR -> Icons.Filled.Search
+    PageRowType.PANEL -> Icons.Filled.Dashboard
 }
 
 @Composable
@@ -455,6 +458,7 @@ internal fun rowLabel(row: PageRow): String = when (row.type) {
     PageRowType.SYSTEM_WIDGET -> stringResource(R.string.picker_widget_more)
     PageRowType.APPS -> stringResource(R.string.settings_rows_add_apps_row)
     PageRowType.SEARCH_BAR -> stringResource(R.string.settings_rows_add_search_bar)
+    PageRowType.PANEL -> stringResource(R.string.settings_home_panel_label)
 }
 
 private fun widgetKindIcon(kind: String): ImageVector = when (kind) {

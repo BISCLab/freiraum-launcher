@@ -15,17 +15,15 @@ import com.bisc.flauncher.data.model.PinnedContact
 import com.bisc.flauncher.data.model.PinnedShortcut
 import com.bisc.flauncher.data.model.PinnedWebsite
 import com.bisc.flauncher.data.model.SavedMapTarget
-import com.bisc.flauncher.data.model.SidebarItem
-import com.bisc.flauncher.data.model.SidebarPinnedApp
 
 @Database(
     entities = [
         LauncherPage::class, PageRow::class, AppRowEntry::class, Folder::class, FolderItem::class,
         Note::class, IconPackMapping::class, SavedMapTarget::class, PinnedWebsite::class,
-        PinnedShortcut::class, SidebarItem::class, AppOverride::class, SidebarPinnedApp::class,
+        PinnedShortcut::class, AppOverride::class,
         PinnedContact::class
     ],
-    version = 44,
+    version = 45,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -40,8 +38,6 @@ abstract class FLauncherDatabase : RoomDatabase() {
     abstract fun savedMapTargetDao(): SavedMapTargetDao
     abstract fun pinnedWebsiteDao(): PinnedWebsiteDao
     abstract fun pinnedShortcutDao(): PinnedShortcutDao
-    abstract fun sidebarItemDao(): SidebarItemDao
     abstract fun appOverrideDao(): AppOverrideDao
-    abstract fun sidebarPinnedAppDao(): SidebarPinnedAppDao
     abstract fun pinnedContactDao(): PinnedContactDao
 }

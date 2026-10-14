@@ -20,8 +20,6 @@ import com.bisc.flauncher.data.db.PinnedContactDao
 import com.bisc.flauncher.data.db.PinnedShortcutDao
 import com.bisc.flauncher.data.db.PinnedWebsiteDao
 import com.bisc.flauncher.data.db.SavedMapTargetDao
-import com.bisc.flauncher.data.db.SidebarItemDao
-import com.bisc.flauncher.data.db.SidebarPinnedAppDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -167,13 +165,7 @@ object AppModule {
     fun providePinnedShortcutDao(db: FLauncherDatabase): PinnedShortcutDao = db.pinnedShortcutDao()
 
     @Provides
-    fun provideSidebarItemDao(db: FLauncherDatabase): SidebarItemDao = db.sidebarItemDao()
-
-    @Provides
     fun provideAppOverrideDao(db: FLauncherDatabase): AppOverrideDao = db.appOverrideDao()
-
-    @Provides
-    fun provideSidebarPinnedAppDao(db: FLauncherDatabase): SidebarPinnedAppDao = db.sidebarPinnedAppDao()
 
     @Provides
     fun providePinnedContactDao(db: FLauncherDatabase): PinnedContactDao = db.pinnedContactDao()

@@ -70,7 +70,12 @@ data class PageRow(
     // off by default to keep the classic icon-only look. Uses elementContentColor as its text
     // color — the same "Text color" picker already shown for the row — so there's only one
     // color setting per row, not a second one specific to captions.
-    val showLabels: Boolean = false
+    val showLabels: Boolean = false,
+    // Target row count for the Home page's own PANEL row's grid — paired with [columns] to define
+    // its total capacity (columns * gridRows empty "+" slots shown until filled), the same "pick a
+    // shape up front" idea as the dock's pillMaxEntries, just two-dimensional. Meaningless for any
+    // other row type.
+    val gridRows: Int = 3
 )
 
 /** Reads the stored date-tap action of a clock row as a [GestureAction]. */

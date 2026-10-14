@@ -38,8 +38,6 @@ import com.bisc.flauncher.data.model.SavedMapTarget
 import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.data.model.SearchEngine
 import com.bisc.flauncher.util.launchAiApp
-import com.bisc.flauncher.data.model.SidebarCategoryViewMode
-import com.bisc.flauncher.data.model.SidebarPinnedApp
 import com.bisc.flauncher.data.model.WeatherSnapshot
 import com.bisc.flauncher.data.model.AppListDisplayMode
 import com.bisc.flauncher.data.model.AppListLayout
@@ -55,16 +53,11 @@ import com.bisc.flauncher.data.repository.NoteRepository
 import com.bisc.flauncher.data.repository.NowPlayingRepository
 import com.bisc.flauncher.data.repository.PageContentRepository
 import com.bisc.flauncher.data.repository.ShortcutRepository
-import com.bisc.flauncher.data.repository.SidebarAppsRepository
-import com.bisc.flauncher.data.repository.SidebarRepository
 import com.bisc.flauncher.data.repository.WeatherRepository
 import com.bisc.flauncher.data.repository.WebsiteRepository
 import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.data.settings.IconShape
 import com.bisc.flauncher.data.settings.SettingsRepository
-import com.bisc.flauncher.ui.home.dock.ResolvedSidebarItem
-import com.bisc.flauncher.ui.home.dock.SidebarEntryType
-import com.bisc.flauncher.ui.home.dock.resolveSidebarItems
 import com.bisc.flauncher.ui.home.dock.PageIconGlyph
 import androidx.compose.runtime.snapshotFlow
 import com.bisc.flauncher.util.AppIconLoader
@@ -106,8 +99,6 @@ class HomeViewModel @Inject constructor(
     private val mapsRepository: MapsRepository,
     private val websiteRepository: WebsiteRepository,
     private val shortcutRepository: ShortcutRepository,
-    private val sidebarRepository: SidebarRepository,
-    private val sidebarAppsRepository: SidebarAppsRepository,
     private val appOverrideRepository: AppOverrideRepository,
     private val weatherRepository: WeatherRepository,
     private val nowPlayingRepository: NowPlayingRepository,
@@ -138,7 +129,7 @@ class HomeViewModel @Inject constructor(
     fun executeDockTapAction(action: DockTapAction) {
         when (action) {
             DockTapAction.NONE -> Unit
-            DockTapAction.QUICK_OVERVIEW -> if (overviewEntry.value != null) closeOverview() else openOverview()
+            DockTapAction.QUICK_OVERVIEW -> if (isPanelOpen.value) closeOverview() else openOverview()
             DockTapAction.FULL_SEARCH -> openSearch()
         }
     }
@@ -155,9 +146,6 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.setPageHideStatusBar(pageId, hide) }
     }
 
-    val quickOverviewHideStatusBar: StateFlow<Boolean> =
-        settingsRepository.quickOverviewHideStatusBar.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-
     val folderHideStatusBar: StateFlow<Boolean> =
         settingsRepository.folderHideStatusBar.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
@@ -170,11 +158,6 @@ class HomeViewModel @Inject constructor(
     // custom-image-to-custom-image one did).
     val globalBackground: StateFlow<BackgroundConfig> =
         settingsRepository.globalBackground.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig())
-
-    val quickOverviewBackground: StateFlow<BackgroundConfig> =
-        combine(settingsRepository.quickOverviewBackgroundOverride, settingsRepository.globalBackground) { override, global ->
-            override ?: global
-        }.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig())
 
     val appListDisplayMode: StateFlow<AppListDisplayMode> =
         settingsRepository.appListDisplayMode.stateIn(viewModelScope, SharingStarted.Eagerly, AppListDisplayMode.FULLSCREEN)
@@ -190,27 +173,6 @@ class HomeViewModel @Inject constructor(
 
     val accentColor: StateFlow<Int> =
         settingsRepository.accentColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF3B82F6.toInt())
-
-    val favoritesBottomBorderEnabled: StateFlow<Boolean> =
-        settingsRepository.favoritesBottomBorderEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
-
-    fun setFavoritesBottomBorderEnabled(enabled: Boolean) {
-        viewModelScope.launch { settingsRepository.setFavoritesBottomBorderEnabled(enabled) }
-    }
-
-    val favoritesGroupDividersEnabled: StateFlow<Boolean> =
-        settingsRepository.favoritesGroupDividersEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
-
-    fun setFavoritesGroupDividersEnabled(enabled: Boolean) {
-        viewModelScope.launch { settingsRepository.setFavoritesGroupDividersEnabled(enabled) }
-    }
-
-    val homePanelEnabled: StateFlow<Boolean> =
-        settingsRepository.homePanelEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-
-    fun setHomePanelEnabled(enabled: Boolean) {
-        viewModelScope.launch { settingsRepository.setHomePanelEnabled(enabled) }
-    }
 
     val sidebarPanelAppearance: StateFlow<ElementAppearance> =
         settingsRepository.sidebarPanelAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
@@ -322,8 +284,8 @@ class HomeViewModel @Inject constructor(
 
     // ---- Overlay state: quick overview, app overview, text search ----
 
-    private val _overviewEntry = MutableStateFlow<SidebarEntryType?>(null)
-    val overviewEntry: StateFlow<SidebarEntryType?> = _overviewEntry.asStateFlow()
+    private val _isPanelOpen = MutableStateFlow(false)
+    val isPanelOpen: StateFlow<Boolean> = _isPanelOpen.asStateFlow()
 
     private val _searchOpen = MutableStateFlow(false)
     val searchOpen: StateFlow<Boolean> = _searchOpen.asStateFlow()
@@ -332,7 +294,7 @@ class HomeViewModel @Inject constructor(
     val appListOpen: StateFlow<Boolean> = _appListOpen.asStateFlow()
 
     fun openAppList() {
-        _overviewEntry.value = null
+        _isPanelOpen.value = false
         _appListOpen.value = true
     }
 
@@ -466,14 +428,6 @@ class HomeViewModel @Inject constructor(
     val pinnedShortcuts: StateFlow<List<PinnedShortcut>> =
         shortcutRepository.pinnedShortcuts.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val sidebarPinnedApps: StateFlow<List<SidebarPinnedApp>> =
-        sidebarAppsRepository.pinnedApps.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
-    val sidebarItems: StateFlow<List<ResolvedSidebarItem>> =
-        combine(sidebarRepository.items, labeledApps, pinnedShortcuts, savedMapTargets) { items, apps, shortcuts, targets ->
-            resolveSidebarItems(items, apps, shortcuts, targets)
-        }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
     private val _shortcutAppPickerOpen = MutableStateFlow(false)
     val shortcutAppPickerOpen: StateFlow<Boolean> = _shortcutAppPickerOpen.asStateFlow()
 
@@ -506,7 +460,6 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch { pageContentRepository.ensureSeeded() }
-        viewModelScope.launch { sidebarRepository.ensureSeeded() }
         viewModelScope.launch {
             _installedApps.value = installedAppsRepository.getLaunchableApps()
             installedAppsRepository.packageChanges().collectLatest {
@@ -533,7 +486,7 @@ class HomeViewModel @Inject constructor(
     fun selectNowPlayingPlayer(packageName: String) = nowPlayingRepository.selectPlayer(packageName)
     fun openNowPlayingPlayer() = nowPlayingRepository.openPlayer()
 
-    // ---- Notes, places, websites, sidebar apps, shortcuts ----
+    // ---- Notes, places, websites, shortcuts ----
 
     fun saveNote(note: Note, onSaved: (Long) -> Unit = {}) {
         viewModelScope.launch { onSaved(noteRepository.save(note)) }
@@ -566,24 +519,6 @@ class HomeViewModel @Inject constructor(
     fun removeWebsite(website: PinnedWebsite) {
         viewModelScope.launch { websiteRepository.remove(website) }
     }
-
-    fun addSidebarApp(app: AppInfo) {
-        viewModelScope.launch { sidebarAppsRepository.add(app.componentName.flattenToString()) }
-    }
-
-    fun addAllSidebarApps(apps: List<AppInfo>) {
-        viewModelScope.launch { sidebarAppsRepository.addAll(apps.map { it.componentName.flattenToString() }) }
-    }
-
-    fun removeSidebarApp(app: SidebarPinnedApp) {
-        viewModelScope.launch { sidebarAppsRepository.remove(app) }
-    }
-
-    fun sidebarCategoryViewMode(entry: SidebarEntryType): Flow<SidebarCategoryViewMode> =
-        settingsRepository.sidebarCategoryViewMode(entry.name)
-
-    fun sidebarCategoryShowAddRow(entry: SidebarEntryType): Flow<Boolean> =
-        settingsRepository.sidebarCategoryShowAddRow(entry.name)
 
     fun loadShortcutIcon(info: ShortcutInfo) = shortcutRepository.loadIcon(info)
 
@@ -711,23 +646,19 @@ class HomeViewModel @Inject constructor(
 
     // ---- Overlay controls and search commands ----
 
-    fun openOverview(entry: SidebarEntryType = _overviewEntry.value ?: SidebarEntryType.APPS) {
-        _overviewEntry.value = entry
+    fun openOverview() {
+        _isPanelOpen.value = true
         // Off the main thread and not awaited: keeps the cached value from going stale (e.g. after a
         // default-launcher change) without making the open animation wait on it.
         viewModelScope.launch(Dispatchers.Default) { _hasShortcutHostPermission.value = shortcutRepository.hasPermission() }
     }
 
-    fun selectSidebarEntry(entry: SidebarEntryType) {
-        _overviewEntry.value = entry
-    }
-
     fun closeOverview() {
-        _overviewEntry.value = null
+        _isPanelOpen.value = false
     }
 
     fun openSearch() {
-        _overviewEntry.value = null
+        _isPanelOpen.value = false
         // The search backdrop is translucent, so the app overview must not stay open behind it.
         _appListOpen.value = false
         _searchOpen.value = true
@@ -949,8 +880,22 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { pageContentRepository.addPageLinkEntry(pageRowId, pageId) }
     }
 
+    /** Pinning a contact into a row also ensures a [PinnedContact] snapshot exists for it (name/photo
+     *  cached, not a live content-resolver lookup on every render) — the same mechanism search's own
+     *  contact pinning already uses, just reused here instead of invented twice. */
+    fun addContactEntryToRow(pageRowId: Long, contact: ContactInfo) {
+        viewModelScope.launch {
+            contactsRepository.pin(contact)
+            pageContentRepository.addContactEntry(pageRowId, contact.id)
+        }
+    }
+
     fun setRowPillMode(row: PageRow, pillMode: Boolean) {
         viewModelScope.launch { pageContentRepository.setRowPillMode(row, pillMode) }
+    }
+
+    fun setRowGridRows(row: PageRow, rows: Int) {
+        viewModelScope.launch { pageContentRepository.setRowGridRows(row, rows) }
     }
 
     fun setRowDockVisibilityMode(row: PageRow, mode: com.bisc.flauncher.data.model.DockVisibilityMode) {

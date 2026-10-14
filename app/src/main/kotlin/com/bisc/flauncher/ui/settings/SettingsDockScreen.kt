@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.ViewCarousel
@@ -131,6 +132,9 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
     val shortcutAppPickerOpen by viewModel.shortcutAppPickerOpen.collectAsState()
     val shortcutPickerForApp by viewModel.shortcutPickerForApp.collectAsState()
     val availableShortcuts by viewModel.availableShortcuts.collectAsState()
+    val pinnedContacts by viewModel.pinnedContacts.collectAsState()
+    val contactPickerOpen by viewModel.contactPickerOpen.collectAsState()
+    val contactPickerList by viewModel.contactPickerList.collectAsState()
 
     var showAddChooser by remember { mutableStateOf(false) }
     var showAppPicker by remember { mutableStateOf(false) }
@@ -160,6 +164,9 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
                     maxEntries = row.pillMaxEntries,
                     showLabels = row.showLabels,
                     labelColor = row.appearance().contentColor?.let { androidx.compose.ui.graphics.Color(it) } ?: androidx.compose.ui.graphics.Color.White,
+                    pinnedContacts = pinnedContacts,
+                    loadContactPhoto = viewModel::loadContactPhoto,
+                    onContactClick = {},
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
                 )
             }
@@ -176,7 +183,8 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
                         pages = allPages,
                         loadIcon = viewModel::loadIcon,
                         resolveLabel = viewModel::resolveLabel,
-                        onRemove = { viewModel.removeAppRowEntry(entry) }
+                        onRemove = { viewModel.removeAppRowEntry(entry) },
+                        pinnedContacts = pinnedContacts
                     )
                 }
             }
@@ -197,6 +205,7 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
             onAddMapTargetClick = { showAddChooser = false; showMapTargetPicker = true },
             onAddWebsiteClick = { showAddChooser = false; showWebsitePicker = true },
             onAddPageLinkClick = { showAddChooser = false; showPagePicker = true },
+            onAddContactClick = { showAddChooser = false; viewModel.openContactPicker() },
             onDismiss = { showAddChooser = false }
         )
     }
@@ -277,6 +286,14 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
             onDismiss = { pendingShortcut = false; viewModel.dismissShortcutPicker() }
         )
     }
+    if (contactPickerOpen) {
+        com.bisc.flauncher.ui.home.dock.ContactPickerSheet(
+            contacts = contactPickerList,
+            loadPhoto = viewModel::loadContactPhoto,
+            onSelected = { contact -> viewModel.addContactEntryToRow(row.id, contact); viewModel.dismissContactPicker() },
+            onDismiss = viewModel::dismissContactPicker
+        )
+    }
 }
 
 /** Shared "what do you want to add" chooser — the entry point for tapping an empty preview slot
@@ -292,6 +309,7 @@ internal fun AddElementChooserSheet(
     onAddMapTargetClick: () -> Unit,
     onAddWebsiteClick: () -> Unit,
     onAddPageLinkClick: () -> Unit,
+    onAddContactClick: () -> Unit,
     onDismiss: () -> Unit
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
@@ -302,6 +320,7 @@ internal fun AddElementChooserSheet(
             SettingsPreference(icon = Icons.Filled.Place, title = stringResource(R.string.settings_apps_row_add_map_target), onClick = onAddMapTargetClick, trailing = null)
             SettingsPreference(icon = Icons.Filled.Language, title = stringResource(R.string.settings_apps_row_add_website), onClick = onAddWebsiteClick, trailing = null)
             SettingsPreference(icon = Icons.Filled.ViewCarousel, title = stringResource(R.string.settings_apps_row_add_page_link), onClick = onAddPageLinkClick, trailing = null)
+            SettingsPreference(icon = Icons.Filled.Person, title = stringResource(R.string.settings_apps_row_add_contact), onClick = onAddContactClick, trailing = null)
         }
     }
 }

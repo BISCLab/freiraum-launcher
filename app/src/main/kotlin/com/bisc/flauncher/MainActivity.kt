@@ -43,8 +43,8 @@ import com.bisc.flauncher.ui.settings.SettingsDockVisibilityScreen
 import com.bisc.flauncher.ui.settings.SettingsDockBackgroundScreen
 import com.bisc.flauncher.ui.settings.SettingsDockBorderScreen
 import com.bisc.flauncher.ui.settings.SettingsDockElementsScreen
+import com.bisc.flauncher.ui.settings.SettingsPanelElementsScreen
 import com.bisc.flauncher.ui.settings.SettingsSearchFullScreen
-import com.bisc.flauncher.ui.settings.SettingsSidebarScreen
 import com.bisc.flauncher.ui.settings.SettingsViewModel
 import com.bisc.flauncher.ui.settings.SettingsWidgetRowEditScreen
 import com.bisc.flauncher.ui.theme.FLauncherTheme
@@ -145,9 +145,6 @@ class MainActivity : ComponentActivity() {
                         composable("settings/appearance/background") {
                             com.bisc.flauncher.ui.settings.SettingsGlobalBackgroundScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
-                        composable("settings/sidebar") {
-                            SettingsSidebarScreen(navController = navController, onBack = { navController.popBackStack() })
-                        }
                         composable("settings/search") {
                             SettingsSearchFullScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
@@ -165,8 +162,10 @@ class MainActivity : ComponentActivity() {
                                             navController.navigate("settings/app_overview")
                                         page.kind == com.bisc.flauncher.data.model.LauncherPageKind.SEARCH ->
                                             navController.navigate("settings/search")
-                                        page.kind == com.bisc.flauncher.data.model.LauncherPageKind.SIDEBAR ->
-                                            navController.navigate("settings/sidebar")
+                                        // SIDEBAR (the Panel's page identity) is filtered out of this
+                                        // list — its settings live under Home > Panel instead, since
+                                        // it's a Home-page bookend, not a standalone page to configure.
+                                        page.kind == com.bisc.flauncher.data.model.LauncherPageKind.SIDEBAR -> Unit
                                     }
                                 },
                                 onOpenIcon = { pageId -> navController.navigate("settings/pages/$pageId/icon") }
@@ -227,14 +226,26 @@ class MainActivity : ComponentActivity() {
                                 onNavigate = { sub -> navController.navigate("settings/pages/$pageId/home/panel/$sub") }
                             )
                         }
-                        composable("settings/pages/{pageId}/home/panel/background") {
-                            SettingsPanelBackgroundScreen(navController = navController, onBack = { navController.popBackStack() })
+                        composable(
+                            "settings/pages/{pageId}/home/panel/background",
+                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@composable
+                            SettingsPanelBackgroundScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
                         }
-                        composable("settings/pages/{pageId}/home/panel/border") {
-                            SettingsPanelBorderScreen(navController = navController, onBack = { navController.popBackStack() })
+                        composable(
+                            "settings/pages/{pageId}/home/panel/border",
+                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@composable
+                            SettingsPanelBorderScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
                         }
-                        composable("settings/pages/{pageId}/home/panel/elements") {
-                            SettingsSidebarScreen(navController = navController, onBack = { navController.popBackStack() })
+                        composable(
+                            "settings/pages/{pageId}/home/panel/elements",
+                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@composable
+                            SettingsPanelElementsScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable(
                             "settings/pages/{pageId}/home/layout/dock",

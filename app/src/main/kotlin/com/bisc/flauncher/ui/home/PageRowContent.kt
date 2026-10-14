@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -51,6 +52,7 @@ import com.bisc.flauncher.data.model.LauncherPage
 import com.bisc.flauncher.data.model.LauncherPageKind
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
+import com.bisc.flauncher.data.model.PinnedContact
 import com.bisc.flauncher.data.model.PinnedWebsite
 import com.bisc.flauncher.data.model.SavedMapTarget
 import com.bisc.flauncher.data.model.WidgetCornerStyle
@@ -182,12 +184,12 @@ fun PageRowContent(
                 )
             }
         }
-        // The dock never actually renders inline as a row — HomeScreen strips this row out before handing
-        // the rest to PageRowsColumn and renders the floating dock itself, directly, as its own layer
-        // outside the pager, calling PillRow with the same entries (see HomeScreen's floating dock Box).
-        // This row only still exists as a marker carrying the dock's own per-row appearance/entries;
+        // Neither the dock nor the Panel ever render inline as a row — HomeScreen strips both out
+        // before handing the rest to PageRowsColumn and renders them itself, directly, as their own
+        // floating layers outside the pager (see HomeScreen's floating dock Box and Panel overlay).
+        // These rows only still exist as markers carrying their own per-row appearance/entries;
         // PageRowType must stay exhaustive.
-        PageRowType.SEARCH_BAR -> Unit
+        PageRowType.SEARCH_BAR, PageRowType.PANEL -> Unit
     }
 }
 
@@ -207,7 +209,6 @@ private fun AppsRowGrid(
     onShortcutClick: (String) -> Unit,
     onOpenPageLink: (Long, LauncherPageKind) -> Unit
 ) {
-    val columns = row.columns.coerceAtLeast(1)
     val horizontalMargin = if (row.edgeToEdge) 0.dp else DockDimens.horizontalMargin
     WidgetCard(
         modifier = Modifier.fillMaxWidth(),
@@ -216,39 +217,105 @@ private fun AppsRowGrid(
         horizontalMargin = horizontalMargin,
         contentPadding = 12.dp
     ) {
-        entries.chunked(columns).forEach { chunk ->
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                repeat(columns) { slot ->
-                    Box(modifier = Modifier.weight(1f)) {
-                        val entry = chunk.getOrNull(slot)
-                        if (entry != null) {
-                            when (entry.type) {
-                                GridItemType.APP -> AppIconCell(payload = entry.payload, loadIcon = loadIcon, resolveLabel = resolveLabel)
-                                GridItemType.FOLDER -> {
-                                    val folderId = remember(entry.payload) { entry.payload.toLongOrNull() }
-                                    val folder = folders.find { it.id == folderId }
-                                    val previewItems = folderId?.let { folderItemsByFolder[it] }.orEmpty()
-                                    FolderCell(folder = folder, previewItems = previewItems, loadIcon = loadIcon, loadPackIcon = loadPackIcon, onClick = { folderId?.let(onFolderClick) })
-                                }
-                                GridItemType.SHORTCUT -> ShortcutCell(payload = entry.payload, onClick = { onShortcutClick(entry.payload) })
-                                GridItemType.MAP_TARGET -> {
-                                    val targetId = remember(entry.payload) { entry.payload.toLongOrNull() }
-                                    val target = savedMapTargets.find { it.id == targetId }
-                                    MapTargetCell(target = target)
-                                }
-                                GridItemType.WEBSITE -> {
-                                    val websiteId = remember(entry.payload) { entry.payload.toLongOrNull() }
-                                    val website = pinnedWebsites.find { it.id == websiteId }
-                                    WebsiteCell(website = website)
-                                }
-                                GridItemType.PAGE -> {
-                                    val pageId = remember(entry.payload) { entry.payload.toLongOrNull() }
-                                    val page = pages.find { it.id == pageId }
-                                    PageLinkCell(page = page, pages = pages, onClick = { page?.let { onOpenPageLink(it.id, it.kind) } })
-                                }
-                                GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Unit
+        AppsGridEntries(
+            entries = entries,
+            columns = row.columns.coerceAtLeast(1),
+            folders = folders,
+            folderItemsByFolder = folderItemsByFolder,
+            savedMapTargets = savedMapTargets,
+            pinnedWebsites = pinnedWebsites,
+            pages = pages,
+            loadIcon = loadIcon,
+            loadPackIcon = loadPackIcon,
+            resolveLabel = resolveLabel,
+            onFolderClick = onFolderClick,
+            onShortcutClick = onShortcutClick,
+            onOpenPageLink = onOpenPageLink
+        )
+    }
+}
+
+/** The actual grid of cells, extracted from [AppsRowGrid] so the Favorites/Panel (which wraps this
+ *  directly in its own [com.bisc.flauncher.ui.home.dock.DockPanelSurface] shell instead of a
+ *  [WidgetCard]) can reuse the exact same per-type cell rendering, now extended with an optional
+ *  [totalSlots]/[onAddEmptySlot] pair (pad with tappable "+" cells up to a target grid shape,
+ *  the dock's "+" slot idea generalized to two dimensions) and [GridItemType.CONTACT]. Ordinary
+ *  in-page apps rows pass neither — unpadded, exactly their entry count, same as before. */
+@Composable
+fun AppsGridEntries(
+    entries: List<AppRowEntry>,
+    columns: Int,
+    folders: List<Folder>,
+    folderItemsByFolder: Map<Long, List<FolderItem>>,
+    savedMapTargets: List<SavedMapTarget>,
+    pinnedWebsites: List<PinnedWebsite>,
+    pages: List<LauncherPage>,
+    loadIcon: (ComponentName) -> ImageBitmap?,
+    loadPackIcon: (String, String) -> ImageBitmap?,
+    resolveLabel: (ComponentName) -> String,
+    onFolderClick: (Long) -> Unit,
+    onShortcutClick: (String) -> Unit,
+    onOpenPageLink: (Long, LauncherPageKind) -> Unit,
+    pinnedContacts: List<PinnedContact> = emptyList(),
+    loadContactPhoto: suspend (Long, String?) -> ImageBitmap? = { _, _ -> null },
+    onContactClick: (Long) -> Unit = {},
+    showLabels: Boolean = true,
+    labelColor: Color = Color.White,
+    totalSlots: Int? = null,
+    onAddEmptySlot: ((Int) -> Unit)? = null
+) {
+    val safeColumns = columns.coerceAtLeast(1)
+    val padded: List<AppRowEntry?> = if (totalSlots != null && onAddEmptySlot != null) {
+        entries + List((totalSlots - entries.size).coerceAtLeast(0)) { null }
+    } else {
+        entries
+    }
+    padded.chunked(safeColumns).forEachIndexed { chunkIndex, chunk ->
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            repeat(safeColumns) { slot ->
+                Box(modifier = Modifier.weight(1f)) {
+                    val entry = chunk.getOrNull(slot)
+                    if (entry != null) {
+                        when (entry.type) {
+                            GridItemType.APP -> AppIconCell(payload = entry.payload, loadIcon = loadIcon, resolveLabel = resolveLabel, showLabel = showLabels, labelColor = labelColor)
+                            GridItemType.FOLDER -> {
+                                val folderId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                                val folder = folders.find { it.id == folderId }
+                                val previewItems = folderId?.let { folderItemsByFolder[it] }.orEmpty()
+                                FolderCell(folder = folder, previewItems = previewItems, loadIcon = loadIcon, loadPackIcon = loadPackIcon, onClick = { folderId?.let(onFolderClick) }, showLabel = showLabels, labelColor = labelColor)
                             }
+                            GridItemType.SHORTCUT -> ShortcutCell(payload = entry.payload, onClick = { onShortcutClick(entry.payload) }, showLabel = showLabels, labelColor = labelColor)
+                            GridItemType.MAP_TARGET -> {
+                                val targetId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                                val target = savedMapTargets.find { it.id == targetId }
+                                MapTargetCell(target = target, showLabel = showLabels, labelColor = labelColor)
+                            }
+                            GridItemType.WEBSITE -> {
+                                val websiteId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                                val website = pinnedWebsites.find { it.id == websiteId }
+                                WebsiteCell(website = website, showLabel = showLabels, labelColor = labelColor)
+                            }
+                            GridItemType.PAGE -> {
+                                val pageId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                                val page = pages.find { it.id == pageId }
+                                PageLinkCell(page = page, pages = pages, onClick = { page?.let { onOpenPageLink(it.id, it.kind) } }, showLabel = showLabels, labelColor = labelColor)
+                            }
+                            GridItemType.CONTACT -> {
+                                val contactId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                                val contact = pinnedContacts.find { it.contactId == contactId }
+                                ContactCell(
+                                    contact = contact,
+                                    loadContactPhoto = loadContactPhoto,
+                                    onClick = { contactId?.let(onContactClick) },
+                                    showLabel = showLabels,
+                                    labelColor = labelColor
+                                )
+                            }
+                            GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Unit
                         }
+                    } else if (onAddEmptySlot != null) {
+                        val slotIndex = chunkIndex * safeColumns + slot
+                        EmptyGridSlotCell(onClick = { onAddEmptySlot(slotIndex) })
                     }
                 }
             }
@@ -257,7 +324,22 @@ private fun AppsRowGrid(
 }
 
 @Composable
-private fun AppIconCell(payload: String, loadIcon: (ComponentName) -> ImageBitmap?, resolveLabel: (ComponentName) -> String) {
+private fun EmptyGridSlotCell(onClick: () -> Unit) {
+    Column(modifier = Modifier.clickable(onClick = onClick).padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(UNSET_APP_SLOT_COLOR),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(imageVector = unsetAppSlotIcon, contentDescription = null, tint = Color.White)
+        }
+    }
+}
+
+@Composable
+private fun AppIconCell(payload: String, loadIcon: (ComponentName) -> ImageBitmap?, resolveLabel: (ComponentName) -> String, showLabel: Boolean = true, labelColor: Color = Color.White) {
     val context = LocalContext.current
     val componentName = remember(payload) { ComponentName.unflattenFromString(payload) }
     val bitmap = rememberAppIcon(componentName, loadIcon)
@@ -280,26 +362,30 @@ private fun AppIconCell(payload: String, loadIcon: (ComponentName) -> ImageBitma
                     .background(Color.White.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
             )
         }
-        Spacer(Modifier.height(8.dp))
-        GridLabel(label)
+        if (showLabel) {
+            Spacer(Modifier.height(8.dp))
+            GridLabel(label, color = labelColor)
+        }
     }
 }
 
 @Composable
-private fun ShortcutCell(payload: String, onClick: () -> Unit) {
+private fun ShortcutCell(payload: String, onClick: () -> Unit, showLabel: Boolean = true, labelColor: Color = Color.White) {
     val label = remember(payload) { payload.split("|").getOrNull(2)?.takeIf { it.isNotBlank() } ?: payload.substringBefore('|') }
     Column(
         modifier = Modifier.clickable(onClick = onClick).padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(imageVector = Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, modifier = Modifier.size(56.dp))
-        Spacer(Modifier.height(8.dp))
-        GridLabel(label)
+        if (showLabel) {
+            Spacer(Modifier.height(8.dp))
+            GridLabel(label, color = labelColor)
+        }
     }
 }
 
 @Composable
-private fun MapTargetCell(target: SavedMapTarget?) {
+private fun MapTargetCell(target: SavedMapTarget?, showLabel: Boolean = true, labelColor: Color = Color.White) {
     val context = LocalContext.current
     Column(
         modifier = Modifier
@@ -308,13 +394,15 @@ private fun MapTargetCell(target: SavedMapTarget?) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(imageVector = Icons.Filled.Place, contentDescription = null, modifier = Modifier.size(56.dp))
-        Spacer(Modifier.height(8.dp))
-        GridLabel(target?.label.orEmpty())
+        if (showLabel) {
+            Spacer(Modifier.height(8.dp))
+            GridLabel(target?.label.orEmpty(), color = labelColor)
+        }
     }
 }
 
 @Composable
-private fun WebsiteCell(website: PinnedWebsite?) {
+private fun WebsiteCell(website: PinnedWebsite?, showLabel: Boolean = true, labelColor: Color = Color.White) {
     val context = LocalContext.current
     Column(
         modifier = Modifier
@@ -323,8 +411,10 @@ private fun WebsiteCell(website: PinnedWebsite?) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(imageVector = Icons.Filled.Language, contentDescription = null, modifier = Modifier.size(56.dp))
-        Spacer(Modifier.height(8.dp))
-        GridLabel(website?.label.orEmpty())
+        if (showLabel) {
+            Spacer(Modifier.height(8.dp))
+            GridLabel(website?.label.orEmpty(), color = labelColor)
+        }
     }
 }
 
@@ -334,7 +424,9 @@ private fun FolderCell(
     previewItems: List<FolderItem>,
     loadIcon: (ComponentName) -> ImageBitmap?,
     loadPackIcon: (String, String) -> ImageBitmap?,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    showLabel: Boolean = true,
+    labelColor: Color = Color.White
 ) {
     Column(
         modifier = Modifier
@@ -343,13 +435,15 @@ private fun FolderCell(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         FolderIcon(folder = folder, previewItems = previewItems, loadIcon = loadIcon, loadPackIcon = loadPackIcon, modifier = Modifier.size(56.dp))
-        Spacer(Modifier.height(8.dp))
-        GridLabel(folder?.name.orEmpty())
+        if (showLabel) {
+            Spacer(Modifier.height(8.dp))
+            GridLabel(folder?.name.orEmpty(), color = labelColor)
+        }
     }
 }
 
 @Composable
-private fun PageLinkCell(page: LauncherPage?, pages: List<LauncherPage>, onClick: () -> Unit) {
+private fun PageLinkCell(page: LauncherPage?, pages: List<LauncherPage>, onClick: () -> Unit, showLabel: Boolean = true, labelColor: Color = Color.White) {
     val glyph = page?.iconGlyph?.let { name -> runCatching { PageIconGlyph.valueOf(name) }.getOrNull() }
         ?: page?.let { PageIconGlyph.forPageKind(it.kind) } ?: PageIconGlyph.WIDGET_PAGE
     val background = page?.iconBackgroundColor?.let { Color(it) } ?: glyph.defaultColor()
@@ -366,8 +460,43 @@ private fun PageLinkCell(page: LauncherPage?, pages: List<LauncherPage>, onClick
         ) {
             PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(30.dp))
         }
-        Spacer(Modifier.height(8.dp))
-        GridLabel(page?.let { pageLabel(it, pages) }.orEmpty())
+        if (showLabel) {
+            Spacer(Modifier.height(8.dp))
+            GridLabel(page?.let { pageLabel(it, pages) }.orEmpty(), color = labelColor)
+        }
+    }
+}
+
+@Composable
+private fun ContactCell(
+    contact: PinnedContact?,
+    loadContactPhoto: suspend (Long, String?) -> ImageBitmap?,
+    onClick: () -> Unit,
+    showLabel: Boolean = true,
+    labelColor: Color = Color.White
+) {
+    Column(
+        modifier = Modifier
+            .clickable(enabled = contact != null, onClick = onClick)
+            .padding(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(modifier = Modifier.size(56.dp), contentAlignment = Alignment.Center) {
+            if (contact != null) {
+                com.bisc.flauncher.ui.home.dock.ContactPhotoIcon(
+                    contactId = contact.contactId,
+                    photoUri = contact.photoUri,
+                    loadPhoto = loadContactPhoto,
+                    size = 56.dp
+                )
+            } else {
+                Icon(imageVector = Icons.Filled.Person, contentDescription = null, modifier = Modifier.size(56.dp))
+            }
+        }
+        if (showLabel) {
+            Spacer(Modifier.height(8.dp))
+            GridLabel(contact?.displayName.orEmpty(), color = labelColor)
+        }
     }
 }
 
@@ -488,6 +617,9 @@ fun PillRowEntries(
     maxEntries: Int,
     showLabels: Boolean = false,
     labelColor: Color = Color.White,
+    pinnedContacts: List<PinnedContact> = emptyList(),
+    loadContactPhoto: suspend (Long, String?) -> ImageBitmap? = { _, _ -> null },
+    onContactClick: (Long) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -565,12 +697,31 @@ fun PillRowEntries(
                                 contentAlignment = Alignment.Center
                             ) { PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(DockDimens.iconSize * 0.55f)) }
                         }
+                        GridItemType.CONTACT -> {
+                            val contactId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                            val contact = pinnedContacts.find { it.contactId == contactId }
+                            Box(
+                                modifier = Modifier.fillMaxSize().clickable(enabled = contact != null) { contactId?.let(onContactClick) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (contact != null) {
+                                    com.bisc.flauncher.ui.home.dock.ContactPhotoIcon(
+                                        contactId = contact.contactId,
+                                        photoUri = contact.photoUri,
+                                        loadPhoto = loadContactPhoto,
+                                        size = DockDimens.iconSize
+                                    )
+                                } else {
+                                    Icon(imageVector = Icons.Filled.Person, contentDescription = null, tint = Color.White)
+                                }
+                            }
+                        }
                         GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Unit
                     }
                 }
                 if (showLabels) {
                     GridLabel(
-                        text = entryLabel(entry, folders, savedMapTargets, pinnedWebsites, pages, resolveLabel),
+                        text = entryLabel(entry, folders, savedMapTargets, pinnedWebsites, pages, pinnedContacts, resolveLabel),
                         color = labelColor,
                         modifier = Modifier.width(DockDimens.iconSize)
                     )
@@ -620,6 +771,7 @@ private fun entryLabel(
     savedMapTargets: List<SavedMapTarget>,
     pinnedWebsites: List<PinnedWebsite>,
     pages: List<LauncherPage>,
+    pinnedContacts: List<PinnedContact>,
     resolveLabel: (ComponentName) -> String
 ): String = when (entry.type) {
     GridItemType.APP -> ComponentName.unflattenFromString(entry.payload)?.let(resolveLabel).orEmpty()
@@ -628,5 +780,6 @@ private fun entryLabel(
     GridItemType.MAP_TARGET -> savedMapTargets.find { it.id == entry.payload.toLongOrNull() }?.label.orEmpty()
     GridItemType.WEBSITE -> pinnedWebsites.find { it.id == entry.payload.toLongOrNull() }?.label.orEmpty()
     GridItemType.PAGE -> pages.find { it.id == entry.payload.toLongOrNull() }?.let { pageLabel(it, pages) }.orEmpty()
+    GridItemType.CONTACT -> pinnedContacts.find { it.contactId == entry.payload.toLongOrNull() }?.displayName.orEmpty()
     GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> ""
 }

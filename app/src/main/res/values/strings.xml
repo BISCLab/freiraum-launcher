@@ -385,6 +385,7 @@
 
     <string name="settings_apps_row_edit_title">Edit apps row</string>
     <string name="settings_apps_row_columns_label">Columns</string>
+    <string name="settings_panel_rows_label">Rows</string>
     <string name="settings_apps_row_apps_label">Apps</string>
     <string name="settings_apps_row_empty">No apps. Add one below.</string>
     <string name="settings_apps_row_add_app">Add app</string>
@@ -393,6 +394,7 @@
     <string name="settings_apps_row_add_map_target">Address</string>
     <string name="settings_apps_row_add_website">Website</string>
     <string name="settings_apps_row_add_page_link">Link a page</string>
+    <string name="settings_apps_row_add_contact">Add contact</string>
     <string name="settings_apps_row_pill_mode_label">Single-line layout</string>
     <string name="settings_apps_row_pill_mode_summary">Entries in one non-wrapping row instead of a grid — used by the dock</string>
     <string name="settings_map_mode_address">Address</string>
