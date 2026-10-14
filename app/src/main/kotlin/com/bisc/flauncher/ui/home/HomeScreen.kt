@@ -615,6 +615,8 @@ fun HomeScreen(
                         onOpenPageLink = onOpenPageLink,
                         onAddEmptySlot = { addingAppToDockRowId = homeDockRow.id },
                         maxEntries = homeDockRow.pillMaxEntries,
+                        showLabels = homeDockRow.showLabels,
+                        labelColor = homeDockRow.appearance().contentColor?.let { Color(it) } ?: Color.White,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = DockDimens.innerHorizontalPadding, vertical = DockDimens.innerVerticalPadding)

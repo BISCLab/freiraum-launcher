@@ -494,6 +494,10 @@ class PageContentRepository @Inject constructor(
         rowDao.update(row.copy(enabled = enabled))
     }
 
+    suspend fun setRowShowLabels(row: PageRow, showLabels: Boolean) {
+        rowDao.update(row.copy(showLabels = showLabels))
+    }
+
     suspend fun removeEntry(entry: AppRowEntry) {
         entryDao.delete(entry)
     }

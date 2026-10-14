@@ -961,6 +961,10 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { pageContentRepository.setRowEnabled(row, enabled) }
     }
 
+    fun setRowShowLabels(row: PageRow, showLabels: Boolean) {
+        viewModelScope.launch { pageContentRepository.setRowShowLabels(row, showLabels) }
+    }
+
     fun addNewMapTargetToRow(pageRowId: Long, label: String, lat: Double, lon: Double, address: String = "") {
         viewModelScope.launch {
             val targetId = mapsRepository.add(label, lat, lon, address)
