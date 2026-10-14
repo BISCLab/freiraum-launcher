@@ -87,12 +87,11 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                     summary = stringResource(R.string.settings_card_pages_subtitle),
                     onClick = { onNavigate("pages") }
                 )
-                SettingsPreference(
-                    icon = Icons.Filled.Dock,
-                    title = stringResource(R.string.settings_section_search_overview),
-                    summary = stringResource(R.string.settings_card_search_overview_subtitle),
-                    onClick = { onNavigate("sidebar") }
-                )
+                // Quick overview (the Sidebar singleton page) is disabled for now — deliberately
+                // taken out of Settings nav rather than deleted, pending a bigger rework the user
+                // hasn't decided on yet. The page and its data are untouched; see SettingsPagesScreen
+                // (filtered out of the Utility pages list) and HomeViewModel.homePanelEnabled (the
+                // live notch on Home, now off by default) for the other two places this is hidden.
                 SettingsPreference(
                     icon = Icons.Filled.GridView,
                     title = stringResource(R.string.settings_section_app_overview),
