@@ -89,8 +89,6 @@ fun SettingsHomeAppearanceScreen(pageId: Long, navController: NavController, onB
                 onClick = { showBackgroundSheet = true },
                 trailing = null
             )
-        }
-        SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_statusbar_hide_page),
