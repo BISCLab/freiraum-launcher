@@ -427,11 +427,12 @@ fun PillRow(
         val barShape = remember(row.cornerStyle) {
             if (row.cornerStyle == WidgetCornerStyle.SQUARE) RoundedCornerShape(0.dp) else RoundedCornerShape(percent = 50)
         }
+        val barHeight = if (row.showLabels) DockDimens.barHeight + DockDimens.labelExtraHeight else DockDimens.barHeight
 
         Box(
             modifier = Modifier
                 .width(pillWidth)
-                .height(DockDimens.barHeight)
+                .height(barHeight)
                 .then(
                     if (colors.backgroundAlpha > 0f) Modifier.clip(barShape).background(colors.background, alpha = colors.backgroundAlpha)
                     else Modifier
@@ -456,6 +457,8 @@ fun PillRow(
                 onOpenPageLink = onOpenPageLink,
                 onAddEmptySlot = onAddEmptySlot,
                 maxEntries = row.pillMaxEntries,
+                showLabels = row.showLabels,
+                labelColor = row.appearance().contentColor?.let { Color(it) } ?: Color.White,
                 modifier = Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = DockDimens.innerHorizontalPadding)
             )
         }
@@ -483,16 +486,19 @@ fun PillRowEntries(
     onOpenPageLink: (Long, LauncherPageKind) -> Unit = { _, _ -> },
     onAddEmptySlot: ((Int) -> Unit)?,
     maxEntries: Int,
+    showLabels: Boolean = false,
+    labelColor: Color = Color.White,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
     ) {
         entries.forEach { entry ->
             key(entry.id) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(modifier = Modifier.size(DockDimens.iconSize).clip(itemShape), contentAlignment = Alignment.Center) {
                     when (entry.type) {
                         GridItemType.APP -> {
@@ -562,6 +568,14 @@ fun PillRowEntries(
                         GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Unit
                     }
                 }
+                if (showLabels) {
+                    GridLabel(
+                        text = entryLabel(entry, folders, savedMapTargets, pinnedWebsites, pages, resolveLabel),
+                        color = labelColor,
+                        modifier = Modifier.width(DockDimens.iconSize)
+                    )
+                }
+                }
             }
         }
         if (onAddEmptySlot != null) {
@@ -583,14 +597,36 @@ fun PillRowEntries(
 }
 
 @Composable
-private fun GridLabel(text: String) {
+private fun GridLabel(text: String, color: Color = Color.White, modifier: Modifier = Modifier) {
     Text(
         text = text,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
+        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        modifier = modifier,
         style = MaterialTheme.typography.labelSmall.copy(
-            color = Color.White,
+            color = color,
             shadow = Shadow(color = Color.Black, blurRadius = 6f, offset = Offset(0f, 1f))
         )
     )
+}
+
+/** Resolves a display name for any [AppRowEntry] type — shared by [PillRowEntries]' optional
+ *  captions (PageRow.showLabels) and AppsRowGrid's own always-on per-cell labels. */
+@Composable
+private fun entryLabel(
+    entry: AppRowEntry,
+    folders: List<Folder>,
+    savedMapTargets: List<SavedMapTarget>,
+    pinnedWebsites: List<PinnedWebsite>,
+    pages: List<LauncherPage>,
+    resolveLabel: (ComponentName) -> String
+): String = when (entry.type) {
+    GridItemType.APP -> ComponentName.unflattenFromString(entry.payload)?.let(resolveLabel).orEmpty()
+    GridItemType.FOLDER -> folders.find { it.id == entry.payload.toLongOrNull() }?.name.orEmpty()
+    GridItemType.SHORTCUT -> entry.payload.split("|").getOrNull(2)?.takeIf { it.isNotBlank() } ?: entry.payload.substringBefore('|')
+    GridItemType.MAP_TARGET -> savedMapTargets.find { it.id == entry.payload.toLongOrNull() }?.label.orEmpty()
+    GridItemType.WEBSITE -> pinnedWebsites.find { it.id == entry.payload.toLongOrNull() }?.label.orEmpty()
+    GridItemType.PAGE -> pages.find { it.id == entry.payload.toLongOrNull() }?.let { pageLabel(it, pages) }.orEmpty()
+    GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> ""
 }

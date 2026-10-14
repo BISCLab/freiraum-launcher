@@ -158,6 +158,8 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
                     itemShape = pillItemShape(iconShape),
                     onAddEmptySlot = { showAddChooser = true },
                     maxEntries = row.pillMaxEntries,
+                    showLabels = row.showLabels,
+                    labelColor = row.appearance().contentColor?.let { androidx.compose.ui.graphics.Color(it) } ?: androidx.compose.ui.graphics.Color.White,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
                 )
             }
@@ -179,11 +181,11 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
                 }
             }
         }
-        AutomaticColorPicker(
-            title = stringResource(R.string.settings_element_text_color_label),
-            custom = row.appearance().contentColor,
-            automaticSeed = android.graphics.Color.WHITE,
-            onChange = { viewModel.setRowAppearance(row, row.appearance().copy(contentColor = it)) }
+        CaptionsSection(
+            showLabels = row.showLabels,
+            onShowLabelsChange = { viewModel.setRowShowLabels(row, it) },
+            appearance = row.appearance(),
+            onAppearanceChange = { viewModel.setRowAppearance(row, it) }
         )
     }
 

@@ -65,7 +65,12 @@ data class PageRow(
     // Lets a row be switched off without deleting it (and losing its configuration) — currently
     // only exposed in the UI for the Home screen's own Dock/Panel bookends (see
     // SettingsHomeLayoutScreen), which are otherwise locked in place and never removable.
-    val enabled: Boolean = true
+    val enabled: Boolean = true,
+    // Caption under each entry's icon (app/folder/shortcut/website/map target/page link name),
+    // off by default to keep the classic icon-only look. Uses elementContentColor as its text
+    // color — the same "Text color" picker already shown for the row — so there's only one
+    // color setting per row, not a second one specific to captions.
+    val showLabels: Boolean = false
 )
 
 /** Reads the stored date-tap action of a clock row as a [GestureAction]. */

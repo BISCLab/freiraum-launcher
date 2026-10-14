@@ -23,6 +23,10 @@ object DockDimens {
     val itemGap = 12.dp
     val innerVerticalPadding = 16.dp
     val barHeight = iconSize + innerVerticalPadding * 2
+    // Extra height a pill bar needs to fit a caption line under each icon (PageRow.showLabels) —
+    // only relevant to PillRow's own fixed-height Box; PillRowEntries used directly inside a
+    // naturally-sizing container (the live dock's DockPanelSurface, a settings preview) just grows.
+    val labelExtraHeight = 20.dp
 
     const val REFERENCE_SLOT_COUNT = 5
 

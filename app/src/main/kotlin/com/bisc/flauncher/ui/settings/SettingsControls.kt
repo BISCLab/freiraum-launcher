@@ -342,7 +342,9 @@ fun ElementBorderSection(appearance: ElementAppearance, onAppearanceChange: (Ele
                 icon = null,
                 title = stringResource(R.string.settings_element_border_color),
                 summary = if (appearance.borderColor == null) stringResource(R.string.settings_element_color_auto_hint) else null,
-                leading = {
+                leading = null,
+                onClick = { colorExpanded = !colorExpanded },
+                trailing = {
                     Box(
                         modifier = Modifier
                             .size(24.dp)
@@ -350,9 +352,7 @@ fun ElementBorderSection(appearance: ElementAppearance, onAppearanceChange: (Ele
                             .background(Color(borderColorValue))
                             .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
                     )
-                },
-                onClick = { colorExpanded = !colorExpanded },
-                trailing = null
+                }
             )
             if (colorExpanded) {
                 ColorPickerControls(
@@ -366,6 +366,58 @@ fun ElementBorderSection(appearance: ElementAppearance, onAppearanceChange: (Ele
                     icon = null,
                     title = stringResource(R.string.settings_element_color_reset),
                     onClick = { onAppearanceChange(appearance.copy(borderColor = null)) },
+                    trailing = null
+                )
+            }
+        }
+    }
+}
+
+/** Captions toggle + (when on) text color, as one connected card — shared by the Dock's and
+ *  Favorites Panel's own Elements screens. The color reuses [ElementAppearance.contentColor],
+ *  the same "Text color" already shown elsewhere for a row, so there's only one text-color
+ *  setting per row rather than a second one specific to captions. */
+@Composable
+fun CaptionsSection(showLabels: Boolean, onShowLabelsChange: (Boolean) -> Unit, appearance: ElementAppearance, onAppearanceChange: (ElementAppearance) -> Unit) {
+    var colorExpanded by remember { mutableStateOf(false) }
+    SettingsPreferenceGroup {
+        SettingsPreference(
+            icon = null,
+            title = stringResource(R.string.settings_element_show_labels_label),
+            onClick = { onShowLabelsChange(!showLabels) },
+            trailing = { Switch(checked = showLabels, onCheckedChange = onShowLabelsChange) }
+        )
+        if (showLabels) {
+            val textColorSeed = autoTextSeed(appearance)
+            val textColorValue = appearance.contentColor ?: textColorSeed
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_element_text_color_label),
+                summary = if (appearance.contentColor == null) stringResource(R.string.settings_element_color_auto_hint) else null,
+                leading = null,
+                onClick = { colorExpanded = !colorExpanded },
+                trailing = {
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .background(Color(textColorValue))
+                            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                    )
+                }
+            )
+            if (colorExpanded) {
+                ColorPickerControls(
+                    color = Color(textColorValue),
+                    onColorChange = { onAppearanceChange(appearance.copy(contentColor = it.toArgb())) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            if (appearance.contentColor != null) {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_element_color_reset),
+                    onClick = { onAppearanceChange(appearance.copy(contentColor = null)) },
                     trailing = null
                 )
             }

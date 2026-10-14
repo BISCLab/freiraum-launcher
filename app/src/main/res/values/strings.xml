@@ -179,6 +179,7 @@
     <string name="settings_layer_surface_alphabet_rail">Letter rail</string>
     <string name="settings_element_text_color_label">Text color</string>
     <string name="settings_element_border_label">Border</string>
+    <string name="settings_element_show_labels_label">Show captions</string>
 
     <string name="settings_layer_background_title">Layer %1$d · %2$s</string>
     <string name="settings_dock_background_label">Background</string>
