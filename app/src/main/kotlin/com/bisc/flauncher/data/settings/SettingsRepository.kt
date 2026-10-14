@@ -106,10 +106,10 @@ class SettingsRepository @Inject constructor(
 
     private fun folderShowAddRowKey(folderId: Long) = booleanPreferencesKey("folder_show_add_row_$folderId")
 
-    // Off by default for now — the Quick overview/Favorites panel is considered outdated pending a
-    // bigger rework (not yet decided), so it starts hidden rather than needing to be turned off by
-    // hand. Still just a flag, not a deletion: setting it back on fully restores the live panel.
-    val homePanelEnabled: Flow<Boolean> = dataStore.data.map { it[HOME_PANEL_ENABLED_KEY] ?: false }
+    // On by default — this is the Favorites/Panel attached to the top of the home screen, not the
+    // separate (and now dead-code) quick-search-sidebar tap action. Its settings live under
+    // Home screen > Panel, not as a standalone top-level entry.
+    val homePanelEnabled: Flow<Boolean> = dataStore.data.map { it[HOME_PANEL_ENABLED_KEY] ?: true }
 
     suspend fun setHomePanelEnabled(enabled: Boolean) {
         dataStore.edit { it[HOME_PANEL_ENABLED_KEY] = enabled }

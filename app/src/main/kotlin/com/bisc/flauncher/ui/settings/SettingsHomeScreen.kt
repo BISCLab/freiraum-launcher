@@ -428,6 +428,12 @@ fun SettingsHomePanelScreen(navController: NavController, onBack: () -> Unit, on
                 onClick = { onNavigate("border") },
                 trailing = null
             )
+            SettingsPreference(
+                icon = Icons.Filled.GridView,
+                title = stringResource(R.string.settings_dock_elements_title),
+                onClick = { onNavigate("elements") },
+                trailing = null
+            )
         }
     }
 }
