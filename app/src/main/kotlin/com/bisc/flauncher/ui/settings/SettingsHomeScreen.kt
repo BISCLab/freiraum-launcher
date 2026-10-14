@@ -186,14 +186,7 @@ fun SettingsHomeLayoutScreen(
                 Text(stringResource(R.string.settings_home_panel_label), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 Switch(checked = homePanelEnabled, onCheckedChange = { viewModel.setHomePanelEnabled(it) })
             }
-            if (otherRows.isEmpty()) {
-                Text(
-                    stringResource(R.string.settings_rows_empty),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainer).fillMaxWidth().padding(16.dp)
-                )
-            } else {
+            if (otherRows.isNotEmpty()) {
                 ReorderableList(
                     items = otherRows,
                     key = { it.id },
@@ -221,6 +214,18 @@ fun SettingsHomeLayoutScreen(
                     }
                 }
             }
+            // Replaces the old standalone "Add row" card below the whole group (and the old
+            // "No rows on this page" empty-state text) — one connected list from Panel to Dock,
+            // with the add action sitting right where new rows actually land.
+            Row(
+                modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer)
+                    .clickable { showAddSheet = true }.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Icon(imageVector = Icons.Filled.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Text(stringResource(R.string.settings_rows_add), style = MaterialTheme.typography.titleMedium)
+            }
             if (dockRow != null) {
                 Row(
                     modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer)
@@ -233,9 +238,6 @@ fun SettingsHomeLayoutScreen(
                     Switch(checked = dockRow.enabled, onCheckedChange = { viewModel.setRowEnabled(dockRow, it) })
                 }
             }
-        }
-        SettingsPreferenceGroup {
-            SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_rows_add), onClick = { showAddSheet = true }, trailing = null)
         }
     }
 
