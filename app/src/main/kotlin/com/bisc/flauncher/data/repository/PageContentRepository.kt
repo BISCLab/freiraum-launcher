@@ -490,6 +490,10 @@ class PageContentRepository @Inject constructor(
         rowDao.update(row.copy(dockVisibilityMode = mode))
     }
 
+    suspend fun setRowEnabled(row: PageRow, enabled: Boolean) {
+        rowDao.update(row.copy(enabled = enabled))
+    }
+
     suspend fun removeEntry(entry: AppRowEntry) {
         entryDao.delete(entry)
     }

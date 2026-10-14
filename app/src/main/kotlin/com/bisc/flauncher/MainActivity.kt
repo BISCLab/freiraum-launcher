@@ -32,6 +32,10 @@ import com.bisc.flauncher.ui.settings.SettingsListScreen
 import com.bisc.flauncher.ui.settings.SettingsPageRowsScreen
 import com.bisc.flauncher.ui.settings.SettingsPageIconScreen
 import com.bisc.flauncher.ui.settings.SettingsPagesScreen
+import com.bisc.flauncher.ui.settings.SettingsHomeScreenHub
+import com.bisc.flauncher.ui.settings.SettingsHomeAppearanceScreen
+import com.bisc.flauncher.ui.settings.SettingsHomeLayoutScreen
+import com.bisc.flauncher.ui.settings.SettingsHomePanelScreen
 import com.bisc.flauncher.ui.settings.SettingsSearchFullScreen
 import com.bisc.flauncher.ui.settings.SettingsSidebarScreen
 import com.bisc.flauncher.ui.settings.SettingsViewModel
@@ -145,11 +149,17 @@ class MainActivity : ComponentActivity() {
                                 navController = navController,
                                 onBack = { navController.popBackStack() },
                                 onOpenPage = { page ->
-                                    when (page.kind) {
-                                        com.bisc.flauncher.data.model.LauncherPageKind.ROWS -> navController.navigate("settings/pages/${page.id}")
-                                        com.bisc.flauncher.data.model.LauncherPageKind.APP_LIST -> navController.navigate("settings/app_overview")
-                                        com.bisc.flauncher.data.model.LauncherPageKind.SEARCH -> navController.navigate("settings/search")
-                                        com.bisc.flauncher.data.model.LauncherPageKind.SIDEBAR -> navController.navigate("settings/sidebar")
+                                    when {
+                                        page.kind == com.bisc.flauncher.data.model.LauncherPageKind.ROWS && page.isHome ->
+                                            navController.navigate("settings/pages/${page.id}/home")
+                                        page.kind == com.bisc.flauncher.data.model.LauncherPageKind.ROWS ->
+                                            navController.navigate("settings/pages/${page.id}")
+                                        page.kind == com.bisc.flauncher.data.model.LauncherPageKind.APP_LIST ->
+                                            navController.navigate("settings/app_overview")
+                                        page.kind == com.bisc.flauncher.data.model.LauncherPageKind.SEARCH ->
+                                            navController.navigate("settings/search")
+                                        page.kind == com.bisc.flauncher.data.model.LauncherPageKind.SIDEBAR ->
+                                            navController.navigate("settings/sidebar")
                                     }
                                 },
                                 onOpenIcon = { pageId -> navController.navigate("settings/pages/$pageId/icon") }
@@ -166,6 +176,40 @@ class MainActivity : ComponentActivity() {
                                 onBack = { navController.popBackStack() },
                                 onOpenRow = { rowId -> navController.navigate("settings/pages/$pageId/rows/$rowId") }
                             )
+                        }
+                        composable(
+                            "settings/pages/{pageId}/home",
+                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@composable
+                            SettingsHomeScreenHub(
+                                navController = navController,
+                                onBack = { navController.popBackStack() },
+                                onNavigate = { sub -> navController.navigate("settings/pages/$pageId/home/$sub") }
+                            )
+                        }
+                        composable(
+                            "settings/pages/{pageId}/home/appearance",
+                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@composable
+                            SettingsHomeAppearanceScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable(
+                            "settings/pages/{pageId}/home/layout",
+                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@composable
+                            SettingsHomeLayoutScreen(
+                                pageId = pageId,
+                                navController = navController,
+                                onBack = { navController.popBackStack() },
+                                onOpenRow = { rowId -> navController.navigate("settings/pages/$pageId/rows/$rowId") },
+                                onOpenPanel = { navController.navigate("settings/pages/$pageId/home/panel") }
+                            )
+                        }
+                        composable("settings/pages/{pageId}/home/panel") {
+                            SettingsHomePanelScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable(
                             "settings/pages/{pageId}/icon",

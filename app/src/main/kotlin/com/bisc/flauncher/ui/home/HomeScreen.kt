@@ -197,6 +197,7 @@ fun HomeScreen(
     val sidebarPanelAppearance by viewModel.sidebarPanelAppearance.collectAsState()
     val favoritesBottomBorderEnabled by viewModel.favoritesBottomBorderEnabled.collectAsState()
     val favoritesGroupDividersEnabled by viewModel.favoritesGroupDividersEnabled.collectAsState()
+    val homePanelEnabled by viewModel.homePanelEnabled.collectAsState()
     val folderHideDock by viewModel.folderHideDock.collectAsState()
     val folderCardAppearance by viewModel.folderCardAppearance.collectAsState()
     val keyboardAppearance by viewModel.keyboardAppearance.collectAsState()
@@ -566,7 +567,7 @@ fun HomeScreen(
         // instead of a plain tap-reveal strip — a proper EdgeNotch to pull it open by hand. Placed
         // before the search/app-list overlays below so those naturally cover it when open;
         // folderHideDock keeps the existing "hide the dock while a folder is open" behavior.
-        if (homeDockRow != null && !(folderOpen && folderHideDock)) {
+        if (homeDockRow != null && homeDockRow.enabled && !(folderOpen && folderHideDock)) {
             // Tapping the open background collapses the dock, same as tapping outside any modal —
             // only live while there's actually something to collapse back to.
             if (dockExpanded && dockCanCollapse) {
@@ -758,7 +759,7 @@ fun HomeScreen(
         // PageContentRepository.ensureSeeded's comment on that), only by tapping or dragging this.
         // Home-page-only, same restriction the old swipe-down gesture already had.
         AnimatedVisibility(
-            visible = overviewEntry == null && !folderOpen && isOnHomePage,
+            visible = homePanelEnabled && overviewEntry == null && !folderOpen && isOnHomePage,
             enter = fadeIn(tween(160)),
             exit = fadeOut(tween(120)),
             modifier = Modifier.align(Alignment.TopCenter)

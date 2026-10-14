@@ -372,7 +372,7 @@ fun SettingsPageRowsScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AddRowSheet(
+internal fun AddRowSheet(
     showSearchBarOption: Boolean,
     onWidgetKindSelected: (String) -> Unit,
     onMoreWidgetsSelected: () -> Unit,
@@ -399,7 +399,7 @@ private fun AddRowSheet(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun WidgetSizeSheet(
+internal fun WidgetSizeSheet(
     row: PageRow,
     spanY: Int,
     minSpan: Int,
@@ -442,7 +442,7 @@ fun CornerStylePreference(value: WidgetCornerStyle, selected: WidgetCornerStyle,
     )
 }
 
-private fun rowIcon(row: PageRow): ImageVector = when (row.type) {
+internal fun rowIcon(row: PageRow): ImageVector = when (row.type) {
     PageRowType.WIDGET -> widgetKindIcon(row.payload)
     PageRowType.SYSTEM_WIDGET -> Icons.Filled.Widgets
     PageRowType.APPS -> Icons.Filled.Apps

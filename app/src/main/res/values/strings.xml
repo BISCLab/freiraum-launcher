@@ -302,12 +302,18 @@
     <string name="settings_card_app_overview_subtitle">Layout, appearance, search button</string>
     <string name="settings_card_pages_subtitle">Widgets, app rows, backgrounds</string>
     <string name="settings_pages_home">Home screen</string>
+    <string name="settings_home_appearance_title">Appearance</string>
+    <string name="settings_home_appearance_subtitle">Background, status bar</string>
+    <string name="settings_home_layout_title">Layout</string>
+    <string name="settings_home_layout_subtitle">Panel, widgets, dock</string>
+    <string name="settings_home_panel_label">Panel</string>
     <string name="settings_pages_app_overview">App overview</string>
     <string name="settings_pages_search">Text search</string>
     <string name="settings_pages_sidebar">Quick overview</string>
     <string name="settings_pages_page">Page %1$d</string>
     <string name="settings_pages_add">Add page</string>
-    <string name="settings_pages_other_label">Other pages</string>
+    <string name="settings_pages_carousel_label">Carousel</string>
+    <string name="settings_pages_other_label">Utility pages</string>
     <string name="settings_pages_invocation_title">How this page is opened</string>
     <string name="settings_pages_invocation_none">Not bound to a gesture</string>
     <string name="settings_pages_add_template_label">Start from</string>
@@ -393,7 +399,6 @@
     <string name="settings_map_city_hint">City / place</string>
     <string name="settings_map_country_hint">Country</string>
     <string name="settings_statusbar_label">Status bar</string>
-    <string name="settings_homescreen_label">Home screen</string>
     <string name="settings_homescreen_widgets_enabled">Enable widgets on home screen</string>
     <string name="settings_homescreen_widgets_enabled_summary">Off by default — the home screen stays empty besides the dock. Turn on to add widgets like the clock.</string>
     <string name="settings_favorites_bottom_border">Apps panel bottom border</string>
