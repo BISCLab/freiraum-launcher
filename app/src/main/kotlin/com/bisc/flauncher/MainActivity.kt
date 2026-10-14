@@ -233,6 +233,9 @@ class MainActivity : ComponentActivity() {
                         composable("settings/pages/{pageId}/home/panel/border") {
                             SettingsPanelBorderScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
+                        composable("settings/pages/{pageId}/home/panel/elements") {
+                            SettingsSidebarScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
                         composable(
                             "settings/pages/{pageId}/home/layout/dock",
                             arguments = listOf(navArgument("pageId") { type = NavType.LongType })
