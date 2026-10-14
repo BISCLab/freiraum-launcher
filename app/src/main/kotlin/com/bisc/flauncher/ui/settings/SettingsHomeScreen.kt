@@ -73,11 +73,12 @@ fun SettingsHomeScreenHub(navController: NavController, onBack: () -> Unit, onNa
 }
 
 /** The Home page's own background and status-bar switch — just "Background" now (not the old
- *  "Layer 1 · Screen" wording, which leaked internal Layer-model terminology into the UI), with
- *  "Hide status bar" folded into the same screen since it's really a background-adjacent setting,
- *  not its own separate concept. */
+ *  "Layer 1 · Screen" wording, which leaked internal Layer-model terminology into the UI). "Hide
+ *  status bar" sits as its own row right below Background on this hub page — not nested inside
+ *  the Background detail page, which is one level further in than it belongs. */
 @Composable
 fun SettingsHomeAppearanceScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+    val pageHideStatusBar by remember(pageId) { viewModel.pageHideStatusBar(pageId) }.collectAsState(initial = false)
     var showBackgroundSheet by remember { mutableStateOf(false) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
@@ -89,10 +90,17 @@ fun SettingsHomeAppearanceScreen(pageId: Long, navController: NavController, onB
                 trailing = null
             )
         }
+        SettingsPreferenceGroup {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_statusbar_hide_page),
+                onClick = { viewModel.setPageHideStatusBar(pageId, !pageHideStatusBar) },
+                trailing = { Switch(checked = pageHideStatusBar, onCheckedChange = { viewModel.setPageHideStatusBar(pageId, it) }) }
+            )
+        }
     }
 
     if (showBackgroundSheet) {
-        val pageHideStatusBar by remember(pageId) { viewModel.pageHideStatusBar(pageId) }.collectAsState(initial = false)
         val pageBackgroundOverride by remember(pageId) { viewModel.pageBackgroundOverride(pageId) }.collectAsState(initial = null)
         val globalBackground by viewModel.globalBackground.collectAsState()
         SettingsEditPage(title = stringResource(R.string.settings_section_global_background), onDismiss = { showBackgroundSheet = false }) {
@@ -100,16 +108,12 @@ fun SettingsHomeAppearanceScreen(pageId: Long, navController: NavController, onB
                 override = pageBackgroundOverride,
                 global = globalBackground,
                 onUseGlobal = { viewModel.clearPageBackgroundConfig(pageId) },
-                onCustomColor = { viewModel.setPageBackgroundConfig(pageId, it) }
+                onCustomColor = { viewModel.setPageBackgroundConfig(pageId, it) },
+                // The page's own title already says "Background" — repeating a "Layer 1 · Screen"
+                // caption (plus a help icon explaining the old Layer 1/2/3 model) inside it too is
+                // redundant clutter, not extra clarity.
+                showLayerHeader = false
             )
-            SettingsPreferenceGroup {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_statusbar_hide_page),
-                    onClick = { viewModel.setPageHideStatusBar(pageId, !pageHideStatusBar) },
-                    trailing = { Switch(checked = pageHideStatusBar, onCheckedChange = { viewModel.setPageHideStatusBar(pageId, it) }) }
-                )
-            }
         }
     }
 }

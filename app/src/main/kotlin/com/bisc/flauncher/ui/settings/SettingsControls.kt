@@ -158,7 +158,6 @@ fun ElementAppearanceSection(
     allowNone: Boolean = true,
     onEyedropperCapture: (() -> androidx.compose.ui.graphics.ImageBitmap?)? = null
 ) {
-    var colorExpanded by remember { mutableStateOf(false) }
     var showLayerHelp by remember { mutableStateOf(false) }
 
     SettingsPreferenceGroup(title = styleGroupTitle, onInfoClick = { showLayerHelp = true }) {
@@ -167,38 +166,21 @@ fun ElementAppearanceSection(
                 value = mode,
                 selected = appearance.fillMode,
                 customFill = appearance.fill.asBrush(),
-                onSelect = { selected ->
-                    onAppearanceChange(appearance.copy(fillMode = selected))
-                    if (selected != ElementFillMode.NONE && appearance.fillMode == ElementFillMode.NONE) colorExpanded = true
-                }
+                onSelect = { selected -> onAppearanceChange(appearance.copy(fillMode = selected)) }
             )
         }
     }
 
     if (appearance.fillMode != ElementFillMode.NONE) {
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_background_source_color),
-                leading = {
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .background(appearance.fill.asBrush(), CircleShape)
-                            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                    )
-                },
-                onClick = { colorExpanded = !colorExpanded },
-                trailing = null
+        // The picker shows directly as soon as Color is selected above — no separate collapsed
+        // "Color" summary row to tap through first.
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_source_color)) {
+            ColorFillPickerContent(
+                fill = appearance.fill,
+                onFillChange = { fill -> onAppearanceChange(appearance.copy(fill = fill)) },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                onEyedropperCapture = onEyedropperCapture
             )
-            if (colorExpanded) {
-                ColorFillPickerContent(
-                    fill = appearance.fill,
-                    onFillChange = { fill -> onAppearanceChange(appearance.copy(fill = fill)) },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                    onEyedropperCapture = onEyedropperCapture
-                )
-            }
         }
 
         SettingsPreferenceGroup(title = stringResource(R.string.settings_background_opacity_label)) {
@@ -273,43 +255,25 @@ fun ElementAppearanceSection(
  *  Background screens instead of the old one-sheet-does-everything editor. */
 @Composable
 fun ElementBackgroundSection(appearance: ElementAppearance, onAppearanceChange: (ElementAppearance) -> Unit, allowNone: Boolean = true) {
-    var colorExpanded by remember { mutableStateOf(false) }
     SettingsPreferenceGroup {
         ElementFillMode.entries.filter { allowNone || it != ElementFillMode.NONE }.forEach { mode ->
             FillModePreference(
                 value = mode,
                 selected = appearance.fillMode,
                 customFill = appearance.fill.asBrush(),
-                onSelect = { selected ->
-                    onAppearanceChange(appearance.copy(fillMode = selected))
-                    if (selected != ElementFillMode.NONE && appearance.fillMode == ElementFillMode.NONE) colorExpanded = true
-                }
+                onSelect = { selected -> onAppearanceChange(appearance.copy(fillMode = selected)) }
             )
         }
     }
     if (appearance.fillMode != ElementFillMode.NONE) {
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_background_source_color),
-                leading = {
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .background(appearance.fill.asBrush(), CircleShape)
-                            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                    )
-                },
-                onClick = { colorExpanded = !colorExpanded },
-                trailing = null
+        // The picker shows directly as soon as Color is selected above — no separate collapsed
+        // "Color" summary row to tap through first.
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_source_color)) {
+            ColorFillPickerContent(
+                fill = appearance.fill,
+                onFillChange = { fill -> onAppearanceChange(appearance.copy(fill = fill)) },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
             )
-            if (colorExpanded) {
-                ColorFillPickerContent(
-                    fill = appearance.fill,
-                    onFillChange = { fill -> onAppearanceChange(appearance.copy(fill = fill)) },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
-                )
-            }
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_background_opacity_label)) {
             SettledSlider(
