@@ -6,9 +6,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BorderAll
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Palette
@@ -38,10 +40,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
+import com.bisc.flauncher.data.model.AppRowEntry
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.model.appearance
+import com.bisc.flauncher.data.model.panelRows
+import com.bisc.flauncher.ui.home.ConfirmRemoveDialog
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.SystemWidgetPickerSheet
 import com.bisc.flauncher.ui.home.dock.AddMapTargetDialog
@@ -465,9 +470,14 @@ fun SettingsPanelBorderScreen(pageId: Long, navController: NavController, onBack
 }
 
 /** The Panel's own grid editor — same "+" preview/chooser idea as [SettingsDockElementsScreen], but
- *  a two-dimensional grid (columns AND rows picked up front) instead of a single pill line, since
- *  the Panel wraps to multiple rows rather than growing/shrinking width like the dock does. Adds
- *  contacts as a 7th content type (via the same [AddElementChooserSheet] the Dock now shares). */
+ *  shaped row by row (each sub-row picks its own column count, 1-6) instead of one shared column
+ *  count for the whole grid, since the Panel wraps to multiple rows rather than growing/shrinking
+ *  width like the dock does — see [com.bisc.flauncher.ui.home.AppsGridEntries]'s rowColumns param
+ *  for the centered layout this produces. No separate reorderable entries list underneath either:
+ *  tapping a filled slot in the preview itself removes it (see onEditEntry there), since every slot
+ *  is already individually picked through the "+" chooser — a second list showing the same content
+ *  again underneath was redundant. Adds contacts as a 7th content type (via the same
+ *  [AddElementChooserSheet] the Dock now shares). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
@@ -486,6 +496,7 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
     val pinnedContacts by viewModel.pinnedContacts.collectAsState()
     val contactPickerOpen by viewModel.contactPickerOpen.collectAsState()
     val contactPickerList by viewModel.contactPickerList.collectAsState()
+    val rowShape = row.panelRows()
 
     var showAddChooser by remember { mutableStateOf(false) }
     var showAppPicker by remember { mutableStateOf(false) }
@@ -496,13 +507,15 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
     var showAddMapTargetDialog by remember { mutableStateOf(false) }
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
     var pendingShortcut by remember { mutableStateOf(false) }
+    var pendingRemoval by remember { mutableStateOf<AppRowEntry?>(null) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_dock_elements_title), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
-            androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 com.bisc.flauncher.ui.home.AppsGridEntries(
                     entries = entries,
-                    columns = row.columns,
+                    columns = 1,
+                    rowColumns = rowShape,
                     folders = folders,
                     folderItemsByFolder = folderItemsByFolder,
                     savedMapTargets = savedMapTargets,
@@ -519,72 +532,56 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
                     onContactClick = {},
                     showLabels = row.showLabels,
                     labelColor = row.appearance().contentColor?.let { androidx.compose.ui.graphics.Color(it) } ?: androidx.compose.ui.graphics.Color.White,
-                    totalSlots = row.columns * row.gridRows,
-                    onAddEmptySlot = { showAddChooser = true }
+                    onAddEmptySlot = { showAddChooser = true },
+                    onEditEntry = { entry -> pendingRemoval = entry }
                 )
             }
         }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_apps_row_columns_label)) {
-            SettingsPreference(
-                icon = null,
-                title = row.columns.toString(),
-                onClick = {},
-                trailing = {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        androidx.compose.material3.IconButton(
-                            onClick = { viewModel.setRowColumns(row, row.columns - 1) },
-                            enabled = row.columns > com.bisc.flauncher.data.model.GridConstants.MIN_APPS_ROW_COLUMNS
-                        ) { Icon(androidx.compose.material.icons.Icons.Filled.Remove, contentDescription = null) }
-                        androidx.compose.material3.IconButton(
-                            onClick = { viewModel.setRowColumns(row, row.columns + 1) },
-                            enabled = row.columns < com.bisc.flauncher.data.model.GridConstants.MAX_APPS_ROW_COLUMNS
-                        ) { Icon(androidx.compose.material.icons.Icons.Filled.Add, contentDescription = null) }
-                    }
-                }
-            )
-        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_panel_rows_label)) {
-            SettingsPreference(
-                icon = null,
-                title = row.gridRows.toString(),
-                onClick = {},
-                trailing = {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        androidx.compose.material3.IconButton(
-                            onClick = { viewModel.setRowGridRows(row, row.gridRows - 1) },
-                            enabled = row.gridRows > 1
-                        ) { Icon(androidx.compose.material.icons.Icons.Filled.Remove, contentDescription = null) }
-                        androidx.compose.material3.IconButton(
-                            onClick = { viewModel.setRowGridRows(row, row.gridRows + 1) },
-                            enabled = row.gridRows < 6
-                        ) { Icon(androidx.compose.material.icons.Icons.Filled.Add, contentDescription = null) }
+            rowShape.forEachIndexed { index, cols ->
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_panel_row_number, index + 1),
+                    onClick = {},
+                    trailing = {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(cols.toString(), modifier = Modifier.padding(end = 4.dp))
+                            androidx.compose.material3.IconButton(
+                                onClick = { viewModel.setPanelRowColumns(row, rowShape.toMutableList().apply { this[index] = cols - 1 }) },
+                                enabled = cols > 1
+                            ) { Icon(androidx.compose.material.icons.Icons.Filled.Remove, contentDescription = null) }
+                            androidx.compose.material3.IconButton(
+                                onClick = { viewModel.setPanelRowColumns(row, rowShape.toMutableList().apply { this[index] = cols + 1 }) },
+                                enabled = cols < 6
+                            ) { Icon(androidx.compose.material.icons.Icons.Filled.Add, contentDescription = null) }
+                            androidx.compose.material3.IconButton(
+                                onClick = { viewModel.setPanelRowColumns(row, rowShape.filterIndexed { i, _ -> i != index }) },
+                                enabled = rowShape.size > 1
+                            ) { Icon(androidx.compose.material.icons.Icons.Filled.Close, contentDescription = null) }
+                        }
                     }
-                }
-            )
-        }
-        if (entries.isNotEmpty()) {
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_apps_row_apps_label)) {
-                ReorderableList(items = entries, key = { it.id }, onReorder = viewModel::reorderAppRowEntries) { entry ->
-                    AppRowEntryRow(
-                        entry = entry,
-                        folders = folders,
-                        folderItemsByFolder = folderItemsByFolder,
-                        savedMapTargets = savedMapTargets,
-                        pinnedWebsites = pinnedWebsites,
-                        pages = allPages,
-                        loadIcon = viewModel::loadIcon,
-                        resolveLabel = viewModel::resolveLabel,
-                        onRemove = { viewModel.removeAppRowEntry(entry) },
-                        pinnedContacts = pinnedContacts
-                    )
-                }
+                )
             }
+            SettingsPreference(
+                icon = androidx.compose.material.icons.Icons.Filled.Add,
+                title = stringResource(R.string.settings_panel_add_row),
+                onClick = { viewModel.setPanelRowColumns(row, rowShape + 4) },
+                trailing = null
+            )
         }
         CaptionsSection(
             showLabels = row.showLabels,
             onShowLabelsChange = { viewModel.setRowShowLabels(row, it) },
             appearance = row.appearance(),
             onAppearanceChange = { viewModel.setRowAppearance(row, it) }
+        )
+    }
+
+    pendingRemoval?.let { entry ->
+        ConfirmRemoveDialog(
+            label = com.bisc.flauncher.ui.home.entryLabel(entry, folders, savedMapTargets, pinnedWebsites, allPages, pinnedContacts, viewModel::resolveLabel),
+            onConfirm = { viewModel.removeAppRowEntry(entry); pendingRemoval = null },
+            onDismiss = { pendingRemoval = null }
         )
     }
 

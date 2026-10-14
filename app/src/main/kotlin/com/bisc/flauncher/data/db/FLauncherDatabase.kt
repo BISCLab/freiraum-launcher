@@ -23,7 +23,7 @@ import com.bisc.flauncher.data.model.SavedMapTarget
         PinnedShortcut::class, AppOverride::class,
         PinnedContact::class
     ],
-    version = 45,
+    version = 46,
     exportSchema = true
 )
 @TypeConverters(Converters::class)

@@ -71,12 +71,19 @@ data class PageRow(
     // color — the same "Text color" picker already shown for the row — so there's only one
     // color setting per row, not a second one specific to captions.
     val showLabels: Boolean = false,
-    // Target row count for the Home page's own PANEL row's grid — paired with [columns] to define
-    // its total capacity (columns * gridRows empty "+" slots shown until filled), the same "pick a
-    // shape up front" idea as the dock's pillMaxEntries, just two-dimensional. Meaningless for any
-    // other row type.
-    val gridRows: Int = 3
+    // The Home page's own PANEL row's shape — one entry per sub-row, each holding that sub-row's own
+    // column count (1-6), comma-separated (e.g. "4,3,4"). Independent per row rather than one shared
+    // column count, so a shorter row isn't forced to the same width as a longer one. See
+    // [PageRow.panelRows]/[PageRow.withPanelRows]. Meaningless for any other row type.
+    val panelRowColumns: String = "4,4,4"
 )
+
+/** Parses [PageRow.panelRowColumns] into one column count per sub-row; always at least one row. */
+fun PageRow.panelRows(): List<Int> =
+    panelRowColumns.split(",").mapNotNull { it.trim().toIntOrNull()?.coerceIn(1, 6) }.ifEmpty { listOf(4) }
+
+fun PageRow.withPanelRows(rows: List<Int>): PageRow =
+    copy(panelRowColumns = rows.ifEmpty { listOf(4) }.joinToString(",") { it.coerceIn(1, 6).toString() })
 
 /** Reads the stored date-tap action of a clock row as a [GestureAction]. */
 fun PageRow.clockDateAction(): GestureAction =

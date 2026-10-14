@@ -97,6 +97,7 @@ import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.data.model.appearance
+import com.bisc.flauncher.data.model.panelRows
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.ui.home.dock.AddMapTargetDialog
@@ -342,8 +343,6 @@ fun HomeScreen(
             com.bisc.flauncher.data.model.LauncherPageKind.SIDEBAR -> viewModel.openOverview()
         }
     }
-    var addingAppToDockRowId by remember { mutableStateOf<Long?>(null) }
-    var addingAppToPanelRowId by remember { mutableStateOf<Long?>(null) }
     // The one place "go back to home" is defined — closes every overlay and, crucially, also scrolls
     // the pager itself back to home. Closing an overlay alone used to leave the pager wherever it
     // already was, which is how the system home gesture (and back-swiping out of search/app overview)
@@ -603,7 +602,9 @@ fun HomeScreen(
                         onFolderClick = viewModel::openFolder,
                         onShortcutClick = viewModel::launchFolderShortcut,
                         onOpenPageLink = onOpenPageLink,
-                        onAddEmptySlot = { addingAppToDockRowId = homeDockRow.id },
+                        // Live dock is display-only now — adding/removing entries only happens in
+                        // Settings > Home screen > Layout > Dock > Elements.
+                        onAddEmptySlot = null,
                         maxEntries = homeDockRow.pillMaxEntries,
                         showLabels = homeDockRow.showLabels,
                         labelColor = homeDockRow.appearance().contentColor?.let { Color(it) } ?: Color.White,
@@ -687,12 +688,11 @@ fun HomeScreen(
             // Top square — flush and seamless against the screen's own top edge, no gap at the device's
             // rounded corners. Bottom stays rounded (the panel's "resting" edge, not attached to anything).
             val panelShape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 28.dp, bottomEnd = 28.dp)
-            val panelColumns = (homePanelRow?.columns ?: 4).coerceAtLeast(1)
-            val panelGridRows = (homePanelRow?.gridRows ?: 3).coerceAtLeast(1)
-            // A fixed shape the user picked up front (columns x rows), not an estimate from content —
-            // predictable size that doesn't jump around as entries are added/removed, same idea as the
-            // dock's own fixed pillMaxEntries width.
-            val panelHeight = (96.dp * panelGridRows + 64.dp).coerceIn(140.dp, maxHeight)
+            val panelRowShape = homePanelRow?.panelRows() ?: listOf(4, 4, 4)
+            // A fixed shape the user picked up front (one column count per row), not an estimate
+            // from content — predictable size that doesn't jump around as entries are added/removed,
+            // same idea as the dock's own fixed pillMaxEntries width.
+            val panelHeight = (96.dp * panelRowShape.size + 64.dp).coerceIn(140.dp, maxHeight)
             val panelAppearance = homePanelRow?.appearance() ?: sidebarPanelAppearance
             val panelBorderColor = resolveElementColors(panelAppearance).borderColor
 
@@ -725,9 +725,11 @@ fun HomeScreen(
                     ) {
                         item {
                             homePanelRow?.let { row ->
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 AppsGridEntries(
                                     entries = appEntriesByRow[row.id].orEmpty(),
-                                    columns = panelColumns,
+                                    columns = 1,
+                                    rowColumns = panelRowShape,
                                     folders = folders,
                                     folderItemsByFolder = folderItemsByFolder,
                                     savedMapTargets = savedMapTargets,
@@ -750,10 +752,11 @@ fun HomeScreen(
                                         }
                                     },
                                     showLabels = row.showLabels,
-                                    labelColor = row.appearance().contentColor?.let { Color(it) } ?: Color.White,
-                                    totalSlots = panelColumns * panelGridRows,
-                                    onAddEmptySlot = { addingAppToPanelRowId = row.id }
+                                    labelColor = row.appearance().contentColor?.let { Color(it) } ?: Color.White
+                                    // Live panel is display-only now — adding/removing entries only
+                                    // happens in Settings > Home screen > Layout > Panel > Elements.
                                 )
+                                }
                             }
                         }
                     }
@@ -772,6 +775,16 @@ fun HomeScreen(
             modifier = Modifier.align(Alignment.TopCenter)
         ) {
             EdgeNotch(edge = NotchEdge.TOP, onOpen = { viewModel.openOverview() })
+        }
+
+        // TEMPORARY — Dock/Panel no longer open a settings-reachable long-press menu of their own
+        // now that live "+" editing is gone from both; until a real way back into Settings from the
+        // home screen is wired up, this plain center button stands in for it so Settings stays reachable.
+        if (isOnHomePage && !isPanelOpen && !searchOpen && !appListOpen && !folderOpen) {
+            androidx.compose.material3.Button(
+                onClick = onNavigateToSettings,
+                modifier = Modifier.align(Alignment.Center)
+            ) { Text("Settings (temp)") }
         }
     }
 
@@ -985,18 +998,6 @@ fun HomeScreen(
         )
     }
 
-    addingAppToPanelRowId?.let { rowId ->
-        ShortcutSourceAppSheet(
-            apps = browsableApps,
-            loadIcon = viewModel::loadIcon,
-            onAppSelected = { app ->
-                viewModel.addAppEntryToRow(rowId, app)
-                addingAppToPanelRowId = null
-            },
-            onDismiss = { addingAppToPanelRowId = null }
-        )
-    }
-
     if (contactPickerOpen) {
         ContactPickerSheet(
             contacts = contactPickerList,
@@ -1105,18 +1106,6 @@ fun HomeScreen(
                 addingAppToFolderId = null
             },
             onDismiss = { addingAppToFolderId = null }
-        )
-    }
-
-    addingAppToDockRowId?.let { rowId ->
-        ShortcutSourceAppSheet(
-            apps = browsableApps,
-            loadIcon = viewModel::loadIcon,
-            onAppSelected = { app ->
-                viewModel.addAppEntryToRow(rowId, app)
-                addingAppToDockRowId = null
-            },
-            onDismiss = { addingAppToDockRowId = null }
         )
     }
 
