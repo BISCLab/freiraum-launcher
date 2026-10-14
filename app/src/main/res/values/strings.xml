@@ -265,7 +265,7 @@
     <string name="settings_background_source_custom_image">Custom image</string>
     <string name="settings_background_source_color">Color</string>
     <string name="settings_background_use_global">Global background</string>
-    <string name="settings_background_use_global_summary">The same background used everywhere, set once in Appearance.</string>
+    <string name="settings_background_use_global_summary">The same background used everywhere, set once in Global settings.</string>
     <string name="settings_section_global_background">Background</string>
     <string name="settings_card_global_background_subtitle">One background image or color for every screen</string>
     <string name="settings_background_opacity_label">Opacity</string>

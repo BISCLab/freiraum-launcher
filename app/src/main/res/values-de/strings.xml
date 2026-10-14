@@ -274,7 +274,7 @@
     <string name="settings_background_source_custom_image">Eigenes Bild</string>
     <string name="settings_background_source_color">Farbe</string>
     <string name="settings_background_use_global">Globaler Hintergrund</string>
-    <string name="settings_background_use_global_summary">Derselbe Hintergrund überall, einmal unter Erscheinungsbild eingestellt.</string>
+    <string name="settings_background_use_global_summary">Derselbe Hintergrund überall, einmal unter Globale Einstellungen eingestellt.</string>
     <string name="settings_section_global_background">Hintergrund</string>
     <string name="settings_card_global_background_subtitle">Ein Hintergrundbild oder eine Farbe für jeden Bildschirm</string>
     <string name="settings_background_opacity_label">Deckkraft</string>
