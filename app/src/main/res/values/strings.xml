@@ -386,6 +386,8 @@
     <string name="settings_apps_row_edit_title">Edit apps row</string>
     <string name="settings_apps_row_columns_label">Columns</string>
     <string name="settings_panel_rows_label">Rows</string>
+    <string name="settings_panel_row_number">Row %1$d</string>
+    <string name="settings_panel_add_row">Add row</string>
     <string name="settings_apps_row_apps_label">Apps</string>
     <string name="settings_apps_row_empty">No apps. Add one below.</string>
     <string name="settings_apps_row_add_app">Add app</string>

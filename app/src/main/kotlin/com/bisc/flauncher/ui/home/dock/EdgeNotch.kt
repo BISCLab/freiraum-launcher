@@ -54,19 +54,19 @@ enum class NotchEdge { TOP, BOTTOM }
  * leave a same-colored notch invisible against it. The notch's only job is to stay discoverable, so
  * it always contrasts with the page behind it instead.
  *
- * A full-width tail (only the central bump itself stays narrow) fills the system inset behind it —
- * the gesture nav bar for a bottom notch, the status bar/camera cutout for a top one — so the
- * collapsed panel reads as "the rest of this bar is just past the edge" instead of the bump
- * floating a visible gap above a sliver of the page's own background.
+ * Full screen width with rounded corners on the open edge (not a narrow centered bump any more) —
+ * one continuous bar that also fills the system inset behind it (the gesture nav bar for a bottom
+ * notch, the status bar/camera cutout for a top one), so the collapsed panel reads as "the rest of
+ * this bar is just past the edge" instead of floating a visible gap above the page's own background.
  */
 @Composable
 fun EdgeNotch(edge: NotchEdge, onOpen: () -> Unit, modifier: Modifier = Modifier) {
     val surfaceDark = LocalSurfaceIsDark.current ?: (MaterialTheme.colorScheme.background.luminance() < 0.5f)
     val background = (if (surfaceDark) Color.White else Color.Black).copy(alpha = 0.85f)
     val iconTint = if (surfaceDark) Color.Black else Color.White
-    val bumpShape = when (edge) {
-        NotchEdge.BOTTOM -> RoundedCornerShape(topStart = 14.dp, topEnd = 14.dp)
-        NotchEdge.TOP -> RoundedCornerShape(bottomStart = 14.dp, bottomEnd = 14.dp)
+    val barShape = when (edge) {
+        NotchEdge.BOTTOM -> RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+        NotchEdge.TOP -> RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)
     }
     val tailHeight: Dp = when (edge) {
         NotchEdge.BOTTOM -> WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
@@ -106,21 +106,19 @@ fun EdgeNotch(edge: NotchEdge, onOpen: () -> Unit, modifier: Modifier = Modifier
             },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (edge == NotchEdge.TOP && tailHeight > 0.dp) {
-            Box(Modifier.fillMaxWidth().height(tailHeight).background(background))
-        }
         Box(
-            modifier = Modifier.size(width = 56.dp, height = 22.dp).clip(bumpShape).background(background),
-            contentAlignment = Alignment.Center
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(22.dp + tailHeight)
+                .clip(barShape)
+                .background(background),
+            contentAlignment = if (edge == NotchEdge.BOTTOM) Alignment.TopCenter else Alignment.BottomCenter
         ) {
             Icon(
                 imageVector = if (edge == NotchEdge.BOTTOM) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
                 contentDescription = null,
                 tint = iconTint
             )
-        }
-        if (edge == NotchEdge.BOTTOM && tailHeight > 0.dp) {
-            Box(Modifier.fillMaxWidth().height(tailHeight).background(background))
         }
     }
 }

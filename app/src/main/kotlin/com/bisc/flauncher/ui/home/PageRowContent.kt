@@ -239,8 +239,10 @@ private fun AppsRowGrid(
  *  directly in its own [com.bisc.flauncher.ui.home.dock.DockPanelSurface] shell instead of a
  *  [WidgetCard]) can reuse the exact same per-type cell rendering, now extended with an optional
  *  [totalSlots]/[onAddEmptySlot] pair (pad with tappable "+" cells up to a target grid shape,
- *  the dock's "+" slot idea generalized to two dimensions) and [GridItemType.CONTACT]. Ordinary
- *  in-page apps rows pass neither — unpadded, exactly their entry count, same as before. */
+ *  the dock's "+" slot idea generalized to two dimensions), [GridItemType.CONTACT], and
+ *  [rowColumns]/[onEditEntry] for the Panel's own per-row-column, centered shape (see their own
+ *  doc comments below). Ordinary in-page apps rows pass neither of the Panel-only params — a
+ *  single [columns] value, stretched to fill the row's full width, same as before. */
 @Composable
 fun AppsGridEntries(
     entries: List<AppRowEntry>,
@@ -262,60 +264,91 @@ fun AppsGridEntries(
     showLabels: Boolean = true,
     labelColor: Color = Color.White,
     totalSlots: Int? = null,
-    onAddEmptySlot: ((Int) -> Unit)? = null
+    onAddEmptySlot: ((Int) -> Unit)? = null,
+    // The Panel's own shape: one column count per sub-row (see PageRow.panelRows), each row
+    // centered around the middle with fixed-size cells and a constant gap — rather than stretched
+    // with Arrangement.SpaceEvenly to fill the full width — so a 3-wide row and a 5-wide row both
+    // read as "centered, evenly spaced" instead of the shorter one looking stretched out. When set,
+    // this entirely replaces the [columns]/[totalSlots] flat-chunking path below.
+    rowColumns: List<Int>? = null,
+    // Settings-only: when set, tapping any *filled* cell calls this instead of its normal live
+    // action (launch the app, open the folder, …) — the Panel's Elements editor uses it to let you
+    // remove an entry by tapping it directly, instead of a separate reorderable list underneath.
+    onEditEntry: ((AppRowEntry) -> Unit)? = null
 ) {
-    val safeColumns = columns.coerceAtLeast(1)
-    val padded: List<AppRowEntry?> = if (totalSlots != null && onAddEmptySlot != null) {
-        entries + List((totalSlots - entries.size).coerceAtLeast(0)) { null }
-    } else {
-        entries
+    @Composable
+    fun Cell(entry: AppRowEntry?, slotIndex: Int) {
+        if (entry == null) {
+            if (onAddEmptySlot != null) EmptyGridSlotCell(onClick = { onAddEmptySlot(slotIndex) })
+            return
+        }
+        val editOverride = onEditEntry?.let { cb -> { cb(entry) } }
+        when (entry.type) {
+            GridItemType.APP -> AppIconCell(payload = entry.payload, loadIcon = loadIcon, resolveLabel = resolveLabel, showLabel = showLabels, labelColor = labelColor, onClickOverride = editOverride)
+            GridItemType.FOLDER -> {
+                val folderId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                val folder = folders.find { it.id == folderId }
+                val previewItems = folderId?.let { folderItemsByFolder[it] }.orEmpty()
+                FolderCell(folder = folder, previewItems = previewItems, loadIcon = loadIcon, loadPackIcon = loadPackIcon, onClick = editOverride ?: { if (folderId != null) onFolderClick(folderId) }, showLabel = showLabels, labelColor = labelColor)
+            }
+            GridItemType.SHORTCUT -> ShortcutCell(payload = entry.payload, onClick = editOverride ?: { onShortcutClick(entry.payload) }, showLabel = showLabels, labelColor = labelColor)
+            GridItemType.MAP_TARGET -> {
+                val targetId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                val target = savedMapTargets.find { it.id == targetId }
+                MapTargetCell(target = target, showLabel = showLabels, labelColor = labelColor, onClickOverride = editOverride)
+            }
+            GridItemType.WEBSITE -> {
+                val websiteId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                val website = pinnedWebsites.find { it.id == websiteId }
+                WebsiteCell(website = website, showLabel = showLabels, labelColor = labelColor, onClickOverride = editOverride)
+            }
+            GridItemType.PAGE -> {
+                val pageId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                val page = pages.find { it.id == pageId }
+                PageLinkCell(page = page, pages = pages, onClick = editOverride ?: { if (page != null) onOpenPageLink(page.id, page.kind) }, showLabel = showLabels, labelColor = labelColor)
+            }
+            GridItemType.CONTACT -> {
+                val contactId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                val contact = pinnedContacts.find { it.contactId == contactId }
+                ContactCell(
+                    contact = contact,
+                    loadContactPhoto = loadContactPhoto,
+                    onClick = editOverride ?: { if (contactId != null) onContactClick(contactId) },
+                    showLabel = showLabels,
+                    labelColor = labelColor
+                )
+            }
+            GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Unit
+        }
     }
-    padded.chunked(safeColumns).forEachIndexed { chunkIndex, chunk ->
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            repeat(safeColumns) { slot ->
-                Box(modifier = Modifier.weight(1f)) {
-                    val entry = chunk.getOrNull(slot)
-                    if (entry != null) {
-                        when (entry.type) {
-                            GridItemType.APP -> AppIconCell(payload = entry.payload, loadIcon = loadIcon, resolveLabel = resolveLabel, showLabel = showLabels, labelColor = labelColor)
-                            GridItemType.FOLDER -> {
-                                val folderId = remember(entry.payload) { entry.payload.toLongOrNull() }
-                                val folder = folders.find { it.id == folderId }
-                                val previewItems = folderId?.let { folderItemsByFolder[it] }.orEmpty()
-                                FolderCell(folder = folder, previewItems = previewItems, loadIcon = loadIcon, loadPackIcon = loadPackIcon, onClick = { folderId?.let(onFolderClick) }, showLabel = showLabels, labelColor = labelColor)
-                            }
-                            GridItemType.SHORTCUT -> ShortcutCell(payload = entry.payload, onClick = { onShortcutClick(entry.payload) }, showLabel = showLabels, labelColor = labelColor)
-                            GridItemType.MAP_TARGET -> {
-                                val targetId = remember(entry.payload) { entry.payload.toLongOrNull() }
-                                val target = savedMapTargets.find { it.id == targetId }
-                                MapTargetCell(target = target, showLabel = showLabels, labelColor = labelColor)
-                            }
-                            GridItemType.WEBSITE -> {
-                                val websiteId = remember(entry.payload) { entry.payload.toLongOrNull() }
-                                val website = pinnedWebsites.find { it.id == websiteId }
-                                WebsiteCell(website = website, showLabel = showLabels, labelColor = labelColor)
-                            }
-                            GridItemType.PAGE -> {
-                                val pageId = remember(entry.payload) { entry.payload.toLongOrNull() }
-                                val page = pages.find { it.id == pageId }
-                                PageLinkCell(page = page, pages = pages, onClick = { page?.let { onOpenPageLink(it.id, it.kind) } }, showLabel = showLabels, labelColor = labelColor)
-                            }
-                            GridItemType.CONTACT -> {
-                                val contactId = remember(entry.payload) { entry.payload.toLongOrNull() }
-                                val contact = pinnedContacts.find { it.contactId == contactId }
-                                ContactCell(
-                                    contact = contact,
-                                    loadContactPhoto = loadContactPhoto,
-                                    onClick = { contactId?.let(onContactClick) },
-                                    showLabel = showLabels,
-                                    labelColor = labelColor
-                                )
-                            }
-                            GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Unit
-                        }
-                    } else if (onAddEmptySlot != null) {
-                        val slotIndex = chunkIndex * safeColumns + slot
-                        EmptyGridSlotCell(onClick = { onAddEmptySlot(slotIndex) })
+
+    if (rowColumns != null) {
+        var consumed = 0
+        rowColumns.forEach { cols ->
+            val safeCols = cols.coerceAtLeast(1)
+            val rowStart = consumed
+            consumed += safeCols
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                repeat(safeCols) { slot ->
+                    if (slot > 0) Spacer(Modifier.width(16.dp))
+                    Box(modifier = Modifier.width(64.dp)) {
+                        Cell(entries.getOrNull(rowStart + slot), rowStart + slot)
+                    }
+                }
+            }
+        }
+    } else {
+        val safeColumns = columns.coerceAtLeast(1)
+        val padded: List<AppRowEntry?> = if (totalSlots != null && onAddEmptySlot != null) {
+            entries + List((totalSlots - entries.size).coerceAtLeast(0)) { null }
+        } else {
+            entries
+        }
+        padded.chunked(safeColumns).forEachIndexed { chunkIndex, chunk ->
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                repeat(safeColumns) { slot ->
+                    Box(modifier = Modifier.weight(1f)) {
+                        Cell(chunk.getOrNull(slot), chunkIndex * safeColumns + slot)
                     }
                 }
             }
@@ -339,7 +372,14 @@ private fun EmptyGridSlotCell(onClick: () -> Unit) {
 }
 
 @Composable
-private fun AppIconCell(payload: String, loadIcon: (ComponentName) -> ImageBitmap?, resolveLabel: (ComponentName) -> String, showLabel: Boolean = true, labelColor: Color = Color.White) {
+private fun AppIconCell(
+    payload: String,
+    loadIcon: (ComponentName) -> ImageBitmap?,
+    resolveLabel: (ComponentName) -> String,
+    showLabel: Boolean = true,
+    labelColor: Color = Color.White,
+    onClickOverride: (() -> Unit)? = null
+) {
     val context = LocalContext.current
     val componentName = remember(payload) { ComponentName.unflattenFromString(payload) }
     val bitmap = rememberAppIcon(componentName, loadIcon)
@@ -347,8 +387,8 @@ private fun AppIconCell(payload: String, loadIcon: (ComponentName) -> ImageBitma
 
     Column(
         modifier = Modifier
-            .clickable(enabled = componentName != null) {
-                componentName?.let { launchApp(context, it) }
+            .clickable(enabled = onClickOverride != null || componentName != null) {
+                if (onClickOverride != null) onClickOverride() else componentName?.let { launchApp(context, it) }
             }
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -385,11 +425,13 @@ private fun ShortcutCell(payload: String, onClick: () -> Unit, showLabel: Boolea
 }
 
 @Composable
-private fun MapTargetCell(target: SavedMapTarget?, showLabel: Boolean = true, labelColor: Color = Color.White) {
+private fun MapTargetCell(target: SavedMapTarget?, showLabel: Boolean = true, labelColor: Color = Color.White, onClickOverride: (() -> Unit)? = null) {
     val context = LocalContext.current
     Column(
         modifier = Modifier
-            .clickable(enabled = target != null) { target?.let { launchMapTarget(context, it) } }
+            .clickable(enabled = onClickOverride != null || target != null) {
+                if (onClickOverride != null) onClickOverride() else target?.let { launchMapTarget(context, it) }
+            }
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -402,11 +444,13 @@ private fun MapTargetCell(target: SavedMapTarget?, showLabel: Boolean = true, la
 }
 
 @Composable
-private fun WebsiteCell(website: PinnedWebsite?, showLabel: Boolean = true, labelColor: Color = Color.White) {
+private fun WebsiteCell(website: PinnedWebsite?, showLabel: Boolean = true, labelColor: Color = Color.White, onClickOverride: (() -> Unit)? = null) {
     val context = LocalContext.current
     Column(
         modifier = Modifier
-            .clickable(enabled = website != null) { website?.let { openWebsite(context, it) } }
+            .clickable(enabled = onClickOverride != null || website != null) {
+                if (onClickOverride != null) onClickOverride() else website?.let { openWebsite(context, it) }
+            }
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -765,7 +809,7 @@ private fun GridLabel(text: String, color: Color = Color.White, modifier: Modifi
 /** Resolves a display name for any [AppRowEntry] type — shared by [PillRowEntries]' optional
  *  captions (PageRow.showLabels) and AppsRowGrid's own always-on per-cell labels. */
 @Composable
-private fun entryLabel(
+internal fun entryLabel(
     entry: AppRowEntry,
     folders: List<Folder>,
     savedMapTargets: List<SavedMapTarget>,

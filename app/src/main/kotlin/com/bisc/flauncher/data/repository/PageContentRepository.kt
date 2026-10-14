@@ -23,6 +23,7 @@ import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.data.model.withAppearance
+import com.bisc.flauncher.data.model.withPanelRows
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.settings.SettingsRepository
 import com.bisc.flauncher.ui.theme.ThemePreference
@@ -77,7 +78,7 @@ class PageContentRepository @Inject constructor(
         // dark/Black-on-light contrast picks a sensible default without any bespoke color logic.
         if (rowDao.getForPage(homeId).none { it.type == PageRowType.PANEL }) {
             rowDao.insert(
-                PageRow(pageId = homeId, orderIndex = 0, type = PageRowType.PANEL, borderEnabled = true, columns = 4, gridRows = 3)
+                PageRow(pageId = homeId, orderIndex = 0, type = PageRowType.PANEL, borderEnabled = true)
                     .withAppearance(ElementAppearance(fill = ColorFill(color = invertedBackgroundColor()), opacity = 0.85f, borderEnabled = true))
             )
         }
@@ -509,8 +510,8 @@ class PageContentRepository @Inject constructor(
         rowDao.update(row.copy(pillMode = pillMode))
     }
 
-    suspend fun setRowGridRows(row: PageRow, rows: Int) {
-        rowDao.update(row.copy(gridRows = rows.coerceIn(1, 6)))
+    suspend fun setPanelRowColumns(row: PageRow, rows: List<Int>) {
+        rowDao.update(row.withPanelRows(rows))
     }
 
     suspend fun setRowDockVisibilityMode(row: PageRow, mode: com.bisc.flauncher.data.model.DockVisibilityMode) {

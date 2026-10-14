@@ -386,6 +386,8 @@
     <string name="settings_apps_row_edit_title">App-Zeile bearbeiten</string>
     <string name="settings_apps_row_columns_label">Spalten</string>
     <string name="settings_panel_rows_label">Zeilen</string>
+    <string name="settings_panel_row_number">Zeile %1$d</string>
+    <string name="settings_panel_add_row">Zeile hinzufügen</string>
     <string name="settings_apps_row_apps_label">Apps</string>
     <string name="settings_apps_row_empty">Keine Apps. Unten hinzufügen.</string>
     <string name="settings_apps_row_add_app">App hinzufügen</string>
