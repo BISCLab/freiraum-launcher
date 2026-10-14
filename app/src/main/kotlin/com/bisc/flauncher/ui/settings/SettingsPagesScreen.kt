@@ -91,7 +91,10 @@ fun SettingsPagesScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val rowsPages = remember(allPages) { allPages.filter { it.kind == LauncherPageKind.ROWS }.sortedBy { it.orderIndex } }
-    val otherPages = remember(allPages) { allPages.filter { it.kind != LauncherPageKind.ROWS } }
+    // Quick overview (SIDEBAR) is disabled for now — hidden here rather than deleted, pending a
+    // bigger rework; see SettingsScreen's own root card and HomeViewModel.homePanelEnabled for the
+    // other two places this is hidden.
+    val otherPages = remember(allPages) { allPages.filter { it.kind != LauncherPageKind.ROWS && it.kind != LauncherPageKind.SIDEBAR } }
 
     fun gestureForPage(pageId: Long): HomeGesture? = HomeGesture.entries.firstOrNull { gesture ->
         gestureActions[gesture]?.type == GestureActionType.PAGE && gestureActions[gesture]?.payload?.toLongOrNull() == pageId
