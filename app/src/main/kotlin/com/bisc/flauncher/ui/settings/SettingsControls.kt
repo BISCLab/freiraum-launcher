@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -292,11 +293,15 @@ fun ElementBackgroundSection(appearance: ElementAppearance, onAppearanceChange: 
     }
 }
 
-/** Border-only half of [ElementAppearanceSection] — enable switch, thickness and color all read
- *  together as one "Border" page instead of being split across differently (or un-)titled groups.
- *  Used by the Dock and (eventually) Favorites Panel's own dedicated Border screens. */
+/** Border-only half of [ElementAppearanceSection] — enable switch, thickness and color all live
+ *  in one connected card (no repeated "Border" sub-heading, since the page itself is already
+ *  titled "Border"). Thickness and color both expand their controls inline when tapped, same
+ *  interaction as any other color row. Used by the Dock and Favorites Panel's own dedicated
+ *  Border screens. */
 @Composable
 fun ElementBorderSection(appearance: ElementAppearance, onAppearanceChange: (ElementAppearance) -> Unit) {
+    var thicknessExpanded by remember { mutableStateOf(false) }
+    var colorExpanded by remember { mutableStateOf(false) }
     SettingsPreferenceGroup {
         SettingsPreference(
             icon = null,
@@ -309,28 +314,62 @@ fun ElementBorderSection(appearance: ElementAppearance, onAppearanceChange: (Ele
                 )
             }
         )
-    }
-    if (appearance.borderEnabled) {
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_element_border_style_label)) {
-            SettledSlider(
-                value = appearance.borderWidth,
-                onSettled = { onAppearanceChange(appearance.copy(borderWidth = (it * 2f).roundToInt() / 2f)) },
-                valueRange = 0.5f..6f,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                label = { live ->
-                    Text(
-                        stringResource(R.string.settings_element_border_width_value, String.format(java.util.Locale.US, "%.1f", live)),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
+        if (appearance.borderEnabled) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_element_border_style_label),
+                summary = stringResource(R.string.settings_element_border_width_value, String.format(java.util.Locale.US, "%.1f", appearance.borderWidth)),
+                onClick = { thicknessExpanded = !thicknessExpanded },
+                trailing = null
             )
+            if (thicknessExpanded) {
+                SettledSlider(
+                    value = appearance.borderWidth,
+                    onSettled = { onAppearanceChange(appearance.copy(borderWidth = (it * 2f).roundToInt() / 2f)) },
+                    valueRange = 0.5f..6f,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                    label = { live ->
+                        Text(
+                            stringResource(R.string.settings_element_border_width_value, String.format(java.util.Locale.US, "%.1f", live)),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                )
+            }
+            val borderColorSeed = autoBorderSeed(appearance)
+            val borderColorValue = appearance.borderColor ?: borderColorSeed
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_element_border_color),
+                summary = if (appearance.borderColor == null) stringResource(R.string.settings_element_color_auto_hint) else null,
+                leading = {
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .background(Color(borderColorValue))
+                            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                    )
+                },
+                onClick = { colorExpanded = !colorExpanded },
+                trailing = null
+            )
+            if (colorExpanded) {
+                ColorPickerControls(
+                    color = Color(borderColorValue),
+                    onColorChange = { onAppearanceChange(appearance.copy(borderColor = it.toArgb())) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            if (appearance.borderColor != null) {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_element_color_reset),
+                    onClick = { onAppearanceChange(appearance.copy(borderColor = null)) },
+                    trailing = null
+                )
+            }
         }
-        AutomaticColorPicker(
-            title = stringResource(R.string.settings_element_border_color),
-            custom = appearance.borderColor,
-            automaticSeed = autoBorderSeed(appearance),
-            onChange = { onAppearanceChange(appearance.copy(borderColor = it)) }
-        )
     }
 }
 
