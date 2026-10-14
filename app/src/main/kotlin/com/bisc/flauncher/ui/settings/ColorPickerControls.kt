@@ -269,7 +269,9 @@ fun ColorPickerSection(title: String, summary: String? = null, info: String? = n
             title = title,
             summary = summary,
             info = info,
-            leading = {
+            leading = null,
+            onClick = { expanded = !expanded },
+            trailing = {
                 Box(
                     modifier = Modifier
                         .size(24.dp)
@@ -277,9 +279,7 @@ fun ColorPickerSection(title: String, summary: String? = null, info: String? = n
                         .background(Color(color))
                         .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
                 )
-            },
-            onClick = { expanded = !expanded },
-            trailing = null
+            }
         )
         if (expanded) {
             ColorPickerControls(
