@@ -307,6 +307,8 @@
     <string name="settings_home_layout_title">Aufbau</string>
     <string name="settings_home_layout_subtitle">Panel, Widgets, Dock</string>
     <string name="settings_home_panel_label">Panel</string>
+    <string name="settings_home_dock_label">Dock</string>
+    <string name="settings_dock_elements_title">Elemente</string>
     <string name="settings_pages_app_overview">App-Übersicht</string>
     <string name="settings_pages_search">Textsuche</string>
     <string name="settings_pages_sidebar">Schnellübersicht</string>
@@ -399,8 +401,6 @@
     <string name="settings_map_city_hint">Ort / Stadt</string>
     <string name="settings_map_country_hint">Land</string>
     <string name="settings_statusbar_label">Statusleiste</string>
-    <string name="settings_homescreen_widgets_enabled">Widgets auf dem Homescreen aktivieren</string>
-    <string name="settings_homescreen_widgets_enabled_summary">Standardmäßig aus — der Homescreen bleibt bis auf das Dock leer. Einschalten, um Widgets wie die Uhr hinzuzufügen.</string>
     <string name="settings_favorites_bottom_border">Unterer Rand des Apps-Panels</string>
     <string name="settings_favorites_bottom_border_summary">Standardmäßig aus. Eine dünne Linie am unteren Rand des Apps-Panels, dort wo es auf den abgedunkelten Homescreen trifft.</string>
     <string name="settings_favorites_group_dividers">Trennlinien im Apps-Panel</string>

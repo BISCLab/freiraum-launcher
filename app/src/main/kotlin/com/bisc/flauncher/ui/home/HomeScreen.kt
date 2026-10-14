@@ -193,7 +193,6 @@ fun HomeScreen(
     val appListShowSearchButton by viewModel.appListShowSearchButton.collectAsState()
     val appListContentAppearance by viewModel.appListContentAppearance.collectAsState()
     val accentColor by viewModel.accentColor.collectAsState()
-    val homeScreenWidgetsEnabled by viewModel.homeScreenWidgetsEnabled.collectAsState()
     val sidebarPanelAppearance by viewModel.sidebarPanelAppearance.collectAsState()
     val favoritesBottomBorderEnabled by viewModel.favoritesBottomBorderEnabled.collectAsState()
     val favoritesGroupDividersEnabled by viewModel.favoritesGroupDividersEnabled.collectAsState()
@@ -499,11 +498,6 @@ fun HomeScreen(
                         val pageRows = rowsByPage[page.id].orEmpty()
                         val pinnedSearchBarRow = pageRows.lastOrNull()?.takeIf { it.type == PageRowType.SEARCH_BAR }
                         val withoutPinnedSearchBar = if (pinnedSearchBarRow != null) pageRows.dropLast(1) else pageRows
-                        // Home starts genuinely empty by design, Discreet-Launcher-style — no row content
-                        // at all (widgets or otherwise) until the user opts in via Settings. Existing rows
-                        // on home aren't deleted, just not rendered; turning the toggle on reveals them
-                        // again. Other pages always show their full row content regardless of this toggle.
-                        val showRowContent = !page.isHome || homeScreenWidgetsEnabled
                         // Flush to the screen's bottom edge now (no floating margin of its own), so
                         // content reserves the panel's own height plus the system nav bar inset below it.
                         val reservedForDock = DockDimens.barHeight + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + DockDimens.contentGap
@@ -529,7 +523,7 @@ fun HomeScreen(
                                 if (pinnedSearchBarRow != null) Modifier.padding(bottom = reservedForDock)
                                 else Modifier.navigationBarsPadding().padding(bottom = 16.dp)
                             )
-                        if (showRowContent) { CompositionLocalProvider(
+                        CompositionLocalProvider(
                             LocalSurfaceIsDark provides pageSurfaceIsDark,
                             LocalSurfaceIsDarkLoading provides (loadedPageBackgroundConfig == null)
                         ) { PageRowsColumn(
@@ -551,7 +545,7 @@ fun HomeScreen(
                                 iconShape = iconShape,
                                 accentColor = Color(accentColor),
                                 modifier = contentModifier.graphicsLayer { alpha = pageContentAlpha }
-                            ) } }
+                            ) }
                     }
                     }
                 }
