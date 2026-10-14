@@ -307,6 +307,8 @@
     <string name="settings_home_layout_title">Layout</string>
     <string name="settings_home_layout_subtitle">Panel, widgets, dock</string>
     <string name="settings_home_panel_label">Panel</string>
+    <string name="settings_home_dock_label">Dock</string>
+    <string name="settings_dock_elements_title">Elements</string>
     <string name="settings_pages_app_overview">App overview</string>
     <string name="settings_pages_search">Text search</string>
     <string name="settings_pages_sidebar">Quick overview</string>
@@ -399,8 +401,6 @@
     <string name="settings_map_city_hint">City / place</string>
     <string name="settings_map_country_hint">Country</string>
     <string name="settings_statusbar_label">Status bar</string>
-    <string name="settings_homescreen_widgets_enabled">Enable widgets on home screen</string>
-    <string name="settings_homescreen_widgets_enabled_summary">Off by default — the home screen stays empty besides the dock. Turn on to add widgets like the clock.</string>
     <string name="settings_favorites_bottom_border">Apps panel bottom border</string>
     <string name="settings_favorites_bottom_border_summary">Off by default. A thin line along the bottom edge of the Apps panel, where it meets the dimmed home screen.</string>
     <string name="settings_favorites_group_dividers">Apps panel group dividers</string>

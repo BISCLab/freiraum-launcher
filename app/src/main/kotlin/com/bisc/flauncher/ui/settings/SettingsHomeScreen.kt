@@ -3,11 +3,14 @@ package com.bisc.flauncher.ui.settings
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.BorderAll
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.ViewAgenda
 import androidx.compose.foundation.layout.Row
@@ -69,42 +72,44 @@ fun SettingsHomeScreenHub(navController: NavController, onBack: () -> Unit, onNa
     }
 }
 
-/** The Home page's own background (Layer 1) and status-bar switch — same two controls every other
- *  page's row screen has at its top, just promoted to their own screen here. */
+/** The Home page's own background and status-bar switch — just "Background" now (not the old
+ *  "Layer 1 · Screen" wording, which leaked internal Layer-model terminology into the UI), with
+ *  "Hide status bar" folded into the same screen since it's really a background-adjacent setting,
+ *  not its own separate concept. */
 @Composable
 fun SettingsHomeAppearanceScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val pageHideStatusBar by remember(pageId) { viewModel.pageHideStatusBar(pageId) }.collectAsState(initial = false)
     var showBackgroundSheet by remember { mutableStateOf(false) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
-                title = layerBackgroundLabel(1, R.string.settings_layer_surface_screen),
+                title = stringResource(R.string.settings_section_global_background),
                 onClick = { showBackgroundSheet = true },
                 trailing = null
-            )
-        }
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_statusbar_hide_page),
-                onClick = { viewModel.setPageHideStatusBar(pageId, !pageHideStatusBar) },
-                trailing = { Switch(checked = pageHideStatusBar, onCheckedChange = { viewModel.setPageHideStatusBar(pageId, it) }) }
             )
         }
     }
 
     if (showBackgroundSheet) {
+        val pageHideStatusBar by remember(pageId) { viewModel.pageHideStatusBar(pageId) }.collectAsState(initial = false)
         val pageBackgroundOverride by remember(pageId) { viewModel.pageBackgroundOverride(pageId) }.collectAsState(initial = null)
         val globalBackground by viewModel.globalBackground.collectAsState()
-        SettingsEditPage(title = layerBackgroundLabel(1, R.string.settings_layer_surface_screen), onDismiss = { showBackgroundSheet = false }) {
+        SettingsEditPage(title = stringResource(R.string.settings_section_global_background), onDismiss = { showBackgroundSheet = false }) {
             BackgroundOverrideSection(
                 override = pageBackgroundOverride,
                 global = globalBackground,
                 onUseGlobal = { viewModel.clearPageBackgroundConfig(pageId) },
                 onCustomColor = { viewModel.setPageBackgroundConfig(pageId, it) }
             )
+            SettingsPreferenceGroup {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_statusbar_hide_page),
+                    onClick = { viewModel.setPageHideStatusBar(pageId, !pageHideStatusBar) },
+                    trailing = { Switch(checked = pageHideStatusBar, onCheckedChange = { viewModel.setPageHideStatusBar(pageId, it) }) }
+                )
+            }
         }
     }
 }
@@ -122,6 +127,7 @@ fun SettingsHomeLayoutScreen(
     onBack: () -> Unit,
     onOpenRow: (Long) -> Unit,
     onOpenPanel: () -> Unit,
+    onOpenDock: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val rowsByPage by viewModel.rowsByPage.collectAsState()
@@ -139,7 +145,6 @@ fun SettingsHomeLayoutScreen(
     val pendingBindIntent by viewModel.pendingBindIntent.collectAsState()
     val pendingConfigureIntent by viewModel.pendingConfigureIntent.collectAsState()
     val widgetRelocationWarningCount by viewModel.widgetRelocationWarningCount.collectAsState()
-    val homeScreenWidgetsEnabled by viewModel.homeScreenWidgetsEnabled.collectAsState()
     val homePanelEnabled by viewModel.homePanelEnabled.collectAsState()
 
     val rows = rowsByPage[pageId].orEmpty()
@@ -169,21 +174,13 @@ fun SettingsHomeLayoutScreen(
 
     SettingsSubScreen(title = stringResource(R.string.settings_home_layout_title), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_homescreen_widgets_enabled),
-                info = stringResource(R.string.settings_homescreen_widgets_enabled_summary),
-                onClick = { viewModel.setHomeScreenWidgetsEnabled(!homeScreenWidgetsEnabled) },
-                trailing = { Switch(checked = homeScreenWidgetsEnabled, onCheckedChange = { viewModel.setHomeScreenWidgetsEnabled(it) }) }
-            )
-        }
-        SettingsPreferenceGroup {
             Row(
-                modifier = Modifier.fillMaxWidth().clickable { onOpenPanel() }.padding(16.dp),
+                modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer)
+                    .clickable { onOpenPanel() }.padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Icon(imageVector = Icons.Filled.Favorite, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Icon(imageVector = Icons.Filled.Dashboard, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Text(stringResource(R.string.settings_home_panel_label), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 Switch(checked = homePanelEnabled, onCheckedChange = { viewModel.setHomePanelEnabled(it) })
             }
@@ -192,7 +189,7 @@ fun SettingsHomeLayoutScreen(
                     stringResource(R.string.settings_rows_empty),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainer).fillMaxWidth().padding(16.dp)
                 )
             } else {
                 ReorderableList(
@@ -206,12 +203,14 @@ fun SettingsHomeLayoutScreen(
                     onReorder = { reordered -> viewModel.reorderRows(reordered + listOfNotNull(dockRow)) }
                 ) { row ->
                     Row(
-                        modifier = Modifier.fillMaxWidth().clickable {
-                            when (row.type) {
-                                PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET -> onOpenRow(row.id)
-                                PageRowType.APPS, PageRowType.SEARCH_BAR -> editingRowId = row.id
+                        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer)
+                            .clickable {
+                                when (row.type) {
+                                    PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET -> onOpenRow(row.id)
+                                    PageRowType.APPS, PageRowType.SEARCH_BAR -> editingRowId = row.id
+                                }
                             }
-                        },
+                            .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
@@ -222,12 +221,13 @@ fun SettingsHomeLayoutScreen(
             }
             if (dockRow != null) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().clickable { editingRowId = dockRow.id }.padding(16.dp),
+                    modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer)
+                        .clickable { onOpenDock() }.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Icon(imageVector = rowIcon(dockRow), contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    Text(rowLabel(dockRow), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                    Icon(imageVector = Icons.Filled.GridView, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(R.string.settings_home_dock_label), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                     Switch(checked = dockRow.enabled, onCheckedChange = { viewModel.setRowEnabled(dockRow, it) })
                 }
             }
@@ -295,43 +295,38 @@ fun SettingsHomeLayoutScreen(
         )
     }
 
-    editingRow?.let { row ->
-        when (row.type) {
-            PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET -> Unit
-            PageRowType.APPS, PageRowType.SEARCH_BAR -> AppsRowEditSheet(
-                row = row,
-                entries = appEntriesByRow[row.id].orEmpty(),
-                installedApps = browsableApps,
-                folders = folders,
-                folderItemsByFolder = folderItemsByFolder,
-                savedMapTargets = savedMapTargets,
-                pinnedWebsites = pinnedWebsites,
-                pages = allPages,
-                loadIcon = viewModel::loadIcon,
-                resolveLabel = viewModel::resolveLabel,
-                onColumnsChange = { viewModel.setRowColumns(row, it) },
-                onAppearanceChange = { appearance -> viewModel.setRowAppearance(row, appearance) },
-                onPillModeChange = { enabled -> viewModel.setRowPillMode(row, enabled) },
-                onDockVisibilityModeChange = { mode -> viewModel.setRowDockVisibilityMode(row, mode) },
-                onAddApp = { app -> viewModel.addAppEntryToRow(row.id, app) },
-                onAddExistingFolder = { folderId -> viewModel.addExistingFolderToRow(row.id, folderId) },
-                onCreateFolder = { name -> viewModel.createFolderInRow(row.id, name) },
-                onAddShortcutClick = {
-                    pendingShortcutRowId = row.id
-                    viewModel.openShortcutAppPicker()
-                },
-                onAddMapTargetClick = { showMapTargetPickerForRow = row.id },
-                onAddWebsiteClick = { showWebsitePickerForRow = row.id },
-                onAddPageLink = { page -> viewModel.addPageLinkEntryToRow(row.id, page.id) },
-                onRemoveEntry = viewModel::removeAppRowEntry,
-                onReorderEntries = viewModel::reorderAppRowEntries,
-                // The dock bookend is never removable from here — switched off instead (see the
-                // inline Switch next to it above).
-                canRemoveRow = row.type != PageRowType.SEARCH_BAR,
-                onRemoveRow = { viewModel.removeRow(row); editingRowId = null },
-                onDismiss = { editingRowId = null }
-            )
-        }
+    // Only ordinary Apps rows reach this sheet now — the Dock bookend opens its own full-page hub
+    // instead (see onOpenDock/SettingsDockScreen).
+    editingRow?.takeIf { it.type == PageRowType.APPS }?.let { row ->
+        AppsRowEditSheet(
+            row = row,
+            entries = appEntriesByRow[row.id].orEmpty(),
+            installedApps = browsableApps,
+            folders = folders,
+            folderItemsByFolder = folderItemsByFolder,
+            savedMapTargets = savedMapTargets,
+            pinnedWebsites = pinnedWebsites,
+            pages = allPages,
+            loadIcon = viewModel::loadIcon,
+            resolveLabel = viewModel::resolveLabel,
+            onColumnsChange = { viewModel.setRowColumns(row, it) },
+            onAppearanceChange = { appearance -> viewModel.setRowAppearance(row, appearance) },
+            onPillModeChange = { enabled -> viewModel.setRowPillMode(row, enabled) },
+            onAddApp = { app -> viewModel.addAppEntryToRow(row.id, app) },
+            onAddExistingFolder = { folderId -> viewModel.addExistingFolderToRow(row.id, folderId) },
+            onCreateFolder = { name -> viewModel.createFolderInRow(row.id, name) },
+            onAddShortcutClick = {
+                pendingShortcutRowId = row.id
+                viewModel.openShortcutAppPicker()
+            },
+            onAddMapTargetClick = { showMapTargetPickerForRow = row.id },
+            onAddWebsiteClick = { showWebsitePickerForRow = row.id },
+            onAddPageLink = { page -> viewModel.addPageLinkEntryToRow(row.id, page.id) },
+            onRemoveEntry = viewModel::removeAppRowEntry,
+            onReorderEntries = viewModel::reorderAppRowEntries,
+            onRemoveRow = { viewModel.removeRow(row); editingRowId = null },
+            onDismiss = { editingRowId = null }
+        )
     }
 
     if (shortcutAppPickerOpen) {
@@ -414,11 +409,43 @@ fun SettingsHomeLayoutScreen(
  *  settings screen (see [SettingsAppearanceScreen]); the enable switch itself lives inline in
  *  [SettingsHomeLayoutScreen]'s list, not here, matching the Dock bookend's own split. */
 @Composable
-fun SettingsHomePanelScreen(navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+fun SettingsHomePanelScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
+    SettingsSubScreen(title = stringResource(R.string.settings_home_panel_label), navController = navController, onBack = onBack) {
+        SettingsPreferenceGroup {
+            SettingsPreference(
+                icon = Icons.Filled.Palette,
+                title = stringResource(R.string.settings_section_global_background),
+                onClick = { onNavigate("background") },
+                trailing = null
+            )
+            SettingsPreference(
+                icon = Icons.Filled.BorderAll,
+                title = stringResource(R.string.settings_element_border_label),
+                onClick = { onNavigate("border") },
+                trailing = null
+            )
+        }
+    }
+}
+
+@Composable
+fun SettingsPanelBackgroundScreen(navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+    val appearance by viewModel.sidebarPanelAppearance.collectAsState()
+    SettingsSubScreen(title = stringResource(R.string.settings_section_global_background), navController = navController, onBack = onBack) {
+        ElementBackgroundSection(appearance = appearance, onAppearanceChange = { viewModel.setSidebarPanelAppearance(it) })
+    }
+}
+
+/** Panel's own, narrower idea of "border" — a single line where the panel meets the dimmed home
+ *  screen behind it, plus the group dividers between its app/folder sections — not the generic
+ *  all-sides [ElementAppearance] border (forced off for this panel, same as the Dock's own one-
+ *  sided top border; see FavoritesPopup's own doc comment). */
+@Composable
+fun SettingsPanelBorderScreen(navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
     val favoritesBottomBorderEnabled by viewModel.favoritesBottomBorderEnabled.collectAsState()
     val favoritesGroupDividersEnabled by viewModel.favoritesGroupDividersEnabled.collectAsState()
 
-    SettingsSubScreen(title = stringResource(R.string.settings_home_panel_label), navController = navController, onBack = onBack) {
+    SettingsSubScreen(title = stringResource(R.string.settings_element_border_label), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,

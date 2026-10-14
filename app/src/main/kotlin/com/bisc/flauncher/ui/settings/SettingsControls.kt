@@ -266,6 +266,110 @@ fun ElementAppearanceSection(
     }
 }
 
+/** Background-only half of [ElementAppearanceSection] — fill mode, color and opacity, with no
+ *  group titles or layer-help info icon of its own (the page it's placed on is already titled
+ *  "Background", so a repeated heading and an explainer link to the old Layer 1/2/3 model would
+ *  just add noise back in). Used by the Dock and (eventually) Favorites Panel's own dedicated
+ *  Background screens instead of the old one-sheet-does-everything editor. */
+@Composable
+fun ElementBackgroundSection(appearance: ElementAppearance, onAppearanceChange: (ElementAppearance) -> Unit, allowNone: Boolean = true) {
+    var colorExpanded by remember { mutableStateOf(false) }
+    SettingsPreferenceGroup {
+        ElementFillMode.entries.filter { allowNone || it != ElementFillMode.NONE }.forEach { mode ->
+            FillModePreference(
+                value = mode,
+                selected = appearance.fillMode,
+                customFill = appearance.fill.asBrush(),
+                onSelect = { selected ->
+                    onAppearanceChange(appearance.copy(fillMode = selected))
+                    if (selected != ElementFillMode.NONE && appearance.fillMode == ElementFillMode.NONE) colorExpanded = true
+                }
+            )
+        }
+    }
+    if (appearance.fillMode != ElementFillMode.NONE) {
+        SettingsPreferenceGroup {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_background_source_color),
+                leading = {
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .background(appearance.fill.asBrush(), CircleShape)
+                            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                    )
+                },
+                onClick = { colorExpanded = !colorExpanded },
+                trailing = null
+            )
+            if (colorExpanded) {
+                ColorFillPickerContent(
+                    fill = appearance.fill,
+                    onFillChange = { fill -> onAppearanceChange(appearance.copy(fill = fill)) },
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
+        }
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_opacity_label)) {
+            SettledSlider(
+                value = appearance.opacity,
+                onSettled = { onAppearanceChange(appearance.copy(opacity = it)) },
+                valueRange = 0f..1f,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                label = { live ->
+                    Text(
+                        stringResource(R.string.settings_background_opacity_value, (live * 100).roundToInt()),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            )
+        }
+    }
+}
+
+/** Border-only half of [ElementAppearanceSection] — enable switch, thickness and color all read
+ *  together as one "Border" page instead of being split across differently (or un-)titled groups.
+ *  Used by the Dock and (eventually) Favorites Panel's own dedicated Border screens. */
+@Composable
+fun ElementBorderSection(appearance: ElementAppearance, onAppearanceChange: (ElementAppearance) -> Unit) {
+    SettingsPreferenceGroup {
+        SettingsPreference(
+            icon = null,
+            title = stringResource(R.string.settings_element_border_label),
+            onClick = { onAppearanceChange(appearance.copy(borderEnabled = !appearance.borderEnabled)) },
+            trailing = {
+                Switch(
+                    checked = appearance.borderEnabled,
+                    onCheckedChange = { onAppearanceChange(appearance.copy(borderEnabled = it)) }
+                )
+            }
+        )
+    }
+    if (appearance.borderEnabled) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_element_border_style_label)) {
+            SettledSlider(
+                value = appearance.borderWidth,
+                onSettled = { onAppearanceChange(appearance.copy(borderWidth = (it * 2f).roundToInt() / 2f)) },
+                valueRange = 0.5f..6f,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                label = { live ->
+                    Text(
+                        stringResource(R.string.settings_element_border_width_value, String.format(java.util.Locale.US, "%.1f", live)),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            )
+        }
+        AutomaticColorPicker(
+            title = stringResource(R.string.settings_element_border_color),
+            custom = appearance.borderColor,
+            automaticSeed = autoBorderSeed(appearance),
+            onChange = { onAppearanceChange(appearance.copy(borderColor = it)) }
+        )
+    }
+}
+
 private fun autoTextSeed(appearance: ElementAppearance): Int {
     val light = appearance.fillMode == ElementFillMode.COLOR && androidx.compose.ui.graphics.Color(appearance.fill.color).luminance() > 0.5f
     return if (light) android.graphics.Color.BLACK else android.graphics.Color.WHITE

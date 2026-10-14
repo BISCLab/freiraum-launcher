@@ -191,13 +191,6 @@ class HomeViewModel @Inject constructor(
     val accentColor: StateFlow<Int> =
         settingsRepository.accentColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF3B82F6.toInt())
 
-    val homeScreenWidgetsEnabled: StateFlow<Boolean> =
-        settingsRepository.homeScreenWidgetsEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
-
-    fun setHomeScreenWidgetsEnabled(enabled: Boolean) {
-        viewModelScope.launch { settingsRepository.setHomeScreenWidgetsEnabled(enabled) }
-    }
-
     val favoritesBottomBorderEnabled: StateFlow<Boolean> =
         settingsRepository.favoritesBottomBorderEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
@@ -221,6 +214,10 @@ class HomeViewModel @Inject constructor(
 
     val sidebarPanelAppearance: StateFlow<ElementAppearance> =
         settingsRepository.sidebarPanelAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
+
+    fun setSidebarPanelAppearance(appearance: ElementAppearance) {
+        viewModelScope.launch { settingsRepository.setSidebarPanelAppearance(appearance) }
+    }
 
     val folderCardAppearance: StateFlow<ElementAppearance> =
         settingsRepository.folderCardAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))

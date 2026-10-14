@@ -36,6 +36,13 @@ import com.bisc.flauncher.ui.settings.SettingsHomeScreenHub
 import com.bisc.flauncher.ui.settings.SettingsHomeAppearanceScreen
 import com.bisc.flauncher.ui.settings.SettingsHomeLayoutScreen
 import com.bisc.flauncher.ui.settings.SettingsHomePanelScreen
+import com.bisc.flauncher.ui.settings.SettingsPanelBackgroundScreen
+import com.bisc.flauncher.ui.settings.SettingsPanelBorderScreen
+import com.bisc.flauncher.ui.settings.SettingsDockScreen
+import com.bisc.flauncher.ui.settings.SettingsDockVisibilityScreen
+import com.bisc.flauncher.ui.settings.SettingsDockBackgroundScreen
+import com.bisc.flauncher.ui.settings.SettingsDockBorderScreen
+import com.bisc.flauncher.ui.settings.SettingsDockElementsScreen
 import com.bisc.flauncher.ui.settings.SettingsSearchFullScreen
 import com.bisc.flauncher.ui.settings.SettingsSidebarScreen
 import com.bisc.flauncher.ui.settings.SettingsViewModel
@@ -205,11 +212,66 @@ class MainActivity : ComponentActivity() {
                                 navController = navController,
                                 onBack = { navController.popBackStack() },
                                 onOpenRow = { rowId -> navController.navigate("settings/pages/$pageId/rows/$rowId") },
-                                onOpenPanel = { navController.navigate("settings/pages/$pageId/home/panel") }
+                                onOpenPanel = { navController.navigate("settings/pages/$pageId/home/panel") },
+                                onOpenDock = { navController.navigate("settings/pages/$pageId/home/layout/dock") }
                             )
                         }
-                        composable("settings/pages/{pageId}/home/panel") {
-                            SettingsHomePanelScreen(navController = navController, onBack = { navController.popBackStack() })
+                        composable(
+                            "settings/pages/{pageId}/home/panel",
+                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@composable
+                            SettingsHomePanelScreen(
+                                navController = navController,
+                                onBack = { navController.popBackStack() },
+                                onNavigate = { sub -> navController.navigate("settings/pages/$pageId/home/panel/$sub") }
+                            )
+                        }
+                        composable("settings/pages/{pageId}/home/panel/background") {
+                            SettingsPanelBackgroundScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable("settings/pages/{pageId}/home/panel/border") {
+                            SettingsPanelBorderScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable(
+                            "settings/pages/{pageId}/home/layout/dock",
+                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@composable
+                            SettingsDockScreen(
+                                pageId = pageId,
+                                navController = navController,
+                                onBack = { navController.popBackStack() },
+                                onNavigate = { sub -> navController.navigate("settings/pages/$pageId/home/layout/dock/$sub") }
+                            )
+                        }
+                        composable(
+                            "settings/pages/{pageId}/home/layout/dock/visibility",
+                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@composable
+                            SettingsDockVisibilityScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable(
+                            "settings/pages/{pageId}/home/layout/dock/background",
+                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@composable
+                            SettingsDockBackgroundScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable(
+                            "settings/pages/{pageId}/home/layout/dock/border",
+                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@composable
+                            SettingsDockBorderScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable(
+                            "settings/pages/{pageId}/home/layout/dock/elements",
+                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@composable
+                            SettingsDockElementsScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable(
                             "settings/pages/{pageId}/icon",

@@ -106,15 +106,6 @@ class SettingsRepository @Inject constructor(
 
     private fun folderShowAddRowKey(folderId: Long) = booleanPreferencesKey("folder_show_add_row_$folderId")
 
-    // Off by default — the home screen starts empty (just the dock) and stays that way until the user
-    // deliberately opts into widgets there, matching Kvaesitso's "enable widgets on home screen" switch.
-    // Other pages are unaffected; this only gates what renders on the page with isHome == true.
-    val homeScreenWidgetsEnabled: Flow<Boolean> = dataStore.data.map { it[HOME_SCREEN_WIDGETS_ENABLED_KEY] ?: false }
-
-    suspend fun setHomeScreenWidgetsEnabled(enabled: Boolean) {
-        dataStore.edit { it[HOME_SCREEN_WIDGETS_ENABLED_KEY] = enabled }
-    }
-
     // On by default — whether the Favorites/Quick-overview panel's top EdgeNotch shows on Home at
     // all. Off hides the entrypoint entirely, same spirit as the Dock row's own per-row enabled flag.
     val homePanelEnabled: Flow<Boolean> = dataStore.data.map { it[HOME_PANEL_ENABLED_KEY] ?: true }
@@ -629,7 +620,6 @@ class SettingsRepository @Inject constructor(
         private val CHARGING_ANIMATION_COLOR_KEY = intPreferencesKey("charging_animation_color")
         private val CHARGING_ANIMATION_ENABLED_KEY = booleanPreferencesKey("charging_animation_enabled")
         private val SEARCH_SHOW_AZ_INDEX_KEY = booleanPreferencesKey("search_show_az_index")
-        private val HOME_SCREEN_WIDGETS_ENABLED_KEY = booleanPreferencesKey("home_screen_widgets_enabled")
         private val FAVORITES_BOTTOM_BORDER_ENABLED_KEY = booleanPreferencesKey("favorites_bottom_border_enabled")
         private val FAVORITES_GROUP_DIVIDERS_ENABLED_KEY = booleanPreferencesKey("favorites_group_dividers_enabled")
         private val HOME_PANEL_ENABLED_KEY = booleanPreferencesKey("home_panel_enabled")

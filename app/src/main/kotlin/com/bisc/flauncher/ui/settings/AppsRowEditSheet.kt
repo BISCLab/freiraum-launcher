@@ -257,14 +257,14 @@ fun AppsRowEditSheet(
 }
 
 @Composable
-private fun dockVisibilityModeLabel(mode: com.bisc.flauncher.data.model.DockVisibilityMode): String = when (mode) {
+internal fun dockVisibilityModeLabel(mode: com.bisc.flauncher.data.model.DockVisibilityMode): String = when (mode) {
     com.bisc.flauncher.data.model.DockVisibilityMode.ALWAYS_VISIBLE -> stringResource(R.string.settings_dock_visibility_always)
     com.bisc.flauncher.data.model.DockVisibilityMode.MANUAL -> stringResource(R.string.settings_dock_visibility_manual)
     com.bisc.flauncher.data.model.DockVisibilityMode.AUTO_EXPAND_ON_ARRIVAL -> stringResource(R.string.settings_dock_visibility_auto)
 }
 
 @Composable
-private fun AppRowEntryRow(
+internal fun AppRowEntryRow(
     entry: AppRowEntry,
     folders: List<Folder>,
     folderItemsByFolder: Map<Long, List<FolderItem>>,

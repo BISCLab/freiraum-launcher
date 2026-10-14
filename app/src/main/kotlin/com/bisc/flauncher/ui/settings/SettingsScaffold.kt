@@ -94,6 +94,13 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
         "settings/pages/{pageId}/home/appearance" -> stringResource(R.string.settings_home_appearance_title)
         "settings/pages/{pageId}/home/layout" -> stringResource(R.string.settings_home_layout_title)
         "settings/pages/{pageId}/home/panel" -> stringResource(R.string.settings_home_panel_label)
+        "settings/pages/{pageId}/home/panel/background" -> stringResource(R.string.settings_section_global_background)
+        "settings/pages/{pageId}/home/panel/border" -> stringResource(R.string.settings_element_border_label)
+        "settings/pages/{pageId}/home/layout/dock" -> stringResource(R.string.settings_home_dock_label)
+        "settings/pages/{pageId}/home/layout/dock/visibility" -> stringResource(R.string.settings_dock_visibility_label)
+        "settings/pages/{pageId}/home/layout/dock/background" -> stringResource(R.string.settings_section_global_background)
+        "settings/pages/{pageId}/home/layout/dock/border" -> stringResource(R.string.settings_element_border_label)
+        "settings/pages/{pageId}/home/layout/dock/elements" -> stringResource(R.string.settings_dock_elements_title)
         "settings/pages/{pageId}/icon" -> stringResource(R.string.settings_page_icon_title)
         "settings/pages/{pageId}/rows/{rowId}" -> {
             val viewModel: HomeViewModel = hiltViewModel(entry)

@@ -370,27 +370,6 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setChargingAnimationEnabled(enabled) }
     }
 
-    val homeScreenWidgetsEnabled: StateFlow<Boolean> =
-        repository.homeScreenWidgetsEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
-
-    fun setHomeScreenWidgetsEnabled(enabled: Boolean) {
-        viewModelScope.launch { repository.setHomeScreenWidgetsEnabled(enabled) }
-    }
-
-    val favoritesBottomBorderEnabled: StateFlow<Boolean> =
-        repository.favoritesBottomBorderEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
-
-    fun setFavoritesBottomBorderEnabled(enabled: Boolean) {
-        viewModelScope.launch { repository.setFavoritesBottomBorderEnabled(enabled) }
-    }
-
-    val favoritesGroupDividersEnabled: StateFlow<Boolean> =
-        repository.favoritesGroupDividersEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
-
-    fun setFavoritesGroupDividersEnabled(enabled: Boolean) {
-        viewModelScope.launch { repository.setFavoritesGroupDividersEnabled(enabled) }
-    }
-
     val activeDesignPreset: StateFlow<DesignPreset?> =
         repository.activeDesignPreset.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
