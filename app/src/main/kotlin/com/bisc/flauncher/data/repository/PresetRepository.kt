@@ -29,7 +29,6 @@ class PresetRepository @Inject constructor(
 
         settingsRepository.setTheme(values.theme)
         settingsRepository.setAccentColor(values.accentColor)
-        settingsRepository.setSidebarPanelAppearance(values.cardAppearance)
         settingsRepository.setFolderCardAppearance(values.cardAppearance)
         settingsRepository.setKeyboardAppearance(values.cardAppearance)
         settingsRepository.setSearchAppearance(values.cardAppearance)
@@ -48,14 +47,14 @@ class PresetRepository @Inject constructor(
         // going forward (matching what "applying a coherent preset" should mean), instead of each still
         // carrying its own now-redundant copy of the same color.
         settingsRepository.setGlobalBackground(BackgroundConfig(source = BackgroundSource.COLOR, fill = ColorFill(color = values.backgroundColor)))
-        settingsRepository.clearQuickOverviewBackground()
         pageContentRepository.allPages.first().forEach { page ->
             BackgroundImageStore.delete(context, "page_${page.id}")
             settingsRepository.clearPageBackgroundConfig(page.id)
         }
 
         val rows = pageRowDao.observeAll().first().map { row ->
-            row.withAppearance(if (row.type == PageRowType.SEARCH_BAR) values.searchBarAppearance else values.rowAppearance)
+            val dockLike = row.type == PageRowType.SEARCH_BAR || row.type == PageRowType.PANEL
+            row.withAppearance(if (dockLike) values.searchBarAppearance else values.rowAppearance)
         }
         pageRowDao.updateAll(rows)
 

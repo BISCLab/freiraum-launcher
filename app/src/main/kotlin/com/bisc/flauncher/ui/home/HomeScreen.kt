@@ -96,12 +96,10 @@ import com.bisc.flauncher.data.model.ContactInfo
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.WidgetCornerStyle
-import com.bisc.flauncher.data.model.SidebarCategoryViewMode
 import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.ui.home.dock.AddMapTargetDialog
-import com.bisc.flauncher.ui.home.dock.AddSidebarAppsChooserSheet
 import com.bisc.flauncher.ui.home.dock.ContactPickerSheet
 import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
@@ -109,9 +107,7 @@ import com.bisc.flauncher.ui.home.dock.BackgroundFill
 import com.bisc.flauncher.ui.home.dock.DockDimens
 import com.bisc.flauncher.ui.home.dock.DockPanelSurface
 import com.bisc.flauncher.ui.home.dock.EdgeNotch
-import com.bisc.flauncher.ui.home.dock.FavoritesPopup
 import com.bisc.flauncher.ui.home.dock.NotchEdge
-import com.bisc.flauncher.ui.home.dock.ResolvedSidebarItem
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 import com.bisc.flauncher.ui.home.dock.resolveElementColors
 import com.bisc.flauncher.ui.home.search.AppOverviewContent
@@ -149,9 +145,7 @@ fun HomeScreen(
     val browsableApps by viewModel.browsableApps.collectAsState()
     val resolveLabel = viewModel::resolveLabel
     val handedness by viewModel.handedness.collectAsState()
-    val overviewEntry by viewModel.overviewEntry.collectAsState()
-    var lastOverviewEntry by remember { mutableStateOf(overviewEntry) }
-    LaunchedEffect(overviewEntry) { if (overviewEntry != null) lastOverviewEntry = overviewEntry }
+    val isPanelOpen by viewModel.isPanelOpen.collectAsState()
     val searchOpen by viewModel.searchOpen.collectAsState()
     val appListOpen by viewModel.appListOpen.collectAsState()
     val appOverviewPageId by viewModel.appOverviewPageId.collectAsState()
@@ -168,12 +162,10 @@ fun HomeScreen(
     val openFolderPath by viewModel.openFolderPath.collectAsState()
     val folderOpen = openFolderPath.isNotEmpty()
     val folderHideStatusBar by viewModel.folderHideStatusBar.collectAsState()
-    val quickHideStatusBar by viewModel.quickOverviewHideStatusBar.collectAsState()
     val notes by viewModel.notes.collectAsState()
     val savedMapTargets by viewModel.savedMapTargets.collectAsState()
     val pinnedWebsites by viewModel.pinnedWebsites.collectAsState()
     val pinnedShortcuts by viewModel.pinnedShortcuts.collectAsState()
-    val sidebarPinnedApps by viewModel.sidebarPinnedApps.collectAsState()
     val pinnedContacts by viewModel.pinnedContacts.collectAsState()
     val contactPickerOpen by viewModel.contactPickerOpen.collectAsState()
     val contactPickerList by viewModel.contactPickerList.collectAsState()
@@ -186,7 +178,6 @@ fun HomeScreen(
     val chargingAnimationColor by viewModel.chargingAnimationColor.collectAsState()
     val searchAppearance by viewModel.searchAppearance.collectAsState()
     val searchKeyboardAutoOpen by viewModel.searchKeyboardAutoOpen.collectAsState()
-    val quickOverviewBackground by viewModel.quickOverviewBackground.collectAsState()
     val appListDisplayMode by viewModel.appListDisplayMode.collectAsState()
     val appListLayout by viewModel.appListLayout.collectAsState()
     val appListSearchButtonAppearance by viewModel.appListSearchButtonAppearance.collectAsState()
@@ -194,13 +185,9 @@ fun HomeScreen(
     val appListContentAppearance by viewModel.appListContentAppearance.collectAsState()
     val accentColor by viewModel.accentColor.collectAsState()
     val sidebarPanelAppearance by viewModel.sidebarPanelAppearance.collectAsState()
-    val favoritesBottomBorderEnabled by viewModel.favoritesBottomBorderEnabled.collectAsState()
-    val favoritesGroupDividersEnabled by viewModel.favoritesGroupDividersEnabled.collectAsState()
-    val homePanelEnabled by viewModel.homePanelEnabled.collectAsState()
     val folderHideDock by viewModel.folderHideDock.collectAsState()
     val folderCardAppearance by viewModel.folderCardAppearance.collectAsState()
     val keyboardAppearance by viewModel.keyboardAppearance.collectAsState()
-    val sidebarItems by viewModel.sidebarItems.collectAsState()
     val searchShowAzIndex by viewModel.searchShowAzIndex.collectAsState()
     val searchHideStatusBar by viewModel.searchHideStatusBar.collectAsState()
     val noteResults by viewModel.noteResults.collectAsState()
@@ -229,11 +216,12 @@ fun HomeScreen(
     // search's setting, with no way to configure it separately from the app overview's own screen.
     val appOverviewHideStatusBar by remember(appOverviewPageId) { viewModel.pageHideStatusBar(appOverviewPageId ?: -1L) }
         .collectAsState(initial = false)
+    // The Panel is part of the home page now (no separate "quick overview" appearance layer), so
+    // it just inherits currentPageHideStatusBar like everything else on Home — no dedicated branch.
     val hideStatusBar = when {
         folderOpen -> folderHideStatusBar
         onAppOverviewPage -> appOverviewHideStatusBar
         searchOpen -> searchHideStatusBar
-        overviewEntry != null -> quickHideStatusBar
         else -> currentPageHideStatusBar
     }
     val immersiveSearch = hideStatusBar && !folderOpen
@@ -268,7 +256,6 @@ fun HomeScreen(
     } else {
         val statusBarBackdrop = when {
             appListOpen -> appOverviewBackground
-            overviewEntry != null && !folderOpen -> quickOverviewBackground
             else -> currentPageBackground
         }
         com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(
@@ -290,9 +277,6 @@ fun HomeScreen(
     var showAddMapTargetDialog by remember { mutableStateOf(false) }
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
     var showFolderCreator by remember { mutableStateOf(false) }
-    var showAddSidebarAppsChooser by remember { mutableStateOf(false) }
-    var showSidebarAppPicker by remember { mutableStateOf(false) }
-
     var addingAppToFolderId by remember { mutableStateOf<Long?>(null) }
     var addingWidgetKindToFolderId by remember { mutableStateOf<Long?>(null) }
     var sizingWidgetForFolder by remember { mutableStateOf<Pair<Long, String>?>(null) }
@@ -324,6 +308,9 @@ fun HomeScreen(
     val homeDockRow = pages.find { it.isHome }
         ?.let { rowsByPage[it.id] }
         ?.find { it.type == PageRowType.SEARCH_BAR }
+    val homePanelRow = pages.find { it.isHome }
+        ?.let { rowsByPage[it.id] }
+        ?.find { it.type == PageRowType.PANEL }
     val dockVisibilityMode = homeDockRow?.dockVisibilityMode ?: com.bisc.flauncher.data.model.DockVisibilityMode.ALWAYS_VISIBLE
     // Ephemeral UI state only, deliberately not persisted — same ephemeral character as the
     // Favorites popup this look mirrors. Resets to its mode's own starting state whenever the
@@ -356,6 +343,7 @@ fun HomeScreen(
         }
     }
     var addingAppToDockRowId by remember { mutableStateOf<Long?>(null) }
+    var addingAppToPanelRowId by remember { mutableStateOf<Long?>(null) }
     // The one place "go back to home" is defined — closes every overlay and, crucially, also scrolls
     // the pager itself back to home. Closing an overlay alone used to leave the pager wherever it
     // already was, which is how the system home gesture (and back-swiping out of search/app overview)
@@ -378,7 +366,7 @@ fun HomeScreen(
         animationSpec = tween(220),
         label = "folderBackdropBlur"
     )
-    val overlayHidesPage = searchOpen || appListOpen || (overviewEntry != null && !folderOpen)
+    val overlayHidesPage = searchOpen || appListOpen || (isPanelOpen && !folderOpen)
     val pageContentAlpha by animateFloatAsState(
         targetValue = if (overlayHidesPage) 0f else 1f,
         animationSpec = tween(200),
@@ -496,8 +484,10 @@ fun HomeScreen(
                     ) {
                     if (page != null) {
                         val pageRows = rowsByPage[page.id].orEmpty()
-                        val pinnedSearchBarRow = pageRows.lastOrNull()?.takeIf { it.type == PageRowType.SEARCH_BAR }
-                        val withoutPinnedSearchBar = if (pinnedSearchBarRow != null) pageRows.dropLast(1) else pageRows
+                        val pinnedSearchBarRow = pageRows.find { it.type == PageRowType.SEARCH_BAR }
+                        // Neither the dock nor the Panel render inline — both float outside the pager
+                        // as their own overlays (see the floating dock Box and Panel overlay below).
+                        val withoutPinnedSearchBar = pageRows.filter { it.type != PageRowType.SEARCH_BAR && it.type != PageRowType.PANEL }
                         // Flush to the screen's bottom edge now (no floating margin of its own), so
                         // content reserves the panel's own height plus the system nav bar inset below it.
                         val reservedForDock = DockDimens.barHeight + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + DockDimens.contentGap
@@ -555,7 +545,7 @@ fun HomeScreen(
         // The dock is a bottom-anchored, full-width panel flush with the screen's own bottom edge —
         // the home page's own pinned SEARCH_BAR row, laid out full-width inside a DockPanelSurface
         // instead of floating as its own pill (that look is now exclusive to an ordinary *inline*
-        // pillMode row, see PillRow). Mirrors FavoritesPopup's own shape/border treatment, just
+        // pillMode row, see PillRow). Mirrors the Panel's own shape/border treatment below, just
         // upside down: rounded only at the top (flush/square at the bottom), a border only on the
         // top edge (the row's own borderEnabled column now means exactly that for this row), and —
         // instead of a plain tap-reveal strip — a proper EdgeNotch to pull it open by hand. Placed
@@ -660,13 +650,11 @@ fun HomeScreen(
         // Charging animation above the pages, below overlays and dock.
         ChargingGlow(enabled = chargingAnimationEnabled, color = Color(chargingAnimationColor))
 
-        // Dims the actual home screen behind the Apps panel instead of replacing it outright — the old
-        // BackgroundFill(quickOverviewBackground, ...) here painted over the *entire* screen with a flat
-        // backdrop color, which is why the home screen visually vanished (replaced by white/whatever that
-        // background resolved to) every time the panel opened. A scrim keeps the real home screen (and
-        // its wallpaper) visible but dimmed underneath, like a standard modal backdrop.
+        // Dims the actual home screen behind the Panel instead of replacing it outright — a scrim keeps
+        // the real home screen (and its wallpaper) visible but dimmed underneath, like a standard modal
+        // backdrop, instead of painting over the entire screen with a flat color.
         AnimatedVisibility(
-            visible = overviewEntry != null && !folderOpen,
+            visible = isPanelOpen && !folderOpen && homePanelRow?.enabled != false,
             enter = fadeIn(tween(120)),
             exit = fadeOut(tween(160)),
             modifier = Modifier.fillMaxSize()
@@ -684,10 +672,11 @@ fun HomeScreen(
             )
         }
 
-        // Discreet Launcher's Apps panel is a box that slides down from the very top edge of the
-        // screen — full width, not the bottom-anchored, dock-pill-width panel this used to reuse from
-        // when the only way in was a drag on the (now-deactivated) Hub button. Bottom corners rounded,
-        // top corners square since the panel is visually attached to the screen's own top edge.
+        // The Panel is a box that slides down from the very top edge of the screen — full width.
+        // Bottom corners rounded, top corners square since the panel is visually attached to the
+        // screen's own top edge. Its content is the same AppsGridEntries grid an ordinary apps row
+        // uses, just laid out full-width inside DockPanelSurface instead of a WidgetCard, mirroring
+        // exactly how the Dock reuses PillRowEntries the same way for its own floating bar.
         //
         // BoxWithConstraints sits *outside* the AnimatedVisibility, and the AnimatedVisibility below
         // gets a fixed width/height instead of sizing to its content — expandVertically would otherwise
@@ -695,67 +684,89 @@ fun HomeScreen(
         // SubcomposeLayout) on every single animation frame, which used to make opening the panel feel
         // choppy compared to text search's own, already pre-sized overlay.
         BoxWithConstraints(modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth()) {
-            val d = com.bisc.flauncher.ui.home.dock.dockDimens(maxWidth)
             // Top square — flush and seamless against the screen's own top edge, no gap at the device's
             // rounded corners. Bottom stays rounded (the panel's "resting" edge, not attached to anything).
             val panelShape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 28.dp, bottomEnd = 28.dp)
-            // Sized to how many rows of 5 the pinned apps + folders actually need, not a flat fraction of
-            // the screen — a flat fraction left a large dead empty area below a handful of icons. At
-            // least 2 rows' worth even with nothing to show yet, so the empty state still reads as a
-            // real panel.
-            // Grows with how many rows of 5 the pinned apps + folders actually need, all the way up to
-            // the full available height if there's enough content — not capped to a flat fraction of the
-            // screen, which used to leave content cut off with no way to tell more existed below it. The
-            // grid itself is still genuinely scrollable (with a fade hint, see FavoritesMergedGrid) for
-            // whenever this estimate undershoots the real content height.
-            val pinnedRows = ((sidebarPinnedApps.size + folders.size + 4) / 5).coerceAtLeast(2)
-            val panelHeight = (104.dp * pinnedRows + 96.dp).coerceIn(140.dp, maxHeight)
+            val panelColumns = (homePanelRow?.columns ?: 4).coerceAtLeast(1)
+            val panelGridRows = (homePanelRow?.gridRows ?: 3).coerceAtLeast(1)
+            // A fixed shape the user picked up front (columns x rows), not an estimate from content —
+            // predictable size that doesn't jump around as entries are added/removed, same idea as the
+            // dock's own fixed pillMaxEntries width.
+            val panelHeight = (96.dp * panelGridRows + 64.dp).coerceIn(140.dp, maxHeight)
+            val panelAppearance = homePanelRow?.appearance() ?: sidebarPanelAppearance
+            val panelBorderColor = resolveElementColors(panelAppearance).borderColor
 
             AnimatedVisibility(
-                visible = overviewEntry != null && !folderOpen,
+                visible = isPanelOpen && !folderOpen && homePanelRow?.enabled != false,
                 enter = expandVertically(animationSpec = tween(160), expandFrom = Alignment.Top) + fadeIn(tween(100)),
                 exit = shrinkVertically(animationSpec = tween(200), shrinkTowards = Alignment.Top) + fadeOut(tween(150)),
                 modifier = Modifier.fillMaxWidth().height(panelHeight)
             ) {
-                // Discreet Launcher's own favorites popup, not the old multi-category rail panel
-                // (SidebarOverviewPanel) — see FavoritesPopup's doc comment. No header, no settings
-                // shortcut, no inline add-row — managing favorites happens through Settings -> Home
-                // screen instead.
-                FavoritesPopup(
-                    installedApps = browsableApps,
-                    pinnedApps = sidebarPinnedApps,
-                    folders = folders,
-                    folderItemsByFolder = folderItemsByFolder,
-                    loadIcon = viewModel::loadIcon,
-                    loadPackIcon = viewModel::loadPackIcon,
-                    onAppClick = { app ->
-                        launchApp(context, app.componentName)
-                        viewModel.closeOverview()
-                    },
-                    onFolderClick = { folder -> viewModel.openFolder(folder.id) },
-                    onRemoveApp = viewModel::removeSidebarApp,
-                    onOpenSettings = { viewModel.closeOverview(); onNavigateToSettings() },
-                    appearance = sidebarPanelAppearance,
+                DockPanelSurface(
+                    appearance = panelAppearance.copy(borderEnabled = false),
                     shape = panelShape,
-                    dock = d,
-                    showBottomBorder = favoritesBottomBorderEnabled,
-                    showGroupDividers = favoritesGroupDividersEnabled,
-                    // The same cached max(status bar, cutout) inset the page content below uses — stays
-                    // correct even though the home page normally hides its status bar, unlike a plain
-                    // statusBarsPadding() which would collapse to zero in that case and leave the grid
-                    // starting right under the camera cutout.
-                    topContentInset = maxOf(cachedStatusBarInset, cachedCutoutInset),
-                    modifier = Modifier.fillMaxSize()
-                )
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .then(
+                            if (panelAppearance.borderEnabled) {
+                                Modifier.drawBehind {
+                                    drawLine(panelBorderColor, Offset(0f, size.height), Offset(size.width, size.height), strokeWidth = 1.dp.toPx())
+                                }
+                            } else {
+                                Modifier
+                            }
+                        )
+                ) {
+                    androidx.compose.foundation.lazy.LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = maxOf(cachedStatusBarInset, cachedCutoutInset))
+                            .padding(16.dp)
+                    ) {
+                        item {
+                            homePanelRow?.let { row ->
+                                AppsGridEntries(
+                                    entries = appEntriesByRow[row.id].orEmpty(),
+                                    columns = panelColumns,
+                                    folders = folders,
+                                    folderItemsByFolder = folderItemsByFolder,
+                                    savedMapTargets = savedMapTargets,
+                                    pinnedWebsites = pinnedWebsites,
+                                    pages = allPages,
+                                    loadIcon = viewModel::loadIcon,
+                                    loadPackIcon = viewModel::loadPackIcon,
+                                    resolveLabel = resolveLabel,
+                                    onFolderClick = { folderId -> viewModel.openFolder(folderId) },
+                                    onShortcutClick = viewModel::launchFolderShortcut,
+                                    onOpenPageLink = onOpenPageLink,
+                                    pinnedContacts = pinnedContacts,
+                                    loadContactPhoto = viewModel::loadContactPhoto,
+                                    onContactClick = { contactId ->
+                                        pinnedContacts.find { it.contactId == contactId }?.let { contact ->
+                                            com.bisc.flauncher.util.openContact(
+                                                context,
+                                                com.bisc.flauncher.data.model.ContactInfo(contact.contactId, contact.lookupKey, contact.displayName, contact.photoUri)
+                                            )
+                                        }
+                                    },
+                                    showLabels = row.showLabels,
+                                    labelColor = row.appearance().contentColor?.let { Color(it) } ?: Color.White,
+                                    totalSlots = panelColumns * panelGridRows,
+                                    onAddEmptySlot = { addingAppToPanelRowId = row.id }
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
 
-        // Mirrors the Dock's own EdgeNotch exactly, just flipped to the top edge — the Favorites
-        // popup no longer opens via a rebindable gesture (SWIPE_DOWN used to default to it, see
-        // PageContentRepository.ensureSeeded's comment on that), only by tapping or dragging this.
-        // Home-page-only, same restriction the old swipe-down gesture already had.
+        // Mirrors the Dock's own EdgeNotch exactly, just flipped to the top edge — the Panel opens by
+        // tapping or dragging this, not via a rebindable gesture (see PageContentRepository.ensureSeeded's
+        // comment on the dropped default SWIPE_DOWN binding). Home-page-only, same restriction the old
+        // swipe-down gesture already had.
         AnimatedVisibility(
-            visible = homePanelEnabled && overviewEntry == null && !folderOpen && isOnHomePage,
+            visible = homePanelRow?.enabled == true && !isPanelOpen && !folderOpen && isOnHomePage,
             enter = fadeIn(tween(160)),
             exit = fadeOut(tween(120)),
             modifier = Modifier.align(Alignment.TopCenter)
@@ -775,7 +786,7 @@ fun HomeScreen(
     // past the activity and out of the app instead of just closing the panel. Easy to miss while it was
     // only reachable via the dock's drag gesture; much more noticeable now that a notification-shade-style
     // swipe down opens it, since a physical/gesture back press is the expected way to dismiss that.
-    BackHandler(enabled = overviewEntry != null) { viewModel.closeOverview() }
+    BackHandler(enabled = isPanelOpen) { viewModel.closeOverview() }
     LaunchedEffect(homeButtonPressCount) { if (homeButtonPressCount > 0) returnHome() }
     AnimatedVisibility(
         visible = appListOpen,
@@ -974,29 +985,15 @@ fun HomeScreen(
         )
     }
 
-    if (showAddSidebarAppsChooser) {
-        AddSidebarAppsChooserSheet(
-            onPickOne = {
-                showAddSidebarAppsChooser = false
-                showSidebarAppPicker = true
-            },
-            onAddAll = {
-                showAddSidebarAppsChooser = false
-                viewModel.addAllSidebarApps(browsableApps)
-            },
-            onDismiss = { showAddSidebarAppsChooser = false }
-        )
-    }
-
-    if (showSidebarAppPicker) {
+    addingAppToPanelRowId?.let { rowId ->
         ShortcutSourceAppSheet(
             apps = browsableApps,
             loadIcon = viewModel::loadIcon,
             onAppSelected = { app ->
-                viewModel.addSidebarApp(app)
-                showSidebarAppPicker = false
+                viewModel.addAppEntryToRow(rowId, app)
+                addingAppToPanelRowId = null
             },
-            onDismiss = { showSidebarAppPicker = false }
+            onDismiss = { addingAppToPanelRowId = null }
         )
     }
 
@@ -1076,7 +1073,7 @@ fun HomeScreen(
                         GridItemType.WEBSITE -> item.payload.toLongOrNull()
                             ?.let { id -> pinnedWebsites.find { it.id == id } }
                             ?.let { website -> openWebsite(context, website) }
-                        GridItemType.FOLDER, GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE -> Unit
+                        GridItemType.FOLDER, GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE, GridItemType.CONTACT -> Unit
                     }
                     viewModel.closeAllFolders()
                     viewModel.closeOverview()

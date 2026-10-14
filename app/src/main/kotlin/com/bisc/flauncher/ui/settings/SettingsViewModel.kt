@@ -17,7 +17,6 @@ import com.bisc.flauncher.data.model.LauncherPage
 import com.bisc.flauncher.data.model.RevealMode
 import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.data.model.SearchEngine
-import com.bisc.flauncher.data.model.SidebarCategoryViewMode
 import com.bisc.flauncher.data.model.DesignPreset
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.ElementFillMode
@@ -29,13 +28,9 @@ import com.bisc.flauncher.data.repository.MapsRepository
 import com.bisc.flauncher.data.repository.PageContentRepository
 import com.bisc.flauncher.data.repository.PresetRepository
 import com.bisc.flauncher.data.repository.ShortcutRepository
-import com.bisc.flauncher.data.repository.SidebarRepository
 import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.data.settings.IconShape
 import com.bisc.flauncher.data.settings.SettingsRepository
-import com.bisc.flauncher.ui.home.dock.ResolvedSidebarItem
-import com.bisc.flauncher.ui.home.dock.SidebarEntryType
-import com.bisc.flauncher.ui.home.dock.resolveSidebarItems
 import com.bisc.flauncher.ui.theme.FontPreference
 import com.bisc.flauncher.ui.theme.ThemePreference
 import com.bisc.flauncher.util.AppIconLoader
@@ -60,7 +55,6 @@ class SettingsViewModel @Inject constructor(
     private val iconPackRepository: IconPackRepository,
     private val installedAppsRepository: InstalledAppsRepository,
     private val appIconLoader: AppIconLoader,
-    private val sidebarRepository: SidebarRepository,
     private val appOverrideRepository: AppOverrideRepository,
     private val shortcutRepository: ShortcutRepository,
     private val mapsRepository: MapsRepository,
@@ -123,7 +117,7 @@ class SettingsViewModel @Inject constructor(
     // page), so "everywhere" actually means everywhere, including app overview's own flag.
     val statusBarHiddenEverywhere: StateFlow<Boolean> = pageContentRepository.allPages.flatMapLatest { allPages ->
         val perPageFlows = allPages.map { repository.pageHideStatusBar(it.id) }
-        val sharedFlows = listOf(repository.quickOverviewHideStatusBar, repository.searchHideStatusBar, repository.folderHideStatusBar)
+        val sharedFlows = listOf(repository.searchHideStatusBar, repository.folderHideStatusBar)
         combine(perPageFlows + sharedFlows) { values -> values.all { it } }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
@@ -132,13 +126,6 @@ class SettingsViewModel @Inject constructor(
             val pageIds = pageContentRepository.allPages.first().map { it.id }
             repository.setStatusBarHiddenEverywhere(pageIds, hidden)
         }
-    }
-
-    val quickOverviewHideStatusBar: StateFlow<Boolean> =
-        repository.quickOverviewHideStatusBar.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-
-    fun setQuickOverviewHideStatusBar(hide: Boolean) {
-        viewModelScope.launch { repository.setQuickOverviewHideStatusBar(hide) }
     }
 
     val folderHideStatusBar: StateFlow<Boolean> =
@@ -157,9 +144,6 @@ class SettingsViewModel @Inject constructor(
 
     val accentColor: StateFlow<Int> =
         repository.accentColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF3B82F6.toInt())
-
-    val sidebarPanelAppearance: StateFlow<ElementAppearance> =
-        repository.sidebarPanelAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
 
     val folderCardAppearance: StateFlow<ElementAppearance> =
         repository.folderCardAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
@@ -291,9 +275,6 @@ class SettingsViewModel @Inject constructor(
 
     val globalBackground: StateFlow<BackgroundConfig> =
         repository.globalBackground.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig())
-
-    val quickOverviewBackgroundOverride: StateFlow<BackgroundConfig?> =
-        repository.quickOverviewBackgroundOverride.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val searchShowAzIndex: StateFlow<Boolean> =
         repository.searchShowAzIndex.stateIn(viewModelScope, SharingStarted.Eagerly, true)
@@ -445,11 +426,6 @@ class SettingsViewModel @Inject constructor(
     val savedMapTargets: StateFlow<List<com.bisc.flauncher.data.model.SavedMapTarget>> =
         mapsRepository.targets.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val sidebarItems: StateFlow<List<ResolvedSidebarItem>> =
-        combine(sidebarRepository.items, labeledApps, pinnedShortcuts, savedMapTargets) { items, apps, shortcuts, targets ->
-            resolveSidebarItems(items, apps, shortcuts, targets)
-        }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
     private val _iconPacks = MutableStateFlow<List<IconPackInfo>>(emptyList())
     val iconPacks: StateFlow<List<IconPackInfo>> = _iconPacks.asStateFlow()
 
@@ -494,10 +470,6 @@ class SettingsViewModel @Inject constructor(
 
     fun setIconShape(shape: IconShape) {
         viewModelScope.launch { repository.setIconShape(shape) }
-    }
-
-    fun setSidebarPanelAppearance(appearance: ElementAppearance) {
-        viewModelScope.launch { repository.setSidebarPanelAppearance(appearance) }
     }
 
     fun setFolderCardAppearance(appearance: ElementAppearance) {
@@ -607,30 +579,8 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { presetRepository.applyPreset(preset) }
     }
 
-    fun sidebarCategoryViewMode(entry: SidebarEntryType): Flow<SidebarCategoryViewMode> =
-        repository.sidebarCategoryViewMode(entry.name)
-
-    fun setSidebarCategoryViewMode(entry: SidebarEntryType, mode: SidebarCategoryViewMode) {
-        viewModelScope.launch { repository.setSidebarCategoryViewMode(entry.name, mode) }
-    }
-
-    fun sidebarCategoryShowAddRow(entry: SidebarEntryType): Flow<Boolean> =
-        repository.sidebarCategoryShowAddRow(entry.name)
-
-    fun setSidebarCategoryShowAddRow(entry: SidebarEntryType, show: Boolean) {
-        viewModelScope.launch { repository.setSidebarCategoryShowAddRow(entry.name, show) }
-    }
-
     fun setGestureAction(gesture: HomeGesture, action: GestureAction) {
         viewModelScope.launch { repository.setGestureAction(gesture, action) }
-    }
-
-    fun addSidebarCategory(entry: SidebarEntryType) {
-        viewModelScope.launch { sidebarRepository.addCategory(entry, sidebarItems.value.size) }
-    }
-
-    fun addSidebarApp(app: AppInfo) {
-        viewModelScope.launch { sidebarRepository.addApp(app.componentName.flattenToString(), sidebarItems.value.size) }
     }
 
     fun openShortcutAppPicker() {
@@ -652,30 +602,4 @@ class SettingsViewModel @Inject constructor(
         _availableShortcuts.value = emptyList()
     }
 
-    fun addSidebarShortcut(info: ShortcutInfo) {
-        viewModelScope.launch {
-            val id = shortcutRepository.pin(info)
-            sidebarRepository.addShortcut(id, sidebarItems.value.size)
-            dismissShortcutPicker()
-        }
-    }
-
-    fun addSidebarMapTarget(label: String, lat: Double, lon: Double, address: String = "") {
-        viewModelScope.launch {
-            val id = mapsRepository.add(label, lat, lon, address)
-            sidebarRepository.addMapTarget(id, sidebarItems.value.size)
-        }
-    }
-
-    fun removeSidebarItem(item: ResolvedSidebarItem) {
-        viewModelScope.launch { sidebarRepository.remove(item.raw) }
-    }
-
-    fun setSidebarItemIcon(item: ResolvedSidebarItem, iconKey: String?) {
-        viewModelScope.launch { sidebarRepository.setCustomIcon(item.raw, iconKey) }
-    }
-
-    fun reorderSidebarItems(reordered: List<ResolvedSidebarItem>) {
-        viewModelScope.launch { sidebarRepository.reorder(reordered.map { it.raw }) }
-    }
 }

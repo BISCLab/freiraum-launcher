@@ -484,7 +484,7 @@ private fun FolderItemRow(
                 Icon(Icons.Filled.Language, contentDescription = null, modifier = Modifier.size(28.dp))
                 Text(website?.label.orEmpty(), modifier = Modifier.weight(1f))
             }
-            GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE -> Text("", modifier = Modifier.weight(1f))
+            GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE, GridItemType.CONTACT -> Text("", modifier = Modifier.weight(1f))
         }
         IconButton(onClick = onRemove) {
             Icon(Icons.Filled.Close, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)

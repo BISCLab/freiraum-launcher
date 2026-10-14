@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.BorderAll
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ViewAgenda
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,6 +41,7 @@ import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.WidgetKind
+import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.SystemWidgetPickerSheet
 import com.bisc.flauncher.ui.home.dock.AddMapTargetDialog
@@ -147,11 +149,10 @@ fun SettingsHomeLayoutScreen(
     val pendingBindIntent by viewModel.pendingBindIntent.collectAsState()
     val pendingConfigureIntent by viewModel.pendingConfigureIntent.collectAsState()
     val widgetRelocationWarningCount by viewModel.widgetRelocationWarningCount.collectAsState()
-    val homePanelEnabled by viewModel.homePanelEnabled.collectAsState()
-
     val rows = rowsByPage[pageId].orEmpty()
     val dockRow = rows.find { it.type == PageRowType.SEARCH_BAR }
-    val otherRows = rows.filter { it.type != PageRowType.SEARCH_BAR }
+    val panelRow = rows.find { it.type == PageRowType.PANEL }
+    val otherRows = rows.filter { it.type != PageRowType.SEARCH_BAR && it.type != PageRowType.PANEL }
 
     var editingRowId by remember { mutableStateOf<Long?>(null) }
     val editingRow = editingRowId?.let { id -> rows.find { it.id == id } }
@@ -184,18 +185,18 @@ fun SettingsHomeLayoutScreen(
             ) {
                 Icon(imageVector = Icons.Filled.Dashboard, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Text(stringResource(R.string.settings_home_panel_label), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                Switch(checked = homePanelEnabled, onCheckedChange = { viewModel.setHomePanelEnabled(it) })
+                if (panelRow != null) {
+                    Switch(checked = panelRow.enabled, onCheckedChange = { viewModel.setRowEnabled(panelRow, it) })
+                }
             }
             if (otherRows.isNotEmpty()) {
                 ReorderableList(
                     items = otherRows,
                     key = { it.id },
-                    // The Dock row is excluded from this list (fixed as its own bookend below) but
-                    // must still be re-persisted alongside it — reorderRows renumbers orderIndex
-                    // 0..n-1 over whatever list it's handed, and HomeScreen's own pager rendering
-                    // assumes the dock row is always the *last* one by orderIndex (see its
-                    // pinnedSearchBarRow lookup) — appending it here keeps that true.
-                    onReorder = { reordered -> viewModel.reorderRows(reordered + listOfNotNull(dockRow)) }
+                    // The Dock and Panel rows are excluded from this list (fixed as their own bookends
+                    // above/below) but must still be re-persisted alongside it — reorderRows renumbers
+                    // orderIndex 0..n-1 over whatever list it's handed.
+                    onReorder = { reordered -> viewModel.reorderRows(reordered + listOfNotNull(dockRow, panelRow)) }
                 ) { row ->
                     Row(
                         modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer)
@@ -203,6 +204,7 @@ fun SettingsHomeLayoutScreen(
                                 when (row.type) {
                                     PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET -> onOpenRow(row.id)
                                     PageRowType.APPS, PageRowType.SEARCH_BAR -> editingRowId = row.id
+                                    PageRowType.PANEL -> Unit
                                 }
                             }
                             .padding(16.dp),
@@ -409,9 +411,9 @@ fun SettingsHomeLayoutScreen(
     }
 }
 
-/** The Favorites "Panel"'s own settings — border + dividers moved here from the old flat Global
- *  settings screen (see [SettingsAppearanceScreen]); the enable switch itself lives inline in
- *  [SettingsHomeLayoutScreen]'s list, not here, matching the Dock bookend's own split. */
+/** The Favorites "Panel"'s own settings hub — Background/Border/Elements, same shape as the Dock's
+ *  own hub; the enable switch itself lives inline in [SettingsHomeLayoutScreen]'s list, not here,
+ *  matching the Dock bookend's own split. */
 @Composable
 fun SettingsHomePanelScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
     SettingsSubScreen(title = stringResource(R.string.settings_home_panel_label), navController = navController, onBack = onBack) {
@@ -438,39 +440,249 @@ fun SettingsHomePanelScreen(navController: NavController, onBack: () -> Unit, on
     }
 }
 
+/** Finds the Home page's own pinned Panel row — mirrors [SettingsDockScreen.kt]'s rememberDockRow,
+ *  same "always present once seeded, null only means not loaded yet" contract. */
 @Composable
-fun SettingsPanelBackgroundScreen(navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val appearance by viewModel.sidebarPanelAppearance.collectAsState()
+private fun rememberPanelRow(pageId: Long, viewModel: HomeViewModel): PageRow? {
+    val rowsByPage by viewModel.rowsByPage.collectAsState()
+    return rowsByPage[pageId]?.find { it.type == PageRowType.PANEL }
+}
+
+@Composable
+fun SettingsPanelBackgroundScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+    val row = rememberPanelRow(pageId, viewModel) ?: return
     SettingsSubScreen(title = stringResource(R.string.settings_section_global_background), navController = navController, onBack = onBack) {
-        ElementBackgroundSection(appearance = appearance, onAppearanceChange = { viewModel.setSidebarPanelAppearance(it) })
+        ElementBackgroundSection(appearance = row.appearance(), onAppearanceChange = { viewModel.setRowAppearance(row, it) })
     }
 }
 
-/** Panel's own, narrower idea of "border" — a single line where the panel meets the dimmed home
- *  screen behind it, plus the group dividers between its app/folder sections — not the generic
- *  all-sides [ElementAppearance] border (forced off for this panel, same as the Dock's own one-
- *  sided top border; see FavoritesPopup's own doc comment). */
 @Composable
-fun SettingsPanelBorderScreen(navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val favoritesBottomBorderEnabled by viewModel.favoritesBottomBorderEnabled.collectAsState()
-    val favoritesGroupDividersEnabled by viewModel.favoritesGroupDividersEnabled.collectAsState()
-
+fun SettingsPanelBorderScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+    val row = rememberPanelRow(pageId, viewModel) ?: return
     SettingsSubScreen(title = stringResource(R.string.settings_element_border_label), navController = navController, onBack = onBack) {
+        ElementBorderSection(appearance = row.appearance(), onAppearanceChange = { viewModel.setRowAppearance(row, it) })
+    }
+}
+
+/** The Panel's own grid editor — same "+" preview/chooser idea as [SettingsDockElementsScreen], but
+ *  a two-dimensional grid (columns AND rows picked up front) instead of a single pill line, since
+ *  the Panel wraps to multiple rows rather than growing/shrinking width like the dock does. Adds
+ *  contacts as a 7th content type (via the same [AddElementChooserSheet] the Dock now shares). */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+    val row = rememberPanelRow(pageId, viewModel) ?: return
+    val appEntriesByRow by viewModel.appEntriesByRow.collectAsState()
+    val entries = appEntriesByRow[row.id].orEmpty()
+    val browsableApps by viewModel.browsableApps.collectAsState()
+    val folders by viewModel.folders.collectAsState()
+    val folderItemsByFolder by viewModel.folderItemsByFolder.collectAsState()
+    val savedMapTargets by viewModel.savedMapTargets.collectAsState()
+    val pinnedWebsites by viewModel.pinnedWebsites.collectAsState()
+    val allPages by viewModel.allPages.collectAsState()
+    val shortcutAppPickerOpen by viewModel.shortcutAppPickerOpen.collectAsState()
+    val shortcutPickerForApp by viewModel.shortcutPickerForApp.collectAsState()
+    val availableShortcuts by viewModel.availableShortcuts.collectAsState()
+    val pinnedContacts by viewModel.pinnedContacts.collectAsState()
+    val contactPickerOpen by viewModel.contactPickerOpen.collectAsState()
+    val contactPickerList by viewModel.contactPickerList.collectAsState()
+
+    var showAddChooser by remember { mutableStateOf(false) }
+    var showAppPicker by remember { mutableStateOf(false) }
+    var showFolderPicker by remember { mutableStateOf(false) }
+    var showPagePicker by remember { mutableStateOf(false) }
+    var showMapTargetPicker by remember { mutableStateOf(false) }
+    var showWebsitePicker by remember { mutableStateOf(false) }
+    var showAddMapTargetDialog by remember { mutableStateOf(false) }
+    var showAddWebsiteDialog by remember { mutableStateOf(false) }
+    var pendingShortcut by remember { mutableStateOf(false) }
+
+    SettingsSubScreen(title = stringResource(R.string.settings_dock_elements_title), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
+            androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                com.bisc.flauncher.ui.home.AppsGridEntries(
+                    entries = entries,
+                    columns = row.columns,
+                    folders = folders,
+                    folderItemsByFolder = folderItemsByFolder,
+                    savedMapTargets = savedMapTargets,
+                    pinnedWebsites = pinnedWebsites,
+                    pages = allPages,
+                    loadIcon = viewModel::loadIcon,
+                    loadPackIcon = viewModel::loadPackIcon,
+                    resolveLabel = viewModel::resolveLabel,
+                    onFolderClick = {},
+                    onShortcutClick = {},
+                    onOpenPageLink = { _, _ -> },
+                    pinnedContacts = pinnedContacts,
+                    loadContactPhoto = viewModel::loadContactPhoto,
+                    onContactClick = {},
+                    showLabels = row.showLabels,
+                    labelColor = row.appearance().contentColor?.let { androidx.compose.ui.graphics.Color(it) } ?: androidx.compose.ui.graphics.Color.White,
+                    totalSlots = row.columns * row.gridRows,
+                    onAddEmptySlot = { showAddChooser = true }
+                )
+            }
+        }
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_apps_row_columns_label)) {
             SettingsPreference(
                 icon = null,
-                title = stringResource(R.string.settings_favorites_bottom_border),
-                info = stringResource(R.string.settings_favorites_bottom_border_summary),
-                onClick = { viewModel.setFavoritesBottomBorderEnabled(!favoritesBottomBorderEnabled) },
-                trailing = { Switch(checked = favoritesBottomBorderEnabled, onCheckedChange = { viewModel.setFavoritesBottomBorderEnabled(it) }) }
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_favorites_group_dividers),
-                info = stringResource(R.string.settings_favorites_group_dividers_summary),
-                onClick = { viewModel.setFavoritesGroupDividersEnabled(!favoritesGroupDividersEnabled) },
-                trailing = { Switch(checked = favoritesGroupDividersEnabled, onCheckedChange = { viewModel.setFavoritesGroupDividersEnabled(it) }) }
+                title = row.columns.toString(),
+                onClick = {},
+                trailing = {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        androidx.compose.material3.IconButton(
+                            onClick = { viewModel.setRowColumns(row, row.columns - 1) },
+                            enabled = row.columns > com.bisc.flauncher.data.model.GridConstants.MIN_APPS_ROW_COLUMNS
+                        ) { Icon(androidx.compose.material.icons.Icons.Filled.Remove, contentDescription = null) }
+                        androidx.compose.material3.IconButton(
+                            onClick = { viewModel.setRowColumns(row, row.columns + 1) },
+                            enabled = row.columns < com.bisc.flauncher.data.model.GridConstants.MAX_APPS_ROW_COLUMNS
+                        ) { Icon(androidx.compose.material.icons.Icons.Filled.Add, contentDescription = null) }
+                    }
+                }
             )
         }
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_panel_rows_label)) {
+            SettingsPreference(
+                icon = null,
+                title = row.gridRows.toString(),
+                onClick = {},
+                trailing = {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        androidx.compose.material3.IconButton(
+                            onClick = { viewModel.setRowGridRows(row, row.gridRows - 1) },
+                            enabled = row.gridRows > 1
+                        ) { Icon(androidx.compose.material.icons.Icons.Filled.Remove, contentDescription = null) }
+                        androidx.compose.material3.IconButton(
+                            onClick = { viewModel.setRowGridRows(row, row.gridRows + 1) },
+                            enabled = row.gridRows < 6
+                        ) { Icon(androidx.compose.material.icons.Icons.Filled.Add, contentDescription = null) }
+                    }
+                }
+            )
+        }
+        if (entries.isNotEmpty()) {
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_apps_row_apps_label)) {
+                ReorderableList(items = entries, key = { it.id }, onReorder = viewModel::reorderAppRowEntries) { entry ->
+                    AppRowEntryRow(
+                        entry = entry,
+                        folders = folders,
+                        folderItemsByFolder = folderItemsByFolder,
+                        savedMapTargets = savedMapTargets,
+                        pinnedWebsites = pinnedWebsites,
+                        pages = allPages,
+                        loadIcon = viewModel::loadIcon,
+                        resolveLabel = viewModel::resolveLabel,
+                        onRemove = { viewModel.removeAppRowEntry(entry) },
+                        pinnedContacts = pinnedContacts
+                    )
+                }
+            }
+        }
+        CaptionsSection(
+            showLabels = row.showLabels,
+            onShowLabelsChange = { viewModel.setRowShowLabels(row, it) },
+            appearance = row.appearance(),
+            onAppearanceChange = { viewModel.setRowAppearance(row, it) }
+        )
+    }
+
+    if (showAddChooser) {
+        AddElementChooserSheet(
+            onAddAppClick = { showAddChooser = false; showAppPicker = true },
+            onAddFolderClick = { showAddChooser = false; showFolderPicker = true },
+            onAddShortcutClick = { showAddChooser = false; pendingShortcut = true; viewModel.openShortcutAppPicker() },
+            onAddMapTargetClick = { showAddChooser = false; showMapTargetPicker = true },
+            onAddWebsiteClick = { showAddChooser = false; showWebsitePicker = true },
+            onAddPageLinkClick = { showAddChooser = false; showPagePicker = true },
+            onAddContactClick = { showAddChooser = false; viewModel.openContactPicker() },
+            onDismiss = { showAddChooser = false }
+        )
+    }
+    if (showAppPicker) {
+        ShortcutSourceAppSheet(
+            apps = browsableApps,
+            loadIcon = viewModel::loadIcon,
+            onAppSelected = { app -> viewModel.addAppEntryToRow(row.id, app); showAppPicker = false },
+            onDismiss = { showAppPicker = false }
+        )
+    }
+    if (showFolderPicker) {
+        val alreadyInRow = remember(entries) {
+            entries.filter { it.type == com.bisc.flauncher.data.model.GridItemType.FOLDER }.mapNotNull { it.payload.toLongOrNull() }.toSet()
+        }
+        FolderPickerDialog(
+            folders = folders.filter { it.id !in alreadyInRow },
+            folderItemsByFolder = folderItemsByFolder,
+            loadIcon = viewModel::loadIcon,
+            onPick = { folder -> viewModel.addExistingFolderToRow(row.id, folder.id); showFolderPicker = false },
+            onCreate = { name -> viewModel.createFolderInRow(row.id, name); showFolderPicker = false },
+            onDismiss = { showFolderPicker = false }
+        )
+    }
+    if (showPagePicker) {
+        com.bisc.flauncher.ui.home.dock.PagePickerSheet(
+            pages = allPages,
+            onPageSelected = { page -> viewModel.addPageLinkEntryToRow(row.id, page.id); showPagePicker = false },
+            onDismiss = { showPagePicker = false }
+        )
+    }
+    if (showMapTargetPicker) {
+        SavedMapTargetPickerSheet(
+            targets = savedMapTargets,
+            onSelect = { target -> viewModel.addMapTargetEntryToRow(row.id, target.id); showMapTargetPicker = false },
+            onAddNew = { showMapTargetPicker = false; showAddMapTargetDialog = true },
+            onDismiss = { showMapTargetPicker = false }
+        )
+    }
+    if (showWebsitePicker) {
+        SavedWebsitePickerSheet(
+            websites = pinnedWebsites,
+            onSelect = { website -> viewModel.addWebsiteEntryToRow(row.id, website.id); showWebsitePicker = false },
+            onAddNew = { showWebsitePicker = false; showAddWebsiteDialog = true },
+            onDismiss = { showWebsitePicker = false }
+        )
+    }
+    if (showAddMapTargetDialog) {
+        AddMapTargetDialog(
+            onSave = { label, lat, lon, address -> viewModel.addNewMapTargetToRow(row.id, label, lat, lon, address); showAddMapTargetDialog = false },
+            onDismiss = { showAddMapTargetDialog = false }
+        )
+    }
+    if (showAddWebsiteDialog) {
+        AddWebsiteDialog(
+            onSave = { label, url -> viewModel.addNewWebsiteToRow(row.id, label, url); showAddWebsiteDialog = false },
+            onDismiss = { showAddWebsiteDialog = false }
+        )
+    }
+    if (shortcutAppPickerOpen) {
+        ShortcutSourceAppSheet(
+            apps = browsableApps,
+            loadIcon = viewModel::loadIcon,
+            onAppSelected = viewModel::selectShortcutSourceApp,
+            onDismiss = viewModel::dismissShortcutAppPicker
+        )
+    }
+    shortcutPickerForApp?.let { app ->
+        AppShortcutPickerDialog(
+            appLabel = app.label,
+            shortcuts = availableShortcuts,
+            loadIcon = viewModel::loadShortcutIcon,
+            onShortcutSelected = { info ->
+                if (pendingShortcut) viewModel.addShortcutEntryToRow(row.id, info)
+                pendingShortcut = false
+                viewModel.dismissShortcutPicker()
+            },
+            onDismiss = { pendingShortcut = false; viewModel.dismissShortcutPicker() }
+        )
+    }
+    if (contactPickerOpen) {
+        com.bisc.flauncher.ui.home.dock.ContactPickerSheet(
+            contacts = contactPickerList,
+            loadPhoto = viewModel::loadContactPhoto,
+            onSelected = { contact -> viewModel.addContactEntryToRow(row.id, contact); viewModel.dismissContactPicker() },
+            onDismiss = viewModel::dismissContactPicker
+        )
     }
 }

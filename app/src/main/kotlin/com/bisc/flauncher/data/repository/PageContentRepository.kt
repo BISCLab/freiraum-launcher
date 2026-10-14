@@ -71,6 +71,17 @@ class PageContentRepository @Inject constructor(
                     .withAppearance(ElementAppearance(fill = ColorFill(color = invertedBackgroundColor()), opacity = 0.85f, borderEnabled = true))
             )
 
+        // Same structural pattern as the dock row above — a pinned bookend on Home, rendered as its
+        // own floating overlay outside the pager (see HomeScreen's top EdgeNotch) rather than inline.
+        // A translucent neutral fill (not opaque white) so resolveElementColors' automatic White-on-
+        // dark/Black-on-light contrast picks a sensible default without any bespoke color logic.
+        if (rowDao.getForPage(homeId).none { it.type == PageRowType.PANEL }) {
+            rowDao.insert(
+                PageRow(pageId = homeId, orderIndex = 0, type = PageRowType.PANEL, borderEnabled = true, columns = 4, gridRows = 3)
+                    .withAppearance(ElementAppearance(fill = ColorFill(color = invertedBackgroundColor()), opacity = 0.85f, borderEnabled = true))
+            )
+        }
+
         if (pageDao.getAppOverviewPage() == null) {
             val appOverviewId = pageDao.insert(
                 LauncherPage(orderIndex = (pageDao.maxOrderIndex() ?: -1) + 1, isAppOverview = true, kind = LauncherPageKind.APP_LIST)
@@ -281,7 +292,9 @@ class PageContentRepository @Inject constructor(
     private suspend fun rebalancePageOverflow(pageId: Long): List<PageRow> {
         val allRows = rowDao.getForPage(pageId)
         val dockRow = allRows.lastOrNull { it.type == PageRowType.SEARCH_BAR }
-        val stackedRows = if (dockRow != null) allRows.filter { it.id != dockRow.id } else allRows
+        // The Panel (like the dock) floats outside the pager rather than rendering inline — see
+        // HomeScreen's top EdgeNotch Box — so it never counts toward this page's inline height budget.
+        val stackedRows = allRows.filter { it.id != dockRow?.id && it.type != PageRowType.PANEL }
         if (stackedRows.isEmpty()) return emptyList()
 
         val dm = context.resources.displayMetrics
@@ -482,8 +495,22 @@ class PageContentRepository @Inject constructor(
         return id
     }
 
+    /** [contactId] is a [com.bisc.flauncher.data.model.PinnedContact.contactId] — the caller (see
+     *  HomeViewModel.addContactEntryToRow) ensures that pin exists first, same as this row just
+     *  referencing an existing folder/website/map target by id. */
+    suspend fun addContactEntry(pageRowId: Long, contactId: Long): Long {
+        val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
+        val id = entryDao.insert(AppRowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.CONTACT, payload = contactId.toString()))
+        rebalanceForRow(pageRowId)
+        return id
+    }
+
     suspend fun setRowPillMode(row: PageRow, pillMode: Boolean) {
         rowDao.update(row.copy(pillMode = pillMode))
+    }
+
+    suspend fun setRowGridRows(row: PageRow, rows: Int) {
+        rowDao.update(row.copy(gridRows = rows.coerceIn(1, 6)))
     }
 
     suspend fun setRowDockVisibilityMode(row: PageRow, mode: com.bisc.flauncher.data.model.DockVisibilityMode) {

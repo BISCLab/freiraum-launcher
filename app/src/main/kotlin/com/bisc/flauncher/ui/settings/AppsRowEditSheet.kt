@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
@@ -273,7 +274,8 @@ internal fun AppRowEntryRow(
     pages: List<LauncherPage>,
     loadIcon: (ComponentName) -> ImageBitmap?,
     resolveLabel: (ComponentName) -> String,
-    onRemove: () -> Unit
+    onRemove: () -> Unit,
+    pinnedContacts: List<com.bisc.flauncher.data.model.PinnedContact> = emptyList()
 ) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         when (entry.type) {
@@ -314,6 +316,12 @@ internal fun AppRowEntryRow(
                     ?: page?.let { PageIconGlyph.forPageKind(it.kind) } ?: PageIconGlyph.WIDGET_PAGE
                 PageIconGlyphImage(glyph = glyph, tint = page?.iconColor?.let { androidx.compose.ui.graphics.Color(it) } ?: glyph.defaultColor(), modifier = Modifier.size(28.dp))
                 Text(page?.let { pageLabel(it, pages) }.orEmpty(), modifier = Modifier.weight(1f))
+            }
+            GridItemType.CONTACT -> {
+                val contactId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                val contact = pinnedContacts.find { it.contactId == contactId }
+                Icon(Icons.Filled.Person, contentDescription = null, modifier = Modifier.size(28.dp))
+                Text(contact?.displayName.orEmpty(), modifier = Modifier.weight(1f))
             }
             GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Text("", modifier = Modifier.weight(1f))
         }

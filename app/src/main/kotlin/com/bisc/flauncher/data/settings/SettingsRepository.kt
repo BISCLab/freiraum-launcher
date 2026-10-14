@@ -25,7 +25,6 @@ import com.bisc.flauncher.data.model.GestureActionType
 import com.bisc.flauncher.data.model.HomeGesture
 import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.data.model.SearchEngine
-import com.bisc.flauncher.data.model.SidebarCategoryViewMode
 import com.bisc.flauncher.ui.theme.FontPreference
 import com.bisc.flauncher.ui.theme.ThemePreference
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -72,8 +71,6 @@ class SettingsRepository @Inject constructor(
 
     val folderCardAppearance: Flow<ElementAppearance> = elementAppearanceFor("folder_card", ElementAppearance(borderEnabled = true))
 
-    val quickOverviewBackgroundOverride: Flow<BackgroundConfig?> = backgroundOverrideFor("quick_overview")
-
     val keyboardAppearance: Flow<ElementAppearance> = elementAppearanceFor("keyboard_background", ElementAppearance(borderEnabled = true))
 
     /** The text search screen's single, full-bleed appearance — covers both the backdrop and the
@@ -85,35 +82,9 @@ class SettingsRepository @Inject constructor(
         prefs[ACCENT_COLOR_KEY] ?: DEFAULT_ACCENT_COLOR
     }
 
-    // Off by default — the Apps panel has no border anywhere by design (flush/seamless on the top/left/
-    // right edges that are always square); this is the one optional exception, a thin line along just the
-    // bottom edge where the panel meets the dimmed home screen.
-    val favoritesBottomBorderEnabled: Flow<Boolean> = dataStore.data.map { it[FAVORITES_BOTTOM_BORDER_ENABLED_KEY] ?: false }
-
-    suspend fun setFavoritesBottomBorderEnabled(enabled: Boolean) {
-        dataStore.edit { it[FAVORITES_BOTTOM_BORDER_ENABLED_KEY] = enabled }
-    }
-
-    // Off by default — a thin horizontal divider between the apps/folders/shortcuts groups in the Apps
-    // panel's grid, only drawn between groups that actually have at least one entry.
-    val favoritesGroupDividersEnabled: Flow<Boolean> = dataStore.data.map { it[FAVORITES_GROUP_DIVIDERS_ENABLED_KEY] ?: false }
-
-    suspend fun setFavoritesGroupDividersEnabled(enabled: Boolean) {
-        dataStore.edit { it[FAVORITES_GROUP_DIVIDERS_ENABLED_KEY] = enabled }
-    }
-
     fun folderShowAddRow(folderId: Long): Flow<Boolean> = dataStore.data.map { it[folderShowAddRowKey(folderId)] ?: true }
 
     private fun folderShowAddRowKey(folderId: Long) = booleanPreferencesKey("folder_show_add_row_$folderId")
-
-    // On by default — this is the Favorites/Panel attached to the top of the home screen, not the
-    // separate (and now dead-code) quick-search-sidebar tap action. Its settings live under
-    // Home screen > Panel, not as a standalone top-level entry.
-    val homePanelEnabled: Flow<Boolean> = dataStore.data.map { it[HOME_PANEL_ENABLED_KEY] ?: true }
-
-    suspend fun setHomePanelEnabled(enabled: Boolean) {
-        dataStore.edit { it[HOME_PANEL_ENABLED_KEY] = enabled }
-    }
 
     val chargingAnimationColor: Flow<Int> = dataStore.data.map { it[CHARGING_ANIMATION_COLOR_KEY] ?: 0xFF34D058.toInt() }
 
@@ -236,26 +207,6 @@ class SettingsRepository @Inject constructor(
 
     fun pageBackgroundOverride(pageId: Long): Flow<BackgroundConfig?> = backgroundOverrideFor(pageKey(pageId))
 
-    fun sidebarCategoryViewMode(categoryKey: String): Flow<SidebarCategoryViewMode> = dataStore.data.map { prefs ->
-        prefs[sidebarViewModeKey(categoryKey)]?.let { runCatching { SidebarCategoryViewMode.valueOf(it) }.getOrNull() }
-            ?: SidebarCategoryViewMode.LIST
-    }
-
-    suspend fun setSidebarCategoryViewMode(categoryKey: String, mode: SidebarCategoryViewMode) {
-        dataStore.edit { it[sidebarViewModeKey(categoryKey)] = mode.name }
-    }
-
-    fun sidebarCategoryShowAddRow(categoryKey: String): Flow<Boolean> = dataStore.data.map { prefs ->
-        prefs[sidebarShowAddRowKey(categoryKey)] ?: true
-    }
-
-    suspend fun setSidebarCategoryShowAddRow(categoryKey: String, show: Boolean) {
-        dataStore.edit { it[sidebarShowAddRowKey(categoryKey)] = show }
-    }
-
-    private fun sidebarViewModeKey(categoryKey: String) = stringPreferencesKey("sidebar_${categoryKey}_view_mode")
-    private fun sidebarShowAddRowKey(categoryKey: String) = booleanPreferencesKey("sidebar_${categoryKey}_show_add_row")
-
     private fun readBackgroundConfig(prefs: Preferences, key: String, default: BackgroundConfig): BackgroundConfig = BackgroundConfig(
         source = prefs[backgroundSourceKey(key)]?.let { runCatching { BackgroundSource.valueOf(it) }.getOrNull() }
             ?: default.source,
@@ -361,12 +312,6 @@ class SettingsRepository @Inject constructor(
 
     private fun pageHideStatusBarKey(pageId: Long) = booleanPreferencesKey("page_hide_status_bar_$pageId")
 
-    val quickOverviewHideStatusBar: Flow<Boolean> = dataStore.data.map { it[QUICK_OVERVIEW_HIDE_STATUS_BAR_KEY] ?: true }
-
-    suspend fun setQuickOverviewHideStatusBar(hide: Boolean) {
-        dataStore.edit { it[QUICK_OVERVIEW_HIDE_STATUS_BAR_KEY] = hide }
-    }
-
     val folderHideStatusBar: Flow<Boolean> = dataStore.data.map { it[FOLDER_HIDE_STATUS_BAR_KEY] ?: false }
 
     suspend fun setFolderHideStatusBar(hide: Boolean) {
@@ -380,10 +325,10 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[FOLDER_HIDE_DOCK_KEY] = hide }
     }
 
-    /** One-shot command: hides the status bar on every screen (quick overview, search, folders, every page). */
+    /** One-shot command: hides the status bar on every screen (search, folders, every page — the
+     *  Panel is part of the home page now, so its own pageHideStatusBar entry already covers it). */
     suspend fun setStatusBarHiddenEverywhere(pageIds: List<Long>, hidden: Boolean) {
         dataStore.edit { prefs ->
-            prefs[QUICK_OVERVIEW_HIDE_STATUS_BAR_KEY] = hidden
             prefs[SEARCH_HIDE_STATUS_BAR_KEY] = hidden
             prefs[FOLDER_HIDE_STATUS_BAR_KEY] = hidden
             pageIds.forEach { prefs[pageHideStatusBarKey(it)] = hidden }
@@ -614,16 +559,12 @@ class SettingsRepository @Inject constructor(
         private val ICON_PACK_KEY = stringPreferencesKey("active_icon_pack")
         private val FONT_KEY = stringPreferencesKey("font_preference")
         private val ICON_SHAPE_KEY = stringPreferencesKey("icon_shape")
-        private val QUICK_OVERVIEW_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("quick_overview_hide_status_bar")
         private val FOLDER_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("folder_hide_status_bar")
         private val FOLDER_HIDE_DOCK_KEY = booleanPreferencesKey("folder_hide_dock")
         private val ACCENT_COLOR_KEY = intPreferencesKey("accent_color")
         private val CHARGING_ANIMATION_COLOR_KEY = intPreferencesKey("charging_animation_color")
         private val CHARGING_ANIMATION_ENABLED_KEY = booleanPreferencesKey("charging_animation_enabled")
         private val SEARCH_SHOW_AZ_INDEX_KEY = booleanPreferencesKey("search_show_az_index")
-        private val FAVORITES_BOTTOM_BORDER_ENABLED_KEY = booleanPreferencesKey("favorites_bottom_border_enabled")
-        private val FAVORITES_GROUP_DIVIDERS_ENABLED_KEY = booleanPreferencesKey("favorites_group_dividers_enabled")
-        private val HOME_PANEL_ENABLED_KEY = booleanPreferencesKey("home_panel_enabled")
         private val SEARCH_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("search_hide_status_bar")
         private val SEARCH_ENGINE_KEY = stringPreferencesKey("search_engine")
         private val SEARCH_ENGINE_CUSTOM_URL_KEY = stringPreferencesKey("search_engine_custom_url")
