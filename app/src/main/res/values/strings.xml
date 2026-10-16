@@ -185,7 +185,7 @@
     <string name="settings_dock_background_label">Background</string>
     <string name="settings_dock_visibility_label">Visibility</string>
     <string name="settings_dock_visibility_always">Always visible</string>
-    <string name="settings_dock_visibility_manual">Pull open with the notch</string>
+    <string name="settings_dock_visibility_manual">Open with a swipe up</string>
     <string name="settings_dock_visibility_auto">Auto-expand on arrival</string>
     <string name="settings_layer_surface_screen">Screen</string>
     <string name="settings_layer_surface_sidebar">Sidebar</string>
@@ -289,6 +289,8 @@
     <string name="settings_gesture_double_tap">Double tap</string>
     <string name="settings_gesture_swipe_up">Swipe up</string>
     <string name="settings_gesture_swipe_down">Swipe down</string>
+    <string name="settings_gesture_locked_by_dock">Used by the Dock to open/close</string>
+    <string name="settings_gesture_locked_by_panel">Used by the Panel to open</string>
     <string name="settings_gesture_action_none">No action</string>
     <string name="settings_gesture_action_app">Open app</string>
     <string name="settings_gesture_action_shortcut">Run shortcut</string>

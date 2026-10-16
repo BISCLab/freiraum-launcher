@@ -22,6 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.AppInfo
+import com.bisc.flauncher.data.model.DockVisibilityMode
 import com.bisc.flauncher.data.model.GestureAction
 import com.bisc.flauncher.data.model.GestureActionType
 import com.bisc.flauncher.data.model.HomeGesture
@@ -39,6 +40,19 @@ fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, vie
     val labeledApps by viewModel.labeledApps.collectAsState()
     val browsableApps by viewModel.browsableApps.collectAsState()
     val allPages by viewModel.allPages.collectAsState()
+    val homeDockRow by viewModel.homeDockRow.collectAsState()
+    val homePanelRow by viewModel.homePanelRow.collectAsState()
+    // Mirrors the reservation HomeScreen's detectHomeGestures actually enforces — a gesture claimed
+    // by the Dock/Panel can't also be rebound here, shown locked with a reason instead of hidden.
+    val lockedReason: @Composable (HomeGesture) -> String? = { gesture ->
+        when {
+            gesture == HomeGesture.SWIPE_UP && homeDockRow?.enabled == true && homeDockRow?.dockVisibilityMode == DockVisibilityMode.MANUAL ->
+                stringResource(R.string.settings_gesture_locked_by_dock)
+            gesture == HomeGesture.SWIPE_DOWN && homePanelRow?.enabled == true ->
+                stringResource(R.string.settings_gesture_locked_by_panel)
+            else -> null
+        }
+    }
     val shortcutAppPickerOpen by viewModel.shortcutAppPickerOpen.collectAsState()
     val shortcutPickerForApp by viewModel.shortcutPickerForApp.collectAsState()
     val availableShortcuts by viewModel.availableShortcuts.collectAsState()
@@ -52,11 +66,13 @@ fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, vie
         SettingsPreferenceGroup {
             HomeGesture.entries.forEach { gesture ->
                 val action = gestureActions[gesture] ?: GestureAction.NONE
+                val locked = lockedReason(gesture)
                 SettingsPreference(
                     icon = gestureIcon(gesture),
                     title = gestureLabel(gesture),
-                    summary = gestureActionSummary(action, allPages, labeledApps),
-                    onClick = { editingGesture = gesture }
+                    summary = locked ?: gestureActionSummary(action, allPages, labeledApps),
+                    onClick = { editingGesture = gesture },
+                    enabled = locked == null
                 )
             }
         }

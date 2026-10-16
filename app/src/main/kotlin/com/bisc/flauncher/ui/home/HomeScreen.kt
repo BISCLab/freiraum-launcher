@@ -82,6 +82,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -107,8 +108,6 @@ import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.BackgroundFill
 import com.bisc.flauncher.ui.home.dock.DockDimens
 import com.bisc.flauncher.ui.home.dock.DockPanelSurface
-import com.bisc.flauncher.ui.home.dock.EdgeNotch
-import com.bisc.flauncher.ui.home.dock.NotchEdge
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 import com.bisc.flauncher.ui.home.dock.resolveElementColors
 import com.bisc.flauncher.ui.home.search.AppOverviewContent
@@ -328,6 +327,11 @@ fun HomeScreen(
         }
     }
     val dockCanCollapse = dockVisibilityMode != com.bisc.flauncher.data.model.DockVisibilityMode.ALWAYS_VISIBLE
+    // Standard edge-gesture hot-zone size (not tied to the live system inset, which collapses to 0
+    // once we hide the status bar — the whole point is keeping Android's own edge swipe reachable
+    // even then), used to keep the Dock's/Panel's swipe-gesture claim from eating the top/bottom
+    // edge strip Android itself reserves for the status bar reveal and the gesture-nav task switcher.
+    val edgeSafeZonePx = with(LocalDensity.current) { 24.dp.toPx() }
 
     val openPageById: (Long) -> Unit = { pageId ->
         val index = pages.indexOfFirst { it.id == pageId }
@@ -465,16 +469,33 @@ fun HomeScreen(
                         // The 4 rebindable HomeGestures (long-press/double-tap/swipe-up/swipe-down),
                         // restricted to the home page only — closing an overlay they open always lands
                         // you back on the page you actually started the gesture from (returnHome does
-                        // the actual closing/scrolling). No longer involved in opening/closing the
-                        // Dock or the Favorites popup at all — those are now a dedicated drag notch
-                        // (see EdgeNotch) instead of competing for one of these 4 slots.
+                        // the actual closing/scrolling). Swipe-up/-down double as the Dock's/Panel's own
+                        // open gesture: when the Dock is in MANUAL mode (or the Panel is enabled), that
+                        // gesture is claimed outright instead of running its normally-bound action —
+                        // mirrored in SettingsGesturesScreen, which shows that slot locked with a reason
+                        // instead of letting it be rebound. A top/bottom safe zone keeps Android's own
+                        // edge gestures (hidden status bar reveal; gesture-nav task switcher) reachable.
                         modifier = Modifier.fillMaxSize().then(
                             if (page?.isHome == true) {
                                 Modifier.detectHomeGestures(
                                     onLongPress = { viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.LONG_PRESS, context, openPageById, openSettingsFromGesture) },
                                     onDoubleTap = { viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.DOUBLE_TAP, context, openPageById, openSettingsFromGesture) },
-                                    onSwipeUp = { viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.SWIPE_UP, context, openPageById, openSettingsFromGesture) },
-                                    onSwipeDown = { viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.SWIPE_DOWN, context, openPageById, openSettingsFromGesture) }
+                                    onSwipeUp = {
+                                        if (dockVisibilityMode == com.bisc.flauncher.data.model.DockVisibilityMode.MANUAL && homeDockRow?.enabled == true) {
+                                            dockExpanded = true
+                                        } else {
+                                            viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.SWIPE_UP, context, openPageById, openSettingsFromGesture)
+                                        }
+                                    },
+                                    onSwipeDown = {
+                                        if (homePanelRow?.enabled == true) {
+                                            viewModel.openOverview()
+                                        } else {
+                                            viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.SWIPE_DOWN, context, openPageById, openSettingsFromGesture)
+                                        }
+                                    },
+                                    topSafeZonePx = edgeSafeZonePx,
+                                    bottomSafeZonePx = edgeSafeZonePx
                                 )
                             } else {
                                 Modifier
@@ -546,8 +567,9 @@ fun HomeScreen(
         // instead of floating as its own pill (that look is now exclusive to an ordinary *inline*
         // pillMode row, see PillRow). Mirrors the Panel's own shape/border treatment below, just
         // upside down: rounded only at the top (flush/square at the bottom), a border only on the
-        // top edge (the row's own borderEnabled column now means exactly that for this row), and —
-        // instead of a plain tap-reveal strip — a proper EdgeNotch to pull it open by hand. Placed
+        // top edge (the row's own borderEnabled column now means exactly that for this row). No
+        // permanent on-screen affordance any more — in MANUAL mode a swipe-up from the home content
+        // (see detectHomeGestures above) is the only way to open it, never a visible notch. Placed
         // before the search/app-list overlays below so those naturally cover it when open;
         // folderHideDock keeps the existing "hide the dock while a folder is open" behavior.
         if (homeDockRow != null && homeDockRow.enabled && !(folderOpen && folderHideDock)) {
@@ -613,16 +635,6 @@ fun HomeScreen(
                             .padding(horizontal = DockDimens.innerHorizontalPadding, vertical = DockDimens.innerVerticalPadding)
                             .navigationBarsPadding()
                     )
-                }
-            }
-            if (dockCanCollapse) {
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = !dockExpanded,
-                    enter = fadeIn(tween(160)),
-                    exit = fadeOut(tween(120)),
-                    modifier = Modifier.align(Alignment.BottomCenter)
-                ) {
-                    EdgeNotch(edge = NotchEdge.BOTTOM, onOpen = { dockExpanded = true })
                 }
             }
         }
@@ -762,19 +774,6 @@ fun HomeScreen(
                     }
                 }
             }
-        }
-
-        // Mirrors the Dock's own EdgeNotch exactly, just flipped to the top edge — the Panel opens by
-        // tapping or dragging this, not via a rebindable gesture (see PageContentRepository.ensureSeeded's
-        // comment on the dropped default SWIPE_DOWN binding). Home-page-only, same restriction the old
-        // swipe-down gesture already had.
-        AnimatedVisibility(
-            visible = homePanelRow?.enabled == true && !isPanelOpen && !folderOpen && isOnHomePage,
-            enter = fadeIn(tween(160)),
-            exit = fadeOut(tween(120)),
-            modifier = Modifier.align(Alignment.TopCenter)
-        ) {
-            EdgeNotch(edge = NotchEdge.TOP, onOpen = { viewModel.openOverview() })
         }
 
         // TEMPORARY — Dock/Panel no longer open a settings-reachable long-press menu of their own

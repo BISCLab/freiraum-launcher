@@ -73,9 +73,10 @@ class PageContentRepository @Inject constructor(
             )
 
         // Same structural pattern as the dock row above — a pinned bookend on Home, rendered as its
-        // own floating overlay outside the pager (see HomeScreen's top EdgeNotch) rather than inline.
-        // A translucent neutral fill (not opaque white) so resolveElementColors' automatic White-on-
-        // dark/Black-on-light contrast picks a sensible default without any bespoke color logic.
+        // own floating overlay outside the pager (see HomeScreen's Panel AnimatedVisibility block)
+        // rather than inline. A translucent neutral fill (not opaque white) so resolveElementColors'
+        // automatic White-on-dark/Black-on-light contrast picks a sensible default without any
+        // bespoke color logic.
         if (rowDao.getForPage(homeId).none { it.type == PageRowType.PANEL }) {
             rowDao.insert(
                 PageRow(pageId = homeId, orderIndex = 0, type = PageRowType.PANEL, borderEnabled = true)
@@ -119,10 +120,10 @@ class PageContentRepository @Inject constructor(
                 settingsRepository.setGestureAction(HomeGesture.SWIPE_UP, GestureAction(GestureActionType.PAGE, appOverview.id.toString()))
             }
         }
-        // No more default SWIPE_DOWN -> Sidebar binding — the Favorites popup now opens exclusively
-        // via its own EdgeNotch (see HomeScreen's top notch Box), same as the Dock. A user can still
-        // bind a gesture to it manually (it's just another PAGE-type GestureAction target), but
-        // nothing does that automatically any more.
+        // No more default SWIPE_DOWN -> Sidebar binding — the Panel claims plain swipe-down on the
+        // home content outright whenever it's enabled (see HomeScreen's detectHomeGestures wiring),
+        // so a default binding here would just sit unreachable behind it. A user can still bind
+        // SWIPE_DOWN to the Favorites page manually; it only takes effect while the Panel is disabled.
 
         // Fresh-install default: the dock arrives already linking to the two singleton pages, so it
         // doesn't look sparse — mirrors the pre-merge DockRepository's own default seed. Only runs once
