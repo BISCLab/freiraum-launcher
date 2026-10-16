@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.bisc.flauncher.data.model.SavedMapTarget
 import kotlinx.coroutines.flow.Flow
 
@@ -14,6 +15,9 @@ interface SavedMapTargetDao {
 
     @Insert
     suspend fun insert(target: SavedMapTarget): Long
+
+    @Update
+    suspend fun update(target: SavedMapTarget)
 
     @Delete
     suspend fun delete(target: SavedMapTarget)

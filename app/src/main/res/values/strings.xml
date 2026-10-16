@@ -181,6 +181,23 @@
     <string name="settings_element_border_label">Border</string>
     <string name="settings_element_show_labels_label">Show captions</string>
 
+    <string name="settings_section_elements">Elements</string>
+    <string name="settings_card_elements_subtitle">Apps, folders, addresses, links, power buttons</string>
+    <string name="settings_elements_addresses_title">Addresses</string>
+    <string name="settings_elements_addresses_empty">No addresses yet.</string>
+    <string name="settings_elements_add_address">Add address</string>
+    <string name="settings_elements_address_hint">Address</string>
+    <string name="settings_elements_navigation_app_label">Navigation app</string>
+    <string name="settings_elements_app_default">System default</string>
+    <string name="settings_elements_use_default">Use default</string>
+    <string name="settings_elements_delete_address">Delete address</string>
+    <string name="settings_elements_links_title">Links</string>
+    <string name="settings_elements_links_empty">No links yet.</string>
+    <string name="settings_elements_add_link">Add link</string>
+    <string name="settings_elements_browser_app_label">Browser</string>
+    <string name="settings_elements_delete_link">Delete link</string>
+    <string name="settings_elements_powerbuttons_title">Power buttons</string>
+
     <string name="settings_dock_background_label">Background</string>
     <string name="settings_dock_visibility_label">Visibility</string>
     <string name="settings_dock_visibility_always">Always visible</string>

@@ -234,6 +234,32 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    // Standalone Elements management (Settings -> Elements -> Addresses/Links) — independent of
+    // any particular row/folder placement, unlike the *ToFolder methods above.
+    fun addMapTarget(label: String, lat: Double, lon: Double, address: String = "") {
+        viewModelScope.launch { mapsRepository.add(label, lat, lon, address) }
+    }
+
+    fun updateMapTarget(target: com.bisc.flauncher.data.model.SavedMapTarget) {
+        viewModelScope.launch { mapsRepository.update(target) }
+    }
+
+    fun removeMapTarget(target: com.bisc.flauncher.data.model.SavedMapTarget) {
+        viewModelScope.launch { mapsRepository.remove(target) }
+    }
+
+    fun addWebsite(label: String, url: String) {
+        viewModelScope.launch { websiteRepository.add(label, url) }
+    }
+
+    fun updateWebsite(website: com.bisc.flauncher.data.model.PinnedWebsite) {
+        viewModelScope.launch { websiteRepository.update(website) }
+    }
+
+    fun removeWebsite(website: com.bisc.flauncher.data.model.PinnedWebsite) {
+        viewModelScope.launch { websiteRepository.remove(website) }
+    }
+
     fun removeFolderItem(item: com.bisc.flauncher.data.model.FolderItem) {
         viewModelScope.launch { folderRepository.removeFolderItem(item) }
     }

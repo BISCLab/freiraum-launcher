@@ -234,8 +234,21 @@ fun SettingsFolderEditScreen(
         val alreadyInside = remember(items) {
             items.filter { it.type == GridItemType.FOLDER }.mapNotNull { it.payload.toLongOrNull() }.toSet()
         }
+        // Only one level of folder nesting is allowed (see the masterplan's "weder direkt noch
+        // indirekt" cycle rule) — a folder already nested somewhere else, or one that already has
+        // folder children of its own, is excluded here. Together these also rule out every
+        // possible cycle, not just the direct one-hop case the old `alreadyInside`-only check
+        // caught: a cycle needs at least two levels of nesting to ever close back on itself.
+        val nestedFolderIds = remember(itemsByFolder) {
+            itemsByFolder.values.flatten().filter { it.type == GridItemType.FOLDER }.mapNotNull { it.payload.toLongOrNull() }.toSet()
+        }
+        val foldersWithFolderChildren = remember(itemsByFolder) {
+            itemsByFolder.filterValues { folderItems -> folderItems.any { it.type == GridItemType.FOLDER } }.keys
+        }
         FolderPickerDialog(
-            folders = folders.filter { it.id != folderId && it.id !in alreadyInside },
+            folders = folders.filter {
+                it.id != folderId && it.id !in alreadyInside && it.id !in nestedFolderIds && it.id !in foldersWithFolderChildren
+            },
             folderItemsByFolder = itemsByFolder,
             loadIcon = viewModel::loadIcon,
             onPick = { picked -> viewModel.addExistingFolderToFolder(folderId, picked.id); showFolderPicker = false },

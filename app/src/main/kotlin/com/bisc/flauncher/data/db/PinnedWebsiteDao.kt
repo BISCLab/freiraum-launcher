@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.bisc.flauncher.data.model.PinnedWebsite
 import kotlinx.coroutines.flow.Flow
 
@@ -14,6 +15,9 @@ interface PinnedWebsiteDao {
 
     @Insert
     suspend fun insert(website: PinnedWebsite): Long
+
+    @Update
+    suspend fun update(website: PinnedWebsite)
 
     @Delete
     suspend fun delete(website: PinnedWebsite)
