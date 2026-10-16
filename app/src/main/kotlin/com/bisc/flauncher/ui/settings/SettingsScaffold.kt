@@ -123,6 +123,21 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
             folders.find { it.id == folderId }?.name ?: stringResource(R.string.settings_folder_edit_title)
         }
         "settings/folder/{folderId}/icon" -> stringResource(R.string.settings_folder_icon_pack_choose_icon)
+        "settings/elements" -> stringResource(R.string.settings_section_elements)
+        "settings/elements/addresses" -> stringResource(R.string.settings_elements_addresses_title)
+        "settings/elements/addresses/{targetId}" -> {
+            val viewModel: SettingsViewModel = hiltViewModel(entry)
+            val targets by viewModel.savedMapTargets.collectAsState()
+            val targetId = entry.arguments?.getLong("targetId")
+            targets.find { it.id == targetId }?.label ?: stringResource(R.string.settings_elements_addresses_title)
+        }
+        "settings/elements/links" -> stringResource(R.string.settings_elements_links_title)
+        "settings/elements/links/{websiteId}" -> {
+            val viewModel: SettingsViewModel = hiltViewModel(entry)
+            val websites by viewModel.pinnedWebsites.collectAsState()
+            val websiteId = entry.arguments?.getLong("websiteId")
+            websites.find { it.id == websiteId }?.label ?: stringResource(R.string.settings_elements_links_title)
+        }
         else -> entry.destination.route.orEmpty()
     }
 }

@@ -103,6 +103,15 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                     summary = stringResource(R.string.settings_card_gestures_subtitle),
                     onClick = { onNavigate("gestures") }
                 )
+                // TEMPORARY placement — the masterplan's final nav is Globale Einstellungen /
+                // Elemente / Seiten / Berechtigungen (see Phase 9); until that reorganization,
+                // "Elements" (Apps/Folders/Addresses/Links/Powerbuttons) just adds on here.
+                SettingsPreference(
+                    icon = Icons.Filled.Apps,
+                    title = stringResource(R.string.settings_section_elements),
+                    summary = stringResource(R.string.settings_card_elements_subtitle),
+                    onClick = { onNavigate("elements") }
+                )
                 SettingsPreference(
                     icon = Icons.Filled.Apps,
                     title = stringResource(R.string.settings_section_manage_apps),

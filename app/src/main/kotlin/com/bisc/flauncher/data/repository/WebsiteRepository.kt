@@ -13,6 +13,10 @@ class WebsiteRepository @Inject constructor(
     suspend fun add(label: String, url: String): Long =
         dao.insert(PinnedWebsite(label = label, url = url))
 
+    suspend fun update(website: PinnedWebsite) {
+        dao.update(website)
+    }
+
     suspend fun remove(website: PinnedWebsite) {
         dao.delete(website)
     }

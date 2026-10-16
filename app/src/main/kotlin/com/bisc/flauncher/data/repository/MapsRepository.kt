@@ -13,6 +13,10 @@ class MapsRepository @Inject constructor(
     suspend fun add(label: String, lat: Double, lon: Double, address: String = ""): Long =
         dao.insert(SavedMapTarget(label = label, lat = lat, lon = lon, address = address))
 
+    suspend fun update(target: SavedMapTarget) {
+        dao.update(target)
+    }
+
     suspend fun remove(target: SavedMapTarget) {
         dao.delete(target)
     }

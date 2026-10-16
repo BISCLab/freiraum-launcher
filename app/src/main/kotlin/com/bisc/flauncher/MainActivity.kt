@@ -339,6 +339,29 @@ class MainActivity : ComponentActivity() {
                             val folderId = backStackEntry.arguments?.getLong("folderId") ?: return@composable
                             SettingsFolderIconScreen(folderId = folderId, navController = navController, onBack = { navController.popBackStack() })
                         }
+                        composable("settings/elements") {
+                            com.bisc.flauncher.ui.settings.SettingsElementsScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable("settings/elements/addresses") {
+                            com.bisc.flauncher.ui.settings.SettingsAddressesScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable(
+                            "settings/elements/addresses/{targetId}",
+                            arguments = listOf(navArgument("targetId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val targetId = backStackEntry.arguments?.getLong("targetId") ?: return@composable
+                            com.bisc.flauncher.ui.settings.SettingsAddressDetailScreen(targetId = targetId, navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable("settings/elements/links") {
+                            com.bisc.flauncher.ui.settings.SettingsLinksScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable(
+                            "settings/elements/links/{websiteId}",
+                            arguments = listOf(navArgument("websiteId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val websiteId = backStackEntry.arguments?.getLong("websiteId") ?: return@composable
+                            com.bisc.flauncher.ui.settings.SettingsLinkDetailScreen(websiteId = websiteId, navController = navController, onBack = { navController.popBackStack() })
+                        }
                     }
                 }
             }

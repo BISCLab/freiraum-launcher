@@ -11,7 +11,7 @@ fun launchMapTarget(context: Context, target: SavedMapTarget) {
     } else {
         Uri.parse("geo:${target.lat},${target.lon}?q=${target.lat},${target.lon}(${Uri.encode(target.label)})")
     }
-    startView(context, uri, ExternalApps.maps)
+    startView(context, uri, target.navigationApp ?: ExternalApps.maps)
 }
 
 /** Free-text place/address search — the maps-search command result. */
