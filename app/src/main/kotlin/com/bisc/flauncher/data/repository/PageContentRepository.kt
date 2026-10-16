@@ -189,16 +189,33 @@ class PageContentRepository @Inject constructor(
      * after, each keeping its own prior relative order among themselves. Avoids a collision-prone
      * localized index shift — page counts are small, a full stable re-sort is cheap and simple.
      */
+    // Ergänzungsseiten start as an independent copy of Home's current *structure* — same row types,
+    // order, appearance and background — not of its actual content. Copying the user's pinned apps/
+    // folders onto a brand-new page by default would be a confusing surprise, not a sensible
+    // starting point; copying the empty scaffold (Dock/Panel/widget rows with their configured
+    // look) matches "Default-Kopie" while staying consistent with this app's existing "home starts
+    // empty" philosophy (see ensureSeeded's own comment on that). Once created, the new page is
+    // fully independent — editing it never touches Home back.
     suspend fun addPageInDirection(direction: PageDirection): Long {
         val all = pageDao.getAllOnce()
         val rowsOnly = all.filter { it.kind == LauncherPageKind.ROWS }
         val nonRows = all.filter { it.kind != LauncherPageKind.ROWS }
+        val homePage = rowsOnly.find { it.isHome }
         val homePos = rowsOnly.indexOfFirst { it.isHome }.coerceAtLeast(0)
         val insertPos = if (direction == PageDirection.LEFT) homePos else homePos + 1
 
         val newId = pageDao.insert(LauncherPage(orderIndex = 0))
         settingsRepository.setPageHideStatusBar(newId, true)
         val newPage = pageDao.getById(newId) ?: return newId
+
+        if (homePage != null) {
+            rowDao.getForPage(homePage.id).forEach { row ->
+                rowDao.insert(row.copy(id = 0, pageId = newId))
+            }
+            settingsRepository.pageBackgroundOverride(homePage.id).first()?.let { override ->
+                settingsRepository.setPageBackgroundConfig(newId, override)
+            }
+        }
 
         val newRowsOrder = rowsOnly.toMutableList().apply { add(insertPos, newPage) }
         (newRowsOrder + nonRows).forEachIndexed { index, page ->
