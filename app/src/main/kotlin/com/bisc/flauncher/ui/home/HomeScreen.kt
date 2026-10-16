@@ -452,11 +452,13 @@ fun HomeScreen(
                     // scrolling, all of it — not just the one swipe this was meant to fix. Back to only
                     // keeping the immediate neighbor pre-warmed, matching how Pager is meant to be used.
                     beyondViewportPageCount = 1,
-                    // Discreet Launcher has exactly one home screen, no horizontal paging to further
-                    // pages — swiping away from home is disabled to match. The multi-page system itself
-                    // (pages data, PageRowsColumn, Settings -> Pages) is untouched and still reachable
-                    // through Settings; this only removes the swipe gesture as a way to leave home.
-                    userScrollEnabled = false,
+                    // Left/right swipe between Home and its Ergänzungsseiten — the carousel is finite
+                    // (no wrap-around) for now, matching the masterplan's stated default; an opt-in
+                    // endless mode is a later addition, not required for the default behavior. Overlays
+                    // (search/app list/Panel/folder) each already render a full-size catch-all Box on
+                    // top of the pager (see overlayHidesPage/folderOpen below), which intercepts the
+                    // touch before it ever reaches the pager, so no extra gating is needed here for them.
+                    userScrollEnabled = true,
                     modifier = Modifier.fillMaxSize()
                 ) { pageIndex ->
                     val page = pages.getOrNull(pageIndex)
