@@ -75,7 +75,11 @@ data class PageRow(
     // column count (1-6), comma-separated (e.g. "4,3,4"). Independent per row rather than one shared
     // column count, so a shorter row isn't forced to the same width as a longer one. See
     // [PageRow.panelRows]/[PageRow.withPanelRows]. Meaningless for any other row type.
-    val panelRowColumns: String = "4,4,4"
+    val panelRowColumns: String = "4,4,4",
+    // Same idea as [panelRowColumns], for the pinned Dock row (type == SEARCH_BAR) — the Dock is
+    // "a mirrored Panel" capped at 2 sub-rows instead of 6 (enforced where rows are added/removed,
+    // not here). Default "5" matches the Dock's existing 5x1 default footprint.
+    val dockRowColumns: String = "5"
 )
 
 /** Parses [PageRow.panelRowColumns] into one column count per sub-row; always at least one row. */
@@ -84,6 +88,13 @@ fun PageRow.panelRows(): List<Int> =
 
 fun PageRow.withPanelRows(rows: List<Int>): PageRow =
     copy(panelRowColumns = rows.ifEmpty { listOf(4) }.joinToString(",") { it.coerceIn(1, 6).toString() })
+
+/** Parses [PageRow.dockRowColumns] into one column count per sub-row; always at least one row. */
+fun PageRow.dockRows(): List<Int> =
+    dockRowColumns.split(",").mapNotNull { it.trim().toIntOrNull()?.coerceIn(1, 6) }.ifEmpty { listOf(5) }
+
+fun PageRow.withDockRows(rows: List<Int>): PageRow =
+    copy(dockRowColumns = rows.ifEmpty { listOf(5) }.joinToString(",") { it.coerceIn(1, 6).toString() })
 
 /** Reads the stored date-tap action of a clock row as a [GestureAction]. */
 fun PageRow.clockDateAction(): GestureAction =

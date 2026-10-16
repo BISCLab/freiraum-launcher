@@ -898,6 +898,10 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { pageContentRepository.setPanelRowColumns(row, rows) }
     }
 
+    fun setDockRowColumns(row: PageRow, rows: List<Int>) {
+        viewModelScope.launch { pageContentRepository.setDockRowColumns(row, rows) }
+    }
+
     fun setRowDockVisibilityMode(row: PageRow, mode: com.bisc.flauncher.data.model.DockVisibilityMode) {
         viewModelScope.launch { pageContentRepository.setRowDockVisibilityMode(row, mode) }
     }

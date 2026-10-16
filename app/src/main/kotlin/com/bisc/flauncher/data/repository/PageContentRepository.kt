@@ -23,6 +23,7 @@ import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.data.model.withAppearance
+import com.bisc.flauncher.data.model.withDockRows
 import com.bisc.flauncher.data.model.withPanelRows
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.settings.SettingsRepository
@@ -530,6 +531,10 @@ class PageContentRepository @Inject constructor(
 
     suspend fun setPanelRowColumns(row: PageRow, rows: List<Int>) {
         rowDao.update(row.withPanelRows(rows))
+    }
+
+    suspend fun setDockRowColumns(row: PageRow, rows: List<Int>) {
+        rowDao.update(row.withDockRows(rows))
     }
 
     suspend fun setRowDockVisibilityMode(row: PageRow, mode: com.bisc.flauncher.data.model.DockVisibilityMode) {

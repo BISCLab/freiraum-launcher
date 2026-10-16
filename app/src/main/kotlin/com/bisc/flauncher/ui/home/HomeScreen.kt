@@ -98,6 +98,7 @@ import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.data.model.appearance
+import com.bisc.flauncher.data.model.dockRows
 import com.bisc.flauncher.data.model.panelRows
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.settings.Handedness
@@ -511,8 +512,11 @@ fun HomeScreen(
                         // as their own overlays (see the floating dock Box and Panel overlay below).
                         val withoutPinnedSearchBar = pageRows.filter { it.type != PageRowType.SEARCH_BAR && it.type != PageRowType.PANEL }
                         // Flush to the screen's bottom edge now (no floating margin of its own), so
-                        // content reserves the panel's own height plus the system nav bar inset below it.
-                        val reservedForDock = DockDimens.barHeight + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + DockDimens.contentGap
+                        // content reserves the dock's own height (1 or 2 rows, see dockRows()) plus the
+                        // system nav bar inset below it.
+                        val dockRowCount = pinnedSearchBarRow?.dockRows()?.size ?: 1
+                        val reservedForDock = (96.dp * dockRowCount + 32.dp).coerceAtLeast(96.dp) +
+                            WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + DockDimens.contentGap
                         val pageBackgroundConfigOrNull by remember(page.id) { viewModel.pageBackgroundConfig(page.id) }.collectAsState(initial = null)
                         LaunchedEffect(page.id, pageBackgroundConfigOrNull) {
                             pageBackgroundConfigOrNull?.let { pageBackgroundCache[page.id] = it }
@@ -591,17 +595,22 @@ fun HomeScreen(
                 RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
             }
             val dockBorderColor = resolveElementColors(dockAppearance).borderColor
+            // Mirrors the Panel's own BoxWithConstraints+fixed-height treatment just above (see its
+            // comment) — the Dock can now be 1 or 2 rows tall (dockRowShape), so its size needs to be
+            // predictable up front rather than estimated from content, same reasoning as the Panel.
+            val dockRowShape = homeDockRow.dockRows()
+            val dockHeight = (96.dp * dockRowShape.size + 32.dp).coerceAtLeast(96.dp)
             androidx.compose.animation.AnimatedVisibility(
                 visible = dockExpanded,
                 enter = fadeIn(tween(160)) + androidx.compose.animation.expandVertically(tween(200), expandFrom = Alignment.Bottom),
                 exit = fadeOut(tween(140)) + androidx.compose.animation.shrinkVertically(tween(180), shrinkTowards = Alignment.Bottom),
-                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(dockHeight + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
             ) {
                 DockPanelSurface(
                     appearance = dockAppearance.copy(borderEnabled = false),
                     shape = dockShape,
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxSize()
                         .then(
                             if (dockAppearance.borderEnabled) {
                                 Modifier.drawBehind {
@@ -612,31 +621,44 @@ fun HomeScreen(
                             }
                         )
                 ) {
-                    PillRowEntries(
-                        entries = appEntriesByRow[homeDockRow.id].orEmpty(),
-                        folders = folders,
-                        folderItemsByFolder = folderItemsByFolder,
-                        savedMapTargets = savedMapTargets,
-                        pinnedWebsites = pinnedWebsites,
-                        pages = allPages,
-                        loadIcon = viewModel::loadIcon,
-                        loadPackIcon = viewModel::loadPackIcon,
-                        resolveLabel = resolveLabel,
-                        itemShape = pillItemShape(iconShape),
-                        onFolderClick = viewModel::openFolder,
-                        onShortcutClick = viewModel::launchFolderShortcut,
-                        onOpenPageLink = onOpenPageLink,
-                        // Live dock is display-only now — adding/removing entries only happens in
-                        // Settings > Home screen > Layout > Dock > Elements.
-                        onAddEmptySlot = null,
-                        maxEntries = homeDockRow.pillMaxEntries,
-                        showLabels = homeDockRow.showLabels,
-                        labelColor = homeDockRow.appearance().contentColor?.let { Color(it) } ?: Color.White,
+                    Column(
+                        verticalArrangement = Arrangement.Center,
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .fillMaxSize()
                             .padding(horizontal = DockDimens.innerHorizontalPadding, vertical = DockDimens.innerVerticalPadding)
                             .navigationBarsPadding()
-                    )
+                    ) {
+                        AppsGridEntries(
+                            entries = appEntriesByRow[homeDockRow.id].orEmpty(),
+                            columns = 1,
+                            rowColumns = dockRowShape,
+                            folders = folders,
+                            folderItemsByFolder = folderItemsByFolder,
+                            savedMapTargets = savedMapTargets,
+                            pinnedWebsites = pinnedWebsites,
+                            pages = allPages,
+                            loadIcon = viewModel::loadIcon,
+                            loadPackIcon = viewModel::loadPackIcon,
+                            resolveLabel = resolveLabel,
+                            onFolderClick = viewModel::openFolder,
+                            onShortcutClick = viewModel::launchFolderShortcut,
+                            onOpenPageLink = onOpenPageLink,
+                            pinnedContacts = pinnedContacts,
+                            loadContactPhoto = viewModel::loadContactPhoto,
+                            onContactClick = { contactId ->
+                                pinnedContacts.find { it.contactId == contactId }?.let { contact ->
+                                    com.bisc.flauncher.util.openContact(
+                                        context,
+                                        com.bisc.flauncher.data.model.ContactInfo(contact.contactId, contact.lookupKey, contact.displayName, contact.photoUri)
+                                    )
+                                }
+                            },
+                            showLabels = homeDockRow.showLabels,
+                            labelColor = homeDockRow.appearance().contentColor?.let { Color(it) } ?: Color.White
+                            // Live dock is display-only now — adding/removing entries only happens in
+                            // Settings > Home screen > Layout > Dock > Elements.
+                        )
+                    }
                 }
             }
         }
@@ -691,7 +713,8 @@ fun HomeScreen(
         // Bottom corners rounded, top corners square since the panel is visually attached to the
         // screen's own top edge. Its content is the same AppsGridEntries grid an ordinary apps row
         // uses, just laid out full-width inside DockPanelSurface instead of a WidgetCard, mirroring
-        // exactly how the Dock reuses PillRowEntries the same way for its own floating bar.
+        // exactly how the Dock now uses the same AppsGridEntries grid for its own floating bar —
+        // the Dock is a mirrored Panel (only-top-rounded corners, capped at 2 rows instead of 6).
         //
         // BoxWithConstraints sits *outside* the AnimatedVisibility, and the AnimatedVisibility below
         // gets a fixed width/height instead of sizing to its content — expandVertically would otherwise

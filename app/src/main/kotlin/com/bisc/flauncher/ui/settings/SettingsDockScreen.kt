@@ -1,24 +1,30 @@
 package com.bisc.flauncher.ui.settings
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BorderAll
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.ViewCarousel
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,9 +42,10 @@ import com.bisc.flauncher.data.model.LauncherPage
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.appearance
+import com.bisc.flauncher.data.model.dockRows
+import com.bisc.flauncher.ui.home.ConfirmRemoveDialog
 import com.bisc.flauncher.ui.home.HomeViewModel
-import com.bisc.flauncher.ui.home.PillRowEntries
-import com.bisc.flauncher.ui.home.pillItemShape
+import com.bisc.flauncher.ui.home.entryLabel
 import com.bisc.flauncher.ui.home.dock.AddMapTargetDialog
 import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
@@ -116,6 +123,9 @@ fun SettingsDockBorderScreen(pageId: Long, navController: NavController, onBack:
     }
 }
 
+/** The Dock's own grid editor — the Dock is a mirrored Panel, so this mirrors
+ *  [SettingsPanelElementsScreen] exactly (same "+" preview/chooser, same tap-a-filled-slot-to-remove
+ *  instead of a separate reorderable list), just capped at 2 sub-rows instead of 6. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
@@ -128,13 +138,13 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
     val savedMapTargets by viewModel.savedMapTargets.collectAsState()
     val pinnedWebsites by viewModel.pinnedWebsites.collectAsState()
     val allPages by viewModel.allPages.collectAsState()
-    val iconShape by viewModel.iconShape.collectAsState()
     val shortcutAppPickerOpen by viewModel.shortcutAppPickerOpen.collectAsState()
     val shortcutPickerForApp by viewModel.shortcutPickerForApp.collectAsState()
     val availableShortcuts by viewModel.availableShortcuts.collectAsState()
     val pinnedContacts by viewModel.pinnedContacts.collectAsState()
     val contactPickerOpen by viewModel.contactPickerOpen.collectAsState()
     val contactPickerList by viewModel.contactPickerList.collectAsState()
+    val rowShape = row.dockRows()
 
     var showAddChooser by remember { mutableStateOf(false) }
     var showAppPicker by remember { mutableStateOf(false) }
@@ -145,12 +155,15 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
     var showAddMapTargetDialog by remember { mutableStateOf(false) }
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
     var pendingShortcut by remember { mutableStateOf(false) }
+    var pendingRemoval by remember { mutableStateOf<com.bisc.flauncher.data.model.AppRowEntry?>(null) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_dock_elements_title), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
-            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                PillRowEntries(
+            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                com.bisc.flauncher.ui.home.AppsGridEntries(
                     entries = entries,
+                    columns = 1,
+                    rowColumns = rowShape,
                     folders = folders,
                     folderItemsByFolder = folderItemsByFolder,
                     savedMapTargets = savedMapTargets,
@@ -159,34 +172,54 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
                     loadIcon = viewModel::loadIcon,
                     loadPackIcon = viewModel::loadPackIcon,
                     resolveLabel = viewModel::resolveLabel,
-                    itemShape = pillItemShape(iconShape),
-                    onAddEmptySlot = { showAddChooser = true },
-                    maxEntries = row.pillMaxEntries,
-                    showLabels = row.showLabels,
-                    labelColor = row.appearance().contentColor?.let { androidx.compose.ui.graphics.Color(it) } ?: androidx.compose.ui.graphics.Color.White,
+                    onFolderClick = {},
+                    onShortcutClick = {},
+                    onOpenPageLink = { _, _ -> },
                     pinnedContacts = pinnedContacts,
                     loadContactPhoto = viewModel::loadContactPhoto,
                     onContactClick = {},
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                    showLabels = row.showLabels,
+                    labelColor = row.appearance().contentColor?.let { androidx.compose.ui.graphics.Color(it) } ?: androidx.compose.ui.graphics.Color.White,
+                    onAddEmptySlot = { showAddChooser = true },
+                    onEditEntry = { entry -> pendingRemoval = entry }
                 )
             }
         }
-        if (entries.isNotEmpty()) {
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_apps_row_apps_label)) {
-                ReorderableList(items = entries, key = { it.id }, onReorder = viewModel::reorderAppRowEntries) { entry ->
-                    AppRowEntryRow(
-                        entry = entry,
-                        folders = folders,
-                        folderItemsByFolder = folderItemsByFolder,
-                        savedMapTargets = savedMapTargets,
-                        pinnedWebsites = pinnedWebsites,
-                        pages = allPages,
-                        loadIcon = viewModel::loadIcon,
-                        resolveLabel = viewModel::resolveLabel,
-                        onRemove = { viewModel.removeAppRowEntry(entry) },
-                        pinnedContacts = pinnedContacts
-                    )
-                }
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_panel_rows_label)) {
+            rowShape.forEachIndexed { index, cols ->
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_panel_row_number, index + 1),
+                    onClick = {},
+                    trailing = {
+                        androidx.compose.foundation.layout.Row(
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(cols.toString(), modifier = Modifier.padding(end = 4.dp))
+                            androidx.compose.material3.IconButton(
+                                onClick = { viewModel.setDockRowColumns(row, rowShape.toMutableList().apply { this[index] = cols - 1 }) },
+                                enabled = cols > 1
+                            ) { androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Filled.Remove, contentDescription = null) }
+                            androidx.compose.material3.IconButton(
+                                onClick = { viewModel.setDockRowColumns(row, rowShape.toMutableList().apply { this[index] = cols + 1 }) },
+                                enabled = cols < 6
+                            ) { androidx.compose.material3.Icon(Icons.Filled.Add, contentDescription = null) }
+                            androidx.compose.material3.IconButton(
+                                onClick = { viewModel.setDockRowColumns(row, rowShape.filterIndexed { i, _ -> i != index }) },
+                                enabled = rowShape.size > 1
+                            ) { androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Filled.Close, contentDescription = null) }
+                        }
+                    }
+                )
+            }
+            if (rowShape.size < 2) {
+                SettingsPreference(
+                    icon = Icons.Filled.Add,
+                    title = stringResource(R.string.settings_panel_add_row),
+                    onClick = { viewModel.setDockRowColumns(row, rowShape + 5) },
+                    trailing = null
+                )
             }
         }
         CaptionsSection(
@@ -194,6 +227,14 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
             onShowLabelsChange = { viewModel.setRowShowLabels(row, it) },
             appearance = row.appearance(),
             onAppearanceChange = { viewModel.setRowAppearance(row, it) }
+        )
+    }
+
+    pendingRemoval?.let { entry ->
+        ConfirmRemoveDialog(
+            label = com.bisc.flauncher.ui.home.entryLabel(entry, folders, savedMapTargets, pinnedWebsites, allPages, pinnedContacts, viewModel::resolveLabel),
+            onConfirm = { viewModel.removeAppRowEntry(entry); pendingRemoval = null },
+            onDismiss = { pendingRemoval = null }
         )
     }
 
