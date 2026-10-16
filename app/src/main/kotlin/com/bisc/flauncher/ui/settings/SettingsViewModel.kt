@@ -14,6 +14,8 @@ import com.bisc.flauncher.data.model.GestureAction
 import com.bisc.flauncher.data.model.HomeGesture
 import com.bisc.flauncher.data.model.IconPackInfo
 import com.bisc.flauncher.data.model.LauncherPage
+import com.bisc.flauncher.data.model.PageRow
+import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.RevealMode
 import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.data.model.SearchEngine
@@ -364,6 +366,20 @@ class SettingsViewModel @Inject constructor(
         combine(HomeGesture.entries.map { repository.gestureAction(it) }) { actions ->
             HomeGesture.entries.zip(actions.toList()).toMap()
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+
+    // Home's own pinned Dock/Panel rows — surfaced here only so SettingsGesturesScreen can show
+    // SWIPE_UP/SWIPE_DOWN locked (with a reason) while the Dock/Panel have claimed that gesture for
+    // themselves (see HomeScreen's detectHomeGestures wiring, the actual place that reservation is
+    // enforced). Not used for editing either row; that still goes through the Home layout screens.
+    val homeDockRow: StateFlow<PageRow?> = combine(pages, pageContentRepository.rows) { pages, rows ->
+        val homeId = pages.find { it.isHome }?.id
+        rows.find { it.pageId == homeId && it.type == PageRowType.SEARCH_BAR }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val homePanelRow: StateFlow<PageRow?> = combine(pages, pageContentRepository.rows) { pages, rows ->
+        val homeId = pages.find { it.isHome }?.id
+        rows.find { it.pageId == homeId && it.type == PageRowType.PANEL }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val _installedApps = MutableStateFlow<List<AppInfo>>(emptyList())
     val installedApps: StateFlow<List<AppInfo>> = _installedApps.asStateFlow()

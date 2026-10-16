@@ -185,7 +185,7 @@
     <string name="settings_dock_background_label">Hintergrund</string>
     <string name="settings_dock_visibility_label">Sichtbarkeit</string>
     <string name="settings_dock_visibility_always">Immer sichtbar</string>
-    <string name="settings_dock_visibility_manual">Mit der Nase aufziehen</string>
+    <string name="settings_dock_visibility_manual">Mit Wischen nach oben öffnen</string>
     <string name="settings_dock_visibility_auto">Automatisch beim Ankommen</string>
     <string name="settings_layer_surface_screen">Bildschirm</string>
     <string name="settings_layer_surface_sidebar">Seitenleiste</string>
@@ -289,6 +289,8 @@
     <string name="settings_gesture_double_tap">Doppeltippen</string>
     <string name="settings_gesture_swipe_up">Nach oben wischen</string>
     <string name="settings_gesture_swipe_down">Nach unten wischen</string>
+    <string name="settings_gesture_locked_by_dock">Wird vom Dock zum Auf-/Zuklappen verwendet</string>
+    <string name="settings_gesture_locked_by_panel">Wird vom Panel zum Öffnen verwendet</string>
     <string name="settings_gesture_action_none">Keine Aktion</string>
     <string name="settings_gesture_action_app">App öffnen</string>
     <string name="settings_gesture_action_shortcut">Verknüpfung ausführen</string>

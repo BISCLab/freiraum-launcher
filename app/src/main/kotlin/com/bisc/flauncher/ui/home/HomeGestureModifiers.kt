@@ -39,7 +39,13 @@ fun Modifier.detectHomeGestures(
     onLongPress: () -> Unit,
     onDoubleTap: () -> Unit,
     onSwipeUp: () -> Unit,
-    onSwipeDown: () -> Unit
+    onSwipeDown: () -> Unit,
+    // Excludes a strip at the top/bottom edge from triggering onSwipeDown/onSwipeUp when the drag
+    // *starts* inside it, so Android's own edge gestures (status bar reveal when we've hidden it;
+    // the gesture-nav task switcher) stay reachable even though this detector otherwise covers the
+    // whole home content area. 0 (the default) means no exclusion.
+    topSafeZonePx: Float = 0f,
+    bottomSafeZonePx: Float = 0f
 ): Modifier {
     val density = LocalDensity.current
     // Was 96dp, back when this read PointerEventPass.Final (after the pager's own Main-pass claim had
@@ -62,8 +68,13 @@ fun Modifier.detectHomeGestures(
     val currentOnLongPress = rememberUpdatedState(onLongPress)
     val currentOnDoubleTap = rememberUpdatedState(onDoubleTap)
     return this
-        .pointerInput(thresholdPx) {
+        .pointerInput(thresholdPx, topSafeZonePx, bottomSafeZonePx) {
             awaitEachGesture {
+                // Captured once, from the very first event of the gesture — used only to check
+                // whether the drag started inside a safe zone, never updated afterward.
+                val firstChange = awaitPointerEvent(PointerEventPass.Main).changes.firstOrNull() ?: return@awaitEachGesture
+                if (!firstChange.pressed) return@awaitEachGesture
+                val startY = firstChange.position.y
                 var accumulated = 0f
                 while (true) {
                     val event = awaitPointerEvent(PointerEventPass.Main)
@@ -72,11 +83,11 @@ fun Modifier.detectHomeGestures(
                     if (change.isConsumed) continue
                     accumulated += change.positionChange().y
                     if (accumulated <= -thresholdPx) {
-                        currentOnSwipeUp.value()
+                        if (startY < size.height - bottomSafeZonePx) currentOnSwipeUp.value()
                         break
                     }
                     if (accumulated >= thresholdPx) {
-                        currentOnSwipeDown.value()
+                        if (startY > topSafeZonePx) currentOnSwipeDown.value()
                         break
                     }
                 }
