@@ -136,7 +136,7 @@ fun SettingsWidgetRowEditScreen(
             ElementAppearanceSection(
                 appearance = row.appearance(),
                 onAppearanceChange = { viewModel.setRowAppearance(row, it) },
-                styleGroupTitle = layerBackgroundLabel(2, R.string.settings_layer_surface_widget),
+                styleGroupTitle = surfaceLabel(R.string.settings_layer_surface_widget),
                 onEyedropperCapture = if (row.type == PageRowType.SYSTEM_WIDGET) {
                     { hostedWidgetView?.let(::captureViewBitmap) }
                 } else null

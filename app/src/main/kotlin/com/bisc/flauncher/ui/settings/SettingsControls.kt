@@ -53,10 +53,12 @@ import com.bisc.flauncher.data.model.asBrush
 import com.bisc.flauncher.data.settings.IconShape
 import kotlin.math.roundToInt
 
-/** Title of a layer background: layer number and surface name. */
+/** Human-readable name for the surface an appearance/background section's group title is for
+ *  (e.g. "Widget", "Folder", "Text search"). Kept as its own function only so every call site uses
+ *  the same pattern — it's a plain passthrough, not a formatted label, now that the old numbered
+ *  "Layer 1/2/3" framing is gone. */
 @Composable
-fun layerBackgroundLabel(layer: Int, surfaceNameRes: Int): String =
-    stringResource(R.string.settings_layer_background_title, layer, stringResource(surfaceNameRes))
+fun surfaceLabel(surfaceNameRes: Int): String = stringResource(surfaceNameRes)
 
 /** Corner shape of all text fields in the settings. */
 val SettingsTextFieldShape = RoundedCornerShape(16.dp)
@@ -159,9 +161,7 @@ fun ElementAppearanceSection(
     allowNone: Boolean = true,
     onEyedropperCapture: (() -> androidx.compose.ui.graphics.ImageBitmap?)? = null
 ) {
-    var showLayerHelp by remember { mutableStateOf(false) }
-
-    SettingsPreferenceGroup(title = styleGroupTitle, onInfoClick = { showLayerHelp = true }) {
+    SettingsPreferenceGroup(title = styleGroupTitle) {
         ElementFillMode.entries.filter { allowNone || it != ElementFillMode.NONE }.forEach { mode ->
             FillModePreference(
                 value = mode,
@@ -243,17 +243,12 @@ fun ElementAppearanceSection(
         automaticSeed = autoTextSeed(appearance),
         onChange = { onAppearanceChange(appearance.copy(contentColor = it)) }
     )
-
-    if (showLayerHelp) {
-        LayerExplainerSheet(onDismiss = { showLayerHelp = false })
-    }
 }
 
 /** Background-only half of [ElementAppearanceSection] — fill mode, color and opacity, with no
- *  group titles or layer-help info icon of its own (the page it's placed on is already titled
- *  "Background", so a repeated heading and an explainer link to the old Layer 1/2/3 model would
- *  just add noise back in). Used by the Dock and (eventually) Favorites Panel's own dedicated
- *  Background screens instead of the old one-sheet-does-everything editor. */
+ *  group title of its own (the page it's placed on is already titled "Background", so a repeated
+ *  heading would just add noise back in). Used by the Dock's and Panel's own dedicated Background
+ *  screens instead of the old one-sheet-does-everything editor. */
 @Composable
 fun ElementBackgroundSection(appearance: ElementAppearance, onAppearanceChange: (ElementAppearance) -> Unit, allowNone: Boolean = true) {
     SettingsPreferenceGroup {
@@ -566,63 +561,6 @@ fun SettingsFixedDialog(
                     content = content
                 )
             }
-        }
-    }
-}
-
-private val Layer1Tone = Color(0xFF64748B)
-private val Layer2Tone = Color(0xFF94A3B8)
-private val Layer3Tone = Color(0xFFE2E8F0)
-
-/** Explanation of the three layers. */
-@Composable
-fun LayerExplainerSheet(onDismiss: () -> Unit) {
-    SettingsEditSheet(title = stringResource(R.string.settings_layer_help_title), onDismiss = onDismiss) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Layer1Tone)
-                .padding(20.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Layer2Tone)
-                    .padding(24.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(Layer3Tone)
-                )
-            }
-        }
-        LayerExplainerRow(Layer1Tone, stringResource(R.string.settings_layer_1_title), stringResource(R.string.settings_layer_1_description))
-        LayerExplainerRow(Layer2Tone, stringResource(R.string.settings_layer_2_title), stringResource(R.string.settings_layer_2_description))
-        LayerExplainerRow(Layer3Tone, stringResource(R.string.settings_layer_3_title), stringResource(R.string.settings_layer_3_description))
-    }
-}
-
-@Composable
-private fun LayerExplainerRow(tone: Color, title: String, description: String) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        Box(
-            modifier = Modifier
-                .padding(top = 3.dp)
-                .size(14.dp)
-                .clip(CircleShape)
-                .background(tone)
-                .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-        )
-        Column(modifier = Modifier.padding(start = 12.dp)) {
-            Text(title, style = MaterialTheme.typography.titleSmall)
-            Text(description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

@@ -181,33 +181,20 @@
     <string name="settings_element_border_label">Rahmen</string>
     <string name="settings_element_show_labels_label">Beschriftung anzeigen</string>
 
-    <string name="settings_layer_background_title">Ebene %1$d · %2$s</string>
     <string name="settings_dock_background_label">Hintergrund</string>
     <string name="settings_dock_visibility_label">Sichtbarkeit</string>
     <string name="settings_dock_visibility_always">Immer sichtbar</string>
     <string name="settings_dock_visibility_manual">Mit Wischen nach oben öffnen</string>
     <string name="settings_dock_visibility_auto">Automatisch beim Ankommen</string>
     <string name="settings_layer_surface_screen">Bildschirm</string>
-    <string name="settings_layer_surface_sidebar">Seitenleiste</string>
     <string name="settings_layer_surface_folder">Ordner</string>
     <string name="settings_layer_surface_search">Textsuche</string>
-    <string name="settings_layer_surface_quick_overview">Schnellübersicht</string>
-    <string name="settings_quick_overview_backdrop_summary">Vollbildhintergrund hinter der Schnellübersicht. Verhält sich wie ein Ebene-1-Hintergrund, ein Bild ist wählbar. Standardmäßig transparent.</string>
-    <string name="settings_overlay_backdrop_explainer">Der Hintergrund füllt den gesamten Bildschirm hinter der Ansicht und verhält sich daher wie ein Ebene-1-Hintergrund. Neben Seiten akzeptieren nur diese Hintergründe ein Bild. Darüberliegende Flächen (Ergebnisse, Tastatur, Seitenleiste) bleiben Ebene-2-Elemente mit eigenem Hintergrund.</string>
     <string name="settings_search_appearance_summary">Das Erscheinungsbild des gesamten Suchbildschirms — Hintergrund und Ergebnisse schweben direkt darauf, keine separaten Karten mehr.</string>
     <string name="settings_layer_surface_keyboard">Tastatur</string>
     <string name="settings_layer_surface_app_list">App-Liste</string>
     <string name="settings_layer_surface_widget">Widget</string>
     <string name="settings_layer_surface_section_letter">Abschnittsbuchstabe</string>
     <string name="settings_layer_surface_alphabet_letter">Leistenbuchstabe</string>
-
-    <string name="settings_layer_help_title">Ebenen</string>
-    <string name="settings_layer_1_title">Ebene 1: Hintergrund</string>
-    <string name="settings_layer_1_description">Der gesamte Bildschirm hinter allen anderen Inhalten: Hintergrundbild oder Farbfläche. Vorhanden bei Seiten, App-Übersicht, Schnellübersicht und Textsuche.</string>
-    <string name="settings_layer_2_title">Ebene 2: Fläche</string>
-    <string name="settings_layer_2_description">Begrenzte Fläche über Ebene 1: Widget-Karte, Dock, Seitenleiste, Ordnerkarte, Suchflächen, Tastatur.</string>
-    <string name="settings_layer_3_title">Ebene 3: Element</string>
-    <string name="settings_layer_3_description">Kleines Element innerhalb einer Ebene-2-Fläche, zum Beispiel der Kreis hinter einem Abschnittsbuchstaben der App-Liste.</string>
 
     <string name="settings_section_icon_pack">Symbolpaket</string>
     <string name="settings_icon_pack_default">Standard</string>

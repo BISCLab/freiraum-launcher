@@ -33,7 +33,7 @@ fun SettingsFolderScreen(navController: NavController, onBack: () -> Unit, viewM
     val browsableApps by viewModel.browsableApps.collectAsState()
     var showCardSheet by remember { mutableStateOf(false) }
     var showCreateDialog by remember { mutableStateOf(false) }
-    val layerLabel = layerBackgroundLabel(2, R.string.settings_layer_surface_folder)
+    val layerLabel = surfaceLabel(R.string.settings_layer_surface_folder)
     val itemsByFolder = remember(folderItems) { folderItems.groupBy { it.folderId } }
 
     SettingsSubScreen(title = stringResource(R.string.settings_folder_title), navController = navController, onBack = onBack) {

@@ -87,14 +87,14 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
         SettingsPreferenceGroup(title = stringResource(R.string.settings_search_appearance_label)) {
             SettingsPreference(
                 icon = null,
-                title = layerBackgroundLabel(2, R.string.settings_layer_surface_search),
+                title = surfaceLabel(R.string.settings_layer_surface_search),
                 info = stringResource(R.string.settings_search_appearance_summary),
                 onClick = { openSheet = SearchElementSheet.SEARCH_APPEARANCE },
                 trailing = null
             )
             SettingsPreference(
                 icon = null,
-                title = layerBackgroundLabel(2, R.string.settings_layer_surface_keyboard),
+                title = surfaceLabel(R.string.settings_layer_surface_keyboard),
                 onClick = { openSheet = SearchElementSheet.KEYBOARD },
                 trailing = null
             )
@@ -263,23 +263,23 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
 
     when (openSheet) {
         SearchElementSheet.SEARCH_APPEARANCE -> SettingsEditPage(
-            title = layerBackgroundLabel(2, R.string.settings_layer_surface_search),
+            title = surfaceLabel(R.string.settings_layer_surface_search),
             onDismiss = { openSheet = null }
         ) {
             ElementAppearanceSection(
                 appearance = searchAppearance,
                 onAppearanceChange = viewModel::setSearchAppearance,
-                styleGroupTitle = layerBackgroundLabel(2, R.string.settings_layer_surface_search)
+                styleGroupTitle = surfaceLabel(R.string.settings_layer_surface_search)
             )
         }
         SearchElementSheet.KEYBOARD -> SettingsEditPage(
-            title = layerBackgroundLabel(2, R.string.settings_layer_surface_keyboard),
+            title = surfaceLabel(R.string.settings_layer_surface_keyboard),
             onDismiss = { openSheet = null }
         ) {
             ElementAppearanceSection(
                 appearance = keyboardAppearance,
                 onAppearanceChange = viewModel::setKeyboardAppearance,
-                styleGroupTitle = layerBackgroundLabel(2, R.string.settings_layer_surface_keyboard)
+                styleGroupTitle = surfaceLabel(R.string.settings_layer_surface_keyboard)
             )
         }
         null -> Unit

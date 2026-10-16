@@ -22,7 +22,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Palette
@@ -133,10 +132,10 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
 
 /** Rounded group of preference rows with an optional title. */
 @Composable
-fun SettingsPreferenceGroup(title: String? = null, onInfoClick: (() -> Unit)? = null, content: @Composable ColumnScope.() -> Unit) {
+fun SettingsPreferenceGroup(title: String? = null, content: @Composable ColumnScope.() -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
         if (title != null) {
-            SettingsGroupLabel(title, onInfoClick)
+            SettingsGroupLabel(title)
         }
         Column(
             modifier = Modifier.clip(MaterialTheme.shapes.medium),
@@ -148,7 +147,7 @@ fun SettingsPreferenceGroup(title: String? = null, onInfoClick: (() -> Unit)? = 
 
 /** The small secondary-colored label [SettingsPreferenceGroup] renders above its own card. */
 @Composable
-fun SettingsGroupLabel(title: String, onInfoClick: (() -> Unit)? = null) {
+fun SettingsGroupLabel(title: String) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 8.dp)) {
         Text(
             title,
@@ -156,16 +155,6 @@ fun SettingsGroupLabel(title: String, onInfoClick: (() -> Unit)? = null) {
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.padding(start = 4.dp)
         )
-        if (onInfoClick != null) {
-            IconButton(onClick = onInfoClick, modifier = Modifier.size(20.dp).padding(start = 4.dp)) {
-                Icon(
-                    Icons.AutoMirrored.Filled.HelpOutline,
-                    contentDescription = stringResource(R.string.settings_layer_help_title),
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
-        }
     }
 }
 
