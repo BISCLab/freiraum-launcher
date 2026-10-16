@@ -181,33 +181,20 @@
     <string name="settings_element_border_label">Border</string>
     <string name="settings_element_show_labels_label">Show captions</string>
 
-    <string name="settings_layer_background_title">Layer %1$d · %2$s</string>
     <string name="settings_dock_background_label">Background</string>
     <string name="settings_dock_visibility_label">Visibility</string>
     <string name="settings_dock_visibility_always">Always visible</string>
     <string name="settings_dock_visibility_manual">Open with a swipe up</string>
     <string name="settings_dock_visibility_auto">Auto-expand on arrival</string>
     <string name="settings_layer_surface_screen">Screen</string>
-    <string name="settings_layer_surface_sidebar">Sidebar</string>
     <string name="settings_layer_surface_folder">Folder</string>
     <string name="settings_layer_surface_search">Text search</string>
-    <string name="settings_layer_surface_quick_overview">Quick overview</string>
-    <string name="settings_quick_overview_backdrop_summary">Full-screen background behind the quick overview. Behaves like a layer 1 background, so an image can be selected. Transparent by default.</string>
-    <string name="settings_overlay_backdrop_explainer">The background covers the whole screen behind the overlay and therefore behaves like a layer 1 background. Besides pages, only these backgrounds accept an image. Surfaces on top (results, keyboard, sidebar) remain layer 2 elements with their own backgrounds.</string>
     <string name="settings_search_appearance_summary">The whole search screen\'s look — background and results float directly on it, no separate cards.</string>
     <string name="settings_layer_surface_keyboard">Keyboard</string>
     <string name="settings_layer_surface_app_list">App list</string>
     <string name="settings_layer_surface_widget">Widget</string>
     <string name="settings_layer_surface_section_letter">Section letter</string>
     <string name="settings_layer_surface_alphabet_letter">Rail letter</string>
-
-    <string name="settings_layer_help_title">Layers</string>
-    <string name="settings_layer_1_title">Layer 1: Background</string>
-    <string name="settings_layer_1_description">The full screen behind all other content: wallpaper image or flat color. Available for pages, the app overview, the quick overview and the text search.</string>
-    <string name="settings_layer_2_title">Layer 2: Surface</string>
-    <string name="settings_layer_2_description">A bounded surface above layer 1: widget card, dock, sidebar, folder card, search panels, keyboard.</string>
-    <string name="settings_layer_3_title">Layer 3: Element</string>
-    <string name="settings_layer_3_description">A small element inside a layer 2 surface, for example the circle behind a section letter in the app list.</string>
 
     <string name="settings_section_icon_pack">Icon pack</string>
     <string name="settings_icon_pack_default">Default</string>

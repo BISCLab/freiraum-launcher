@@ -129,7 +129,7 @@ fun SettingsPageRowsScreen(
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
-                title = layerBackgroundLabel(1, R.string.settings_layer_surface_screen),
+                title = surfaceLabel(R.string.settings_layer_surface_screen),
                 onClick = { showBackgroundSheet = true },
                 trailing = null
             )
@@ -188,7 +188,7 @@ fun SettingsPageRowsScreen(
     if (showBackgroundSheet) {
         val pageBackgroundOverride by remember(pageId) { viewModel.pageBackgroundOverride(pageId) }.collectAsState(initial = null)
         val globalBackground by viewModel.globalBackground.collectAsState()
-        SettingsEditPage(title = layerBackgroundLabel(1, R.string.settings_layer_surface_screen), onDismiss = { showBackgroundSheet = false }) {
+        SettingsEditPage(title = surfaceLabel(R.string.settings_layer_surface_screen), onDismiss = { showBackgroundSheet = false }) {
             BackgroundOverrideSection(
                 override = pageBackgroundOverride,
                 global = globalBackground,

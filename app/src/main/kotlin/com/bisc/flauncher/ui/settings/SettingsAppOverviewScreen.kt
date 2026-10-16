@@ -40,7 +40,7 @@ fun SettingsAppOverviewScreen(navController: NavController, onBack: () -> Unit, 
             SettingsPreferenceGroup {
                 SettingsPreference(
                     icon = null,
-                    title = layerBackgroundLabel(1, R.string.settings_layer_surface_screen),
+                    title = surfaceLabel(R.string.settings_layer_surface_screen),
                     onClick = { showBackgroundSheet = true },
                     trailing = null
                 )
@@ -61,7 +61,7 @@ fun SettingsAppOverviewScreen(navController: NavController, onBack: () -> Unit, 
     if (showBackgroundSheet && id != null) {
         val override by remember(id) { viewModel.pageBackgroundOverride(id) }.collectAsState(initial = null)
         val globalBackground by viewModel.globalBackground.collectAsState()
-        SettingsEditPage(title = layerBackgroundLabel(1, R.string.settings_layer_surface_screen), onDismiss = { showBackgroundSheet = false }) {
+        SettingsEditPage(title = surfaceLabel(R.string.settings_layer_surface_screen), onDismiss = { showBackgroundSheet = false }) {
             BackgroundOverrideSection(
                 override = override,
                 global = globalBackground,

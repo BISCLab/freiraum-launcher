@@ -66,31 +66,31 @@ fun ColumnScope.AppOverviewSettingsSection(surfaceIsDark: Boolean, viewModel: Se
     SettingsPreferenceGroup(title = stringResource(R.string.settings_app_overview_elements_label)) {
         SettingsPreference(
             icon = null,
-            title = layerBackgroundLabel(2, R.string.settings_layer_surface_app_list),
+            title = surfaceLabel(R.string.settings_layer_surface_app_list),
             onClick = { openSheet = OverviewElementSheet.LIST_BACKGROUND },
             trailing = null
         )
         SettingsPreference(
             icon = null,
-            title = layerBackgroundLabel(3, R.string.settings_layer_surface_section_letter),
+            title = surfaceLabel(R.string.settings_layer_surface_section_letter),
             onClick = { openSheet = OverviewElementSheet.HEADER_LETTERS },
             trailing = null
         )
         SettingsPreference(
             icon = null,
-            title = layerBackgroundLabel(3, R.string.settings_layer_surface_alphabet_letter),
+            title = surfaceLabel(R.string.settings_layer_surface_alphabet_letter),
             onClick = { openSheet = OverviewElementSheet.ALPHABET_LETTERS },
             trailing = null
         )
         SettingsPreference(
             icon = null,
-            title = layerBackgroundLabel(3, R.string.settings_layer_surface_search_button),
+            title = surfaceLabel(R.string.settings_layer_surface_search_button),
             onClick = { openSheet = OverviewElementSheet.SEARCH_BUTTON },
             trailing = null
         )
         SettingsPreference(
             icon = null,
-            title = layerBackgroundLabel(3, R.string.settings_layer_surface_alphabet_rail),
+            title = surfaceLabel(R.string.settings_layer_surface_alphabet_rail),
             onClick = { openSheet = OverviewElementSheet.RAIL_BOX },
             trailing = null
         )
@@ -127,43 +127,43 @@ fun ColumnScope.AppOverviewSettingsSection(surfaceIsDark: Boolean, viewModel: Se
 
     when (openSheet) {
         OverviewElementSheet.LIST_BACKGROUND -> SettingsEditPage(
-            title = layerBackgroundLabel(2, R.string.settings_layer_surface_app_list),
+            title = surfaceLabel(R.string.settings_layer_surface_app_list),
             onDismiss = { openSheet = null }
         ) {
             ElementAppearanceSection(
                 appearance = contentAppearance,
                 onAppearanceChange = viewModel::setAppListContentAppearance,
-                styleGroupTitle = layerBackgroundLabel(2, R.string.settings_layer_surface_app_list)
+                styleGroupTitle = surfaceLabel(R.string.settings_layer_surface_app_list)
             )
         }
         OverviewElementSheet.HEADER_LETTERS -> SettingsEditPage(
-            title = layerBackgroundLabel(3, R.string.settings_layer_surface_section_letter),
+            title = surfaceLabel(R.string.settings_layer_surface_section_letter),
             onDismiss = { openSheet = null }
         ) {
             ElementAppearanceSection(
                 appearance = headerLetterAppearance,
                 onAppearanceChange = viewModel::setSearchHeaderLetterAppearance,
-                styleGroupTitle = layerBackgroundLabel(3, R.string.settings_layer_surface_section_letter)
+                styleGroupTitle = surfaceLabel(R.string.settings_layer_surface_section_letter)
             )
         }
         OverviewElementSheet.ALPHABET_LETTERS -> SettingsEditPage(
-            title = layerBackgroundLabel(3, R.string.settings_layer_surface_alphabet_letter),
+            title = surfaceLabel(R.string.settings_layer_surface_alphabet_letter),
             onDismiss = { openSheet = null }
         ) {
             ElementAppearanceSection(
                 appearance = alphabetLetterAppearance,
                 onAppearanceChange = viewModel::setSearchAlphabetLetterAppearance,
-                styleGroupTitle = layerBackgroundLabel(3, R.string.settings_layer_surface_alphabet_letter)
+                styleGroupTitle = surfaceLabel(R.string.settings_layer_surface_alphabet_letter)
             )
         }
         OverviewElementSheet.SEARCH_BUTTON -> SettingsEditPage(
-            title = layerBackgroundLabel(3, R.string.settings_layer_surface_search_button),
+            title = surfaceLabel(R.string.settings_layer_surface_search_button),
             onDismiss = { openSheet = null }
         ) {
             ElementAppearanceSection(
                 appearance = searchButtonAppearance ?: railAppearance ?: automaticRailAppearance(surfaceIsDark),
                 onAppearanceChange = viewModel::setAppListSearchButtonAppearance,
-                styleGroupTitle = layerBackgroundLabel(3, R.string.settings_layer_surface_search_button)
+                styleGroupTitle = surfaceLabel(R.string.settings_layer_surface_search_button)
             )
             if (searchButtonAppearance != null) {
                 SettingsPreferenceGroup {
@@ -177,13 +177,13 @@ fun ColumnScope.AppOverviewSettingsSection(surfaceIsDark: Boolean, viewModel: Se
             }
         }
         OverviewElementSheet.RAIL_BOX -> SettingsEditPage(
-            title = layerBackgroundLabel(3, R.string.settings_layer_surface_alphabet_rail),
+            title = surfaceLabel(R.string.settings_layer_surface_alphabet_rail),
             onDismiss = { openSheet = null }
         ) {
             ElementAppearanceSection(
                 appearance = railAppearance ?: automaticRailAppearance(surfaceIsDark),
                 onAppearanceChange = viewModel::setSearchAlphabetRailAppearance,
-                styleGroupTitle = layerBackgroundLabel(3, R.string.settings_layer_surface_alphabet_rail)
+                styleGroupTitle = surfaceLabel(R.string.settings_layer_surface_alphabet_rail)
             )
             if (railAppearance != null) {
                 SettingsPreferenceGroup {

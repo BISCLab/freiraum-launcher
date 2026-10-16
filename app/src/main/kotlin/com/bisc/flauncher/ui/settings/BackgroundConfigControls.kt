@@ -50,7 +50,7 @@ import com.bisc.flauncher.util.BackgroundImageStore
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-/** Editor for the single global layer 1 background shared by every surface: image, color, opacity, darkening. */
+/** Editor for the single global background shared by every surface: image, color, opacity, darkening. */
 @Composable
 fun BackgroundConfigSection(
     imageKey: String,
@@ -58,7 +58,6 @@ fun BackgroundConfigSection(
     onConfigChange: (BackgroundConfig) -> Unit
 ) {
     var colorExpanded by remember { mutableStateOf(false) }
-    var showLayerHelp by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
@@ -75,10 +74,7 @@ fun BackgroundConfigSection(
     val customImagePath = config.imagePath
     val imageSelected = config.source == BackgroundSource.IMAGE
 
-    SettingsPreferenceGroup(
-        title = layerBackgroundLabel(1, R.string.settings_layer_surface_screen),
-        onInfoClick = { showLayerHelp = true }
-    ) {
+    SettingsPreferenceGroup(title = surfaceLabel(R.string.settings_layer_surface_screen)) {
         SettingsPreference(
             icon = null,
             title = stringResource(R.string.settings_background_source_custom_image),
@@ -201,16 +197,13 @@ fun BackgroundConfigSection(
         )
     }
 
-    if (showLayerHelp) {
-        LayerExplainerSheet(onDismiss = { showLayerHelp = false })
-    }
 }
 
 /**
- * Editor for one surface's layer 1 when it can only ever be "the shared global background" or "my own
- * color" — no per-surface image anymore (see SettingsRepository.backgroundOverrideFor for why: a custom
- * image only ever flickered against *another* custom image, never against a color or the already-
- * GPU-resident global image, so images only live at the global level now).
+ * Editor for one surface's background when it can only ever be "the shared global background" or
+ * "my own color" — no per-surface image anymore (see SettingsRepository.backgroundOverrideFor for
+ * why: a custom image only ever flickered against *another* custom image, never against a color or
+ * the already-GPU-resident global image, so images only live at the global level now).
  */
 @Composable
 fun BackgroundOverrideSection(
@@ -219,20 +212,16 @@ fun BackgroundOverrideSection(
     onUseGlobal: () -> Unit,
     onCustomColor: (BackgroundConfig) -> Unit,
     // Off for callers whose own page is already titled "Background" (Home's own Appearance screen,
-    // for one) — repeating "Layer 1 · Screen" plus a help icon explaining the old Layer 1/2/3 model
-    // right underneath is redundant there. Still on by default for every other caller (a page's row
-    // editor, a folder, etc.) where this section sits alongside other content on a differently-
-    // titled screen and the caption is the only thing saying what it's for.
+    // for one) — repeating a "Screen" group title right underneath would just be redundant there.
+    // Still on by default for every other caller (a page's row editor, a folder, etc.) where this
+    // section sits alongside other content on a differently-titled screen and the caption is the
+    // only thing saying what it's for.
     showLayerHeader: Boolean = true
 ) {
-    var showLayerHelp by remember { mutableStateOf(false) }
     val usesGlobal = override == null
     val current = override ?: BackgroundConfig(source = BackgroundSource.COLOR)
 
-    SettingsPreferenceGroup(
-        title = if (showLayerHeader) layerBackgroundLabel(1, R.string.settings_layer_surface_screen) else null,
-        onInfoClick = if (showLayerHeader) ({ showLayerHelp = true }) else null
-    ) {
+    SettingsPreferenceGroup(title = if (showLayerHeader) surfaceLabel(R.string.settings_layer_surface_screen) else null) {
         SettingsPreference(
             icon = null,
             title = stringResource(R.string.settings_background_use_global),
@@ -312,10 +301,6 @@ fun BackgroundOverrideSection(
                 }
             )
         }
-    }
-
-    if (showLayerHelp) {
-        LayerExplainerSheet(onDismiss = { showLayerHelp = false })
     }
 }
 
