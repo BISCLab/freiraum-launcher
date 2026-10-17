@@ -15,6 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.DesignPreset
+import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.ui.theme.FontPreference
 import com.bisc.flauncher.ui.theme.ThemePreference
@@ -32,8 +33,18 @@ fun SettingsAppearanceScreen(
     val chargingAnimation by viewModel.chargingAnimationEnabled.collectAsState()
     val chargingColor by viewModel.chargingAnimationColor.collectAsState()
     val statusBarHiddenEverywhere by viewModel.statusBarHiddenEverywhere.collectAsState()
+    val defaultCornerStyle by viewModel.defaultCornerStyle.collectAsState()
+    val browserPackage by viewModel.searchBrowserApp.collectAsState()
+    val mapsPackage by viewModel.searchMapsApp.collectAsState()
+    var browserPickerOpen by remember { mutableStateOf(false) }
+    var mapsPickerOpen by remember { mutableStateOf(false) }
     var confirmingPreset by remember { mutableStateOf<DesignPreset?>(null) }
+    var confirmingHideStatusBarEverywhere by remember { mutableStateOf<Boolean?>(null) }
     val context = androidx.compose.ui.platform.LocalContext.current
+    val defaultAppLabel = stringResource(R.string.settings_search_open_with_default)
+    fun appLabel(pkg: String?): String = pkg?.let {
+        runCatching { context.packageManager.getApplicationLabel(context.packageManager.getApplicationInfo(it, 0)).toString() }.getOrNull()
+    } ?: defaultAppLabel
     var pendingImport by remember { mutableStateOf<android.net.Uri?>(null) }
     val exportLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/zip")
@@ -98,6 +109,27 @@ fun SettingsAppearanceScreen(
             RadioPreference(stringResource(R.string.settings_handedness_left), Handedness.LEFT, handedness, viewModel::setHandedness)
             RadioPreference(stringResource(R.string.settings_handedness_right), Handedness.RIGHT, handedness, viewModel::setHandedness)
         }
+        // Applies to newly created elements only — each one's own Appearance screen can still
+        // override it afterwards (see SettingsRepository.defaultCornerStyle).
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_corner_style_label)) {
+            RadioPreference(stringResource(R.string.settings_corner_style_rounded), WidgetCornerStyle.ROUNDED, defaultCornerStyle, viewModel::setDefaultCornerStyle)
+            RadioPreference(stringResource(R.string.settings_corner_style_square), WidgetCornerStyle.SQUARE, defaultCornerStyle, viewModel::setDefaultCornerStyle)
+        }
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_standard_apps_label)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_search_browser_title),
+                summary = appLabel(browserPackage),
+                info = stringResource(R.string.settings_search_open_with_info),
+                onClick = { browserPickerOpen = true }
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_search_maps_title),
+                summary = appLabel(mapsPackage),
+                onClick = { mapsPickerOpen = true }
+            )
+        }
         // Home, Pages, Quick overview and Text search each have their own status-bar switch on their own screen.
         // This one is a bulk action over all of them — checked reflects whether every one of them is
         // currently hidden, and toggling it off sets every one of them back to shown.
@@ -106,9 +138,9 @@ fun SettingsAppearanceScreen(
                 icon = null,
                 title = stringResource(R.string.settings_statusbar_hide_all),
                 info = stringResource(R.string.settings_statusbar_hide_all_summary),
-                onClick = { viewModel.setStatusBarHiddenEverywhere(!statusBarHiddenEverywhere) },
+                onClick = { confirmingHideStatusBarEverywhere = !statusBarHiddenEverywhere },
                 trailing = {
-                    Switch(checked = statusBarHiddenEverywhere, onCheckedChange = { viewModel.setStatusBarHiddenEverywhere(it) })
+                    Switch(checked = statusBarHiddenEverywhere, onCheckedChange = { confirmingHideStatusBarEverywhere = it })
                 }
             )
         }
@@ -147,6 +179,53 @@ fun SettingsAppearanceScreen(
                 onColorChange = viewModel::setChargingAnimationColor
             )
         }
+    }
+
+    if (browserPickerOpen) {
+        AppPickerDialog(
+            title = stringResource(R.string.settings_search_browser_pick),
+            clearLabel = stringResource(R.string.settings_search_open_with_clear),
+            apps = remember { appsHandling(context, "https://example.com", browsable = true) },
+            selectedPackage = browserPackage,
+            onPick = { viewModel.setSearchBrowserApp(it); browserPickerOpen = false },
+            onClear = { viewModel.setSearchBrowserApp(null); browserPickerOpen = false },
+            onDismiss = { browserPickerOpen = false }
+        )
+    }
+    if (mapsPickerOpen) {
+        AppPickerDialog(
+            title = stringResource(R.string.settings_search_maps_pick),
+            clearLabel = stringResource(R.string.settings_search_open_with_clear),
+            apps = remember { appsHandling(context, "geo:0,0?q=test", browsable = false) },
+            selectedPackage = mapsPackage,
+            onPick = { viewModel.setSearchMapsApp(it); mapsPickerOpen = false },
+            onClear = { viewModel.setSearchMapsApp(null); mapsPickerOpen = false },
+            onDismiss = { mapsPickerOpen = false }
+        )
+    }
+
+    confirmingHideStatusBarEverywhere?.let { targetHidden ->
+        AlertDialog(
+            onDismissRequest = { confirmingHideStatusBarEverywhere = null },
+            title = { Text(stringResource(R.string.settings_statusbar_hide_all)) },
+            text = {
+                Text(
+                    stringResource(
+                        if (targetHidden) R.string.settings_statusbar_confirm_hide_message
+                        else R.string.settings_statusbar_confirm_show_message
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.setStatusBarHiddenEverywhere(targetHidden)
+                    confirmingHideStatusBarEverywhere = null
+                }) { Text(stringResource(R.string.widget_notes_save)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmingHideStatusBarEverywhere = null }) { Text(stringResource(R.string.widget_notes_cancel)) }
+            }
+        )
     }
 
     pendingImport?.let { uri ->

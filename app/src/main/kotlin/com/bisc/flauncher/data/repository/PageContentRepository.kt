@@ -266,7 +266,10 @@ class PageContentRepository @Inject constructor(
         settingsRepository.activeDesignPreset.first()?.let { DesignPresetValues.of(it).searchBarAppearance }
 
     suspend fun addWidgetRow(pageId: Long, kind: String, spanY: Int = WidgetKind.defaultSpan(kind)): Long {
-        var row = PageRow(pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.WIDGET, payload = kind, spanY = spanY)
+        var row = PageRow(
+            pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.WIDGET, payload = kind, spanY = spanY,
+            cornerStyle = settingsRepository.defaultCornerStyle.first()
+        )
         presetRowAppearance()?.let { row = row.withAppearance(it) }
         val id = rowDao.insert(row)
         rebalancePageOverflow(pageId)
@@ -274,7 +277,10 @@ class PageContentRepository @Inject constructor(
     }
 
     suspend fun addSystemWidgetRow(pageId: Long, appWidgetId: Int, spanY: Int): Long {
-        var row = PageRow(pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.SYSTEM_WIDGET, payload = appWidgetId.toString(), spanY = spanY)
+        var row = PageRow(
+            pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.SYSTEM_WIDGET, payload = appWidgetId.toString(), spanY = spanY,
+            cornerStyle = settingsRepository.defaultCornerStyle.first()
+        )
         presetRowAppearance()?.let { row = row.withAppearance(it) }
         val id = rowDao.insert(row)
         rebalancePageOverflow(pageId)
@@ -282,7 +288,10 @@ class PageContentRepository @Inject constructor(
     }
 
     suspend fun addAppsRow(pageId: Long): Long {
-        var row = PageRow(pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.APPS, columns = GridConstants.DEFAULT_APPS_ROW_COLUMNS)
+        var row = PageRow(
+            pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.APPS, columns = GridConstants.DEFAULT_APPS_ROW_COLUMNS,
+            cornerStyle = settingsRepository.defaultCornerStyle.first()
+        )
         presetRowAppearance()?.let { row = row.withAppearance(it) }
         val id = rowDao.insert(row)
         rebalancePageOverflow(pageId)

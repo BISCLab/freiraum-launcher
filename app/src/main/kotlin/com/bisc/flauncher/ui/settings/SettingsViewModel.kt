@@ -102,6 +102,9 @@ class SettingsViewModel @Inject constructor(
     val iconSize: StateFlow<com.bisc.flauncher.data.settings.IconSize> =
         repository.iconSize.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.data.settings.IconSize.MEDIUM)
 
+    val defaultCornerStyle: StateFlow<com.bisc.flauncher.data.model.WidgetCornerStyle> =
+        repository.defaultCornerStyle.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.data.model.WidgetCornerStyle.ROUNDED)
+
     val searchAlphabetRailAppearance: StateFlow<ElementAppearance?> =
         repository.searchAlphabetRailAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
@@ -535,6 +538,10 @@ class SettingsViewModel @Inject constructor(
 
     fun setIconSize(size: com.bisc.flauncher.data.settings.IconSize) {
         viewModelScope.launch { repository.setIconSize(size) }
+    }
+
+    fun setDefaultCornerStyle(style: com.bisc.flauncher.data.model.WidgetCornerStyle) {
+        viewModelScope.launch { repository.setDefaultCornerStyle(style) }
     }
 
     fun setFolderCardAppearance(appearance: ElementAppearance) {

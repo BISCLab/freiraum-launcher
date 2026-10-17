@@ -337,6 +337,7 @@
     <string name="settings_pages_add">Add page</string>
     <string name="settings_pages_carousel_label">Carousel</string>
     <string name="settings_pages_other_label">Utility pages</string>
+    <string name="settings_pages_behavior_label">Behavior</string>
     <string name="settings_pages_invocation_title">How this page is opened</string>
     <string name="settings_pages_invocation_none">Not bound to a gesture</string>
     <string name="settings_pages_add_template_label">Start from</string>
@@ -454,6 +455,11 @@
     <string name="settings_backup_import_failed">File could not be read</string>
     <string name="settings_statusbar_hide_all">Hide everywhere</string>
     <string name="settings_statusbar_hide_all_summary">Turns the status bar off on every page, quick overview, text search and folders. You can turn it back on individually per screen afterwards. A swipe down from the top edge always shows it briefly.</string>
+    <string name="settings_statusbar_confirm_hide_message">This hides the status bar on every page, quick overview, text search and folders at once, overriding whatever each one is currently set to.</string>
+    <string name="settings_statusbar_confirm_show_message">This shows the status bar on every page, quick overview, text search and folders at once, overriding whatever each one is currently set to.</string>
+    <string name="settings_corner_style_label">Corner style</string>
+    <string name="settings_corner_style_rounded">Rounded</string>
+    <string name="settings_corner_style_square">Square</string>
     <string name="settings_statusbar_hide_page">Hide status bar</string>
     <string name="settings_statusbar_hide_quick_search">Hide status bar in quick overview</string>
     <string name="settings_folder_hide_status_bar">Hide status bar in folders</string>
@@ -549,6 +555,7 @@
     <string name="settings_search_browser_pick">Choose browser</string>
     <string name="settings_search_maps_title">Maps app</string>
     <string name="settings_search_maps_pick">Choose maps app</string>
+    <string name="settings_standard_apps_label">Standard apps</string>
     <string name="settings_search_engine_custom_url_row">Custom search URL</string>
     <string name="settings_search_engine_custom_url_unset">Not set</string>
     <string name="settings_search_engine_custom_info" formatted="false">Write %s where the search term belongs, for example https://www.google.com/search?q=%s. Without %s the term is appended as ?q=, and a missing https:// is added automatically.</string>

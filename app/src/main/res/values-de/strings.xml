@@ -337,6 +337,7 @@
     <string name="settings_pages_add">Seite hinzufügen</string>
     <string name="settings_pages_carousel_label">Karussell</string>
     <string name="settings_pages_other_label">Funktionsseiten</string>
+    <string name="settings_pages_behavior_label">Verhalten</string>
     <string name="settings_pages_invocation_title">Wie diese Seite aufgerufen wird</string>
     <string name="settings_pages_invocation_none">Keiner Geste zugewiesen</string>
     <string name="settings_pages_add_template_label">Ausgangspunkt</string>
@@ -454,6 +455,11 @@
     <string name="settings_backup_import_failed">Datei konnte nicht gelesen werden</string>
     <string name="settings_statusbar_hide_all">Überall ausblenden</string>
     <string name="settings_statusbar_hide_all_summary">Schaltet die Statusleiste auf jeder Seite, der Schnellübersicht, der Textsuche und in Ordnern aus. Danach kann sie pro Bildschirm einzeln wieder eingeschaltet werden. Wischen vom oberen Rand zeigt sie immer kurzzeitig an.</string>
+    <string name="settings_statusbar_confirm_hide_message">Dadurch wird die Statusleiste auf jeder Seite, der Schnellübersicht, der Textsuche und in Ordnern auf einmal ausgeblendet — unabhängig davon, wie jede einzeln aktuell eingestellt ist.</string>
+    <string name="settings_statusbar_confirm_show_message">Dadurch wird die Statusleiste auf jeder Seite, der Schnellübersicht, der Textsuche und in Ordnern auf einmal eingeblendet — unabhängig davon, wie jede einzeln aktuell eingestellt ist.</string>
+    <string name="settings_corner_style_label">Eckenform</string>
+    <string name="settings_corner_style_rounded">Abgerundet</string>
+    <string name="settings_corner_style_square">Eckig</string>
     <string name="settings_statusbar_hide_page">Statusleiste ausblenden</string>
     <string name="settings_statusbar_hide_quick_search">Statusleiste in der Schnellübersicht ausblenden</string>
     <string name="settings_folder_hide_status_bar">Statusleiste in Ordnern ausblenden</string>
@@ -549,6 +555,7 @@
     <string name="settings_search_browser_pick">Browser auswählen</string>
     <string name="settings_search_maps_title">Karten-App</string>
     <string name="settings_search_maps_pick">Karten-App auswählen</string>
+    <string name="settings_standard_apps_label">Standard-Apps</string>
     <string name="settings_search_engine_custom_url_row">Eigene Such-URL</string>
     <string name="settings_search_engine_custom_url_unset">Nicht festgelegt</string>
     <string name="settings_search_engine_custom_info" formatted="false">Schreibe %s an die Stelle des Suchbegriffs, zum Beispiel https://www.google.com/search?q=%s. Ohne %s wird der Begriff als ?q= angehängt, ein fehlendes https:// wird automatisch ergänzt.</string>

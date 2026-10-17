@@ -75,6 +75,14 @@ class SettingsRepository @Inject constructor(
             ?: IconSize.MEDIUM
     }
 
+    // New elements (rows, folders) are created with this shape; existing ones keep whatever
+    // corner style they already have — see masterplan Phase 9 "einheitliche Eckenform". Each
+    // element's own Appearance screen can still override it individually afterwards.
+    val defaultCornerStyle: Flow<com.bisc.flauncher.data.model.WidgetCornerStyle> = dataStore.data.map { prefs ->
+        prefs[DEFAULT_CORNER_STYLE_KEY]?.let { runCatching { com.bisc.flauncher.data.model.WidgetCornerStyle.valueOf(it) }.getOrNull() }
+            ?: com.bisc.flauncher.data.model.WidgetCornerStyle.ROUNDED
+    }
+
     val sidebarPanelAppearance: Flow<ElementAppearance> = elementAppearanceFor("sidebar_panel", ElementAppearance(borderEnabled = true))
 
     val folderCardAppearance: Flow<ElementAppearance> = elementAppearanceFor("folder_card", ElementAppearance(borderEnabled = true))
@@ -312,6 +320,10 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setIconSize(size: IconSize) {
         dataStore.edit { it[ICON_SIZE_KEY] = size.name }
+    }
+
+    suspend fun setDefaultCornerStyle(style: com.bisc.flauncher.data.model.WidgetCornerStyle) {
+        dataStore.edit { it[DEFAULT_CORNER_STYLE_KEY] = style.name }
     }
 
     // ---- Status bar ----
@@ -572,6 +584,7 @@ class SettingsRepository @Inject constructor(
         private val FONT_KEY = stringPreferencesKey("font_preference")
         private val ICON_SHAPE_KEY = stringPreferencesKey("icon_shape")
         private val ICON_SIZE_KEY = stringPreferencesKey("icon_size")
+        private val DEFAULT_CORNER_STYLE_KEY = stringPreferencesKey("default_corner_style")
         private val FOLDER_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("folder_hide_status_bar")
         private val FOLDER_HIDE_DOCK_KEY = booleanPreferencesKey("folder_hide_dock")
         private val ACCENT_COLOR_KEY = intPreferencesKey("accent_color")
