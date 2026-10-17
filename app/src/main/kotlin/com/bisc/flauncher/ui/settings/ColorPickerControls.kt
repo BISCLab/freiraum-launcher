@@ -55,8 +55,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.ColorFill
-import com.bisc.flauncher.data.model.DesignPresetValues
 import com.bisc.flauncher.data.model.FillMode
+import com.bisc.flauncher.ui.theme.defaultBoxFillColorFor
 import com.bisc.flauncher.data.model.GradientDirection
 import com.bisc.flauncher.data.model.asBrush
 import kotlin.math.max
@@ -193,7 +193,7 @@ fun ColorPickerControls(
             ColorPresetSwatch(Color.White, ::applyPreset)
             // The default surface color of the current light/dark mode, for when a color was picked by mistake.
             val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
-            val default = Color(if (isDark) DesignPresetValues.DARK_SURFACE else DesignPresetValues.LIGHT_SURFACE)
+            val default = Color(defaultBoxFillColorFor(isDark))
             TextButton(onClick = { applyPreset(default) }) {
                 Icon(Icons.Filled.RestartAlt, contentDescription = null, modifier = Modifier.size(18.dp))
                 Text(stringResource(R.string.settings_color_reset_default), modifier = Modifier.padding(start = 6.dp))

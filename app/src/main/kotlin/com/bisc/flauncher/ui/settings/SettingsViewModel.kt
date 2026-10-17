@@ -19,7 +19,6 @@ import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.RevealMode
 import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.data.model.SearchEngine
-import com.bisc.flauncher.data.model.DesignPreset
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.ElementFillMode
 import com.bisc.flauncher.data.repository.AppOverrideRepository
@@ -28,7 +27,7 @@ import com.bisc.flauncher.data.repository.IconPackRepository
 import com.bisc.flauncher.data.repository.InstalledAppsRepository
 import com.bisc.flauncher.data.repository.MapsRepository
 import com.bisc.flauncher.data.repository.PageContentRepository
-import com.bisc.flauncher.data.repository.PresetRepository
+import com.bisc.flauncher.data.repository.ThemeRepository
 import com.bisc.flauncher.data.repository.ShortcutRepository
 import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.data.settings.IconShape
@@ -61,7 +60,7 @@ class SettingsViewModel @Inject constructor(
     private val shortcutRepository: ShortcutRepository,
     private val mapsRepository: MapsRepository,
     private val pageContentRepository: PageContentRepository,
-    private val presetRepository: PresetRepository,
+    private val themeRepository: ThemeRepository,
     private val folderRepository: FolderRepository,
     private val websiteRepository: com.bisc.flauncher.data.repository.WebsiteRepository,
     private val actionButtonRepository: com.bisc.flauncher.data.repository.ActionButtonRepository,
@@ -401,9 +400,6 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setChargingAnimationEnabled(enabled) }
     }
 
-    val activeDesignPreset: StateFlow<DesignPreset?> =
-        repository.activeDesignPreset.stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
     val pages: StateFlow<List<LauncherPage>> =
         pageContentRepository.pages.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
@@ -516,8 +512,16 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun setTheme(theme: ThemePreference) {
-        viewModelScope.launch { repository.setTheme(theme) }
+    /** Persists the chosen Light/Dark/System and immediately re-stamps the background and every
+     *  box/card/widget/dock/panel's default fill to match it (see ThemeRepository.reapplyTheme) —
+     *  Light/Dark/System is FLauncher's only appearance control, there's no separate preset layered
+     *  on top of it, so switching it is exactly as consequential as the old preset switch was
+     *  (clears per-surface customizations back to automatic), hence the same confirm-dialog UX. */
+    fun applyTheme(theme: ThemePreference) {
+        viewModelScope.launch {
+            repository.setTheme(theme)
+            themeRepository.reapplyTheme()
+        }
     }
 
     fun setHandedness(handedness: Handedness) {
@@ -645,10 +649,6 @@ class SettingsViewModel @Inject constructor(
 
     fun setAppListContentAppearance(appearance: ElementAppearance) {
         viewModelScope.launch { repository.setAppListContentAppearance(appearance) }
-    }
-
-    fun applyDesignPreset(preset: DesignPreset) {
-        viewModelScope.launch { presetRepository.applyPreset(preset) }
     }
 
     fun setGestureAction(gesture: HomeGesture, action: GestureAction) {

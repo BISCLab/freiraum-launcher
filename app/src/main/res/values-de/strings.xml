@@ -111,16 +111,10 @@
 
     <string name="settings_title">Einstellungen</string>
     <string name="settings_section_appearance">Globale Einstellungen</string>
-    <string name="settings_card_appearance_subtitle">Design-Vorlagen, Sprache, Farbmodus, Schriftart, Händigkeit</string>
-    <string name="settings_design_presets_label">Design-Vorlagen</string>
-    <string name="settings_design_preset_light">Helle Vorlage anwenden</string>
-    <string name="settings_design_preset_dark">Dunkle Vorlage anwenden</string>
-    <string name="settings_design_preset_name_light">Hell</string>
-    <string name="settings_design_preset_name_dark">Dunkel</string>
-    <string name="settings_design_preset_summary">Überschreibt Hintergrund sowie alle Farb- und Stileinstellungen im gesamten Launcher.</string>
-    <string name="settings_design_preset_confirm_title">„%1$s“ anwenden?</string>
-    <string name="settings_design_preset_confirm_message">Überschreibt Hintergrund und alle angepassten Farb- und Stileinstellungen im gesamten Launcher. Danach bleibt jede Fläche einzeln bearbeitbar. Diese Aktion kann nicht automatisch rückgängig gemacht werden.</string>
-    <string name="settings_design_preset_apply">Anwenden</string>
+    <string name="settings_card_appearance_subtitle">Sprache, Farbmodus, Schriftart</string>
+    <string name="settings_theme_confirm_title">„%1$s“ anwenden?</string>
+    <string name="settings_theme_confirm_message">Überschreibt Hintergrund und alle angepassten Farb- und Stileinstellungen im gesamten Launcher. Danach bleibt jede Fläche einzeln bearbeitbar. Diese Aktion kann nicht automatisch rückgängig gemacht werden.</string>
+    <string name="settings_theme_apply">Anwenden</string>
     <string name="settings_language_label">Sprache</string>
     <string name="settings_language_system">Systemstandard</string>
     <string name="settings_theme_label">Farbmodus der Einstellungen</string>

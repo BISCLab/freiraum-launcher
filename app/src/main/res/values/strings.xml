@@ -111,16 +111,10 @@
 
     <string name="settings_title">Settings</string>
     <string name="settings_section_appearance">Global settings</string>
-    <string name="settings_card_appearance_subtitle">Design presets, language, color mode, font, handedness</string>
-    <string name="settings_design_presets_label">Design presets</string>
-    <string name="settings_design_preset_light">Apply light preset</string>
-    <string name="settings_design_preset_dark">Apply dark preset</string>
-    <string name="settings_design_preset_name_light">Light</string>
-    <string name="settings_design_preset_name_dark">Dark</string>
-    <string name="settings_design_preset_summary">Overwrites the background and all color and style settings throughout the launcher.</string>
-    <string name="settings_design_preset_confirm_title">Apply “%1$s”?</string>
-    <string name="settings_design_preset_confirm_message">Overwrites the background and all customized color and style settings throughout the launcher. Every surface remains individually editable afterwards. This action cannot be undone automatically.</string>
-    <string name="settings_design_preset_apply">Apply</string>
+    <string name="settings_card_appearance_subtitle">Language, color mode, font</string>
+    <string name="settings_theme_confirm_title">Apply “%1$s”?</string>
+    <string name="settings_theme_confirm_message">Overwrites the background and all customized color and style settings throughout the launcher. Every surface remains individually editable afterwards. This action cannot be undone automatically.</string>
+    <string name="settings_theme_apply">Apply</string>
     <string name="settings_language_label">Language</string>
     <string name="settings_language_system">System default</string>
     <string name="settings_theme_label">Settings color mode</string>

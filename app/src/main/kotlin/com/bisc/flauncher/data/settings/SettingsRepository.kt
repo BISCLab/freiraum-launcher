@@ -1,7 +1,6 @@
 package com.bisc.flauncher.data.settings
 
 import android.content.Context
-import android.content.res.Configuration
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -14,8 +13,6 @@ import com.bisc.flauncher.data.model.AppListLayout
 import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.BackgroundSource
 import com.bisc.flauncher.data.model.ColorFill
-import com.bisc.flauncher.data.model.DesignPreset
-import com.bisc.flauncher.data.model.DesignPresetValues
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.ElementFillMode
 import com.bisc.flauncher.data.model.FillMode
@@ -27,6 +24,8 @@ import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.data.model.SearchEngine
 import com.bisc.flauncher.ui.theme.FontPreference
 import com.bisc.flauncher.ui.theme.ThemePreference
+import com.bisc.flauncher.ui.theme.defaultBoxFillColorFor
+import com.bisc.flauncher.ui.theme.isDark
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -215,11 +214,7 @@ class SettingsRepository @Inject constructor(
     val appListContentAppearance: Flow<ElementAppearance> =
         elementAppearanceFor("app_list_content", ElementAppearance(borderEnabled = true, opacity = 0f))
 
-    // ---- Presets, page backgrounds, sidebar ----
-
-    val activeDesignPreset: Flow<DesignPreset?> = dataStore.data.map { prefs ->
-        prefs[ACTIVE_DESIGN_PRESET_KEY]?.let { runCatching { DesignPreset.valueOf(it) }.getOrNull() }
-    }
+    // ---- Page backgrounds, sidebar ----
 
     fun pageBackgroundOverride(pageId: Long): Flow<BackgroundConfig?> = backgroundOverrideFor(pageKey(pageId))
 
@@ -432,12 +427,7 @@ class SettingsRepository @Inject constructor(
 
     private fun resolveDefaultSurfaceColor(prefs: Preferences): Int {
         val theme = prefs[THEME_KEY]?.let { runCatching { ThemePreference.valueOf(it) }.getOrNull() } ?: ThemePreference.SYSTEM
-        val isDark = when (theme) {
-            ThemePreference.DARK -> true
-            ThemePreference.LIGHT -> false
-            ThemePreference.SYSTEM -> (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-        }
-        return if (isDark) DesignPresetValues.DARK_SURFACE else DesignPresetValues.LIGHT_SURFACE
+        return defaultBoxFillColorFor(theme.isDark(context))
     }
 
     private suspend fun setElementAppearanceFor(prefix: String, appearance: ElementAppearance) {
@@ -527,13 +517,7 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setAppListContentAppearance(appearance: ElementAppearance) = setElementAppearanceFor("app_list_content", appearance)
 
-    // ---- Setters: presets, backgrounds, gestures ----
-
-    suspend fun setActiveDesignPreset(preset: DesignPreset?) {
-        dataStore.edit { prefs ->
-            if (preset == null) prefs.remove(ACTIVE_DESIGN_PRESET_KEY) else prefs[ACTIVE_DESIGN_PRESET_KEY] = preset.name
-        }
-    }
+    // ---- Setters: backgrounds, gestures ----
 
     suspend fun setPageBackgroundConfig(pageId: Long, config: BackgroundConfig) =
         setBackgroundConfigFor(pageKey(pageId), config)
@@ -605,6 +589,5 @@ class SettingsRepository @Inject constructor(
         private val APP_LIST_DISPLAY_MODE_KEY = stringPreferencesKey("app_list_display_mode")
         private val APP_LIST_LAYOUT_KEY = stringPreferencesKey("app_list_layout")
         private val APP_LIST_SHOW_SEARCH_BUTTON_KEY = booleanPreferencesKey("app_list_show_search_button")
-        private val ACTIVE_DESIGN_PRESET_KEY = stringPreferencesKey("active_design_preset")
     }
 }
