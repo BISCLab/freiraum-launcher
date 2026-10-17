@@ -38,6 +38,9 @@ enum class Handedness { LEFT, RIGHT }
 /** Shape applied to the dock's quick-launch icons and search button. */
 enum class IconShape { CIRCLE, ROUNDED_SQUARE }
 
+/** Global multiplier applied to every Element icon's size. */
+enum class IconSize(val scale: Float) { SMALL(0.82f), MEDIUM(1f), LARGE(1.2f) }
+
 /** Persistent settings in DataStore; each setting is exposed as a flow with its default value. */
 class SettingsRepository @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -65,6 +68,11 @@ class SettingsRepository @Inject constructor(
     val iconShape: Flow<IconShape> = dataStore.data.map { prefs ->
         prefs[ICON_SHAPE_KEY]?.let { runCatching { IconShape.valueOf(it) }.getOrNull() }
             ?: IconShape.ROUNDED_SQUARE
+    }
+
+    val iconSize: Flow<IconSize> = dataStore.data.map { prefs ->
+        prefs[ICON_SIZE_KEY]?.let { runCatching { IconSize.valueOf(it) }.getOrNull() }
+            ?: IconSize.MEDIUM
     }
 
     val sidebarPanelAppearance: Flow<ElementAppearance> = elementAppearanceFor("sidebar_panel", ElementAppearance(borderEnabled = true))
@@ -300,6 +308,10 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setIconShape(shape: IconShape) {
         dataStore.edit { it[ICON_SHAPE_KEY] = shape.name }
+    }
+
+    suspend fun setIconSize(size: IconSize) {
+        dataStore.edit { it[ICON_SIZE_KEY] = size.name }
     }
 
     // ---- Status bar ----
@@ -559,6 +571,7 @@ class SettingsRepository @Inject constructor(
         private val ICON_PACK_KEY = stringPreferencesKey("active_icon_pack")
         private val FONT_KEY = stringPreferencesKey("font_preference")
         private val ICON_SHAPE_KEY = stringPreferencesKey("icon_shape")
+        private val ICON_SIZE_KEY = stringPreferencesKey("icon_size")
         private val FOLDER_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("folder_hide_status_bar")
         private val FOLDER_HIDE_DOCK_KEY = booleanPreferencesKey("folder_hide_dock")
         private val ACCENT_COLOR_KEY = intPreferencesKey("accent_color")

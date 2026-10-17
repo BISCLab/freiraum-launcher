@@ -17,6 +17,8 @@ data class PowerButton(
     val label: String,
     val actionType: PowerButtonActionType = PowerButtonActionType.PAGE,
     val actionPageId: Long? = null,
+    // Key into PictogramCatalog; null falls back to the action-type glyph (Panel/Dock/Page).
+    val iconKey: String? = null,
     // Null means "adaptive black/white", the same default every other Element icon uses.
     val backgroundColor: Int? = null,
     val iconColor: Int? = null

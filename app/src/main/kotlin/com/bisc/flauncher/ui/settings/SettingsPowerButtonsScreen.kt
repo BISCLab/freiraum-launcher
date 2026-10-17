@@ -145,6 +145,7 @@ fun SettingsPowerButtonDetailScreen(buttonId: Long, navController: NavController
     val button = buttons.find { it.id == buttonId } ?: return
     val allPages by viewModel.allPages.collectAsState()
     var showPagePicker by remember { mutableStateOf(false) }
+    var showIconPicker by remember { mutableStateOf(false) }
     var confirmingDelete by remember { mutableStateOf(false) }
 
     SettingsSubScreen(title = button.label, navController = navController, onBack = onBack) {
@@ -187,6 +188,12 @@ fun SettingsPowerButtonDetailScreen(buttonId: Long, navController: NavController
             }
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_powerbutton_colors_label)) {
+            SettingsPreference(
+                icon = com.bisc.flauncher.ui.home.PictogramCatalog.iconFor(button.iconKey) ?: powerButtonActionIcon(button.actionType),
+                title = stringResource(R.string.settings_element_icon_label),
+                onClick = { showIconPicker = true },
+                trailing = null
+            )
             AutomaticColorPicker(
                 title = stringResource(R.string.settings_section_global_background),
                 custom = button.backgroundColor,
@@ -215,6 +222,14 @@ fun SettingsPowerButtonDetailScreen(buttonId: Long, navController: NavController
             pages = allPages,
             onPageSelected = { page -> viewModel.updatePowerButton(button.copy(actionPageId = page.id)); showPagePicker = false },
             onDismiss = { showPagePicker = false }
+        )
+    }
+
+    if (showIconPicker) {
+        PictogramPickerSheet(
+            selected = button.iconKey,
+            onSelect = { key -> viewModel.updatePowerButton(button.copy(iconKey = key)); showIconPicker = false },
+            onDismiss = { showIconPicker = false }
         )
     }
 

@@ -77,6 +77,7 @@ fun SettingsAppsScreen(navController: NavController, onBack: () -> Unit, viewMod
     val apps by viewModel.labeledApps.collectAsState()
     val overrides by viewModel.appOverrides.collectAsState()
     val iconShape by viewModel.iconShape.collectAsState()
+    val iconSize by viewModel.iconSize.collectAsState()
     val activeIconPack by viewModel.activeIconPack.collectAsState()
     val iconPacks by viewModel.iconPacks.collectAsState()
     var filter by rememberSaveable { mutableStateOf("") }
@@ -117,6 +118,16 @@ fun SettingsAppsScreen(navController: NavController, onBack: () -> Unit, viewMod
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     IconShapePreference(stringResource(R.string.settings_icon_shape_rounded_square), IconShape.ROUNDED_SQUARE, iconShape, viewModel::setIconShape)
                     IconShapePreference(stringResource(R.string.settings_icon_shape_circle), IconShape.CIRCLE, iconShape, viewModel::setIconShape)
+                }
+            }
+            item { Spacer24() }
+
+            item { SettingsGroupLabel(stringResource(R.string.settings_icon_size_label)) }
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    IconSizePreference(stringResource(R.string.settings_icon_size_small), com.bisc.flauncher.data.settings.IconSize.SMALL, iconSize, viewModel::setIconSize)
+                    IconSizePreference(stringResource(R.string.settings_icon_size_medium), com.bisc.flauncher.data.settings.IconSize.MEDIUM, iconSize, viewModel::setIconSize)
+                    IconSizePreference(stringResource(R.string.settings_icon_size_large), com.bisc.flauncher.data.settings.IconSize.LARGE, iconSize, viewModel::setIconSize)
                 }
             }
             item { Spacer24() }

@@ -57,6 +57,7 @@ import com.bisc.flauncher.data.repository.WeatherRepository
 import com.bisc.flauncher.data.repository.WebsiteRepository
 import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.data.settings.IconShape
+import com.bisc.flauncher.data.settings.IconSize
 import com.bisc.flauncher.data.settings.SettingsRepository
 import com.bisc.flauncher.ui.home.dock.PageIconGlyph
 import androidx.compose.runtime.snapshotFlow
@@ -137,6 +138,9 @@ class HomeViewModel @Inject constructor(
 
     val iconShape: StateFlow<IconShape> =
         settingsRepository.iconShape.stateIn(viewModelScope, SharingStarted.Eagerly, IconShape.ROUNDED_SQUARE)
+
+    val iconSize: StateFlow<IconSize> =
+        settingsRepository.iconSize.stateIn(viewModelScope, SharingStarted.Eagerly, IconSize.MEDIUM)
 
     val searchAlphabetRailAppearance: StateFlow<ElementAppearance?> =
         settingsRepository.searchAlphabetRailAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)

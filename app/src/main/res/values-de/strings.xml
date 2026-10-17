@@ -136,6 +136,12 @@
     <string name="settings_icon_shape_label">Symbolform</string>
     <string name="settings_icon_shape_rounded_square">Abgerundetes Quadrat</string>
     <string name="settings_icon_shape_circle">Kreis</string>
+    <string name="settings_icon_size_label">Symbolgröße</string>
+    <string name="settings_icon_size_small">Klein</string>
+    <string name="settings_icon_size_medium">Mittel</string>
+    <string name="settings_icon_size_large">Groß</string>
+    <string name="settings_pictogram_picker_title">Symbol wählen</string>
+    <string name="settings_element_icon_label">Symbol</string>
 
     <string name="settings_handedness_label">Händigkeit</string>
     <string name="settings_handedness_left">Links</string>

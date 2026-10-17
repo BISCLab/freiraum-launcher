@@ -591,3 +591,26 @@ fun IconShapePreference(
         trailing = { RadioButton(selected = value == selected, onClick = { onSelect(value) }) }
     )
 }
+
+/** One [com.bisc.flauncher.data.settings.IconSize] radio row, with a swatch sized to scale. */
+@Composable
+fun IconSizePreference(
+    label: String,
+    value: com.bisc.flauncher.data.settings.IconSize,
+    selected: com.bisc.flauncher.data.settings.IconSize,
+    onSelect: (com.bisc.flauncher.data.settings.IconSize) -> Unit
+) {
+    SettingsPreference(
+        icon = null,
+        title = label,
+        onClick = { onSelect(value) },
+        leading = {
+            Box(
+                modifier = Modifier
+                    .size(24.dp * value.scale)
+                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp))
+            )
+        },
+        trailing = { RadioButton(selected = value == selected, onClick = { onSelect(value) }) }
+    )
+}

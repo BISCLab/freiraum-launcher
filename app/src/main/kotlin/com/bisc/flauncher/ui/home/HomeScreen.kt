@@ -175,6 +175,7 @@ fun HomeScreen(
     val shortcutPickerForApp by viewModel.shortcutPickerForApp.collectAsState()
     val availableShortcuts by viewModel.availableShortcuts.collectAsState()
     val iconShape by viewModel.iconShape.collectAsState()
+    val iconSize by viewModel.iconSize.collectAsState()
     val railAppearance by viewModel.searchAlphabetRailAppearance.collectAsState()
     val chargingAnimationEnabled by viewModel.chargingAnimationEnabled.collectAsState()
     val chargingAnimationColor by viewModel.chargingAnimationColor.collectAsState()
@@ -571,6 +572,7 @@ fun HomeScreen(
                                 onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) },
                                 handedness = handedness,
                                 iconShape = iconShape,
+                                iconSizeScale = iconSize.scale,
                                 accentColor = Color(accentColor),
                                 modifier = contentModifier.graphicsLayer { alpha = pageContentAlpha }
                             ) }
@@ -668,7 +670,8 @@ fun HomeScreen(
                             powerButtons = powerButtons,
                             onPowerButtonClick = onPowerButtonClick,
                             showLabels = homeDockRow.showLabels,
-                            labelColor = homeDockRow.appearance().contentColor?.let { Color(it) } ?: Color.White
+                            labelColor = homeDockRow.appearance().contentColor?.let { Color(it) } ?: Color.White,
+                            iconSizeScale = iconSize.scale
                             // Live dock is display-only now — adding/removing entries only happens in
                             // Settings > Home screen > Layout > Dock > Elements.
                         )
@@ -805,7 +808,8 @@ fun HomeScreen(
                                     powerButtons = powerButtons,
                                     onPowerButtonClick = onPowerButtonClick,
                                     showLabels = row.showLabels,
-                                    labelColor = row.appearance().contentColor?.let { Color(it) } ?: Color.White
+                                    labelColor = row.appearance().contentColor?.let { Color(it) } ?: Color.White,
+                                    iconSizeScale = iconSize.scale
                                     // Live panel is display-only now — adding/removing entries only
                                     // happens in Settings > Home screen > Layout > Panel > Elements.
                                 )

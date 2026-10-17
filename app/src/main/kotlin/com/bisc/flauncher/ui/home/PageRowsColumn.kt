@@ -46,6 +46,7 @@ fun PageRowsColumn(
     onExecuteAction: (GestureAction) -> Unit = {},
     handedness: Handedness = Handedness.RIGHT,
     iconShape: IconShape = IconShape.ROUNDED_SQUARE,
+    iconSizeScale: Float = 1f,
     accentColor: Color = Color(0xFF3B82F6),
     modifier: Modifier = Modifier
 ) {
@@ -72,6 +73,7 @@ fun PageRowsColumn(
                     onExecuteAction = onExecuteAction,
                     handedness = handedness,
                     iconShape = iconShape,
+                    iconSizeScale = iconSizeScale,
                     accentColor = accentColor
                 )
             }

@@ -102,6 +102,7 @@ fun PageRowContent(
     onExecuteAction: (GestureAction) -> Unit = {},
     handedness: Handedness = Handedness.RIGHT,
     iconShape: IconShape = IconShape.ROUNDED_SQUARE,
+    iconSizeScale: Float = 1f,
     onSystemWidgetViewReady: ((android.view.View) -> Unit)? = null,
     accentColor: Color = Color(0xFF3B82F6)
 ) {
@@ -183,7 +184,8 @@ fun PageRowContent(
                     resolveLabel = resolveLabel,
                     onFolderClick = onFolderClick,
                     onShortcutClick = onShortcutClick,
-                    onOpenPageLink = onOpenPageLink
+                    onOpenPageLink = onOpenPageLink,
+                    iconSizeScale = iconSizeScale
                 )
             }
         }
@@ -210,7 +212,8 @@ private fun AppsRowGrid(
     resolveLabel: (ComponentName) -> String,
     onFolderClick: (Long) -> Unit,
     onShortcutClick: (String) -> Unit,
-    onOpenPageLink: (Long, LauncherPageKind) -> Unit
+    onOpenPageLink: (Long, LauncherPageKind) -> Unit,
+    iconSizeScale: Float = 1f
 ) {
     val horizontalMargin = if (row.edgeToEdge) 0.dp else DockDimens.horizontalMargin
     WidgetCard(
@@ -233,7 +236,8 @@ private fun AppsRowGrid(
             resolveLabel = resolveLabel,
             onFolderClick = onFolderClick,
             onShortcutClick = onShortcutClick,
-            onOpenPageLink = onOpenPageLink
+            onOpenPageLink = onOpenPageLink,
+            iconSizeScale = iconSizeScale
         )
     }
 }
@@ -268,6 +272,7 @@ fun AppsGridEntries(
     onPowerButtonClick: (com.bisc.flauncher.data.model.PowerButton) -> Unit = {},
     showLabels: Boolean = true,
     labelColor: Color = Color.White,
+    iconSizeScale: Float = 1f,
     totalSlots: Int? = null,
     onAddEmptySlot: ((Int) -> Unit)? = null,
     // The Panel's own shape: one column count per sub-row (see PageRow.panelRows), each row
@@ -284,33 +289,33 @@ fun AppsGridEntries(
     @Composable
     fun Cell(entry: AppRowEntry?, slotIndex: Int) {
         if (entry == null) {
-            if (onAddEmptySlot != null) EmptyGridSlotCell(onClick = { onAddEmptySlot(slotIndex) })
+            if (onAddEmptySlot != null) EmptyGridSlotCell(onClick = { onAddEmptySlot(slotIndex) }, iconSizeScale = iconSizeScale)
             return
         }
         val editOverride = onEditEntry?.let { cb -> { cb(entry) } }
         when (entry.type) {
-            GridItemType.APP -> AppIconCell(payload = entry.payload, loadIcon = loadIcon, resolveLabel = resolveLabel, showLabel = showLabels, labelColor = labelColor, onClickOverride = editOverride)
+            GridItemType.APP -> AppIconCell(payload = entry.payload, loadIcon = loadIcon, resolveLabel = resolveLabel, showLabel = showLabels, labelColor = labelColor, iconSizeScale = iconSizeScale, onClickOverride = editOverride)
             GridItemType.FOLDER -> {
                 val folderId = remember(entry.payload) { entry.payload.toLongOrNull() }
                 val folder = folders.find { it.id == folderId }
                 val previewItems = folderId?.let { folderItemsByFolder[it] }.orEmpty()
-                FolderCell(folder = folder, previewItems = previewItems, loadIcon = loadIcon, loadPackIcon = loadPackIcon, onClick = editOverride ?: { if (folderId != null) onFolderClick(folderId) }, showLabel = showLabels, labelColor = labelColor)
+                FolderCell(folder = folder, previewItems = previewItems, loadIcon = loadIcon, loadPackIcon = loadPackIcon, onClick = editOverride ?: { if (folderId != null) onFolderClick(folderId) }, showLabel = showLabels, labelColor = labelColor, iconSizeScale = iconSizeScale)
             }
-            GridItemType.SHORTCUT -> ShortcutCell(payload = entry.payload, onClick = editOverride ?: { onShortcutClick(entry.payload) }, showLabel = showLabels, labelColor = labelColor)
+            GridItemType.SHORTCUT -> ShortcutCell(payload = entry.payload, onClick = editOverride ?: { onShortcutClick(entry.payload) }, showLabel = showLabels, labelColor = labelColor, iconSizeScale = iconSizeScale)
             GridItemType.MAP_TARGET -> {
                 val targetId = remember(entry.payload) { entry.payload.toLongOrNull() }
                 val target = savedMapTargets.find { it.id == targetId }
-                MapTargetCell(target = target, showLabel = showLabels, labelColor = labelColor, onClickOverride = editOverride)
+                MapTargetCell(target = target, showLabel = showLabels, labelColor = labelColor, iconSizeScale = iconSizeScale, onClickOverride = editOverride)
             }
             GridItemType.WEBSITE -> {
                 val websiteId = remember(entry.payload) { entry.payload.toLongOrNull() }
                 val website = pinnedWebsites.find { it.id == websiteId }
-                WebsiteCell(website = website, showLabel = showLabels, labelColor = labelColor, onClickOverride = editOverride)
+                WebsiteCell(website = website, showLabel = showLabels, labelColor = labelColor, iconSizeScale = iconSizeScale, onClickOverride = editOverride)
             }
             GridItemType.PAGE -> {
                 val pageId = remember(entry.payload) { entry.payload.toLongOrNull() }
                 val page = pages.find { it.id == pageId }
-                PageLinkCell(page = page, pages = pages, onClick = editOverride ?: { if (page != null) onOpenPageLink(page.id, page.kind) }, showLabel = showLabels, labelColor = labelColor)
+                PageLinkCell(page = page, pages = pages, onClick = editOverride ?: { if (page != null) onOpenPageLink(page.id, page.kind) }, showLabel = showLabels, labelColor = labelColor, iconSizeScale = iconSizeScale)
             }
             GridItemType.CONTACT -> {
                 val contactId = remember(entry.payload) { entry.payload.toLongOrNull() }
@@ -320,7 +325,8 @@ fun AppsGridEntries(
                     loadContactPhoto = loadContactPhoto,
                     onClick = editOverride ?: { if (contactId != null) onContactClick(contactId) },
                     showLabel = showLabels,
-                    labelColor = labelColor
+                    labelColor = labelColor,
+                    iconSizeScale = iconSizeScale
                 )
             }
             GridItemType.POWER_BUTTON -> {
@@ -330,7 +336,8 @@ fun AppsGridEntries(
                     button = button,
                     onClick = editOverride ?: { if (button != null) onPowerButtonClick(button) },
                     showLabel = showLabels,
-                    labelColor = labelColor
+                    labelColor = labelColor,
+                    iconSizeScale = iconSizeScale
                 )
             }
             GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Unit
@@ -346,7 +353,7 @@ fun AppsGridEntries(
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 repeat(safeCols) { slot ->
                     if (slot > 0) Spacer(Modifier.width(16.dp))
-                    Box(modifier = Modifier.width(64.dp)) {
+                    Box(modifier = Modifier.width(64.dp * iconSizeScale)) {
                         Cell(entries.getOrNull(rowStart + slot), rowStart + slot)
                     }
                 }
@@ -372,11 +379,11 @@ fun AppsGridEntries(
 }
 
 @Composable
-private fun EmptyGridSlotCell(onClick: () -> Unit) {
+private fun EmptyGridSlotCell(onClick: () -> Unit, iconSizeScale: Float = 1f) {
     Column(modifier = Modifier.clickable(onClick = onClick).padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier = Modifier
-                .size(56.dp)
+                .size(56.dp * iconSizeScale)
                 .clip(RoundedCornerShape(16.dp))
                 .background(UNSET_APP_SLOT_COLOR),
             contentAlignment = Alignment.Center
@@ -393,6 +400,7 @@ private fun AppIconCell(
     resolveLabel: (ComponentName) -> String,
     showLabel: Boolean = true,
     labelColor: Color = Color.White,
+    iconSizeScale: Float = 1f,
     onClickOverride: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
@@ -409,11 +417,11 @@ private fun AppIconCell(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (bitmap != null) {
-            Image(bitmap = bitmap, contentDescription = label, modifier = Modifier.size(56.dp))
+            Image(bitmap = bitmap, contentDescription = label, modifier = Modifier.size(56.dp * iconSizeScale))
         } else {
             Spacer(
                 modifier = Modifier
-                    .size(56.dp)
+                    .size(56.dp * iconSizeScale)
                     .background(Color.White.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
             )
         }
@@ -425,13 +433,13 @@ private fun AppIconCell(
 }
 
 @Composable
-private fun ShortcutCell(payload: String, onClick: () -> Unit, showLabel: Boolean = true, labelColor: Color = Color.White) {
+private fun ShortcutCell(payload: String, onClick: () -> Unit, showLabel: Boolean = true, labelColor: Color = Color.White, iconSizeScale: Float = 1f) {
     val label = remember(payload) { payload.split("|").getOrNull(2)?.takeIf { it.isNotBlank() } ?: payload.substringBefore('|') }
     Column(
         modifier = Modifier.clickable(onClick = onClick).padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(imageVector = Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, modifier = Modifier.size(56.dp))
+        Icon(imageVector = Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, modifier = Modifier.size(56.dp * iconSizeScale))
         if (showLabel) {
             Spacer(Modifier.height(8.dp))
             GridLabel(label, color = labelColor)
@@ -440,8 +448,11 @@ private fun ShortcutCell(payload: String, onClick: () -> Unit, showLabel: Boolea
 }
 
 @Composable
-private fun MapTargetCell(target: SavedMapTarget?, showLabel: Boolean = true, labelColor: Color = Color.White, onClickOverride: (() -> Unit)? = null) {
+private fun MapTargetCell(target: SavedMapTarget?, showLabel: Boolean = true, labelColor: Color = Color.White, iconSizeScale: Float = 1f, onClickOverride: (() -> Unit)? = null) {
     val context = LocalContext.current
+    val background = target?.backgroundColor?.let { Color(it) } ?: UNSET_APP_SLOT_COLOR
+    val tint = target?.iconColor?.let { Color(it) } ?: Color.White
+    val icon = PictogramCatalog.iconFor(target?.iconKey) ?: Icons.Filled.Place
     Column(
         modifier = Modifier
             .clickable(enabled = onClickOverride != null || target != null) {
@@ -450,7 +461,12 @@ private fun MapTargetCell(target: SavedMapTarget?, showLabel: Boolean = true, la
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(imageVector = Icons.Filled.Place, contentDescription = null, modifier = Modifier.size(56.dp))
+        Box(
+            modifier = Modifier.size(56.dp * iconSizeScale).clip(RoundedCornerShape(16.dp)).background(background),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = Modifier.size(30.dp * iconSizeScale))
+        }
         if (showLabel) {
             Spacer(Modifier.height(8.dp))
             GridLabel(target?.label.orEmpty(), color = labelColor)
@@ -459,8 +475,11 @@ private fun MapTargetCell(target: SavedMapTarget?, showLabel: Boolean = true, la
 }
 
 @Composable
-private fun WebsiteCell(website: PinnedWebsite?, showLabel: Boolean = true, labelColor: Color = Color.White, onClickOverride: (() -> Unit)? = null) {
+private fun WebsiteCell(website: PinnedWebsite?, showLabel: Boolean = true, labelColor: Color = Color.White, iconSizeScale: Float = 1f, onClickOverride: (() -> Unit)? = null) {
     val context = LocalContext.current
+    val background = website?.backgroundColor?.let { Color(it) } ?: UNSET_APP_SLOT_COLOR
+    val tint = website?.iconColor?.let { Color(it) } ?: Color.White
+    val icon = PictogramCatalog.iconFor(website?.iconKey) ?: Icons.Filled.Language
     Column(
         modifier = Modifier
             .clickable(enabled = onClickOverride != null || website != null) {
@@ -469,7 +488,12 @@ private fun WebsiteCell(website: PinnedWebsite?, showLabel: Boolean = true, labe
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(imageVector = Icons.Filled.Language, contentDescription = null, modifier = Modifier.size(56.dp))
+        Box(
+            modifier = Modifier.size(56.dp * iconSizeScale).clip(RoundedCornerShape(16.dp)).background(background),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = Modifier.size(30.dp * iconSizeScale))
+        }
         if (showLabel) {
             Spacer(Modifier.height(8.dp))
             GridLabel(website?.label.orEmpty(), color = labelColor)
@@ -485,7 +509,8 @@ private fun FolderCell(
     loadPackIcon: (String, String) -> ImageBitmap?,
     onClick: () -> Unit,
     showLabel: Boolean = true,
-    labelColor: Color = Color.White
+    labelColor: Color = Color.White,
+    iconSizeScale: Float = 1f
 ) {
     Column(
         modifier = Modifier
@@ -493,7 +518,7 @@ private fun FolderCell(
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        FolderIcon(folder = folder, previewItems = previewItems, loadIcon = loadIcon, loadPackIcon = loadPackIcon, modifier = Modifier.size(56.dp))
+        FolderIcon(folder = folder, previewItems = previewItems, loadIcon = loadIcon, loadPackIcon = loadPackIcon, modifier = Modifier.size(56.dp * iconSizeScale))
         if (showLabel) {
             Spacer(Modifier.height(8.dp))
             GridLabel(folder?.name.orEmpty(), color = labelColor)
@@ -502,7 +527,7 @@ private fun FolderCell(
 }
 
 @Composable
-private fun PageLinkCell(page: LauncherPage?, pages: List<LauncherPage>, onClick: () -> Unit, showLabel: Boolean = true, labelColor: Color = Color.White) {
+private fun PageLinkCell(page: LauncherPage?, pages: List<LauncherPage>, onClick: () -> Unit, showLabel: Boolean = true, labelColor: Color = Color.White, iconSizeScale: Float = 1f) {
     val glyph = page?.iconGlyph?.let { name -> runCatching { PageIconGlyph.valueOf(name) }.getOrNull() }
         ?: page?.let { PageIconGlyph.forPageKind(it.kind) } ?: PageIconGlyph.WIDGET_PAGE
     val background = page?.iconBackgroundColor?.let { Color(it) } ?: glyph.defaultColor()
@@ -514,10 +539,10 @@ private fun PageLinkCell(page: LauncherPage?, pages: List<LauncherPage>, onClick
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier.size(56.dp).clip(RoundedCornerShape(16.dp)).background(background),
+            modifier = Modifier.size(56.dp * iconSizeScale).clip(RoundedCornerShape(16.dp)).background(background),
             contentAlignment = Alignment.Center
         ) {
-            PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(30.dp))
+            PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(30.dp * iconSizeScale))
         }
         if (showLabel) {
             Spacer(Modifier.height(8.dp))
@@ -532,7 +557,8 @@ private fun ContactCell(
     loadContactPhoto: suspend (Long, String?) -> ImageBitmap?,
     onClick: () -> Unit,
     showLabel: Boolean = true,
-    labelColor: Color = Color.White
+    labelColor: Color = Color.White,
+    iconSizeScale: Float = 1f
 ) {
     Column(
         modifier = Modifier
@@ -540,16 +566,16 @@ private fun ContactCell(
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(modifier = Modifier.size(56.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.size(56.dp * iconSizeScale), contentAlignment = Alignment.Center) {
             if (contact != null) {
                 com.bisc.flauncher.ui.home.dock.ContactPhotoIcon(
                     contactId = contact.contactId,
                     photoUri = contact.photoUri,
                     loadPhoto = loadContactPhoto,
-                    size = 56.dp
+                    size = 56.dp * iconSizeScale
                 )
             } else {
-                Icon(imageVector = Icons.Filled.Person, contentDescription = null, modifier = Modifier.size(56.dp))
+                Icon(imageVector = Icons.Filled.Person, contentDescription = null, modifier = Modifier.size(56.dp * iconSizeScale))
             }
         }
         if (showLabel) {
@@ -564,11 +590,12 @@ private fun PowerButtonCell(
     button: com.bisc.flauncher.data.model.PowerButton?,
     onClick: () -> Unit,
     showLabel: Boolean = true,
-    labelColor: Color = Color.White
+    labelColor: Color = Color.White,
+    iconSizeScale: Float = 1f
 ) {
     val background = button?.backgroundColor?.let { Color(it) } ?: UNSET_APP_SLOT_COLOR
     val tint = button?.iconColor?.let { Color(it) } ?: Color.White
-    val icon = when (button?.actionType) {
+    val icon = PictogramCatalog.iconFor(button?.iconKey) ?: when (button?.actionType) {
         com.bisc.flauncher.data.model.PowerButtonActionType.PANEL -> Icons.Filled.Dashboard
         com.bisc.flauncher.data.model.PowerButtonActionType.DOCK -> Icons.Filled.Apps
         else -> Icons.Filled.ViewCarousel
@@ -580,10 +607,10 @@ private fun PowerButtonCell(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier.size(56.dp).clip(RoundedCornerShape(16.dp)).background(background),
+            modifier = Modifier.size(56.dp * iconSizeScale).clip(RoundedCornerShape(16.dp)).background(background),
             contentAlignment = Alignment.Center
         ) {
-            Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = Modifier.size(30.dp))
+            Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = Modifier.size(30.dp * iconSizeScale))
         }
         if (showLabel) {
             Spacer(Modifier.height(8.dp))
