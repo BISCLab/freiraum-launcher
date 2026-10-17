@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.AppInfo
 import com.bisc.flauncher.data.model.ContactInfo
-import com.bisc.flauncher.data.model.Note
 import com.bisc.flauncher.data.model.PinnedShortcut
 import com.bisc.flauncher.data.model.PinnedWebsite
 import com.bisc.flauncher.data.model.SettingsShortcut
@@ -68,7 +67,6 @@ fun SearchOverlay(
     calculatorResult: String?,
     converterResult: String?,
     contactResults: List<ContactInfo>,
-    noteResults: List<Note>,
     websiteResults: List<PinnedWebsite>,
     shortcutResults: List<PinnedShortcut>,
     folderResults: List<com.bisc.flauncher.data.model.Folder> = emptyList(),
@@ -89,7 +87,6 @@ fun SearchOverlay(
     onAppClick: (AppInfo) -> Unit,
     onContactClick: (ContactInfo) -> Unit,
     onSettingsShortcutClick: (SettingsShortcut) -> Unit,
-    onNoteClick: (Note) -> Unit,
     onFolderClick: (com.bisc.flauncher.data.model.Folder) -> Unit = {},
     onMapTargetClick: (com.bisc.flauncher.data.model.SavedMapTarget) -> Unit = {},
     onWebsiteClick: (PinnedWebsite) -> Unit,
@@ -167,7 +164,6 @@ fun SearchOverlay(
                         appResults = appResults,
                         contactResults = contactResults,
                         settingsResults = settingsResults,
-                        noteResults = noteResults,
                         websiteResults = websiteResults,
                         shortcutResults = shortcutResults,
                         folderResults = folderResults,
@@ -182,7 +178,6 @@ fun SearchOverlay(
                         onAppClick = onAppClick,
                         onContactClick = onContactClick,
                         onSettingsShortcutClick = onSettingsShortcutClick,
-                        onNoteClick = onNoteClick,
                         onFolderClick = onFolderClick,
                         onMapTargetClick = onMapTargetClick,
                         onWebsiteClick = onWebsiteClick,

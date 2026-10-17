@@ -6,7 +6,6 @@ enum class SearchCategory(val storageKey: String, val legacyKey: String? = null)
     FOLDERS("folders", legacyKey = "apps"),
     CONTACTS("contacts"),
     SETTINGS("settings"),
-    NOTES("notes", legacyKey = "documents"),
     WEBSITES("websites", legacyKey = "documents"),
     PLACES("maps"),
     SHORTCUTS("shortcuts"),

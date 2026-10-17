@@ -192,7 +192,6 @@ fun HomeScreen(
     val keyboardAppearance by viewModel.keyboardAppearance.collectAsState()
     val searchShowAzIndex by viewModel.searchShowAzIndex.collectAsState()
     val searchHideStatusBar by viewModel.searchHideStatusBar.collectAsState()
-    val noteResults by viewModel.noteResults.collectAsState()
     val websiteResults by viewModel.websiteResults.collectAsState()
     val shortcutResults by viewModel.shortcutResults.collectAsState()
     val folderResults by viewModel.folderResults.collectAsState()
@@ -941,7 +940,6 @@ fun HomeScreen(
             calculatorResult = calculatorResult,
             converterResult = converterResult,
             contactResults = contactResults,
-            noteResults = noteResults,
             websiteResults = websiteResults,
             shortcutResults = shortcutResults,
             folderResults = folderResults,
@@ -966,11 +964,6 @@ fun HomeScreen(
             onContactClick = { contact -> contactActionsFor = contact },
             onSettingsShortcutClick = { shortcut ->
                 launchSettingsShortcut(context, shortcut)
-                viewModel.closeSearch()
-            },
-            onNoteClick = { note ->
-                editingNote = note
-                showNoteEditor = true
                 viewModel.closeSearch()
             },
             onFolderClick = { folder ->

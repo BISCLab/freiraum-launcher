@@ -130,7 +130,7 @@ class SettingsRepository @Inject constructor(
         // Categories that were split later replace their old entry in place.
         val saved = prefs[SEARCH_CATEGORY_ORDER_KEY].orEmpty().split(',').flatMap { name ->
             when (name) {
-                "DOCUMENTS" -> listOf(SearchCategory.NOTES, SearchCategory.WEBSITES)
+                "DOCUMENTS" -> listOf(SearchCategory.WEBSITES)
                 "APPS" -> listOf(SearchCategory.APPS, SearchCategory.FOLDERS)
                 "WEB" -> listOf(SearchCategory.EMAIL, SearchCategory.WEB)
                 else -> listOfNotNull(SearchCategory.entries.firstOrNull { it.name == name })
