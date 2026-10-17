@@ -58,15 +58,7 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
     val aiAppPackage by viewModel.searchAiApp.collectAsState()
     val installedApps by viewModel.browsableApps.collectAsState()
     var aiPickerOpen by remember { mutableStateOf(false) }
-    var browserPickerOpen by remember { mutableStateOf(false) }
-    var mapsPickerOpen by remember { mutableStateOf(false) }
     var pickingColorFor by remember { mutableStateOf<SearchCategory?>(null) }
-    val browserPackage by viewModel.searchBrowserApp.collectAsState()
-    val mapsPackage by viewModel.searchMapsApp.collectAsState()
-    val defaultLabel = stringResource(R.string.settings_search_open_with_default)
-    fun appLabel(pkg: String?): String = pkg?.let {
-        runCatching { context.packageManager.getApplicationLabel(context.packageManager.getApplicationInfo(it, 0)).toString() }.getOrNull()
-    } ?: defaultLabel
     val aiAppLabel = remember(aiAppPackage) {
         aiAppPackage?.let { pkg ->
             runCatching { context.packageManager.getApplicationLabel(context.packageManager.getApplicationInfo(pkg, 0)).toString() }.getOrNull()
@@ -179,19 +171,6 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
 
         SettingsPreferenceGroup(title = stringResource(R.string.settings_search_open_with_label)) {
             SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_browser_title),
-                summary = appLabel(browserPackage),
-                info = stringResource(R.string.settings_search_open_with_info),
-                onClick = { browserPickerOpen = true }
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_maps_title),
-                summary = appLabel(mapsPackage),
-                onClick = { mapsPickerOpen = true }
-            )
-            SettingsPreference(
                 icon = SearchCategory.AI.icon,
                 title = stringResource(R.string.settings_search_ai_title),
                 summary = aiAppLabel ?: stringResource(R.string.settings_search_ai_none),
@@ -238,29 +217,6 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
             onDismiss = { aiPickerOpen = false }
         )
     }
-    if (browserPickerOpen) {
-        AppPickerDialog(
-            title = stringResource(R.string.settings_search_browser_pick),
-            clearLabel = stringResource(R.string.settings_search_open_with_clear),
-            apps = remember { appsHandling(context, "https://example.com", browsable = true) },
-            selectedPackage = browserPackage,
-            onPick = { viewModel.setSearchBrowserApp(it); browserPickerOpen = false },
-            onClear = { viewModel.setSearchBrowserApp(null); browserPickerOpen = false },
-            onDismiss = { browserPickerOpen = false }
-        )
-    }
-    if (mapsPickerOpen) {
-        AppPickerDialog(
-            title = stringResource(R.string.settings_search_maps_pick),
-            clearLabel = stringResource(R.string.settings_search_open_with_clear),
-            apps = remember { appsHandling(context, "geo:0,0?q=test", browsable = false) },
-            selectedPackage = mapsPackage,
-            onPick = { viewModel.setSearchMapsApp(it); mapsPickerOpen = false },
-            onClear = { viewModel.setSearchMapsApp(null); mapsPickerOpen = false },
-            onDismiss = { mapsPickerOpen = false }
-        )
-    }
-
     when (openSheet) {
         SearchElementSheet.SEARCH_APPEARANCE -> SettingsEditPage(
             title = surfaceLabel(R.string.settings_layer_surface_search),
@@ -308,10 +264,10 @@ private fun searchEngineLabel(engine: SearchEngine): String = when (engine) {
     SearchEngine.CUSTOM -> stringResource(R.string.settings_search_engine_custom)
 }
 
-private data class PickableApp(val packageName: String, val label: String)
+internal data class PickableApp(val packageName: String, val label: String)
 
 @Composable
-private fun AppPickerDialog(
+internal fun AppPickerDialog(
     title: String,
     clearLabel: String,
     apps: List<PickableApp>,
@@ -344,7 +300,7 @@ private fun AppPickerDialog(
 }
 
 /** Apps that handle [uri] as a view intent, sorted by name. */
-private fun appsHandling(context: android.content.Context, uri: String, browsable: Boolean): List<PickableApp> {
+internal fun appsHandling(context: android.content.Context, uri: String, browsable: Boolean): List<PickableApp> {
     val pm = context.packageManager
     val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(uri))
     if (browsable) intent.addCategory(android.content.Intent.CATEGORY_BROWSABLE)

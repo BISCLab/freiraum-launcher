@@ -22,12 +22,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Dock
-import androidx.compose.material.icons.filled.Gesture
-import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.ViewCarousel
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -73,6 +69,9 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
         bottomBar = { SettingsBreadcrumbBar(navController) }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(16.dp)) {
+            // Masterplan's final nav (Phase 9): Globale Einstellungen / Elemente / Seiten /
+            // Berechtigungen. Apps/Folder live only under Elements now; Gestures/App overview only
+            // under Pages — see SettingsElementsScreen/SettingsPagesScreen for those sub-links.
             SettingsPreferenceGroup {
                 SettingsPreference(
                     icon = Icons.Filled.Palette,
@@ -81,48 +80,16 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                     onClick = { onNavigate("appearance") }
                 )
                 SettingsPreference(
-                    icon = Icons.Filled.ViewCarousel,
-                    title = stringResource(R.string.settings_section_pages),
-                    summary = stringResource(R.string.settings_card_pages_subtitle),
-                    onClick = { onNavigate("pages") }
-                )
-                // Quick overview (the Sidebar singleton page) is disabled for now — deliberately
-                // taken out of Settings nav rather than deleted, pending a bigger rework the user
-                // hasn't decided on yet. The page and its data are untouched; see SettingsPagesScreen
-                // (filtered out of the Utility pages list) and HomeViewModel.homePanelEnabled (the
-                // live notch on Home, now off by default) for the other two places this is hidden.
-                SettingsPreference(
-                    icon = Icons.Filled.GridView,
-                    title = stringResource(R.string.settings_section_app_overview),
-                    summary = stringResource(R.string.settings_card_app_overview_subtitle),
-                    onClick = { onNavigate("app_overview") }
-                )
-                SettingsPreference(
-                    icon = Icons.Filled.Gesture,
-                    title = stringResource(R.string.settings_section_gestures),
-                    summary = stringResource(R.string.settings_card_gestures_subtitle),
-                    onClick = { onNavigate("gestures") }
-                )
-                // TEMPORARY placement — the masterplan's final nav is Globale Einstellungen /
-                // Elemente / Seiten / Berechtigungen (see Phase 9); until that reorganization,
-                // "Elements" (Apps/Folders/Addresses/Links/Powerbuttons) just adds on here.
-                SettingsPreference(
                     icon = Icons.Filled.Apps,
                     title = stringResource(R.string.settings_section_elements),
                     summary = stringResource(R.string.settings_card_elements_subtitle),
                     onClick = { onNavigate("elements") }
                 )
                 SettingsPreference(
-                    icon = Icons.Filled.Apps,
-                    title = stringResource(R.string.settings_section_manage_apps),
-                    summary = stringResource(R.string.settings_card_manage_apps_subtitle),
-                    onClick = { onNavigate("apps") }
-                )
-                SettingsPreference(
-                    icon = Icons.AutoMirrored.Filled.List,
-                    title = stringResource(R.string.settings_section_folder),
-                    summary = stringResource(R.string.settings_card_folder_subtitle),
-                    onClick = { onNavigate("folder") }
+                    icon = Icons.Filled.ViewCarousel,
+                    title = stringResource(R.string.settings_section_pages),
+                    summary = stringResource(R.string.settings_card_pages_subtitle),
+                    onClick = { onNavigate("pages") }
                 )
                 SettingsPreference(
                     icon = Icons.Filled.PhoneAndroid,
