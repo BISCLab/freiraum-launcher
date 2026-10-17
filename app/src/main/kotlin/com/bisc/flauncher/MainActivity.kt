@@ -310,6 +310,22 @@ class MainActivity : ComponentActivity() {
                                 onBack = { navController.popBackStack() }
                             )
                         }
+                        composable(
+                            "settings/pages/{pageId}/rows/{rowId}/apps",
+                            arguments = listOf(
+                                navArgument("pageId") { type = NavType.LongType },
+                                navArgument("rowId") { type = NavType.LongType }
+                            )
+                        ) { backStackEntry ->
+                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@composable
+                            val rowId = backStackEntry.arguments?.getLong("rowId") ?: return@composable
+                            com.bisc.flauncher.ui.settings.SettingsAppsRowEditScreen(
+                                pageId = pageId,
+                                rowId = rowId,
+                                navController = navController,
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
                         composable("settings/app_overview") {
                             com.bisc.flauncher.ui.settings.SettingsAppOverviewScreen(navController = navController, onBack = { navController.popBackStack() })
                         }

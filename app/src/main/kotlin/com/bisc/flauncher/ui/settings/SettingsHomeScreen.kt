@@ -140,16 +140,6 @@ fun SettingsHomeLayoutScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val rowsByPage by viewModel.rowsByPage.collectAsState()
-    val appEntriesByRow by viewModel.appEntriesByRow.collectAsState()
-    val browsableApps by viewModel.browsableApps.collectAsState()
-    val folders by viewModel.folders.collectAsState()
-    val folderItemsByFolder by viewModel.folderItemsByFolder.collectAsState()
-    val savedMapTargets by viewModel.savedMapTargets.collectAsState()
-    val pinnedWebsites by viewModel.pinnedWebsites.collectAsState()
-    val shortcutAppPickerOpen by viewModel.shortcutAppPickerOpen.collectAsState()
-    val shortcutPickerForApp by viewModel.shortcutPickerForApp.collectAsState()
-    val availableShortcuts by viewModel.availableShortcuts.collectAsState()
-    val allPages by viewModel.allPages.collectAsState()
     val systemWidgetPickerOpenForPage by viewModel.systemWidgetPickerOpenForPage.collectAsState()
     val pendingBindIntent by viewModel.pendingBindIntent.collectAsState()
     val pendingConfigureIntent by viewModel.pendingConfigureIntent.collectAsState()
@@ -159,15 +149,7 @@ fun SettingsHomeLayoutScreen(
     val panelRow = rows.find { it.type == PageRowType.PANEL }
     val otherRows = rows.filter { it.type != PageRowType.SEARCH_BAR && it.type != PageRowType.PANEL }
 
-    var editingRowId by remember { mutableStateOf<Long?>(null) }
-    val editingRow = editingRowId?.let { id -> rows.find { it.id == id } }
     var showAddSheet by remember { mutableStateOf(false) }
-
-    var pendingShortcutRowId by remember { mutableStateOf<Long?>(null) }
-    var showMapTargetPickerForRow by remember { mutableStateOf<Long?>(null) }
-    var showWebsitePickerForRow by remember { mutableStateOf<Long?>(null) }
-    var showAddMapTargetDialogForRow by remember { mutableStateOf<Long?>(null) }
-    var showAddWebsiteDialogForRow by remember { mutableStateOf<Long?>(null) }
     var sizingKind by remember { mutableStateOf<String?>(null) }
     var sizingSpan by remember { mutableStateOf(1) }
 
@@ -208,7 +190,7 @@ fun SettingsHomeLayoutScreen(
                             .clickable {
                                 when (row.type) {
                                     PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET -> onOpenRow(row.id)
-                                    PageRowType.APPS, PageRowType.SEARCH_BAR -> editingRowId = row.id
+                                    PageRowType.APPS, PageRowType.SEARCH_BAR -> navController.navigate("settings/pages/$pageId/rows/${row.id}/apps")
                                     PageRowType.PANEL -> Unit
                                 }
                             }
@@ -306,114 +288,6 @@ fun SettingsHomeLayoutScreen(
         )
     }
 
-    // Only ordinary Apps rows reach this sheet now — the Dock bookend opens its own full-page hub
-    // instead (see onOpenDock/SettingsDockScreen).
-    editingRow?.takeIf { it.type == PageRowType.APPS }?.let { row ->
-        AppsRowEditSheet(
-            row = row,
-            entries = appEntriesByRow[row.id].orEmpty(),
-            installedApps = browsableApps,
-            folders = folders,
-            folderItemsByFolder = folderItemsByFolder,
-            savedMapTargets = savedMapTargets,
-            pinnedWebsites = pinnedWebsites,
-            pages = allPages,
-            loadIcon = viewModel::loadIcon,
-            resolveLabel = viewModel::resolveLabel,
-            onColumnsChange = { viewModel.setRowColumns(row, it) },
-            onAppearanceChange = { appearance -> viewModel.setRowAppearance(row, appearance) },
-            onPillModeChange = { enabled -> viewModel.setRowPillMode(row, enabled) },
-            onAddApp = { app -> viewModel.addAppEntryToRow(row.id, app) },
-            onAddExistingFolder = { folderId -> viewModel.addExistingFolderToRow(row.id, folderId) },
-            onCreateFolder = { name -> viewModel.createFolderInRow(row.id, name) },
-            onAddShortcutClick = {
-                pendingShortcutRowId = row.id
-                viewModel.openShortcutAppPicker()
-            },
-            onAddMapTargetClick = { showMapTargetPickerForRow = row.id },
-            onAddWebsiteClick = { showWebsitePickerForRow = row.id },
-            onAddPageLink = { page -> viewModel.addPageLinkEntryToRow(row.id, page.id) },
-            onRemoveEntry = viewModel::removeAppRowEntry,
-            onReorderEntries = viewModel::reorderAppRowEntries,
-            onRemoveRow = { viewModel.removeRow(row); editingRowId = null },
-            onDismiss = { editingRowId = null }
-        )
-    }
-
-    if (shortcutAppPickerOpen) {
-        ShortcutSourceAppSheet(
-            apps = browsableApps,
-            loadIcon = viewModel::loadIcon,
-            onAppSelected = viewModel::selectShortcutSourceApp,
-            onDismiss = viewModel::dismissShortcutAppPicker
-        )
-    }
-
-    shortcutPickerForApp?.let { app ->
-        AppShortcutPickerDialog(
-            appLabel = app.label,
-            shortcuts = availableShortcuts,
-            loadIcon = viewModel::loadShortcutIcon,
-            onShortcutSelected = { info ->
-                pendingShortcutRowId?.let { rowId -> viewModel.addShortcutEntryToRow(rowId, info) }
-                pendingShortcutRowId = null
-            },
-            onDismiss = {
-                pendingShortcutRowId = null
-                viewModel.dismissShortcutPicker()
-            }
-        )
-    }
-
-    showMapTargetPickerForRow?.let { rowId ->
-        SavedMapTargetPickerSheet(
-            targets = savedMapTargets,
-            onSelect = { target ->
-                viewModel.addMapTargetEntryToRow(rowId, target.id)
-                showMapTargetPickerForRow = null
-            },
-            onAddNew = {
-                showMapTargetPickerForRow = null
-                showAddMapTargetDialogForRow = rowId
-            },
-            onDismiss = { showMapTargetPickerForRow = null }
-        )
-    }
-
-    showWebsitePickerForRow?.let { rowId ->
-        SavedWebsitePickerSheet(
-            websites = pinnedWebsites,
-            onSelect = { website ->
-                viewModel.addWebsiteEntryToRow(rowId, website.id)
-                showWebsitePickerForRow = null
-            },
-            onAddNew = {
-                showWebsitePickerForRow = null
-                showAddWebsiteDialogForRow = rowId
-            },
-            onDismiss = { showWebsitePickerForRow = null }
-        )
-    }
-
-    showAddMapTargetDialogForRow?.let { rowId ->
-        AddMapTargetDialog(
-            onSave = { label, lat, lon, address ->
-                viewModel.addNewMapTargetToRow(rowId, label, lat, lon, address)
-                showAddMapTargetDialogForRow = null
-            },
-            onDismiss = { showAddMapTargetDialogForRow = null }
-        )
-    }
-
-    showAddWebsiteDialogForRow?.let { rowId ->
-        AddWebsiteDialog(
-            onSave = { label, url ->
-                viewModel.addNewWebsiteToRow(rowId, label, url)
-                showAddWebsiteDialogForRow = null
-            },
-            onDismiss = { showAddWebsiteDialogForRow = null }
-        )
-    }
 }
 
 /** The Favorites "Panel"'s own settings hub — Background/Border/Elements, same shape as the Dock's

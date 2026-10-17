@@ -111,6 +111,7 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
             val row = rowsByPage[pageId]?.find { it.id == rowId }
             row?.let { rowLabel(it) } ?: stringResource(R.string.settings_widgets_edit_title)
         }
+        "settings/pages/{pageId}/rows/{rowId}/apps" -> stringResource(R.string.settings_apps_row_edit_title)
         "settings/app_overview" -> stringResource(R.string.settings_section_app_overview)
         "settings/permissions" -> stringResource(R.string.settings_section_permissions)
         "settings/gestures" -> stringResource(R.string.settings_section_gestures)
