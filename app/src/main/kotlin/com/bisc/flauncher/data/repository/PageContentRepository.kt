@@ -126,6 +126,13 @@ class PageContentRepository @Inject constructor(
         // so a default binding here would just sit unreachable behind it. A user can still bind
         // SWIPE_DOWN to the Favorites page manually; it only takes effect while the Panel is disabled.
 
+        // Settings needs a default path from the home screen itself — otherwise, on a fresh install,
+        // the only way in would be the system "App info" entry or the static app shortcut (both
+        // outside this app's own UI). Long-press is free by default and matches the Android norm.
+        if (!settingsRepository.isGestureConfigured(HomeGesture.LONG_PRESS)) {
+            settingsRepository.setGestureAction(HomeGesture.LONG_PRESS, GestureAction(GestureActionType.SETTINGS, null))
+        }
+
         // Fresh-install default: the dock arrives already linking to the two singleton pages, so it
         // doesn't look sparse — mirrors the pre-merge DockRepository's own default seed. Only runs once
         // (dockRowId already had zero entries at that point), never re-applied once the user has
