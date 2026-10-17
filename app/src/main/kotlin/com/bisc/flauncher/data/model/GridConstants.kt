@@ -1,10 +1,10 @@
 package com.bisc.flauncher.data.model
 
-/** Bounds for [PageRow.columns] on an [PageRowType.APPS] row. */
+/** Bounds for [PageRow.columns] on an [PageRowType.ELEMENT_BOX] row. */
 object GridConstants {
-    const val DEFAULT_APPS_ROW_COLUMNS = 5
-    const val MIN_APPS_ROW_COLUMNS = 2
-    const val MAX_APPS_ROW_COLUMNS = 8
+    const val DEFAULT_ELEMENT_BOX_COLUMNS = 5
+    const val MIN_ELEMENT_BOX_COLUMNS = 2
+    const val MAX_ELEMENT_BOX_COLUMNS = 8
 }
 
 /** Identifiers for built-in (non-system-AppWidget) widgets rendered by the launcher itself. */

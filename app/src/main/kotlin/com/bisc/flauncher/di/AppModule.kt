@@ -8,7 +8,7 @@ import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.bisc.flauncher.data.db.AppOverrideDao
-import com.bisc.flauncher.data.db.AppRowEntryDao
+import com.bisc.flauncher.data.db.RowEntryDao
 import com.bisc.flauncher.data.db.FLauncherDatabase
 import com.bisc.flauncher.data.db.FolderDao
 import com.bisc.flauncher.data.db.FolderItemDao
@@ -142,7 +142,7 @@ object AppModule {
     fun providePageRowDao(db: FLauncherDatabase): PageRowDao = db.pageRowDao()
 
     @Provides
-    fun provideAppRowEntryDao(db: FLauncherDatabase): AppRowEntryDao = db.appRowEntryDao()
+    fun provideRowEntryDao(db: FLauncherDatabase): RowEntryDao = db.rowEntryDao()
 
     @Provides
     fun provideFolderDao(db: FLauncherDatabase): FolderDao = db.folderDao()

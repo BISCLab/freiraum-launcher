@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
-import com.bisc.flauncher.data.model.AppRowEntry
+import com.bisc.flauncher.data.model.RowEntry
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.WidgetKind
@@ -190,7 +190,7 @@ fun SettingsHomeLayoutScreen(
                             .clickable {
                                 when (row.type) {
                                     PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET -> onOpenRow(row.id)
-                                    PageRowType.APPS, PageRowType.SEARCH_BAR -> navController.navigate("settings/pages/$pageId/rows/${row.id}/apps")
+                                    PageRowType.ELEMENT_BOX, PageRowType.SEARCH_BAR -> navController.navigate("settings/pages/$pageId/rows/${row.id}/elementbox")
                                     PageRowType.PANEL -> Unit
                                 }
                             }
@@ -244,9 +244,9 @@ fun SettingsHomeLayoutScreen(
                 showAddSheet = false
                 viewModel.openSystemWidgetPicker(pageId)
             },
-            onAppsRowSelected = {
+            onElementBoxSelected = {
                 showAddSheet = false
-                viewModel.addAppsRow(pageId)
+                viewModel.addElementBox(pageId)
             },
             onSearchBarSelected = {},
             onDismiss = { showAddSheet = false }
@@ -346,7 +346,7 @@ fun SettingsPanelBorderScreen(pageId: Long, navController: NavController, onBack
 /** The Panel's own grid editor — same "+" preview/chooser idea as [SettingsDockElementsScreen], but
  *  shaped row by row (each sub-row picks its own column count, 1-6) instead of one shared column
  *  count for the whole grid, since the Panel wraps to multiple rows rather than growing/shrinking
- *  width like the dock does — see [com.bisc.flauncher.ui.home.AppsGridEntries]'s rowColumns param
+ *  width like the dock does — see [com.bisc.flauncher.ui.home.GridEntries]'s rowColumns param
  *  for the centered layout this produces. No separate reorderable entries list underneath either:
  *  tapping a filled slot in the preview itself removes it (see onEditEntry there), since every slot
  *  is already individually picked through the "+" chooser — a second list showing the same content
@@ -356,8 +356,8 @@ fun SettingsPanelBorderScreen(pageId: Long, navController: NavController, onBack
 @Composable
 fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
     val row = rememberPanelRow(pageId, viewModel) ?: return
-    val appEntriesByRow by viewModel.appEntriesByRow.collectAsState()
-    val entries = appEntriesByRow[row.id].orEmpty()
+    val rowEntriesByRow by viewModel.rowEntriesByRow.collectAsState()
+    val entries = rowEntriesByRow[row.id].orEmpty()
     val browsableApps by viewModel.browsableApps.collectAsState()
     val folders by viewModel.folders.collectAsState()
     val folderItemsByFolder by viewModel.folderItemsByFolder.collectAsState()
@@ -383,12 +383,12 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
     var showActionButtonPicker by remember { mutableStateOf(false) }
     var pendingShortcut by remember { mutableStateOf(false) }
-    var pendingRemoval by remember { mutableStateOf<AppRowEntry?>(null) }
+    var pendingRemoval by remember { mutableStateOf<RowEntry?>(null) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_dock_elements_title), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                com.bisc.flauncher.ui.home.AppsGridEntries(
+                com.bisc.flauncher.ui.home.GridEntries(
                     entries = entries,
                     columns = 1,
                     rowColumns = rowShape,
@@ -458,7 +458,7 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
     pendingRemoval?.let { entry ->
         ConfirmRemoveDialog(
             label = com.bisc.flauncher.ui.home.entryLabel(entry, folders, savedMapTargets, pinnedWebsites, allPages, pinnedContacts, viewModel::resolveLabel, actionButtons),
-            onConfirm = { viewModel.removeAppRowEntry(entry); pendingRemoval = null },
+            onConfirm = { viewModel.removeRowEntry(entry); pendingRemoval = null },
             onDismiss = { pendingRemoval = null }
         )
     }

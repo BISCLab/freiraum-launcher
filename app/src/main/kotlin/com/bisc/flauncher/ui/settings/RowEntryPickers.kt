@@ -52,7 +52,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.AppInfo
-import com.bisc.flauncher.data.model.AppRowEntry
+import com.bisc.flauncher.data.model.RowEntry
 import com.bisc.flauncher.data.model.Folder
 import com.bisc.flauncher.data.model.FolderItem
 import com.bisc.flauncher.data.model.GridConstants
@@ -79,8 +79,8 @@ internal fun dockVisibilityModeLabel(mode: com.bisc.flauncher.data.model.DockVis
 }
 
 @Composable
-internal fun AppRowEntryRow(
-    entry: AppRowEntry,
+internal fun RowEntryRow(
+    entry: RowEntry,
     folders: List<Folder>,
     folderItemsByFolder: Map<Long, List<FolderItem>>,
     savedMapTargets: List<SavedMapTarget>,
@@ -152,7 +152,7 @@ internal fun AppRowEntryRow(
     }
 }
 
-/** Selection of an existing folder, or creation of a new one, for an apps row. */
+/** Selection of an existing folder, or creation of a new one, for a row. */
 @Composable
 fun FolderPickerDialog(
     folders: List<Folder>,
@@ -163,18 +163,18 @@ fun FolderPickerDialog(
     onDismiss: () -> Unit
 ) {
     var creating by remember { mutableStateOf(false) }
-    SettingsFixedDialog(title = stringResource(R.string.settings_apps_row_add_folder), onDismiss = onDismiss) {
+    SettingsFixedDialog(title = stringResource(R.string.settings_row_entry_add_folder), onDismiss = onDismiss) {
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = Icons.Filled.CreateNewFolder,
-                title = stringResource(R.string.settings_apps_row_new_folder),
+                title = stringResource(R.string.settings_row_entry_new_folder),
                 onClick = { creating = true },
                 trailing = null
             )
         }
         if (folders.isEmpty()) {
             Text(
-                stringResource(R.string.settings_apps_row_no_folders),
+                stringResource(R.string.settings_row_entry_no_folders),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(vertical = 16.dp)
@@ -200,7 +200,7 @@ fun FolderPickerDialog(
         var name by remember { mutableStateOf("") }
         AlertDialog(
             onDismissRequest = { creating = false },
-            title = { Text(stringResource(R.string.settings_apps_row_new_folder)) },
+            title = { Text(stringResource(R.string.settings_row_entry_new_folder)) },
             text = {
                 OutlinedTextField(
                     value = name,

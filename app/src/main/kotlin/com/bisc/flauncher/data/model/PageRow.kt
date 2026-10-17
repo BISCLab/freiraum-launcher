@@ -51,7 +51,7 @@ data class PageRow(
     val elementBorderWidth: Float = 1f,
     val elementContentColor: Int? = null,
     // Single-line/pill layout, opt-in on any row (not just the dock's own SEARCH_BAR row) — entries
-    // laid out in one non-wrapping line instead of AppsRowGrid's usual column-wrapped grid, sized per
+    // laid out in one non-wrapping line instead of ElementBoxGrid's usual column-wrapped grid, sized per
     // pillWidthMode (only meaningful while pillMode is true) and capped to pillMaxEntries.
     val pillMode: Boolean = false,
     val pillWidthMode: DockWidthMode = DockWidthMode.FIXED,

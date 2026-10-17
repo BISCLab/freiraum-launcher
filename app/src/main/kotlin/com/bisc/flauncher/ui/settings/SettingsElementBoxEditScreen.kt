@@ -45,7 +45,7 @@ import com.bisc.flauncher.ui.home.dock.PagePickerSheet
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
 /**
- * Full-screen editor for one [PageRowType.APPS] (or, for the dock, [PageRowType.SEARCH_BAR]) row —
+ * Full-screen editor for one [PageRowType.ELEMENT_BOX] (or, for the dock, [PageRowType.SEARCH_BAR]) row —
  * the masterplan Phase 9 template for converting the remaining ModalBottomSheet row editors to real
  * nav screens: same chrome ([SettingsSubScreen]) and immediate-apply behavior (no Save/Discard) as
  * its sibling [SettingsWidgetRowEditScreen], which already established that pattern for widget rows.
@@ -55,7 +55,7 @@ import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
  * inconsistent rather than a genuine improvement.
  */
 @Composable
-fun SettingsAppsRowEditScreen(
+fun SettingsElementBoxEditScreen(
     pageId: Long,
     rowId: Long,
     navController: NavController,
@@ -63,7 +63,7 @@ fun SettingsAppsRowEditScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val rowsByPage by viewModel.rowsByPage.collectAsState()
-    val appEntriesByRow by viewModel.appEntriesByRow.collectAsState()
+    val rowEntriesByRow by viewModel.rowEntriesByRow.collectAsState()
     val browsableApps by viewModel.browsableApps.collectAsState()
     val folders by viewModel.folders.collectAsState()
     val folderItemsByFolder by viewModel.folderItemsByFolder.collectAsState()
@@ -86,7 +86,7 @@ fun SettingsAppsRowEditScreen(
         else if (everSawRow) onBack()
     }
     if (row == null) return
-    val entries = appEntriesByRow[row.id].orEmpty()
+    val entries = rowEntriesByRow[row.id].orEmpty()
 
     var showAppPicker by remember { mutableStateOf(false) }
     var showFolderCreator by remember { mutableStateOf(false) }
@@ -99,7 +99,7 @@ fun SettingsAppsRowEditScreen(
     var confirmingRemoveRow by remember { mutableStateOf(false) }
 
     // The dock row (PageRowType.SEARCH_BAR) always floats as a single-line pill regardless of its
-    // own pillMode column — that flag only matters for an ordinary APPS row opting in. Showing the
+    // own pillMode column — that flag only matters for an ordinary element box opting in. Showing the
     // toggle (off) and the irrelevant Columns stepper for the dock would be actively misleading.
     val isDock = row.type == PageRowType.SEARCH_BAR
     val isPillLayout = row.pillMode || isDock
@@ -107,7 +107,7 @@ fun SettingsAppsRowEditScreen(
     // now-merged SearchBarRowEditSheet.
     val canRemoveRow = row.type != PageRowType.SEARCH_BAR || pages.find { it.id == pageId }?.isHome != true
 
-    SettingsSubScreen(title = stringResource(R.string.settings_apps_row_edit_title), navController = navController, onBack = onBack) {
+    SettingsSubScreen(title = stringResource(R.string.settings_element_box_edit_title), navController = navController, onBack = onBack) {
         if (isDock) {
             val visibilityMode = row.dockVisibilityMode
             SettingsPreferenceGroup(title = stringResource(R.string.settings_dock_visibility_label)) {
@@ -121,8 +121,8 @@ fun SettingsAppsRowEditScreen(
             SettingsPreferenceGroup {
                 SettingsPreference(
                     icon = null,
-                    title = stringResource(R.string.settings_apps_row_pill_mode_label),
-                    summary = stringResource(R.string.settings_apps_row_pill_mode_summary),
+                    title = stringResource(R.string.settings_element_box_pill_mode_label),
+                    summary = stringResource(R.string.settings_element_box_pill_mode_summary),
                     onClick = { viewModel.setRowPillMode(row, !row.pillMode) },
                     trailing = { Switch(checked = row.pillMode, onCheckedChange = { viewModel.setRowPillMode(row, it) }) }
                 )
@@ -130,7 +130,7 @@ fun SettingsAppsRowEditScreen(
         }
 
         if (!isPillLayout) {
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_apps_row_columns_label)) {
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_element_box_columns_label)) {
                 SettingsPreference(
                     icon = null,
                     title = row.columns.toString(),
@@ -139,11 +139,11 @@ fun SettingsAppsRowEditScreen(
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             IconButton(
                                 onClick = { viewModel.setRowColumns(row, row.columns - 1) },
-                                enabled = row.columns > GridConstants.MIN_APPS_ROW_COLUMNS
+                                enabled = row.columns > GridConstants.MIN_ELEMENT_BOX_COLUMNS
                             ) { Icon(Icons.Filled.Remove, contentDescription = null) }
                             IconButton(
                                 onClick = { viewModel.setRowColumns(row, row.columns + 1) },
-                                enabled = row.columns < GridConstants.MAX_APPS_ROW_COLUMNS
+                                enabled = row.columns < GridConstants.MAX_ELEMENT_BOX_COLUMNS
                             ) { Icon(Icons.Filled.Add, contentDescription = null) }
                         }
                     }
@@ -157,17 +157,17 @@ fun SettingsAppsRowEditScreen(
             styleGroupTitle = stringResource(R.string.settings_dock_background_label)
         )
 
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_apps_row_apps_label)) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_element_box_entries_label)) {
             if (entries.isEmpty()) {
                 Text(
-                    stringResource(R.string.settings_apps_row_empty),
+                    stringResource(R.string.settings_element_box_empty),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(16.dp)
                 )
             } else {
-                ReorderableList(items = entries, key = { it.id }, onReorder = viewModel::reorderAppRowEntries) { entry ->
-                    AppRowEntryRow(
+                ReorderableList(items = entries, key = { it.id }, onReorder = viewModel::reorderRowEntries) { entry ->
+                    RowEntryRow(
                         entry = entry,
                         folders = folders,
                         folderItemsByFolder = folderItemsByFolder,
@@ -176,24 +176,24 @@ fun SettingsAppsRowEditScreen(
                         pages = allPages,
                         loadIcon = viewModel::loadIcon,
                         resolveLabel = viewModel::resolveLabel,
-                        onRemove = { viewModel.removeAppRowEntry(entry) }
+                        onRemove = { viewModel.removeRowEntry(entry) }
                     )
                 }
             }
         }
 
         SettingsPreferenceGroup {
-            SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_apps_row_add_app), onClick = { showAppPicker = true }, trailing = null)
-            SettingsPreference(icon = Icons.Filled.CreateNewFolder, title = stringResource(R.string.settings_apps_row_add_folder), onClick = { showFolderCreator = true }, trailing = null)
+            SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_row_entry_add_app), onClick = { showAppPicker = true }, trailing = null)
+            SettingsPreference(icon = Icons.Filled.CreateNewFolder, title = stringResource(R.string.settings_row_entry_add_folder), onClick = { showFolderCreator = true }, trailing = null)
             SettingsPreference(
                 icon = Icons.AutoMirrored.Filled.Shortcut,
-                title = stringResource(R.string.settings_apps_row_add_shortcut),
+                title = stringResource(R.string.settings_row_entry_add_shortcut),
                 onClick = { pendingShortcut = true; viewModel.openShortcutAppPicker() },
                 trailing = null
             )
-            SettingsPreference(icon = Icons.Filled.Place, title = stringResource(R.string.settings_apps_row_add_map_target), onClick = { showMapTargetPicker = true }, trailing = null)
-            SettingsPreference(icon = Icons.Filled.Language, title = stringResource(R.string.settings_apps_row_add_website), onClick = { showWebsitePicker = true }, trailing = null)
-            SettingsPreference(icon = Icons.Filled.ViewCarousel, title = stringResource(R.string.settings_apps_row_add_page_link), onClick = { showPagePicker = true }, trailing = null)
+            SettingsPreference(icon = Icons.Filled.Place, title = stringResource(R.string.settings_row_entry_add_map_target), onClick = { showMapTargetPicker = true }, trailing = null)
+            SettingsPreference(icon = Icons.Filled.Language, title = stringResource(R.string.settings_row_entry_add_website), onClick = { showWebsitePicker = true }, trailing = null)
+            SettingsPreference(icon = Icons.Filled.ViewCarousel, title = stringResource(R.string.settings_row_entry_add_page_link), onClick = { showPagePicker = true }, trailing = null)
         }
 
         if (canRemoveRow) {

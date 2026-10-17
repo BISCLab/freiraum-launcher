@@ -5,9 +5,9 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-/** One icon inside a [PageRowType.APPS] row, in [orderIndex] order. */
+/** One icon inside a [PageRowType.ELEMENT_BOX] row, in [orderIndex] order. */
 @Entity(
-    tableName = "app_row_entries",
+    tableName = "row_entries",
     foreignKeys = [
         ForeignKey(
             entity = PageRow::class,
@@ -18,7 +18,7 @@ import androidx.room.PrimaryKey
     ],
     indices = [Index("pageRowId")]
 )
-data class AppRowEntry(
+data class RowEntry(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val pageRowId: Long,
     val orderIndex: Int,

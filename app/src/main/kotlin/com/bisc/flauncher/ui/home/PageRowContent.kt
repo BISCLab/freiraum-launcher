@@ -45,7 +45,7 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.bisc.flauncher.data.model.AppRowEntry
+import com.bisc.flauncher.data.model.RowEntry
 import com.bisc.flauncher.data.model.DockWidthMode
 import com.bisc.flauncher.data.model.Folder
 import com.bisc.flauncher.data.model.FolderItem
@@ -84,11 +84,11 @@ import com.bisc.flauncher.util.launchApp
 import com.bisc.flauncher.util.launchMapTarget
 import com.bisc.flauncher.util.openWebsite
 
-/** Renders one [PageRow], full page width, at its own height (widgets) or content-driven height (an apps row). */
+/** Renders one [PageRow], full page width, at its own height (widgets) or content-driven height (an element box). */
 @Composable
 fun PageRowContent(
     row: PageRow,
-    entries: List<AppRowEntry>,
+    entries: List<RowEntry>,
     folders: List<Folder>,
     folderItemsByFolder: Map<Long, List<FolderItem>>,
     savedMapTargets: List<SavedMapTarget> = emptyList(),
@@ -153,7 +153,7 @@ fun PageRowContent(
                 )
             }
         }
-        PageRowType.APPS -> {
+        PageRowType.ELEMENT_BOX -> {
             if (row.pillMode) {
                 PillRow(
                     row = row,
@@ -172,7 +172,7 @@ fun PageRowContent(
                     onOpenPageLink = onOpenPageLink
                 )
             } else {
-                AppsRowGrid(
+                ElementBoxGrid(
                     row = row,
                     entries = entries,
                     folders = folders,
@@ -200,9 +200,9 @@ fun PageRowContent(
 }
 
 @Composable
-private fun AppsRowGrid(
+private fun ElementBoxGrid(
     row: PageRow,
-    entries: List<AppRowEntry>,
+    entries: List<RowEntry>,
     folders: List<Folder>,
     folderItemsByFolder: Map<Long, List<FolderItem>>,
     savedMapTargets: List<SavedMapTarget>,
@@ -224,7 +224,7 @@ private fun AppsRowGrid(
         horizontalMargin = horizontalMargin,
         contentPadding = 12.dp
     ) {
-        AppsGridEntries(
+        GridEntries(
             entries = entries,
             columns = row.columns.coerceAtLeast(1),
             folders = folders,
@@ -243,17 +243,17 @@ private fun AppsRowGrid(
     }
 }
 
-/** The actual grid of cells, extracted from [AppsRowGrid] so the Favorites/Panel (which wraps this
+/** The actual grid of cells, extracted from [ElementBoxGrid] so the Favorites/Panel (which wraps this
  *  directly in its own [com.bisc.flauncher.ui.home.dock.DockPanelSurface] shell instead of a
  *  [WidgetCard]) can reuse the exact same per-type cell rendering, now extended with an optional
  *  [totalSlots]/[onAddEmptySlot] pair (pad with tappable "+" cells up to a target grid shape,
  *  the dock's "+" slot idea generalized to two dimensions), [GridItemType.CONTACT], and
  *  [rowColumns]/[onEditEntry] for the Panel's own per-row-column, centered shape (see their own
- *  doc comments below). Ordinary in-page apps rows pass neither of the Panel-only params — a
+ *  doc comments below). Ordinary in-page element boxes pass neither of the Panel-only params — a
  *  single [columns] value, stretched to fill the row's full width, same as before. */
 @Composable
-fun AppsGridEntries(
-    entries: List<AppRowEntry>,
+fun GridEntries(
+    entries: List<RowEntry>,
     columns: Int,
     folders: List<Folder>,
     folderItemsByFolder: Map<Long, List<FolderItem>>,
@@ -285,10 +285,10 @@ fun AppsGridEntries(
     // Settings-only: when set, tapping any *filled* cell calls this instead of its normal live
     // action (launch the app, open the folder, …) — the Panel's Elements editor uses it to let you
     // remove an entry by tapping it directly, instead of a separate reorderable list underneath.
-    onEditEntry: ((AppRowEntry) -> Unit)? = null
+    onEditEntry: ((RowEntry) -> Unit)? = null
 ) {
     @Composable
-    fun Cell(entry: AppRowEntry?, slotIndex: Int) {
+    fun Cell(entry: RowEntry?, slotIndex: Int) {
         if (entry == null) {
             if (onAddEmptySlot != null) EmptyGridSlotCell(onClick = { onAddEmptySlot(slotIndex) }, iconSizeScale = iconSizeScale)
             return
@@ -362,7 +362,7 @@ fun AppsGridEntries(
         }
     } else {
         val safeColumns = columns.coerceAtLeast(1)
-        val padded: List<AppRowEntry?> = if (totalSlots != null && onAddEmptySlot != null) {
+        val padded: List<RowEntry?> = if (totalSlots != null && onAddEmptySlot != null) {
             entries + List((totalSlots - entries.size).coerceAtLeast(0)) { null }
         } else {
             entries
@@ -633,7 +633,7 @@ fun pillItemShape(iconShape: IconShape): Shape = when (iconShape) {
  * A single non-wrapping line of entries (no per-cell text labels — matches the old dock's uniform
  * squircle-button look), for any row with [PageRow.pillMode] set — the dock being the one instance
  * that floats outside the pager (see HomeScreen's floating dock Box, which calls this directly with
- * the home page's pinned SEARCH_BAR row), but any ordinary [PageRowType.APPS] row can opt into the
+ * the home page's pinned SEARCH_BAR row), but any ordinary [PageRowType.ELEMENT_BOX] row can opt into the
  * same layout. Width is either pinned to [PageRow.pillMaxEntries] reference slots or grows with the
  * actual entry count, per [PageRow.pillWidthMode] (see [DockDimens.pillWidth]). When [onAddEmptySlot]
  * is non-null, the row pads itself with tappable empty placeholders up to [PageRow.pillMaxEntries] —
@@ -643,7 +643,7 @@ fun pillItemShape(iconShape: IconShape): Shape = when (iconShape) {
 @Composable
 fun PillRow(
     row: PageRow,
-    entries: List<AppRowEntry>,
+    entries: List<RowEntry>,
     folders: List<Folder>,
     folderItemsByFolder: Map<Long, List<FolderItem>>,
     savedMapTargets: List<SavedMapTarget>,
@@ -721,7 +721,7 @@ fun PillRow(
  *  bar Box. */
 @Composable
 fun PillRowEntries(
-    entries: List<AppRowEntry>,
+    entries: List<RowEntry>,
     folders: List<Folder>,
     folderItemsByFolder: Map<Long, List<FolderItem>>,
     savedMapTargets: List<SavedMapTarget>,
@@ -902,11 +902,11 @@ private fun GridLabel(text: String, color: Color = Color.White, modifier: Modifi
     )
 }
 
-/** Resolves a display name for any [AppRowEntry] type — shared by [PillRowEntries]' optional
- *  captions (PageRow.showLabels) and AppsRowGrid's own always-on per-cell labels. */
+/** Resolves a display name for any [RowEntry] type — shared by [PillRowEntries]' optional
+ *  captions (PageRow.showLabels) and ElementBoxGrid's own always-on per-cell labels. */
 @Composable
 internal fun entryLabel(
-    entry: AppRowEntry,
+    entry: RowEntry,
     folders: List<Folder>,
     savedMapTargets: List<SavedMapTarget>,
     pinnedWebsites: List<PinnedWebsite>,

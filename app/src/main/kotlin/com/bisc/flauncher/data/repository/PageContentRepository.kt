@@ -2,10 +2,10 @@ package com.bisc.flauncher.data.repository
 
 import android.content.Context
 import com.bisc.flauncher.R
-import com.bisc.flauncher.data.db.AppRowEntryDao
+import com.bisc.flauncher.data.db.RowEntryDao
 import com.bisc.flauncher.data.db.LauncherPageDao
 import com.bisc.flauncher.data.db.PageRowDao
-import com.bisc.flauncher.data.model.AppRowEntry
+import com.bisc.flauncher.data.model.RowEntry
 import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.BackgroundSource
 import com.bisc.flauncher.data.model.ColorFill
@@ -35,12 +35,12 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-/** Pages, page rows and apps-row entries, including seeding of the default pages. */
+/** Pages, page rows and row entries, including seeding of the default pages. */
 class PageContentRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val pageDao: LauncherPageDao,
     private val rowDao: PageRowDao,
-    private val entryDao: AppRowEntryDao,
+    private val entryDao: RowEntryDao,
     private val settingsRepository: SettingsRepository
 ) {
     val allPages: Flow<List<LauncherPage>> = pageDao.observeAll()
@@ -50,7 +50,7 @@ class PageContentRepository @Inject constructor(
     val appOverviewPageId: Flow<Long?> = allPages.map { list -> list.firstOrNull { it.kind == LauncherPageKind.APP_LIST }?.id }
     val searchPageId: Flow<Long?> = allPages.map { list -> list.firstOrNull { it.kind == LauncherPageKind.SEARCH }?.id }
     val rows: Flow<List<PageRow>> = rowDao.observeAll()
-    val appRowEntries: Flow<List<AppRowEntry>> = entryDao.observeAll()
+    val rowEntries: Flow<List<RowEntry>> = entryDao.observeAll()
 
     suspend fun ensureSeeded() {
         ensureGlobalBackgroundSeeded()
@@ -61,7 +61,7 @@ class PageContentRepository @Inject constructor(
         // Home starts with just the dock — no clock, no widgets. Widgets (the clock included) only
         // appear once the user opts in via "Widgets auf dem Homescreen aktivieren" in Settings, matching
         // the Discreet Launcher "empty home screen" principle this app is built on. The dock row's own
-        // entries are plain AppRowEntry rows, same table/machinery as any other apps row. Unlike the
+        // entries are plain RowEntry rows, same table/machinery as any other row. Unlike the
         // Favorites popup (which matches the page's own light/dark mode), the dock deliberately
         // INVERTS it by default — black-on-light/white-on-dark — so it reads as its own distinct
         // surface against the page behind it; borderEnabled here now means "show the top edge line"
@@ -141,8 +141,8 @@ class PageContentRepository @Inject constructor(
         if (entryDao.countForRow(dockRowId) == 0) {
             val appOverviewId = pageDao.getAppOverviewPage()?.id
             val searchId = pageDao.getByKind(LauncherPageKind.SEARCH)?.id
-            searchId?.let { entryDao.insert(AppRowEntry(pageRowId = dockRowId, orderIndex = 0, type = GridItemType.PAGE, payload = it.toString())) }
-            appOverviewId?.let { entryDao.insert(AppRowEntry(pageRowId = dockRowId, orderIndex = 1, type = GridItemType.PAGE, payload = it.toString())) }
+            searchId?.let { entryDao.insert(RowEntry(pageRowId = dockRowId, orderIndex = 0, type = GridItemType.PAGE, payload = it.toString())) }
+            appOverviewId?.let { entryDao.insert(RowEntry(pageRowId = dockRowId, orderIndex = 1, type = GridItemType.PAGE, payload = it.toString())) }
         }
 
         // Self-healing check on every start: pages used to scroll, so content sized against that
@@ -295,9 +295,9 @@ class PageContentRepository @Inject constructor(
         return id
     }
 
-    suspend fun addAppsRow(pageId: Long): Long {
+    suspend fun addElementBox(pageId: Long): Long {
         var row = PageRow(
-            pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.APPS, columns = GridConstants.DEFAULT_APPS_ROW_COLUMNS,
+            pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.ELEMENT_BOX, columns = GridConstants.DEFAULT_ELEMENT_BOX_COLUMNS,
             cornerStyle = settingsRepository.defaultCornerStyle.first()
         )
         presetRowAppearance()?.let { row = row.withAppearance(it) }
@@ -327,8 +327,8 @@ class PageContentRepository @Inject constructor(
      * terminate. Recurses in case the fresh page overflows too (e.g. several oversized rows at once).
      */
     private suspend fun heightPxOf(row: PageRow, density: androidx.compose.ui.unit.Density): Int = row.heightPx ?: with(density) {
-        val heightDp = if (row.type == PageRowType.APPS) {
-            com.bisc.flauncher.ui.home.PageRowDimens.appsRowHeight(entryDao.countForRow(row.id), row.columns.coerceAtLeast(1))
+        val heightDp = if (row.type == PageRowType.ELEMENT_BOX) {
+            com.bisc.flauncher.ui.home.PageRowDimens.elementBoxHeight(entryDao.countForRow(row.id), row.columns.coerceAtLeast(1))
         } else {
             com.bisc.flauncher.ui.home.PageRowDimens.rowUnitHeight * row.spanY
         }
@@ -463,7 +463,7 @@ class PageContentRepository @Inject constructor(
     }
 
     suspend fun setRowColumns(row: PageRow, columns: Int) {
-        rowDao.update(row.copy(columns = columns.coerceIn(GridConstants.MIN_APPS_ROW_COLUMNS, GridConstants.MAX_APPS_ROW_COLUMNS)))
+        rowDao.update(row.copy(columns = columns.coerceIn(GridConstants.MIN_ELEMENT_BOX_COLUMNS, GridConstants.MAX_ELEMENT_BOX_COLUMNS)))
         // Fewer columns means more icon rows, i.e. taller — can push the page over budget too.
         rebalancePageOverflow(row.pageId)
     }
@@ -506,21 +506,21 @@ class PageContentRepository @Inject constructor(
         }
     }
 
-    /** An apps row grows taller as entries are added to it — this can push a page over budget too. */
+    /** An element box grows taller as entries are added to it — this can push a page over budget too. */
     private suspend fun rebalanceForRow(pageRowId: Long) {
         rowDao.getById(pageRowId)?.let { rebalancePageOverflow(it.pageId) }
     }
 
     suspend fun addAppEntry(pageRowId: Long, componentName: String): Long {
         val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
-        val id = entryDao.insert(AppRowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.APP, payload = componentName))
+        val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.APP, payload = componentName))
         rebalanceForRow(pageRowId)
         return id
     }
 
     suspend fun addFolderEntry(pageRowId: Long, folderId: Long): Long {
         val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
-        val id = entryDao.insert(AppRowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.FOLDER, payload = folderId.toString()))
+        val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.FOLDER, payload = folderId.toString()))
         rebalanceForRow(pageRowId)
         return id
     }
@@ -528,7 +528,7 @@ class PageContentRepository @Inject constructor(
     suspend fun addShortcutEntry(pageRowId: Long, packageName: String, shortcutId: String, label: String): Long {
         val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
         val id = entryDao.insert(
-            AppRowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.SHORTCUT, payload = "$packageName|$shortcutId|$label")
+            RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.SHORTCUT, payload = "$packageName|$shortcutId|$label")
         )
         rebalanceForRow(pageRowId)
         return id
@@ -536,21 +536,21 @@ class PageContentRepository @Inject constructor(
 
     suspend fun addMapTargetEntry(pageRowId: Long, targetId: Long): Long {
         val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
-        val id = entryDao.insert(AppRowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.MAP_TARGET, payload = targetId.toString()))
+        val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.MAP_TARGET, payload = targetId.toString()))
         rebalanceForRow(pageRowId)
         return id
     }
 
     suspend fun addWebsiteEntry(pageRowId: Long, websiteId: Long): Long {
         val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
-        val id = entryDao.insert(AppRowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.WEBSITE, payload = websiteId.toString()))
+        val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.WEBSITE, payload = websiteId.toString()))
         rebalanceForRow(pageRowId)
         return id
     }
 
     suspend fun addPageLinkEntry(pageRowId: Long, pageId: Long): Long {
         val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
-        val id = entryDao.insert(AppRowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.PAGE, payload = pageId.toString()))
+        val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.PAGE, payload = pageId.toString()))
         rebalanceForRow(pageRowId)
         return id
     }
@@ -560,14 +560,14 @@ class PageContentRepository @Inject constructor(
      *  referencing an existing folder/website/map target by id. */
     suspend fun addContactEntry(pageRowId: Long, contactId: Long): Long {
         val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
-        val id = entryDao.insert(AppRowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.CONTACT, payload = contactId.toString()))
+        val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.CONTACT, payload = contactId.toString()))
         rebalanceForRow(pageRowId)
         return id
     }
 
     suspend fun addActionButtonEntry(pageRowId: Long, actionButtonId: Long): Long {
         val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
-        val id = entryDao.insert(AppRowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.ACTION_BUTTON, payload = actionButtonId.toString()))
+        val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.ACTION_BUTTON, payload = actionButtonId.toString()))
         rebalanceForRow(pageRowId)
         return id
     }
@@ -596,11 +596,11 @@ class PageContentRepository @Inject constructor(
         rowDao.update(row.copy(showLabels = showLabels))
     }
 
-    suspend fun removeEntry(entry: AppRowEntry) {
+    suspend fun removeEntry(entry: RowEntry) {
         entryDao.delete(entry)
     }
 
-    suspend fun reorderEntries(orderedEntries: List<AppRowEntry>) {
+    suspend fun reorderEntries(orderedEntries: List<RowEntry>) {
         orderedEntries.forEachIndexed { index, entry ->
             if (entry.orderIndex != index) entryDao.update(entry.copy(orderIndex = index))
         }
