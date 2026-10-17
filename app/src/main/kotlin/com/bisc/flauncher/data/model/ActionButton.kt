@@ -4,16 +4,16 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /** What an [ActionButton] does when tapped. Unlike a plain [GridItemType.PAGE] link, it can also
- *  trigger the Panel/Dock directly, or jump straight into a curated Android settings screen,
- *  instead of navigating anywhere inside the app. */
-enum class ActionButtonActionType { PAGE, PANEL, DOCK, ANDROID_SETTING }
+ *  trigger the Panel/Dock directly, jump straight into a curated Android settings screen, or open
+ *  FLauncher's own Settings — instead of navigating anywhere inside the app's pages. */
+enum class ActionButtonActionType { PAGE, PANEL, DOCK, ANDROID_SETTING, LAUNCHER_SETTINGS }
 
 /** A global "Action button" Element (see Settings -> Elements -> Action buttons): a named action
- *  (open a page, open the Panel/Dock, or open an Android settings screen) with its own icon
- *  colors, placeable anywhere a [GridItemType.ACTION_BUTTON] entry is allowed. [actionPageId] is
- *  only meaningful when [actionType] is [ActionButtonActionType.PAGE]; [androidSettingAction]
- *  only when it's [ActionButtonActionType.ANDROID_SETTING] — it holds one of
- *  [com.bisc.flauncher.data.model.SettingsShortcut.action]'s intent-action strings, the same
+ *  (open a page, open the Panel/Dock, open an Android settings screen, or open FLauncher's own
+ *  Settings) with its own icon colors, placeable anywhere a [GridItemType.ACTION_BUTTON] entry is
+ *  allowed. [actionPageId] is only meaningful when [actionType] is [ActionButtonActionType.PAGE];
+ *  [androidSettingAction] only when it's [ActionButtonActionType.ANDROID_SETTING] — it holds one
+ *  of [com.bisc.flauncher.data.model.SettingsShortcut.action]'s intent-action strings, the same
  *  curated list the search feature already uses for its own settings shortcuts. */
 @Entity(tableName = "action_buttons")
 data class ActionButton(
