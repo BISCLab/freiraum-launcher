@@ -321,7 +321,7 @@
     <string name="settings_section_pages">Seiten</string>
     <string name="settings_section_app_overview">App-Übersicht</string>
     <string name="settings_card_app_overview_subtitle">Layout, Darstellung, Suchbutton</string>
-    <string name="settings_card_pages_subtitle">Widgets, App-Zeilen, Hintergründe</string>
+    <string name="settings_card_pages_subtitle">Widgets, Elementenboxen, Hintergründe</string>
     <string name="settings_pages_home">Startbildschirm</string>
     <string name="settings_home_appearance_title">Erscheinungsbild</string>
     <string name="settings_home_appearance_subtitle">Hintergrund, Statusleiste</string>
@@ -354,7 +354,7 @@
     <string name="settings_page_icon_glyph_widget_page">Widget-Seite</string>
 
     <string name="settings_rows_title">Zeilen</string>
-    <string name="settings_rows_empty">Keine Zeilen auf dieser Seite. Über „Zeile hinzufügen“ ein Widget oder eine App-Zeile ergänzen.</string>
+    <string name="settings_rows_empty">Keine Zeilen auf dieser Seite. Über „Zeile hinzufügen“ ein Widget oder eine Elementenbox ergänzen.</string>
     <string name="settings_page_app_overview_description">Vollbildliste aller Apps. Wird per Geste geöffnet (Standard: Nach oben wischen, siehe Gesten).</string>
     <plurals name="settings_widget_size_rows">
         <item quantity="one">%1$d Zeile</item>
@@ -364,7 +364,7 @@
     <string name="settings_widget_size_increase">Um %1$d erhöhen</string>
     <string name="settings_widget_size_decrease">Um %1$d verringern</string>
     <string name="settings_rows_add">Zeile hinzufügen</string>
-    <string name="settings_rows_add_apps_row">App-Zeile</string>
+    <string name="settings_rows_add_apps_row">Elementenbox</string>
     <string name="settings_rows_add_search_bar">Dock</string>
     <string name="settings_rows_size_title">Widget-Höhe</string>
     <string name="settings_rows_save">Speichern</string>
@@ -403,7 +403,7 @@
     <string name="settings_clock_show_next_alarm">Nächsten Alarm anzeigen</string>
     <string name="settings_clock_show_next_alarm_summary">Zeigt den nächsten Alarm unter dem Datum. Keine zusätzliche Berechtigung erforderlich.</string>
 
-    <string name="settings_apps_row_edit_title">App-Zeile bearbeiten</string>
+    <string name="settings_apps_row_edit_title">Elementenbox bearbeiten</string>
     <string name="settings_apps_row_columns_label">Spalten</string>
     <string name="settings_panel_rows_label">Zeilen</string>
     <string name="settings_panel_row_number">Zeile %1$d</string>
