@@ -12,6 +12,7 @@ object SettingsShortcuts {
         SettingsShortcut(R.string.settings_shortcut_bluetooth, Settings.ACTION_BLUETOOTH_SETTINGS),
         SettingsShortcut(R.string.settings_shortcut_display, Settings.ACTION_DISPLAY_SETTINGS),
         SettingsShortcut(R.string.settings_shortcut_sound, Settings.ACTION_SOUND_SETTINGS),
+        SettingsShortcut(R.string.settings_shortcut_battery, android.content.Intent.ACTION_POWER_USAGE_SUMMARY),
         SettingsShortcut(R.string.settings_shortcut_apps, Settings.ACTION_APPLICATION_SETTINGS),
         SettingsShortcut(R.string.settings_shortcut_storage, Settings.ACTION_INTERNAL_STORAGE_SETTINGS),
         SettingsShortcut(R.string.settings_shortcut_location, Settings.ACTION_LOCATION_SOURCE_SETTINGS),

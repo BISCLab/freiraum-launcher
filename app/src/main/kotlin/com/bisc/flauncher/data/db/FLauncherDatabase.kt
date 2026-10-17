@@ -3,6 +3,7 @@ package com.bisc.flauncher.data.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.bisc.flauncher.data.model.ActionButton
 import com.bisc.flauncher.data.model.AppOverride
 import com.bisc.flauncher.data.model.AppRowEntry
 import com.bisc.flauncher.data.model.Folder
@@ -14,7 +15,6 @@ import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PinnedContact
 import com.bisc.flauncher.data.model.PinnedShortcut
 import com.bisc.flauncher.data.model.PinnedWebsite
-import com.bisc.flauncher.data.model.PowerButton
 import com.bisc.flauncher.data.model.SavedMapTarget
 
 @Database(
@@ -22,9 +22,9 @@ import com.bisc.flauncher.data.model.SavedMapTarget
         LauncherPage::class, PageRow::class, AppRowEntry::class, Folder::class, FolderItem::class,
         Note::class, IconPackMapping::class, SavedMapTarget::class, PinnedWebsite::class,
         PinnedShortcut::class, AppOverride::class,
-        PinnedContact::class, PowerButton::class
+        PinnedContact::class, ActionButton::class
     ],
-    version = 50,
+    version = 51,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -41,5 +41,5 @@ abstract class FLauncherDatabase : RoomDatabase() {
     abstract fun pinnedShortcutDao(): PinnedShortcutDao
     abstract fun appOverrideDao(): AppOverrideDao
     abstract fun pinnedContactDao(): PinnedContactDao
-    abstract fun powerButtonDao(): PowerButtonDao
+    abstract fun actionButtonDao(): ActionButtonDao
 }

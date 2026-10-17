@@ -100,6 +100,7 @@
     <string name="settings_shortcut_bluetooth">Bluetooth</string>
     <string name="settings_shortcut_display">Display</string>
     <string name="settings_shortcut_sound">Sound</string>
+    <string name="settings_shortcut_battery">Battery</string>
     <string name="settings_shortcut_apps">Apps</string>
     <string name="settings_shortcut_storage">Storage</string>
     <string name="settings_shortcut_location">Location</string>
@@ -185,7 +186,7 @@
     <string name="settings_element_show_labels_label">Show captions</string>
 
     <string name="settings_section_elements">Elements</string>
-    <string name="settings_card_elements_subtitle">Apps, folders, addresses, links, power buttons</string>
+    <string name="settings_card_elements_subtitle">Apps, folders, addresses, links, action buttons</string>
     <string name="settings_elements_addresses_title">Addresses</string>
     <string name="settings_elements_addresses_empty">No addresses yet.</string>
     <string name="settings_elements_add_address">Add address</string>
@@ -199,18 +200,20 @@
     <string name="settings_elements_add_link">Add link</string>
     <string name="settings_elements_browser_app_label">Browser</string>
     <string name="settings_elements_delete_link">Delete link</string>
-    <string name="settings_elements_powerbuttons_title">Power buttons</string>
-    <string name="settings_elements_powerbuttons_empty">No power buttons yet.</string>
-    <string name="settings_elements_powerbuttons_picker_empty">No power buttons yet — create one in Settings -&gt; Elements -&gt; Power buttons.</string>
-    <string name="settings_elements_add_powerbutton">Add power button</string>
-    <string name="settings_elements_powerbutton_name_hint">Name</string>
-    <string name="settings_elements_powerbutton_action_label">Action</string>
-    <string name="settings_elements_powerbutton_action_panel">Open Panel</string>
-    <string name="settings_elements_powerbutton_action_dock">Open Dock</string>
-    <string name="settings_elements_powerbutton_action_page">Open a page</string>
-    <string name="settings_elements_powerbutton_pick_page">Choose page</string>
-    <string name="settings_elements_powerbutton_colors_label">Colors</string>
-    <string name="settings_elements_delete_powerbutton">Delete power button</string>
+    <string name="settings_elements_actionbuttons_title">Action buttons</string>
+    <string name="settings_elements_actionbuttons_empty">No action buttons yet.</string>
+    <string name="settings_elements_actionbuttons_picker_empty">No action buttons yet — create one in Settings -&gt; Elements -&gt; Action buttons.</string>
+    <string name="settings_elements_add_actionbutton">Add action button</string>
+    <string name="settings_elements_actionbutton_name_hint">Name</string>
+    <string name="settings_elements_actionbutton_action_label">Action</string>
+    <string name="settings_elements_actionbutton_action_panel">Open Panel</string>
+    <string name="settings_elements_actionbutton_action_dock">Open Dock</string>
+    <string name="settings_elements_actionbutton_action_page">Open a page</string>
+    <string name="settings_elements_actionbutton_action_setting">Open an Android settings screen</string>
+    <string name="settings_elements_actionbutton_pick_page">Choose page</string>
+    <string name="settings_elements_actionbutton_pick_setting">Choose settings screen</string>
+    <string name="settings_elements_colors_label">Colors</string>
+    <string name="settings_elements_delete_actionbutton">Delete action button</string>
 
     <string name="settings_dock_background_label">Background</string>
     <string name="settings_dock_visibility_label">Visibility</string>
@@ -421,7 +424,7 @@
     <string name="settings_apps_row_add_website">Website</string>
     <string name="settings_apps_row_add_page_link">Link a page</string>
     <string name="settings_apps_row_add_contact">Add contact</string>
-    <string name="settings_apps_row_add_powerbutton">Add power button</string>
+    <string name="settings_apps_row_add_actionbutton">Add action button</string>
     <string name="settings_apps_row_pill_mode_label">Single-line layout</string>
     <string name="settings_apps_row_pill_mode_summary">Entries in one non-wrapping row instead of a grid — used by the dock</string>
     <string name="settings_map_mode_address">Address</string>

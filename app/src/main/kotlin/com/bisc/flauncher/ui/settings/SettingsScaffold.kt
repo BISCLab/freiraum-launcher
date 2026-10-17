@@ -139,12 +139,12 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
             val websiteId = entry.arguments?.getLong("websiteId")
             websites.find { it.id == websiteId }?.label ?: stringResource(R.string.settings_elements_links_title)
         }
-        "settings/elements/powerbuttons" -> stringResource(R.string.settings_elements_powerbuttons_title)
-        "settings/elements/powerbuttons/{buttonId}" -> {
+        "settings/elements/actionbuttons" -> stringResource(R.string.settings_elements_actionbuttons_title)
+        "settings/elements/actionbuttons/{buttonId}" -> {
             val viewModel: SettingsViewModel = hiltViewModel(entry)
-            val buttons by viewModel.powerButtons.collectAsState()
+            val buttons by viewModel.actionButtons.collectAsState()
             val buttonId = entry.arguments?.getLong("buttonId")
-            buttons.find { it.id == buttonId }?.label ?: stringResource(R.string.settings_elements_powerbuttons_title)
+            buttons.find { it.id == buttonId }?.label ?: stringResource(R.string.settings_elements_actionbuttons_title)
         }
         else -> entry.destination.route.orEmpty()
     }

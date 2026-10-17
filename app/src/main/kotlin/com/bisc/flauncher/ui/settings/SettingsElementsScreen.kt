@@ -4,16 +4,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
 
 /** Global "Elemente" hub (Settings -> Elements) — Apps/Ordner/Adressen/Internetadressen/Shortcuts/
- *  Powerbuttons, each configured once here and used everywhere that Element type can be placed
+ *  Action buttons, each configured once here and used everywhere that Element type can be placed
  *  (Panel, Dock, Elementenbox rows, folders). Shortcuts has no entry of its own per the masterplan
  *  (2.5: "kein eigenes Untermenü nötig" — they're not meaningfully editable beyond add/remove,
  *  which already happens wherever they're placed). */
@@ -44,9 +44,9 @@ fun SettingsElementsScreen(navController: NavController, onBack: () -> Unit) {
                 onClick = { navController.navigate("settings/elements/links") }
             )
             SettingsPreference(
-                icon = Icons.Filled.PowerSettingsNew,
-                title = stringResource(R.string.settings_elements_powerbuttons_title),
-                onClick = { navController.navigate("settings/elements/powerbuttons") }
+                icon = Icons.Filled.Bolt,
+                title = stringResource(R.string.settings_elements_actionbuttons_title),
+                onClick = { navController.navigate("settings/elements/actionbuttons") }
             )
         }
     }

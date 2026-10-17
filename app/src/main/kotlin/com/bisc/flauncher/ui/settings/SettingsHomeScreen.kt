@@ -370,7 +370,7 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
     val pinnedContacts by viewModel.pinnedContacts.collectAsState()
     val contactPickerOpen by viewModel.contactPickerOpen.collectAsState()
     val contactPickerList by viewModel.contactPickerList.collectAsState()
-    val powerButtons by viewModel.powerButtons.collectAsState()
+    val actionButtons by viewModel.actionButtons.collectAsState()
     val rowShape = row.panelRows()
 
     var showAddChooser by remember { mutableStateOf(false) }
@@ -381,7 +381,7 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
     var showWebsitePicker by remember { mutableStateOf(false) }
     var showAddMapTargetDialog by remember { mutableStateOf(false) }
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
-    var showPowerButtonPicker by remember { mutableStateOf(false) }
+    var showActionButtonPicker by remember { mutableStateOf(false) }
     var pendingShortcut by remember { mutableStateOf(false) }
     var pendingRemoval by remember { mutableStateOf<AppRowEntry?>(null) }
 
@@ -406,8 +406,8 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
                     pinnedContacts = pinnedContacts,
                     loadContactPhoto = viewModel::loadContactPhoto,
                     onContactClick = {},
-                    powerButtons = powerButtons,
-                    onPowerButtonClick = {},
+                    actionButtons = actionButtons,
+                    onActionButtonClick = {},
                     showLabels = row.showLabels,
                     labelColor = row.appearance().contentColor?.let { androidx.compose.ui.graphics.Color(it) } ?: androidx.compose.ui.graphics.Color.White,
                     onAddEmptySlot = { showAddChooser = true },
@@ -457,7 +457,7 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
 
     pendingRemoval?.let { entry ->
         ConfirmRemoveDialog(
-            label = com.bisc.flauncher.ui.home.entryLabel(entry, folders, savedMapTargets, pinnedWebsites, allPages, pinnedContacts, viewModel::resolveLabel, powerButtons),
+            label = com.bisc.flauncher.ui.home.entryLabel(entry, folders, savedMapTargets, pinnedWebsites, allPages, pinnedContacts, viewModel::resolveLabel, actionButtons),
             onConfirm = { viewModel.removeAppRowEntry(entry); pendingRemoval = null },
             onDismiss = { pendingRemoval = null }
         )
@@ -472,15 +472,15 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
             onAddWebsiteClick = { showAddChooser = false; showWebsitePicker = true },
             onAddPageLinkClick = { showAddChooser = false; showPagePicker = true },
             onAddContactClick = { showAddChooser = false; viewModel.openContactPicker() },
-            onAddPowerButtonClick = { showAddChooser = false; showPowerButtonPicker = true },
+            onAddActionButtonClick = { showAddChooser = false; showActionButtonPicker = true },
             onDismiss = { showAddChooser = false }
         )
     }
-    if (showPowerButtonPicker) {
-        PowerButtonPickerSheet(
-            buttons = powerButtons,
-            onSelect = { button -> viewModel.addPowerButtonEntryToRow(row.id, button.id); showPowerButtonPicker = false },
-            onDismiss = { showPowerButtonPicker = false }
+    if (showActionButtonPicker) {
+        ActionButtonPickerSheet(
+            buttons = actionButtons,
+            onSelect = { button -> viewModel.addActionButtonEntryToRow(row.id, button.id); showActionButtonPicker = false },
+            onDismiss = { showActionButtonPicker = false }
         )
     }
     if (showAppPicker) {

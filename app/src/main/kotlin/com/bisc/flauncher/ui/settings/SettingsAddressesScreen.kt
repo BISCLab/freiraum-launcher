@@ -105,7 +105,7 @@ fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, on
                 } else null
             )
         }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_powerbutton_colors_label)) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_colors_label)) {
             SettingsPreference(
                 icon = com.bisc.flauncher.ui.home.PictogramCatalog.iconFor(target.iconKey) ?: Icons.Filled.Place,
                 title = stringResource(R.string.settings_element_icon_label),

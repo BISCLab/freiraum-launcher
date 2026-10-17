@@ -51,7 +51,7 @@ import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.ui.home.dock.resolveElementColors
 
 /**
- * Full-screen search, decoupled from the dock — reachable from a dock power button, a gesture, or
+ * Full-screen search, decoupled from the dock — reachable from a dock action button, a gesture, or
  * (later) a standalone icon, and fully optional/ignorable if none of those is configured. The
  * whole screen shares one flat [appearance]: result cards float on it with a small gap between
  * them (see [SearchResultsColumn]). The search field + category filter is one combined element

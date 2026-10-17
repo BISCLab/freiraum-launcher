@@ -103,7 +103,7 @@ fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBa
                 } else null
             )
         }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_powerbutton_colors_label)) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_colors_label)) {
             SettingsPreference(
                 icon = com.bisc.flauncher.ui.home.PictogramCatalog.iconFor(website.iconKey) ?: Icons.Filled.Language,
                 title = stringResource(R.string.settings_element_icon_label),

@@ -5,8 +5,8 @@ package com.bisc.flauncher.data.model
  *  dock) to open that page on tap. [CONTACT]'s payload is a [com.bisc.flauncher.data.model.PinnedContact.contactId]
  *  — pinning a contact into a row also ensures a [PinnedContact] row exists for it (see
  *  PageContentRepository.addContactEntry), the same cached-name/photo snapshot pattern already used
- *  elsewhere for contacts. [POWER_BUTTON]'s payload is a [com.bisc.flauncher.data.model.PowerButton.id]
+ *  elsewhere for contacts. [ACTION_BUTTON]'s payload is a [com.bisc.flauncher.data.model.ActionButton.id]
  *  — a global Element like [CONTACT]/[MAP_TARGET]/[WEBSITE] (see Settings -> Elements -> Power
  *  buttons), distinct from a plain [PAGE] link because its action can also be "open the Panel" or
  *  "open the Dock", not just navigate to a page. */
-enum class GridItemType { APP, SHORTCUT, MAP_TARGET, WEBSITE, WIDGET, SYSTEM_WIDGET, FOLDER, PAGE, CONTACT, POWER_BUTTON }
+enum class GridItemType { APP, SHORTCUT, MAP_TARGET, WEBSITE, WIDGET, SYSTEM_WIDGET, FOLDER, PAGE, CONTACT, ACTION_BUTTON }
