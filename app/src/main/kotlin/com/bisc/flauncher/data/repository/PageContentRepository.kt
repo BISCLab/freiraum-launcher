@@ -1,10 +1,17 @@
 package com.bisc.flauncher.data.repository
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.MediaStore
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.db.RowEntryDao
 import com.bisc.flauncher.data.db.LauncherPageDao
 import com.bisc.flauncher.data.db.PageRowDao
+import com.bisc.flauncher.data.model.ActionButton
+import com.bisc.flauncher.data.model.ActionButtonActionType
 import com.bisc.flauncher.data.model.RowEntry
 import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.BackgroundSource
@@ -41,7 +48,8 @@ class PageContentRepository @Inject constructor(
     private val pageDao: LauncherPageDao,
     private val rowDao: PageRowDao,
     private val entryDao: RowEntryDao,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val actionButtonRepository: ActionButtonRepository
 ) {
     val allPages: Flow<List<LauncherPage>> = pageDao.observeAll()
 
@@ -134,21 +142,52 @@ class PageContentRepository @Inject constructor(
             settingsRepository.setGestureAction(HomeGesture.LONG_PRESS, GestureAction(GestureActionType.SETTINGS, null))
         }
 
-        // Fresh-install default: the dock arrives already linking to the two singleton pages, so it
-        // doesn't look sparse — mirrors the pre-merge DockRepository's own default seed. Only runs once
+        // Fresh-install default: the dock (ALWAYS_VISIBLE by default, see PageRow.dockVisibilityMode)
+        // arrives with 5 ready-to-use entries so it doesn't look sparse — Android Settings, Camera,
+        // Browser and Phone (each resolved to this device's actual default handler via
+        // resolveLauncherComponentFor, not a hardcoded package name, so it works the same across
+        // OEM skins/emulators), plus a button back into FLauncher's own Settings. Only runs once
         // (dockRowId already had zero entries at that point), never re-applied once the user has
         // touched the row themselves.
         if (entryDao.countForRow(dockRowId) == 0) {
-            val appOverviewId = pageDao.getAppOverviewPage()?.id
-            val searchId = pageDao.getByKind(LauncherPageKind.SEARCH)?.id
-            searchId?.let { entryDao.insert(RowEntry(pageRowId = dockRowId, orderIndex = 0, type = GridItemType.PAGE, payload = it.toString())) }
-            appOverviewId?.let { entryDao.insert(RowEntry(pageRowId = dockRowId, orderIndex = 1, type = GridItemType.PAGE, payload = it.toString())) }
+            var order = 0
+            resolveLauncherComponentFor(Intent(android.provider.Settings.ACTION_SETTINGS))?.let { component ->
+                entryDao.insert(RowEntry(pageRowId = dockRowId, orderIndex = order++, type = GridItemType.APP, payload = component.flattenToString()))
+            }
+            resolveLauncherComponentFor(Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA))?.let { component ->
+                entryDao.insert(RowEntry(pageRowId = dockRowId, orderIndex = order++, type = GridItemType.APP, payload = component.flattenToString()))
+            }
+            resolveLauncherComponentFor(Intent(Intent.ACTION_VIEW, Uri.parse("https://")).addCategory(Intent.CATEGORY_BROWSABLE))?.let { component ->
+                entryDao.insert(RowEntry(pageRowId = dockRowId, orderIndex = order++, type = GridItemType.APP, payload = component.flattenToString()))
+            }
+            resolveLauncherComponentFor(Intent(Intent.ACTION_DIAL))?.let { component ->
+                entryDao.insert(RowEntry(pageRowId = dockRowId, orderIndex = order++, type = GridItemType.APP, payload = component.flattenToString()))
+            }
+            val settingsButtonId = actionButtonRepository.add(
+                ActionButton(label = context.getString(R.string.settings_title), actionType = ActionButtonActionType.LAUNCHER_SETTINGS)
+            )
+            entryDao.insert(RowEntry(pageRowId = dockRowId, orderIndex = order++, type = GridItemType.ACTION_BUTTON, payload = settingsButtonId.toString()))
         }
 
         // Self-healing check on every start: pages used to scroll, so content sized against that
         // no longer fits now that a page is a hard, fixed screen. A no-op once everything's already
         // rebalanced (the common case), so safe to run unconditionally rather than only once ever.
         pageDao.getAllOnce().filter { it.kind == LauncherPageKind.ROWS }.forEach { rebalancePageOverflow(it.id) }
+    }
+
+    /** Finds [intent]'s current default handler, then resolves that same package's actual
+     *  ACTION_MAIN/CATEGORY_LAUNCHER activity — not the (possibly different, non-launchable)
+     *  activity that narrowly handles [intent] itself — so the result is always safe to hand to
+     *  [com.bisc.flauncher.util.launchApp], which requires a real launcher activity. Returns null
+     *  if the device has no default handler for it (e.g. no camera app on some emulator images). */
+    private fun resolveLauncherComponentFor(intent: Intent): ComponentName? {
+        val packageManager = context.packageManager
+        val targetPackage = runCatching {
+            packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo?.packageName
+        }.getOrNull() ?: return null
+        val launcherIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setPackage(targetPackage)
+        val launcherActivity = runCatching { packageManager.resolveActivity(launcherIntent, 0)?.activityInfo }.getOrNull() ?: return null
+        return ComponentName(launcherActivity.packageName, launcherActivity.name)
     }
 
     /** Every page/surface falls back to this when it has no color override of its own. */

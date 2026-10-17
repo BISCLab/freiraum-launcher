@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.ViewCarousel
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -600,6 +601,7 @@ private fun ActionButtonCell(
         com.bisc.flauncher.data.model.ActionButtonActionType.PANEL -> Icons.Filled.Dashboard
         com.bisc.flauncher.data.model.ActionButtonActionType.DOCK -> Icons.Filled.Apps
         com.bisc.flauncher.data.model.ActionButtonActionType.ANDROID_SETTING -> Icons.Filled.Settings
+        com.bisc.flauncher.data.model.ActionButtonActionType.LAUNCHER_SETTINGS -> Icons.Filled.Tune
         else -> Icons.Filled.ViewCarousel
     }
     Column(
@@ -848,6 +850,7 @@ fun PillRowEntries(
                                 com.bisc.flauncher.data.model.ActionButtonActionType.PANEL -> Icons.Filled.Dashboard
                                 com.bisc.flauncher.data.model.ActionButtonActionType.DOCK -> Icons.Filled.Apps
                                 com.bisc.flauncher.data.model.ActionButtonActionType.ANDROID_SETTING -> Icons.Filled.Settings
+                                com.bisc.flauncher.data.model.ActionButtonActionType.LAUNCHER_SETTINGS -> Icons.Filled.Tune
                                 else -> Icons.Filled.ViewCarousel
                             }
                             Box(

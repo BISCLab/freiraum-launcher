@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.ViewCarousel
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
@@ -106,6 +107,7 @@ internal fun actionButtonActionIcon(type: ActionButtonActionType) = when (type) 
     ActionButtonActionType.DOCK -> Icons.Filled.Apps
     ActionButtonActionType.PAGE -> Icons.Filled.ViewCarousel
     ActionButtonActionType.ANDROID_SETTING -> Icons.Filled.Settings
+    ActionButtonActionType.LAUNCHER_SETTINGS -> Icons.Filled.Tune
 }
 
 /** Picks an *existing* [ActionButton] for a row's "+" slot — unlike the Addresses/Links pickers,
@@ -206,6 +208,12 @@ fun SettingsActionButtonDetailScreen(buttonId: Long, navController: NavControlle
                     trailing = null
                 )
             }
+            RadioPreference(
+                stringResource(R.string.settings_elements_actionbutton_action_launcher_settings),
+                ActionButtonActionType.LAUNCHER_SETTINGS,
+                button.actionType,
+                { viewModel.updateActionButton(button.copy(actionType = it, actionPageId = null)) }
+            )
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_colors_label)) {
             SettingsPreference(

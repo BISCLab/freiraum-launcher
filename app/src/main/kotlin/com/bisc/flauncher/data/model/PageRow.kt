@@ -57,11 +57,10 @@ data class PageRow(
     val pillWidthMode: DockWidthMode = DockWidthMode.FIXED,
     val pillMaxEntries: Int = 5,
     // Only meaningful for the pinned dock row (type == SEARCH_BAR) — see HomeScreen's dock panel Box
-    // for the expand/collapse rendering this drives. MANUAL (collapsed by default, pulled open via
-    // the edge notch) is the actual default now, not ALWAYS_VISIBLE — a home screen that's "empty
-    // until you open it" matches the same Discreet Launcher minimalism the rest of Home already
-    // follows (see PageContentRepository.ensureSeeded's own comment on Home starting empty).
-    val dockVisibilityMode: DockVisibilityMode = DockVisibilityMode.MANUAL,
+    // for the expand/collapse rendering this drives. ALWAYS_VISIBLE by default, so the dock's
+    // default entries (see PageContentRepository.ensureSeeded) are immediately reachable on a fresh
+    // install without needing a gesture first.
+    val dockVisibilityMode: DockVisibilityMode = DockVisibilityMode.ALWAYS_VISIBLE,
     // Lets a row be switched off without deleting it (and losing its configuration) — currently
     // only exposed in the UI for the Home screen's own Dock/Panel bookends (see
     // SettingsHomeLayoutScreen), which are otherwise locked in place and never removable.

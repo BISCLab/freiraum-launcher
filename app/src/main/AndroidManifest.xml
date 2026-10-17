@@ -26,6 +26,17 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="geo" />
         </intent>
+        <!-- Default-dock seeding (PageContentRepository.ensureSeeded): resolving this device's actual
+             Settings/Camera/Phone app to pin on first install. -->
+        <intent>
+            <action android:name="android.settings.SETTINGS" />
+        </intent>
+        <intent>
+            <action android:name="android.media.action.STILL_IMAGE_CAMERA" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.DIAL" />
+        </intent>
     </queries>
 
     <!-- Contact search and pinned contacts; requested at runtime. -->

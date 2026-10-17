@@ -350,8 +350,8 @@ fun HomeScreen(
         }
     }
     // An Action button's action: open a page (same dispatch as a plain page-link entry), trigger
-    // the Panel/Dock directly (the one thing a page-link can't express), or jump into a curated
-    // Android settings screen — see ActionButtonActionType.
+    // the Panel/Dock directly (the one thing a page-link can't express), jump into a curated
+    // Android settings screen, or open FLauncher's own Settings — see ActionButtonActionType.
     val onActionButtonClick: (com.bisc.flauncher.data.model.ActionButton) -> Unit = { button ->
         when (button.actionType) {
             com.bisc.flauncher.data.model.ActionButtonActionType.PAGE -> {
@@ -363,6 +363,7 @@ fun HomeScreen(
             com.bisc.flauncher.data.model.ActionButtonActionType.ANDROID_SETTING -> {
                 button.androidSettingAction?.let { action -> launchSettingsShortcut(context, action) }
             }
+            com.bisc.flauncher.data.model.ActionButtonActionType.LAUNCHER_SETTINGS -> onNavigateToSettings()
         }
     }
     // The one place "go back to home" is defined — closes every overlay and, crucially, also scrolls

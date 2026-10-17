@@ -210,6 +210,7 @@
     <string name="settings_elements_actionbutton_action_dock">Dock öffnen</string>
     <string name="settings_elements_actionbutton_action_page">Seite öffnen</string>
     <string name="settings_elements_actionbutton_action_setting">Android-Einstellungsseite öffnen</string>
+    <string name="settings_elements_actionbutton_action_launcher_settings">FLauncher-Einstellungen öffnen</string>
     <string name="settings_elements_actionbutton_pick_page">Seite auswählen</string>
     <string name="settings_elements_actionbutton_pick_setting">Einstellungsseite auswählen</string>
     <string name="settings_elements_colors_label">Farben</string>
