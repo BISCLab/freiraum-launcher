@@ -821,15 +821,6 @@ fun HomeScreen(
             }
         }
 
-        // TEMPORARY — Dock/Panel no longer open a settings-reachable long-press menu of their own
-        // now that live "+" editing is gone from both; until a real way back into Settings from the
-        // home screen is wired up, this plain center button stands in for it so Settings stays reachable.
-        if (isOnHomePage && !isPanelOpen && !searchOpen && !appListOpen && !folderOpen) {
-            androidx.compose.material3.Button(
-                onClick = onNavigateToSettings,
-                modifier = Modifier.align(Alignment.Center)
-            ) { Text("Settings (temp)") }
-        }
     }
 
     // All three cover the same "classic back-swipe/home gesture always lands you on the actual home
