@@ -14,5 +14,10 @@ data class SavedMapTarget(
     val address: String = "",
     // Package name of the navigation app to prefer for this address specifically — overrides the
     // global default navigation app (ExternalApps.maps) when set, see launchMapTarget.
-    val navigationApp: String? = null
+    val navigationApp: String? = null,
+    // Key into PictogramCatalog; null falls back to the default Place glyph.
+    val iconKey: String? = null,
+    // Null means "adaptive black/white", the same default every other Element icon uses.
+    val backgroundColor: Int? = null,
+    val iconColor: Int? = null
 )

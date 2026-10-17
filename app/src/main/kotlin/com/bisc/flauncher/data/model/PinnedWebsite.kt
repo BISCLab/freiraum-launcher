@@ -12,5 +12,10 @@ data class PinnedWebsite(
     val url: String,
     // Package name of the browser to prefer for this link specifically — overrides the global
     // default browser (ExternalApps.browser) when set, see openWebsite.
-    val browserApp: String? = null
+    val browserApp: String? = null,
+    // Key into PictogramCatalog; null falls back to the default Language glyph.
+    val iconKey: String? = null,
+    // Null means "adaptive black/white", the same default every other Element icon uses.
+    val backgroundColor: Int? = null,
+    val iconColor: Int? = null
 )

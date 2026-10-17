@@ -75,6 +75,7 @@ fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, on
     val target = targets.find { it.id == targetId } ?: return
     val browsableApps by viewModel.browsableApps.collectAsState()
     var showAppPicker by remember { mutableStateOf(false) }
+    var showIconPicker by remember { mutableStateOf(false) }
     var confirmingDelete by remember { mutableStateOf(false) }
 
     SettingsSubScreen(title = target.label, navController = navController, onBack = onBack) {
@@ -104,6 +105,26 @@ fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, on
                 } else null
             )
         }
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_powerbutton_colors_label)) {
+            SettingsPreference(
+                icon = com.bisc.flauncher.ui.home.PictogramCatalog.iconFor(target.iconKey) ?: Icons.Filled.Place,
+                title = stringResource(R.string.settings_element_icon_label),
+                onClick = { showIconPicker = true },
+                trailing = null
+            )
+            AutomaticColorPicker(
+                title = stringResource(R.string.settings_section_global_background),
+                custom = target.backgroundColor,
+                automaticSeed = android.graphics.Color.DKGRAY,
+                onChange = { viewModel.updateMapTarget(target.copy(backgroundColor = it)) }
+            )
+            AutomaticColorPicker(
+                title = stringResource(R.string.settings_element_text_color_label),
+                custom = target.iconColor,
+                automaticSeed = android.graphics.Color.WHITE,
+                onChange = { viewModel.updateMapTarget(target.copy(iconColor = it)) }
+            )
+        }
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = Icons.Filled.DeleteOutline,
@@ -112,6 +133,14 @@ fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, on
                 trailing = null
             )
         }
+    }
+
+    if (showIconPicker) {
+        PictogramPickerSheet(
+            selected = target.iconKey,
+            onSelect = { key -> viewModel.updateMapTarget(target.copy(iconKey = key)); showIconPicker = false },
+            onDismiss = { showIconPicker = false }
+        )
     }
 
     if (showAppPicker) {

@@ -99,6 +99,9 @@ class SettingsViewModel @Inject constructor(
     val iconShape: StateFlow<IconShape> =
         repository.iconShape.stateIn(viewModelScope, SharingStarted.Eagerly, IconShape.ROUNDED_SQUARE)
 
+    val iconSize: StateFlow<com.bisc.flauncher.data.settings.IconSize> =
+        repository.iconSize.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.data.settings.IconSize.MEDIUM)
+
     val searchAlphabetRailAppearance: StateFlow<ElementAppearance?> =
         repository.searchAlphabetRailAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
@@ -528,6 +531,10 @@ class SettingsViewModel @Inject constructor(
 
     fun setIconShape(shape: IconShape) {
         viewModelScope.launch { repository.setIconShape(shape) }
+    }
+
+    fun setIconSize(size: com.bisc.flauncher.data.settings.IconSize) {
+        viewModelScope.launch { repository.setIconSize(size) }
     }
 
     fun setFolderCardAppearance(appearance: ElementAppearance) {
