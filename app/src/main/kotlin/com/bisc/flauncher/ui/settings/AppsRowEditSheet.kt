@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ViewCarousel
@@ -275,7 +276,8 @@ internal fun AppRowEntryRow(
     loadIcon: (ComponentName) -> ImageBitmap?,
     resolveLabel: (ComponentName) -> String,
     onRemove: () -> Unit,
-    pinnedContacts: List<com.bisc.flauncher.data.model.PinnedContact> = emptyList()
+    pinnedContacts: List<com.bisc.flauncher.data.model.PinnedContact> = emptyList(),
+    powerButtons: List<com.bisc.flauncher.data.model.PowerButton> = emptyList()
 ) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         when (entry.type) {
@@ -322,6 +324,12 @@ internal fun AppRowEntryRow(
                 val contact = pinnedContacts.find { it.contactId == contactId }
                 Icon(Icons.Filled.Person, contentDescription = null, modifier = Modifier.size(28.dp))
                 Text(contact?.displayName.orEmpty(), modifier = Modifier.weight(1f))
+            }
+            GridItemType.POWER_BUTTON -> {
+                val buttonId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                val button = powerButtons.find { it.id == buttonId }
+                Icon(Icons.Filled.PowerSettingsNew, contentDescription = null, modifier = Modifier.size(28.dp))
+                Text(button?.label.orEmpty(), modifier = Modifier.weight(1f))
             }
             GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Text("", modifier = Modifier.weight(1f))
         }

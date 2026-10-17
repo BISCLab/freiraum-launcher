@@ -9,6 +9,7 @@ import com.bisc.flauncher.data.model.GradientDirection
 import com.bisc.flauncher.data.model.GridItemType
 import com.bisc.flauncher.data.model.LauncherPageKind
 import com.bisc.flauncher.data.model.NoteType
+import com.bisc.flauncher.data.model.PowerButtonActionType
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -57,6 +58,13 @@ class Converters {
 
     @TypeConverter
     fun toNoteType(value: String): NoteType = runCatching { NoteType.valueOf(value) }.getOrDefault(NoteType.FREITEXT)
+
+    @TypeConverter
+    fun fromPowerButtonActionType(type: PowerButtonActionType): String = type.name
+
+    @TypeConverter
+    fun toPowerButtonActionType(value: String): PowerButtonActionType =
+        runCatching { PowerButtonActionType.valueOf(value) }.getOrDefault(PowerButtonActionType.PAGE)
 
     @TypeConverter
     fun fromChecklistItems(items: List<ChecklistItem>): String {

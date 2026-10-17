@@ -98,6 +98,7 @@ class HomeViewModel @Inject constructor(
     private val noteRepository: NoteRepository,
     private val mapsRepository: MapsRepository,
     private val websiteRepository: WebsiteRepository,
+    private val powerButtonRepository: com.bisc.flauncher.data.repository.PowerButtonRepository,
     private val shortcutRepository: ShortcutRepository,
     private val appOverrideRepository: AppOverrideRepository,
     private val weatherRepository: WeatherRepository,
@@ -424,6 +425,9 @@ class HomeViewModel @Inject constructor(
 
     val pinnedWebsites: StateFlow<List<PinnedWebsite>> =
         websiteRepository.websites.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val powerButtons: StateFlow<List<com.bisc.flauncher.data.model.PowerButton>> =
+        powerButtonRepository.powerButtons.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val pinnedShortcuts: StateFlow<List<PinnedShortcut>> =
         shortcutRepository.pinnedShortcuts.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
@@ -888,6 +892,10 @@ class HomeViewModel @Inject constructor(
             contactsRepository.pin(contact)
             pageContentRepository.addContactEntry(pageRowId, contact.id)
         }
+    }
+
+    fun addPowerButtonEntryToRow(pageRowId: Long, powerButtonId: Long) {
+        viewModelScope.launch { pageContentRepository.addPowerButtonEntry(pageRowId, powerButtonId) }
     }
 
     fun setRowPillMode(row: PageRow, pillMode: Boolean) {

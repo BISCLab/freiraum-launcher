@@ -22,9 +22,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Shortcut
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.ViewCarousel
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -261,6 +264,8 @@ fun AppsGridEntries(
     pinnedContacts: List<PinnedContact> = emptyList(),
     loadContactPhoto: suspend (Long, String?) -> ImageBitmap? = { _, _ -> null },
     onContactClick: (Long) -> Unit = {},
+    powerButtons: List<com.bisc.flauncher.data.model.PowerButton> = emptyList(),
+    onPowerButtonClick: (com.bisc.flauncher.data.model.PowerButton) -> Unit = {},
     showLabels: Boolean = true,
     labelColor: Color = Color.White,
     totalSlots: Int? = null,
@@ -314,6 +319,16 @@ fun AppsGridEntries(
                     contact = contact,
                     loadContactPhoto = loadContactPhoto,
                     onClick = editOverride ?: { if (contactId != null) onContactClick(contactId) },
+                    showLabel = showLabels,
+                    labelColor = labelColor
+                )
+            }
+            GridItemType.POWER_BUTTON -> {
+                val buttonId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                val button = powerButtons.find { it.id == buttonId }
+                PowerButtonCell(
+                    button = button,
+                    onClick = editOverride ?: { if (button != null) onPowerButtonClick(button) },
                     showLabel = showLabels,
                     labelColor = labelColor
                 )
@@ -544,6 +559,39 @@ private fun ContactCell(
     }
 }
 
+@Composable
+private fun PowerButtonCell(
+    button: com.bisc.flauncher.data.model.PowerButton?,
+    onClick: () -> Unit,
+    showLabel: Boolean = true,
+    labelColor: Color = Color.White
+) {
+    val background = button?.backgroundColor?.let { Color(it) } ?: UNSET_APP_SLOT_COLOR
+    val tint = button?.iconColor?.let { Color(it) } ?: Color.White
+    val icon = when (button?.actionType) {
+        com.bisc.flauncher.data.model.PowerButtonActionType.PANEL -> Icons.Filled.Dashboard
+        com.bisc.flauncher.data.model.PowerButtonActionType.DOCK -> Icons.Filled.Apps
+        else -> Icons.Filled.ViewCarousel
+    }
+    Column(
+        modifier = Modifier
+            .clickable(enabled = button != null, onClick = onClick)
+            .padding(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier.size(56.dp).clip(RoundedCornerShape(16.dp)).background(background),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = Modifier.size(30.dp))
+        }
+        if (showLabel) {
+            Spacer(Modifier.height(8.dp))
+            GridLabel(button?.label.orEmpty(), color = labelColor)
+        }
+    }
+}
+
 /** Per-icon clip shape for a pill-style row — shared by [PillRow] and the Dock's own flush panel in
  *  HomeScreen.kt, which lays [PillRowEntries] out directly rather than through [PillRow]. */
 @Composable
@@ -664,6 +712,8 @@ fun PillRowEntries(
     pinnedContacts: List<PinnedContact> = emptyList(),
     loadContactPhoto: suspend (Long, String?) -> ImageBitmap? = { _, _ -> null },
     onContactClick: (Long) -> Unit = {},
+    powerButtons: List<com.bisc.flauncher.data.model.PowerButton> = emptyList(),
+    onPowerButtonClick: (com.bisc.flauncher.data.model.PowerButton) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -760,12 +810,28 @@ fun PillRowEntries(
                                 }
                             }
                         }
+                        GridItemType.POWER_BUTTON -> {
+                            val buttonId = remember(entry.payload) { entry.payload.toLongOrNull() }
+                            val button = powerButtons.find { it.id == buttonId }
+                            val background = button?.backgroundColor?.let { Color(it) } ?: UNSET_APP_SLOT_COLOR
+                            val tint = button?.iconColor?.let { Color(it) } ?: Color.White
+                            val icon = when (button?.actionType) {
+                                com.bisc.flauncher.data.model.PowerButtonActionType.PANEL -> Icons.Filled.Dashboard
+                                com.bisc.flauncher.data.model.PowerButtonActionType.DOCK -> Icons.Filled.Apps
+                                else -> Icons.Filled.ViewCarousel
+                            }
+                            Box(
+                                modifier = Modifier.fillMaxSize().background(background)
+                                    .clickable(enabled = button != null) { button?.let(onPowerButtonClick) },
+                                contentAlignment = Alignment.Center
+                            ) { Icon(imageVector = icon, contentDescription = null, tint = tint) }
+                        }
                         GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Unit
                     }
                 }
                 if (showLabels) {
                     GridLabel(
-                        text = entryLabel(entry, folders, savedMapTargets, pinnedWebsites, pages, pinnedContacts, resolveLabel),
+                        text = entryLabel(entry, folders, savedMapTargets, pinnedWebsites, pages, pinnedContacts, resolveLabel, powerButtons),
                         color = labelColor,
                         modifier = Modifier.width(DockDimens.iconSize)
                     )
@@ -816,7 +882,8 @@ internal fun entryLabel(
     pinnedWebsites: List<PinnedWebsite>,
     pages: List<LauncherPage>,
     pinnedContacts: List<PinnedContact>,
-    resolveLabel: (ComponentName) -> String
+    resolveLabel: (ComponentName) -> String,
+    powerButtons: List<com.bisc.flauncher.data.model.PowerButton> = emptyList()
 ): String = when (entry.type) {
     GridItemType.APP -> ComponentName.unflattenFromString(entry.payload)?.let(resolveLabel).orEmpty()
     GridItemType.FOLDER -> folders.find { it.id == entry.payload.toLongOrNull() }?.name.orEmpty()
@@ -825,5 +892,6 @@ internal fun entryLabel(
     GridItemType.WEBSITE -> pinnedWebsites.find { it.id == entry.payload.toLongOrNull() }?.label.orEmpty()
     GridItemType.PAGE -> pages.find { it.id == entry.payload.toLongOrNull() }?.let { pageLabel(it, pages) }.orEmpty()
     GridItemType.CONTACT -> pinnedContacts.find { it.contactId == entry.payload.toLongOrNull() }?.displayName.orEmpty()
+    GridItemType.POWER_BUTTON -> powerButtons.find { it.id == entry.payload.toLongOrNull() }?.label.orEmpty()
     GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> ""
 }

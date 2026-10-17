@@ -170,6 +170,7 @@ fun HomeScreen(
     val pinnedContacts by viewModel.pinnedContacts.collectAsState()
     val contactPickerOpen by viewModel.contactPickerOpen.collectAsState()
     val contactPickerList by viewModel.contactPickerList.collectAsState()
+    val powerButtons by viewModel.powerButtons.collectAsState()
     val shortcutAppPickerOpen by viewModel.shortcutAppPickerOpen.collectAsState()
     val shortcutPickerForApp by viewModel.shortcutPickerForApp.collectAsState()
     val availableShortcuts by viewModel.availableShortcuts.collectAsState()
@@ -346,6 +347,18 @@ fun HomeScreen(
             com.bisc.flauncher.data.model.LauncherPageKind.APP_LIST -> viewModel.openAppList()
             com.bisc.flauncher.data.model.LauncherPageKind.SEARCH -> viewModel.openSearch()
             com.bisc.flauncher.data.model.LauncherPageKind.SIDEBAR -> viewModel.openOverview()
+        }
+    }
+    // A Powerbutton's action: open a page (same dispatch as a plain page-link entry), or trigger
+    // the Panel/Dock directly — the one thing a page-link can't express, see PowerButtonActionType.
+    val onPowerButtonClick: (com.bisc.flauncher.data.model.PowerButton) -> Unit = { button ->
+        when (button.actionType) {
+            com.bisc.flauncher.data.model.PowerButtonActionType.PAGE -> {
+                val target = allPages.find { it.id == button.actionPageId }
+                if (target != null) onOpenPageLink(target.id, target.kind)
+            }
+            com.bisc.flauncher.data.model.PowerButtonActionType.PANEL -> viewModel.openOverview()
+            com.bisc.flauncher.data.model.PowerButtonActionType.DOCK -> dockExpanded = true
         }
     }
     // The one place "go back to home" is defined — closes every overlay and, crucially, also scrolls
@@ -653,6 +666,8 @@ fun HomeScreen(
                                     )
                                 }
                             },
+                            powerButtons = powerButtons,
+                            onPowerButtonClick = onPowerButtonClick,
                             showLabels = homeDockRow.showLabels,
                             labelColor = homeDockRow.appearance().contentColor?.let { Color(it) } ?: Color.White
                             // Live dock is display-only now — adding/removing entries only happens in
@@ -788,6 +803,8 @@ fun HomeScreen(
                                             )
                                         }
                                     },
+                                    powerButtons = powerButtons,
+                                    onPowerButtonClick = onPowerButtonClick,
                                     showLabels = row.showLabels,
                                     labelColor = row.appearance().contentColor?.let { Color(it) } ?: Color.White
                                     // Live panel is display-only now — adding/removing entries only
@@ -1098,7 +1115,7 @@ fun HomeScreen(
                         GridItemType.WEBSITE -> item.payload.toLongOrNull()
                             ?.let { id -> pinnedWebsites.find { it.id == id } }
                             ?.let { website -> openWebsite(context, website) }
-                        GridItemType.FOLDER, GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE, GridItemType.CONTACT -> Unit
+                        GridItemType.FOLDER, GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE, GridItemType.CONTACT, GridItemType.POWER_BUTTON -> Unit
                     }
                     viewModel.closeAllFolders()
                     viewModel.closeOverview()
