@@ -321,7 +321,7 @@
     <string name="settings_section_pages">Pages</string>
     <string name="settings_section_app_overview">App overview</string>
     <string name="settings_card_app_overview_subtitle">Layout, appearance, search button</string>
-    <string name="settings_card_pages_subtitle">Widgets, app rows, backgrounds</string>
+    <string name="settings_card_pages_subtitle">Widgets, element boxes, backgrounds</string>
     <string name="settings_pages_home">Home screen</string>
     <string name="settings_home_appearance_title">Appearance</string>
     <string name="settings_home_appearance_subtitle">Background, status bar</string>
@@ -354,7 +354,7 @@
     <string name="settings_page_icon_glyph_widget_page">Widget page</string>
 
     <string name="settings_rows_title">Rows</string>
-    <string name="settings_rows_empty">No rows on this page. Use “Add row” to add a widget or an apps row.</string>
+    <string name="settings_rows_empty">No rows on this page. Use “Add row” to add a widget or an element box.</string>
     <string name="settings_page_app_overview_description">Fullscreen list of all apps. Opened by a gesture (default: swipe up, see Gestures).</string>
     <plurals name="settings_widget_size_rows">
         <item quantity="one">%1$d row</item>
@@ -364,7 +364,7 @@
     <string name="settings_widget_size_increase">Increase by %1$d</string>
     <string name="settings_widget_size_decrease">Decrease by %1$d</string>
     <string name="settings_rows_add">Add row</string>
-    <string name="settings_rows_add_apps_row">Apps row</string>
+    <string name="settings_rows_add_apps_row">Element box</string>
     <string name="settings_rows_add_search_bar">Dock</string>
     <string name="settings_rows_size_title">Widget height</string>
     <string name="settings_rows_save">Save</string>
@@ -403,7 +403,7 @@
     <string name="settings_clock_show_next_alarm">Show next alarm</string>
     <string name="settings_clock_show_next_alarm_summary">Shows the next alarm below the date. Requires no additional permission.</string>
 
-    <string name="settings_apps_row_edit_title">Edit apps row</string>
+    <string name="settings_apps_row_edit_title">Edit element box</string>
     <string name="settings_apps_row_columns_label">Columns</string>
     <string name="settings_panel_rows_label">Rows</string>
     <string name="settings_panel_row_number">Row %1$d</string>
