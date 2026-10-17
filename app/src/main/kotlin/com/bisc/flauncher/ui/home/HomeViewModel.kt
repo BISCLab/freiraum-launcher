@@ -617,12 +617,6 @@ class HomeViewModel @Inject constructor(
     suspend fun loadContactPhoto(contactId: Long, photoUri: String?): ImageBitmap? =
         contactPhotoLoader.load(contactId, photoUri)
 
-    val noteResults: StateFlow<List<Note>> =
-        combine(_searchQuery, notes, activeSearchCategories) { query, list, active ->
-            val include = SearchCategory.NOTES in active
-            if (query.isBlank() || !include) emptyList() else list.filter { matchesWordStart(it.title, query) }
-        }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
     val folderResults: StateFlow<List<Folder>> =
         combine(_searchQuery, folders, activeSearchCategories) { query, list, active ->
             val include = SearchCategory.FOLDERS in active

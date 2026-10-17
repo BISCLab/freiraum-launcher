@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Mail
@@ -50,7 +49,6 @@ import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.AppInfo
 import com.bisc.flauncher.data.model.ContactInfo
 import com.bisc.flauncher.data.model.ElementAppearance
-import com.bisc.flauncher.data.model.Note
 import com.bisc.flauncher.data.model.PinnedShortcut
 import com.bisc.flauncher.data.model.PinnedWebsite
 import com.bisc.flauncher.data.model.SearchCategory
@@ -74,7 +72,6 @@ fun SearchResultsColumn(
     appResults: List<AppInfo>,
     contactResults: List<ContactInfo>,
     settingsResults: List<SettingsShortcut>,
-    noteResults: List<Note>,
     websiteResults: List<PinnedWebsite>,
     shortcutResults: List<PinnedShortcut>,
     folderResults: List<com.bisc.flauncher.data.model.Folder> = emptyList(),
@@ -89,7 +86,6 @@ fun SearchResultsColumn(
     onAppClick: (AppInfo) -> Unit,
     onContactClick: (ContactInfo) -> Unit,
     onSettingsShortcutClick: (SettingsShortcut) -> Unit,
-    onNoteClick: (Note) -> Unit,
     onFolderClick: (com.bisc.flauncher.data.model.Folder) -> Unit = {},
     onMapTargetClick: (com.bisc.flauncher.data.model.SavedMapTarget) -> Unit = {},
     onWebsiteClick: (PinnedWebsite) -> Unit,
@@ -110,7 +106,6 @@ fun SearchResultsColumn(
     val shownAppResults = if (SearchCategory.APPS in active) appResults else emptyList()
     val shownContactResults = if (SearchCategory.CONTACTS in active && contactsPermissionGranted) contactResults else emptyList()
     val shownSettingsResults = if (SearchCategory.SETTINGS in active) settingsResults else emptyList()
-    val shownNoteResults = if (SearchCategory.NOTES in active) noteResults else emptyList()
     val shownWebsiteResults = if (SearchCategory.WEBSITES in active) websiteResults else emptyList()
     val shownShortcutResults = if (SearchCategory.SHORTCUTS in active) shortcutResults else emptyList()
     val shownFolderResults = if (SearchCategory.FOLDERS in active) folderResults else emptyList()
@@ -120,7 +115,7 @@ fun SearchResultsColumn(
     val showAi = SearchCategory.AI in active && aiAppLabel != null && query.isNotBlank()
     val showEmail = SearchCategory.EMAIL in active && looksLikeEmail(query)
     val hasDirectResults = shownAppResults.isNotEmpty() || shownContactResults.isNotEmpty() || shownSettingsResults.isNotEmpty() ||
-        shownNoteResults.isNotEmpty() || shownWebsiteResults.isNotEmpty() || shownShortcutResults.isNotEmpty() ||
+        shownWebsiteResults.isNotEmpty() || shownShortcutResults.isNotEmpty() ||
         shownFolderResults.isNotEmpty() || shownMapTargetResults.isNotEmpty()
 
     fun categoryColor(category: SearchCategory): Color = categoryColors[category]?.let { Color(it) } ?: category.defaultColor
@@ -171,9 +166,6 @@ fun SearchResultsColumn(
                     }
                     SearchCategory.SETTINGS -> sectionCard(category, shownSettingsResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { shortcut ->
                         ResultRow(leading = { Icon(Icons.Filled.Search, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = stringResource(shortcut.labelRes), onClick = { onSettingsShortcutClick(shortcut) })
-                    }
-                    SearchCategory.NOTES -> sectionCard(category, shownNoteResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { note ->
-                        ResultRow(leading = { Icon(Icons.Filled.EditNote, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = note.title, onClick = { onNoteClick(note) })
                     }
                     SearchCategory.WEBSITES -> sectionCard(category, shownWebsiteResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { website ->
                         ResultRow(leading = { Icon(Icons.Filled.Bookmark, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = website.label, onClick = { onWebsiteClick(website) })
@@ -256,7 +248,6 @@ private val SearchCategory.sectionTitleRes: Int
         SearchCategory.FOLDERS -> R.string.search_section_folders
         SearchCategory.CONTACTS -> R.string.search_section_contacts
         SearchCategory.SETTINGS -> R.string.search_section_settings
-        SearchCategory.NOTES -> R.string.search_section_notes
         SearchCategory.WEBSITES -> R.string.search_section_websites
         SearchCategory.PLACES -> R.string.search_section_places
         SearchCategory.SHORTCUTS -> R.string.search_section_shortcuts
