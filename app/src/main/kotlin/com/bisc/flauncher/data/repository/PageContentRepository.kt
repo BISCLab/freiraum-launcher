@@ -309,6 +309,51 @@ class PageContentRepository @Inject constructor(
      * that maximum directly instead of being moved again and again, which would otherwise never
      * terminate. Recurses in case the fresh page overflows too (e.g. several oversized rows at once).
      */
+    private suspend fun heightPxOf(row: PageRow, density: androidx.compose.ui.unit.Density): Int = row.heightPx ?: with(density) {
+        val heightDp = if (row.type == PageRowType.APPS) {
+            com.bisc.flauncher.ui.home.PageRowDimens.appsRowHeight(entryDao.countForRow(row.id), row.columns.coerceAtLeast(1))
+        } else {
+            com.bisc.flauncher.ui.home.PageRowDimens.rowUnitHeight * row.spanY
+        }
+        heightDp.toPx().roundToInt()
+    }
+
+    private fun stackedRowsBudget(pageId: Long, hasDock: Boolean): Int {
+        val dm = context.resources.displayMetrics
+        val (topInsetPx, bottomInsetPx) = systemInsetsPx()
+        return com.bisc.flauncher.ui.home.safeSystemWidgetMaxHeightPx(
+            pageHasDock = hasDock,
+            screenWidthPx = dm.widthPixels,
+            screenHeightPx = dm.heightPixels,
+            densityValue = dm.density,
+            statusBarPx = topInsetPx,
+            navigationBarPx = bottomInsetPx
+        )
+    }
+
+    /**
+     * Dry-run check for the "this page is full" prompt (see masterplan Phase 7: offer a new page
+     * instead of silently relocating rows there): would a not-yet-inserted row shaped like
+     * [candidateRow] still fit on [pageId] alongside what's already there? Mirrors
+     * [rebalancePageOverflow]'s own budget math exactly, just without writing anything.
+     */
+    suspend fun wouldOverflow(pageId: Long, candidateRow: PageRow): Boolean {
+        if (candidateRow.type == PageRowType.SEARCH_BAR) return false // floats separately, never part of this budget
+        val allRows = rowDao.getForPage(pageId)
+        val dockRow = allRows.lastOrNull { it.type == PageRowType.SEARCH_BAR }
+        val stackedRows = allRows.filter { it.id != dockRow?.id && it.type != PageRowType.PANEL }
+        val density = androidx.compose.ui.unit.Density(context.resources.displayMetrics.density)
+        val budgetPx = stackedRowsBudget(pageId, dockRow != null)
+        val spacingPx = with(density) { com.bisc.flauncher.ui.home.PageRowDimens.rowSpacing.toPx().roundToInt() }
+
+        var used = 0
+        for (row in stackedRows) {
+            used += (if (used > 0) spacingPx else 0) + heightPxOf(row, density)
+        }
+        val needed = used + (if (used > 0) spacingPx else 0) + heightPxOf(candidateRow, density)
+        return needed > budgetPx
+    }
+
     private suspend fun rebalancePageOverflow(pageId: Long): List<PageRow> {
         val allRows = rowDao.getForPage(pageId)
         val dockRow = allRows.lastOrNull { it.type == PageRowType.SEARCH_BAR }
@@ -319,25 +364,10 @@ class PageContentRepository @Inject constructor(
 
         val dm = context.resources.displayMetrics
         val density = androidx.compose.ui.unit.Density(dm.density)
-        val (topInsetPx, bottomInsetPx) = systemInsetsPx()
-        val budgetPx = com.bisc.flauncher.ui.home.safeSystemWidgetMaxHeightPx(
-            pageHasDock = dockRow != null,
-            screenWidthPx = dm.widthPixels,
-            screenHeightPx = dm.heightPixels,
-            densityValue = dm.density,
-            statusBarPx = topInsetPx,
-            navigationBarPx = bottomInsetPx
-        )
+        val budgetPx = stackedRowsBudget(pageId, dockRow != null)
         val spacingPx = with(density) { com.bisc.flauncher.ui.home.PageRowDimens.rowSpacing.toPx().roundToInt() }
 
-        suspend fun heightPxOf(row: PageRow): Int = row.heightPx ?: with(density) {
-            val heightDp = if (row.type == PageRowType.APPS) {
-                com.bisc.flauncher.ui.home.PageRowDimens.appsRowHeight(entryDao.countForRow(row.id), row.columns.coerceAtLeast(1))
-            } else {
-                com.bisc.flauncher.ui.home.PageRowDimens.rowUnitHeight * row.spanY
-            }
-            heightDp.toPx().roundToInt()
-        }
+        suspend fun heightPxOf(row: PageRow): Int = heightPxOf(row, density)
 
         var used = 0
         val overflow = mutableListOf<PageRow>()
@@ -353,14 +383,7 @@ class PageContentRepository @Inject constructor(
 
         val newPageId = addPage()
         // A fresh page never has a dock yet, so this is the most room any of these rows could ever get.
-        val freshPageBudgetPx = com.bisc.flauncher.ui.home.safeSystemWidgetMaxHeightPx(
-            pageHasDock = false,
-            screenWidthPx = dm.widthPixels,
-            screenHeightPx = dm.heightPixels,
-            densityValue = dm.density,
-            statusBarPx = topInsetPx,
-            navigationBarPx = bottomInsetPx
-        )
+        val freshPageBudgetPx = stackedRowsBudget(newPageId, hasDock = false)
         var nextOrder = (rowDao.maxOrderIndex(newPageId) ?: -1) + 1
         overflow.forEach { row ->
             var moved = row.copy(pageId = newPageId, orderIndex = nextOrder)

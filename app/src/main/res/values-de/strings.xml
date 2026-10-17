@@ -373,6 +373,9 @@
     <string name="settings_widget_relocated_title">Widget auf neue Seite verschoben</string>
     <string name="settings_widget_relocated_message">Das Widget auf dieser Seite war zu hoch, um zusammen mit dem gerade hinzugefügten Dock zu passen — das kann bei manchen Widgets zu Abstürzen führen. Es wurde automatisch auf eine neue Seite verschoben, damit es weiter funktioniert.</string>
     <string name="settings_widget_relocated_confirm">OK</string>
+    <string name="settings_page_full_title">Diese Seite ist voll</string>
+    <string name="settings_page_full_message">Es passt hier nicht mehr neben das, was schon auf dieser Seite ist. Eine neue Seite dafür anlegen?</string>
+    <string name="settings_page_full_confirm">Seite hinzufügen</string>
     <string name="settings_widgets_corner_shape_label">Eckenform</string>
     <string name="settings_widgets_corner_shape_square">Eckig</string>
     <string name="settings_widgets_corner_shape_rounded">Abgerundet</string>

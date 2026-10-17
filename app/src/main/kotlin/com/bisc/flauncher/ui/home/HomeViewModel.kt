@@ -22,6 +22,7 @@ import com.bisc.flauncher.data.model.FolderIconMode
 import com.bisc.flauncher.data.model.FolderItem
 import com.bisc.flauncher.data.model.GestureAction
 import com.bisc.flauncher.data.model.GestureActionType
+import com.bisc.flauncher.data.model.GridConstants
 import com.bisc.flauncher.data.model.GridItemType
 import com.bisc.flauncher.data.model.HomeGesture
 import com.bisc.flauncher.data.model.LauncherPageKind
@@ -753,11 +754,25 @@ class HomeViewModel @Inject constructor(
     }
 
     fun addWidgetRow(pageId: Long, kind: String, spanY: Int) {
-        viewModelScope.launch { pageContentRepository.addWidgetRow(pageId, kind, spanY) }
+        val candidate = PageRow(pageId = pageId, orderIndex = 0, type = PageRowType.WIDGET, payload = kind, spanY = spanY)
+        viewModelScope.launch {
+            if (pageContentRepository.wouldOverflow(pageId, candidate)) {
+                _pendingOverflowAdd.value = PendingOverflowAdd.WidgetRow(pageId, kind, spanY)
+            } else {
+                pageContentRepository.addWidgetRow(pageId, kind, spanY)
+            }
+        }
     }
 
     fun addAppsRow(pageId: Long) {
-        viewModelScope.launch { pageContentRepository.addAppsRow(pageId) }
+        val candidate = PageRow(pageId = pageId, orderIndex = 0, type = PageRowType.APPS, columns = GridConstants.DEFAULT_APPS_ROW_COLUMNS)
+        viewModelScope.launch {
+            if (pageContentRepository.wouldOverflow(pageId, candidate)) {
+                _pendingOverflowAdd.value = PendingOverflowAdd.AppsRow(pageId)
+            } else {
+                pageContentRepository.addAppsRow(pageId)
+            }
+        }
     }
 
     fun addSearchBarRow(pageId: Long) {
@@ -773,6 +788,32 @@ class HomeViewModel @Inject constructor(
 
     fun dismissWidgetRelocationWarning() {
         _widgetRelocationWarningCount.value = 0
+    }
+
+    /** A would-be apps/widget row that doesn't fit this page as-is — see masterplan Phase 7: offer a
+     *  new page for it instead of silently relocating something there, [wouldOverflow]-gated in
+     *  [addAppsRow]/[addWidgetRow]. Resolved by [confirmPendingOverflowAdd]/[cancelPendingOverflowAdd]. */
+    sealed class PendingOverflowAdd {
+        data class AppsRow(val pageId: Long) : PendingOverflowAdd()
+        data class WidgetRow(val pageId: Long, val kind: String, val spanY: Int) : PendingOverflowAdd()
+    }
+
+    val pendingOverflowAdd: StateFlow<PendingOverflowAdd?> get() = _pendingOverflowAdd
+    private val _pendingOverflowAdd = MutableStateFlow<PendingOverflowAdd?>(null)
+
+    fun confirmPendingOverflowAdd() {
+        val pending = _pendingOverflowAdd.value ?: return
+        _pendingOverflowAdd.value = null
+        viewModelScope.launch {
+            when (pending) {
+                is PendingOverflowAdd.AppsRow -> pageContentRepository.addAppsRow(pending.pageId)
+                is PendingOverflowAdd.WidgetRow -> pageContentRepository.addWidgetRow(pending.pageId, pending.kind, pending.spanY)
+            }
+        }
+    }
+
+    fun cancelPendingOverflowAdd() {
+        _pendingOverflowAdd.value = null
     }
 
     fun setRowSpanY(row: PageRow, spanY: Int) {
