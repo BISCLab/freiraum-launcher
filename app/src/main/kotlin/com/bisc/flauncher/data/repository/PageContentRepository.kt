@@ -525,6 +525,13 @@ class PageContentRepository @Inject constructor(
         return id
     }
 
+    suspend fun addPowerButtonEntry(pageRowId: Long, powerButtonId: Long): Long {
+        val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
+        val id = entryDao.insert(AppRowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.POWER_BUTTON, payload = powerButtonId.toString()))
+        rebalanceForRow(pageRowId)
+        return id
+    }
+
     suspend fun setRowPillMode(row: PageRow, pillMode: Boolean) {
         rowDao.update(row.copy(pillMode = pillMode))
     }

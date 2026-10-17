@@ -6,6 +6,7 @@ import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
@@ -42,7 +43,11 @@ fun SettingsElementsScreen(navController: NavController, onBack: () -> Unit) {
                 title = stringResource(R.string.settings_elements_links_title),
                 onClick = { navController.navigate("settings/elements/links") }
             )
-            // Powerbuttons row is added once its screen exists (follow-up within this phase).
+            SettingsPreference(
+                icon = Icons.Filled.PowerSettingsNew,
+                title = stringResource(R.string.settings_elements_powerbuttons_title),
+                onClick = { navController.navigate("settings/elements/powerbuttons") }
+            )
         }
     }
 }

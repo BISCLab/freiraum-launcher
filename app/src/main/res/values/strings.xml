@@ -197,6 +197,17 @@
     <string name="settings_elements_browser_app_label">Browser</string>
     <string name="settings_elements_delete_link">Delete link</string>
     <string name="settings_elements_powerbuttons_title">Power buttons</string>
+    <string name="settings_elements_powerbuttons_empty">No power buttons yet.</string>
+    <string name="settings_elements_powerbuttons_picker_empty">No power buttons yet — create one in Settings -&gt; Elements -&gt; Power buttons.</string>
+    <string name="settings_elements_add_powerbutton">Add power button</string>
+    <string name="settings_elements_powerbutton_name_hint">Name</string>
+    <string name="settings_elements_powerbutton_action_label">Action</string>
+    <string name="settings_elements_powerbutton_action_panel">Open Panel</string>
+    <string name="settings_elements_powerbutton_action_dock">Open Dock</string>
+    <string name="settings_elements_powerbutton_action_page">Open a page</string>
+    <string name="settings_elements_powerbutton_pick_page">Choose page</string>
+    <string name="settings_elements_powerbutton_colors_label">Colors</string>
+    <string name="settings_elements_delete_powerbutton">Delete power button</string>
 
     <string name="settings_dock_background_label">Background</string>
     <string name="settings_dock_visibility_label">Visibility</string>
@@ -403,6 +414,7 @@
     <string name="settings_apps_row_add_website">Website</string>
     <string name="settings_apps_row_add_page_link">Link a page</string>
     <string name="settings_apps_row_add_contact">Add contact</string>
+    <string name="settings_apps_row_add_powerbutton">Add power button</string>
     <string name="settings_apps_row_pill_mode_label">Single-line layout</string>
     <string name="settings_apps_row_pill_mode_summary">Entries in one non-wrapping row instead of a grid — used by the dock</string>
     <string name="settings_map_mode_address">Address</string>

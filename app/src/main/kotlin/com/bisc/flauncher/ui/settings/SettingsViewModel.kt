@@ -64,6 +64,7 @@ class SettingsViewModel @Inject constructor(
     private val presetRepository: PresetRepository,
     private val folderRepository: FolderRepository,
     private val websiteRepository: com.bisc.flauncher.data.repository.WebsiteRepository,
+    private val powerButtonRepository: com.bisc.flauncher.data.repository.PowerButtonRepository,
     private val backupManager: com.bisc.flauncher.data.backup.BackupManager
 ) : ViewModel() {
     fun exportBackup(uri: android.net.Uri, onResult: (Boolean) -> Unit) {
@@ -258,6 +259,21 @@ class SettingsViewModel @Inject constructor(
 
     fun removeWebsite(website: com.bisc.flauncher.data.model.PinnedWebsite) {
         viewModelScope.launch { websiteRepository.remove(website) }
+    }
+
+    val powerButtons: StateFlow<List<com.bisc.flauncher.data.model.PowerButton>> =
+        powerButtonRepository.powerButtons.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    fun addPowerButton(label: String, onCreated: (Long) -> Unit) {
+        viewModelScope.launch { onCreated(powerButtonRepository.add(com.bisc.flauncher.data.model.PowerButton(label = label))) }
+    }
+
+    fun updatePowerButton(button: com.bisc.flauncher.data.model.PowerButton) {
+        viewModelScope.launch { powerButtonRepository.update(button) }
+    }
+
+    fun removePowerButton(button: com.bisc.flauncher.data.model.PowerButton) {
+        viewModelScope.launch { powerButtonRepository.remove(button) }
     }
 
     fun removeFolderItem(item: com.bisc.flauncher.data.model.FolderItem) {

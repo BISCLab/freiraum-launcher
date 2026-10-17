@@ -14,6 +14,7 @@ import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PinnedContact
 import com.bisc.flauncher.data.model.PinnedShortcut
 import com.bisc.flauncher.data.model.PinnedWebsite
+import com.bisc.flauncher.data.model.PowerButton
 import com.bisc.flauncher.data.model.SavedMapTarget
 
 @Database(
@@ -21,9 +22,9 @@ import com.bisc.flauncher.data.model.SavedMapTarget
         LauncherPage::class, PageRow::class, AppRowEntry::class, Folder::class, FolderItem::class,
         Note::class, IconPackMapping::class, SavedMapTarget::class, PinnedWebsite::class,
         PinnedShortcut::class, AppOverride::class,
-        PinnedContact::class
+        PinnedContact::class, PowerButton::class
     ],
-    version = 48,
+    version = 49,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -40,4 +41,5 @@ abstract class FLauncherDatabase : RoomDatabase() {
     abstract fun pinnedShortcutDao(): PinnedShortcutDao
     abstract fun appOverrideDao(): AppOverrideDao
     abstract fun pinnedContactDao(): PinnedContactDao
+    abstract fun powerButtonDao(): PowerButtonDao
 }
