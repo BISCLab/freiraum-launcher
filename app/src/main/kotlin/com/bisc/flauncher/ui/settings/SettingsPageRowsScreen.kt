@@ -96,6 +96,7 @@ fun SettingsPageRowsScreen(
     val pendingBindIntent by viewModel.pendingBindIntent.collectAsState()
     val pendingConfigureIntent by viewModel.pendingConfigureIntent.collectAsState()
     val widgetRelocationWarningCount by viewModel.widgetRelocationWarningCount.collectAsState()
+    val pendingOverflowAdd by viewModel.pendingOverflowAdd.collectAsState()
 
     val rows = rowsByPage[pageId].orEmpty()
     val page = pages.find { it.id == pageId }
@@ -229,6 +230,20 @@ fun SettingsPageRowsScreen(
             text = { Text(stringResource(R.string.settings_widget_relocated_message)) },
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissWidgetRelocationWarning() }) { Text(stringResource(R.string.settings_widget_relocated_confirm)) }
+            }
+        )
+    }
+
+    if (pendingOverflowAdd != null) {
+        AlertDialog(
+            onDismissRequest = viewModel::cancelPendingOverflowAdd,
+            title = { Text(stringResource(R.string.settings_page_full_title)) },
+            text = { Text(stringResource(R.string.settings_page_full_message)) },
+            confirmButton = {
+                TextButton(onClick = viewModel::confirmPendingOverflowAdd) { Text(stringResource(R.string.settings_page_full_confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::cancelPendingOverflowAdd) { Text(stringResource(R.string.widget_notes_cancel)) }
             }
         )
     }

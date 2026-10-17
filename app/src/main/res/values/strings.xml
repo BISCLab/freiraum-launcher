@@ -373,6 +373,9 @@
     <string name="settings_widget_relocated_title">Widget moved to a new page</string>
     <string name="settings_widget_relocated_message">This page\'s widget was too tall to fit alongside the dock you just added, which can crash some widgets — it was moved to a new page automatically so it keeps working.</string>
     <string name="settings_widget_relocated_confirm">OK</string>
+    <string name="settings_page_full_title">This page is full</string>
+    <string name="settings_page_full_message">It doesn\'t fit here alongside what\'s already on this page. Add a new page for it?</string>
+    <string name="settings_page_full_confirm">Add page</string>
     <string name="settings_widgets_corner_shape_label">Corner shape</string>
     <string name="settings_widgets_corner_shape_square">Square</string>
     <string name="settings_widgets_corner_shape_rounded">Rounded</string>
