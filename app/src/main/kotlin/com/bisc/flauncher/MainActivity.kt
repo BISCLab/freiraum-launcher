@@ -311,7 +311,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable(
-                            "settings/pages/{pageId}/rows/{rowId}/apps",
+                            "settings/pages/{pageId}/rows/{rowId}/elementbox",
                             arguments = listOf(
                                 navArgument("pageId") { type = NavType.LongType },
                                 navArgument("rowId") { type = NavType.LongType }
@@ -319,7 +319,7 @@ class MainActivity : ComponentActivity() {
                         ) { backStackEntry ->
                             val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@composable
                             val rowId = backStackEntry.arguments?.getLong("rowId") ?: return@composable
-                            com.bisc.flauncher.ui.settings.SettingsAppsRowEditScreen(
+                            com.bisc.flauncher.ui.settings.SettingsElementBoxEditScreen(
                                 pageId = pageId,
                                 rowId = rowId,
                                 navController = navController,

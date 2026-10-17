@@ -10,7 +10,7 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import com.bisc.flauncher.data.model.AppRowEntry
+import com.bisc.flauncher.data.model.RowEntry
 import com.bisc.flauncher.data.model.Folder
 import com.bisc.flauncher.data.model.FolderItem
 import com.bisc.flauncher.data.model.GestureAction
@@ -31,7 +31,7 @@ import com.bisc.flauncher.data.settings.IconShape
 @Composable
 fun PageRowsColumn(
     rows: List<PageRow>,
-    entriesByRow: Map<Long, List<AppRowEntry>>,
+    entriesByRow: Map<Long, List<RowEntry>>,
     folders: List<Folder>,
     folderItemsByFolder: Map<Long, List<FolderItem>>,
     savedMapTargets: List<SavedMapTarget> = emptyList(),

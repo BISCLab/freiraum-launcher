@@ -216,8 +216,8 @@ fun FolderView(
                     ) {
                         AddButton(Icons.Filled.Add, stringResource(R.string.folder_add_app), onAddAppClick, Modifier.weight(1f))
                         AddButton(Icons.AutoMirrored.Filled.Shortcut, stringResource(R.string.folder_add_shortcut), onAddShortcutClick, Modifier.weight(1f))
-                        AddButton(Icons.Filled.Place, stringResource(R.string.settings_apps_row_add_map_target), onAddMapTargetClick, Modifier.weight(1f))
-                        AddButton(Icons.Filled.Language, stringResource(R.string.settings_apps_row_add_website), onAddWebsiteClick, Modifier.weight(1f))
+                        AddButton(Icons.Filled.Place, stringResource(R.string.settings_row_entry_add_map_target), onAddMapTargetClick, Modifier.weight(1f))
+                        AddButton(Icons.Filled.Language, stringResource(R.string.settings_row_entry_add_website), onAddWebsiteClick, Modifier.weight(1f))
                         AddButton(Icons.Filled.Widgets, stringResource(R.string.folder_add_widget), onAddWidgetClick, Modifier.weight(1f))
                         AddButton(Icons.Filled.CreateNewFolder, stringResource(R.string.folder_add_subfolder), onAddSubfolderClick, Modifier.weight(1f))
                     }

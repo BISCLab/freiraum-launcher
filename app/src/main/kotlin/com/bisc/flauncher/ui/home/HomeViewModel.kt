@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bisc.flauncher.data.model.AppInfo
 import com.bisc.flauncher.data.model.AppOverride
-import com.bisc.flauncher.data.model.AppRowEntry
+import com.bisc.flauncher.data.model.RowEntry
 import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.ContactInfo
 import com.bisc.flauncher.data.model.DockTapAction
@@ -220,7 +220,7 @@ class HomeViewModel @Inject constructor(
             }
             // The sole way to reference a page now — ROWS pages jump the pager via onOpenPage,
             // the singleton overlays (App overview/Search/Sidebar) open their own overlay directly,
-            // same dispatch PageRowContent's onOpenPageLink already does for a dock/apps-row page-link tap.
+            // same dispatch PageRowContent's onOpenPageLink already does for a dock/element-box page-link tap.
             GestureActionType.PAGE -> action.payload?.toLongOrNull()?.let { id ->
                 when (allPages.value.find { it.id == id }?.kind) {
                     LauncherPageKind.APP_LIST -> openAppList()
@@ -255,8 +255,8 @@ class HomeViewModel @Inject constructor(
             .map { rows -> rows.groupBy { it.pageId }.mapValues { (_, v) -> v.sortedBy { it.orderIndex } } }
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
-    val appEntriesByRow: StateFlow<Map<Long, List<AppRowEntry>>> =
-        pageContentRepository.appRowEntries
+    val rowEntriesByRow: StateFlow<Map<Long, List<RowEntry>>> =
+        pageContentRepository.rowEntries
             .map { entries -> entries.groupBy { it.pageRowId }.mapValues { (_, v) -> v.sortedBy { it.orderIndex } } }
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
@@ -764,13 +764,13 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun addAppsRow(pageId: Long) {
-        val candidate = PageRow(pageId = pageId, orderIndex = 0, type = PageRowType.APPS, columns = GridConstants.DEFAULT_APPS_ROW_COLUMNS)
+    fun addElementBox(pageId: Long) {
+        val candidate = PageRow(pageId = pageId, orderIndex = 0, type = PageRowType.ELEMENT_BOX, columns = GridConstants.DEFAULT_ELEMENT_BOX_COLUMNS)
         viewModelScope.launch {
             if (pageContentRepository.wouldOverflow(pageId, candidate)) {
-                _pendingOverflowAdd.value = PendingOverflowAdd.AppsRow(pageId)
+                _pendingOverflowAdd.value = PendingOverflowAdd.ElementBox(pageId)
             } else {
-                pageContentRepository.addAppsRow(pageId)
+                pageContentRepository.addElementBox(pageId)
             }
         }
     }
@@ -792,9 +792,9 @@ class HomeViewModel @Inject constructor(
 
     /** A would-be apps/widget row that doesn't fit this page as-is — see masterplan Phase 7: offer a
      *  new page for it instead of silently relocating something there, [wouldOverflow]-gated in
-     *  [addAppsRow]/[addWidgetRow]. Resolved by [confirmPendingOverflowAdd]/[cancelPendingOverflowAdd]. */
+     *  [addElementBox]/[addWidgetRow]. Resolved by [confirmPendingOverflowAdd]/[cancelPendingOverflowAdd]. */
     sealed class PendingOverflowAdd {
-        data class AppsRow(val pageId: Long) : PendingOverflowAdd()
+        data class ElementBox(val pageId: Long) : PendingOverflowAdd()
         data class WidgetRow(val pageId: Long, val kind: String, val spanY: Int) : PendingOverflowAdd()
     }
 
@@ -806,7 +806,7 @@ class HomeViewModel @Inject constructor(
         _pendingOverflowAdd.value = null
         viewModelScope.launch {
             when (pending) {
-                is PendingOverflowAdd.AppsRow -> pageContentRepository.addAppsRow(pending.pageId)
+                is PendingOverflowAdd.ElementBox -> pageContentRepository.addElementBox(pending.pageId)
                 is PendingOverflowAdd.WidgetRow -> pageContentRepository.addWidgetRow(pending.pageId, pending.kind, pending.spanY)
             }
         }
@@ -975,7 +975,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun removeAppRowEntry(entry: AppRowEntry) {
+    fun removeRowEntry(entry: RowEntry) {
         viewModelScope.launch {
             pageContentRepository.removeEntry(entry)
             if (entry.type == GridItemType.FOLDER) {
@@ -984,7 +984,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun reorderAppRowEntries(orderedEntries: List<AppRowEntry>) {
+    fun reorderRowEntries(orderedEntries: List<RowEntry>) {
         viewModelScope.launch { pageContentRepository.reorderEntries(orderedEntries) }
     }
 
@@ -1152,10 +1152,10 @@ class HomeViewModel @Inject constructor(
             val folderDeleted = folderRepository.removeFolderItem(item)
             if (folderDeleted) {
                 closeFolder()
-                val appRowEntry = appEntriesByRow.value.values.flatten()
+                val rowEntry = rowEntriesByRow.value.values.flatten()
                     .find { it.type == GridItemType.FOLDER && it.payload == item.folderId.toString() }
-                if (appRowEntry != null) {
-                    pageContentRepository.removeEntry(appRowEntry)
+                if (rowEntry != null) {
+                    pageContentRepository.removeEntry(rowEntry)
                 } else {
                     val parentEntry = folderItemsByFolder.value.values.flatten()
                         .find { it.type == GridItemType.FOLDER && it.payload == item.folderId.toString() }

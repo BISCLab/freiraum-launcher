@@ -5,7 +5,6 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.bisc.flauncher.data.model.ActionButton
 import com.bisc.flauncher.data.model.AppOverride
-import com.bisc.flauncher.data.model.AppRowEntry
 import com.bisc.flauncher.data.model.Folder
 import com.bisc.flauncher.data.model.FolderItem
 import com.bisc.flauncher.data.model.IconPackMapping
@@ -15,23 +14,24 @@ import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PinnedContact
 import com.bisc.flauncher.data.model.PinnedShortcut
 import com.bisc.flauncher.data.model.PinnedWebsite
+import com.bisc.flauncher.data.model.RowEntry
 import com.bisc.flauncher.data.model.SavedMapTarget
 
 @Database(
     entities = [
-        LauncherPage::class, PageRow::class, AppRowEntry::class, Folder::class, FolderItem::class,
+        LauncherPage::class, PageRow::class, RowEntry::class, Folder::class, FolderItem::class,
         Note::class, IconPackMapping::class, SavedMapTarget::class, PinnedWebsite::class,
         PinnedShortcut::class, AppOverride::class,
         PinnedContact::class, ActionButton::class
     ],
-    version = 51,
+    version = 52,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class FLauncherDatabase : RoomDatabase() {
     abstract fun launcherPageDao(): LauncherPageDao
     abstract fun pageRowDao(): PageRowDao
-    abstract fun appRowEntryDao(): AppRowEntryDao
+    abstract fun rowEntryDao(): RowEntryDao
     abstract fun folderDao(): FolderDao
     abstract fun folderItemDao(): FolderItemDao
     abstract fun noteDao(): NoteDao

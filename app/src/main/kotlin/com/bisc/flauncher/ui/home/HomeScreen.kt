@@ -142,7 +142,7 @@ fun HomeScreen(
     // list), which is why those two always fell back to the generic "unknown page" glyph otherwise.
     val allPages by viewModel.allPages.collectAsState()
     val rowsByPage by viewModel.rowsByPage.collectAsState()
-    val appEntriesByRow by viewModel.appEntriesByRow.collectAsState()
+    val rowEntriesByRow by viewModel.rowEntriesByRow.collectAsState()
     val browsableApps by viewModel.browsableApps.collectAsState()
     val resolveLabel = viewModel::resolveLabel
     val handedness by viewModel.handedness.collectAsState()
@@ -339,7 +339,7 @@ fun HomeScreen(
         val index = pages.indexOfFirst { it.id == pageId }
         if (index >= 0) coroutineScope.launch { pagerState.animateScrollToPage(index) }
     }
-    // Shared by every page-link entry (an AppsRowGrid cell, a pill-row cell, the floating dock) —
+    // Shared by every page-link entry (an ElementBoxGrid cell, a pill-row cell, the floating dock) —
     // jumps the pager for a swipeable ROWS page, opens the matching overlay for the two singletons.
     val onOpenPageLink: (Long, com.bisc.flauncher.data.model.LauncherPageKind) -> Unit = { pageId, kind ->
         when (kind) {
@@ -561,7 +561,7 @@ fun HomeScreen(
                             LocalSurfaceIsDarkLoading provides (loadedPageBackgroundConfig == null)
                         ) { PageRowsColumn(
                                 rows = withoutPinnedSearchBar,
-                                entriesByRow = appEntriesByRow,
+                                entriesByRow = rowEntriesByRow,
                                 folders = folders,
                                 folderItemsByFolder = folderItemsByFolder,
                                 savedMapTargets = savedMapTargets,
@@ -646,8 +646,8 @@ fun HomeScreen(
                             .padding(horizontal = DockDimens.innerHorizontalPadding, vertical = DockDimens.innerVerticalPadding)
                             .navigationBarsPadding()
                     ) {
-                        AppsGridEntries(
-                            entries = appEntriesByRow[homeDockRow.id].orEmpty(),
+                        GridEntries(
+                            entries = rowEntriesByRow[homeDockRow.id].orEmpty(),
                             columns = 1,
                             rowColumns = dockRowShape,
                             folders = folders,
@@ -732,9 +732,9 @@ fun HomeScreen(
 
         // The Panel is a box that slides down from the very top edge of the screen — full width.
         // Bottom corners rounded, top corners square since the panel is visually attached to the
-        // screen's own top edge. Its content is the same AppsGridEntries grid an ordinary apps row
+        // screen's own top edge. Its content is the same GridEntries grid an ordinary element box
         // uses, just laid out full-width inside DockPanelSurface instead of a WidgetCard, mirroring
-        // exactly how the Dock now uses the same AppsGridEntries grid for its own floating bar —
+        // exactly how the Dock now uses the same GridEntries grid for its own floating bar —
         // the Dock is a mirrored Panel (only-top-rounded corners, capped at 2 rows instead of 6).
         //
         // BoxWithConstraints sits *outside* the AnimatedVisibility, and the AnimatedVisibility below
@@ -784,8 +784,8 @@ fun HomeScreen(
                         item {
                             homePanelRow?.let { row ->
                                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                AppsGridEntries(
-                                    entries = appEntriesByRow[row.id].orEmpty(),
+                                GridEntries(
+                                    entries = rowEntriesByRow[row.id].orEmpty(),
                                     columns = 1,
                                     rowColumns = panelRowShape,
                                     folders = folders,

@@ -53,7 +53,7 @@ import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
 /** The Dock's own settings — a hub (mirrors the Home page's own Appearance/Layout split) instead
- *  of the old single cluttered "Edit apps row" sheet, which mixed a Visibility picker, background
+ *  of the old single cluttered "Edit element box" sheet, which mixed a Visibility picker, background
  *  fill/opacity, border controls and a flat entries list with no clear grouping. */
 @Composable
 fun SettingsDockScreen(pageId: Long, navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
@@ -131,8 +131,8 @@ fun SettingsDockBorderScreen(pageId: Long, navController: NavController, onBack:
 @Composable
 fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
     val row = rememberDockRow(pageId, viewModel) ?: return
-    val appEntriesByRow by viewModel.appEntriesByRow.collectAsState()
-    val entries = appEntriesByRow[row.id].orEmpty()
+    val rowEntriesByRow by viewModel.rowEntriesByRow.collectAsState()
+    val entries = rowEntriesByRow[row.id].orEmpty()
     val browsableApps by viewModel.browsableApps.collectAsState()
     val folders by viewModel.folders.collectAsState()
     val folderItemsByFolder by viewModel.folderItemsByFolder.collectAsState()
@@ -158,12 +158,12 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
     var showActionButtonPicker by remember { mutableStateOf(false) }
     var pendingShortcut by remember { mutableStateOf(false) }
-    var pendingRemoval by remember { mutableStateOf<com.bisc.flauncher.data.model.AppRowEntry?>(null) }
+    var pendingRemoval by remember { mutableStateOf<com.bisc.flauncher.data.model.RowEntry?>(null) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_dock_elements_title), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                com.bisc.flauncher.ui.home.AppsGridEntries(
+                com.bisc.flauncher.ui.home.GridEntries(
                     entries = entries,
                     columns = 1,
                     rowColumns = rowShape,
@@ -238,7 +238,7 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
     pendingRemoval?.let { entry ->
         ConfirmRemoveDialog(
             label = com.bisc.flauncher.ui.home.entryLabel(entry, folders, savedMapTargets, pinnedWebsites, allPages, pinnedContacts, viewModel::resolveLabel, actionButtons),
-            onConfirm = { viewModel.removeAppRowEntry(entry); pendingRemoval = null },
+            onConfirm = { viewModel.removeRowEntry(entry); pendingRemoval = null },
             onDismiss = { pendingRemoval = null }
         )
     }
@@ -369,14 +369,14 @@ internal fun AddElementChooserSheet(
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         SettingsPreferenceGroup {
-            SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_apps_row_add_app), onClick = onAddAppClick, trailing = null)
-            SettingsPreference(icon = Icons.Filled.CreateNewFolder, title = stringResource(R.string.settings_apps_row_add_folder), onClick = onAddFolderClick, trailing = null)
-            SettingsPreference(icon = Icons.AutoMirrored.Filled.Shortcut, title = stringResource(R.string.settings_apps_row_add_shortcut), onClick = onAddShortcutClick, trailing = null)
-            SettingsPreference(icon = Icons.Filled.Place, title = stringResource(R.string.settings_apps_row_add_map_target), onClick = onAddMapTargetClick, trailing = null)
-            SettingsPreference(icon = Icons.Filled.Language, title = stringResource(R.string.settings_apps_row_add_website), onClick = onAddWebsiteClick, trailing = null)
-            SettingsPreference(icon = Icons.Filled.ViewCarousel, title = stringResource(R.string.settings_apps_row_add_page_link), onClick = onAddPageLinkClick, trailing = null)
-            SettingsPreference(icon = Icons.Filled.Person, title = stringResource(R.string.settings_apps_row_add_contact), onClick = onAddContactClick, trailing = null)
-            SettingsPreference(icon = Icons.Filled.Bolt, title = stringResource(R.string.settings_apps_row_add_actionbutton), onClick = onAddActionButtonClick, trailing = null)
+            SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_row_entry_add_app), onClick = onAddAppClick, trailing = null)
+            SettingsPreference(icon = Icons.Filled.CreateNewFolder, title = stringResource(R.string.settings_row_entry_add_folder), onClick = onAddFolderClick, trailing = null)
+            SettingsPreference(icon = Icons.AutoMirrored.Filled.Shortcut, title = stringResource(R.string.settings_row_entry_add_shortcut), onClick = onAddShortcutClick, trailing = null)
+            SettingsPreference(icon = Icons.Filled.Place, title = stringResource(R.string.settings_row_entry_add_map_target), onClick = onAddMapTargetClick, trailing = null)
+            SettingsPreference(icon = Icons.Filled.Language, title = stringResource(R.string.settings_row_entry_add_website), onClick = onAddWebsiteClick, trailing = null)
+            SettingsPreference(icon = Icons.Filled.ViewCarousel, title = stringResource(R.string.settings_row_entry_add_page_link), onClick = onAddPageLinkClick, trailing = null)
+            SettingsPreference(icon = Icons.Filled.Person, title = stringResource(R.string.settings_row_entry_add_contact), onClick = onAddContactClick, trailing = null)
+            SettingsPreference(icon = Icons.Filled.Bolt, title = stringResource(R.string.settings_row_entry_add_actionbutton), onClick = onAddActionButtonClick, trailing = null)
         }
     }
 }

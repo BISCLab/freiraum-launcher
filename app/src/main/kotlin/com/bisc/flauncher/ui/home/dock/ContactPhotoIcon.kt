@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 
 /** Contact photo, loaded lazily — falls back to a generic person icon while loading or if the
  *  contact has none. Shared by [ContactPickerSheet], the search overlay's contact result, and any
- *  CONTACT-type [com.bisc.flauncher.data.model.AppRowEntry] cell (Dock/Panel). */
+ *  CONTACT-type [com.bisc.flauncher.data.model.RowEntry] cell (Dock/Panel). */
 @Composable
 fun ContactPhotoIcon(contactId: Long, photoUri: String?, loadPhoto: suspend (Long, String?) -> ImageBitmap?, size: Dp = 28.dp) {
     var photo by remember(contactId) { mutableStateOf<ImageBitmap?>(null) }

@@ -18,7 +18,7 @@ import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.ui.home.dock.resolveElementColors
 
-/** Shared card shell for the built-in widgets (Music/Weather/Notes) and the APPS row grid. */
+/** Shared card shell for the built-in widgets (Music/Weather/Notes) and the element box grid. */
 @Composable
 fun WidgetCard(
     modifier: Modifier = Modifier,

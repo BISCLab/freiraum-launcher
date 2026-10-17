@@ -70,7 +70,7 @@ import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
-/** One page's rows — widget rows and apps rows mixed freely in one drag-reorder list (see [PageRow]'s doc comment). */
+/** One page's rows — widget rows and element boxes mixed freely in one drag-reorder list (see [PageRow]'s doc comment). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsPageRowsScreen(
@@ -145,7 +145,7 @@ fun SettingsPageRowsScreen(
                             modifier = Modifier.fillMaxWidth().clickable {
                                 when (row.type) {
                                     PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET -> onOpenRow(row.id)
-                                    PageRowType.APPS, PageRowType.SEARCH_BAR -> navController.navigate("settings/pages/$pageId/rows/${row.id}/apps")
+                                    PageRowType.ELEMENT_BOX, PageRowType.SEARCH_BAR -> navController.navigate("settings/pages/$pageId/rows/${row.id}/elementbox")
                                     PageRowType.PANEL -> Unit
                                 }
                             },
@@ -194,9 +194,9 @@ fun SettingsPageRowsScreen(
                 showAddSheet = false
                 viewModel.openSystemWidgetPicker(pageId)
             },
-            onAppsRowSelected = {
+            onElementBoxSelected = {
                 showAddSheet = false
-                viewModel.addAppsRow(pageId)
+                viewModel.addElementBox(pageId)
             },
             onSearchBarSelected = {
                 showAddSheet = false
@@ -263,7 +263,7 @@ internal fun AddRowSheet(
     showSearchBarOption: Boolean,
     onWidgetKindSelected: (String) -> Unit,
     onMoreWidgetsSelected: () -> Unit,
-    onAppsRowSelected: () -> Unit,
+    onElementBoxSelected: () -> Unit,
     onSearchBarSelected: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -276,7 +276,7 @@ internal fun AddRowSheet(
                 SettingsPreference(icon = widgetKindIcon(kind), title = widgetKindLabel(kind), onClick = { onWidgetKindSelected(kind) }, trailing = null)
             }
             SettingsPreference(icon = Icons.Filled.Widgets, title = stringResource(R.string.picker_widget_more), onClick = onMoreWidgetsSelected, trailing = null)
-            SettingsPreference(icon = Icons.Filled.Apps, title = stringResource(R.string.settings_rows_add_apps_row), onClick = onAppsRowSelected, trailing = null)
+            SettingsPreference(icon = Icons.Filled.Apps, title = stringResource(R.string.settings_rows_add_element_box), onClick = onElementBoxSelected, trailing = null)
             if (showSearchBarOption) {
                 SettingsPreference(icon = Icons.Filled.Search, title = stringResource(R.string.settings_rows_add_search_bar), onClick = onSearchBarSelected, trailing = null)
             }
@@ -332,7 +332,7 @@ fun CornerStylePreference(value: WidgetCornerStyle, selected: WidgetCornerStyle,
 internal fun rowIcon(row: PageRow): ImageVector = when (row.type) {
     PageRowType.WIDGET -> widgetKindIcon(row.payload)
     PageRowType.SYSTEM_WIDGET -> Icons.Filled.Widgets
-    PageRowType.APPS -> Icons.Filled.Apps
+    PageRowType.ELEMENT_BOX -> Icons.Filled.Apps
     PageRowType.SEARCH_BAR -> Icons.Filled.Search
     PageRowType.PANEL -> Icons.Filled.Dashboard
 }
@@ -341,7 +341,7 @@ internal fun rowIcon(row: PageRow): ImageVector = when (row.type) {
 internal fun rowLabel(row: PageRow): String = when (row.type) {
     PageRowType.WIDGET -> widgetKindLabel(row.payload)
     PageRowType.SYSTEM_WIDGET -> stringResource(R.string.picker_widget_more)
-    PageRowType.APPS -> stringResource(R.string.settings_rows_add_apps_row)
+    PageRowType.ELEMENT_BOX -> stringResource(R.string.settings_rows_add_element_box)
     PageRowType.SEARCH_BAR -> stringResource(R.string.settings_rows_add_search_bar)
     PageRowType.PANEL -> stringResource(R.string.settings_home_panel_label)
 }

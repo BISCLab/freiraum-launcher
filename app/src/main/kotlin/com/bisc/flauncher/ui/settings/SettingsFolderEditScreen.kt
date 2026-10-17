@@ -204,11 +204,11 @@ fun SettingsFolderEditScreen(
         }
 
         SettingsPreferenceGroup {
-            SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_apps_row_add_app), onClick = { showAppPicker = true }, trailing = null)
-            SettingsPreference(icon = Icons.Filled.CreateNewFolder, title = stringResource(R.string.settings_apps_row_add_folder), onClick = { showFolderPicker = true }, trailing = null)
-            SettingsPreference(icon = Icons.AutoMirrored.Filled.Shortcut, title = stringResource(R.string.settings_apps_row_add_shortcut), onClick = { viewModel.openFolderShortcutAppPicker(folderId) }, trailing = null)
-            SettingsPreference(icon = Icons.Filled.Place, title = stringResource(R.string.settings_apps_row_add_map_target), onClick = { showMapTargetPicker = true }, trailing = null)
-            SettingsPreference(icon = Icons.Filled.Language, title = stringResource(R.string.settings_apps_row_add_website), onClick = { showWebsitePicker = true }, trailing = null)
+            SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_row_entry_add_app), onClick = { showAppPicker = true }, trailing = null)
+            SettingsPreference(icon = Icons.Filled.CreateNewFolder, title = stringResource(R.string.settings_row_entry_add_folder), onClick = { showFolderPicker = true }, trailing = null)
+            SettingsPreference(icon = Icons.AutoMirrored.Filled.Shortcut, title = stringResource(R.string.settings_row_entry_add_shortcut), onClick = { viewModel.openFolderShortcutAppPicker(folderId) }, trailing = null)
+            SettingsPreference(icon = Icons.Filled.Place, title = stringResource(R.string.settings_row_entry_add_map_target), onClick = { showMapTargetPicker = true }, trailing = null)
+            SettingsPreference(icon = Icons.Filled.Language, title = stringResource(R.string.settings_row_entry_add_website), onClick = { showWebsitePicker = true }, trailing = null)
         }
 
         SettingsPreferenceGroup {
