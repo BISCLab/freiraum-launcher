@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.theme
 
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -15,8 +17,40 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
+import com.bisc.flauncher.data.model.ColorFill
+import com.bisc.flauncher.data.model.ElementAppearance
 
 enum class ThemePreference { LIGHT, DARK, SYSTEM }
+
+/** Resolves SYSTEM against the live device setting — the single place this check happens, reused
+ *  by every background/box color resolution so they all agree with each other and with
+ *  [FLauncherTheme]'s own [isSystemInDarkTheme] check. */
+fun ThemePreference.isDark(context: Context): Boolean = when (this) {
+    ThemePreference.LIGHT -> false
+    ThemePreference.DARK -> true
+    ThemePreference.SYSTEM -> (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+}
+
+/** A matte near-black, not pure black — FLauncher's only default background in dark mode. No
+ *  bundled wallpaper is shipped; this plus plain white in light mode are the only two defaults. */
+const val MATTE_DARK_COLOR = 0xFF121212.toInt()
+
+/** The page background for the given effective mode. */
+fun backgroundColorFor(isDark: Boolean): Int = if (isDark) MATTE_DARK_COLOR else android.graphics.Color.WHITE
+
+/** The fill color every box/card/widget/dock/panel defaults to: the opposite tone from the page
+ *  background, so it reads as a distinct layer floating over the page. */
+fun defaultBoxFillColorFor(isDark: Boolean): Int = if (isDark) android.graphics.Color.WHITE else MATTE_DARK_COLOR
+
+/** The shared default look for every box/card/widget/dock/panel when it has no customization of
+ *  its own — [defaultBoxFillColorFor] at 80% opacity with a border, a frosted layer that reads as
+ *  a distinct surface floating over the page. The same treatment the dock always had bespoke, now
+ *  the one shared default everywhere. */
+fun defaultBoxAppearanceFor(isDark: Boolean): ElementAppearance = ElementAppearance(
+    fill = ColorFill(color = defaultBoxFillColorFor(isDark)),
+    opacity = 0.8f,
+    borderEnabled = true
+)
 
 @Composable
 fun FLauncherTheme(

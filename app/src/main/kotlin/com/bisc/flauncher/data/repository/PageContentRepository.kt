@@ -16,7 +16,6 @@ import com.bisc.flauncher.data.model.RowEntry
 import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.BackgroundSource
 import com.bisc.flauncher.data.model.ColorFill
-import com.bisc.flauncher.data.model.DesignPresetValues
 import com.bisc.flauncher.data.model.GestureAction
 import com.bisc.flauncher.data.model.GestureActionType
 import com.bisc.flauncher.data.model.GridConstants
@@ -34,7 +33,9 @@ import com.bisc.flauncher.data.model.withDockRows
 import com.bisc.flauncher.data.model.withPanelRows
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.settings.SettingsRepository
-import com.bisc.flauncher.ui.theme.ThemePreference
+import com.bisc.flauncher.ui.theme.backgroundColorFor
+import com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor
+import com.bisc.flauncher.ui.theme.isDark
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -66,30 +67,29 @@ class PageContentRepository @Inject constructor(
         val homeId = existingHome?.id ?: pageDao.insert(LauncherPage(orderIndex = 0, isHome = true)).also { newHomeId ->
             settingsRepository.setPageHideStatusBar(newHomeId, true)
         }
+        val isDark = isDark()
+
         // Home starts with just the dock — no clock, no widgets. Widgets (the clock included) only
         // appear once the user opts in via "Widgets auf dem Homescreen aktivieren" in Settings, matching
         // the Discreet Launcher "empty home screen" principle this app is built on. The dock row's own
-        // entries are plain RowEntry rows, same table/machinery as any other row. Unlike the
-        // Favorites popup (which matches the page's own light/dark mode), the dock deliberately
-        // INVERTS it by default — black-on-light/white-on-dark — so it reads as its own distinct
-        // surface against the page behind it; borderEnabled here now means "show the top edge line"
-        // (the dock panel is flush with the screen's bottom edge, so only that one edge can have a
-        // border at all — see the dock panel rendering in HomeScreen.kt).
+        // entries are plain RowEntry rows, same table/machinery as any other row. The dock deliberately
+        // takes the *opposite* tone from the page (see defaultBoxAppearanceFor) so it reads as its own
+        // distinct surface against the page behind it; borderEnabled here now means "show the top edge
+        // line" (the dock panel is flush with the screen's bottom edge, so only that one edge can have
+        // a border at all — see the dock panel rendering in HomeScreen.kt).
         val dockRowId = rowDao.getForPage(homeId).find { it.type == PageRowType.SEARCH_BAR }?.id
             ?: rowDao.insert(
                 PageRow(pageId = homeId, orderIndex = 0, type = PageRowType.SEARCH_BAR, borderEnabled = true)
-                    .withAppearance(ElementAppearance(fill = ColorFill(color = invertedBackgroundColor()), opacity = 0.85f, borderEnabled = true))
+                    .withAppearance(defaultBoxAppearanceFor(isDark))
             )
 
         // Same structural pattern as the dock row above — a pinned bookend on Home, rendered as its
         // own floating overlay outside the pager (see HomeScreen's Panel AnimatedVisibility block)
-        // rather than inline. A translucent neutral fill (not opaque white) so resolveElementColors'
-        // automatic White-on-dark/Black-on-light contrast picks a sensible default without any
-        // bespoke color logic.
+        // rather than inline.
         if (rowDao.getForPage(homeId).none { it.type == PageRowType.PANEL }) {
             rowDao.insert(
                 PageRow(pageId = homeId, orderIndex = 0, type = PageRowType.PANEL, borderEnabled = true)
-                    .withAppearance(ElementAppearance(fill = ColorFill(color = invertedBackgroundColor()), opacity = 0.85f, borderEnabled = true))
+                    .withAppearance(defaultBoxAppearanceFor(isDark))
             )
         }
 
@@ -193,26 +193,13 @@ class PageContentRepository @Inject constructor(
     /** Every page/surface falls back to this when it has no color override of its own. */
     private suspend fun ensureGlobalBackgroundSeeded() {
         if (!settingsRepository.hasGlobalBackground()) {
-            settingsRepository.setGlobalBackground(BackgroundConfig(source = BackgroundSource.COLOR, fill = ColorFill(color = defaultBackgroundColor())))
+            settingsRepository.setGlobalBackground(BackgroundConfig(source = BackgroundSource.COLOR, fill = ColorFill(color = backgroundColorFor(isDark()))))
         }
     }
 
-    /** Plain black in dark mode, plain white in light mode — no bundled wallpaper is shipped anymore. */
-    private suspend fun defaultBackgroundColor(): Int {
-        val isDark = when (settingsRepository.theme.first()) {
-            ThemePreference.DARK -> true
-            ThemePreference.LIGHT -> false
-            ThemePreference.SYSTEM ->
-                context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
-                    android.content.res.Configuration.UI_MODE_NIGHT_YES
-        }
-        return if (isDark) android.graphics.Color.BLACK else android.graphics.Color.WHITE
-    }
-
-    /** The opposite of [defaultBackgroundColor] — for surfaces that want to read as a distinct layer
-     *  against the page instead of blending into it (the dock panel's own default fill). */
-    private suspend fun invertedBackgroundColor(): Int =
-        if (defaultBackgroundColor() == android.graphics.Color.BLACK) android.graphics.Color.WHITE else android.graphics.Color.BLACK
+    /** Resolves ThemePreference.SYSTEM against the live device setting — no bundled wallpaper is
+     *  shipped, Light/Dark/System (see ui.theme.Theme.kt) is the only appearance control there is. */
+    private suspend fun isDark(): Boolean = settingsRepository.theme.first().isDark(context)
 
     suspend fun addPage(): Long {
         val next = (pageDao.maxOrderIndex() ?: -1) + 1
@@ -306,18 +293,12 @@ class PageContentRepository @Inject constructor(
         return (rowDao.maxOrderIndex(pageId) ?: -1) + 1
     }
 
-    private suspend fun presetRowAppearance(): ElementAppearance? =
-        settingsRepository.activeDesignPreset.first()?.let { DesignPresetValues.of(it).rowAppearance }
-
-    private suspend fun presetSearchBarAppearance(): ElementAppearance? =
-        settingsRepository.activeDesignPreset.first()?.let { DesignPresetValues.of(it).searchBarAppearance }
-
     suspend fun addWidgetRow(pageId: Long, kind: String, spanY: Int = WidgetKind.defaultSpan(kind)): Long {
         var row = PageRow(
             pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.WIDGET, payload = kind, spanY = spanY,
             cornerStyle = settingsRepository.defaultCornerStyle.first()
         )
-        presetRowAppearance()?.let { row = row.withAppearance(it) }
+        row = row.withAppearance(defaultBoxAppearanceFor(isDark()))
         val id = rowDao.insert(row)
         rebalancePageOverflow(pageId)
         return id
@@ -328,7 +309,7 @@ class PageContentRepository @Inject constructor(
             pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.SYSTEM_WIDGET, payload = appWidgetId.toString(), spanY = spanY,
             cornerStyle = settingsRepository.defaultCornerStyle.first()
         )
-        presetRowAppearance()?.let { row = row.withAppearance(it) }
+        row = row.withAppearance(defaultBoxAppearanceFor(isDark()))
         val id = rowDao.insert(row)
         rebalancePageOverflow(pageId)
         return id
@@ -339,7 +320,7 @@ class PageContentRepository @Inject constructor(
             pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.ELEMENT_BOX, columns = GridConstants.DEFAULT_ELEMENT_BOX_COLUMNS,
             cornerStyle = settingsRepository.defaultCornerStyle.first()
         )
-        presetRowAppearance()?.let { row = row.withAppearance(it) }
+        row = row.withAppearance(defaultBoxAppearanceFor(isDark()))
         val id = rowDao.insert(row)
         rebalancePageOverflow(pageId)
         return id
@@ -348,8 +329,8 @@ class PageContentRepository @Inject constructor(
     /** Returns how many rows on [pageId] had to be relocated to a new page as a result — see [rebalancePageOverflow]. */
     suspend fun addSearchBarRow(pageId: Long): Int {
         val next = (rowDao.maxOrderIndex(pageId) ?: -1) + 1
-        var row = PageRow(pageId = pageId, orderIndex = next, type = PageRowType.SEARCH_BAR, borderEnabled = true)
-        presetSearchBarAppearance()?.let { row = row.withAppearance(it) }
+        val row = PageRow(pageId = pageId, orderIndex = next, type = PageRowType.SEARCH_BAR, borderEnabled = true)
+            .withAppearance(defaultBoxAppearanceFor(isDark()))
         rowDao.insert(row)
         return rebalancePageOverflow(pageId).size
     }

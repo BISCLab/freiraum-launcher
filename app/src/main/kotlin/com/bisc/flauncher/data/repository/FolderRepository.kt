@@ -1,9 +1,8 @@
 package com.bisc.flauncher.data.repository
 
+import android.content.Context
 import com.bisc.flauncher.data.db.FolderDao
 import com.bisc.flauncher.data.db.FolderItemDao
-import com.bisc.flauncher.data.model.DesignPresetValues
-import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.Folder
 import com.bisc.flauncher.data.model.FolderIconMode
 import com.bisc.flauncher.data.model.FolderItem
@@ -11,11 +10,15 @@ import com.bisc.flauncher.data.model.GridItemType
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.model.withAppearance
 import com.bisc.flauncher.data.settings.SettingsRepository
+import com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor
+import com.bisc.flauncher.ui.theme.isDark
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 class FolderRepository @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val folderDao: FolderDao,
     private val folderItemDao: FolderItemDao,
     private val settingsRepository: SettingsRepository
@@ -66,12 +69,10 @@ class FolderRepository @Inject constructor(
         folderItemDao.insert(FolderItem(folderId = folderId, type = type, payload = payload, orderIndex = nextOrderIndex(folderId)))
     }
 
-    private suspend fun presetItemAppearance(): ElementAppearance? =
-        settingsRepository.activeDesignPreset.first()?.let { DesignPresetValues.of(it).rowAppearance }
-
     suspend fun addWidgetToFolder(folderId: Long, kind: String, spanY: Int = WidgetKind.defaultSpan(kind)): Long {
+        val isDark = settingsRepository.theme.first().isDark(context)
         var item = FolderItem(folderId = folderId, type = GridItemType.WIDGET, payload = kind, spanY = spanY, orderIndex = nextOrderIndex(folderId))
-        presetItemAppearance()?.let { item = item.withAppearance(it) }
+        item = item.withAppearance(defaultBoxAppearanceFor(isDark))
         return folderItemDao.insert(item)
     }
 

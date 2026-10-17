@@ -48,8 +48,11 @@ import com.bisc.flauncher.ui.settings.SettingsSearchFullScreen
 import com.bisc.flauncher.ui.settings.SettingsViewModel
 import com.bisc.flauncher.ui.settings.SettingsWidgetRowEditScreen
 import com.bisc.flauncher.ui.theme.FLauncherTheme
+import com.bisc.flauncher.ui.theme.ThemePreference
 import com.bisc.flauncher.util.SystemWidgetHostManager
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -57,6 +60,10 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var widgetHostManager: SystemWidgetHostManager
 
     @Inject lateinit var appIconLoader: com.bisc.flauncher.util.AppIconLoader
+
+    @Inject lateinit var themeRepository: com.bisc.flauncher.data.repository.ThemeRepository
+
+    @Inject lateinit var settingsRepository: com.bisc.flauncher.data.settings.SettingsRepository
 
     private var homeButtonPressCount by mutableIntStateOf(0)
 
@@ -86,6 +93,19 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         if (intent.hasCategory(Intent.CATEGORY_HOME)) homeButtonPressCount++
         handleSettingsIntent(intent)
+    }
+
+    // uiMode is declared in configChanges (manifest), so a device dark/light flip lands here
+    // instead of recreating the Activity. Only matters for ThemePreference.SYSTEM — Light/Dark
+    // ignore the device setting entirely, so reapplying for them here would just be a no-op
+    // rewrite. See ThemeRepository.reapplyTheme for what "System follows the device live" means
+    // in practice: it re-stamps the background and every box/card/widget/dock/panel's default
+    // fill, the same as a manual Light/Dark/System switch in Settings does.
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        lifecycleScope.launch {
+            if (settingsRepository.theme.first() == ThemePreference.SYSTEM) themeRepository.reapplyTheme()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

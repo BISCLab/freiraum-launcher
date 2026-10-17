@@ -14,7 +14,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
-import com.bisc.flauncher.data.model.DesignPreset
 import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.ui.theme.FontPreference
@@ -38,7 +37,7 @@ fun SettingsAppearanceScreen(
     val mapsPackage by viewModel.searchMapsApp.collectAsState()
     var browserPickerOpen by remember { mutableStateOf(false) }
     var mapsPickerOpen by remember { mutableStateOf(false) }
-    var confirmingPreset by remember { mutableStateOf<DesignPreset?>(null) }
+    var confirmingTheme by remember { mutableStateOf<ThemePreference?>(null) }
     var confirmingHideStatusBarEverywhere by remember { mutableStateOf<Boolean?>(null) }
     val context = androidx.compose.ui.platform.LocalContext.current
     val defaultAppLabel = stringResource(R.string.settings_search_open_with_default)
@@ -67,22 +66,6 @@ fun SettingsAppearanceScreen(
                 trailing = null
             )
         }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_design_presets_label)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_design_preset_light),
-                info = stringResource(R.string.settings_design_preset_summary),
-                onClick = { confirmingPreset = DesignPreset.LIGHT },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_design_preset_dark),
-                info = stringResource(R.string.settings_design_preset_summary),
-                onClick = { confirmingPreset = DesignPreset.DARK },
-                trailing = null
-            )
-        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_language_label)) {
             var language by remember { mutableStateOf(com.bisc.flauncher.util.AppLanguage.current(context)) }
             val pick = { tag: String ->
@@ -95,9 +78,9 @@ fun SettingsAppearanceScreen(
             RadioPreference("Deutsch", "de", language, pick)
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_theme_label)) {
-            RadioPreference(stringResource(R.string.settings_theme_light), ThemePreference.LIGHT, theme, viewModel::setTheme)
-            RadioPreference(stringResource(R.string.settings_theme_dark), ThemePreference.DARK, theme, viewModel::setTheme)
-            RadioPreference(stringResource(R.string.settings_theme_system), ThemePreference.SYSTEM, theme, viewModel::setTheme)
+            RadioPreference(stringResource(R.string.settings_theme_light), ThemePreference.LIGHT, theme, onSelect = { confirmingTheme = it })
+            RadioPreference(stringResource(R.string.settings_theme_dark), ThemePreference.DARK, theme, onSelect = { confirmingTheme = it })
+            RadioPreference(stringResource(R.string.settings_theme_system), ThemePreference.SYSTEM, theme, onSelect = { confirmingTheme = it })
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_font_label)) {
             RadioPreference(stringResource(R.string.settings_font_system), FontPreference.SYSTEM, fontPreference, viewModel::setFontPreference, font = FontPreference.SYSTEM.fontFamily)
@@ -251,24 +234,28 @@ fun SettingsAppearanceScreen(
         )
     }
 
-    confirmingPreset?.let { preset ->
+    confirmingTheme?.let { pref ->
         val label = stringResource(
-            if (preset == DesignPreset.LIGHT) R.string.settings_design_preset_name_light else R.string.settings_design_preset_name_dark
+            when (pref) {
+                ThemePreference.LIGHT -> R.string.settings_theme_light
+                ThemePreference.DARK -> R.string.settings_theme_dark
+                ThemePreference.SYSTEM -> R.string.settings_theme_system
+            }
         )
         AlertDialog(
-            onDismissRequest = { confirmingPreset = null },
-            title = { Text(stringResource(R.string.settings_design_preset_confirm_title, label)) },
-            text = { Text(stringResource(R.string.settings_design_preset_confirm_message)) },
+            onDismissRequest = { confirmingTheme = null },
+            title = { Text(stringResource(R.string.settings_theme_confirm_title, label)) },
+            text = { Text(stringResource(R.string.settings_theme_confirm_message)) },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.applyDesignPreset(preset)
-                    confirmingPreset = null
+                    viewModel.applyTheme(pref)
+                    confirmingTheme = null
                 }) {
-                    Text(stringResource(R.string.settings_design_preset_apply))
+                    Text(stringResource(R.string.settings_theme_apply))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { confirmingPreset = null }) { Text(stringResource(R.string.widget_notes_cancel)) }
+                TextButton(onClick = { confirmingTheme = null }) { Text(stringResource(R.string.widget_notes_cancel)) }
             }
         )
     }
