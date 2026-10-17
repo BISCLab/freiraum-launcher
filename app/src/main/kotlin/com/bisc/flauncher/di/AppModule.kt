@@ -17,9 +17,9 @@ import com.bisc.flauncher.data.db.LauncherPageDao
 import com.bisc.flauncher.data.db.NoteDao
 import com.bisc.flauncher.data.db.PageRowDao
 import com.bisc.flauncher.data.db.PinnedContactDao
+import com.bisc.flauncher.data.db.ActionButtonDao
 import com.bisc.flauncher.data.db.PinnedShortcutDao
 import com.bisc.flauncher.data.db.PinnedWebsiteDao
-import com.bisc.flauncher.data.db.PowerButtonDao
 import com.bisc.flauncher.data.db.SavedMapTargetDao
 import dagger.Module
 import dagger.Provides
@@ -172,5 +172,5 @@ object AppModule {
     fun providePinnedContactDao(db: FLauncherDatabase): PinnedContactDao = db.pinnedContactDao()
 
     @Provides
-    fun providePowerButtonDao(db: FLauncherDatabase): PowerButtonDao = db.powerButtonDao()
+    fun provideActionButtonDao(db: FLauncherDatabase): ActionButtonDao = db.actionButtonDao()
 }

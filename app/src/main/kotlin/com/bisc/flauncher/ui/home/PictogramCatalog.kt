@@ -24,7 +24,7 @@ import androidx.compose.material.icons.filled.Work
 import androidx.compose.ui.graphics.vector.ImageVector
 
 /**
- * Placeholder pictogram set for Elements (Addresses/Links/Powerbuttons) that need a user-pickable
+ * Placeholder pictogram set for Elements (Addresses/Links/Action buttons) that need a user-pickable
  * icon independent of any app icon. Keys are stable identifiers stored in the database — the
  * Material Icons behind them are a stand-in until the user supplies a real flat/transparent SVG set
  * (see masterplan Phase 6), at which point each key's [ImageVector] is swapped for a VectorDrawable

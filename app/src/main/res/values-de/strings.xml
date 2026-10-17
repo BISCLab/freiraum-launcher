@@ -100,6 +100,7 @@
     <string name="settings_shortcut_bluetooth">Bluetooth</string>
     <string name="settings_shortcut_display">Display</string>
     <string name="settings_shortcut_sound">Ton</string>
+    <string name="settings_shortcut_battery">Akku</string>
     <string name="settings_shortcut_apps">Apps</string>
     <string name="settings_shortcut_storage">Speicher</string>
     <string name="settings_shortcut_location">Standort</string>
@@ -185,7 +186,7 @@
     <string name="settings_element_show_labels_label">Beschriftung anzeigen</string>
 
     <string name="settings_section_elements">Elemente</string>
-    <string name="settings_card_elements_subtitle">Apps, Ordner, Adressen, Links, Powerbuttons</string>
+    <string name="settings_card_elements_subtitle">Apps, Ordner, Adressen, Links, Aktionsbuttons</string>
     <string name="settings_elements_addresses_title">Adressen</string>
     <string name="settings_elements_addresses_empty">Noch keine Adressen.</string>
     <string name="settings_elements_add_address">Adresse hinzufügen</string>
@@ -199,18 +200,20 @@
     <string name="settings_elements_add_link">Link hinzufügen</string>
     <string name="settings_elements_browser_app_label">Browser</string>
     <string name="settings_elements_delete_link">Link löschen</string>
-    <string name="settings_elements_powerbuttons_title">Powerbuttons</string>
-    <string name="settings_elements_powerbuttons_empty">Noch keine Powerbuttons.</string>
-    <string name="settings_elements_powerbuttons_picker_empty">Noch keine Powerbuttons – erstelle einen unter Einstellungen -&gt; Elemente -&gt; Powerbuttons.</string>
-    <string name="settings_elements_add_powerbutton">Powerbutton hinzufügen</string>
-    <string name="settings_elements_powerbutton_name_hint">Name</string>
-    <string name="settings_elements_powerbutton_action_label">Aktion</string>
-    <string name="settings_elements_powerbutton_action_panel">Panel öffnen</string>
-    <string name="settings_elements_powerbutton_action_dock">Dock öffnen</string>
-    <string name="settings_elements_powerbutton_action_page">Seite öffnen</string>
-    <string name="settings_elements_powerbutton_pick_page">Seite auswählen</string>
-    <string name="settings_elements_powerbutton_colors_label">Farben</string>
-    <string name="settings_elements_delete_powerbutton">Powerbutton löschen</string>
+    <string name="settings_elements_actionbuttons_title">Aktionsbuttons</string>
+    <string name="settings_elements_actionbuttons_empty">Noch keine Aktionsbuttons.</string>
+    <string name="settings_elements_actionbuttons_picker_empty">Noch keine Aktionsbuttons – erstelle einen unter Einstellungen -&gt; Elemente -&gt; Aktionsbuttons.</string>
+    <string name="settings_elements_add_actionbutton">Aktionsbutton hinzufügen</string>
+    <string name="settings_elements_actionbutton_name_hint">Name</string>
+    <string name="settings_elements_actionbutton_action_label">Aktion</string>
+    <string name="settings_elements_actionbutton_action_panel">Panel öffnen</string>
+    <string name="settings_elements_actionbutton_action_dock">Dock öffnen</string>
+    <string name="settings_elements_actionbutton_action_page">Seite öffnen</string>
+    <string name="settings_elements_actionbutton_action_setting">Android-Einstellungsseite öffnen</string>
+    <string name="settings_elements_actionbutton_pick_page">Seite auswählen</string>
+    <string name="settings_elements_actionbutton_pick_setting">Einstellungsseite auswählen</string>
+    <string name="settings_elements_colors_label">Farben</string>
+    <string name="settings_elements_delete_actionbutton">Aktionsbutton löschen</string>
 
     <string name="settings_dock_background_label">Hintergrund</string>
     <string name="settings_dock_visibility_label">Sichtbarkeit</string>
@@ -421,7 +424,7 @@
     <string name="settings_apps_row_add_website">Website</string>
     <string name="settings_apps_row_add_page_link">Seite verlinken</string>
     <string name="settings_apps_row_add_contact">Kontakt hinzufügen</string>
-    <string name="settings_apps_row_add_powerbutton">Powerbutton hinzufügen</string>
+    <string name="settings_apps_row_add_actionbutton">Aktionsbutton hinzufügen</string>
     <string name="settings_apps_row_pill_mode_label">Einzeiliges Layout</string>
     <string name="settings_apps_row_pill_mode_summary">Einträge in einer Zeile ohne Umbruch statt im Raster — so wie das Dock</string>
     <string name="settings_map_mode_address">Adresse</string>

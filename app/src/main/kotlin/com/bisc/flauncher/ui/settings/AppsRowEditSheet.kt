@@ -19,13 +19,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ViewCarousel
@@ -90,7 +90,7 @@ internal fun AppRowEntryRow(
     resolveLabel: (ComponentName) -> String,
     onRemove: () -> Unit,
     pinnedContacts: List<com.bisc.flauncher.data.model.PinnedContact> = emptyList(),
-    powerButtons: List<com.bisc.flauncher.data.model.PowerButton> = emptyList()
+    actionButtons: List<com.bisc.flauncher.data.model.ActionButton> = emptyList()
 ) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         when (entry.type) {
@@ -138,10 +138,10 @@ internal fun AppRowEntryRow(
                 Icon(Icons.Filled.Person, contentDescription = null, modifier = Modifier.size(28.dp))
                 Text(contact?.displayName.orEmpty(), modifier = Modifier.weight(1f))
             }
-            GridItemType.POWER_BUTTON -> {
+            GridItemType.ACTION_BUTTON -> {
                 val buttonId = remember(entry.payload) { entry.payload.toLongOrNull() }
-                val button = powerButtons.find { it.id == buttonId }
-                Icon(Icons.Filled.PowerSettingsNew, contentDescription = null, modifier = Modifier.size(28.dp))
+                val button = actionButtons.find { it.id == buttonId }
+                Icon(Icons.Filled.Bolt, contentDescription = null, modifier = Modifier.size(28.dp))
                 Text(button?.label.orEmpty(), modifier = Modifier.weight(1f))
             }
             GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Text("", modifier = Modifier.weight(1f))

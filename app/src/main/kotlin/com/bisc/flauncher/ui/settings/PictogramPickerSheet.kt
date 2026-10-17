@@ -26,7 +26,7 @@ import com.bisc.flauncher.R
 import com.bisc.flauncher.ui.home.PictogramCatalog
 
 /** Picks one pictogram from [PictogramCatalog] — a placeholder Material-icon grid standing in for the
- *  flat/transparent SVG set the masterplan calls for, used by Addresses/Links/Powerbuttons. */
+ *  flat/transparent SVG set the masterplan calls for, used by Addresses/Links/Action buttons. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PictogramPickerSheet(selected: String?, onSelect: (String) -> Unit, onDismiss: () -> Unit) {

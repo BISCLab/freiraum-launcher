@@ -100,7 +100,7 @@ class HomeViewModel @Inject constructor(
     private val noteRepository: NoteRepository,
     private val mapsRepository: MapsRepository,
     private val websiteRepository: WebsiteRepository,
-    private val powerButtonRepository: com.bisc.flauncher.data.repository.PowerButtonRepository,
+    private val actionButtonRepository: com.bisc.flauncher.data.repository.ActionButtonRepository,
     private val shortcutRepository: ShortcutRepository,
     private val appOverrideRepository: AppOverrideRepository,
     private val weatherRepository: WeatherRepository,
@@ -431,8 +431,8 @@ class HomeViewModel @Inject constructor(
     val pinnedWebsites: StateFlow<List<PinnedWebsite>> =
         websiteRepository.websites.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val powerButtons: StateFlow<List<com.bisc.flauncher.data.model.PowerButton>> =
-        powerButtonRepository.powerButtons.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    val actionButtons: StateFlow<List<com.bisc.flauncher.data.model.ActionButton>> =
+        actionButtonRepository.actionButtons.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val pinnedShortcuts: StateFlow<List<PinnedShortcut>> =
         shortcutRepository.pinnedShortcuts.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
@@ -933,8 +933,8 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun addPowerButtonEntryToRow(pageRowId: Long, powerButtonId: Long) {
-        viewModelScope.launch { pageContentRepository.addPowerButtonEntry(pageRowId, powerButtonId) }
+    fun addActionButtonEntryToRow(pageRowId: Long, actionButtonId: Long) {
+        viewModelScope.launch { pageContentRepository.addActionButtonEntry(pageRowId, actionButtonId) }
     }
 
     fun setRowPillMode(row: PageRow, pillMode: Boolean) {

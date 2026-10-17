@@ -378,15 +378,15 @@ class MainActivity : ComponentActivity() {
                             val websiteId = backStackEntry.arguments?.getLong("websiteId") ?: return@composable
                             com.bisc.flauncher.ui.settings.SettingsLinkDetailScreen(websiteId = websiteId, navController = navController, onBack = { navController.popBackStack() })
                         }
-                        composable("settings/elements/powerbuttons") {
-                            com.bisc.flauncher.ui.settings.SettingsPowerButtonsScreen(navController = navController, onBack = { navController.popBackStack() })
+                        composable("settings/elements/actionbuttons") {
+                            com.bisc.flauncher.ui.settings.SettingsActionButtonsScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable(
-                            "settings/elements/powerbuttons/{buttonId}",
+                            "settings/elements/actionbuttons/{buttonId}",
                             arguments = listOf(navArgument("buttonId") { type = NavType.LongType })
                         ) { backStackEntry ->
                             val buttonId = backStackEntry.arguments?.getLong("buttonId") ?: return@composable
-                            com.bisc.flauncher.ui.settings.SettingsPowerButtonDetailScreen(buttonId = buttonId, navController = navController, onBack = { navController.popBackStack() })
+                            com.bisc.flauncher.ui.settings.SettingsActionButtonDetailScreen(buttonId = buttonId, navController = navController, onBack = { navController.popBackStack() })
                         }
                     }
                 }

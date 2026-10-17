@@ -93,7 +93,8 @@ class PageContentRepository @Inject constructor(
         }
 
         // Autonomous singleton, same pattern as the app overview above — exists and works whether or
-        // not any dock slot links to it (unlike the old TEXT_SEARCH power button, which search *was*).
+        // not any dock slot links to it (unlike the old, now-deleted TEXT_SEARCH dock button, which
+        // search *was*, predating today's ActionButton Element entirely).
         if (pageDao.getByKind(LauncherPageKind.SEARCH) == null) {
             val searchId = pageDao.insert(
                 LauncherPage(orderIndex = (pageDao.maxOrderIndex() ?: -1) + 1, kind = LauncherPageKind.SEARCH)
@@ -564,9 +565,9 @@ class PageContentRepository @Inject constructor(
         return id
     }
 
-    suspend fun addPowerButtonEntry(pageRowId: Long, powerButtonId: Long): Long {
+    suspend fun addActionButtonEntry(pageRowId: Long, actionButtonId: Long): Long {
         val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
-        val id = entryDao.insert(AppRowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.POWER_BUTTON, payload = powerButtonId.toString()))
+        val id = entryDao.insert(AppRowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.ACTION_BUTTON, payload = actionButtonId.toString()))
         rebalanceForRow(pageRowId)
         return id
     }

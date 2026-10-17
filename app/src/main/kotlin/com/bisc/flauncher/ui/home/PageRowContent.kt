@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ViewCarousel
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -268,8 +269,8 @@ fun AppsGridEntries(
     pinnedContacts: List<PinnedContact> = emptyList(),
     loadContactPhoto: suspend (Long, String?) -> ImageBitmap? = { _, _ -> null },
     onContactClick: (Long) -> Unit = {},
-    powerButtons: List<com.bisc.flauncher.data.model.PowerButton> = emptyList(),
-    onPowerButtonClick: (com.bisc.flauncher.data.model.PowerButton) -> Unit = {},
+    actionButtons: List<com.bisc.flauncher.data.model.ActionButton> = emptyList(),
+    onActionButtonClick: (com.bisc.flauncher.data.model.ActionButton) -> Unit = {},
     showLabels: Boolean = true,
     labelColor: Color = Color.White,
     iconSizeScale: Float = 1f,
@@ -329,12 +330,12 @@ fun AppsGridEntries(
                     iconSizeScale = iconSizeScale
                 )
             }
-            GridItemType.POWER_BUTTON -> {
+            GridItemType.ACTION_BUTTON -> {
                 val buttonId = remember(entry.payload) { entry.payload.toLongOrNull() }
-                val button = powerButtons.find { it.id == buttonId }
-                PowerButtonCell(
+                val button = actionButtons.find { it.id == buttonId }
+                ActionButtonCell(
                     button = button,
-                    onClick = editOverride ?: { if (button != null) onPowerButtonClick(button) },
+                    onClick = editOverride ?: { if (button != null) onActionButtonClick(button) },
                     showLabel = showLabels,
                     labelColor = labelColor,
                     iconSizeScale = iconSizeScale
@@ -586,8 +587,8 @@ private fun ContactCell(
 }
 
 @Composable
-private fun PowerButtonCell(
-    button: com.bisc.flauncher.data.model.PowerButton?,
+private fun ActionButtonCell(
+    button: com.bisc.flauncher.data.model.ActionButton?,
     onClick: () -> Unit,
     showLabel: Boolean = true,
     labelColor: Color = Color.White,
@@ -596,8 +597,9 @@ private fun PowerButtonCell(
     val background = button?.backgroundColor?.let { Color(it) } ?: UNSET_APP_SLOT_COLOR
     val tint = button?.iconColor?.let { Color(it) } ?: Color.White
     val icon = PictogramCatalog.iconFor(button?.iconKey) ?: when (button?.actionType) {
-        com.bisc.flauncher.data.model.PowerButtonActionType.PANEL -> Icons.Filled.Dashboard
-        com.bisc.flauncher.data.model.PowerButtonActionType.DOCK -> Icons.Filled.Apps
+        com.bisc.flauncher.data.model.ActionButtonActionType.PANEL -> Icons.Filled.Dashboard
+        com.bisc.flauncher.data.model.ActionButtonActionType.DOCK -> Icons.Filled.Apps
+        com.bisc.flauncher.data.model.ActionButtonActionType.ANDROID_SETTING -> Icons.Filled.Settings
         else -> Icons.Filled.ViewCarousel
     }
     Column(
@@ -739,8 +741,8 @@ fun PillRowEntries(
     pinnedContacts: List<PinnedContact> = emptyList(),
     loadContactPhoto: suspend (Long, String?) -> ImageBitmap? = { _, _ -> null },
     onContactClick: (Long) -> Unit = {},
-    powerButtons: List<com.bisc.flauncher.data.model.PowerButton> = emptyList(),
-    onPowerButtonClick: (com.bisc.flauncher.data.model.PowerButton) -> Unit = {},
+    actionButtons: List<com.bisc.flauncher.data.model.ActionButton> = emptyList(),
+    onActionButtonClick: (com.bisc.flauncher.data.model.ActionButton) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -837,19 +839,20 @@ fun PillRowEntries(
                                 }
                             }
                         }
-                        GridItemType.POWER_BUTTON -> {
+                        GridItemType.ACTION_BUTTON -> {
                             val buttonId = remember(entry.payload) { entry.payload.toLongOrNull() }
-                            val button = powerButtons.find { it.id == buttonId }
+                            val button = actionButtons.find { it.id == buttonId }
                             val background = button?.backgroundColor?.let { Color(it) } ?: UNSET_APP_SLOT_COLOR
                             val tint = button?.iconColor?.let { Color(it) } ?: Color.White
-                            val icon = when (button?.actionType) {
-                                com.bisc.flauncher.data.model.PowerButtonActionType.PANEL -> Icons.Filled.Dashboard
-                                com.bisc.flauncher.data.model.PowerButtonActionType.DOCK -> Icons.Filled.Apps
+                            val icon = PictogramCatalog.iconFor(button?.iconKey) ?: when (button?.actionType) {
+                                com.bisc.flauncher.data.model.ActionButtonActionType.PANEL -> Icons.Filled.Dashboard
+                                com.bisc.flauncher.data.model.ActionButtonActionType.DOCK -> Icons.Filled.Apps
+                                com.bisc.flauncher.data.model.ActionButtonActionType.ANDROID_SETTING -> Icons.Filled.Settings
                                 else -> Icons.Filled.ViewCarousel
                             }
                             Box(
                                 modifier = Modifier.fillMaxSize().background(background)
-                                    .clickable(enabled = button != null) { button?.let(onPowerButtonClick) },
+                                    .clickable(enabled = button != null) { button?.let(onActionButtonClick) },
                                 contentAlignment = Alignment.Center
                             ) { Icon(imageVector = icon, contentDescription = null, tint = tint) }
                         }
@@ -858,7 +861,7 @@ fun PillRowEntries(
                 }
                 if (showLabels) {
                     GridLabel(
-                        text = entryLabel(entry, folders, savedMapTargets, pinnedWebsites, pages, pinnedContacts, resolveLabel, powerButtons),
+                        text = entryLabel(entry, folders, savedMapTargets, pinnedWebsites, pages, pinnedContacts, resolveLabel, actionButtons),
                         color = labelColor,
                         modifier = Modifier.width(DockDimens.iconSize)
                     )
@@ -910,7 +913,7 @@ internal fun entryLabel(
     pages: List<LauncherPage>,
     pinnedContacts: List<PinnedContact>,
     resolveLabel: (ComponentName) -> String,
-    powerButtons: List<com.bisc.flauncher.data.model.PowerButton> = emptyList()
+    actionButtons: List<com.bisc.flauncher.data.model.ActionButton> = emptyList()
 ): String = when (entry.type) {
     GridItemType.APP -> ComponentName.unflattenFromString(entry.payload)?.let(resolveLabel).orEmpty()
     GridItemType.FOLDER -> folders.find { it.id == entry.payload.toLongOrNull() }?.name.orEmpty()
@@ -919,6 +922,6 @@ internal fun entryLabel(
     GridItemType.WEBSITE -> pinnedWebsites.find { it.id == entry.payload.toLongOrNull() }?.label.orEmpty()
     GridItemType.PAGE -> pages.find { it.id == entry.payload.toLongOrNull() }?.let { pageLabel(it, pages) }.orEmpty()
     GridItemType.CONTACT -> pinnedContacts.find { it.contactId == entry.payload.toLongOrNull() }?.displayName.orEmpty()
-    GridItemType.POWER_BUTTON -> powerButtons.find { it.id == entry.payload.toLongOrNull() }?.label.orEmpty()
+    GridItemType.ACTION_BUTTON -> actionButtons.find { it.id == entry.payload.toLongOrNull() }?.label.orEmpty()
     GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> ""
 }

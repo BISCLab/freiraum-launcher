@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.BorderAll
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CreateNewFolder
@@ -15,7 +16,6 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.ViewCarousel
@@ -145,7 +145,7 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
     val pinnedContacts by viewModel.pinnedContacts.collectAsState()
     val contactPickerOpen by viewModel.contactPickerOpen.collectAsState()
     val contactPickerList by viewModel.contactPickerList.collectAsState()
-    val powerButtons by viewModel.powerButtons.collectAsState()
+    val actionButtons by viewModel.actionButtons.collectAsState()
     val rowShape = row.dockRows()
 
     var showAddChooser by remember { mutableStateOf(false) }
@@ -156,7 +156,7 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
     var showWebsitePicker by remember { mutableStateOf(false) }
     var showAddMapTargetDialog by remember { mutableStateOf(false) }
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
-    var showPowerButtonPicker by remember { mutableStateOf(false) }
+    var showActionButtonPicker by remember { mutableStateOf(false) }
     var pendingShortcut by remember { mutableStateOf(false) }
     var pendingRemoval by remember { mutableStateOf<com.bisc.flauncher.data.model.AppRowEntry?>(null) }
 
@@ -181,8 +181,8 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
                     pinnedContacts = pinnedContacts,
                     loadContactPhoto = viewModel::loadContactPhoto,
                     onContactClick = {},
-                    powerButtons = powerButtons,
-                    onPowerButtonClick = {},
+                    actionButtons = actionButtons,
+                    onActionButtonClick = {},
                     showLabels = row.showLabels,
                     labelColor = row.appearance().contentColor?.let { androidx.compose.ui.graphics.Color(it) } ?: androidx.compose.ui.graphics.Color.White,
                     onAddEmptySlot = { showAddChooser = true },
@@ -237,7 +237,7 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
 
     pendingRemoval?.let { entry ->
         ConfirmRemoveDialog(
-            label = com.bisc.flauncher.ui.home.entryLabel(entry, folders, savedMapTargets, pinnedWebsites, allPages, pinnedContacts, viewModel::resolveLabel, powerButtons),
+            label = com.bisc.flauncher.ui.home.entryLabel(entry, folders, savedMapTargets, pinnedWebsites, allPages, pinnedContacts, viewModel::resolveLabel, actionButtons),
             onConfirm = { viewModel.removeAppRowEntry(entry); pendingRemoval = null },
             onDismiss = { pendingRemoval = null }
         )
@@ -252,15 +252,15 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
             onAddWebsiteClick = { showAddChooser = false; showWebsitePicker = true },
             onAddPageLinkClick = { showAddChooser = false; showPagePicker = true },
             onAddContactClick = { showAddChooser = false; viewModel.openContactPicker() },
-            onAddPowerButtonClick = { showAddChooser = false; showPowerButtonPicker = true },
+            onAddActionButtonClick = { showAddChooser = false; showActionButtonPicker = true },
             onDismiss = { showAddChooser = false }
         )
     }
-    if (showPowerButtonPicker) {
-        PowerButtonPickerSheet(
-            buttons = powerButtons,
-            onSelect = { button -> viewModel.addPowerButtonEntryToRow(row.id, button.id); showPowerButtonPicker = false },
-            onDismiss = { showPowerButtonPicker = false }
+    if (showActionButtonPicker) {
+        ActionButtonPickerSheet(
+            buttons = actionButtons,
+            onSelect = { button -> viewModel.addActionButtonEntryToRow(row.id, button.id); showActionButtonPicker = false },
+            onDismiss = { showActionButtonPicker = false }
         )
     }
     if (showAppPicker) {
@@ -364,7 +364,7 @@ internal fun AddElementChooserSheet(
     onAddWebsiteClick: () -> Unit,
     onAddPageLinkClick: () -> Unit,
     onAddContactClick: () -> Unit,
-    onAddPowerButtonClick: () -> Unit,
+    onAddActionButtonClick: () -> Unit,
     onDismiss: () -> Unit
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
@@ -376,7 +376,7 @@ internal fun AddElementChooserSheet(
             SettingsPreference(icon = Icons.Filled.Language, title = stringResource(R.string.settings_apps_row_add_website), onClick = onAddWebsiteClick, trailing = null)
             SettingsPreference(icon = Icons.Filled.ViewCarousel, title = stringResource(R.string.settings_apps_row_add_page_link), onClick = onAddPageLinkClick, trailing = null)
             SettingsPreference(icon = Icons.Filled.Person, title = stringResource(R.string.settings_apps_row_add_contact), onClick = onAddContactClick, trailing = null)
-            SettingsPreference(icon = Icons.Filled.PowerSettingsNew, title = stringResource(R.string.settings_apps_row_add_powerbutton), onClick = onAddPowerButtonClick, trailing = null)
+            SettingsPreference(icon = Icons.Filled.Bolt, title = stringResource(R.string.settings_apps_row_add_actionbutton), onClick = onAddActionButtonClick, trailing = null)
         }
     }
 }

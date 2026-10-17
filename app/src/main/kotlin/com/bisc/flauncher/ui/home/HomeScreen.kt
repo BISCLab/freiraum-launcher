@@ -170,7 +170,7 @@ fun HomeScreen(
     val pinnedContacts by viewModel.pinnedContacts.collectAsState()
     val contactPickerOpen by viewModel.contactPickerOpen.collectAsState()
     val contactPickerList by viewModel.contactPickerList.collectAsState()
-    val powerButtons by viewModel.powerButtons.collectAsState()
+    val actionButtons by viewModel.actionButtons.collectAsState()
     val shortcutAppPickerOpen by viewModel.shortcutAppPickerOpen.collectAsState()
     val shortcutPickerForApp by viewModel.shortcutPickerForApp.collectAsState()
     val availableShortcuts by viewModel.availableShortcuts.collectAsState()
@@ -349,16 +349,20 @@ fun HomeScreen(
             com.bisc.flauncher.data.model.LauncherPageKind.SIDEBAR -> viewModel.openOverview()
         }
     }
-    // A Powerbutton's action: open a page (same dispatch as a plain page-link entry), or trigger
-    // the Panel/Dock directly — the one thing a page-link can't express, see PowerButtonActionType.
-    val onPowerButtonClick: (com.bisc.flauncher.data.model.PowerButton) -> Unit = { button ->
+    // An Action button's action: open a page (same dispatch as a plain page-link entry), trigger
+    // the Panel/Dock directly (the one thing a page-link can't express), or jump into a curated
+    // Android settings screen — see ActionButtonActionType.
+    val onActionButtonClick: (com.bisc.flauncher.data.model.ActionButton) -> Unit = { button ->
         when (button.actionType) {
-            com.bisc.flauncher.data.model.PowerButtonActionType.PAGE -> {
+            com.bisc.flauncher.data.model.ActionButtonActionType.PAGE -> {
                 val target = allPages.find { it.id == button.actionPageId }
                 if (target != null) onOpenPageLink(target.id, target.kind)
             }
-            com.bisc.flauncher.data.model.PowerButtonActionType.PANEL -> viewModel.openOverview()
-            com.bisc.flauncher.data.model.PowerButtonActionType.DOCK -> dockExpanded = true
+            com.bisc.flauncher.data.model.ActionButtonActionType.PANEL -> viewModel.openOverview()
+            com.bisc.flauncher.data.model.ActionButtonActionType.DOCK -> dockExpanded = true
+            com.bisc.flauncher.data.model.ActionButtonActionType.ANDROID_SETTING -> {
+                button.androidSettingAction?.let { action -> launchSettingsShortcut(context, action) }
+            }
         }
     }
     // The one place "go back to home" is defined — closes every overlay and, crucially, also scrolls
@@ -667,8 +671,8 @@ fun HomeScreen(
                                     )
                                 }
                             },
-                            powerButtons = powerButtons,
-                            onPowerButtonClick = onPowerButtonClick,
+                            actionButtons = actionButtons,
+                            onActionButtonClick = onActionButtonClick,
                             showLabels = homeDockRow.showLabels,
                             labelColor = homeDockRow.appearance().contentColor?.let { Color(it) } ?: Color.White,
                             iconSizeScale = iconSize.scale
@@ -805,8 +809,8 @@ fun HomeScreen(
                                             )
                                         }
                                     },
-                                    powerButtons = powerButtons,
-                                    onPowerButtonClick = onPowerButtonClick,
+                                    actionButtons = actionButtons,
+                                    onActionButtonClick = onActionButtonClick,
                                     showLabels = row.showLabels,
                                     labelColor = row.appearance().contentColor?.let { Color(it) } ?: Color.White,
                                     iconSizeScale = iconSize.scale
@@ -958,7 +962,7 @@ fun HomeScreen(
             },
             onContactClick = { contact -> contactActionsFor = contact },
             onSettingsShortcutClick = { shortcut ->
-                launchSettingsShortcut(context, shortcut)
+                launchSettingsShortcut(context, shortcut.action)
                 viewModel.closeSearch()
             },
             onFolderClick = { folder ->
@@ -1103,7 +1107,7 @@ fun HomeScreen(
                         GridItemType.WEBSITE -> item.payload.toLongOrNull()
                             ?.let { id -> pinnedWebsites.find { it.id == id } }
                             ?.let { website -> openWebsite(context, website) }
-                        GridItemType.FOLDER, GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE, GridItemType.CONTACT, GridItemType.POWER_BUTTON -> Unit
+                        GridItemType.FOLDER, GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE, GridItemType.CONTACT, GridItemType.ACTION_BUTTON -> Unit
                     }
                     viewModel.closeAllFolders()
                     viewModel.closeOverview()
