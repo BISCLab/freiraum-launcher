@@ -138,9 +138,9 @@
     <string name="settings_pictogram_picker_title">Choose an icon</string>
     <string name="settings_element_icon_label">Icon</string>
 
-    <string name="settings_handedness_label">Handedness</string>
-    <string name="settings_handedness_left">Left</string>
-    <string name="settings_handedness_right">Right</string>
+    <string name="settings_app_overview_alignment_label">Alignment</string>
+    <string name="settings_app_overview_align_left">Left</string>
+    <string name="settings_app_overview_align_right">Right</string>
 
     <string name="settings_color_eyedropper">Pick from widget</string>
     <string name="settings_color_eyedropper_hint">Tap a point on the widget to use that exact color.</string>

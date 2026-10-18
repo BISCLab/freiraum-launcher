@@ -15,7 +15,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.WidgetCornerStyle
-import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.ui.theme.FontPreference
 import com.bisc.flauncher.ui.theme.ThemePreference
 
@@ -28,7 +27,6 @@ fun SettingsAppearanceScreen(
 ) {
     val theme by viewModel.theme.collectAsState()
     val fontPreference by viewModel.fontPreference.collectAsState()
-    val handedness by viewModel.handedness.collectAsState()
     val chargingAnimation by viewModel.chargingAnimationEnabled.collectAsState()
     val chargingColor by viewModel.chargingAnimationColor.collectAsState()
     val statusBarHiddenEverywhere by viewModel.statusBarHiddenEverywhere.collectAsState()
@@ -87,10 +85,6 @@ fun SettingsAppearanceScreen(
             RadioPreference(stringResource(R.string.settings_font_serif), FontPreference.SERIF, fontPreference, viewModel::setFontPreference, font = FontPreference.SERIF.fontFamily)
             RadioPreference(stringResource(R.string.settings_font_monospace), FontPreference.MONOSPACE, fontPreference, viewModel::setFontPreference, font = FontPreference.MONOSPACE.fontFamily)
             RadioPreference(stringResource(R.string.settings_font_rounded), FontPreference.ROUNDED, fontPreference, viewModel::setFontPreference, font = FontPreference.ROUNDED.fontFamily)
-        }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_handedness_label)) {
-            RadioPreference(stringResource(R.string.settings_handedness_left), Handedness.LEFT, handedness, viewModel::setHandedness)
-            RadioPreference(stringResource(R.string.settings_handedness_right), Handedness.RIGHT, handedness, viewModel::setHandedness)
         }
         // Applies to newly created elements only — each one's own Appearance screen can still
         // override it afterwards (see SettingsRepository.defaultCornerStyle).

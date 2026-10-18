@@ -118,8 +118,8 @@ class HomeViewModel @Inject constructor(
     val appListLayout: StateFlow<AppListLayout> =
         settingsRepository.appListLayout.stateIn(viewModelScope, SharingStarted.Eagerly, AppListLayout.LIST)
 
-    val handedness: StateFlow<Handedness> =
-        settingsRepository.handedness.stateIn(viewModelScope, SharingStarted.Eagerly, Handedness.RIGHT)
+    val appOverviewHandedness: StateFlow<Handedness> =
+        settingsRepository.appOverviewHandedness.stateIn(viewModelScope, SharingStarted.Eagerly, Handedness.RIGHT)
 
     val chargingAnimationColor: StateFlow<Int> =
         settingsRepository.chargingAnimationColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF34D058.toInt())

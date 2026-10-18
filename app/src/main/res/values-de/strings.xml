@@ -138,9 +138,9 @@
     <string name="settings_pictogram_picker_title">Symbol wählen</string>
     <string name="settings_element_icon_label">Symbol</string>
 
-    <string name="settings_handedness_label">Händigkeit</string>
-    <string name="settings_handedness_left">Links</string>
-    <string name="settings_handedness_right">Rechts</string>
+    <string name="settings_app_overview_alignment_label">Ausrichtung</string>
+    <string name="settings_app_overview_align_left">Links</string>
+    <string name="settings_app_overview_align_right">Rechts</string>
 
     <string name="settings_color_eyedropper">Aus Widget übernehmen</string>
     <string name="settings_color_eyedropper_hint">Tippe auf eine Stelle im Widget, um genau diese Farbe zu übernehmen.</string>

@@ -65,7 +65,6 @@ import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.data.model.clockDateAction
 import com.bisc.flauncher.data.model.clockTimeAction
-import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.data.settings.IconShape
 import com.bisc.flauncher.ui.home.dock.DockDimens
 import com.bisc.flauncher.ui.home.dock.PageIconGlyph
@@ -102,7 +101,6 @@ fun PageRowContent(
     onShortcutClick: (String) -> Unit = {},
     onOpenPageLink: (Long, LauncherPageKind) -> Unit = { _, _ -> },
     onExecuteAction: (GestureAction) -> Unit = {},
-    handedness: Handedness = Handedness.RIGHT,
     iconShape: IconShape = IconShape.ROUNDED_SQUARE,
     iconSizeScale: Float = 1f,
     onSystemWidgetViewReady: ((android.view.View) -> Unit)? = null,

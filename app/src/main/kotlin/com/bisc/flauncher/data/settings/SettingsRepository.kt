@@ -32,6 +32,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
+/** Which edge a left/right-dependent layout favors — currently only the app overview's own
+ *  alphabet rail and floating search button (see [SettingsRepository.appOverviewHandedness]). */
 enum class Handedness { LEFT, RIGHT }
 
 /** Shape applied to the dock's quick-launch icons and search button. */
@@ -50,11 +52,6 @@ class SettingsRepository @Inject constructor(
     val theme: Flow<ThemePreference> = dataStore.data.map { prefs ->
         prefs[THEME_KEY]?.let { runCatching { ThemePreference.valueOf(it) }.getOrNull() }
             ?: ThemePreference.SYSTEM
-    }
-
-    val handedness: Flow<Handedness> = dataStore.data.map { prefs ->
-        prefs[HANDEDNESS_KEY]?.let { runCatching { Handedness.valueOf(it) }.getOrNull() }
-            ?: Handedness.RIGHT
     }
 
     val activeIconPack: Flow<String?> = dataStore.data.map { prefs -> prefs[ICON_PACK_KEY] }
@@ -189,6 +186,13 @@ class SettingsRepository @Inject constructor(
 
     val searchIndexShowRailBar: Flow<Boolean> = dataStore.data.map { it[SEARCH_INDEX_SHOW_RAIL_BAR_KEY] ?: true }
 
+    /** Which edge the app-overview's own alphabet rail and floating search button sit on — the
+     *  App overview page's own setting (see SettingsAppOverviewSection), not a global one: nothing
+     *  else in the launcher has a left/right-dependent layout. */
+    val appOverviewHandedness: Flow<Handedness> = dataStore.data.map { prefs ->
+        prefs[APP_OVERVIEW_HANDEDNESS_KEY]?.let { runCatching { Handedness.valueOf(it) }.getOrNull() } ?: Handedness.RIGHT
+    }
+
     val searchHeaderLetterAppearance: Flow<ElementAppearance> =
         elementAppearanceFor("search_header_letter", ElementAppearance(fillMode = ElementFillMode.NONE, borderEnabled = true))
 
@@ -295,8 +299,8 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[THEME_KEY] = theme.name }
     }
 
-    suspend fun setHandedness(handedness: Handedness) {
-        dataStore.edit { it[HANDEDNESS_KEY] = handedness.name }
+    suspend fun setAppOverviewHandedness(handedness: Handedness) {
+        dataStore.edit { it[APP_OVERVIEW_HANDEDNESS_KEY] = handedness.name }
     }
 
     suspend fun setActiveIconPack(packageName: String?) {
@@ -563,7 +567,7 @@ class SettingsRepository @Inject constructor(
         private val DEFAULT_ACCENT_COLOR = 0xFF3B82F6.toInt()
 
         private val THEME_KEY = stringPreferencesKey("theme")
-        private val HANDEDNESS_KEY = stringPreferencesKey("handedness")
+        private val APP_OVERVIEW_HANDEDNESS_KEY = stringPreferencesKey("app_overview_handedness")
         private val ICON_PACK_KEY = stringPreferencesKey("active_icon_pack")
         private val FONT_KEY = stringPreferencesKey("font_preference")
         private val ICON_SHAPE_KEY = stringPreferencesKey("icon_shape")
