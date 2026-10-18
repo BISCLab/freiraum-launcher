@@ -24,8 +24,18 @@ data class Folder(
     val borderEnabled: Boolean = false,
     val elementBorderColor: Int? = null,
     val elementBorderWidth: Float = 1f,
-    val elementContentColor: Int? = null
+    val elementContentColor: Int? = null,
+    // This folder's own grid shape — one column count per sub-row, comma-separated (e.g. "4,3"),
+    // same idea as [PageRow.dockRowColumns]/[PageRow.panelRowColumns]. See [Folder.rows]/[Folder.withRows].
+    val rowColumns: String = "4"
 )
+
+/** Parses [Folder.rowColumns] into one column count per sub-row; always at least one row. */
+fun Folder.rows(): List<Int> =
+    rowColumns.split(",").mapNotNull { it.trim().toIntOrNull()?.coerceIn(1, 6) }.ifEmpty { listOf(4) }
+
+fun Folder.withRows(rows: List<Int>): Folder =
+    copy(rowColumns = rows.ifEmpty { listOf(4) }.joinToString(",") { it.coerceIn(1, 6).toString() })
 
 /** Assembles this folder's flattened override columns into an [ElementAppearance], regardless of
  *  whether the override is actually enabled — callers check [Folder.appearanceOverrideEnabled]

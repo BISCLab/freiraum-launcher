@@ -11,6 +11,7 @@ import com.bisc.flauncher.data.model.GridItemType
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.model.withAppearance
 import com.bisc.flauncher.data.model.withAppearanceOverride
+import com.bisc.flauncher.data.model.withRows
 import com.bisc.flauncher.data.settings.SettingsRepository
 import com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor
 import com.bisc.flauncher.ui.theme.isDark
@@ -76,6 +77,10 @@ class FolderRepository @Inject constructor(
 
     suspend fun setFolderAppearanceById(id: Long, appearance: ElementAppearance) {
         folderDao.get(id)?.let { folderDao.update(it.withAppearanceOverride(appearance).copy(appearanceOverrideEnabled = true)) }
+    }
+
+    suspend fun setFolderRowColumnsById(id: Long, rows: List<Int>) {
+        folderDao.get(id)?.let { folderDao.update(it.withRows(rows)) }
     }
 
     private suspend fun nextOrderIndex(folderId: Long): Int = (folderItemDao.maxOrderIndex(folderId) ?: -1) + 1

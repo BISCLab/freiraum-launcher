@@ -313,6 +313,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { folderRepository.setFolderAppearanceById(folderId, appearance) }
     }
 
+    fun setFolderRowColumns(folderId: Long, rows: List<Int>) {
+        viewModelScope.launch { folderRepository.setFolderRowColumnsById(folderId, rows) }
+    }
+
     val iconLoader: com.bisc.flauncher.util.AppIconLoader get() = appIconLoader
 
     fun loadPackIcon(iconPackPackage: String, drawableName: String): ImageBitmap? =
