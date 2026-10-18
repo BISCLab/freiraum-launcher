@@ -168,17 +168,9 @@ fun BackgroundConfigSection(
     }
 
     SettingsPreferenceGroup(title = stringResource(R.string.settings_background_shade_label)) {
-        SettledSlider(
-            value = config.shade,
-            onSettled = { onConfigChange(config.copy(shade = it)) },
-            valueRange = -1f..1f,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            label = { live ->
-                Text(
-                    stringResource(R.string.settings_background_shade_value, (live * 100).roundToInt()),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
+        ExpandableShadePercentSlider(
+            percent = (config.shade * 100).roundToInt(),
+            onSettled = { onConfigChange(config.copy(shade = it / 100f)) }
         )
     }
 
@@ -259,17 +251,9 @@ fun BackgroundOverrideSection(
 
     if (!usesGlobal) {
         SettingsPreferenceGroup(title = stringResource(R.string.settings_background_shade_label)) {
-            SettledSlider(
-                value = current.shade,
-                onSettled = { onCustomColor(current.copy(shade = it)) },
-                valueRange = -1f..1f,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                label = { live ->
-                    Text(
-                        stringResource(R.string.settings_background_shade_value, (live * 100).roundToInt()),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
+            ExpandableShadePercentSlider(
+                percent = (current.shade * 100).roundToInt(),
+                onSettled = { onCustomColor(current.copy(shade = it / 100f)) }
             )
         }
     }
