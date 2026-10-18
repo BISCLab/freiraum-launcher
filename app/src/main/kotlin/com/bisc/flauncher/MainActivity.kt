@@ -116,6 +116,16 @@ class MainActivity : ComponentActivity() {
             val settingsVm: SettingsViewModel = hiltViewModel()
             val theme by settingsVm.theme.collectAsState()
             val font by settingsVm.fontPreference.collectAsState()
+            val globalIconSizePercent by settingsVm.iconSizePercent.collectAsState()
+            val appOverridesForIconSize by settingsVm.appOverrides.collectAsState()
+            // New lambda identity whenever either input changes, so LocalIconSizeResolver consumers
+            // (AppIconCell) recompose — a StateFlow's plain .value read wouldn't do that on its own.
+            val iconSizeResolver = androidx.compose.runtime.remember(globalIconSizePercent, appOverridesForIconSize) {
+                { componentName: String ->
+                    val percent = appOverridesForIconSize[componentName]?.iconSizePercent ?: globalIconSizePercent
+                    1f + percent / 100f
+                }
+            }
             val navController = rememberNavController()
             androidx.compose.runtime.LaunchedEffect(openSettingsRequest) {
                 if (openSettingsRequest > 0) {
@@ -137,7 +147,8 @@ class MainActivity : ComponentActivity() {
                 onDispose { }
             }
             androidx.compose.runtime.CompositionLocalProvider(
-                com.bisc.flauncher.ui.home.LocalAppIconLoader provides appIconLoader
+                com.bisc.flauncher.ui.home.LocalAppIconLoader provides appIconLoader,
+                com.bisc.flauncher.ui.home.LocalIconSizeResolver provides iconSizeResolver
             ) {
             FLauncherTheme(themePreference = theme, fontPreference = font) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -356,7 +367,14 @@ class MainActivity : ComponentActivity() {
                             SettingsGesturesScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable("settings/apps") {
-                            SettingsAppsScreen(navController = navController, onBack = { navController.popBackStack() })
+                            SettingsAppsScreen(
+                                navController = navController,
+                                onBack = { navController.popBackStack() },
+                                onNavigate = { route -> navController.navigate("settings/apps/$route") }
+                            )
+                        }
+                        composable("settings/apps/global") {
+                            com.bisc.flauncher.ui.settings.SettingsAppsGlobalScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable("settings/folder") {
                             SettingsFolderScreen(navController = navController, onBack = { navController.popBackStack() })

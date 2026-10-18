@@ -36,11 +36,9 @@ import javax.inject.Inject
  *  alphabet rail and floating search button (see [SettingsRepository.appOverviewHandedness]). */
 enum class Handedness { LEFT, RIGHT }
 
-/** Shape applied to the dock's quick-launch icons and search button. */
+/** Shape every app icon is masked to — both the dock/search-button containers and the actual
+ *  icon bitmaps rendered everywhere else (see [com.bisc.flauncher.util.AppIconLoader]). */
 enum class IconShape { CIRCLE, ROUNDED_SQUARE }
-
-/** Global multiplier applied to every Element icon's size. */
-enum class IconSize(val scale: Float) { SMALL(0.82f), MEDIUM(1f), LARGE(1.2f) }
 
 /** Persistent settings in DataStore; each setting is exposed as a flow with its default value. */
 class SettingsRepository @Inject constructor(
@@ -66,10 +64,9 @@ class SettingsRepository @Inject constructor(
             ?: IconShape.ROUNDED_SQUARE
     }
 
-    val iconSize: Flow<IconSize> = dataStore.data.map { prefs ->
-        prefs[ICON_SIZE_KEY]?.let { runCatching { IconSize.valueOf(it) }.getOrNull() }
-            ?: IconSize.MEDIUM
-    }
+    // -50..50, 0 is the neutral/default size; each app's own override screen can still adjust its
+    // own icon individually on the same scale (see AppOverride.iconSizePercent).
+    val iconSizePercent: Flow<Int> = dataStore.data.map { prefs -> prefs[ICON_SIZE_PERCENT_KEY] ?: 0 }
 
     // New elements (rows, folders) are created with this value; changing it also immediately
     // re-stamps every existing row/folder item to match (see PageContentRepository/FolderRepository
@@ -313,8 +310,8 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[ICON_SHAPE_KEY] = shape.name }
     }
 
-    suspend fun setIconSize(size: IconSize) {
-        dataStore.edit { it[ICON_SIZE_KEY] = size.name }
+    suspend fun setIconSizePercent(percent: Int) {
+        dataStore.edit { it[ICON_SIZE_PERCENT_KEY] = percent.coerceIn(-50, 50) }
     }
 
     suspend fun setDefaultCornerRadiusPercent(percent: Int) {
@@ -565,7 +562,7 @@ class SettingsRepository @Inject constructor(
         private val ICON_PACK_KEY = stringPreferencesKey("active_icon_pack")
         private val FONT_KEY = stringPreferencesKey("font_preference")
         private val ICON_SHAPE_KEY = stringPreferencesKey("icon_shape")
-        private val ICON_SIZE_KEY = stringPreferencesKey("icon_size")
+        private val ICON_SIZE_PERCENT_KEY = intPreferencesKey("icon_size_percent")
         private val DEFAULT_CORNER_RADIUS_PERCENT_KEY = intPreferencesKey("default_corner_radius_percent")
         private val FOLDER_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("folder_hide_status_bar")
         private val FOLDER_HIDE_DOCK_KEY = booleanPreferencesKey("folder_hide_dock")

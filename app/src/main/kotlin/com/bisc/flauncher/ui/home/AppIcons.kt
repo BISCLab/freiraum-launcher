@@ -14,6 +14,13 @@ import kotlinx.coroutines.withContext
 /** The shared icon loader, provided once by [HomeScreen] so long lists can read the icon cache directly. */
 val LocalAppIconLoader = staticCompositionLocalOf<AppIconLoader?> { null }
 
+/** Resolves the effective icon-size scale for one app (its own override if it has one, otherwise
+ *  the global default) — provided once by [HomeScreen] so [com.bisc.flauncher.ui.home.AppIconCell]
+ *  doesn't need this threaded as an explicit parameter through every grid/row/folder call site that
+ *  merely forwards the global scale unchanged (see HomeViewModel.iconSizeScaleFor). Null when not
+ *  provided (e.g. Settings' own icon previews), which callers treat as "use the flat scale passed in". */
+val LocalIconSizeResolver = staticCompositionLocalOf<((String) -> Float)?> { null }
+
 /** An app's icon for a scrolling list. */
 @Composable
 fun rememberAppIcon(componentName: ComponentName?, load: (ComponentName) -> ImageBitmap?): ImageBitmap? {

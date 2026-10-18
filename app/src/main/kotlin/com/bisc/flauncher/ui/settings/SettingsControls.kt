@@ -153,6 +153,41 @@ fun ExpandableShadePercentSlider(percent: Int, onSettled: (Int) -> Unit) {
     )
 }
 
+/** -50..50 signed percent case for icon size (0 is the neutral/default size). */
+@Composable
+fun ExpandableIconSizeSlider(percent: Int, onSettled: (Int) -> Unit) {
+    ExpandableSlider(
+        value = percent.toFloat(),
+        onSettled = { onSettled(it.roundToInt()) },
+        valueRange = -50f..50f,
+        valueLabel = { stringResource(R.string.settings_icon_size_value, it.roundToInt()) }
+    )
+}
+
+/** Same as [ExpandableIconSizeSlider], but [percent] is nullable (null = inherit the global
+ *  default); moving the slider sets an explicit override, and a reset row clears it back to null
+ *  once one is set — the same "Automatic until touched" pattern as [AutomaticColorPicker]. */
+@Composable
+fun ExpandableOptionalIconSizeSlider(percent: Int?, globalDefault: Int, onSettled: (Int?) -> Unit) {
+    ExpandableSlider(
+        value = (percent ?: globalDefault).toFloat(),
+        onSettled = { onSettled(it.roundToInt()) },
+        valueRange = -50f..50f,
+        valueLabel = {
+            if (percent == null) stringResource(R.string.settings_element_color_auto_hint)
+            else stringResource(R.string.settings_icon_size_value, it.roundToInt())
+        }
+    )
+    if (percent != null) {
+        SettingsPreference(
+            icon = null,
+            title = stringResource(R.string.settings_element_color_reset),
+            onClick = { onSettled(null) },
+            trailing = null
+        )
+    }
+}
+
 /** Shared generic radio-list row, one [SettingsPreference] with a trailing [RadioButton]. */
 @Composable
 fun <T> RadioPreference(
@@ -625,12 +660,13 @@ fun SettingsFixedDialog(
     }
 }
 
-/** One [IconShape] radio row, with a tiny live preview swatch of the shape itself. */
+/** One [IconShape] radio row, with a tiny live preview swatch of the shape itself. [selected] may be
+ *  null (e.g. a per-app override that currently inherits the global default — nothing matches it). */
 @Composable
 fun IconShapePreference(
     label: String,
     value: IconShape,
-    selected: IconShape,
+    selected: IconShape?,
     onSelect: (IconShape) -> Unit
 ) {
     val shape = when (value) {
@@ -652,25 +688,3 @@ fun IconShapePreference(
     )
 }
 
-/** One [com.bisc.flauncher.data.settings.IconSize] radio row, with a swatch sized to scale. */
-@Composable
-fun IconSizePreference(
-    label: String,
-    value: com.bisc.flauncher.data.settings.IconSize,
-    selected: com.bisc.flauncher.data.settings.IconSize,
-    onSelect: (com.bisc.flauncher.data.settings.IconSize) -> Unit
-) {
-    SettingsPreference(
-        icon = null,
-        title = label,
-        onClick = { onSelect(value) },
-        leading = {
-            Box(
-                modifier = Modifier
-                    .size(24.dp * value.scale)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp))
-            )
-        },
-        trailing = { RadioButton(selected = value == selected, onClick = { onSelect(value) }) }
-    )
-}

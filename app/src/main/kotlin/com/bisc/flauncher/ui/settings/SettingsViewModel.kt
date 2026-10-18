@@ -98,8 +98,8 @@ class SettingsViewModel @Inject constructor(
     val iconShape: StateFlow<IconShape> =
         repository.iconShape.stateIn(viewModelScope, SharingStarted.Eagerly, IconShape.ROUNDED_SQUARE)
 
-    val iconSize: StateFlow<com.bisc.flauncher.data.settings.IconSize> =
-        repository.iconSize.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.data.settings.IconSize.MEDIUM)
+    val iconSizePercent: StateFlow<Int> =
+        repository.iconSizePercent.stateIn(viewModelScope, SharingStarted.Eagerly, 0)
 
     val defaultCornerRadiusPercent: StateFlow<Int> =
         repository.defaultCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, 25)
@@ -454,6 +454,16 @@ class SettingsViewModel @Inject constructor(
     fun overrideFor(componentName: ComponentName): AppOverride =
         appOverrides.value[componentName.flattenToString()] ?: AppOverride(componentName.flattenToString())
 
+    /** Resolves the effective icon-size scale for one app: its own override if it has one
+     *  ([AppOverride.iconSizePercent]), otherwise the global default. Provided to the home UI via
+     *  [com.bisc.flauncher.ui.home.LocalIconSizeResolver] so every app-icon cell can look this up
+     *  without threading an extra parameter through every grid/row/folder call site. */
+    fun iconSizeScaleFor(componentName: String): Float {
+        val override = appOverrides.value[componentName]?.iconSizePercent
+        val percent = override ?: iconSizePercent.value
+        return 1f + percent / 100f
+    }
+
     fun saveAppOverride(componentName: ComponentName, customLabel: String?, hidden: Boolean, revealMode: RevealMode, revealCode: String?) {
         viewModelScope.launch {
             val effectiveMode = if (hidden) revealMode else RevealMode.NONE
@@ -463,6 +473,8 @@ class SettingsViewModel @Inject constructor(
                     componentName = componentName.flattenToString(),
                     iconPackPackage = existing?.iconPackPackage,
                     iconPackDrawable = existing?.iconPackDrawable,
+                    iconShape = existing?.iconShape,
+                    iconSizePercent = existing?.iconSizePercent,
                     customLabel = customLabel?.trim()?.takeIf { it.isNotEmpty() },
                     hidden = hidden,
                     revealMode = effectiveMode,
@@ -477,6 +489,22 @@ class SettingsViewModel @Inject constructor(
             val key = componentName.flattenToString()
             val current = appOverrides.value[key] ?: AppOverride(key)
             appOverrideRepository.save(current.copy(iconPackPackage = packPackage, iconPackDrawable = packDrawable))
+        }
+    }
+
+    fun setAppIconShape(componentName: ComponentName, shape: IconShape?) {
+        viewModelScope.launch {
+            val key = componentName.flattenToString()
+            val current = appOverrides.value[key] ?: AppOverride(key)
+            appOverrideRepository.save(current.copy(iconShape = shape))
+        }
+    }
+
+    fun setAppIconSizePercent(componentName: ComponentName, percent: Int?) {
+        viewModelScope.launch {
+            val key = componentName.flattenToString()
+            val current = appOverrides.value[key] ?: AppOverride(key)
+            appOverrideRepository.save(current.copy(iconSizePercent = percent?.coerceIn(-50, 50)))
         }
     }
 
@@ -540,8 +568,8 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setIconShape(shape) }
     }
 
-    fun setIconSize(size: com.bisc.flauncher.data.settings.IconSize) {
-        viewModelScope.launch { repository.setIconSize(size) }
+    fun setIconSizePercent(percent: Int) {
+        viewModelScope.launch { repository.setIconSizePercent(percent) }
     }
 
     fun setDefaultCornerRadiusPercent(percent: Int) {

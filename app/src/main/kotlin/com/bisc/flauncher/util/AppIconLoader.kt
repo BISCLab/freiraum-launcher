@@ -18,6 +18,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.bisc.flauncher.data.db.AppOverrideDao
+import com.bisc.flauncher.data.settings.IconShape
+import com.bisc.flauncher.data.settings.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +37,7 @@ import javax.inject.Singleton
 class AppIconLoader @Inject constructor(
     @ApplicationContext private val context: Context,
     private val activeIconPackState: ActiveIconPackState,
+    private val settingsRepository: SettingsRepository,
     appOverrideDao: AppOverrideDao
 ) {
     private val cache = object : LruCache<ComponentName, ImageBitmap>(cacheSizeKb()) {
@@ -47,6 +50,13 @@ class AppIconLoader @Inject constructor(
 
     @Volatile
     private var overrides: Map<String, Pair<String, String>> = emptyMap()
+
+    // Per-app icon-shape overrides — null for a component means "use the global iconShape".
+    @Volatile
+    private var shapeOverrides: Map<String, IconShape> = emptyMap()
+
+    @Volatile
+    private var globalShape: IconShape = IconShape.ROUNDED_SQUARE
 
     var revision by mutableIntStateOf(0)
         private set
@@ -61,6 +71,19 @@ class AppIconLoader @Inject constructor(
                         if (pack != null && drawable != null) override.componentName to (pack to drawable) else null
                     }.toMap()
                 )
+                setShapeOverrides(
+                    list.mapNotNull { override ->
+                        override.iconShape?.let { shape -> override.componentName to shape }
+                    }.toMap()
+                )
+            }
+        }
+        CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+            settingsRepository.iconShape.collect { shape ->
+                if (shape != globalShape) {
+                    globalShape = shape
+                    clearCache()
+                }
             }
         }
     }
@@ -68,6 +91,12 @@ class AppIconLoader @Inject constructor(
     private fun setOverrides(newOverrides: Map<String, Pair<String, String>>) {
         if (newOverrides == overrides) return
         overrides = newOverrides
+        clearCache()
+    }
+
+    private fun setShapeOverrides(newOverrides: Map<String, IconShape>) {
+        if (newOverrides == shapeOverrides) return
+        shapeOverrides = newOverrides
         clearCache()
     }
 
@@ -102,7 +131,8 @@ class AppIconLoader @Inject constructor(
                 } catch (e: PackageManager.NameNotFoundException) {
                     return null
                 }
-                renderMasked(drawable).asImageBitmap()
+                val shape = shapeOverrides[componentName.flattenToString()] ?: globalShape
+                renderMasked(drawable, shape).asImageBitmap()
             }
         }
         cache.put(componentName, resolved)
@@ -125,12 +155,18 @@ class AppIconLoader @Inject constructor(
         revision++
     }
 
-    private fun renderMasked(drawable: Drawable): Bitmap {
+    private fun renderMasked(drawable: Drawable, shape: IconShape): Bitmap {
         val output = Bitmap.createBitmap(ICON_SIZE_PX, ICON_SIZE_PX, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(output)
-        val radius = ICON_SIZE_PX * CORNER_RADIUS_FRACTION
-        val path = Path().apply {
-            addRoundRect(RectF(0f, 0f, ICON_SIZE_PX.toFloat(), ICON_SIZE_PX.toFloat()), radius, radius, Path.Direction.CW)
+        val path = when (shape) {
+            IconShape.CIRCLE -> Path().apply {
+                val r = ICON_SIZE_PX / 2f
+                addCircle(r, r, r, Path.Direction.CW)
+            }
+            IconShape.ROUNDED_SQUARE -> Path().apply {
+                val radius = ICON_SIZE_PX * CORNER_RADIUS_FRACTION
+                addRoundRect(RectF(0f, 0f, ICON_SIZE_PX.toFloat(), ICON_SIZE_PX.toFloat()), radius, radius, Path.Direction.CW)
+            }
         }
         canvas.clipPath(path)
         if (drawable is AdaptiveIconDrawable) {

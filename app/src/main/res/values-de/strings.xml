@@ -132,9 +132,7 @@
     <string name="settings_icon_shape_rounded_square">Abgerundetes Quadrat</string>
     <string name="settings_icon_shape_circle">Kreis</string>
     <string name="settings_icon_size_label">Symbolgröße</string>
-    <string name="settings_icon_size_small">Klein</string>
-    <string name="settings_icon_size_medium">Mittel</string>
-    <string name="settings_icon_size_large">Groß</string>
+    <string name="settings_icon_size_value">%1$d%%</string>
     <string name="settings_pictogram_picker_title">Symbol wählen</string>
     <string name="settings_element_icon_label">Symbol</string>
 
@@ -249,6 +247,8 @@
 
     <string name="settings_section_manage_apps">Apps</string>
     <string name="settings_card_manage_apps_subtitle">Apps ausblenden und umbenennen, Symbole, Symbolpaket</string>
+    <string name="settings_apps_global_label">Globale App-Einstellungen</string>
+    <string name="settings_apps_global_subtitle">Symbolform, -größe, Symbolpaket</string>
     <string name="settings_manage_apps_search_hint">Apps durchsuchen…</string>
     <string name="settings_manage_apps_hidden_summary">Ausgeblendet</string>
     <string name="settings_manage_apps_renamed_summary">Umbenannt in „%1$s“</string>
