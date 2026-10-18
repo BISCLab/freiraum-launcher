@@ -188,12 +188,10 @@ fun ColorPickerControls(
             hue = h[0]; saturation = h[1]; value = h[2]
             updateFromHsv()
         }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            ColorPresetSwatch(Color.Black, ::applyPreset)
-            ColorPresetSwatch(Color.White, ::applyPreset)
-            // The default surface color of the current light/dark mode, for when a color was picked by mistake.
-            val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
-            val default = Color(defaultBoxFillColorFor(isDark))
+        // The default surface color of the current light/dark mode, for when a color was picked by mistake.
+        val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+        val default = Color(defaultBoxFillColorFor(isDark))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             TextButton(onClick = { applyPreset(default) }) {
                 Icon(Icons.Filled.RestartAlt, contentDescription = null, modifier = Modifier.size(18.dp))
                 Text(stringResource(R.string.settings_color_reset_default), modifier = Modifier.padding(start = 6.dp))
@@ -267,18 +265,20 @@ fun ColorPickerSection(title: String, summary: String? = null, info: String? = n
     }
 }
 
-/** The row+expander content of [ColorPickerSection], without its own [SettingsPreferenceGroup] wrapper —
- *  for attaching directly inside another group's card (e.g. right under a related switch). */
+/** The row+opener content of [ColorPickerSection], without its own [SettingsPreferenceGroup] wrapper —
+ *  for attaching directly inside another group's card (e.g. right under a related switch). Tapping it
+ *  opens the actual [ColorPickerControls] in their own [SettingsEditPage] rather than expanding inline,
+ *  so a color menu never pushes the rest of a long settings list around. */
 @Composable
 fun ColorPickerRow(title: String, summary: String? = null, info: String? = null, color: Int, onColorChange: (Int) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
+    var open by remember { mutableStateOf(false) }
     SettingsPreference(
         icon = null,
         title = title,
         summary = summary,
         info = info,
         leading = null,
-        onClick = { expanded = !expanded },
+        onClick = { open = true },
         trailing = {
             Box(
                 modifier = Modifier
@@ -289,12 +289,14 @@ fun ColorPickerRow(title: String, summary: String? = null, info: String? = null,
             )
         }
     )
-    if (expanded) {
-        ColorPickerControls(
-            color = Color(color),
-            onColorChange = { onColorChange(it.toArgb()) },
-            modifier = Modifier.fillMaxWidth()
-        )
+    if (open) {
+        SettingsEditPage(title = title, onDismiss = { open = false }) {
+            ColorPickerControls(
+                color = Color(color),
+                onColorChange = { onColorChange(it.toArgb()) },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 
@@ -401,18 +403,6 @@ private fun ColorSlotSwatch(label: String, color: Color, active: Boolean, onClic
         )
         Text(label, style = MaterialTheme.typography.labelSmall)
     }
-}
-
-@Composable
-internal fun ColorPresetSwatch(color: Color, onClick: (Color) -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(36.dp)
-            .clip(CircleShape)
-            .background(color)
-            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-            .clickable { onClick(color) }
-    )
 }
 
 internal fun hsvToColor(h: Float, s: Float, v: Float): Color {
