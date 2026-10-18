@@ -406,6 +406,8 @@ private fun AppIconCell(
     val componentName = remember(payload) { ComponentName.unflattenFromString(payload) }
     val bitmap = rememberAppIcon(componentName, loadIcon)
     val label = componentName?.let(resolveLabel).orEmpty()
+    // This app's own icon-size override if it has one, otherwise the flat scale passed in.
+    val effectiveIconSizeScale = LocalIconSizeResolver.current?.invoke(payload) ?: iconSizeScale
 
     Column(
         modifier = Modifier
@@ -416,11 +418,11 @@ private fun AppIconCell(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (bitmap != null) {
-            Image(bitmap = bitmap, contentDescription = label, modifier = Modifier.size(56.dp * iconSizeScale))
+            Image(bitmap = bitmap, contentDescription = label, modifier = Modifier.size(56.dp * effectiveIconSizeScale))
         } else {
             Spacer(
                 modifier = Modifier
-                    .size(56.dp * iconSizeScale)
+                    .size(56.dp * effectiveIconSizeScale)
                     .background(Color.White.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
             )
         }

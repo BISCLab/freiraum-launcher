@@ -53,7 +53,6 @@ import com.bisc.flauncher.R
 import com.bisc.flauncher.ui.theme.noRippleClickable
 import com.bisc.flauncher.data.model.AppInfo
 import com.bisc.flauncher.data.model.AppOverride
-import com.bisc.flauncher.data.model.IconPackInfo
 import com.bisc.flauncher.data.model.RevealMode
 import com.bisc.flauncher.data.settings.IconShape
 
@@ -70,16 +69,12 @@ private fun groupItemShape(index: Int, count: Int): Shape {
     }
 }
 
-/** Every installed app in one place: icon appearance (shape + pack) up top, then the apps themselves. */
+/** Every installed app in one place: a link to the shared icon presets up top, then the apps themselves. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsAppsScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsAppsScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val apps by viewModel.labeledApps.collectAsState()
     val overrides by viewModel.appOverrides.collectAsState()
-    val iconShape by viewModel.iconShape.collectAsState()
-    val iconSize by viewModel.iconSize.collectAsState()
-    val activeIconPack by viewModel.activeIconPack.collectAsState()
-    val iconPacks by viewModel.iconPacks.collectAsState()
     var filter by rememberSaveable { mutableStateOf("") }
     var editingApp by remember { mutableStateOf<AppInfo?>(null) }
 
@@ -113,42 +108,14 @@ fun SettingsAppsScreen(navController: NavController, onBack: () -> Unit, viewMod
             modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            item { SettingsGroupLabel(stringResource(R.string.settings_icon_shape_label)) }
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    IconShapePreference(stringResource(R.string.settings_icon_shape_rounded_square), IconShape.ROUNDED_SQUARE, iconShape, viewModel::setIconShape)
-                    IconShapePreference(stringResource(R.string.settings_icon_shape_circle), IconShape.CIRCLE, iconShape, viewModel::setIconShape)
-                }
-            }
-            item { Spacer24() }
-
-            item { SettingsGroupLabel(stringResource(R.string.settings_icon_size_label)) }
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    IconSizePreference(stringResource(R.string.settings_icon_size_small), com.bisc.flauncher.data.settings.IconSize.SMALL, iconSize, viewModel::setIconSize)
-                    IconSizePreference(stringResource(R.string.settings_icon_size_medium), com.bisc.flauncher.data.settings.IconSize.MEDIUM, iconSize, viewModel::setIconSize)
-                    IconSizePreference(stringResource(R.string.settings_icon_size_large), com.bisc.flauncher.data.settings.IconSize.LARGE, iconSize, viewModel::setIconSize)
-                }
-            }
-            item { Spacer24() }
-
-            item { SettingsGroupLabel(stringResource(R.string.settings_section_icon_pack)) }
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    IconPackPreference(
-                        label = stringResource(R.string.settings_icon_pack_default),
+                SettingsPreferenceGroup {
+                    SettingsPreference(
                         icon = null,
-                        selected = activeIconPack == null,
-                        onSelect = { viewModel.selectIconPack(null) }
+                        title = stringResource(R.string.settings_apps_global_label),
+                        summary = stringResource(R.string.settings_apps_global_subtitle),
+                        onClick = { onNavigate("global") }
                     )
-                    iconPacks.forEach { pack ->
-                        IconPackPreference(
-                            label = pack.label,
-                            icon = pack,
-                            selected = activeIconPack == pack.packageName,
-                            onSelect = { viewModel.selectIconPack(pack.packageName) }
-                        )
-                    }
                 }
             }
             item { Spacer24() }
@@ -290,6 +257,7 @@ private fun AppOverrideEditSheetContent(
     onSave: (customLabel: String?, hidden: Boolean, revealMode: RevealMode, revealCode: String?) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val globalIconSizePercent by viewModel.iconSizePercent.collectAsState()
     // Keyed on the component, not the whole override.
     var customLabel by remember(override.componentName) { mutableStateOf(override.customLabel.orEmpty()) }
     var hidden by remember(override.componentName) { mutableStateOf(override.hidden) }
@@ -317,6 +285,35 @@ private fun AppOverrideEditSheetContent(
                 else stringResource(R.string.settings_app_icon_default),
                 onClick = { pickingIcon = true },
                 trailing = { if (preview != null) Image(bitmap = preview, contentDescription = null, modifier = Modifier.size(36.dp)) }
+            )
+        }
+
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_shape_label)) {
+            RadioPreference(
+                label = stringResource(R.string.settings_element_color_auto_hint),
+                value = null,
+                selected = override.iconShape,
+                onSelect = { viewModel.setAppIconShape(app.componentName, it) }
+            )
+            IconShapePreference(
+                stringResource(R.string.settings_icon_shape_rounded_square),
+                IconShape.ROUNDED_SQUARE,
+                override.iconShape,
+                { viewModel.setAppIconShape(app.componentName, it) }
+            )
+            IconShapePreference(
+                stringResource(R.string.settings_icon_shape_circle),
+                IconShape.CIRCLE,
+                override.iconShape,
+                { viewModel.setAppIconShape(app.componentName, it) }
+            )
+        }
+
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_size_label)) {
+            ExpandableOptionalIconSizeSlider(
+                percent = override.iconSizePercent,
+                globalDefault = globalIconSizePercent,
+                onSettled = { viewModel.setAppIconSizePercent(app.componentName, it) }
             )
         }
 
@@ -387,32 +384,3 @@ private fun AppOverrideEditSheetContent(
     }
 }
 
-@Composable
-private fun IconPackPreference(
-    label: String,
-    icon: IconPackInfo?,
-    selected: Boolean,
-    onSelect: () -> Unit
-) {
-    val context = LocalContext.current
-    val bitmap = remember(icon?.packageName) {
-        icon?.let {
-            runCatching {
-                context.packageManager.getApplicationIcon(it.packageName)
-                    .toBitmap(width = 96, height = 96)
-                    .asImageBitmap()
-            }.getOrNull()
-        }
-    }
-    SettingsPreference(
-        icon = null,
-        title = label,
-        onClick = onSelect,
-        leading = if (bitmap != null) {
-            { Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(24.dp)) }
-        } else {
-            { Box(modifier = Modifier.size(24.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)) }
-        },
-        trailing = { RadioButton(selected = selected, onClick = onSelect) }
-    )
-}

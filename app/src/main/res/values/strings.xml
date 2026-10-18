@@ -132,9 +132,7 @@
     <string name="settings_icon_shape_rounded_square">Rounded square</string>
     <string name="settings_icon_shape_circle">Circle</string>
     <string name="settings_icon_size_label">Icon size</string>
-    <string name="settings_icon_size_small">Small</string>
-    <string name="settings_icon_size_medium">Medium</string>
-    <string name="settings_icon_size_large">Large</string>
+    <string name="settings_icon_size_value">%1$d%%</string>
     <string name="settings_pictogram_picker_title">Choose an icon</string>
     <string name="settings_element_icon_label">Icon</string>
 
@@ -249,6 +247,8 @@
 
     <string name="settings_section_manage_apps">Apps</string>
     <string name="settings_card_manage_apps_subtitle">Hide and rename apps, icons, icon pack</string>
+    <string name="settings_apps_global_label">Global app settings</string>
+    <string name="settings_apps_global_subtitle">Icon shape, size, pack</string>
     <string name="settings_manage_apps_search_hint">Search apps…</string>
     <string name="settings_manage_apps_hidden_summary">Hidden</string>
     <string name="settings_manage_apps_renamed_summary">Renamed to “%1$s”</string>

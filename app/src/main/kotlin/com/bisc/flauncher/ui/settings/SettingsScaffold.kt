@@ -116,6 +116,7 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
         "settings/permissions" -> stringResource(R.string.settings_section_permissions)
         "settings/gestures" -> stringResource(R.string.settings_section_gestures)
         "settings/apps" -> stringResource(R.string.settings_section_manage_apps)
+        "settings/apps/global" -> stringResource(R.string.settings_apps_global_label)
         "settings/folder" -> stringResource(R.string.settings_section_folder)
         "settings/folder/{folderId}" -> {
             val viewModel: SettingsViewModel = hiltViewModel(entry)

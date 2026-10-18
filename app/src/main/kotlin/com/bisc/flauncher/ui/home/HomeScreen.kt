@@ -1,4 +1,4 @@
-package com.bisc.flauncher.ui.home
+﻿package com.bisc.flauncher.ui.home
 
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.animation.slideOutVertically
@@ -174,7 +174,7 @@ fun HomeScreen(
     val shortcutPickerForApp by viewModel.shortcutPickerForApp.collectAsState()
     val availableShortcuts by viewModel.availableShortcuts.collectAsState()
     val iconShape by viewModel.iconShape.collectAsState()
-    val iconSize by viewModel.iconSize.collectAsState()
+    val iconSizeScale by viewModel.iconSizeScale.collectAsState()
     val railAppearance by viewModel.searchAlphabetRailAppearance.collectAsState()
     val chargingAnimationEnabled by viewModel.chargingAnimationEnabled.collectAsState()
     val chargingAnimationColor by viewModel.chargingAnimationColor.collectAsState()
@@ -575,7 +575,7 @@ fun HomeScreen(
                                 onOpenPageLink = onOpenPageLink,
                                 onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) },
                                 iconShape = iconShape,
-                                iconSizeScale = iconSize.scale,
+                                iconSizeScale = iconSizeScale,
                                 accentColor = Color(accentColor),
                                 modifier = contentModifier.graphicsLayer { alpha = pageContentAlpha }
                             ) }
@@ -673,7 +673,7 @@ fun HomeScreen(
                             onActionButtonClick = onActionButtonClick,
                             showLabels = homeDockRow.showLabels,
                             labelColor = homeDockRow.appearance().contentColor?.let { Color(it) } ?: Color.White,
-                            iconSizeScale = iconSize.scale
+                            iconSizeScale = iconSizeScale
                             // Live dock is display-only now — adding/removing entries only happens in
                             // Settings > Home screen > Layout > Dock > Elements.
                         )
@@ -813,7 +813,7 @@ fun HomeScreen(
                                     onActionButtonClick = onActionButtonClick,
                                     showLabels = row.showLabels,
                                     labelColor = row.appearance().contentColor?.let { Color(it) } ?: Color.White,
-                                    iconSizeScale = iconSize.scale
+                                    iconSizeScale = iconSizeScale
                                     // Live panel is display-only now — adding/removing entries only
                                     // happens in Settings > Home screen > Layout > Panel > Elements.
                                 )
