@@ -145,7 +145,7 @@ fun HomeScreen(
     val rowEntriesByRow by viewModel.rowEntriesByRow.collectAsState()
     val browsableApps by viewModel.browsableApps.collectAsState()
     val resolveLabel = viewModel::resolveLabel
-    val handedness by viewModel.handedness.collectAsState()
+    val appOverviewHandedness by viewModel.appOverviewHandedness.collectAsState()
     val isPanelOpen by viewModel.isPanelOpen.collectAsState()
     val searchOpen by viewModel.searchOpen.collectAsState()
     val appListOpen by viewModel.appListOpen.collectAsState()
@@ -575,7 +575,6 @@ fun HomeScreen(
                                 onShortcutClick = viewModel::launchFolderShortcut,
                                 onOpenPageLink = onOpenPageLink,
                                 onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) },
-                                handedness = handedness,
                                 iconShape = iconShape,
                                 iconSizeScale = iconSize.scale,
                                 accentColor = Color(accentColor),
@@ -886,7 +885,7 @@ fun HomeScreen(
                     pageBackground = appOverviewBackground,
                     railAppearance = railAppearance,
                     accentColor = accentColor,
-                    handedness = handedness,
+                    handedness = appOverviewHandedness,
                     loadIcon = viewModel::loadIcon,
                     onAppClick = { app ->
                         launchApp(context, app.componentName)
@@ -904,7 +903,7 @@ fun HomeScreen(
                 if (appListShowSearchButton) {
                     com.bisc.flauncher.ui.home.dock.FloatingSearchButton(
                         onClick = { viewModel.executeDockTapAction(com.bisc.flauncher.data.model.DockTapAction.FULL_SEARCH) },
-                        handedness = handedness,
+                        handedness = appOverviewHandedness,
                         iconShape = iconShape,
                         appearance = appListSearchButtonAppearance ?: railAppearance ?: automaticRailAppearance(overviewSurfaceDark)
                     )
@@ -913,7 +912,7 @@ fun HomeScreen(
         }
     }
 
-    val searchPivotX = if (handedness == Handedness.LEFT) 0.12f else 0.88f
+    val searchPivotX = if (appOverviewHandedness == Handedness.LEFT) 0.12f else 0.88f
     AnimatedVisibility(
         visible = searchOpen,
         modifier = Modifier.fillMaxSize(),

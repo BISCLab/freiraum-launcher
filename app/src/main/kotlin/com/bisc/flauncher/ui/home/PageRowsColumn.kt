@@ -19,7 +19,6 @@ import com.bisc.flauncher.data.model.LauncherPageKind
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PinnedWebsite
 import com.bisc.flauncher.data.model.SavedMapTarget
-import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.data.settings.IconShape
 
 /**
@@ -44,7 +43,6 @@ fun PageRowsColumn(
     onShortcutClick: (String) -> Unit = {},
     onOpenPageLink: (Long, LauncherPageKind) -> Unit = { _, _ -> },
     onExecuteAction: (GestureAction) -> Unit = {},
-    handedness: Handedness = Handedness.RIGHT,
     iconShape: IconShape = IconShape.ROUNDED_SQUARE,
     iconSizeScale: Float = 1f,
     accentColor: Color = Color(0xFF3B82F6),
@@ -71,7 +69,6 @@ fun PageRowsColumn(
                     onShortcutClick = onShortcutClick,
                     onOpenPageLink = onOpenPageLink,
                     onExecuteAction = onExecuteAction,
-                    handedness = handedness,
                     iconShape = iconShape,
                     iconSizeScale = iconSizeScale,
                     accentColor = accentColor

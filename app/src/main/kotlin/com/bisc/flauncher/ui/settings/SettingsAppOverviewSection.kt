@@ -13,6 +13,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.AppListDisplayMode
 import com.bisc.flauncher.data.model.AppListLayout
+import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.ui.home.search.automaticRailAppearance
 
 private enum class OverviewElementSheet { LIST_BACKGROUND, HEADER_LETTERS, ALPHABET_LETTERS, RAIL_BOX, SEARCH_BUTTON }
@@ -31,6 +32,7 @@ fun ColumnScope.AppOverviewSettingsSection(surfaceIsDark: Boolean, viewModel: Se
     val headerLetterAppearance by viewModel.searchHeaderLetterAppearance.collectAsState()
     val alphabetLetterAppearance by viewModel.searchAlphabetLetterAppearance.collectAsState()
     val railAppearance by viewModel.searchAlphabetRailAppearance.collectAsState()
+    val handedness by viewModel.appOverviewHandedness.collectAsState()
     var openSheet by remember { mutableStateOf<OverviewElementSheet?>(null) }
 
     SettingsPreferenceGroup(title = stringResource(R.string.settings_search_app_list_mode_label)) {
@@ -60,6 +62,21 @@ fun ColumnScope.AppOverviewSettingsSection(surfaceIsDark: Boolean, viewModel: Se
             value = AppListLayout.TILES,
             selected = layout,
             onSelect = viewModel::setAppListLayout
+        )
+    }
+
+    SettingsPreferenceGroup(title = stringResource(R.string.settings_app_overview_alignment_label)) {
+        RadioPreference(
+            label = stringResource(R.string.settings_app_overview_align_left),
+            value = Handedness.LEFT,
+            selected = handedness,
+            onSelect = viewModel::setAppOverviewHandedness
+        )
+        RadioPreference(
+            label = stringResource(R.string.settings_app_overview_align_right),
+            value = Handedness.RIGHT,
+            selected = handedness,
+            onSelect = viewModel::setAppOverviewHandedness
         )
     }
 

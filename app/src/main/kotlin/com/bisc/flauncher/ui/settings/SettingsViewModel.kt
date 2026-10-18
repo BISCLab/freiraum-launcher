@@ -86,8 +86,8 @@ class SettingsViewModel @Inject constructor(
     val theme: StateFlow<ThemePreference> =
         repository.theme.stateIn(viewModelScope, SharingStarted.Eagerly, ThemePreference.SYSTEM)
 
-    val handedness: StateFlow<Handedness> =
-        repository.handedness.stateIn(viewModelScope, SharingStarted.Eagerly, Handedness.RIGHT)
+    val appOverviewHandedness: StateFlow<Handedness> =
+        repository.appOverviewHandedness.stateIn(viewModelScope, SharingStarted.Eagerly, Handedness.RIGHT)
 
     val activeIconPack: StateFlow<String?> =
         repository.activeIconPack.stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -524,8 +524,8 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun setHandedness(handedness: Handedness) {
-        viewModelScope.launch { repository.setHandedness(handedness) }
+    fun setAppOverviewHandedness(handedness: Handedness) {
+        viewModelScope.launch { repository.setAppOverviewHandedness(handedness) }
     }
 
     fun selectIconPack(packageName: String?) {
