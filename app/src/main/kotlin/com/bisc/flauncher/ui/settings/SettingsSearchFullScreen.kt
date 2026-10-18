@@ -76,11 +76,13 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
     var customUrlSheetOpen by remember { mutableStateOf(false) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_search_full), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_search_appearance_label)) {
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_search_appearance_label),
+            info = stringResource(R.string.settings_search_appearance_summary)
+        ) {
             SettingsPreference(
                 icon = null,
                 title = surfaceLabel(R.string.settings_layer_surface_search),
-                info = stringResource(R.string.settings_search_appearance_summary),
                 onClick = { openSheet = SearchElementSheet.SEARCH_APPEARANCE },
                 trailing = null
             )
@@ -109,11 +111,13 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
             )
         }
 
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_search_categories_label)) {
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_search_categories_label),
+            info = stringResource(R.string.settings_search_categories_info)
+        ) {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_search_categories_order_title),
-                info = stringResource(R.string.settings_search_categories_info),
                 onClick = {},
                 trailing = null
             )
@@ -140,11 +144,13 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
             }
         }
 
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_search_tools_label)) {
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_search_tools_label),
+            info = stringResource(R.string.settings_search_tools_info_summary)
+        ) {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_search_tools_info_title),
-                info = stringResource(R.string.settings_search_tools_info_summary),
                 onClick = {},
                 trailing = null
             )
@@ -169,12 +175,14 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
             }
         }
 
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_search_open_with_label)) {
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_search_open_with_label),
+            info = stringResource(R.string.settings_search_ai_info)
+        ) {
             SettingsPreference(
                 icon = SearchCategory.AI.icon,
                 title = stringResource(R.string.settings_search_ai_title),
                 summary = aiAppLabel ?: stringResource(R.string.settings_search_ai_none),
-                info = stringResource(R.string.settings_search_ai_info),
                 onClick = { aiPickerOpen = true }
             )
         }
