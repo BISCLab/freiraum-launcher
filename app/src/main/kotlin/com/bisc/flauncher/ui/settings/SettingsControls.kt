@@ -1,6 +1,9 @@
 package com.bisc.flauncher.ui.settings
 
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
@@ -89,6 +93,40 @@ fun SettledSlider(
             onValueChange = { local = it },
             onValueChangeFinished = { onSettled(local) },
             valueRange = valueRange
+        )
+    }
+}
+
+/** A collapsible row for a 0-100 percent [SettledSlider]: shows the current value and a chevron, and
+ *  only reveals the slider once tapped, so a compact numeric setting (like corner roundness) doesn't
+ *  always take up the extra vertical space in a settings list. */
+@Composable
+fun ExpandablePercentSlider(percent: Int, onSettled: (Int) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    SettingsPreference(
+        icon = null,
+        title = stringResource(R.string.settings_corner_radius_value, percent),
+        onClick = { expanded = !expanded },
+        trailing = {
+            Icon(
+                imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    )
+    if (expanded) {
+        SettledSlider(
+            value = percent.toFloat(),
+            onSettled = { onSettled(it.roundToInt()) },
+            valueRange = 0f..100f,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            label = { live ->
+                Text(
+                    stringResource(R.string.settings_corner_radius_value, live.roundToInt()),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         )
     }
 }

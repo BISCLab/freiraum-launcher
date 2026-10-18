@@ -1,6 +1,5 @@
 package com.bisc.flauncher.ui.settings
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -12,13 +11,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
 import com.bisc.flauncher.ui.theme.FontPreference
 import com.bisc.flauncher.ui.theme.ThemePreference
-import kotlin.math.roundToInt
 
 @Composable
 fun SettingsAppearanceScreen(
@@ -92,17 +89,9 @@ fun SettingsAppearanceScreen(
         // SettingsViewModel.setDefaultCornerRadiusPercent) — each element's own Appearance screen
         // can still override it individually afterwards.
         SettingsPreferenceGroup(title = stringResource(R.string.settings_corner_style_label)) {
-            SettledSlider(
-                value = defaultCornerRadiusPercent.toFloat(),
-                onSettled = { viewModel.setDefaultCornerRadiusPercent(it.roundToInt()) },
-                valueRange = 0f..100f,
-                modifier = androidx.compose.ui.Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                label = { live ->
-                    Text(
-                        stringResource(R.string.settings_corner_radius_value, live.roundToInt()),
-                        style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
-                    )
-                }
+            ExpandablePercentSlider(
+                percent = defaultCornerRadiusPercent,
+                onSettled = viewModel::setDefaultCornerRadiusPercent
             )
         }
         SettingsPreferenceGroup(
