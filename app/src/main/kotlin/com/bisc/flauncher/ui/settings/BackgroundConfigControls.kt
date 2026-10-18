@@ -50,7 +50,7 @@ import com.bisc.flauncher.util.BackgroundImageStore
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-/** Editor for the single global background shared by every surface: image, color, opacity, darkening. */
+/** Editor for the single global background shared by every surface: image, color, darken/lighten shade. */
 @Composable
 fun BackgroundConfigSection(
     imageKey: String,
@@ -167,30 +167,15 @@ fun BackgroundConfigSection(
         }
     }
 
-    SettingsPreferenceGroup(title = stringResource(R.string.settings_background_opacity_label)) {
+    SettingsPreferenceGroup(title = stringResource(R.string.settings_background_shade_label)) {
         SettledSlider(
-            value = config.opacity,
-            onSettled = { onConfigChange(config.copy(opacity = it)) },
-            valueRange = 0f..1f,
+            value = config.shade,
+            onSettled = { onConfigChange(config.copy(shade = it)) },
+            valueRange = -1f..1f,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             label = { live ->
                 Text(
-                    stringResource(R.string.settings_background_opacity_value, (live * 100).roundToInt()),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        )
-    }
-
-    SettingsPreferenceGroup(title = stringResource(R.string.settings_background_darken_label)) {
-        SettledSlider(
-            value = config.darken,
-            onSettled = { onConfigChange(config.copy(darken = it)) },
-            valueRange = 0f..1f,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            label = { live ->
-                Text(
-                    stringResource(R.string.settings_background_darken_value, (live * 100).roundToInt()),
+                    stringResource(R.string.settings_background_shade_value, (live * 100).roundToInt()),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -273,29 +258,15 @@ fun BackgroundOverrideSection(
     }
 
     if (!usesGlobal) {
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_opacity_label)) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_shade_label)) {
             SettledSlider(
-                value = current.opacity,
-                onSettled = { onCustomColor(current.copy(opacity = it)) },
-                valueRange = 0f..1f,
+                value = current.shade,
+                onSettled = { onCustomColor(current.copy(shade = it)) },
+                valueRange = -1f..1f,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 label = { live ->
                     Text(
-                        stringResource(R.string.settings_background_opacity_value, (live * 100).roundToInt()),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            )
-        }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_darken_label)) {
-            SettledSlider(
-                value = current.darken,
-                onSettled = { onCustomColor(current.copy(darken = it)) },
-                valueRange = 0f..1f,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                label = { live ->
-                    Text(
-                        stringResource(R.string.settings_background_darken_value, (live * 100).roundToInt()),
+                        stringResource(R.string.settings_background_shade_value, (live * 100).roundToInt()),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -333,6 +304,5 @@ private fun WallpaperCard(selected: Boolean, label: String, onClick: () -> Unit,
     }
 }
 
-/** Selecting an image also raises a fully transparent background, since it would otherwise stay invisible. */
 private fun BackgroundConfig.withImage(path: String) =
-    copy(source = BackgroundSource.IMAGE, imagePath = path, opacity = if (opacity <= 0f) 1f else opacity)
+    copy(source = BackgroundSource.IMAGE, imagePath = path)
