@@ -130,7 +130,8 @@ fun BrowseAppList(
     accentColor: Int,
     edgeInset: Dp = DockDimens.horizontalMargin,
     layout: AppListLayout = AppListLayout.LIST,
-    iconSize: Dp = TILE_ICON_SIZE
+    iconSize: Dp = TILE_ICON_SIZE,
+    cornerRadiusPercent: Int = 25
 ) {
     val scrub = remember { BrowseScrubState() }
     val gridState = rememberLazyGridState()
@@ -234,6 +235,7 @@ fun BrowseAppList(
                 showRailBar = indexShowRailBar,
                 letterAppearance = alphabetLetterAppearance,
                 handedness = handedness,
+                cornerRadiusPercent = cornerRadiusPercent,
                 modifier = Modifier
                     .align(if (handedness == Handedness.LEFT) Alignment.TopStart else Alignment.TopEnd)
                     .width(INDEX_TOUCH_WIDTH)

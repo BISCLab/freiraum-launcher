@@ -217,7 +217,6 @@
     <string name="settings_layer_surface_folder">Folder</string>
     <string name="settings_layer_surface_search">Text search</string>
     <string name="settings_search_appearance_summary">The whole search screen\'s look — background and results float directly on it, no separate cards.</string>
-    <string name="settings_layer_surface_keyboard">Keyboard</string>
     <string name="settings_layer_surface_app_list">App list</string>
     <string name="settings_layer_surface_widget">Widget</string>
     <string name="settings_layer_surface_section_letter">Section letter</string>
@@ -318,7 +317,6 @@
 
     <string name="settings_section_pages">Pages</string>
     <string name="settings_section_app_overview">App overview</string>
-    <string name="settings_card_app_overview_subtitle">Layout, appearance, search button</string>
     <string name="settings_card_pages_subtitle">Widgets, element boxes, backgrounds</string>
     <string name="settings_pages_home">Home screen</string>
     <string name="settings_home_appearance_title">Appearance</string>
@@ -467,7 +465,7 @@
     <string name="settings_section_search_overview">Quick overview</string>
     <string name="settings_card_search_overview_subtitle">Sidebar order, categories, background</string>
     <string name="settings_section_search_full">Text search</string>
-    <string name="settings_card_search_full_subtitle">Backgrounds, keyboard, categories, search engine</string>
+    <string name="settings_card_search_full_subtitle">Backgrounds, categories, search engine</string>
     <string name="settings_search_full_browse_label">Navigation</string>
     <string name="settings_search_show_az_index">A–Z rail</string>
     <string name="settings_search_index_show_rail_bar">Rail background</string>
@@ -489,22 +487,12 @@
     <string name="settings_search_appearance_label">Appearance</string>
     <string name="settings_search_hide_status_bar">Hide status bar while searching</string>
     <string name="settings_search_hide_status_bar_summary">Applies to the quick overview, text search and app overview.</string>
-    <string name="settings_search_keyboard_layout_label">Keyboard layout</string>
-    <string name="settings_search_keyboard_layout_qwerty">American (QWERTY)</string>
-    <string name="settings_search_keyboard_layout_qwertz">European / German (QWERTZ)</string>
     <string name="touch_feedback_hint_open">Open sound settings</string>
     <string name="settings_permissions_system_group">System</string>
     <string name="settings_permissions_touch_feedback">Touch feedback</string>
     <string name="settings_permissions_touch_feedback_purpose">Key vibration of the search keyboard. System setting; opens the sound settings.</string>
     <string name="settings_permissions_on">On</string>
     <string name="settings_permissions_off">Off</string>
-    <string name="settings_search_keyboard_sparks">Key sparks</string>
-    <string name="settings_search_keyboard_sparks_summary">Shows small sparks at the touch point when a key is pressed.</string>
-    <string name="settings_search_keyboard_spark_color">Spark color</string>
-    <string name="settings_search_keyboard_haptics">Key vibration</string>
-    <string name="settings_search_keyboard_haptics_summary">Short vibration on each key press via Android touch feedback. Requires Settings > Sound &amp; vibration > Vibration &amp; haptics > Touch feedback to be enabled (on some devices under vibration strength).</string>
-    <string name="settings_search_keyboard_show_number_row">Always show number row</string>
-    <string name="settings_search_keyboard_show_number_row_summary">Off: numbers are reached through the 123 key.</string>
     <string name="settings_search_keyboard_auto_open">Open keyboard automatically</string>
     <string name="settings_search_keyboard_auto_open_summary">Off: search opens with just the input field; tap it to show the keyboard.</string>
     <string name="search_filter_ai">AI app</string>
@@ -523,11 +511,6 @@
     <string name="settings_search_ai_clear">Remove</string>
     <string name="settings_search_ai_info">The query is handed to this app like a share. It appears as its own category with its own icon; the switch below turns it on or off. The launcher itself does not access the network.</string>
     <string name="settings_search_categories_info">Drag to change the order of the result sections. The switch decides whether a category is searched by default. In the results you can still tap a category icon at the bottom to show only that category, even if it is switched off here. Web and maps only hand the query to your browser or maps app; the launcher itself does not access the network.</string>
-    <string name="settings_search_keyboard_type_label">Keyboard</string>
-    <string name="settings_search_keyboard_type_custom">FLauncher keyboard</string>
-    <string name="settings_search_keyboard_type_system">System keyboard</string>
-    <string name="settings_search_keyboard_type_system_howto">How it works</string>
-    <string name="settings_search_keyboard_type_system_info">Uses the keyboard set up in Android, for example with suggestions or your own layout. The results fit the space above it, and the back gesture returns to the home screen.</string>
     <string name="settings_search_categories_order_title">Order and default search</string>
     <string name="settings_search_categories_label">Search categories</string>
     <string name="settings_search_tools_label">Tools</string>

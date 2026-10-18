@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -22,14 +21,13 @@ import androidx.compose.ui.unit.dp
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.settings.Handedness
-import com.bisc.flauncher.data.settings.IconShape
 
 /** The dock's search button, floating free: the same size, shape and. */
 @Composable
 fun FloatingSearchButton(
     onClick: () -> Unit,
     handedness: Handedness,
-    iconShape: IconShape,
+    cornerRadiusPercent: Int,
     appearance: ElementAppearance,
     modifier: Modifier = Modifier
 ) {
@@ -38,10 +36,7 @@ fun FloatingSearchButton(
         val d = DockDimens.scaled((maxWidth - DockDimens.horizontalMargin * 2).coerceAtLeast(0.dp))
         val slack = ((maxWidth - DockDimens.horizontalMargin * 2 - d.pillWidth) / 2).coerceAtLeast(0.dp)
         val edge = DockDimens.horizontalMargin + slack + d.innerHorizontalPadding
-        val shape = when (iconShape) {
-            IconShape.CIRCLE -> CircleShape
-            IconShape.ROUNDED_SQUARE -> RoundedCornerShape(d.iconCornerRadius)
-        }
+        val shape = RoundedCornerShape(percent = cornerRadiusPercent.coerceIn(0, 100))
         Box(
             modifier = Modifier
                 .align(if (handedness == Handedness.LEFT) Alignment.BottomStart else Alignment.BottomEnd)

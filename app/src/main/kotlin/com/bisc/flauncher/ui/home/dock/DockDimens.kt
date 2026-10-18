@@ -30,10 +30,10 @@ object DockDimens {
 
     const val REFERENCE_SLOT_COUNT = 5
 
-    /** Fallback corner radius for "dock-matched" surfaces that have no [com.bisc.flauncher.data.model.PageRow]
-     *  of their own to read a real corner style from (the search keyboard's action bar, the app overview's
-     *  window-mode panel, etc.) — the dock bar itself no longer uses this, it reads its own row's
-     *  `cornerStyle` instead (see the pill rendering in PageRowContent.kt). */
+    /** Max corner radius for "dock-matched" surfaces that have no [com.bisc.flauncher.data.model.PageRow]
+     *  of their own to read a real `cornerRadiusPercent` from (the app overview's window-mode panel) —
+     *  scaled by the global corner-roundness default instead. The dock bar itself no longer uses this,
+     *  it reads its own row's `cornerRadiusPercent` (see the pill rendering in PageRowContent.kt). */
     val defaultCornerRadius = 32.dp
 
     /** Width needed to fit exactly [count] icons at their fixed size, with the bar's own edge padding and inter-icon gaps. */
@@ -77,22 +77,6 @@ object DockDimens {
 
 /** Corner radius of the Layer-2 widgets/cards (see WidgetCard). */
 val WidgetCornerRadius = 20.dp
-
-/** Dock-matched dimensions for surfaces with no row of their own — see [DockDimens.defaultCornerRadius].
- *  [availableWidth] is unused for sizing now (icon size is fixed) but kept so existing callers (the
- *  search keyboard, etc.) don't need to change. */
-@androidx.compose.runtime.Composable
-fun dockDimens(availableWidth: Dp): ScaledDock = ScaledDock(
-    pillWidth = availableWidth,
-    barHeight = DockDimens.barHeight,
-    cornerRadius = DockDimens.defaultCornerRadius,
-    innerHorizontalPadding = DockDimens.innerHorizontalPadding,
-    iconSize = DockDimens.iconSize,
-    iconCornerRadius = DockDimens.iconCornerRadius,
-    buttonSize = DockDimens.iconSize,
-    itemSpacing = DockDimens.itemGap,
-    innerVerticalPadding = DockDimens.innerVerticalPadding
-)
 
 /** One consistently-resolved snapshot of the dock's dimensions. */
 data class ScaledDock(

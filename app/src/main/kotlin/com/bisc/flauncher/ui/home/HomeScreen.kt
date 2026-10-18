@@ -189,7 +189,7 @@ fun HomeScreen(
     val sidebarPanelAppearance by viewModel.sidebarPanelAppearance.collectAsState()
     val folderHideDock by viewModel.folderHideDock.collectAsState()
     val folderCardAppearance by viewModel.folderCardAppearance.collectAsState()
-    val keyboardAppearance by viewModel.keyboardAppearance.collectAsState()
+    val cornerRadiusPercent by viewModel.cornerRadiusPercent.collectAsState()
     val searchShowAzIndex by viewModel.searchShowAzIndex.collectAsState()
     val searchHideStatusBar by viewModel.searchHideStatusBar.collectAsState()
     val websiteResults by viewModel.websiteResults.collectAsState()
@@ -886,6 +886,7 @@ fun HomeScreen(
                     railAppearance = railAppearance,
                     accentColor = accentColor,
                     handedness = appOverviewHandedness,
+                    cornerRadiusPercent = cornerRadiusPercent,
                     loadIcon = viewModel::loadIcon,
                     onAppClick = { app ->
                         launchApp(context, app.componentName)
@@ -904,7 +905,7 @@ fun HomeScreen(
                     com.bisc.flauncher.ui.home.dock.FloatingSearchButton(
                         onClick = { viewModel.executeDockTapAction(com.bisc.flauncher.data.model.DockTapAction.FULL_SEARCH) },
                         handedness = appOverviewHandedness,
-                        iconShape = iconShape,
+                        cornerRadiusPercent = cornerRadiusPercent,
                         appearance = appListSearchButtonAppearance ?: railAppearance ?: automaticRailAppearance(overviewSurfaceDark)
                     )
                 }
@@ -953,7 +954,7 @@ fun HomeScreen(
             onToggleFilter = viewModel::toggleSearchFilter,
             keyboardAutoOpen = searchKeyboardAutoOpen,
             appearance = searchAppearance,
-            keyboardAppearance = keyboardAppearance,
+            cornerRadiusPercent = cornerRadiusPercent,
             loadIcon = viewModel::loadIcon,
             onQueryChange = viewModel::updateSearchQuery,
             onAppClick = { app ->
