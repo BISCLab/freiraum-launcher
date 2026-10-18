@@ -28,12 +28,15 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -63,7 +66,9 @@ import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.FolderIconMode
 import com.bisc.flauncher.data.model.GridItemType
 import com.bisc.flauncher.data.model.IconPackIcon
+import com.bisc.flauncher.data.model.RowEntry
 import com.bisc.flauncher.data.model.appearanceOverride
+import com.bisc.flauncher.data.model.rows
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Language
@@ -99,6 +104,7 @@ private fun toggleFolderAppearanceOverride(
 }
 
 /** Edit page for a single folder. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsFolderEditScreen(
     folderId: Long,
@@ -128,6 +134,8 @@ fun SettingsFolderEditScreen(
     var showAddMapTargetDialog by remember { mutableStateOf(false) }
     var showWebsitePicker by remember { mutableStateOf(false) }
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
+    var showAddChooser by remember { mutableStateOf(false) }
+    var pendingRemoval by remember { mutableStateOf<com.bisc.flauncher.data.model.FolderItem?>(null) }
 
     val latestEdited by rememberUpdatedState(edited)
     val latestName by rememberUpdatedState(folder?.name)
@@ -210,29 +218,69 @@ fun SettingsFolderEditScreen(
             )
         }
 
+        val rowShape = folder.rows()
+        val gridEntries = remember(items) {
+            items.map { item -> RowEntry(id = item.id, pageRowId = 0L, orderIndex = item.orderIndex, type = item.type, payload = item.payload) }
+        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_folder_items_label)) {
-            if (items.isEmpty()) {
-                Text(
-                    stringResource(R.string.folder_overview_empty),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(16.dp)
+            androidx.compose.foundation.layout.Column(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                com.bisc.flauncher.ui.home.GridEntries(
+                    entries = gridEntries,
+                    columns = 1,
+                    rowColumns = rowShape,
+                    folders = folders,
+                    folderItemsByFolder = itemsByFolder,
+                    savedMapTargets = savedMapTargets,
+                    pinnedWebsites = pinnedWebsites,
+                    pages = emptyList(),
+                    loadIcon = viewModel::loadIcon,
+                    loadPackIcon = viewModel::loadPackIcon,
+                    resolveLabel = viewModel::resolveLabel,
+                    onFolderClick = {},
+                    onShortcutClick = {},
+                    onOpenPageLink = { _, _ -> },
+                    showLabels = true,
+                    labelColor = Color.White,
+                    onAddEmptySlot = { showAddChooser = true },
+                    onEditEntry = { entry -> pendingRemoval = items.find { it.id == entry.id } }
                 )
-            } else {
-                items.forEach { item ->
-                    FolderItemRow(
-                        item = item,
-                        folders = folders,
-                        folderItemsByFolder = itemsByFolder,
-                        savedMapTargets = savedMapTargets,
-                        pinnedWebsites = pinnedWebsites,
-                        loadIcon = viewModel::loadIcon,
-                        loadPackIcon = viewModel::loadPackIcon,
-                        resolveLabel = viewModel::resolveLabel,
-                        onRemove = { viewModel.removeFolderItem(item) }
-                    )
-                }
             }
+        }
+
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_panel_rows_label)) {
+            rowShape.forEachIndexed { index, cols ->
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_panel_row_number, index + 1),
+                    onClick = {},
+                    trailing = {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(cols.toString(), modifier = Modifier.padding(end = 4.dp))
+                            IconButton(
+                                onClick = { viewModel.setFolderRowColumns(folderId, rowShape.toMutableList().apply { this[index] = cols - 1 }) },
+                                enabled = cols > 1
+                            ) { Icon(Icons.Filled.Remove, contentDescription = null) }
+                            IconButton(
+                                onClick = { viewModel.setFolderRowColumns(folderId, rowShape.toMutableList().apply { this[index] = cols + 1 }) },
+                                enabled = cols < 6
+                            ) { Icon(Icons.Filled.Add, contentDescription = null) }
+                            IconButton(
+                                onClick = { viewModel.setFolderRowColumns(folderId, rowShape.filterIndexed { i, _ -> i != index }) },
+                                enabled = rowShape.size > 1
+                            ) { Icon(Icons.Filled.Close, contentDescription = null) }
+                        }
+                    }
+                )
+            }
+            SettingsPreference(
+                icon = Icons.Filled.Add,
+                title = stringResource(R.string.settings_panel_add_row),
+                onClick = { viewModel.setFolderRowColumns(folderId, rowShape + 4) },
+                trailing = null
+            )
         }
 
         val showAddRow by remember(folderId) { viewModel.folderShowAddRow(folderId) }.collectAsState(initial = true)
@@ -247,20 +295,35 @@ fun SettingsFolderEditScreen(
         }
 
         SettingsPreferenceGroup {
-            SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_row_entry_add_app), onClick = { showAppPicker = true }, trailing = null)
-            SettingsPreference(icon = Icons.Filled.CreateNewFolder, title = stringResource(R.string.settings_row_entry_add_folder), onClick = { showFolderPicker = true }, trailing = null)
-            SettingsPreference(icon = Icons.AutoMirrored.Filled.Shortcut, title = stringResource(R.string.settings_row_entry_add_shortcut), onClick = { viewModel.openFolderShortcutAppPicker(folderId) }, trailing = null)
-            SettingsPreference(icon = Icons.Filled.Place, title = stringResource(R.string.settings_row_entry_add_map_target), onClick = { showMapTargetPicker = true }, trailing = null)
-            SettingsPreference(icon = Icons.Filled.Language, title = stringResource(R.string.settings_row_entry_add_website), onClick = { showWebsitePicker = true }, trailing = null)
-        }
-
-        SettingsPreferenceGroup {
             SettingsPreference(
                 icon = Icons.Filled.DeleteOutline,
                 title = stringResource(R.string.settings_folder_delete),
                 onClick = { confirmingDelete = true },
                 trailing = null
             )
+        }
+    }
+
+    pendingRemoval?.let { item ->
+        com.bisc.flauncher.ui.home.ConfirmRemoveDialog(
+            label = com.bisc.flauncher.ui.home.entryLabel(
+                RowEntry(id = item.id, pageRowId = 0L, orderIndex = item.orderIndex, type = item.type, payload = item.payload),
+                folders, savedMapTargets, pinnedWebsites, emptyList(), emptyList(), viewModel::resolveLabel
+            ),
+            onConfirm = { viewModel.removeFolderItem(item); pendingRemoval = null },
+            onDismiss = { pendingRemoval = null }
+        )
+    }
+
+    if (showAddChooser) {
+        ModalBottomSheet(onDismissRequest = { showAddChooser = false }) {
+            SettingsPreferenceGroup {
+                SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_row_entry_add_app), onClick = { showAddChooser = false; showAppPicker = true }, trailing = null)
+                SettingsPreference(icon = Icons.Filled.CreateNewFolder, title = stringResource(R.string.settings_row_entry_add_folder), onClick = { showAddChooser = false; showFolderPicker = true }, trailing = null)
+                SettingsPreference(icon = Icons.AutoMirrored.Filled.Shortcut, title = stringResource(R.string.settings_row_entry_add_shortcut), onClick = { showAddChooser = false; viewModel.openFolderShortcutAppPicker(folderId) }, trailing = null)
+                SettingsPreference(icon = Icons.Filled.Place, title = stringResource(R.string.settings_row_entry_add_map_target), onClick = { showAddChooser = false; showMapTargetPicker = true }, trailing = null)
+                SettingsPreference(icon = Icons.Filled.Language, title = stringResource(R.string.settings_row_entry_add_website), onClick = { showAddChooser = false; showWebsitePicker = true }, trailing = null)
+            }
         }
     }
 
@@ -492,58 +555,3 @@ fun ColumnScope.IconPackPickerContent(
     }
 }
 
-@Composable
-private fun FolderItemRow(
-    item: com.bisc.flauncher.data.model.FolderItem,
-    folders: List<com.bisc.flauncher.data.model.Folder>,
-    folderItemsByFolder: Map<Long, List<com.bisc.flauncher.data.model.FolderItem>>,
-    savedMapTargets: List<com.bisc.flauncher.data.model.SavedMapTarget>,
-    pinnedWebsites: List<com.bisc.flauncher.data.model.PinnedWebsite>,
-    loadIcon: (android.content.ComponentName) -> ImageBitmap?,
-    loadPackIcon: (String, String) -> ImageBitmap?,
-    resolveLabel: (android.content.ComponentName) -> String,
-    onRemove: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        when (item.type) {
-            GridItemType.APP -> {
-                val componentName = remember(item.payload) { android.content.ComponentName.unflattenFromString(item.payload) }
-                val bitmap = com.bisc.flauncher.ui.home.rememberAppIcon(componentName, loadIcon)
-                val label = componentName?.let(resolveLabel).orEmpty()
-                if (bitmap != null) Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(28.dp))
-                Text(label, modifier = Modifier.weight(1f))
-            }
-            GridItemType.FOLDER -> {
-                val childId = remember(item.payload) { item.payload.toLongOrNull() }
-                val child = folders.find { it.id == childId }
-                FolderIcon(folder = child, previewItems = childId?.let { folderItemsByFolder[it] }.orEmpty(), loadIcon = loadIcon, loadPackIcon = loadPackIcon, modifier = Modifier.size(28.dp))
-                Text(child?.name.orEmpty(), modifier = Modifier.weight(1f))
-            }
-            GridItemType.SHORTCUT -> {
-                val label = remember(item.payload) { item.payload.split("|").getOrNull(2).orEmpty() }
-                Icon(Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, modifier = Modifier.size(28.dp))
-                Text(label, modifier = Modifier.weight(1f))
-            }
-            GridItemType.MAP_TARGET -> {
-                val targetId = remember(item.payload) { item.payload.toLongOrNull() }
-                val target = savedMapTargets.find { it.id == targetId }
-                Icon(Icons.Filled.Place, contentDescription = null, modifier = Modifier.size(28.dp))
-                Text(target?.label.orEmpty(), modifier = Modifier.weight(1f))
-            }
-            GridItemType.WEBSITE -> {
-                val websiteId = remember(item.payload) { item.payload.toLongOrNull() }
-                val website = pinnedWebsites.find { it.id == websiteId }
-                Icon(Icons.Filled.Language, contentDescription = null, modifier = Modifier.size(28.dp))
-                Text(website?.label.orEmpty(), modifier = Modifier.weight(1f))
-            }
-            GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE, GridItemType.CONTACT, GridItemType.ACTION_BUTTON -> Text("", modifier = Modifier.weight(1f))
-        }
-        IconButton(onClick = onRemove) {
-            Icon(Icons.Filled.Close, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}

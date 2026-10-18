@@ -68,6 +68,7 @@ import com.bisc.flauncher.data.model.PinnedWebsite
 import com.bisc.flauncher.data.model.SavedMapTarget
 import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.data.model.WidgetKind
+import com.bisc.flauncher.data.model.rows
 import com.bisc.flauncher.ui.home.dock.DockDimens
 import com.bisc.flauncher.ui.home.dock.DockPanelSurface
 import com.bisc.flauncher.ui.home.widgets.ClockWidget
@@ -76,9 +77,29 @@ import com.bisc.flauncher.ui.home.widgets.NotesWidget
 import com.bisc.flauncher.ui.home.widgets.SystemWidgetView
 import com.bisc.flauncher.ui.home.widgets.WeatherWidget
 
-private const val GRID_COLUMNS = 4
-
 private val FolderCornerRadius = 28.dp
+
+/** One sub-row of the folder's content grid: its configured column [width] (from
+ *  [com.bisc.flauncher.data.model.Folder.rows], reserved even if this row isn't fully filled, so
+ *  columns stay aligned across rows the way a fully-filled row's do) and the [items] that actually
+ *  landed in it. */
+private data class FolderGridRow(val width: Int, val items: List<FolderItem>)
+
+/** Slices [gridItems] into rows sized by [rowShape]; any items beyond what [rowShape] accounts for
+ *  overflow into further rows reusing its last width, so a folder never silently hides content just
+ *  because it has more items than its configured rows add up to. */
+private fun gridRowsFor(gridItems: List<FolderItem>, rowShape: List<Int>): List<FolderGridRow> {
+    val widths = rowShape.ifEmpty { listOf(4) }.toMutableList()
+    val lastWidth = widths.last()
+    var consumed = widths.sum()
+    while (consumed < gridItems.size) {
+        widths += lastWidth
+        consumed += lastWidth
+    }
+    var index = 0
+    return widths.map { width -> FolderGridRow(width, gridItems.drop(index).take(width).also { index += width }) }
+        .filter { it.items.isNotEmpty() }
+}
 
 /** Folder card with its items, shown above the home screen. */
 @Composable
@@ -119,7 +140,7 @@ fun FolderView(
         WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
     )
     val (widgetItems, gridItems) = items.partition { it.type == GridItemType.WIDGET || it.type == GridItemType.SYSTEM_WIDGET }
-    val gridRows = gridItems.chunked(GRID_COLUMNS)
+    val gridRows = gridRowsFor(gridItems, folder.rows())
     val movingItem = gridItems.find { it.id == movingItemId }
     fun moveBy(delta: Int) {
         val from = gridItems.indexOfFirst { it.id == movingItemId }
@@ -153,11 +174,11 @@ fun FolderView(
                     key("widget_${widgetItem.id}") { FolderWidgetRow(item = widgetItem) }
                 }
                 for (row in gridRows) {
-                    key("grid_${row.first().id}") {
+                    key("grid_${row.items.first().id}") {
                         Row(modifier = Modifier.fillMaxWidth()) {
-                            repeat(GRID_COLUMNS) { slot ->
+                            repeat(row.width) { slot ->
                                 Box(modifier = Modifier.weight(1f)) {
-                                    val entry = row.getOrNull(slot)
+                                    val entry = row.items.getOrNull(slot)
                                     if (entry != null) {
                                         key(entry.id) {
                                             FolderContentCell(
