@@ -97,15 +97,20 @@ fun SettledSlider(
     }
 }
 
-/** A collapsible row for a 0-100 percent [SettledSlider]: shows the current value and a chevron, and
- *  only reveals the slider once tapped, so a compact numeric setting (like corner roundness) doesn't
- *  always take up the extra vertical space in a settings list. */
+/** A collapsible row for a [SettledSlider]: shows the current value (via [valueLabel]) and a chevron,
+ *  and only reveals the slider once tapped, so a compact numeric setting doesn't always take up the
+ *  extra vertical space in a settings list. */
 @Composable
-fun ExpandablePercentSlider(percent: Int, onSettled: (Int) -> Unit) {
+private fun ExpandableSlider(
+    value: Float,
+    onSettled: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    valueLabel: @Composable (Float) -> String
+) {
     var expanded by remember { mutableStateOf(false) }
     SettingsPreference(
         icon = null,
-        title = stringResource(R.string.settings_corner_radius_value, percent),
+        title = valueLabel(value),
         onClick = { expanded = !expanded },
         trailing = {
             Icon(
@@ -117,18 +122,35 @@ fun ExpandablePercentSlider(percent: Int, onSettled: (Int) -> Unit) {
     )
     if (expanded) {
         SettledSlider(
-            value = percent.toFloat(),
-            onSettled = { onSettled(it.roundToInt()) },
-            valueRange = 0f..100f,
+            value = value,
+            onSettled = onSettled,
+            valueRange = valueRange,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            label = { live ->
-                Text(
-                    stringResource(R.string.settings_corner_radius_value, live.roundToInt()),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
+            label = { live -> Text(valueLabel(live), style = MaterialTheme.typography.bodyMedium) }
         )
     }
+}
+
+/** 0-100 percent case, e.g. corner roundness. */
+@Composable
+fun ExpandablePercentSlider(percent: Int, onSettled: (Int) -> Unit) {
+    ExpandableSlider(
+        value = percent.toFloat(),
+        onSettled = { onSettled(it.roundToInt()) },
+        valueRange = 0f..100f,
+        valueLabel = { stringResource(R.string.settings_corner_radius_value, it.roundToInt()) }
+    )
+}
+
+/** -100..100 signed percent case, e.g. background darken/lighten shade. */
+@Composable
+fun ExpandableShadePercentSlider(percent: Int, onSettled: (Int) -> Unit) {
+    ExpandableSlider(
+        value = percent.toFloat(),
+        onSettled = { onSettled(it.roundToInt()) },
+        valueRange = -100f..100f,
+        valueLabel = { stringResource(R.string.settings_background_shade_value, it.roundToInt()) }
+    )
 }
 
 /** Shared generic radio-list row, one [SettingsPreference] with a trailing [RadioButton]. */
