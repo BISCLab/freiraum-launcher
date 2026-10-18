@@ -35,7 +35,9 @@ data class PageRow(
     val fillDirection: GradientDirection = GradientDirection.TOP_TO_BOTTOM,
     val elementOpacity: Float = 1f,
     val borderEnabled: Boolean = false,
-    val cornerStyle: WidgetCornerStyle = WidgetCornerStyle.ROUNDED,
+    // 0 = sharp 90° corners, 100 = fully rounded (a capsule/pill on the shape's shorter axis) — see
+    // RoundedCornerShape(percent = ...), used directly everywhere this is rendered.
+    val cornerRadiusPercent: Int = 25,
     val edgeToEdge: Boolean = false,
     val columns: Int = 5,
     val clockStyle: String = ClockStyle.DIGITAL,

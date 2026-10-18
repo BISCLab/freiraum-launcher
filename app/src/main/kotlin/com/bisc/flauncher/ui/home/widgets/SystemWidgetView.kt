@@ -24,7 +24,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.iterator
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bisc.flauncher.data.model.ElementAppearance
-import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.LocalSurfaceIsDark
 import com.bisc.flauncher.ui.home.LocalSurfaceIsDarkLoading
@@ -64,7 +63,7 @@ fun SystemWidgetView(
     appWidgetId: Int,
     modifier: Modifier = Modifier,
     appearance: ElementAppearance = ElementAppearance(),
-    cornerStyle: WidgetCornerStyle = WidgetCornerStyle.ROUNDED,
+    cornerRadiusPercent: Int = 25,
     horizontalMargin: Dp = 0.dp,
     onHostedViewReady: ((android.view.View) -> Unit)? = null,
     viewModel: HomeViewModel = hiltViewModel()
@@ -75,7 +74,7 @@ fun SystemWidgetView(
     // value arrives (many widgets don't repaint themselves just because our host view gets recreated).
     val surfaceLoading = LocalSurfaceIsDarkLoading.current
     if (info == null || surfaceLoading) {
-        WidgetCard(modifier = modifier, appearance = appearance, cornerStyle = cornerStyle, horizontalMargin = horizontalMargin) {
+        WidgetCard(modifier = modifier, appearance = appearance, cornerRadiusPercent = cornerRadiusPercent, horizontalMargin = horizontalMargin) {
             Text("···", color = Color.White.copy(alpha = 0.5f), style = MaterialTheme.typography.bodySmall)
         }
         return
@@ -83,7 +82,7 @@ fun SystemWidgetView(
     WidgetCard(
         modifier = modifier,
         appearance = appearance,
-        cornerStyle = cornerStyle,
+        cornerRadiusPercent = cornerRadiusPercent,
         horizontalMargin = horizontalMargin,
         contentPadding = 0.dp
     ) {

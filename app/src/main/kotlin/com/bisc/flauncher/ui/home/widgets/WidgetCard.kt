@@ -15,7 +15,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bisc.flauncher.data.model.ElementAppearance
-import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.ui.home.dock.resolveElementColors
 
 /** Shared card shell for the built-in widgets (Music/Weather/Notes) and the element box grid. */
@@ -23,16 +22,13 @@ import com.bisc.flauncher.ui.home.dock.resolveElementColors
 fun WidgetCard(
     modifier: Modifier = Modifier,
     appearance: ElementAppearance = ElementAppearance(),
-    cornerStyle: WidgetCornerStyle = WidgetCornerStyle.ROUNDED,
+    cornerRadiusPercent: Int = 25,
     horizontalMargin: Dp = 0.dp,
     contentPadding: Dp = 16.dp,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val colors = resolveElementColors(appearance)
-    val shape = when (cornerStyle) {
-        WidgetCornerStyle.SQUARE -> RoundedCornerShape(0.dp)
-        WidgetCornerStyle.ROUNDED -> RoundedCornerShape(com.bisc.flauncher.ui.home.dock.WidgetCornerRadius)
-    }
+    val shape = RoundedCornerShape(percent = cornerRadiusPercent.coerceIn(0, 100))
 
     CompositionLocalProvider(LocalContentColor provides colors.contentColor) {
         Column(

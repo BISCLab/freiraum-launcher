@@ -58,7 +58,6 @@ import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.HourlyWeather
 import com.bisc.flauncher.data.model.WeatherCondition
 import com.bisc.flauncher.data.model.WeatherSnapshot
-import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.ui.home.HomeViewModel
 import java.time.Instant
 import java.time.LocalDate
@@ -81,13 +80,13 @@ private const val MAX_DAYS = 7
 fun WeatherWidget(
     modifier: Modifier = Modifier,
     appearance: ElementAppearance = ElementAppearance(),
-    cornerStyle: WidgetCornerStyle = WidgetCornerStyle.ROUNDED,
+    cornerRadiusPercent: Int = 25,
     horizontalMargin: Dp = 0.dp,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val snapshot by viewModel.weather.collectAsState()
 
-    WidgetCard(modifier = modifier, appearance = appearance, cornerStyle = cornerStyle, horizontalMargin = horizontalMargin) {
+    WidgetCard(modifier = modifier, appearance = appearance, cornerRadiusPercent = cornerRadiusPercent, horizontalMargin = horizontalMargin) {
         val weather = snapshot
         if (weather == null) {
             Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {

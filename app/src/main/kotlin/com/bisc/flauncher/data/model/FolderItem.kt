@@ -33,7 +33,8 @@ data class FolderItem(
     val fillDirection: GradientDirection = GradientDirection.TOP_TO_BOTTOM,
     val elementOpacity: Float = 1f,
     val borderEnabled: Boolean = false,
-    val cornerStyle: WidgetCornerStyle = WidgetCornerStyle.ROUNDED,
+    // 0 = sharp 90° corners, 100 = fully rounded — see PageRow.cornerRadiusPercent.
+    val cornerRadiusPercent: Int = 25,
     val elementBorderColor: Int? = null,
     val elementBorderWidth: Float = 1f,
     val elementContentColor: Int? = null

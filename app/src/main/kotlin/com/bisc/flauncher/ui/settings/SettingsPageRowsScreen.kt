@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -58,7 +57,6 @@ import com.bisc.flauncher.data.model.ClockStyle
 import com.bisc.flauncher.data.model.ClockTimeFormat
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
-import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.ui.pageLabel
@@ -307,26 +305,6 @@ internal fun WidgetSizeSheet(
             }
         }
     }
-}
-
-/** One [WidgetCornerStyle] radio row, with a small swatch previewing the shape itself. */
-@Composable
-fun CornerStylePreference(value: WidgetCornerStyle, selected: WidgetCornerStyle, onSelect: (WidgetCornerStyle) -> Unit) {
-    val label = when (value) {
-        WidgetCornerStyle.SQUARE -> stringResource(R.string.settings_widgets_corner_shape_square)
-        WidgetCornerStyle.ROUNDED -> stringResource(R.string.settings_widgets_corner_shape_rounded)
-    }
-    val shape = when (value) {
-        WidgetCornerStyle.SQUARE -> RoundedCornerShape(0.dp)
-        WidgetCornerStyle.ROUNDED -> RoundedCornerShape(6.dp)
-    }
-    SettingsPreference(
-        icon = null,
-        title = label,
-        onClick = { onSelect(value) },
-        leading = { Box(modifier = Modifier.size(24.dp).background(MaterialTheme.colorScheme.primary, shape)) },
-        trailing = { RadioButton(selected = value == selected, onClick = { onSelect(value) }) }
-    )
 }
 
 internal fun rowIcon(row: PageRow): ImageVector = when (row.type) {

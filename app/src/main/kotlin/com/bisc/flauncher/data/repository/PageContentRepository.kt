@@ -27,7 +27,6 @@ import com.bisc.flauncher.data.model.PageDirection
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
-import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.data.model.withAppearance
 import com.bisc.flauncher.data.model.withDockRows
 import com.bisc.flauncher.data.model.withPanelRows
@@ -296,7 +295,7 @@ class PageContentRepository @Inject constructor(
     suspend fun addWidgetRow(pageId: Long, kind: String, spanY: Int = WidgetKind.defaultSpan(kind)): Long {
         var row = PageRow(
             pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.WIDGET, payload = kind, spanY = spanY,
-            cornerStyle = settingsRepository.defaultCornerStyle.first()
+            cornerRadiusPercent = settingsRepository.defaultCornerRadiusPercent.first()
         )
         row = row.withAppearance(defaultBoxAppearanceFor(isDark()))
         val id = rowDao.insert(row)
@@ -307,7 +306,7 @@ class PageContentRepository @Inject constructor(
     suspend fun addSystemWidgetRow(pageId: Long, appWidgetId: Int, spanY: Int): Long {
         var row = PageRow(
             pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.SYSTEM_WIDGET, payload = appWidgetId.toString(), spanY = spanY,
-            cornerStyle = settingsRepository.defaultCornerStyle.first()
+            cornerRadiusPercent = settingsRepository.defaultCornerRadiusPercent.first()
         )
         row = row.withAppearance(defaultBoxAppearanceFor(isDark()))
         val id = rowDao.insert(row)
@@ -318,7 +317,7 @@ class PageContentRepository @Inject constructor(
     suspend fun addElementBox(pageId: Long): Long {
         var row = PageRow(
             pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.ELEMENT_BOX, columns = GridConstants.DEFAULT_ELEMENT_BOX_COLUMNS,
-            cornerStyle = settingsRepository.defaultCornerStyle.first()
+            cornerRadiusPercent = settingsRepository.defaultCornerRadiusPercent.first()
         )
         row = row.withAppearance(defaultBoxAppearanceFor(isDark()))
         val id = rowDao.insert(row)
@@ -474,8 +473,13 @@ class PageContentRepository @Inject constructor(
         rowDao.update(row.withAppearance(appearance))
     }
 
-    suspend fun setRowCornerStyle(row: PageRow, style: WidgetCornerStyle) {
-        rowDao.update(row.copy(cornerStyle = style))
+    suspend fun setRowCornerRadiusPercent(row: PageRow, percent: Int) {
+        rowDao.update(row.copy(cornerRadiusPercent = percent))
+    }
+
+    suspend fun applyCornerRadiusToAllRows(percent: Int) {
+        val rows = rowDao.observeAll().first().map { it.copy(cornerRadiusPercent = percent) }
+        rowDao.updateAll(rows)
     }
 
     suspend fun setRowEdgeToEdge(row: PageRow, edgeToEdge: Boolean) {

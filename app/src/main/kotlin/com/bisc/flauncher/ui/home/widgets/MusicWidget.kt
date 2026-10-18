@@ -64,7 +64,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.NowPlayingInfo
-import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.ui.home.HomeViewModel
 import kotlinx.coroutines.delay
 
@@ -78,7 +77,7 @@ private const val MAX_INLINE_CUSTOM_ACTIONS = 2
 fun MusicWidget(
     modifier: Modifier = Modifier,
     appearance: ElementAppearance = ElementAppearance(),
-    cornerStyle: WidgetCornerStyle = WidgetCornerStyle.ROUNDED,
+    cornerRadiusPercent: Int = 25,
     horizontalMargin: Dp = 0.dp,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -90,7 +89,7 @@ fun MusicWidget(
     WidgetCard(
         modifier = modifier,
         appearance = appearance,
-        cornerStyle = cornerStyle,
+        cornerRadiusPercent = cornerRadiusPercent,
         horizontalMargin = horizontalMargin,
         contentPadding = 10.dp
     ) {

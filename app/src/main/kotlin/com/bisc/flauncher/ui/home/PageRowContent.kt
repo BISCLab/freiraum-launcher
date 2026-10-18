@@ -60,7 +60,6 @@ import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.PinnedContact
 import com.bisc.flauncher.data.model.PinnedWebsite
 import com.bisc.flauncher.data.model.SavedMapTarget
-import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.data.model.clockDateAction
@@ -125,9 +124,9 @@ fun PageRowContent(
                         onDateClick = row.clockDateAction().takeIf { it.type != GestureActionType.NONE }?.let { action -> { onExecuteAction(action) } },
                         onTimeClick = row.clockTimeAction().takeIf { it.type != GestureActionType.NONE }?.let { action -> { onExecuteAction(action) } }
                     )
-                    WidgetKind.MUSIC -> MusicWidget(appearance = row.appearance(), cornerStyle = row.cornerStyle, horizontalMargin = horizontalMargin)
-                    WidgetKind.WEATHER -> WeatherWidget(appearance = row.appearance(), cornerStyle = row.cornerStyle, horizontalMargin = horizontalMargin)
-                    WidgetKind.NOTES -> NotesWidget(appearance = row.appearance(), cornerStyle = row.cornerStyle, horizontalMargin = horizontalMargin, spanY = row.spanY)
+                    WidgetKind.MUSIC -> MusicWidget(appearance = row.appearance(), cornerRadiusPercent = row.cornerRadiusPercent, horizontalMargin = horizontalMargin)
+                    WidgetKind.WEATHER -> WeatherWidget(appearance = row.appearance(), cornerRadiusPercent = row.cornerRadiusPercent, horizontalMargin = horizontalMargin)
+                    WidgetKind.NOTES -> NotesWidget(appearance = row.appearance(), cornerRadiusPercent = row.cornerRadiusPercent, horizontalMargin = horizontalMargin, spanY = row.spanY)
                     WidgetKind.SPACER -> Unit
                 }
             }
@@ -146,7 +145,7 @@ fun PageRowContent(
                     appWidgetId = appWidgetId,
                     modifier = Modifier.fillMaxWidth().height(rowHeight),
                     appearance = row.appearance(),
-                    cornerStyle = row.cornerStyle,
+                    cornerRadiusPercent = row.cornerRadiusPercent,
                     horizontalMargin = horizontalMargin,
                     onHostedViewReady = onSystemWidgetViewReady
                 )
@@ -219,7 +218,7 @@ private fun ElementBoxGrid(
     WidgetCard(
         modifier = Modifier.fillMaxWidth(),
         appearance = row.appearance(),
-        cornerStyle = row.cornerStyle,
+        cornerRadiusPercent = row.cornerRadiusPercent,
         horizontalMargin = horizontalMargin,
         contentPadding = 12.dp
     ) {
@@ -674,8 +673,8 @@ fun PillRow(
         val displayedCount = if (onAddEmptySlot != null) maxOf(entries.size, row.pillMaxEntries) else entries.size
         val pillWidth = DockDimens.pillWidth(displayedCount, row.pillWidthMode, maxWidth)
         val itemShape = pillItemShape(iconShape)
-        val barShape = remember(row.cornerStyle) {
-            if (row.cornerStyle == WidgetCornerStyle.SQUARE) RoundedCornerShape(0.dp) else RoundedCornerShape(percent = 50)
+        val barShape = remember(row.cornerRadiusPercent) {
+            RoundedCornerShape(percent = row.cornerRadiusPercent.coerceIn(0, 100))
         }
         val barHeight = if (row.showLabels) DockDimens.barHeight + DockDimens.labelExtraHeight else DockDimens.barHeight
 

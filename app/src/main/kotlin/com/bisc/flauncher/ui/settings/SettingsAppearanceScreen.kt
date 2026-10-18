@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -11,12 +12,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
-import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.ui.theme.FontPreference
 import com.bisc.flauncher.ui.theme.ThemePreference
+import kotlin.math.roundToInt
 
 @Composable
 fun SettingsAppearanceScreen(
@@ -30,7 +32,7 @@ fun SettingsAppearanceScreen(
     val chargingAnimation by viewModel.chargingAnimationEnabled.collectAsState()
     val chargingColor by viewModel.chargingAnimationColor.collectAsState()
     val statusBarHiddenEverywhere by viewModel.statusBarHiddenEverywhere.collectAsState()
-    val defaultCornerStyle by viewModel.defaultCornerStyle.collectAsState()
+    val defaultCornerRadiusPercent by viewModel.defaultCornerRadiusPercent.collectAsState()
     val browserPackage by viewModel.searchBrowserApp.collectAsState()
     val mapsPackage by viewModel.searchMapsApp.collectAsState()
     var browserPickerOpen by remember { mutableStateOf(false) }
@@ -86,11 +88,22 @@ fun SettingsAppearanceScreen(
             RadioPreference(stringResource(R.string.settings_font_monospace), FontPreference.MONOSPACE, fontPreference, viewModel::setFontPreference, font = FontPreference.MONOSPACE.fontFamily)
             RadioPreference(stringResource(R.string.settings_font_rounded), FontPreference.ROUNDED, fontPreference, viewModel::setFontPreference, font = FontPreference.ROUNDED.fontFamily)
         }
-        // Applies to newly created elements only — each one's own Appearance screen can still
-        // override it afterwards (see SettingsRepository.defaultCornerStyle).
+        // Changing this immediately re-stamps every existing row/folder item to match (see
+        // SettingsViewModel.setDefaultCornerRadiusPercent) — each element's own Appearance screen
+        // can still override it individually afterwards.
         SettingsPreferenceGroup(title = stringResource(R.string.settings_corner_style_label)) {
-            RadioPreference(stringResource(R.string.settings_corner_style_rounded), WidgetCornerStyle.ROUNDED, defaultCornerStyle, viewModel::setDefaultCornerStyle)
-            RadioPreference(stringResource(R.string.settings_corner_style_square), WidgetCornerStyle.SQUARE, defaultCornerStyle, viewModel::setDefaultCornerStyle)
+            SettledSlider(
+                value = defaultCornerRadiusPercent.toFloat(),
+                onSettled = { viewModel.setDefaultCornerRadiusPercent(it.roundToInt()) },
+                valueRange = 0f..100f,
+                modifier = androidx.compose.ui.Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                label = { live ->
+                    Text(
+                        stringResource(R.string.settings_corner_radius_value, live.roundToInt()),
+                        style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
+                    )
+                }
+            )
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_standard_apps_label)) {
             SettingsPreference(

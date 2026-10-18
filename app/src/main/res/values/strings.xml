@@ -376,8 +376,6 @@
     <string name="settings_page_full_message">It doesn\'t fit here alongside what\'s already on this page. Add a new page for it?</string>
     <string name="settings_page_full_confirm">Add page</string>
     <string name="settings_widgets_corner_shape_label">Corner shape</string>
-    <string name="settings_widgets_corner_shape_square">Square</string>
-    <string name="settings_widgets_corner_shape_rounded">Rounded</string>
     <string name="settings_widgets_edge_to_edge_label">Edge to edge</string>
     <string name="settings_widgets_edge_to_edge_summary">Removes the side margin so the widget spans the full screen width. Off by default; the width then matches the dock.</string>
 
@@ -456,8 +454,7 @@
     <string name="settings_statusbar_confirm_hide_message">This hides the status bar on every page, quick overview, text search and folders at once, overriding whatever each one is currently set to.</string>
     <string name="settings_statusbar_confirm_show_message">This shows the status bar on every page, quick overview, text search and folders at once, overriding whatever each one is currently set to.</string>
     <string name="settings_corner_style_label">Corner style</string>
-    <string name="settings_corner_style_rounded">Rounded</string>
-    <string name="settings_corner_style_square">Square</string>
+    <string name="settings_corner_radius_value">%1$d%%</string>
     <string name="settings_statusbar_hide_page">Hide status bar</string>
     <string name="settings_statusbar_hide_quick_search">Hide status bar in quick overview</string>
     <string name="settings_folder_hide_status_bar">Hide status bar in folders</string>

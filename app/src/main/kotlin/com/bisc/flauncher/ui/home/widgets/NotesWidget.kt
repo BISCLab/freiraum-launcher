@@ -48,7 +48,6 @@ import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.Note
 import com.bisc.flauncher.data.model.NoteType
 import com.bisc.flauncher.data.model.ElementAppearance
-import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.dock.resolveElementColors
 
@@ -62,7 +61,7 @@ private const val COLUMNS = 2
 fun NotesWidget(
     modifier: Modifier = Modifier,
     appearance: ElementAppearance = ElementAppearance(),
-    cornerStyle: WidgetCornerStyle = WidgetCornerStyle.ROUNDED,
+    cornerRadiusPercent: Int = 25,
     horizontalMargin: Dp = 0.dp,
     spanY: Int = 1,
     viewModel: HomeViewModel = hiltViewModel()
@@ -91,7 +90,7 @@ fun NotesWidget(
         viewModel.reorderNotes(reordered)
     }
 
-    WidgetCard(modifier = modifier, appearance = appearance, cornerStyle = cornerStyle, horizontalMargin = horizontalMargin, contentPadding = 0.dp) {
+    WidgetCard(modifier = modifier, appearance = appearance, cornerRadiusPercent = cornerRadiusPercent, horizontalMargin = horizontalMargin, contentPadding = 0.dp) {
         Column(modifier = Modifier.fillMaxSize()) {
             if (movingNoteId != null) {
                 Row(
