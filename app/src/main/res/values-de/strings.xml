@@ -272,6 +272,7 @@
     <string name="settings_folder_global_subtitle">Aussehen, Rahmen und Sichtbarkeit für alle Ordner</string>
     <string name="settings_folder_appearance_override_label">Aussehen für diesen Ordner anpassen</string>
     <string name="settings_folder_appearance_override_summary">Überschreibt das globale Ordner-Aussehen nur für diesen einen Ordner.</string>
+    <string name="settings_folder_visibility_label">Sichtbarkeit</string>
     <string name="settings_folder_show_add_row_label">Zeile „Hinzufügen …“ anzeigen</string>
     <string name="settings_folder_show_add_row_summary">Zeile mit den Schaltflächen zum Hinzufügen von App, Verknüpfung, Widget, Ort, Website oder Unterordner am unteren Rand eines geöffneten Ordners.</string>
     <string name="settings_folder_show_add_row_everywhere_off">Zeile „Hinzufügen …“ überall ausblenden</string>

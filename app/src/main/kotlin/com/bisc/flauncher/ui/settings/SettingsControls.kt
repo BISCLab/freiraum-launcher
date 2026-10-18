@@ -256,27 +256,51 @@ fun ElementAppearanceSection(
     allowNone: Boolean = true,
     onEyedropperCapture: (() -> androidx.compose.ui.graphics.ImageBitmap?)? = null
 ) {
+    var colorEditorOpen by remember { mutableStateOf(false) }
+
+    // One connected card for everything color-related: fill mode, then (once a fill mode other than
+    // None needs an actual color) the text color right underneath — no separate untitled "Color" row
+    // to tap through first, tapping "Color" itself opens its own full editor screen directly.
     SettingsPreferenceGroup(title = styleGroupTitle) {
         ElementFillMode.entries.filter { allowNone || it != ElementFillMode.NONE }.forEach { mode ->
             FillModePreference(
                 value = mode,
                 selected = appearance.fillMode,
                 customFill = appearance.fill.asBrush(),
-                onSelect = { selected -> onAppearanceChange(appearance.copy(fillMode = selected)) }
+                onSelect = { selected ->
+                    onAppearanceChange(appearance.copy(fillMode = selected))
+                    if (selected == ElementFillMode.COLOR) colorEditorOpen = true
+                }
+            )
+        }
+        val textColorSeed = autoTextSeed(appearance)
+        ColorPickerRow(
+            title = stringResource(R.string.settings_element_text_color_label),
+            summary = if (appearance.contentColor == null) stringResource(R.string.settings_element_color_auto_hint) else null,
+            color = appearance.contentColor ?: textColorSeed,
+            onColorChange = { onAppearanceChange(appearance.copy(contentColor = it)) }
+        )
+        if (appearance.contentColor != null) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_element_color_reset),
+                onClick = { onAppearanceChange(appearance.copy(contentColor = null)) },
+                trailing = null
+            )
+        }
+    }
+    if (colorEditorOpen) {
+        SettingsEditPage(title = stringResource(R.string.settings_background_source_color), onDismiss = { colorEditorOpen = false }) {
+            ColorFillPickerContent(
+                fill = appearance.fill,
+                onFillChange = { fill -> onAppearanceChange(appearance.copy(fill = fill)) },
+                modifier = Modifier.fillMaxWidth(),
+                onEyedropperCapture = onEyedropperCapture
             )
         }
     }
 
     if (appearance.fillMode != ElementFillMode.NONE) {
-        SettingsPreferenceGroup {
-            ColorFillPickerRow(
-                title = stringResource(R.string.settings_background_source_color),
-                fill = appearance.fill,
-                onFillChange = { fill -> onAppearanceChange(appearance.copy(fill = fill)) },
-                onEyedropperCapture = onEyedropperCapture
-            )
-        }
-
         SettingsPreferenceGroup(title = stringResource(R.string.settings_background_opacity_label)) {
             ExpandableSlider(
                 value = appearance.opacity,
@@ -287,7 +311,9 @@ fun ElementAppearanceSection(
         }
     }
 
-    SettingsPreferenceGroup {
+    // Border, all in one connected card under its own heading: on/off, then (once on) thickness and
+    // color stacked right underneath — mirrors ElementBorderSection's own dedicated-screen layout.
+    SettingsPreferenceGroup(title = stringResource(R.string.settings_element_border_label)) {
         SettingsPreference(
             icon = null,
             title = stringResource(R.string.settings_element_border_label),
@@ -299,31 +325,30 @@ fun ElementAppearanceSection(
                 )
             }
         )
-    }
-
-    if (appearance.borderEnabled) {
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_element_border_style_label)) {
+        if (appearance.borderEnabled) {
             ExpandableSlider(
                 value = appearance.borderWidth,
                 onSettled = { onAppearanceChange(appearance.copy(borderWidth = (it * 2f).roundToInt() / 2f)) },
                 valueRange = 0.5f..6f,
                 valueLabel = { stringResource(R.string.settings_element_border_width_value, String.format(java.util.Locale.US, "%.1f", it)) }
             )
+            val borderColorSeed = autoBorderSeed(appearance)
+            ColorPickerRow(
+                title = stringResource(R.string.settings_element_border_color),
+                summary = if (appearance.borderColor == null) stringResource(R.string.settings_element_color_auto_hint) else null,
+                color = appearance.borderColor ?: borderColorSeed,
+                onColorChange = { onAppearanceChange(appearance.copy(borderColor = it)) }
+            )
+            if (appearance.borderColor != null) {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_element_color_reset),
+                    onClick = { onAppearanceChange(appearance.copy(borderColor = null)) },
+                    trailing = null
+                )
+            }
         }
-        AutomaticColorPicker(
-            title = stringResource(R.string.settings_element_border_color),
-            custom = appearance.borderColor,
-            automaticSeed = autoBorderSeed(appearance),
-            onChange = { onAppearanceChange(appearance.copy(borderColor = it)) }
-        )
     }
-
-    AutomaticColorPicker(
-        title = stringResource(R.string.settings_element_text_color_label),
-        custom = appearance.contentColor,
-        automaticSeed = autoTextSeed(appearance),
-        onChange = { onAppearanceChange(appearance.copy(contentColor = it)) }
-    )
 }
 
 /** Background-only half of [ElementAppearanceSection] — fill mode, color and opacity, with no
