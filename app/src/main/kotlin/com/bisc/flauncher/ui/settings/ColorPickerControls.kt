@@ -262,32 +262,39 @@ private fun EyedropperDialog(bitmap: ImageBitmap, onPick: (Color) -> Unit, onDis
 /** A titled row (with a live swatch) that expands [ColorPickerControls] inline beneath itself when tapped. */
 @Composable
 fun ColorPickerSection(title: String, summary: String? = null, info: String? = null, color: Int, onColorChange: (Int) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
     SettingsPreferenceGroup {
-        SettingsPreference(
-            icon = null,
-            title = title,
-            summary = summary,
-            info = info,
-            leading = null,
-            onClick = { expanded = !expanded },
-            trailing = {
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .background(Color(color))
-                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                )
-            }
-        )
-        if (expanded) {
-            ColorPickerControls(
-                color = Color(color),
-                onColorChange = { onColorChange(it.toArgb()) },
-                modifier = Modifier.fillMaxWidth()
+        ColorPickerRow(title = title, summary = summary, info = info, color = color, onColorChange = onColorChange)
+    }
+}
+
+/** The row+expander content of [ColorPickerSection], without its own [SettingsPreferenceGroup] wrapper —
+ *  for attaching directly inside another group's card (e.g. right under a related switch). */
+@Composable
+fun ColorPickerRow(title: String, summary: String? = null, info: String? = null, color: Int, onColorChange: (Int) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    SettingsPreference(
+        icon = null,
+        title = title,
+        summary = summary,
+        info = info,
+        leading = null,
+        onClick = { expanded = !expanded },
+        trailing = {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(Color(color))
+                    .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
             )
         }
+    )
+    if (expanded) {
+        ColorPickerControls(
+            color = Color(color),
+            onColorChange = { onColorChange(it.toArgb()) },
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 

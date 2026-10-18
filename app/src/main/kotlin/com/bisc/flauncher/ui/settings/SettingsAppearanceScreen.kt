@@ -161,13 +161,13 @@ fun SettingsAppearanceScreen(
                 onClick = { viewModel.setChargingAnimationEnabled(!chargingAnimation) },
                 trailing = { Switch(checked = chargingAnimation, onCheckedChange = viewModel::setChargingAnimationEnabled) }
             )
-        }
-        if (chargingAnimation) {
-            ColorPickerSection(
-                title = stringResource(R.string.settings_charging_color),
-                color = chargingColor,
-                onColorChange = viewModel::setChargingAnimationColor
-            )
+            if (chargingAnimation) {
+                ColorPickerRow(
+                    title = stringResource(R.string.settings_charging_color),
+                    color = chargingColor,
+                    onColorChange = viewModel::setChargingAnimationColor
+                )
+            }
         }
     }
 
