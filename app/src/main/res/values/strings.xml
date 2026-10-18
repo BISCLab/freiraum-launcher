@@ -117,7 +117,7 @@
     <string name="settings_theme_apply">Apply</string>
     <string name="settings_language_label">Language</string>
     <string name="settings_language_system">System default</string>
-    <string name="settings_theme_label">Settings color mode</string>
+    <string name="settings_theme_label">Color mode</string>
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_theme_system">System</string>
@@ -287,8 +287,8 @@
     <string name="settings_card_global_background_subtitle">One background image or color for every screen</string>
     <string name="settings_background_opacity_label">Opacity</string>
     <string name="settings_background_opacity_value">%1$d%%</string>
-    <string name="settings_background_darken_label">Darken</string>
-    <string name="settings_background_darken_value">%1$d%%</string>
+    <string name="settings_background_shade_label">Darken / Lighten</string>
+    <string name="settings_background_shade_value">%1$d%%</string>
     <string name="settings_manage_apps_edit_title">Edit app</string>
     <string name="settings_manage_apps_name_label">Display name</string>
     <string name="settings_manage_apps_hidden_label">Hidden</string>

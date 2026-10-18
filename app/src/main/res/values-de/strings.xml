@@ -117,7 +117,7 @@
     <string name="settings_theme_apply">Anwenden</string>
     <string name="settings_language_label">Sprache</string>
     <string name="settings_language_system">Systemstandard</string>
-    <string name="settings_theme_label">Farbmodus der Einstellungen</string>
+    <string name="settings_theme_label">Farbmodus</string>
     <string name="settings_theme_light">Hell</string>
     <string name="settings_theme_dark">Dunkel</string>
     <string name="settings_theme_system">System</string>
@@ -296,8 +296,8 @@
     <string name="settings_card_global_background_subtitle">Ein Hintergrundbild oder eine Farbe für jeden Bildschirm</string>
     <string name="settings_background_opacity_label">Deckkraft</string>
     <string name="settings_background_opacity_value">%1$d%%</string>
-    <string name="settings_background_darken_label">Abdunkeln</string>
-    <string name="settings_background_darken_value">%1$d%%</string>
+    <string name="settings_background_shade_label">Abdunkeln / Aufhellen</string>
+    <string name="settings_background_shade_value">%1$d%%</string>
 
     <string name="settings_section_gestures">Gesten</string>
     <string name="settings_card_gestures_subtitle">Langes Drücken, Doppeltippen, Wischgesten, Home-Taste</string>

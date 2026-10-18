@@ -74,10 +74,11 @@ fun rememberSurfaceIsDark(fill: ElementAppearance, page: BackgroundConfig): Bool
     if (fill.fillMode == ElementFillMode.COLOR && fill.opacity >= 0.5f) {
         return fill.fill.averageLuminance() < 0.5f
     }
-    if (page.opacity < 0.5f) return systemDark
     val pageLum = when (page.source) {
         BackgroundSource.COLOR -> page.fill.averageLuminance()
         BackgroundSource.IMAGE -> imageLum ?: return systemDark
     }
-    return pageLum * (1f - page.darken) < 0.5f
+    // Estimate the luminance after the shade overlay: negative shade blends toward black, positive toward white.
+    val shadedLum = if (page.shade >= 0f) pageLum + (1f - pageLum) * page.shade else pageLum * (1f + page.shade)
+    return shadedLum < 0.5f
 }

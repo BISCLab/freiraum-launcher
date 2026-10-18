@@ -232,8 +232,7 @@ class SettingsRepository @Inject constructor(
                 ?: default.fill.direction
         ),
         imagePath = prefs[backgroundImagePathKey(key)],
-        opacity = (prefs[backgroundOpacityKey(key)] ?: default.opacity).coerceIn(0f, 1f),
-        darken = (prefs[backgroundDarkenKey(key)] ?: default.darken).coerceIn(0f, 1f)
+        shade = (prefs[backgroundShadeKey(key)] ?: default.shade).coerceIn(-1f, 1f)
     )
 
     private fun backgroundConfigFor(key: String, default: BackgroundConfig): Flow<BackgroundConfig> = dataStore.data.map { prefs ->
@@ -258,8 +257,7 @@ class SettingsRepository @Inject constructor(
             prefs.remove(backgroundFillModeKey(key))
             prefs.remove(backgroundDirectionKey(key))
             prefs.remove(backgroundImagePathKey(key))
-            prefs.remove(backgroundOpacityKey(key))
-            prefs.remove(backgroundDarkenKey(key))
+            prefs.remove(backgroundShadeKey(key))
         }
     }
 
@@ -535,8 +533,7 @@ class SettingsRepository @Inject constructor(
             prefs[backgroundDirectionKey(key)] = config.fill.direction.name
             if (config.imagePath != null) prefs[backgroundImagePathKey(key)] = config.imagePath
             else prefs.remove(backgroundImagePathKey(key))
-            prefs[backgroundOpacityKey(key)] = config.opacity.coerceIn(0f, 1f)
-            prefs[backgroundDarkenKey(key)] = config.darken.coerceIn(0f, 1f)
+            prefs[backgroundShadeKey(key)] = config.shade.coerceIn(-1f, 1f)
         }
     }
 
@@ -546,8 +543,7 @@ class SettingsRepository @Inject constructor(
     private fun backgroundFillModeKey(key: String) = stringPreferencesKey("bg_${key}_fill_mode")
     private fun backgroundDirectionKey(key: String) = stringPreferencesKey("bg_${key}_direction")
     private fun backgroundImagePathKey(key: String) = stringPreferencesKey("bg_${key}_image_path")
-    private fun backgroundOpacityKey(key: String) = floatPreferencesKey("bg_${key}_opacity")
-    private fun backgroundDarkenKey(key: String) = floatPreferencesKey("bg_${key}_darken")
+    private fun backgroundShadeKey(key: String) = floatPreferencesKey("bg_${key}_shade")
 
     suspend fun setGestureAction(gesture: HomeGesture, action: GestureAction) {
         dataStore.edit { prefs ->

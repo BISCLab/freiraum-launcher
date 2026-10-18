@@ -3,14 +3,12 @@ package com.bisc.flauncher.ui.home.dock
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import com.bisc.flauncher.data.model.BackgroundConfig
@@ -20,40 +18,32 @@ import com.bisc.flauncher.util.BackgroundImageStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/** Draws a layer 1 background (image or color) with opacity and darkening. */
+/** Draws a layer 1 background (image or color), fully opaque, with an optional black/white shade
+ *  overlay on top (negative [BackgroundConfig.shade] darkens, positive lightens). */
 @Composable
 fun BackgroundFill(config: BackgroundConfig, modifier: Modifier = Modifier) {
     Box(modifier = modifier) {
-        val alpha = config.opacity.coerceIn(0f, 1f)
         when (config.source) {
             BackgroundSource.COLOR -> {
-                Box(Modifier.matchParentSize().background(config.fill.asBrush(), alpha = alpha))
+                Box(Modifier.matchParentSize().background(config.fill.asBrush()))
             }
             BackgroundSource.IMAGE -> {
-                // Fading the image out (opacity < 1) used to reveal whatever happened to sit behind this
-                // whole composable — nothing in particular, since there's no second background config to
-                // fall back to at the image level. A plain white/black backing that matches the current
-                // theme is what dimming a wallpaper looks like on a normal phone, so that's what fades in
-                // as the image fades out, instead of an arbitrary transparent gap.
-                if (alpha < 1f) {
-                    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
-                    Box(Modifier.matchParentSize().background(if (isDark) Color.Black else Color.White))
-                }
                 val bitmap = rememberBackgroundBitmap(config.imagePath)
                 if (bitmap != null) {
                     Image(
                         bitmap = bitmap,
                         contentDescription = null,
                         modifier = Modifier.matchParentSize(),
-                        contentScale = ContentScale.Crop,
-                        alpha = alpha
+                        contentScale = ContentScale.Crop
                     )
                 }
             }
         }
-        val darkenAlpha = config.darken.coerceIn(0f, 1f)
-        if (darkenAlpha > 0f) {
-            Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = darkenAlpha)))
+        val shade = config.shade.coerceIn(-1f, 1f)
+        if (shade < 0f) {
+            Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = -shade)))
+        } else if (shade > 0f) {
+            Box(Modifier.matchParentSize().background(Color.White.copy(alpha = shade)))
         }
     }
 }
