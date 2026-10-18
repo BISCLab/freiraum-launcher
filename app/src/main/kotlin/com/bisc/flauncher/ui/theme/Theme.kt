@@ -13,6 +13,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -21,6 +22,11 @@ import com.bisc.flauncher.data.model.ColorFill
 import com.bisc.flauncher.data.model.ElementAppearance
 
 enum class ThemePreference { LIGHT, DARK, SYSTEM }
+
+/** The global corner-roundness default (see SettingsRepository.defaultCornerRadiusPercent), provided
+ *  from the app root so Settings' own preference-group cards can preview it live — changing the
+ *  slider should visibly change the very cards you're looking at, not just home-screen elements. */
+val LocalCornerRoundnessPercent = compositionLocalOf { 25 }
 
 /** Resolves SYSTEM against the live device setting — the single place this check happens, reused
  *  by every background/box color resolution so they all agree with each other and with
