@@ -48,7 +48,6 @@ import com.bisc.flauncher.ui.settings.SettingsSearchFullScreen
 import com.bisc.flauncher.ui.settings.SettingsViewModel
 import com.bisc.flauncher.ui.settings.SettingsWidgetRowEditScreen
 import com.bisc.flauncher.ui.theme.FLauncherTheme
-import com.bisc.flauncher.ui.theme.LocalCornerRoundnessPercent
 import com.bisc.flauncher.ui.theme.ThemePreference
 import com.bisc.flauncher.util.SystemWidgetHostManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -117,7 +116,6 @@ class MainActivity : ComponentActivity() {
             val settingsVm: SettingsViewModel = hiltViewModel()
             val theme by settingsVm.theme.collectAsState()
             val font by settingsVm.fontPreference.collectAsState()
-            val cornerRoundness by settingsVm.defaultCornerRadiusPercent.collectAsState()
             val navController = rememberNavController()
             androidx.compose.runtime.LaunchedEffect(openSettingsRequest) {
                 if (openSettingsRequest > 0) {
@@ -139,8 +137,7 @@ class MainActivity : ComponentActivity() {
                 onDispose { }
             }
             androidx.compose.runtime.CompositionLocalProvider(
-                com.bisc.flauncher.ui.home.LocalAppIconLoader provides appIconLoader,
-                LocalCornerRoundnessPercent provides cornerRoundness
+                com.bisc.flauncher.ui.home.LocalAppIconLoader provides appIconLoader
             ) {
             FLauncherTheme(themePreference = theme, fontPreference = font) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
