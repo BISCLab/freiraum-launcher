@@ -50,7 +50,6 @@ class ThemeRepository @Inject constructor(
         settingsRepository.resetSearchAlphabetRailAppearance()
         settingsRepository.resetAppListSearchButtonAppearance()
         settingsRepository.setFolderCardAppearance(boxAppearance)
-        settingsRepository.setKeyboardAppearance(boxAppearance)
         settingsRepository.setSearchAppearance(boxAppearance)
         settingsRepository.setAppListContentAppearance(boxAppearance)
 

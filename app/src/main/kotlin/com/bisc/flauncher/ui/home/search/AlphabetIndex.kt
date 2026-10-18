@@ -49,7 +49,6 @@ fun IndexEntry.label(): String = when (this) {
 internal val FLUSH_INSET = DockDimens.horizontalMargin
 
 internal val RAIL_BAR_WIDTH = 28.dp
-private val RAIL_BAR_CORNER = RAIL_BAR_WIDTH / 2
 
 /** Right-edge fast-scroll rail for the browse app list. */
 @Composable
@@ -59,11 +58,13 @@ fun AlphabetIndex(
     showRailBar: Boolean,
     letterAppearance: ElementAppearance,
     handedness: Handedness,
+    cornerRadiusPercent: Int,
     onSelect: (IndexEntry) -> Unit,
     onScrub: (active: Boolean, label: String, verticalFraction: Float) -> Unit,
     modifier: Modifier = Modifier,
     edgeInset: Dp = FLUSH_INSET
 ) {
+    val railBarCorner = (RAIL_BAR_WIDTH / 2) * (cornerRadiusPercent.coerceIn(0, 100) / 100f)
     val entries = remember(letters, hasOtherGroup) {
         buildList {
             letters.forEach { add(IndexEntry.Letter(it)) }
@@ -111,10 +112,10 @@ fun AlphabetIndex(
                     .then(
                         if (showRailBar) {
                             Modifier
-                                .clip(RoundedCornerShape(RAIL_BAR_CORNER))
+                                .clip(RoundedCornerShape(railBarCorner))
                                 .background(railColors.box, alpha = railColors.boxAlpha)
                                 .then(
-                                    if (railColors.showBorder) Modifier.border(railColors.borderWidth, railColors.border, RoundedCornerShape(RAIL_BAR_CORNER))
+                                    if (railColors.showBorder) Modifier.border(railColors.borderWidth, railColors.border, RoundedCornerShape(railBarCorner))
                                     else Modifier
                                 )
                         } else {

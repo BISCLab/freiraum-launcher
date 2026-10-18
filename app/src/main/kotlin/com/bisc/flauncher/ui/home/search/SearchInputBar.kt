@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,7 +45,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.ElementAppearance
@@ -63,6 +61,11 @@ private val FILTER_CHIP_GAP = 6.dp
  * equal-height rows separated by a thin divider — the input field (with the Home button) on top,
  * the category filter chips below. Replaces the old separate SystemSearchField pill and the
  * category row that used to live at the bottom of the results list.
+ *
+ * Sits flush at the very top of the search screen (its caller no longer gives it any outer
+ * margin), the same "permanently-shown Panel" treatment as the home screen's own Panel: square top
+ * corners (flush with the screen/cutout-safe edge above it), bottom corners scaled by
+ * [cornerRadiusPercent] the same way Dock/Panel scale theirs.
  */
 @Composable
 fun SearchInputBar(
@@ -77,7 +80,7 @@ fun SearchInputBar(
     categoryColors: Map<SearchCategory, Int?>,
     selectedCategory: SearchCategory?,
     onToggleCategory: (SearchCategory) -> Unit,
-    bottomMargin: Dp,
+    cornerRadiusPercent: Int,
     modifier: Modifier = Modifier
 ) {
     val colors = resolveElementColors(appearance)
@@ -95,22 +98,16 @@ fun SearchInputBar(
         }
     }
 
-    BoxWithConstraints(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(start = SearchDimens.horizontalMargin, end = SearchDimens.horizontalMargin, bottom = bottomMargin),
-        contentAlignment = Alignment.Center
-    ) {
-        val d = searchDimens(maxWidth)
-        val shape = RoundedCornerShape(d.cornerRadius)
-        CompositionLocalProvider(LocalContentColor provides colors.contentColor) {
-            Column(
-                modifier = Modifier
-                    .width(d.pillWidth)
-                    .clip(shape)
-                    .background(colors.background, alpha = colors.backgroundAlpha)
-                    .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)
-            ) {
+    val radius = SearchDimens.cornerRadius * (cornerRadiusPercent.coerceIn(0, 100) / 100f)
+    val shape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = radius, bottomEnd = radius)
+    CompositionLocalProvider(LocalContentColor provides colors.contentColor) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .background(colors.background, alpha = colors.backgroundAlpha)
+                .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)
+        ) {
                 Row(
                     modifier = Modifier.fillMaxWidth().height(ROW_HEIGHT).padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -160,7 +157,6 @@ fun SearchInputBar(
             }
         }
     }
-}
 
 @Composable
 private fun CategoryFilterRow(

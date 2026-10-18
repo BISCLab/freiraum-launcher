@@ -313,9 +313,6 @@ class SettingsViewModel @Inject constructor(
     suspend fun availableIconPackIcons(iconPackPackage: String): List<com.bisc.flauncher.data.model.IconPackIcon> =
         iconPackRepository.availableIcons(iconPackPackage)
 
-    val keyboardAppearance: StateFlow<ElementAppearance> =
-        repository.keyboardAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
-
     val searchAppearance: StateFlow<ElementAppearance> =
         repository.searchAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance())
 
@@ -594,10 +591,6 @@ class SettingsViewModel @Inject constructor(
 
     fun clearQuickOverviewBackground() {
         viewModelScope.launch { repository.clearQuickOverviewBackground() }
-    }
-
-    fun setKeyboardAppearance(appearance: ElementAppearance) {
-        viewModelScope.launch { repository.setKeyboardAppearance(appearance) }
     }
 
     fun setSearchAppearance(appearance: ElementAppearance) {

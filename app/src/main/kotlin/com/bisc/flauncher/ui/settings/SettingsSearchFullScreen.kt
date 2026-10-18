@@ -42,8 +42,6 @@ import com.bisc.flauncher.ui.home.search.defaultColor
 import com.bisc.flauncher.ui.home.search.icon
 import com.bisc.flauncher.ui.home.search.settingsLabelRes
 
-private enum class SearchElementSheet { SEARCH_APPEARANCE, KEYBOARD }
-
 /** Settings for the text search: appearance, keyboard behavior, categories (with per-category
  *  color), search engine and "open with" (browser/maps/AI). The custom in-app keyboard was
  *  removed — search always uses the system keyboard now, see [com.bisc.flauncher.ui.home.search.SearchInputBar]. */
@@ -64,7 +62,6 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
             runCatching { context.packageManager.getApplicationLabel(context.packageManager.getApplicationInfo(pkg, 0)).toString() }.getOrNull()
         }
     }
-    val keyboardAppearance by viewModel.keyboardAppearance.collectAsState()
     val searchAppearance by viewModel.searchAppearance.collectAsState()
     val engine by viewModel.searchEngine.collectAsState()
     val savedCustomUrl by viewModel.searchEngineCustomUrl.collectAsState()
@@ -72,7 +69,7 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
     var customUrl by remember { mutableStateOf(savedCustomUrl) }
     var customUrlEdited by remember { mutableStateOf(false) }
     LaunchedEffect(savedCustomUrl) { if (!customUrlEdited) customUrl = savedCustomUrl }
-    var openSheet by remember { mutableStateOf<SearchElementSheet?>(null) }
+    var searchAppearanceSheetOpen by remember { mutableStateOf(false) }
     var customUrlSheetOpen by remember { mutableStateOf(false) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_search_full), navController = navController, onBack = onBack) {
@@ -83,13 +80,7 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
             SettingsPreference(
                 icon = null,
                 title = surfaceLabel(R.string.settings_layer_surface_search),
-                onClick = { openSheet = SearchElementSheet.SEARCH_APPEARANCE },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = null,
-                title = surfaceLabel(R.string.settings_layer_surface_keyboard),
-                onClick = { openSheet = SearchElementSheet.KEYBOARD },
+                onClick = { searchAppearanceSheetOpen = true },
                 trailing = null
             )
         }
@@ -225,10 +216,10 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
             onDismiss = { aiPickerOpen = false }
         )
     }
-    when (openSheet) {
-        SearchElementSheet.SEARCH_APPEARANCE -> SettingsEditPage(
+    if (searchAppearanceSheetOpen) {
+        SettingsEditPage(
             title = surfaceLabel(R.string.settings_layer_surface_search),
-            onDismiss = { openSheet = null }
+            onDismiss = { searchAppearanceSheetOpen = false }
         ) {
             ElementAppearanceSection(
                 appearance = searchAppearance,
@@ -236,17 +227,6 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, v
                 styleGroupTitle = surfaceLabel(R.string.settings_layer_surface_search)
             )
         }
-        SearchElementSheet.KEYBOARD -> SettingsEditPage(
-            title = surfaceLabel(R.string.settings_layer_surface_keyboard),
-            onDismiss = { openSheet = null }
-        ) {
-            ElementAppearanceSection(
-                appearance = keyboardAppearance,
-                onAppearanceChange = viewModel::setKeyboardAppearance,
-                styleGroupTitle = surfaceLabel(R.string.settings_layer_surface_keyboard)
-            )
-        }
-        null -> Unit
     }
 
     pickingColorFor?.let { category ->

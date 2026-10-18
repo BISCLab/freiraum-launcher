@@ -45,6 +45,7 @@ fun AppOverviewContent(
     railAppearance: ElementAppearance?,
     accentColor: Int,
     handedness: Handedness,
+    cornerRadiusPercent: Int,
     loadIcon: (ComponentName) -> ImageBitmap?,
     onAppClick: (AppInfo) -> Unit,
     showSearchButton: Boolean = false,
@@ -80,7 +81,8 @@ fun AppOverviewContent(
             accentColor = accentColor,
             edgeInset = edgeInset,
             layout = layout,
-            iconSize = scaledDock.iconSize
+            iconSize = scaledDock.iconSize,
+            cornerRadiusPercent = cornerRadiusPercent
         )
     }
 
@@ -99,7 +101,7 @@ fun AppOverviewContent(
                     .padding(horizontal = DockDimens.horizontalMargin)
                     .padding(bottom = bottomInset)
             ) {
-                val cornerRadius = com.bisc.flauncher.ui.home.dock.dockDimens(maxWidth).cornerRadius
+                val cornerRadius = DockDimens.defaultCornerRadius * (cornerRadiusPercent.coerceIn(0, 100) / 100f)
                 DockPanelSurface(
                     appearance = contentAppearance,
                     shape = RoundedCornerShape(cornerRadius),

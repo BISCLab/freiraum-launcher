@@ -78,8 +78,6 @@ class SettingsRepository @Inject constructor(
 
     val folderCardAppearance: Flow<ElementAppearance> = elementAppearanceFor("folder_card", ElementAppearance(borderEnabled = true))
 
-    val keyboardAppearance: Flow<ElementAppearance> = elementAppearanceFor("keyboard_background", ElementAppearance(borderEnabled = true))
-
     /** The text search screen's single, full-bleed appearance — covers both the backdrop and the
      *  results, which now float directly on it instead of sitting in a separate card (see the search
      *  redesign: the screen has no more layered boxes, just one themed fill behind everything). */
@@ -391,8 +389,6 @@ class SettingsRepository @Inject constructor(
     suspend fun setQuickOverviewBackground(config: BackgroundConfig) = setBackgroundConfigFor("quick_overview", config)
 
     suspend fun clearQuickOverviewBackground() = clearBackgroundConfigFor("quick_overview")
-
-    suspend fun setKeyboardAppearance(appearance: ElementAppearance) = setElementAppearanceFor("keyboard_background", appearance)
 
     suspend fun setSearchAppearance(appearance: ElementAppearance) = setElementAppearanceFor("search_appearance", appearance)
 

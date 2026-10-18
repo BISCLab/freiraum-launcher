@@ -217,7 +217,6 @@
     <string name="settings_layer_surface_folder">Ordner</string>
     <string name="settings_layer_surface_search">Textsuche</string>
     <string name="settings_search_appearance_summary">Das Erscheinungsbild des gesamten Suchbildschirms — Hintergrund und Ergebnisse schweben direkt darauf, keine separaten Karten mehr.</string>
-    <string name="settings_layer_surface_keyboard">Tastatur</string>
     <string name="settings_layer_surface_app_list">App-Liste</string>
     <string name="settings_layer_surface_widget">Widget</string>
     <string name="settings_layer_surface_section_letter">Abschnittsbuchstabe</string>
@@ -318,7 +317,6 @@
 
     <string name="settings_section_pages">Seiten</string>
     <string name="settings_section_app_overview">App-Übersicht</string>
-    <string name="settings_card_app_overview_subtitle">Layout, Darstellung, Suchbutton</string>
     <string name="settings_card_pages_subtitle">Widgets, Elementenboxen, Hintergründe</string>
     <string name="settings_pages_home">Startbildschirm</string>
     <string name="settings_home_appearance_title">Erscheinungsbild</string>
@@ -467,7 +465,7 @@
     <string name="settings_section_search_overview">Schnellübersicht</string>
     <string name="settings_card_search_overview_subtitle">Reihenfolge der Seitenleiste, Kategorien, Hintergrund</string>
     <string name="settings_section_search_full">Textsuche</string>
-    <string name="settings_card_search_full_subtitle">Hintergründe, Tastatur, Kategorien, Suchmaschine</string>
+    <string name="settings_card_search_full_subtitle">Hintergründe, Kategorien, Suchmaschine</string>
     <string name="settings_search_full_browse_label">Navigation</string>
     <string name="settings_search_show_az_index">A–Z-Leiste</string>
     <string name="settings_search_index_show_rail_bar">Leistenhintergrund</string>
@@ -489,22 +487,12 @@
     <string name="settings_search_appearance_label">Darstellung</string>
     <string name="settings_search_hide_status_bar">Statusleiste beim Suchen ausblenden</string>
     <string name="settings_search_hide_status_bar_summary">Gilt für Schnellübersicht, Textsuche und App-Übersicht.</string>
-    <string name="settings_search_keyboard_layout_label">Tastaturbelegung</string>
-    <string name="settings_search_keyboard_layout_qwerty">Amerikanisch (QWERTY)</string>
-    <string name="settings_search_keyboard_layout_qwertz">Europäisch / Deutsch (QWERTZ)</string>
     <string name="touch_feedback_hint_open">Toneinstellungen öffnen</string>
     <string name="settings_permissions_system_group">System</string>
     <string name="settings_permissions_touch_feedback">Berührungsfeedback</string>
     <string name="settings_permissions_touch_feedback_purpose">Tastenvibration der Suchtastatur. Systemeinstellung; öffnet die Toneinstellungen.</string>
     <string name="settings_permissions_on">An</string>
     <string name="settings_permissions_off">Aus</string>
-    <string name="settings_search_keyboard_sparks">Tastenfunken</string>
-    <string name="settings_search_keyboard_sparks_summary">Zeigt beim Tastendruck kleine Funken am Berührungspunkt.</string>
-    <string name="settings_search_keyboard_spark_color">Funkenfarbe</string>
-    <string name="settings_search_keyboard_haptics">Tastenvibration</string>
-    <string name="settings_search_keyboard_haptics_summary">Kurze Vibration bei jedem Tastendruck über das Berührungsfeedback von Android. Erfordert Einstellungen > Ton &amp; Vibration > Vibration &amp; Haptik > Berührungsfeedback (bei manchen Geräten unter Vibrationsstärke).</string>
-    <string name="settings_search_keyboard_show_number_row">Zahlenreihe immer anzeigen</string>
-    <string name="settings_search_keyboard_show_number_row_summary">Aus: Zahlen sind über die 123-Taste erreichbar.</string>
     <string name="settings_search_keyboard_auto_open">Tastatur automatisch öffnen</string>
     <string name="settings_search_keyboard_auto_open_summary">Aus: Die Suche öffnet nur mit dem Eingabefeld; antippen zeigt die Tastatur.</string>
     <string name="search_filter_ai">KI-App</string>
@@ -523,11 +511,6 @@
     <string name="settings_search_ai_clear">Entfernen</string>
     <string name="settings_search_ai_info">Die Suchanfrage wird wie beim Teilen an diese App übergeben. Sie erscheint als eigene Kategorie mit eigenem Symbol; mit dem Schalter darunter schaltest du sie ein oder aus. Der Launcher selbst greift nicht auf das Netz zu.</string>
     <string name="settings_search_categories_info">Ziehe die Kategorien, um die Reihenfolge der Ergebnisse zu ändern. Der Schalter legt fest, ob eine Kategorie standardmäßig durchsucht wird. Im Ergebnisfeld kannst du unten trotzdem ein Kategorie-Symbol antippen, um nur diese Kategorie zu zeigen – auch wenn sie hier ausgeschaltet ist. Web und Karten übergeben die Anfrage nur an deinen Browser bzw. deine Karten-App; der Launcher selbst greift nicht auf das Netz zu.</string>
-    <string name="settings_search_keyboard_type_label">Tastatur</string>
-    <string name="settings_search_keyboard_type_custom">FLauncher-Tastatur</string>
-    <string name="settings_search_keyboard_type_system">System-Tastatur</string>
-    <string name="settings_search_keyboard_type_system_howto">So funktioniert es</string>
-    <string name="settings_search_keyboard_type_system_info">Nutzt die in Android eingerichtete Tastatur, z. B. mit Vorschlägen oder eigenem Layout. Die Ergebnisse passen sich dem Platz darüber an, und die Zurück-Geste führt zum Startbildschirm.</string>
     <string name="settings_search_categories_order_title">Reihenfolge und Standardsuche</string>
     <string name="settings_search_categories_label">Suchkategorien</string>
     <string name="settings_search_tools_label">Werkzeuge</string>

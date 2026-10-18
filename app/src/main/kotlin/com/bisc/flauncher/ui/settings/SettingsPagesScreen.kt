@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Gesture
-import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.AlertDialog
@@ -154,16 +153,12 @@ fun SettingsPagesScreen(
             }
         }
 
-        // Folded in here per the masterplan's final nav (Phase 9) — Gestures/App overview are no
-        // longer their own top-level Settings entries, since both are fundamentally page/navigation
-        // behavior rather than a separate concern.
+        // Folded in here per the masterplan's final nav (Phase 9) — Gestures is no longer its own
+        // top-level Settings entry, since it's fundamentally page/navigation behavior rather than a
+        // separate concern. App overview used to have its own shortcut row here too, duplicating the
+        // "Utility pages" row above (same destination, same route) but with less functionality (that
+        // row also offers rename/icon/gesture-invocation) — removed in favor of just that one row.
         SettingsPreferenceGroup(title = stringResource(R.string.settings_pages_behavior_label)) {
-            SettingsPreference(
-                icon = Icons.Filled.GridView,
-                title = stringResource(R.string.settings_section_app_overview),
-                summary = stringResource(R.string.settings_card_app_overview_subtitle),
-                onClick = { navController.navigate("settings/app_overview") }
-            )
             SettingsPreference(
                 icon = Icons.Filled.Gesture,
                 title = stringResource(R.string.settings_section_gestures),

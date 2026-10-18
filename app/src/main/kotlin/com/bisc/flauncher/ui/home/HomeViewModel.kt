@@ -141,6 +141,12 @@ class HomeViewModel @Inject constructor(
     val iconSizeScale: StateFlow<Float> =
         settingsRepository.iconSizePercent.map { 1f + it / 100f }.stateIn(viewModelScope, SharingStarted.Eagerly, 1f)
 
+    // The same global default Dock/Panel/widgets already read via their own row's cornerRadiusPercent
+    // — used here for surfaces with no row of their own (search bar, app-overview card, A-Z rail,
+    // floating search button).
+    val cornerRadiusPercent: StateFlow<Int> =
+        settingsRepository.defaultCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, 25)
+
     val searchAlphabetRailAppearance: StateFlow<ElementAppearance?> =
         settingsRepository.searchAlphabetRailAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
@@ -187,9 +193,6 @@ class HomeViewModel @Inject constructor(
 
     val folderCardAppearance: StateFlow<ElementAppearance> =
         settingsRepository.folderCardAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
-
-    val keyboardAppearance: StateFlow<ElementAppearance> =
-        settingsRepository.keyboardAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
 
     val searchAppearance: StateFlow<ElementAppearance> =
         settingsRepository.searchAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance())
