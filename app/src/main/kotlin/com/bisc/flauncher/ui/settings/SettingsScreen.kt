@@ -8,7 +8,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,7 +44,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
-import com.bisc.flauncher.ui.theme.LocalCornerRoundnessPercent
 import com.bisc.flauncher.ui.theme.noRippleClickable
 import com.bisc.flauncher.util.DefaultLauncherUtil
 
@@ -114,13 +112,12 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
  *  shouldn't also carry their own [SettingsPreference.info] (see that param's doc). */
 @Composable
 fun SettingsPreferenceGroup(title: String? = null, info: String? = null, content: @Composable ColumnScope.() -> Unit) {
-    val cornerPercent = LocalCornerRoundnessPercent.current.coerceIn(0, 100)
     Column(modifier = Modifier.fillMaxWidth()) {
         if (title != null) {
             SettingsGroupLabel(title, info = info)
         }
         Column(
-            modifier = Modifier.clip(RoundedCornerShape(percent = cornerPercent)),
+            modifier = Modifier.clip(MaterialTheme.shapes.medium),
             verticalArrangement = Arrangement.spacedBy(2.dp),
             content = content
         )
