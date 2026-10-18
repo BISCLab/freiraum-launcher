@@ -143,17 +143,9 @@ fun SettingsWidgetRowEditScreen(
                 } else null
             )
             SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
-                SettledSlider(
-                    value = row.cornerRadiusPercent.toFloat(),
-                    onSettled = { viewModel.setRowCornerRadiusPercent(row, it.roundToInt()) },
-                    valueRange = 0f..100f,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    label = { live ->
-                        Text(
-                            stringResource(R.string.settings_corner_radius_value, live.roundToInt()),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
+                ExpandablePercentSlider(
+                    percent = row.cornerRadiusPercent,
+                    onSettled = { viewModel.setRowCornerRadiusPercent(row, it) }
                 )
             }
             SettingsPreferenceGroup {
