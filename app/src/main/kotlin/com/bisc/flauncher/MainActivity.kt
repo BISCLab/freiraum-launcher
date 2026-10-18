@@ -379,6 +379,9 @@ class MainActivity : ComponentActivity() {
                         composable("settings/folder") {
                             SettingsFolderScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
+                        composable("settings/folder/global") {
+                            com.bisc.flauncher.ui.settings.SettingsFolderGlobalScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
                         composable(
                             "settings/folder/{folderId}",
                             arguments = listOf(navArgument("folderId") { type = NavType.LongType })

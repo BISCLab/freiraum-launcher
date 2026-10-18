@@ -3,12 +3,14 @@ package com.bisc.flauncher.data.repository
 import android.content.Context
 import com.bisc.flauncher.data.db.FolderDao
 import com.bisc.flauncher.data.db.FolderItemDao
+import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.Folder
 import com.bisc.flauncher.data.model.FolderIconMode
 import com.bisc.flauncher.data.model.FolderItem
 import com.bisc.flauncher.data.model.GridItemType
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.model.withAppearance
+import com.bisc.flauncher.data.model.withAppearanceOverride
 import com.bisc.flauncher.data.settings.SettingsRepository
 import com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor
 import com.bisc.flauncher.ui.theme.isDark
@@ -66,6 +68,14 @@ class FolderRepository @Inject constructor(
                 iconPackDrawable = if (mode == FolderIconMode.ICON_PACK) packDrawable else null
             )
         )
+    }
+
+    suspend fun setFolderAppearanceOverrideEnabledById(id: Long, enabled: Boolean) {
+        folderDao.get(id)?.let { folderDao.update(it.copy(appearanceOverrideEnabled = enabled)) }
+    }
+
+    suspend fun setFolderAppearanceById(id: Long, appearance: ElementAppearance) {
+        folderDao.get(id)?.let { folderDao.update(it.withAppearanceOverride(appearance).copy(appearanceOverrideEnabled = true)) }
     }
 
     private suspend fun nextOrderIndex(folderId: Long): Int = (folderItemDao.maxOrderIndex(folderId) ?: -1) + 1

@@ -35,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -62,6 +63,7 @@ import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.FolderIconMode
 import com.bisc.flauncher.data.model.GridItemType
 import com.bisc.flauncher.data.model.IconPackIcon
+import com.bisc.flauncher.data.model.appearanceOverride
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Language
@@ -78,6 +80,24 @@ private val PRESET_COLORS = listOf(
     "#FF4F378B", "#FFB3261E", "#FF386A20", "#FF9A5D00", "#FF00658F", "#FF6B5C00"
 )
 
+/** Turning the per-folder override on for the first time seeds it from the current global folder
+ *  appearance instead of the entity's bare defaults, so the editor doesn't visibly jump to a
+ *  different look the instant it's switched on. Turning it off just clears the flag — the stored
+ *  override fields are left in place in case it's switched back on. */
+private fun toggleFolderAppearanceOverride(
+    viewModel: SettingsViewModel,
+    folderId: Long,
+    folder: com.bisc.flauncher.data.model.Folder,
+    globalAppearance: com.bisc.flauncher.data.model.ElementAppearance,
+    enabled: Boolean
+) {
+    if (enabled && !folder.appearanceOverrideEnabled) {
+        viewModel.setFolderAppearance(folderId, globalAppearance)
+    } else {
+        viewModel.setFolderAppearanceOverrideEnabled(folderId, enabled)
+    }
+}
+
 /** Edit page for a single folder. */
 @Composable
 fun SettingsFolderEditScreen(
@@ -89,6 +109,7 @@ fun SettingsFolderEditScreen(
     val folders by viewModel.folders.collectAsState()
     val folderItems by viewModel.folderItems.collectAsState()
     val iconPacks by viewModel.iconPacks.collectAsState()
+    val globalCardAppearance by viewModel.folderCardAppearance.collectAsState()
     val folder = folders.find { it.id == folderId }
     var edited by rememberSaveable(folderId) { mutableStateOf<String?>(null) }
     var confirmingDelete by remember { mutableStateOf(false) }
@@ -164,6 +185,28 @@ fun SettingsFolderEditScreen(
                     iconPacks.find { it.packageName == folder.iconPackPackage }?.label ?: folder.iconPackPackage
                 } else null,
                 onClick = { navController.navigate("settings/folder/$folderId/icon") }
+            )
+        }
+
+        SettingsPreferenceGroup {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_folder_appearance_override_label),
+                info = stringResource(R.string.settings_folder_appearance_override_summary),
+                onClick = { toggleFolderAppearanceOverride(viewModel, folderId, folder, globalCardAppearance, !folder.appearanceOverrideEnabled) },
+                trailing = {
+                    Switch(
+                        checked = folder.appearanceOverrideEnabled,
+                        onCheckedChange = { toggleFolderAppearanceOverride(viewModel, folderId, folder, globalCardAppearance, it) }
+                    )
+                }
+            )
+        }
+        if (folder.appearanceOverrideEnabled) {
+            ElementAppearanceSection(
+                appearance = folder.appearanceOverride(),
+                onAppearanceChange = { viewModel.setFolderAppearance(folderId, it) },
+                styleGroupTitle = stringResource(R.string.settings_folder_appearance_override_label)
             )
         }
 

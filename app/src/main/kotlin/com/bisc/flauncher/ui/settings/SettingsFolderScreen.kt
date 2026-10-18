@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -22,44 +21,23 @@ import androidx.navigation.NavController
 import com.bisc.flauncher.R
 import com.bisc.flauncher.ui.home.FolderIcon
 
-/** Folder overlay's own settings screen. */
+/** Folder overlay's own settings screen: a link to the shared appearance/visibility presets up
+ *  top, then the folders themselves. */
 @Composable
 fun SettingsFolderScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val cardAppearance by viewModel.folderCardAppearance.collectAsState()
-    val hideStatusBar by viewModel.folderHideStatusBar.collectAsState()
-    val hideDock by viewModel.folderHideDock.collectAsState()
     val folders by viewModel.folders.collectAsState()
     val folderItems by viewModel.folderItems.collectAsState()
     val browsableApps by viewModel.browsableApps.collectAsState()
-    var showCardSheet by remember { mutableStateOf(false) }
     var showCreateDialog by remember { mutableStateOf(false) }
-    val layerLabel = surfaceLabel(R.string.settings_layer_surface_folder)
     val itemsByFolder = remember(folderItems) { folderItems.groupBy { it.folderId } }
 
     SettingsSubScreen(title = stringResource(R.string.settings_folder_title), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
-            SettingsPreference(icon = null, title = layerLabel, onClick = { showCardSheet = true }, trailing = null)
-        }
-        SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
-                title = stringResource(R.string.settings_folder_show_add_row_everywhere_off),
-                info = stringResource(R.string.settings_folder_show_add_row_everywhere_off_summary),
-                onClick = { viewModel.hideFolderAddRowEverywhere() },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_folder_hide_status_bar),
-                onClick = { viewModel.setFolderHideStatusBar(!hideStatusBar) },
-                trailing = { Switch(checked = hideStatusBar, onCheckedChange = viewModel::setFolderHideStatusBar) }
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_folder_hide_dock),
-                info = stringResource(R.string.settings_folder_hide_dock_summary),
-                onClick = { viewModel.setFolderHideDock(!hideDock) },
-                trailing = { Switch(checked = hideDock, onCheckedChange = viewModel::setFolderHideDock) }
+                title = stringResource(R.string.settings_folder_global_label),
+                summary = stringResource(R.string.settings_folder_global_subtitle),
+                onClick = { navController.navigate("settings/folder/global") }
             )
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_folder_list_label)) {
@@ -92,12 +70,6 @@ fun SettingsFolderScreen(navController: NavController, onBack: () -> Unit, viewM
                 onClick = { showCreateDialog = true },
                 trailing = null
             )
-        }
-    }
-
-    if (showCardSheet) {
-        SettingsEditPage(title = layerLabel, onDismiss = { showCardSheet = false }) {
-            ElementAppearanceSection(appearance = cardAppearance, onAppearanceChange = viewModel::setFolderCardAppearance, styleGroupTitle = layerLabel)
         }
     }
 
