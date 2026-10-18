@@ -279,7 +279,7 @@ class HomeViewModel @Inject constructor(
 
     val browsableApps: StateFlow<List<AppInfo>> =
         combine(labeledApps, appOverrides) { apps, overrides ->
-            apps.filter { overrides[it.componentName.flattenToString()]?.hidden != true }
+            apps.filter { overrides[it.componentName.flattenToString()]?.hiddenFromAppList != true }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     // ---- Dock ----
@@ -374,12 +374,12 @@ class HomeViewModel @Inject constructor(
             if (query.isBlank() || !include) {
                 emptyList()
             } else {
-                val visible = apps.filter { overrides[it.componentName.flattenToString()]?.hidden != true }
+                val visible = apps.filter { overrides[it.componentName.flattenToString()]?.hiddenFromSearch != true }
                 val prefixMatches = visible.filter { matchesWordStart(it.label, query) }
                     .sortedByDescending { it.label.startsWith(query.trim(), ignoreCase = true) }
                 val revealed = apps.filter { app ->
                     val override = overrides[app.componentName.flattenToString()]
-                    override?.hidden == true && override.revealMode == RevealMode.SEARCH_CODE && override.revealCode == query
+                    override?.hiddenFromSearch == true && override.revealMode == RevealMode.SEARCH_CODE && override.revealCode == query
                 }
                 (prefixMatches + revealed).distinctBy { it.componentName }
             }

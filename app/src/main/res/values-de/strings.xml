@@ -250,6 +250,8 @@
     <string name="settings_apps_global_subtitle">Symbolform, -größe, Symbolpaket</string>
     <string name="settings_manage_apps_search_hint">Apps durchsuchen…</string>
     <string name="settings_manage_apps_hidden_summary">Ausgeblendet</string>
+    <string name="settings_manage_apps_hidden_from_list_summary">In App-Liste ausgeblendet</string>
+    <string name="settings_manage_apps_hidden_from_search_summary">In Suche ausgeblendet</string>
     <string name="settings_manage_apps_renamed_summary">Umbenannt in „%1$s“</string>
     <string name="settings_manage_apps_customized_label">Angepasst</string>
     <string name="settings_manage_apps_all_label">Alle Apps · %1$d</string>
@@ -257,8 +259,11 @@
     <string name="settings_manage_apps_empty">Keine Apps gefunden</string>
     <string name="settings_manage_apps_edit_title">App bearbeiten</string>
     <string name="settings_manage_apps_name_label">Anzeigename</string>
-    <string name="settings_manage_apps_hidden_label">Versteckt</string>
-    <string name="settings_manage_apps_hidden_description">Blendet die App in App-Liste, Suchergebnissen und App-Auswahl aus. Platzierungen auf Seiten, im Dock und in Ordnern bleiben erhalten.</string>
+    <string name="settings_manage_apps_visibility_label">Sichtbarkeit</string>
+    <string name="settings_manage_apps_visibility_app_list_label">App-Liste</string>
+    <string name="settings_manage_apps_visibility_app_list_description">Blendet die App auch in der App-Auswahl aus. Platzierungen auf Seiten, im Dock und in Ordnern bleiben erhalten.</string>
+    <string name="settings_manage_apps_visibility_search_label">Suche</string>
+    <string name="settings_manage_apps_visibility_search_description">Blendet die App in den Suchergebnissen aus.</string>
     <string name="settings_manage_apps_reveal_mode_label">Zugriff</string>
     <string name="settings_manage_apps_reveal_none">Im Launcher nicht erreichbar (nur über die Systemeinstellungen)</string>
     <string name="settings_manage_apps_reveal_search_code">Mit Suchcode einblenden</string>

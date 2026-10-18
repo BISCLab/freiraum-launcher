@@ -250,6 +250,8 @@
     <string name="settings_apps_global_subtitle">Icon shape, size, pack</string>
     <string name="settings_manage_apps_search_hint">Search apps…</string>
     <string name="settings_manage_apps_hidden_summary">Hidden</string>
+    <string name="settings_manage_apps_hidden_from_list_summary">Hidden from app list</string>
+    <string name="settings_manage_apps_hidden_from_search_summary">Hidden from search</string>
     <string name="settings_manage_apps_renamed_summary">Renamed to “%1$s”</string>
     <string name="settings_manage_apps_customized_label">Customized</string>
     <string name="settings_manage_apps_all_label">All apps · %1$d</string>
@@ -295,8 +297,11 @@
     <string name="settings_background_shade_value">%1$d%%</string>
     <string name="settings_manage_apps_edit_title">Edit app</string>
     <string name="settings_manage_apps_name_label">Display name</string>
-    <string name="settings_manage_apps_hidden_label">Hidden</string>
-    <string name="settings_manage_apps_hidden_description">Hides the app from the app list, search results and app pickers. Placements on pages, in the dock and in folders remain.</string>
+    <string name="settings_manage_apps_visibility_label">Visibility</string>
+    <string name="settings_manage_apps_visibility_app_list_label">App list</string>
+    <string name="settings_manage_apps_visibility_app_list_description">Also hides the app from app pickers. Placements on pages, in the dock and in folders remain.</string>
+    <string name="settings_manage_apps_visibility_search_label">Search</string>
+    <string name="settings_manage_apps_visibility_search_description">Hides the app from search results.</string>
     <string name="settings_manage_apps_reveal_mode_label">Access</string>
     <string name="settings_manage_apps_reveal_none">Not accessible in the launcher (system app settings only)</string>
     <string name="settings_manage_apps_reveal_search_code">Reveal with search code</string>

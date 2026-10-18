@@ -183,8 +183,8 @@ fun SettingsAppsScreen(navController: NavController, onBack: () -> Unit, onNavig
             app = app,
             viewModel = viewModel,
             override = overrides[app.componentName.flattenToString()] ?: AppOverride(app.componentName.flattenToString()),
-            onSave = { customLabel, hidden, revealMode, revealCode ->
-                viewModel.saveAppOverride(app.componentName, customLabel, hidden, revealMode, revealCode)
+            onSave = { customLabel, hiddenFromAppList, hiddenFromSearch, revealMode, revealCode ->
+                viewModel.saveAppOverride(app.componentName, customLabel, hiddenFromAppList, hiddenFromSearch, revealMode, revealCode)
                 editingApp = null
             },
             onDismiss = { editingApp = null }
@@ -206,10 +206,16 @@ private fun AppOverrideRow(
     onClick: () -> Unit
 ) {
     val bitmap = com.bisc.flauncher.ui.home.rememberAppIcon(app.componentName, loadIcon)
+    val hiddenSummary = when {
+        override?.hiddenFromAppList == true && override.hiddenFromSearch == true -> stringResource(R.string.settings_manage_apps_hidden_summary)
+        override?.hiddenFromAppList == true -> stringResource(R.string.settings_manage_apps_hidden_from_list_summary)
+        override?.hiddenFromSearch == true -> stringResource(R.string.settings_manage_apps_hidden_from_search_summary)
+        else -> null
+    }
     val summary = when {
-        override?.hidden == true && !override.customLabel.isNullOrBlank() ->
-            stringResource(R.string.settings_manage_apps_hidden_summary) + " · " + stringResource(R.string.settings_manage_apps_renamed_summary, override.customLabel)
-        override?.hidden == true -> stringResource(R.string.settings_manage_apps_hidden_summary)
+        hiddenSummary != null && !override?.customLabel.isNullOrBlank() ->
+            hiddenSummary + " · " + stringResource(R.string.settings_manage_apps_renamed_summary, override?.customLabel.orEmpty())
+        hiddenSummary != null -> hiddenSummary
         !override?.customLabel.isNullOrBlank() -> stringResource(R.string.settings_manage_apps_renamed_summary, override?.customLabel.orEmpty())
         else -> null
     }
@@ -241,7 +247,7 @@ private fun AppOverrideEditSheet(
     app: AppInfo,
     viewModel: SettingsViewModel,
     override: AppOverride,
-    onSave: (customLabel: String?, hidden: Boolean, revealMode: RevealMode, revealCode: String?) -> Unit,
+    onSave: (customLabel: String?, hiddenFromAppList: Boolean, hiddenFromSearch: Boolean, revealMode: RevealMode, revealCode: String?) -> Unit,
     onDismiss: () -> Unit
 ) {
     CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalAppIconLoader provides viewModel.iconLoader) {
@@ -254,13 +260,14 @@ private fun AppOverrideEditSheetContent(
     app: AppInfo,
     viewModel: SettingsViewModel,
     override: AppOverride,
-    onSave: (customLabel: String?, hidden: Boolean, revealMode: RevealMode, revealCode: String?) -> Unit,
+    onSave: (customLabel: String?, hiddenFromAppList: Boolean, hiddenFromSearch: Boolean, revealMode: RevealMode, revealCode: String?) -> Unit,
     onDismiss: () -> Unit
 ) {
     val globalIconSizePercent by viewModel.iconSizePercent.collectAsState()
     // Keyed on the component, not the whole override.
     var customLabel by remember(override.componentName) { mutableStateOf(override.customLabel.orEmpty()) }
-    var hidden by remember(override.componentName) { mutableStateOf(override.hidden) }
+    var hiddenFromAppList by remember(override.componentName) { mutableStateOf(override.hiddenFromAppList) }
+    var hiddenFromSearch by remember(override.componentName) { mutableStateOf(override.hiddenFromSearch) }
     var revealMode by remember(override.componentName) { mutableStateOf(override.revealMode) }
     var revealCode by remember(override.componentName) { mutableStateOf(override.revealCode.orEmpty()) }
     var pickingIcon by remember { mutableStateOf(false) }
@@ -317,17 +324,28 @@ private fun AppOverrideEditSheetContent(
             )
         }
 
-        SettingsPreferenceGroup {
+        // Independent per-surface visibility — an app can stay out of the app list while still
+        // being searchable, or vice versa; placements on pages, in the dock and in folders are
+        // unaffected either way. Once other page types exist, a "Pages" row belongs in this same
+        // group alongside App list/Search.
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_manage_apps_visibility_label)) {
             SettingsPreference(
                 icon = null,
-                title = stringResource(R.string.settings_manage_apps_hidden_label),
-                info = stringResource(R.string.settings_manage_apps_hidden_description),
-                onClick = { hidden = !hidden },
-                trailing = { Switch(checked = hidden, onCheckedChange = { hidden = it }) }
+                title = stringResource(R.string.settings_manage_apps_visibility_app_list_label),
+                info = stringResource(R.string.settings_manage_apps_visibility_app_list_description),
+                onClick = { hiddenFromAppList = !hiddenFromAppList },
+                trailing = { Switch(checked = !hiddenFromAppList, onCheckedChange = { hiddenFromAppList = !it }) }
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_manage_apps_visibility_search_label),
+                info = stringResource(R.string.settings_manage_apps_visibility_search_description),
+                onClick = { hiddenFromSearch = !hiddenFromSearch },
+                trailing = { Switch(checked = !hiddenFromSearch, onCheckedChange = { hiddenFromSearch = !it }) }
             )
         }
 
-        if (hidden) {
+        if (hiddenFromSearch) {
             SettingsPreferenceGroup(title = stringResource(R.string.settings_manage_apps_reveal_mode_label)) {
                 RadioPreference(
                     label = stringResource(R.string.settings_manage_apps_reveal_none),
@@ -355,7 +373,7 @@ private fun AppOverrideEditSheetContent(
         }
 
         TextButton(
-            onClick = { onSave(customLabel, hidden, revealMode, revealCode) },
+            onClick = { onSave(customLabel, hiddenFromAppList, hiddenFromSearch, revealMode, revealCode) },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(stringResource(R.string.settings_manage_apps_save))
