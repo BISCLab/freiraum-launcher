@@ -452,7 +452,7 @@ class SettingsViewModel @Inject constructor(
 
     val browsableApps: StateFlow<List<AppInfo>> =
         combine(labeledApps, appOverrides) { apps, overrides ->
-            apps.filter { overrides[it.componentName.flattenToString()]?.hidden != true }
+            apps.filter { overrides[it.componentName.flattenToString()]?.hiddenFromAppList != true }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     fun resolveLabel(componentName: ComponentName): String {
@@ -473,9 +473,16 @@ class SettingsViewModel @Inject constructor(
         return 1f + percent / 100f
     }
 
-    fun saveAppOverride(componentName: ComponentName, customLabel: String?, hidden: Boolean, revealMode: RevealMode, revealCode: String?) {
+    fun saveAppOverride(
+        componentName: ComponentName,
+        customLabel: String?,
+        hiddenFromAppList: Boolean,
+        hiddenFromSearch: Boolean,
+        revealMode: RevealMode,
+        revealCode: String?
+    ) {
         viewModelScope.launch {
-            val effectiveMode = if (hidden) revealMode else RevealMode.NONE
+            val effectiveMode = if (hiddenFromSearch) revealMode else RevealMode.NONE
             val existing = appOverrides.value[componentName.flattenToString()]
             appOverrideRepository.save(
                 AppOverride(
@@ -485,7 +492,8 @@ class SettingsViewModel @Inject constructor(
                     iconShape = existing?.iconShape,
                     iconSizePercent = existing?.iconSizePercent,
                     customLabel = customLabel?.trim()?.takeIf { it.isNotEmpty() },
-                    hidden = hidden,
+                    hiddenFromAppList = hiddenFromAppList,
+                    hiddenFromSearch = hiddenFromSearch,
                     revealMode = effectiveMode,
                     revealCode = if (effectiveMode == RevealMode.SEARCH_CODE) revealCode?.takeIf { it.isNotEmpty() } else null
                 )
