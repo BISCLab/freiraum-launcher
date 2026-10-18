@@ -642,13 +642,23 @@ fun HomeScreen(
                         verticalArrangement = Arrangement.Center,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = DockDimens.innerHorizontalPadding, vertical = DockDimens.innerVerticalPadding)
+                            // Top gap matches the icon-to-side-edge gap (innerHorizontalPadding) rather
+                            // than the taller innerVerticalPadding — see DockDimens.rowGap for the
+                            // (separate) gap this creates *between* the Dock's own sub-rows.
+                            .padding(
+                                start = DockDimens.innerHorizontalPadding,
+                                end = DockDimens.innerHorizontalPadding,
+                                top = DockDimens.innerHorizontalPadding,
+                                bottom = DockDimens.innerVerticalPadding
+                            )
                             .navigationBarsPadding()
                     ) {
                         GridEntries(
                             entries = rowEntriesByRow[homeDockRow.id].orEmpty(),
                             columns = 1,
                             rowColumns = dockRowShape,
+                            referenceColumnCount = DockDimens.REFERENCE_SLOT_COUNT,
+                            rowGap = DockDimens.rowGap,
                             folders = folders,
                             folderItemsByFolder = folderItemsByFolder,
                             savedMapTargets = savedMapTargets,

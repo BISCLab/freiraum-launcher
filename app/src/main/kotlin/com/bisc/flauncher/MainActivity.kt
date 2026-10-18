@@ -117,6 +117,7 @@ class MainActivity : ComponentActivity() {
             val theme by settingsVm.theme.collectAsState()
             val font by settingsVm.fontPreference.collectAsState()
             val globalIconSizePercent by settingsVm.iconSizePercent.collectAsState()
+            val globalIconShape by settingsVm.iconShape.collectAsState()
             val appOverridesForIconSize by settingsVm.appOverrides.collectAsState()
             // New lambda identity whenever either input changes, so LocalIconSizeResolver consumers
             // (AppIconCell) recompose — a StateFlow's plain .value read wouldn't do that on its own.
@@ -148,7 +149,8 @@ class MainActivity : ComponentActivity() {
             }
             androidx.compose.runtime.CompositionLocalProvider(
                 com.bisc.flauncher.ui.home.LocalAppIconLoader provides appIconLoader,
-                com.bisc.flauncher.ui.home.LocalIconSizeResolver provides iconSizeResolver
+                com.bisc.flauncher.ui.home.LocalIconSizeResolver provides iconSizeResolver,
+                com.bisc.flauncher.ui.home.LocalIconShape provides globalIconShape
             ) {
             FLauncherTheme(themePreference = theme, fontPreference = font) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {

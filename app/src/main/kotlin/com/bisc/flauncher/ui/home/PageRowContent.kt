@@ -283,7 +283,14 @@ fun GridEntries(
     // Settings-only: when set, tapping any *filled* cell calls this instead of its normal live
     // action (launch the app, open the folder, …) — the Panel's Elements editor uses it to let you
     // remove an entry by tapping it directly, instead of a separate reorderable list underneath.
-    onEditEntry: ((RowEntry) -> Unit)? = null
+    onEditEntry: ((RowEntry) -> Unit)? = null,
+    // The Dock's own need: every sub-row centered within the same fixed reference width (sized for
+    // this many columns) instead of its own actual content width, so a shorter row (e.g. 4 icons)
+    // gets the same edge-to-icon gap as a full row (5 icons) rather than extra Arrangement.Center
+    // slack making its edges sit further in. Null (the Panel's case) keeps the old per-row width.
+    referenceColumnCount: Int? = null,
+    // Vertical gap between sub-rows — also Dock-only (0 keeps the Panel's rows flush, as before).
+    rowGap: androidx.compose.ui.unit.Dp = 0.dp
 ) {
     @Composable
     fun Cell(entry: RowEntry?, slotIndex: Int) {
@@ -345,15 +352,23 @@ fun GridEntries(
 
     if (rowColumns != null) {
         var consumed = 0
-        rowColumns.forEach { cols ->
+        val cellWidth = 64.dp * iconSizeScale
+        val columnGap = 16.dp
+        fun widthFor(cols: Int) = cellWidth * cols + columnGap * (cols - 1).coerceAtLeast(0)
+        val referenceWidth = referenceColumnCount?.let { widthFor(it.coerceAtLeast(1)) }
+        rowColumns.forEachIndexed { rowIndex, cols ->
+            if (rowIndex > 0 && rowGap > 0.dp) Spacer(Modifier.height(rowGap))
             val safeCols = cols.coerceAtLeast(1)
             val rowStart = consumed
             consumed += safeCols
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                repeat(safeCols) { slot ->
-                    if (slot > 0) Spacer(Modifier.width(16.dp))
-                    Box(modifier = Modifier.width(64.dp * iconSizeScale)) {
-                        Cell(entries.getOrNull(rowStart + slot), rowStart + slot)
+            val containerWidth = referenceWidth?.let { maxOf(it, widthFor(safeCols)) } ?: widthFor(safeCols)
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Row(modifier = Modifier.width(containerWidth), horizontalArrangement = Arrangement.Center) {
+                    repeat(safeCols) { slot ->
+                        if (slot > 0) Spacer(Modifier.width(columnGap))
+                        Box(modifier = Modifier.width(cellWidth)) {
+                            Cell(entries.getOrNull(rowStart + slot), rowStart + slot)
+                        }
                     }
                 }
             }
@@ -377,13 +392,21 @@ fun GridEntries(
     }
 }
 
+/** Clip shape for the cell types whose background box is drawn directly in Compose rather than
+ *  baked into a cached bitmap — see [LocalIconShape]'s doc comment for why those need this instead
+ *  of just picking up the shape for free the way app icons do. */
+private fun elementCellShape(iconShape: IconShape): Shape = when (iconShape) {
+    IconShape.CIRCLE -> CircleShape
+    IconShape.ROUNDED_SQUARE -> RoundedCornerShape(16.dp)
+}
+
 @Composable
 private fun EmptyGridSlotCell(onClick: () -> Unit, iconSizeScale: Float = 1f) {
     Column(modifier = Modifier.clickable(onClick = onClick).padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier = Modifier
                 .size(56.dp * iconSizeScale)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(elementCellShape(LocalIconShape.current))
                 .background(UNSET_APP_SLOT_COLOR),
             contentAlignment = Alignment.Center
         ) {
@@ -463,7 +486,7 @@ private fun MapTargetCell(target: SavedMapTarget?, showLabel: Boolean = true, la
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier.size(56.dp * iconSizeScale).clip(RoundedCornerShape(16.dp)).background(background),
+            modifier = Modifier.size(56.dp * iconSizeScale).clip(elementCellShape(LocalIconShape.current)).background(background),
             contentAlignment = Alignment.Center
         ) {
             Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = Modifier.size(30.dp * iconSizeScale))
@@ -490,7 +513,7 @@ private fun WebsiteCell(website: PinnedWebsite?, showLabel: Boolean = true, labe
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier.size(56.dp * iconSizeScale).clip(RoundedCornerShape(16.dp)).background(background),
+            modifier = Modifier.size(56.dp * iconSizeScale).clip(elementCellShape(LocalIconShape.current)).background(background),
             contentAlignment = Alignment.Center
         ) {
             Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = Modifier.size(30.dp * iconSizeScale))
@@ -540,7 +563,7 @@ private fun PageLinkCell(page: LauncherPage?, pages: List<LauncherPage>, onClick
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier.size(56.dp * iconSizeScale).clip(RoundedCornerShape(16.dp)).background(background),
+            modifier = Modifier.size(56.dp * iconSizeScale).clip(elementCellShape(LocalIconShape.current)).background(background),
             contentAlignment = Alignment.Center
         ) {
             PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(30.dp * iconSizeScale))
@@ -610,7 +633,7 @@ private fun ActionButtonCell(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier.size(56.dp * iconSizeScale).clip(RoundedCornerShape(16.dp)).background(background),
+            modifier = Modifier.size(56.dp * iconSizeScale).clip(elementCellShape(LocalIconShape.current)).background(background),
             contentAlignment = Alignment.Center
         ) {
             Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = Modifier.size(30.dp * iconSizeScale))
