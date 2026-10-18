@@ -742,8 +742,10 @@ fun HomeScreen(
         // choppy compared to text search's own, already pre-sized overlay.
         BoxWithConstraints(modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth()) {
             // Top square — flush and seamless against the screen's own top edge, no gap at the device's
-            // rounded corners. Bottom stays rounded (the panel's "resting" edge, not attached to anything).
-            val panelShape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 28.dp, bottomEnd = 28.dp)
+            // rounded corners. Bottom stays rounded (the panel's "resting" edge, not attached to
+            // anything) — the percent scales how far towards the 28dp max it goes, same as the Dock.
+            val panelCornerRadius = 28.dp * ((homePanelRow?.cornerRadiusPercent ?: 25).coerceIn(0, 100) / 100f)
+            val panelShape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = panelCornerRadius, bottomEnd = panelCornerRadius)
             val panelRowShape = homePanelRow?.panelRows() ?: listOf(4, 4, 4)
             // A fixed shape the user picked up front (one column count per row), not an estimate
             // from content — predictable size that doesn't jump around as entries are added/removed,
