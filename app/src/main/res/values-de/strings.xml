@@ -437,10 +437,9 @@
     <string name="settings_row_entry_new_folder">Neuer Ordner</string>
     <string name="settings_row_entry_no_folders">Keine weiteren Ordner. Oben einen anlegen.</string>
     <string name="settings_backup_label">Sicherung</string>
+    <string name="settings_backup_info">Export speichert Einstellungen, Seiten, Widgets, Ordner und Hintergründe in einer Datei. Import ersetzt alle aktuellen Daten durch den Inhalt einer Sicherungsdatei.</string>
     <string name="settings_backup_export">Sicherung exportieren</string>
-    <string name="settings_backup_export_summary">Speichert Einstellungen, Seiten, Widgets, Ordner und Hintergründe in einer Datei.</string>
     <string name="settings_backup_import">Sicherung importieren</string>
-    <string name="settings_backup_import_summary">Ersetzt alle aktuellen Daten durch den Inhalt einer Sicherungsdatei.</string>
     <string name="settings_backup_import_confirm_title">Sicherung importieren?</string>
     <string name="settings_backup_import_confirm_message">Ersetzt alle aktuellen Einstellungen, Seiten, Ordner und Hintergründe durch den Inhalt der Datei. FLauncher wird anschließend neu gestartet.</string>
     <string name="settings_backup_export_done">Sicherung gespeichert</string>

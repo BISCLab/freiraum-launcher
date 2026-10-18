@@ -437,10 +437,9 @@
     <string name="settings_row_entry_new_folder">New folder</string>
     <string name="settings_row_entry_no_folders">No other folders. Create one above.</string>
     <string name="settings_backup_label">Backup</string>
+    <string name="settings_backup_info">Export saves settings, pages, widgets, folders and backgrounds to one file. Import replaces all current data with the content of a backup file.</string>
     <string name="settings_backup_export">Export backup</string>
-    <string name="settings_backup_export_summary">Saves settings, pages, widgets, folders and backgrounds to one file.</string>
     <string name="settings_backup_import">Import backup</string>
-    <string name="settings_backup_import_summary">Replaces all current data with the content of a backup file.</string>
     <string name="settings_backup_import_confirm_title">Import backup?</string>
     <string name="settings_backup_import_confirm_message">Replaces all current settings, pages, folders and backgrounds with the content of the file. FLauncher restarts afterwards.</string>
     <string name="settings_backup_export_done">Backup saved</string>

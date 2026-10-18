@@ -113,7 +113,10 @@ fun ColumnScope.AppOverviewSettingsSection(surfaceIsDark: Boolean, viewModel: Se
         )
     }
 
-    SettingsPreferenceGroup(title = stringResource(R.string.settings_search_full_browse_label)) {
+    SettingsPreferenceGroup(
+        title = stringResource(R.string.settings_search_full_browse_label),
+        info = stringResource(R.string.settings_app_list_search_button_summary)
+    ) {
         SettingsPreference(
             icon = null,
             title = stringResource(R.string.settings_search_show_az_index),
@@ -129,7 +132,6 @@ fun ColumnScope.AppOverviewSettingsSection(surfaceIsDark: Boolean, viewModel: Se
         SettingsPreference(
             icon = null,
             title = stringResource(R.string.settings_app_list_search_button),
-            info = stringResource(R.string.settings_app_list_search_button_summary),
             onClick = { viewModel.setAppListShowSearchButton(!showSearchButton) },
             trailing = { Switch(checked = showSearchButton, onCheckedChange = viewModel::setAppListShowSearchButton) }
         )

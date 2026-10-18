@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.material3.TextButton
-import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -106,12 +106,15 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
     }
 }
 
-/** Rounded group of preference rows with an optional title. */
+/** Rounded group of preference rows with an optional title and an optional explanation that covers
+ *  the whole group. When [info] is given, a neutral-gray "?" button next to the title expands it
+ *  inline — this is the shared spot for a group's explanatory text, so a group's rows generally
+ *  shouldn't also carry their own [SettingsPreference.info] (see that param's doc). */
 @Composable
-fun SettingsPreferenceGroup(title: String? = null, content: @Composable ColumnScope.() -> Unit) {
+fun SettingsPreferenceGroup(title: String? = null, info: String? = null, content: @Composable ColumnScope.() -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
         if (title != null) {
-            SettingsGroupLabel(title)
+            SettingsGroupLabel(title, info = info)
         }
         Column(
             modifier = Modifier.clip(MaterialTheme.shapes.medium),
@@ -121,16 +124,40 @@ fun SettingsPreferenceGroup(title: String? = null, content: @Composable ColumnSc
     }
 }
 
-/** The small secondary-colored label [SettingsPreferenceGroup] renders above its own card. */
+/** The small secondary-colored label [SettingsPreferenceGroup] renders above its own card, with an
+ *  optional expandable [info] text next to it. */
 @Composable
-fun SettingsGroupLabel(title: String) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 8.dp)) {
-        Text(
-            title,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.padding(start = 4.dp)
-        )
+fun SettingsGroupLabel(title: String, info: String? = null) {
+    var infoOpen by rememberSaveable { mutableStateOf(false) }
+    Column(modifier = Modifier.padding(bottom = 8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                title,
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+            if (info != null) {
+                IconButton(onClick = { infoOpen = !infoOpen }, modifier = Modifier.size(24.dp).padding(start = 2.dp)) {
+                    Icon(
+                        Icons.AutoMirrored.Outlined.HelpOutline,
+                        contentDescription = stringResource(R.string.settings_info_button),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+        }
+        if (info != null) {
+            AnimatedVisibility(visible = infoOpen) {
+                Text(
+                    info,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+                )
+            }
+        }
     }
 }
 
@@ -181,9 +208,9 @@ fun SettingsPreference(
             if (info != null) {
                 IconButton(onClick = { infoOpen = !infoOpen }, modifier = Modifier.padding(start = 4.dp).size(32.dp)) {
                     Icon(
-                        Icons.Outlined.Info,
+                        Icons.AutoMirrored.Outlined.HelpOutline,
                         contentDescription = stringResource(R.string.settings_info_button),
-                        tint = MaterialTheme.colorScheme.error,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )
                 }

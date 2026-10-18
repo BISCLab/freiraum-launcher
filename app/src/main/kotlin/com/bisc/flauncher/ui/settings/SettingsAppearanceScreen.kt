@@ -105,12 +105,14 @@ fun SettingsAppearanceScreen(
                 }
             )
         }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_standard_apps_label)) {
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_standard_apps_label),
+            info = stringResource(R.string.settings_search_open_with_info)
+        ) {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_search_browser_title),
                 summary = appLabel(browserPackage),
-                info = stringResource(R.string.settings_search_open_with_info),
                 onClick = { browserPickerOpen = true }
             )
             SettingsPreference(
@@ -123,22 +125,26 @@ fun SettingsAppearanceScreen(
         // Home, Pages, Quick overview and Text search each have their own status-bar switch on their own screen.
         // This one is a bulk action over all of them — checked reflects whether every one of them is
         // currently hidden, and toggling it off sets every one of them back to shown.
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_statusbar_label)) {
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_statusbar_label),
+            info = stringResource(R.string.settings_statusbar_hide_all_summary)
+        ) {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_statusbar_hide_all),
-                info = stringResource(R.string.settings_statusbar_hide_all_summary),
                 onClick = { confirmingHideStatusBarEverywhere = !statusBarHiddenEverywhere },
                 trailing = {
                     Switch(checked = statusBarHiddenEverywhere, onCheckedChange = { confirmingHideStatusBarEverywhere = it })
                 }
             )
         }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_backup_label)) {
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_backup_label),
+            info = stringResource(R.string.settings_backup_info)
+        ) {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_backup_export),
-                info = stringResource(R.string.settings_backup_export_summary),
                 onClick = {
                     val stamp = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
                     exportLauncher.launch("flauncher-backup-$stamp.zip")
@@ -148,16 +154,17 @@ fun SettingsAppearanceScreen(
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_backup_import),
-                info = stringResource(R.string.settings_backup_import_summary),
                 onClick = { importLauncher.launch(arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream")) },
                 trailing = null
             )
         }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_charging_label)) {
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_charging_label),
+            info = stringResource(R.string.settings_charging_animation_summary)
+        ) {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_charging_animation),
-                info = stringResource(R.string.settings_charging_animation_summary),
                 onClick = { viewModel.setChargingAnimationEnabled(!chargingAnimation) },
                 trailing = { Switch(checked = chargingAnimation, onCheckedChange = viewModel::setChargingAnimationEnabled) }
             )
