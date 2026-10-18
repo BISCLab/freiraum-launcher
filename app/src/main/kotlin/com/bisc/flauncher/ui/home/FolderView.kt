@@ -274,16 +274,16 @@ private fun FolderWidgetRow(item: FolderItem) {
         when (item.type) {
             GridItemType.WIDGET -> when (item.payload) {
                 WidgetKind.CLOCK -> ClockWidget()
-                WidgetKind.MUSIC -> MusicWidget(appearance = item.appearance(), cornerStyle = item.cornerStyle)
-                WidgetKind.WEATHER -> WeatherWidget(appearance = item.appearance(), cornerStyle = item.cornerStyle)
-                WidgetKind.NOTES -> NotesWidget(appearance = item.appearance(), cornerStyle = item.cornerStyle, spanY = item.spanY)
+                WidgetKind.MUSIC -> MusicWidget(appearance = item.appearance(), cornerRadiusPercent = item.cornerRadiusPercent)
+                WidgetKind.WEATHER -> WeatherWidget(appearance = item.appearance(), cornerRadiusPercent = item.cornerRadiusPercent)
+                WidgetKind.NOTES -> NotesWidget(appearance = item.appearance(), cornerRadiusPercent = item.cornerRadiusPercent, spanY = item.spanY)
             }
             GridItemType.SYSTEM_WIDGET -> item.payload.toIntOrNull()?.let { appWidgetId ->
                 SystemWidgetView(
                     appWidgetId = appWidgetId,
                     modifier = Modifier.fillMaxSize(),
                     appearance = item.appearance(),
-                    cornerStyle = item.cornerStyle
+                    cornerRadiusPercent = item.cornerRadiusPercent
                 )
             }
             GridItemType.APP, GridItemType.SHORTCUT, GridItemType.MAP_TARGET, GridItemType.WEBSITE, GridItemType.FOLDER, GridItemType.PAGE, GridItemType.CONTACT, GridItemType.ACTION_BUTTON -> Unit

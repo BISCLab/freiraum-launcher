@@ -5,11 +5,13 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -35,7 +37,6 @@ import com.bisc.flauncher.data.model.ClockTimeFormat
 import com.bisc.flauncher.data.model.GestureAction
 import com.bisc.flauncher.data.model.GestureActionType
 import com.bisc.flauncher.data.model.PageRowType
-import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.data.model.clockDateAction
@@ -142,8 +143,18 @@ fun SettingsWidgetRowEditScreen(
                 } else null
             )
             SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
-                CornerStylePreference(value = WidgetCornerStyle.ROUNDED, selected = row.cornerStyle, onSelect = { viewModel.setRowCornerStyle(row, it) })
-                CornerStylePreference(value = WidgetCornerStyle.SQUARE, selected = row.cornerStyle, onSelect = { viewModel.setRowCornerStyle(row, it) })
+                SettledSlider(
+                    value = row.cornerRadiusPercent.toFloat(),
+                    onSettled = { viewModel.setRowCornerRadiusPercent(row, it.roundToInt()) },
+                    valueRange = 0f..100f,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    label = { live ->
+                        Text(
+                            stringResource(R.string.settings_corner_radius_value, live.roundToInt()),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                )
             }
             SettingsPreferenceGroup {
                 SettingsPreference(

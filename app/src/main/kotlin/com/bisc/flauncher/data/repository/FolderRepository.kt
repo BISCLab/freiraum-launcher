@@ -26,6 +26,11 @@ class FolderRepository @Inject constructor(
     val folders: Flow<List<Folder>> = folderDao.observeAll()
     val folderItems: Flow<List<FolderItem>> = folderItemDao.observeAll()
 
+    suspend fun applyCornerRadiusToAllItems(percent: Int) {
+        val items = folderItemDao.observeAll().first().map { it.copy(cornerRadiusPercent = percent) }
+        folderItemDao.updateAll(items)
+    }
+
     suspend fun createFolder(name: String): Long = folderDao.insert(Folder(name = name))
 
     suspend fun renameFolder(folder: Folder, newName: String) {

@@ -96,7 +96,6 @@ import com.bisc.flauncher.data.model.Note
 import com.bisc.flauncher.data.model.ContactInfo
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
-import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.data.model.dockRows
 import com.bisc.flauncher.data.model.panelRows
@@ -607,11 +606,10 @@ fun HomeScreen(
                 )
             }
             val dockAppearance = homeDockRow.appearance()
-            val dockShape = if (homeDockRow.cornerStyle == WidgetCornerStyle.SQUARE) {
-                RoundedCornerShape(0.dp)
-            } else {
-                RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
-            }
+            // Only the top corners round (the dock sits flush with the screen's bottom edge) — the
+            // percent scales how far towards the 28dp max each one goes, 0 staying perfectly flat.
+            val dockCornerRadius = 28.dp * (homeDockRow.cornerRadiusPercent.coerceIn(0, 100) / 100f)
+            val dockShape = RoundedCornerShape(topStart = dockCornerRadius, topEnd = dockCornerRadius)
             val dockBorderColor = resolveElementColors(dockAppearance).borderColor
             // Mirrors the Panel's own BoxWithConstraints+fixed-height treatment just above (see its
             // comment) — the Dock can now be 1 or 2 rows tall (dockRowShape), so its size needs to be

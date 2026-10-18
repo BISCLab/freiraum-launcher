@@ -44,7 +44,6 @@ import com.bisc.flauncher.data.model.AppListDisplayMode
 import com.bisc.flauncher.data.model.AppListLayout
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.ElementFillMode
-import com.bisc.flauncher.data.model.WidgetCornerStyle
 import com.bisc.flauncher.data.repository.AppOverrideRepository
 import com.bisc.flauncher.data.repository.ContactsRepository
 import com.bisc.flauncher.data.repository.FolderRepository
@@ -832,8 +831,8 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { pageContentRepository.setRowEdgeToEdge(row, edgeToEdge) }
     }
 
-    fun setRowCornerStyle(row: PageRow, cornerStyle: WidgetCornerStyle) {
-        viewModelScope.launch { pageContentRepository.setRowCornerStyle(row, cornerStyle) }
+    fun setRowCornerRadiusPercent(row: PageRow, percent: Int) {
+        viewModelScope.launch { pageContentRepository.setRowCornerRadiusPercent(row, percent) }
     }
 
     fun setRowColumns(row: PageRow, columns: Int) {

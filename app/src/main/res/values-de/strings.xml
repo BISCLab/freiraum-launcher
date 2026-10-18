@@ -376,8 +376,6 @@
     <string name="settings_page_full_message">Es passt hier nicht mehr neben das, was schon auf dieser Seite ist. Eine neue Seite dafür anlegen?</string>
     <string name="settings_page_full_confirm">Seite hinzufügen</string>
     <string name="settings_widgets_corner_shape_label">Eckenform</string>
-    <string name="settings_widgets_corner_shape_square">Eckig</string>
-    <string name="settings_widgets_corner_shape_rounded">Abgerundet</string>
     <string name="settings_widgets_edge_to_edge_label">Randlos</string>
     <string name="settings_widgets_edge_to_edge_summary">Entfernt den seitlichen Abstand, das Widget nutzt die volle Bildschirmbreite. Standardmäßig aus; die Breite entspricht dann dem Dock.</string>
 
@@ -456,8 +454,7 @@
     <string name="settings_statusbar_confirm_hide_message">Dadurch wird die Statusleiste auf jeder Seite, der Schnellübersicht, der Textsuche und in Ordnern auf einmal ausgeblendet — unabhängig davon, wie jede einzeln aktuell eingestellt ist.</string>
     <string name="settings_statusbar_confirm_show_message">Dadurch wird die Statusleiste auf jeder Seite, der Schnellübersicht, der Textsuche und in Ordnern auf einmal eingeblendet — unabhängig davon, wie jede einzeln aktuell eingestellt ist.</string>
     <string name="settings_corner_style_label">Eckenform</string>
-    <string name="settings_corner_style_rounded">Abgerundet</string>
-    <string name="settings_corner_style_square">Eckig</string>
+    <string name="settings_corner_radius_value">%1$d%%</string>
     <string name="settings_statusbar_hide_page">Statusleiste ausblenden</string>
     <string name="settings_statusbar_hide_quick_search">Statusleiste in der Schnellübersicht ausblenden</string>
     <string name="settings_folder_hide_status_bar">Statusleiste in Ordnern ausblenden</string>
