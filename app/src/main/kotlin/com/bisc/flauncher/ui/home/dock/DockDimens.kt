@@ -26,6 +26,15 @@ object DockDimens {
     // gap GridEntries' rowColumns path uses by default (rows just stacked back to back), since a
     // flush 2-row dock reads as cramped.
     val rowGap = 20.dp
+
+    // Actual rendered height of one Dock sub-row's content — a bare icon cell (its 56dp image plus
+    // the cell Column's own 4dp top/bottom padding) when captions are off; rowHeightWithLabel adds
+    // the caption line + its spacer for when PageRow.showLabels is on. Used to size the Dock's fixed-
+    // height AnimatedVisibility box exactly, instead of a flat generous guess — the previous one left
+    // unused centering slack above the top row (on top of the deliberate top padding) and made the
+    // whole dock taller than it needed to be.
+    val rowHeight = 64.dp
+    val rowHeightWithLabel = 92.dp
     val barHeight = iconSize + innerVerticalPadding * 2
     // Extra height a pill bar needs to fit a caption line under each icon (PageRow.showLabels) —
     // only relevant to PillRow's own fixed-height Box; PillRowEntries used directly inside a

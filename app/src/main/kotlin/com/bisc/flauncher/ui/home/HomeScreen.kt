@@ -615,8 +615,14 @@ fun HomeScreen(
             // Mirrors the Panel's own BoxWithConstraints+fixed-height treatment just above (see its
             // comment) — the Dock can now be 1 or 2 rows tall (dockRowShape), so its size needs to be
             // predictable up front rather than estimated from content, same reasoning as the Panel.
+            // Computed exactly from the same padding/rowGap/row-height constants the content itself
+            // uses below, rather than a flat generous guess — any slack here is slack the Column's
+            // Arrangement.Top has to center into, pushing the top row down from the top edge.
             val dockRowShape = homeDockRow.dockRows()
-            val dockHeight = (96.dp * dockRowShape.size + 32.dp).coerceAtLeast(96.dp)
+            val dockRowContentHeight = if (homeDockRow.showLabels) DockDimens.rowHeightWithLabel else DockDimens.rowHeight
+            val dockHeight = DockDimens.innerHorizontalPadding + DockDimens.innerVerticalPadding +
+                dockRowContentHeight * dockRowShape.size +
+                DockDimens.rowGap * (dockRowShape.size - 1).coerceAtLeast(0)
             androidx.compose.animation.AnimatedVisibility(
                 visible = dockExpanded,
                 enter = fadeIn(tween(160)) + androidx.compose.animation.expandVertically(tween(200), expandFrom = Alignment.Bottom),
@@ -639,7 +645,10 @@ fun HomeScreen(
                         )
                 ) {
                     Column(
-                        verticalArrangement = Arrangement.Center,
+                        // Top-anchored, not centered — dockHeight is now computed to match the content
+                        // exactly, so Center would just be an identity no-op when the estimate is right
+                        // and silently reintroduce a gap above the top row if it's ever slightly off.
+                        verticalArrangement = Arrangement.Top,
                         modifier = Modifier
                             .fillMaxSize()
                             // Top gap matches the icon-to-side-edge gap (innerHorizontalPadding) rather
