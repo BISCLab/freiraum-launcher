@@ -22,7 +22,7 @@ fun SettingsFolderGlobalScreen(navController: NavController, onBack: () -> Unit,
     SettingsSubScreen(title = stringResource(R.string.settings_folder_global_label), navController = navController, onBack = onBack) {
         ElementAppearanceSection(appearance = cardAppearance, onAppearanceChange = viewModel::setFolderCardAppearance, styleGroupTitle = layerLabel)
 
-        SettingsPreferenceGroup {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_folder_visibility_label)) {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_folder_show_add_row_everywhere_off),
