@@ -22,6 +22,10 @@ object DockDimens {
     val innerHorizontalPadding = 12.dp
     val itemGap = 12.dp
     val innerVerticalPadding = 16.dp
+    // Vertical gap between the Dock's own sub-rows when it's 2 rows tall — bigger than the near-zero
+    // gap GridEntries' rowColumns path uses by default (rows just stacked back to back), since a
+    // flush 2-row dock reads as cramped.
+    val rowGap = 20.dp
     val barHeight = iconSize + innerVerticalPadding * 2
     // Extra height a pill bar needs to fit a caption line under each icon (PageRow.showLabels) —
     // only relevant to PillRow's own fixed-height Box; PillRowEntries used directly inside a
