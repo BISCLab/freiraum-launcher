@@ -268,29 +268,21 @@ fun ElementAppearanceSection(
     }
 
     if (appearance.fillMode != ElementFillMode.NONE) {
-        // The picker shows directly as soon as Color is selected above — no separate collapsed
-        // "Color" summary row to tap through first.
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_source_color)) {
-            ColorFillPickerContent(
+        SettingsPreferenceGroup {
+            ColorFillPickerRow(
+                title = stringResource(R.string.settings_background_source_color),
                 fill = appearance.fill,
                 onFillChange = { fill -> onAppearanceChange(appearance.copy(fill = fill)) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                 onEyedropperCapture = onEyedropperCapture
             )
         }
 
         SettingsPreferenceGroup(title = stringResource(R.string.settings_background_opacity_label)) {
-            SettledSlider(
+            ExpandableSlider(
                 value = appearance.opacity,
                 onSettled = { onAppearanceChange(appearance.copy(opacity = it)) },
                 valueRange = 0f..1f,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                label = { live ->
-                    Text(
-                        stringResource(R.string.settings_background_opacity_value, (live * 100).roundToInt()),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
+                valueLabel = { stringResource(R.string.settings_background_opacity_value, (it * 100).roundToInt()) }
             )
         }
     }
@@ -311,17 +303,11 @@ fun ElementAppearanceSection(
 
     if (appearance.borderEnabled) {
         SettingsPreferenceGroup(title = stringResource(R.string.settings_element_border_style_label)) {
-            SettledSlider(
+            ExpandableSlider(
                 value = appearance.borderWidth,
                 onSettled = { onAppearanceChange(appearance.copy(borderWidth = (it * 2f).roundToInt() / 2f)) },
                 valueRange = 0.5f..6f,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                label = { live ->
-                    Text(
-                        stringResource(R.string.settings_element_border_width_value, String.format(java.util.Locale.US, "%.1f", live)),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
+                valueLabel = { stringResource(R.string.settings_element_border_width_value, String.format(java.util.Locale.US, "%.1f", it)) }
             )
         }
         AutomaticColorPicker(

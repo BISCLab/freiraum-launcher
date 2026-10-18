@@ -305,6 +305,14 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { folderRepository.deleteFolder(folder) }
     }
 
+    fun setFolderAppearanceOverrideEnabled(folderId: Long, enabled: Boolean) {
+        viewModelScope.launch { folderRepository.setFolderAppearanceOverrideEnabledById(folderId, enabled) }
+    }
+
+    fun setFolderAppearance(folderId: Long, appearance: ElementAppearance) {
+        viewModelScope.launch { folderRepository.setFolderAppearanceById(folderId, appearance) }
+    }
+
     val iconLoader: com.bisc.flauncher.util.AppIconLoader get() = appIconLoader
 
     fun loadPackIcon(iconPackPackage: String, drawableName: String): ImageBitmap? =
