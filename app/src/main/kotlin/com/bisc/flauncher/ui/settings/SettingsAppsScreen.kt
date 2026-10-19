@@ -327,9 +327,11 @@ private fun AppOverrideEditSheetContent(
         // Independent per-surface visibility — an app can stay out of the app list while still
         // being searchable, or vice versa; placements on pages, in the dock and in folders are
         // unaffected either way. Once other page types exist, a "Pages" row belongs in this same
-        // group alongside App list/Search. Reveal-with-search-code only makes sense once Search is
-        // off — if the app can't be searched for at all, there's nothing to bypass with a code — so
-        // it's nested right under Search and only shown then.
+        // group alongside App list/Text search. Reveal-with-search-code only makes sense once Text
+        // search is ON — if the app is already out of Text search entirely, there's no code that
+        // could bypass that — so it's nested right under Text search and only shown then; turning
+        // it on *replaces* name matching rather than adding to it, the app then only turns up for
+        // the exact code.
         SettingsPreferenceGroup(title = stringResource(R.string.settings_manage_apps_visibility_label)) {
             SettingsPreference(
                 icon = null,
@@ -345,11 +347,12 @@ private fun AppOverrideEditSheetContent(
                 onClick = { hiddenFromSearch = !hiddenFromSearch },
                 trailing = { Switch(checked = !hiddenFromSearch, onCheckedChange = { hiddenFromSearch = !it }) }
             )
-            if (hiddenFromSearch) {
+            if (!hiddenFromSearch) {
                 val revealEnabled = revealMode == RevealMode.SEARCH_CODE
                 SettingsPreference(
                     icon = null,
                     title = stringResource(R.string.settings_manage_apps_reveal_search_code),
+                    info = stringResource(R.string.settings_manage_apps_reveal_search_code_description),
                     onClick = { revealMode = if (revealEnabled) RevealMode.NONE else RevealMode.SEARCH_CODE },
                     trailing = {
                         Switch(
@@ -361,7 +364,7 @@ private fun AppOverrideEditSheetContent(
             }
         }
 
-        if (hiddenFromSearch && revealMode == RevealMode.SEARCH_CODE) {
+        if (!hiddenFromSearch && revealMode == RevealMode.SEARCH_CODE) {
             OutlinedTextField(
                 value = revealCode,
                 onValueChange = { revealCode = it },
