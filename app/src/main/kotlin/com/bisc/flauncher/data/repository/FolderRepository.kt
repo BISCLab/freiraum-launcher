@@ -83,6 +83,10 @@ class FolderRepository @Inject constructor(
         folderDao.get(id)?.let { folderDao.update(it.withRows(rows)) }
     }
 
+    suspend fun setFolderShowLabelsById(id: Long, show: Boolean) {
+        folderDao.get(id)?.let { folderDao.update(it.copy(showLabelsOverrideEnabled = true, showLabels = show)) }
+    }
+
     private suspend fun nextOrderIndex(folderId: Long): Int = (folderItemDao.maxOrderIndex(folderId) ?: -1) + 1
 
     suspend fun addItemToFolder(folderId: Long, type: GridItemType, payload: String) {

@@ -17,10 +17,20 @@ fun SettingsFolderGlobalScreen(navController: NavController, onBack: () -> Unit,
     val cardAppearance by viewModel.folderCardAppearance.collectAsState()
     val hideStatusBar by viewModel.folderHideStatusBar.collectAsState()
     val hideDock by viewModel.folderHideDock.collectAsState()
+    val showLabels by viewModel.folderShowLabels.collectAsState()
     val layerLabel = surfaceLabel(R.string.settings_layer_surface_folder)
 
     SettingsSubScreen(title = stringResource(R.string.settings_folder_global_label), navController = navController, onBack = onBack) {
         ElementAppearanceSection(appearance = cardAppearance, onAppearanceChange = viewModel::setFolderCardAppearance, styleGroupTitle = layerLabel)
+
+        SettingsPreferenceGroup {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_element_show_labels_label),
+                onClick = { viewModel.setFolderShowLabels(!showLabels) },
+                trailing = { Switch(checked = showLabels, onCheckedChange = viewModel::setFolderShowLabels) }
+            )
+        }
 
         SettingsPreferenceGroup(title = stringResource(R.string.settings_folder_visibility_label)) {
             SettingsPreference(

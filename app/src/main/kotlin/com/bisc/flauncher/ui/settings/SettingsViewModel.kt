@@ -150,6 +150,13 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setFolderHideDock(hide) }
     }
 
+    val folderShowLabels: StateFlow<Boolean> =
+        repository.folderShowLabels.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun setFolderShowLabels(show: Boolean) {
+        viewModelScope.launch { repository.setFolderShowLabels(show) }
+    }
+
     val accentColor: StateFlow<Int> =
         repository.accentColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF3B82F6.toInt())
 
@@ -315,6 +322,10 @@ class SettingsViewModel @Inject constructor(
 
     fun setFolderRowColumns(folderId: Long, rows: List<Int>) {
         viewModelScope.launch { folderRepository.setFolderRowColumnsById(folderId, rows) }
+    }
+
+    fun setFolderItemsShowLabels(folderId: Long, show: Boolean) {
+        viewModelScope.launch { folderRepository.setFolderShowLabelsById(folderId, show) }
     }
 
     val iconLoader: com.bisc.flauncher.util.AppIconLoader get() = appIconLoader

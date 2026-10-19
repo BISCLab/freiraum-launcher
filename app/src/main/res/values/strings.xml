@@ -263,8 +263,8 @@
 <string name="settings_folder_title">Folder</string>
     <string name="settings_folder_global_label">Global folder settings</string>
     <string name="settings_folder_global_subtitle">Appearance, border and visibility shared by every folder</string>
-    <string name="settings_folder_appearance_override_label">Customize appearance for this folder</string>
-    <string name="settings_folder_appearance_override_summary">Overrides the global folder appearance just for this one folder.</string>
+    <string name="settings_folder_appearance_label">Appearance</string>
+    <string name="settings_folder_appearance_reset_label">Reset to global appearance</string>
     <string name="settings_folder_visibility_label">Visibility</string>
     <string name="settings_folder_show_add_row_label">Show “Add …” row</string>
     <string name="settings_folder_show_add_row_summary">Row with the buttons for adding an app, shortcut, widget, place, website or subfolder at the bottom of an open folder.</string>
