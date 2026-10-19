@@ -302,8 +302,6 @@
     <string name="settings_manage_apps_visibility_app_list_description">Also hides the app from app pickers. Placements on pages, in the dock and in folders remain.</string>
     <string name="settings_manage_apps_visibility_search_label">Search</string>
     <string name="settings_manage_apps_visibility_search_description">Hides the app from search results.</string>
-    <string name="settings_manage_apps_reveal_mode_label">Access</string>
-    <string name="settings_manage_apps_reveal_none">Not accessible in the launcher (system app settings only)</string>
     <string name="settings_manage_apps_reveal_search_code">Reveal with search code</string>
     <string name="settings_manage_apps_reveal_code_hint">Search code</string>
     <string name="settings_manage_apps_save">Save</string>
