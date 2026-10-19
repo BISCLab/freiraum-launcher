@@ -327,7 +327,9 @@ private fun AppOverrideEditSheetContent(
         // Independent per-surface visibility — an app can stay out of the app list while still
         // being searchable, or vice versa; placements on pages, in the dock and in folders are
         // unaffected either way. Once other page types exist, a "Pages" row belongs in this same
-        // group alongside App list/Search.
+        // group alongside App list/Search. Reveal-with-search-code only makes sense once Search is
+        // off — if the app can't be searched for at all, there's nothing to bypass with a code — so
+        // it's nested right under Search and only shown then.
         SettingsPreferenceGroup(title = stringResource(R.string.settings_manage_apps_visibility_label)) {
             SettingsPreference(
                 icon = null,
@@ -343,33 +345,31 @@ private fun AppOverrideEditSheetContent(
                 onClick = { hiddenFromSearch = !hiddenFromSearch },
                 trailing = { Switch(checked = !hiddenFromSearch, onCheckedChange = { hiddenFromSearch = !it }) }
             )
+            if (hiddenFromSearch) {
+                val revealEnabled = revealMode == RevealMode.SEARCH_CODE
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_manage_apps_reveal_search_code),
+                    onClick = { revealMode = if (revealEnabled) RevealMode.NONE else RevealMode.SEARCH_CODE },
+                    trailing = {
+                        Switch(
+                            checked = revealEnabled,
+                            onCheckedChange = { revealMode = if (it) RevealMode.SEARCH_CODE else RevealMode.NONE }
+                        )
+                    }
+                )
+            }
         }
 
-        if (hiddenFromSearch) {
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_manage_apps_reveal_mode_label)) {
-                RadioPreference(
-                    label = stringResource(R.string.settings_manage_apps_reveal_none),
-                    value = RevealMode.NONE,
-                    selected = revealMode,
-                    onSelect = { revealMode = it }
-                )
-                RadioPreference(
-                    label = stringResource(R.string.settings_manage_apps_reveal_search_code),
-                    value = RevealMode.SEARCH_CODE,
-                    selected = revealMode,
-                    onSelect = { revealMode = it }
-                )
-            }
-            if (revealMode == RevealMode.SEARCH_CODE) {
-                OutlinedTextField(
-                    value = revealCode,
-                    onValueChange = { revealCode = it },
-                    label = { Text(stringResource(R.string.settings_manage_apps_reveal_code_hint)) },
-                    singleLine = true,
-                    shape = SettingsTextFieldShape,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+        if (hiddenFromSearch && revealMode == RevealMode.SEARCH_CODE) {
+            OutlinedTextField(
+                value = revealCode,
+                onValueChange = { revealCode = it },
+                label = { Text(stringResource(R.string.settings_manage_apps_reveal_code_hint)) },
+                singleLine = true,
+                shape = SettingsTextFieldShape,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
 
         TextButton(

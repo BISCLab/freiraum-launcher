@@ -264,8 +264,6 @@
     <string name="settings_manage_apps_visibility_app_list_description">Blendet die App auch in der App-Auswahl aus. Platzierungen auf Seiten, im Dock und in Ordnern bleiben erhalten.</string>
     <string name="settings_manage_apps_visibility_search_label">Suche</string>
     <string name="settings_manage_apps_visibility_search_description">Blendet die App in den Suchergebnissen aus.</string>
-    <string name="settings_manage_apps_reveal_mode_label">Zugriff</string>
-    <string name="settings_manage_apps_reveal_none">Im Launcher nicht erreichbar (nur über die Systemeinstellungen)</string>
     <string name="settings_manage_apps_reveal_search_code">Mit Suchcode einblenden</string>
     <string name="settings_manage_apps_reveal_code_hint">Suchcode</string>
     <string name="settings_manage_apps_save">Speichern</string>
