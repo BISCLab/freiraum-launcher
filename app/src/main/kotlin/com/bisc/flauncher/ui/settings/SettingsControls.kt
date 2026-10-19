@@ -153,13 +153,14 @@ fun ExpandableShadePercentSlider(percent: Int, onSettled: (Int) -> Unit) {
     )
 }
 
-/** -50..50 signed percent case for icon size (0 is the neutral/default size). */
+/** 0..200 percent case for icon size — the icon's actual size relative to normal, 100 being
+ *  neutral/default, smaller below and larger above. */
 @Composable
 fun ExpandableIconSizeSlider(percent: Int, onSettled: (Int) -> Unit) {
     ExpandableSlider(
         value = percent.toFloat(),
         onSettled = { onSettled(it.roundToInt()) },
-        valueRange = -50f..50f,
+        valueRange = 0f..200f,
         valueLabel = { stringResource(R.string.settings_icon_size_value, it.roundToInt()) }
     )
 }
@@ -172,7 +173,7 @@ fun ExpandableOptionalIconSizeSlider(percent: Int?, globalDefault: Int, onSettle
     ExpandableSlider(
         value = (percent ?: globalDefault).toFloat(),
         onSettled = { onSettled(it.roundToInt()) },
-        valueRange = -50f..50f,
+        valueRange = 0f..200f,
         valueLabel = {
             if (percent == null) stringResource(R.string.settings_element_color_auto_hint)
             else stringResource(R.string.settings_icon_size_value, it.roundToInt())

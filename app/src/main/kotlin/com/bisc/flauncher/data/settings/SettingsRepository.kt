@@ -64,9 +64,10 @@ class SettingsRepository @Inject constructor(
             ?: IconShape.ROUNDED_SQUARE
     }
 
-    // -50..50, 0 is the neutral/default size; each app's own override screen can still adjust its
-    // own icon individually on the same scale (see AppOverride.iconSizePercent).
-    val iconSizePercent: Flow<Int> = dataStore.data.map { prefs -> prefs[ICON_SIZE_PERCENT_KEY] ?: 0 }
+    // 0..200, the icon's actual size as a percent of its normal size — 100 is neutral/default,
+    // below shrinks, above grows; each app's own override screen can still adjust its own icon
+    // individually on the same scale (see AppOverride.iconSizePercent).
+    val iconSizePercent: Flow<Int> = dataStore.data.map { prefs -> prefs[ICON_SIZE_PERCENT_KEY] ?: 100 }
 
     // New elements (rows, folders) are created with this value; changing it also immediately
     // re-stamps every existing row/folder item to match (see PageContentRepository/FolderRepository
@@ -309,7 +310,7 @@ class SettingsRepository @Inject constructor(
     }
 
     suspend fun setIconSizePercent(percent: Int) {
-        dataStore.edit { it[ICON_SIZE_PERCENT_KEY] = percent.coerceIn(-50, 50) }
+        dataStore.edit { it[ICON_SIZE_PERCENT_KEY] = percent.coerceIn(0, 200) }
     }
 
     suspend fun setDefaultCornerRadiusPercent(percent: Int) {
@@ -566,7 +567,10 @@ class SettingsRepository @Inject constructor(
         private val ICON_PACK_KEY = stringPreferencesKey("active_icon_pack")
         private val FONT_KEY = stringPreferencesKey("font_preference")
         private val ICON_SHAPE_KEY = stringPreferencesKey("icon_shape")
-        private val ICON_SIZE_PERCENT_KEY = intPreferencesKey("icon_size_percent")
+        // Renamed from the old "icon_size_percent" key when the scale changed from a -50..50
+        // offset to a direct 0..200 percent, so a pre-existing stored offset is never misread as
+        // the new absolute percent — it just reads back as unset (100, the new default) instead.
+        private val ICON_SIZE_PERCENT_KEY = intPreferencesKey("icon_size_scale_percent")
         private val DEFAULT_CORNER_RADIUS_PERCENT_KEY = intPreferencesKey("default_corner_radius_percent")
         private val FOLDER_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("folder_hide_status_bar")
         private val FOLDER_HIDE_DOCK_KEY = booleanPreferencesKey("folder_hide_dock")

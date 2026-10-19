@@ -139,7 +139,7 @@ class HomeViewModel @Inject constructor(
         settingsRepository.iconShape.stateIn(viewModelScope, SharingStarted.Eagerly, IconShape.ROUNDED_SQUARE)
 
     val iconSizeScale: StateFlow<Float> =
-        settingsRepository.iconSizePercent.map { 1f + it / 100f }.stateIn(viewModelScope, SharingStarted.Eagerly, 1f)
+        settingsRepository.iconSizePercent.map { it / 100f }.stateIn(viewModelScope, SharingStarted.Eagerly, 1f)
 
     // The same global default Dock/Panel/widgets already read via their own row's cornerRadiusPercent
     // — used here for surfaces with no row of their own (search bar, app-overview card, A-Z rail,
@@ -377,14 +377,19 @@ class HomeViewModel @Inject constructor(
             if (query.isBlank() || !include) {
                 emptyList()
             } else {
+                // hiddenFromSearch off the table entirely, code or not — it's the Text-search
+                // toggle itself. Within what's left, SEARCH_CODE *replaces* name matching rather
+                // than adding to it: the app only turns up for the exact code, never by name.
                 val visible = apps.filter { overrides[it.componentName.flattenToString()]?.hiddenFromSearch != true }
-                val prefixMatches = visible.filter { matchesWordStart(it.label, query) }
-                    .sortedByDescending { it.label.startsWith(query.trim(), ignoreCase = true) }
-                val revealed = apps.filter { app ->
+                val nameMatches = visible.filter { app ->
+                    overrides[app.componentName.flattenToString()]?.revealMode != RevealMode.SEARCH_CODE &&
+                        matchesWordStart(app.label, query)
+                }.sortedByDescending { it.label.startsWith(query.trim(), ignoreCase = true) }
+                val codeMatches = visible.filter { app ->
                     val override = overrides[app.componentName.flattenToString()]
-                    override?.hiddenFromSearch == true && override.revealMode == RevealMode.SEARCH_CODE && override.revealCode == query
+                    override?.revealMode == RevealMode.SEARCH_CODE && override.revealCode == query
                 }
-                (prefixMatches + revealed).distinctBy { it.componentName }
+                (nameMatches + codeMatches).distinctBy { it.componentName }
             }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 

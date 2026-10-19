@@ -124,7 +124,7 @@ class MainActivity : ComponentActivity() {
             val iconSizeResolver = androidx.compose.runtime.remember(globalIconSizePercent, appOverridesForIconSize) {
                 { componentName: String ->
                     val percent = appOverridesForIconSize[componentName]?.iconSizePercent ?: globalIconSizePercent
-                    1f + percent / 100f
+                    percent / 100f
                 }
             }
             val navController = rememberNavController()

@@ -300,9 +300,10 @@
     <string name="settings_manage_apps_visibility_label">Visibility</string>
     <string name="settings_manage_apps_visibility_app_list_label">App list</string>
     <string name="settings_manage_apps_visibility_app_list_description">Also hides the app from app pickers. Placements on pages, in the dock and in folders remain.</string>
-    <string name="settings_manage_apps_visibility_search_label">Search</string>
-    <string name="settings_manage_apps_visibility_search_description">Hides the app from search results.</string>
+    <string name="settings_manage_apps_visibility_search_label">Text search</string>
+    <string name="settings_manage_apps_visibility_search_description">Hides the app from text search results.</string>
     <string name="settings_manage_apps_reveal_search_code">Reveal with search code</string>
+    <string name="settings_manage_apps_reveal_search_code_description">Findable only by typing the exact code below, instead of by name.</string>
     <string name="settings_manage_apps_reveal_code_hint">Search code</string>
     <string name="settings_manage_apps_save">Save</string>
 

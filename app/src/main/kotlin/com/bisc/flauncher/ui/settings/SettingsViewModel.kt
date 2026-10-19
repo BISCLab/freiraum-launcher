@@ -99,7 +99,7 @@ class SettingsViewModel @Inject constructor(
         repository.iconShape.stateIn(viewModelScope, SharingStarted.Eagerly, IconShape.ROUNDED_SQUARE)
 
     val iconSizePercent: StateFlow<Int> =
-        repository.iconSizePercent.stateIn(viewModelScope, SharingStarted.Eagerly, 0)
+        repository.iconSizePercent.stateIn(viewModelScope, SharingStarted.Eagerly, 100)
 
     val defaultCornerRadiusPercent: StateFlow<Int> =
         repository.defaultCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, 25)
@@ -481,7 +481,7 @@ class SettingsViewModel @Inject constructor(
     fun iconSizeScaleFor(componentName: String): Float {
         val override = appOverrides.value[componentName]?.iconSizePercent
         val percent = override ?: iconSizePercent.value
-        return 1f + percent / 100f
+        return percent / 100f
     }
 
     fun saveAppOverride(
@@ -493,7 +493,7 @@ class SettingsViewModel @Inject constructor(
         revealCode: String?
     ) {
         viewModelScope.launch {
-            val effectiveMode = if (hiddenFromSearch) revealMode else RevealMode.NONE
+            val effectiveMode = if (!hiddenFromSearch) revealMode else RevealMode.NONE
             val existing = appOverrides.value[componentName.flattenToString()]
             appOverrideRepository.save(
                 AppOverride(
@@ -532,7 +532,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             val key = componentName.flattenToString()
             val current = appOverrides.value[key] ?: AppOverride(key)
-            appOverrideRepository.save(current.copy(iconSizePercent = percent?.coerceIn(-50, 50)))
+            appOverrideRepository.save(current.copy(iconSizePercent = percent?.coerceIn(0, 200)))
         }
     }
 
