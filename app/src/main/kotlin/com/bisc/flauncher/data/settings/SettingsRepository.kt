@@ -339,6 +339,14 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[FOLDER_HIDE_DOCK_KEY] = hide }
     }
 
+    /** Default for whether folder items show a text label under their icon — used by any folder
+     *  that doesn't set its own [com.bisc.flauncher.data.model.Folder.showLabelsOverrideEnabled]. */
+    val folderShowLabels: Flow<Boolean> = dataStore.data.map { it[FOLDER_SHOW_LABELS_KEY] ?: false }
+
+    suspend fun setFolderShowLabels(show: Boolean) {
+        dataStore.edit { it[FOLDER_SHOW_LABELS_KEY] = show }
+    }
+
     /** One-shot command: hides the status bar on every screen (search, folders, every page — the
      *  Panel is part of the home page now, so its own pageHideStatusBar entry already covers it). */
     suspend fun setStatusBarHiddenEverywhere(pageIds: List<Long>, hidden: Boolean) {
@@ -562,6 +570,7 @@ class SettingsRepository @Inject constructor(
         private val DEFAULT_CORNER_RADIUS_PERCENT_KEY = intPreferencesKey("default_corner_radius_percent")
         private val FOLDER_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("folder_hide_status_bar")
         private val FOLDER_HIDE_DOCK_KEY = booleanPreferencesKey("folder_hide_dock")
+        private val FOLDER_SHOW_LABELS_KEY = booleanPreferencesKey("folder_show_labels")
         private val ACCENT_COLOR_KEY = intPreferencesKey("accent_color")
         private val CHARGING_ANIMATION_COLOR_KEY = intPreferencesKey("charging_animation_color")
         private val CHARGING_ANIMATION_ENABLED_KEY = booleanPreferencesKey("charging_animation_enabled")

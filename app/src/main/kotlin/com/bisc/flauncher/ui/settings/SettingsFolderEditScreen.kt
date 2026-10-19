@@ -85,24 +85,6 @@ private val PRESET_COLORS = listOf(
     "#FF4F378B", "#FFB3261E", "#FF386A20", "#FF9A5D00", "#FF00658F", "#FF6B5C00"
 )
 
-/** Turning the per-folder override on for the first time seeds it from the current global folder
- *  appearance instead of the entity's bare defaults, so the editor doesn't visibly jump to a
- *  different look the instant it's switched on. Turning it off just clears the flag — the stored
- *  override fields are left in place in case it's switched back on. */
-private fun toggleFolderAppearanceOverride(
-    viewModel: SettingsViewModel,
-    folderId: Long,
-    folder: com.bisc.flauncher.data.model.Folder,
-    globalAppearance: com.bisc.flauncher.data.model.ElementAppearance,
-    enabled: Boolean
-) {
-    if (enabled && !folder.appearanceOverrideEnabled) {
-        viewModel.setFolderAppearance(folderId, globalAppearance)
-    } else {
-        viewModel.setFolderAppearanceOverrideEnabled(folderId, enabled)
-    }
-}
-
 /** Edit page for a single folder. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -136,6 +118,10 @@ fun SettingsFolderEditScreen(
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
     var showAddChooser by remember { mutableStateOf(false) }
     var pendingRemoval by remember { mutableStateOf<com.bisc.flauncher.data.model.FolderItem?>(null) }
+    var pickingFolderIcon by remember { mutableStateOf(false) }
+    var appearanceOpen by remember { mutableStateOf(false) }
+    val showAddRow by remember(folderId) { viewModel.folderShowAddRow(folderId) }.collectAsState(initial = true)
+    val globalShowLabels by viewModel.folderShowLabels.collectAsState()
 
     val latestEdited by rememberUpdatedState(edited)
     val latestName by rememberUpdatedState(folder?.name)
@@ -149,7 +135,10 @@ fun SettingsFolderEditScreen(
     SettingsSubScreen(title = stringResource(R.string.settings_folder_edit_title), navController = navController, onBack = onBack) {
         if (folder == null) return@SettingsSubScreen
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+        Row(
+            modifier = Modifier.fillMaxWidth().clickable { pickingFolderIcon = true },
+            horizontalArrangement = Arrangement.Center
+        ) {
             FolderIcon(
                 folder = folder,
                 previewItems = folderItems.filter { it.folderId == folderId },
@@ -168,53 +157,12 @@ fun SettingsFolderEditScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        SettingsPreferenceGroup(title = stringResource(R.string.folder_icon_auto)) {
-            Row(
-                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { viewModel.setFolderIcon(folderId, FolderIconMode.AUTO_STACK) }) {
-                    Icon(imageVector = Icons.Filled.Apps, contentDescription = stringResource(R.string.folder_icon_auto))
-                }
-                PRESET_COLORS.forEach { hex ->
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .background(Color(android.graphics.Color.parseColor(hex)), CircleShape)
-                            .combinedClickable(onClick = { viewModel.setFolderIcon(folderId, FolderIconMode.CUSTOM_COLOR, color = hex) })
-                    )
-                }
-            }
-            SettingsPreference(
-                icon = Icons.Filled.Extension,
-                title = stringResource(R.string.settings_folder_icon_pack_label),
-                summary = if (folder.iconMode == FolderIconMode.ICON_PACK) {
-                    iconPacks.find { it.packageName == folder.iconPackPackage }?.label ?: folder.iconPackPackage
-                } else null,
-                onClick = { navController.navigate("settings/folder/$folderId/icon") }
-            )
-        }
-
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
-                title = stringResource(R.string.settings_folder_appearance_override_label),
-                info = stringResource(R.string.settings_folder_appearance_override_summary),
-                onClick = { toggleFolderAppearanceOverride(viewModel, folderId, folder, globalCardAppearance, !folder.appearanceOverrideEnabled) },
-                trailing = {
-                    Switch(
-                        checked = folder.appearanceOverrideEnabled,
-                        onCheckedChange = { toggleFolderAppearanceOverride(viewModel, folderId, folder, globalCardAppearance, it) }
-                    )
-                }
-            )
-        }
-        if (folder.appearanceOverrideEnabled) {
-            ElementAppearanceSection(
-                appearance = folder.appearanceOverride(),
-                onAppearanceChange = { viewModel.setFolderAppearance(folderId, it) },
-                styleGroupTitle = stringResource(R.string.settings_folder_appearance_override_label)
+                title = stringResource(R.string.settings_folder_appearance_label),
+                onClick = { appearanceOpen = true },
+                trailing = null
             )
         }
 
@@ -283,17 +231,6 @@ fun SettingsFolderEditScreen(
             )
         }
 
-        val showAddRow by remember(folderId) { viewModel.folderShowAddRow(folderId) }.collectAsState(initial = true)
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_folder_show_add_row_label),
-                info = stringResource(R.string.settings_folder_show_add_row_summary),
-                onClick = { viewModel.setFolderShowAddRow(folderId, !showAddRow) },
-                trailing = { androidx.compose.material3.Switch(checked = showAddRow, onCheckedChange = { viewModel.setFolderShowAddRow(folderId, it) }) }
-            )
-        }
-
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = Icons.Filled.DeleteOutline,
@@ -301,6 +238,80 @@ fun SettingsFolderEditScreen(
                 onClick = { confirmingDelete = true },
                 trailing = null
             )
+        }
+    }
+
+    if (appearanceOpen) {
+        val effectiveAppearance = if (folder?.appearanceOverrideEnabled == true) folder.appearanceOverride() else globalCardAppearance
+        val effectiveShowLabels = if (folder?.showLabelsOverrideEnabled == true) folder.showLabels else globalShowLabels
+        SettingsEditPage(title = stringResource(R.string.settings_folder_appearance_label), onDismiss = { appearanceOpen = false }) {
+            ElementAppearanceSection(
+                appearance = effectiveAppearance,
+                onAppearanceChange = { viewModel.setFolderAppearance(folderId, it) },
+                styleGroupTitle = stringResource(R.string.settings_folder_appearance_label)
+            )
+            if (folder?.appearanceOverrideEnabled == true) {
+                SettingsPreferenceGroup {
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(R.string.settings_folder_appearance_reset_label),
+                        onClick = { viewModel.setFolderAppearanceOverrideEnabled(folderId, false) },
+                        trailing = null
+                    )
+                }
+            }
+            SettingsPreferenceGroup {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_folder_show_add_row_label),
+                    info = stringResource(R.string.settings_folder_show_add_row_summary),
+                    onClick = { viewModel.setFolderShowAddRow(folderId, !showAddRow) },
+                    trailing = { Switch(checked = showAddRow, onCheckedChange = { viewModel.setFolderShowAddRow(folderId, it) }) }
+                )
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_element_show_labels_label),
+                    onClick = { viewModel.setFolderItemsShowLabels(folderId, !effectiveShowLabels) },
+                    trailing = { Switch(checked = effectiveShowLabels, onCheckedChange = { viewModel.setFolderItemsShowLabels(folderId, it) }) }
+                )
+            }
+        }
+    }
+
+    if (pickingFolderIcon) {
+        SettingsFixedDialog(title = stringResource(R.string.settings_app_icon_label), onDismiss = { pickingFolderIcon = false }) {
+            SettingsPreferenceGroup {
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { viewModel.setFolderIcon(folderId, FolderIconMode.AUTO_STACK); pickingFolderIcon = false }) {
+                        Icon(imageVector = Icons.Filled.Apps, contentDescription = stringResource(R.string.folder_icon_auto))
+                    }
+                    PRESET_COLORS.forEach { hex ->
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(Color(android.graphics.Color.parseColor(hex)), CircleShape)
+                                .combinedClickable(onClick = {
+                                    viewModel.setFolderIcon(folderId, FolderIconMode.CUSTOM_COLOR, color = hex)
+                                    pickingFolderIcon = false
+                                })
+                        )
+                    }
+                }
+            }
+            SettingsPreferenceGroup {
+                SettingsPreference(
+                    icon = Icons.Filled.Extension,
+                    title = stringResource(R.string.settings_folder_icon_pack_label),
+                    summary = if (folder?.iconMode == FolderIconMode.ICON_PACK) {
+                        iconPacks.find { it.packageName == folder.iconPackPackage }?.label ?: folder.iconPackPackage
+                    } else null,
+                    onClick = { pickingFolderIcon = false; navController.navigate("settings/folder/$folderId/icon") }
+                )
+            }
         }
     }
 

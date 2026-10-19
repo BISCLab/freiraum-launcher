@@ -194,6 +194,9 @@ class HomeViewModel @Inject constructor(
     val folderCardAppearance: StateFlow<ElementAppearance> =
         settingsRepository.folderCardAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
 
+    val folderShowLabels: StateFlow<Boolean> =
+        settingsRepository.folderShowLabels.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
     val searchAppearance: StateFlow<ElementAppearance> =
         settingsRepository.searchAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance())
 

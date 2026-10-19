@@ -190,6 +190,7 @@ fun HomeScreen(
     val sidebarPanelAppearance by viewModel.sidebarPanelAppearance.collectAsState()
     val folderHideDock by viewModel.folderHideDock.collectAsState()
     val folderCardAppearance by viewModel.folderCardAppearance.collectAsState()
+    val folderShowLabels by viewModel.folderShowLabels.collectAsState()
     val cornerRadiusPercent by viewModel.cornerRadiusPercent.collectAsState()
     val searchShowAzIndex by viewModel.searchShowAzIndex.collectAsState()
     val searchHideStatusBar by viewModel.searchHideStatusBar.collectAsState()
@@ -1146,7 +1147,8 @@ fun HomeScreen(
                 onAddMapTargetClick = { mapTargetPickerForFolderId = folderId },
                 onAddWebsiteClick = { websitePickerForFolderId = folderId },
                 onBack = viewModel::closeFolder,
-                cardAppearance = if (folder.appearanceOverrideEnabled) folder.appearanceOverride() else folderCardAppearance
+                cardAppearance = if (folder.appearanceOverrideEnabled) folder.appearanceOverride() else folderCardAppearance,
+                showLabels = if (folder.showLabelsOverrideEnabled) folder.showLabels else folderShowLabels
             )
         }
     }

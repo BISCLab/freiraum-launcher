@@ -111,6 +111,7 @@ fun FolderView(
     savedMapTargets: List<SavedMapTarget> = emptyList(),
     pinnedWebsites: List<PinnedWebsite> = emptyList(),
     showAddRow: Boolean = true,
+    showLabels: Boolean = false,
     loadIcon: (ComponentName) -> ImageBitmap?,
     loadPackIcon: (String, String) -> ImageBitmap? = { _, _ -> null },
     resolveLabel: (ComponentName) -> String = { "" },
@@ -197,7 +198,8 @@ fun FolderView(
                                                 onLongClick = { menuForItemId = entry.id },
                                                 onDismissMenu = { menuForItemId = null },
                                                 onRequestMove = { menuForItemId = null; movingItemId = entry.id },
-                                                onRequestRemove = { menuForItemId = null; pendingRemoval = entry }
+                                                onRequestRemove = { menuForItemId = null; pendingRemoval = entry },
+                                                showLabel = showLabels
                                             )
                                         }
                                     }
@@ -329,7 +331,8 @@ private fun FolderContentCell(
     onLongClick: () -> Unit,
     onDismissMenu: () -> Unit,
     onRequestMove: () -> Unit,
-    onRequestRemove: () -> Unit
+    onRequestRemove: () -> Unit,
+    showLabel: Boolean
 ) {
     Column(
         modifier = Modifier
@@ -364,27 +367,35 @@ private fun FolderContentCell(
                 val bitmap = rememberAppIcon(componentName, loadIcon)
                 val label = componentName?.let(resolveLabel).orEmpty()
                 if (bitmap != null) Image(bitmap = bitmap, contentDescription = label, modifier = Modifier.size(56.dp))
-                Spacer(Modifier.height(6.dp))
-                GridLabel(label)
+                if (showLabel) {
+                    Spacer(Modifier.height(6.dp))
+                    GridLabel(label)
+                }
             }
             GridItemType.SHORTCUT -> {
                 Icon(imageVector = Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, modifier = Modifier.size(56.dp))
-                Spacer(Modifier.height(6.dp))
-                GridLabel(item.payload.split("|").getOrNull(2)?.takeIf { it.isNotBlank() } ?: item.payload.substringBefore('|'))
+                if (showLabel) {
+                    Spacer(Modifier.height(6.dp))
+                    GridLabel(item.payload.split("|").getOrNull(2)?.takeIf { it.isNotBlank() } ?: item.payload.substringBefore('|'))
+                }
             }
             GridItemType.MAP_TARGET -> {
                 val targetId = remember(item.payload) { item.payload.toLongOrNull() }
                 val target = savedMapTargets.find { it.id == targetId }
                 Icon(imageVector = Icons.Filled.Place, contentDescription = null, modifier = Modifier.size(56.dp))
-                Spacer(Modifier.height(6.dp))
-                GridLabel(target?.label.orEmpty())
+                if (showLabel) {
+                    Spacer(Modifier.height(6.dp))
+                    GridLabel(target?.label.orEmpty())
+                }
             }
             GridItemType.WEBSITE -> {
                 val websiteId = remember(item.payload) { item.payload.toLongOrNull() }
                 val website = pinnedWebsites.find { it.id == websiteId }
                 Icon(imageVector = Icons.Filled.Language, contentDescription = null, modifier = Modifier.size(56.dp))
-                Spacer(Modifier.height(6.dp))
-                GridLabel(website?.label.orEmpty())
+                if (showLabel) {
+                    Spacer(Modifier.height(6.dp))
+                    GridLabel(website?.label.orEmpty())
+                }
             }
             GridItemType.FOLDER -> {
                 val folderId = remember(item.payload) { item.payload.toLongOrNull() }
@@ -396,8 +407,10 @@ private fun FolderContentCell(
                     loadPackIcon = loadPackIcon,
                     modifier = Modifier.size(56.dp)
                 )
-                Spacer(Modifier.height(6.dp))
-                GridLabel(childFolder?.name.orEmpty())
+                if (showLabel) {
+                    Spacer(Modifier.height(6.dp))
+                    GridLabel(childFolder?.name.orEmpty())
+                }
             }
             GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE, GridItemType.CONTACT, GridItemType.ACTION_BUTTON -> Unit
         }

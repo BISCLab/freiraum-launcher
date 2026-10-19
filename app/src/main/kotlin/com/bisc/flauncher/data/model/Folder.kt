@@ -27,7 +27,11 @@ data class Folder(
     val elementContentColor: Int? = null,
     // This folder's own grid shape — one column count per sub-row, comma-separated (e.g. "4,3"),
     // same idea as [PageRow.dockRowColumns]/[PageRow.panelRowColumns]. See [Folder.rows]/[Folder.withRows].
-    val rowColumns: String = "4"
+    val rowColumns: String = "4",
+    // Same override-vs-global pattern as [appearanceOverrideEnabled] — when false, this folder uses
+    // the shared global default (SettingsRepository.folderShowLabels) instead of [showLabels].
+    val showLabelsOverrideEnabled: Boolean = false,
+    val showLabels: Boolean = false
 )
 
 /** Parses [Folder.rowColumns] into one column count per sub-row; always at least one row. */
