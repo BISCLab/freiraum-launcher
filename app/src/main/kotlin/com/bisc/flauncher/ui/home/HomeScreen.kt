@@ -97,7 +97,7 @@ import com.bisc.flauncher.data.model.ContactInfo
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.appearance
-import com.bisc.flauncher.data.model.appearanceOverride
+import com.bisc.flauncher.data.model.effectiveAppearance
 import com.bisc.flauncher.data.model.dockRows
 import com.bisc.flauncher.data.model.panelRows
 import com.bisc.flauncher.data.model.WidgetKind
@@ -1147,7 +1147,7 @@ fun HomeScreen(
                 onAddMapTargetClick = { mapTargetPickerForFolderId = folderId },
                 onAddWebsiteClick = { websitePickerForFolderId = folderId },
                 onBack = viewModel::closeFolder,
-                cardAppearance = if (folder.appearanceOverrideEnabled) folder.appearanceOverride() else folderCardAppearance,
+                cardAppearance = folder.effectiveAppearance(folderCardAppearance),
                 showLabels = if (folder.showLabelsOverrideEnabled) folder.showLabels else folderShowLabels
             )
         }

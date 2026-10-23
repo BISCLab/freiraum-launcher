@@ -480,9 +480,15 @@ fun ElementBorderSection(appearance: ElementAppearance, onAppearanceChange: (Ele
  *  the same "Text color" already shown elsewhere for a row, so there's only one text-color
  *  setting per row rather than a second one specific to captions. */
 @Composable
-fun CaptionsSection(showLabels: Boolean, onShowLabelsChange: (Boolean) -> Unit, appearance: ElementAppearance, onAppearanceChange: (ElementAppearance) -> Unit) {
+fun CaptionsSection(
+    showLabels: Boolean,
+    onShowLabelsChange: (Boolean) -> Unit,
+    appearance: ElementAppearance,
+    onAppearanceChange: (ElementAppearance) -> Unit,
+    title: String? = null
+) {
     var colorExpanded by remember { mutableStateOf(false) }
-    SettingsPreferenceGroup {
+    SettingsPreferenceGroup(title = title) {
         SettingsPreference(
             icon = null,
             title = stringResource(R.string.settings_element_show_labels_label),

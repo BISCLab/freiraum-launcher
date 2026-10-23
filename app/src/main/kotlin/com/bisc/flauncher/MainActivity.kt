@@ -382,7 +382,20 @@ class MainActivity : ComponentActivity() {
                             SettingsFolderScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable("settings/folder/global") {
-                            com.bisc.flauncher.ui.settings.SettingsFolderGlobalScreen(navController = navController, onBack = { navController.popBackStack() })
+                            com.bisc.flauncher.ui.settings.SettingsFolderGlobalScreen(
+                                navController = navController,
+                                onBack = { navController.popBackStack() },
+                                onNavigate = { sub -> navController.navigate("settings/folder/global/$sub") }
+                            )
+                        }
+                        composable("settings/folder/global/appearance") {
+                            com.bisc.flauncher.ui.settings.SettingsFolderGlobalAppearanceScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable("settings/folder/global/border") {
+                            com.bisc.flauncher.ui.settings.SettingsFolderGlobalBorderScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable("settings/folder/global/visibility") {
+                            com.bisc.flauncher.ui.settings.SettingsFolderGlobalVisibilityScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable(
                             "settings/folder/{folderId}",

@@ -67,7 +67,8 @@ import com.bisc.flauncher.data.model.FolderIconMode
 import com.bisc.flauncher.data.model.GridItemType
 import com.bisc.flauncher.data.model.IconPackIcon
 import com.bisc.flauncher.data.model.RowEntry
-import com.bisc.flauncher.data.model.appearanceOverride
+import com.bisc.flauncher.data.model.borderAppearance
+import com.bisc.flauncher.data.model.contentAppearance
 import com.bisc.flauncher.data.model.rows
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.CreateNewFolder
@@ -120,6 +121,8 @@ fun SettingsFolderEditScreen(
     var pendingRemoval by remember { mutableStateOf<com.bisc.flauncher.data.model.FolderItem?>(null) }
     var pickingFolderIcon by remember { mutableStateOf(false) }
     var appearanceOpen by remember { mutableStateOf(false) }
+    var borderOpen by remember { mutableStateOf(false) }
+    var visibilityOpen by remember { mutableStateOf(false) }
     val showAddRow by remember(folderId) { viewModel.folderShowAddRow(folderId) }.collectAsState(initial = true)
     val globalShowLabels by viewModel.folderShowLabels.collectAsState()
 
@@ -162,6 +165,18 @@ fun SettingsFolderEditScreen(
                 icon = null,
                 title = stringResource(R.string.settings_folder_appearance_label),
                 onClick = { appearanceOpen = true },
+                trailing = null
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_element_border_label),
+                onClick = { borderOpen = true },
+                trailing = null
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_folder_visibility_label),
+                onClick = { visibilityOpen = true },
                 trailing = null
             )
         }
@@ -242,14 +257,10 @@ fun SettingsFolderEditScreen(
     }
 
     if (appearanceOpen) {
-        val effectiveAppearance = if (folder?.appearanceOverrideEnabled == true) folder.appearanceOverride() else globalCardAppearance
+        val effectiveContentAppearance = if (folder?.appearanceOverrideEnabled == true) folder.contentAppearance() else globalCardAppearance
         val effectiveShowLabels = if (folder?.showLabelsOverrideEnabled == true) folder.showLabels else globalShowLabels
         SettingsEditPage(title = stringResource(R.string.settings_folder_appearance_label), onDismiss = { appearanceOpen = false }) {
-            ElementAppearanceSection(
-                appearance = effectiveAppearance,
-                onAppearanceChange = { viewModel.setFolderAppearance(folderId, it) },
-                styleGroupTitle = stringResource(R.string.settings_folder_appearance_label)
-            )
+            ElementBackgroundSection(appearance = effectiveContentAppearance, onAppearanceChange = { viewModel.setFolderAppearance(folderId, it) })
             if (folder?.appearanceOverrideEnabled == true) {
                 SettingsPreferenceGroup {
                     SettingsPreference(
@@ -260,6 +271,35 @@ fun SettingsFolderEditScreen(
                     )
                 }
             }
+            CaptionsSection(
+                showLabels = effectiveShowLabels,
+                onShowLabelsChange = { viewModel.setFolderItemsShowLabels(folderId, it) },
+                appearance = effectiveContentAppearance,
+                onAppearanceChange = { viewModel.setFolderAppearance(folderId, it) },
+                title = stringResource(R.string.settings_captions_label)
+            )
+        }
+    }
+
+    if (borderOpen) {
+        val effectiveBorderAppearance = if (folder?.borderOverrideEnabled == true) folder.borderAppearance() else globalCardAppearance
+        SettingsEditPage(title = stringResource(R.string.settings_element_border_label), onDismiss = { borderOpen = false }) {
+            ElementBorderSection(appearance = effectiveBorderAppearance, onAppearanceChange = { viewModel.setFolderBorderAppearance(folderId, it) })
+            if (folder?.borderOverrideEnabled == true) {
+                SettingsPreferenceGroup {
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(R.string.settings_folder_border_reset_label),
+                        onClick = { viewModel.setFolderBorderOverrideEnabled(folderId, false) },
+                        trailing = null
+                    )
+                }
+            }
+        }
+    }
+
+    if (visibilityOpen) {
+        SettingsEditPage(title = stringResource(R.string.settings_folder_visibility_label), onDismiss = { visibilityOpen = false }) {
             SettingsPreferenceGroup {
                 SettingsPreference(
                     icon = null,
@@ -267,12 +307,6 @@ fun SettingsFolderEditScreen(
                     info = stringResource(R.string.settings_folder_show_add_row_summary),
                     onClick = { viewModel.setFolderShowAddRow(folderId, !showAddRow) },
                     trailing = { Switch(checked = showAddRow, onCheckedChange = { viewModel.setFolderShowAddRow(folderId, it) }) }
-                )
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_element_show_labels_label),
-                    onClick = { viewModel.setFolderItemsShowLabels(folderId, !effectiveShowLabels) },
-                    trailing = { Switch(checked = effectiveShowLabels, onCheckedChange = { viewModel.setFolderItemsShowLabels(folderId, it) }) }
                 )
             }
         }
