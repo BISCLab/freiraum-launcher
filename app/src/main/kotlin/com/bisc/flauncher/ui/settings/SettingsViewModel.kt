@@ -173,6 +173,13 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.hideFolderAddRowEverywhere(folders.value.map { it.id }) }
     }
 
+    val folderShowAddRowDefault: StateFlow<Boolean> =
+        repository.folderShowAddRowDefault.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    fun setFolderShowAddRowDefault(show: Boolean) {
+        viewModelScope.launch { repository.setFolderShowAddRowDefault(show) }
+    }
+
     val folders: StateFlow<List<com.bisc.flauncher.data.model.Folder>> =
         folderRepository.folders.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
@@ -318,6 +325,14 @@ class SettingsViewModel @Inject constructor(
 
     fun setFolderAppearance(folderId: Long, appearance: ElementAppearance) {
         viewModelScope.launch { folderRepository.setFolderAppearanceById(folderId, appearance) }
+    }
+
+    fun setFolderBorderOverrideEnabled(folderId: Long, enabled: Boolean) {
+        viewModelScope.launch { folderRepository.setFolderBorderOverrideEnabledById(folderId, enabled) }
+    }
+
+    fun setFolderBorderAppearance(folderId: Long, appearance: ElementAppearance) {
+        viewModelScope.launch { folderRepository.setFolderBorderAppearanceById(folderId, appearance) }
     }
 
     fun setFolderRowColumns(folderId: Long, rows: List<Int>) {

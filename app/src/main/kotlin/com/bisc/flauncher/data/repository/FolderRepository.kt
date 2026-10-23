@@ -10,7 +10,8 @@ import com.bisc.flauncher.data.model.FolderItem
 import com.bisc.flauncher.data.model.GridItemType
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.model.withAppearance
-import com.bisc.flauncher.data.model.withAppearanceOverride
+import com.bisc.flauncher.data.model.withBorderAppearance
+import com.bisc.flauncher.data.model.withContentAppearance
 import com.bisc.flauncher.data.model.withRows
 import com.bisc.flauncher.data.settings.SettingsRepository
 import com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor
@@ -76,7 +77,15 @@ class FolderRepository @Inject constructor(
     }
 
     suspend fun setFolderAppearanceById(id: Long, appearance: ElementAppearance) {
-        folderDao.get(id)?.let { folderDao.update(it.withAppearanceOverride(appearance).copy(appearanceOverrideEnabled = true)) }
+        folderDao.get(id)?.let { folderDao.update(it.withContentAppearance(appearance).copy(appearanceOverrideEnabled = true)) }
+    }
+
+    suspend fun setFolderBorderOverrideEnabledById(id: Long, enabled: Boolean) {
+        folderDao.get(id)?.let { folderDao.update(it.copy(borderOverrideEnabled = enabled)) }
+    }
+
+    suspend fun setFolderBorderAppearanceById(id: Long, appearance: ElementAppearance) {
+        folderDao.get(id)?.let { folderDao.update(it.withBorderAppearance(appearance).copy(borderOverrideEnabled = true)) }
     }
 
     suspend fun setFolderRowColumnsById(id: Long, rows: List<Int>) {

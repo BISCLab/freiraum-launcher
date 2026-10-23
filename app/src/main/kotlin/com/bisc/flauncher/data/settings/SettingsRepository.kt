@@ -88,9 +88,20 @@ class SettingsRepository @Inject constructor(
         prefs[ACCENT_COLOR_KEY] ?: DEFAULT_ACCENT_COLOR
     }
 
-    fun folderShowAddRow(folderId: Long): Flow<Boolean> = dataStore.data.map { it[folderShowAddRowKey(folderId)] ?: true }
+    fun folderShowAddRow(folderId: Long): Flow<Boolean> =
+        dataStore.data.map { prefs -> prefs[folderShowAddRowKey(folderId)] ?: (prefs[FOLDER_SHOW_ADD_ROW_DEFAULT_KEY] ?: true) }
 
     private fun folderShowAddRowKey(folderId: Long) = booleanPreferencesKey("folder_show_add_row_$folderId")
+
+    /** Persistent default for whether a not-yet-overridden folder shows its own "Add …" row — unlike
+     *  [hideFolderAddRowEverywhere], which only mass-writes the per-folder keys that already exist,
+     *  this is read by [folderShowAddRow] as the fallback for folders with no per-folder key set yet,
+     *  including ones created after this default is changed. */
+    val folderShowAddRowDefault: Flow<Boolean> = dataStore.data.map { it[FOLDER_SHOW_ADD_ROW_DEFAULT_KEY] ?: true }
+
+    suspend fun setFolderShowAddRowDefault(show: Boolean) {
+        dataStore.edit { it[FOLDER_SHOW_ADD_ROW_DEFAULT_KEY] = show }
+    }
 
     val chargingAnimationColor: Flow<Int> = dataStore.data.map { it[CHARGING_ANIMATION_COLOR_KEY] ?: 0xFF34D058.toInt() }
 
@@ -575,6 +586,7 @@ class SettingsRepository @Inject constructor(
         private val FOLDER_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("folder_hide_status_bar")
         private val FOLDER_HIDE_DOCK_KEY = booleanPreferencesKey("folder_hide_dock")
         private val FOLDER_SHOW_LABELS_KEY = booleanPreferencesKey("folder_show_labels")
+        private val FOLDER_SHOW_ADD_ROW_DEFAULT_KEY = booleanPreferencesKey("folder_show_add_row_default")
         private val ACCENT_COLOR_KEY = intPreferencesKey("accent_color")
         private val CHARGING_ANIMATION_COLOR_KEY = intPreferencesKey("charging_animation_color")
         private val CHARGING_ANIMATION_ENABLED_KEY = booleanPreferencesKey("charging_animation_enabled")

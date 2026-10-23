@@ -176,6 +176,7 @@
     <string name="settings_element_text_color_label">Schriftfarbe</string>
     <string name="settings_element_border_label">Rahmen</string>
     <string name="settings_element_show_labels_label">Beschriftung anzeigen</string>
+    <string name="settings_captions_label">Beschriftung</string>
 
     <string name="settings_section_elements">Elemente</string>
     <string name="settings_card_elements_subtitle">Apps, Ordner, Adressen, Links, Aktionsbuttons</string>
@@ -276,8 +277,10 @@
     <string name="settings_folder_global_subtitle">Aussehen, Rahmen und Sichtbarkeit für alle Ordner</string>
     <string name="settings_folder_appearance_label">Aussehen</string>
     <string name="settings_folder_appearance_reset_label">Auf globales Aussehen zurücksetzen</string>
+    <string name="settings_folder_border_reset_label">Auf globalen Rahmen zurücksetzen</string>
     <string name="settings_folder_visibility_label">Sichtbarkeit</string>
     <string name="settings_folder_show_add_row_label">Zeile „Hinzufügen …“ anzeigen</string>
+    <string name="settings_folder_show_add_row_default_label">Zeile „Hinzufügen …“ standardmäßig anzeigen</string>
     <string name="settings_folder_show_add_row_summary">Zeile mit den Schaltflächen zum Hinzufügen von App, Verknüpfung, Widget, Ort, Website oder Unterordner am unteren Rand eines geöffneten Ordners.</string>
     <string name="settings_folder_show_add_row_everywhere_off">Zeile „Hinzufügen …“ überall ausblenden</string>
     <string name="settings_folder_show_add_row_everywhere_off_summary">Blendet die Zeile „Hinzufügen …“ bei allen aktuell vorhandenen Ordnern aus. Danach kann sie pro Ordner einzeln wieder eingeschaltet werden.</string>
