@@ -120,17 +120,6 @@ fun SettingsAppsScreen(navController: NavController, onBack: () -> Unit, onNavig
             }
             item { Spacer24() }
 
-            item {
-                OutlinedTextField(
-                    value = filter,
-                    onValueChange = { filter = it },
-                    placeholder = { Text(stringResource(R.string.settings_manage_apps_search_hint)) },
-                    singleLine = true,
-                    shape = SettingsTextFieldShape,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-                )
-            }
-
             if (customizedApps.isNotEmpty()) {
                 item { SettingsGroupLabel(stringResource(R.string.settings_manage_apps_customized_label)) }
                 itemsIndexed(customizedApps, key = { _, app -> app.componentName.flattenToString() }) { index, app ->
@@ -152,6 +141,17 @@ fun SettingsAppsScreen(navController: NavController, onBack: () -> Unit, onNavig
                     } else {
                         stringResource(R.string.settings_manage_apps_all_label, remainingApps.size)
                     }
+                )
+            }
+
+            item {
+                OutlinedTextField(
+                    value = filter,
+                    onValueChange = { filter = it },
+                    placeholder = { Text(stringResource(R.string.settings_manage_apps_search_hint)) },
+                    singleLine = true,
+                    shape = SettingsTextFieldShape,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
             if (remainingApps.isEmpty()) {
