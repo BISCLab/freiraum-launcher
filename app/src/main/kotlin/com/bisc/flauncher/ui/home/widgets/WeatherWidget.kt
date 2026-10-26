@@ -80,7 +80,7 @@ private const val MAX_DAYS = 7
 fun WeatherWidget(
     modifier: Modifier = Modifier,
     appearance: ElementAppearance = ElementAppearance(),
-    cornerRadiusPercent: Int = 25,
+    cornerRadiusPercent: Int = com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT,
     horizontalMargin: Dp = 0.dp,
     viewModel: HomeViewModel = hiltViewModel()
 ) {

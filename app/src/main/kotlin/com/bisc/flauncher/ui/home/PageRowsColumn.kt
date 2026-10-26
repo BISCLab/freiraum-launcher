@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import com.bisc.flauncher.data.model.RowEntry
 import com.bisc.flauncher.data.model.Folder
@@ -45,7 +44,6 @@ fun PageRowsColumn(
     onExecuteAction: (GestureAction) -> Unit = {},
     iconShape: IconShape = IconShape.ROUNDED_SQUARE,
     iconSizeScale: Float = 1f,
-    accentColor: Color = Color(0xFF3B82F6),
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -70,8 +68,7 @@ fun PageRowsColumn(
                     onOpenPageLink = onOpenPageLink,
                     onExecuteAction = onExecuteAction,
                     iconShape = iconShape,
-                    iconSizeScale = iconSizeScale,
-                    accentColor = accentColor
+                    iconSizeScale = iconSizeScale
                 )
             }
         }

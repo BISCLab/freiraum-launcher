@@ -120,6 +120,7 @@ class MainActivity : ComponentActivity() {
             val globalIconShape by settingsVm.iconShape.collectAsState()
             val appOverridesForIconSize by settingsVm.appOverrides.collectAsState()
             val showSettingsTips by settingsVm.showSettingsTips.collectAsState()
+            val accentColor by settingsVm.accentColor.collectAsState()
             // New lambda identity whenever either input changes, so LocalIconSizeResolver consumers
             // (AppIconCell) recompose — a StateFlow's plain .value read wouldn't do that on its own.
             val iconSizeResolver = androidx.compose.runtime.remember(globalIconSizePercent, appOverridesForIconSize) {
@@ -154,7 +155,7 @@ class MainActivity : ComponentActivity() {
                 com.bisc.flauncher.ui.home.LocalIconShape provides globalIconShape,
                 com.bisc.flauncher.ui.settings.LocalShowSettingsTips provides showSettingsTips
             ) {
-            FLauncherTheme(themePreference = theme, fontPreference = font) {
+            FLauncherTheme(themePreference = theme, fontPreference = font, accentColor = accentColor) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     NavHost(navController = navController, startDestination = "home") {
                         composable("home") {
@@ -233,10 +234,6 @@ class MainActivity : ComponentActivity() {
                                             navController.navigate("settings/app_overview")
                                         page.kind == com.bisc.flauncher.data.model.LauncherPageKind.SEARCH ->
                                             navController.navigate("settings/search")
-                                        // SIDEBAR (the Panel's page identity) is filtered out of this
-                                        // list — its settings live under Home > Panel instead, since
-                                        // it's a Home-page bookend, not a standalone page to configure.
-                                        page.kind == com.bisc.flauncher.data.model.LauncherPageKind.SIDEBAR -> Unit
                                     }
                                 },
                                 onOpenIcon = { pageId -> navController.navigate("settings/pages/$pageId/icon") }
@@ -412,7 +409,20 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("settings/app_overview/appearance") {
-                            com.bisc.flauncher.ui.settings.SettingsAppOverviewAppearanceScreen(navController = navController, onBack = { navController.popBackStack() })
+                            com.bisc.flauncher.ui.settings.SettingsAppOverviewAppearanceHubScreen(
+                                navController = navController,
+                                onBack = { navController.popBackStack() },
+                                onNavigate = { sub -> navController.navigate("settings/app_overview/$sub") }
+                            )
+                        }
+                        composable("settings/app_overview/page") {
+                            com.bisc.flauncher.ui.settings.SettingsAppOverviewPageScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable("settings/app_overview/search_button") {
+                            com.bisc.flauncher.ui.settings.SettingsAppOverviewSearchButtonScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable("settings/app_overview/behavior") {
+                            com.bisc.flauncher.ui.settings.SettingsAppOverviewBehaviorScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable("settings/app_overview/section_letters") {
                             com.bisc.flauncher.ui.settings.SettingsAppOverviewSectionLettersScreen(navController = navController, onBack = { navController.popBackStack() })
@@ -433,8 +443,15 @@ class MainActivity : ComponentActivity() {
                                 onNavigate = { route -> navController.navigate("settings/apps/$route") }
                             )
                         }
-                        composable("settings/apps/global") {
+                        composable("settings/appearance/icons") {
                             com.bisc.flauncher.ui.settings.SettingsAppsGlobalScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable("settings/system") {
+                            com.bisc.flauncher.ui.settings.SettingsSystemScreen(
+                                navController = navController,
+                                onBack = { navController.popBackStack() },
+                                onNavigate = { route -> navController.navigate("settings/$route") }
+                            )
                         }
                         composable("settings/folder") {
                             SettingsFolderScreen(navController = navController, onBack = { navController.popBackStack() })

@@ -71,9 +71,7 @@ class SettingsRepository @Inject constructor(
     // re-stamps every existing row/folder item to match (see PageContentRepository/FolderRepository
     // .applyCornerRadiusToAll, called from SettingsViewModel.setDefaultCornerRadiusPercent) — each
     // element's own Appearance screen can still override it individually afterwards.
-    val defaultCornerRadiusPercent: Flow<Int> = dataStore.data.map { prefs -> prefs[DEFAULT_CORNER_RADIUS_PERCENT_KEY] ?: 25 }
-
-    val sidebarPanelAppearance: Flow<ElementAppearance> = elementAppearanceFor("sidebar_panel", ElementAppearance(borderEnabled = true))
+    val defaultCornerRadiusPercent: Flow<Int> = dataStore.data.map { prefs -> prefs[DEFAULT_CORNER_RADIUS_PERCENT_KEY] ?: com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT }
 
     val folderCardAppearance: Flow<ElementAppearance> = elementAppearanceFor("folder_card", ElementAppearance(borderEnabled = true))
 
@@ -82,14 +80,22 @@ class SettingsRepository @Inject constructor(
      *  redesign: the screen has no more layered boxes, just one themed fill behind everything). */
     val searchAppearance: Flow<ElementAppearance> = elementAppearanceFor("search_appearance", ElementAppearance())
 
+    /** The global accent color (Design). The app list's scroll bubble and the charging animation
+     *  follow it unless they have their own color set (null below = follow this one). */
     val accentColor: Flow<Int> = dataStore.data.map { prefs ->
         prefs[ACCENT_COLOR_KEY] ?: DEFAULT_ACCENT_COLOR
     }
 
-    val chargingAnimationColor: Flow<Int> = dataStore.data.map { it[CHARGING_ANIMATION_COLOR_KEY] ?: 0xFF34D058.toInt() }
+    val appListAccentColor: Flow<Int?> = dataStore.data.map { it[APP_LIST_ACCENT_COLOR_KEY] }
 
-    suspend fun setChargingAnimationColor(color: Int) {
-        dataStore.edit { it[CHARGING_ANIMATION_COLOR_KEY] = color }
+    suspend fun setAppListAccentColor(color: Int?) {
+        dataStore.edit { if (color == null) it.remove(APP_LIST_ACCENT_COLOR_KEY) else it[APP_LIST_ACCENT_COLOR_KEY] = color }
+    }
+
+    val chargingAnimationColor: Flow<Int?> = dataStore.data.map { it[CHARGING_ANIMATION_COLOR_KEY] }
+
+    suspend fun setChargingAnimationColor(color: Int?) {
+        dataStore.edit { if (color == null) it.remove(CHARGING_ANIMATION_COLOR_KEY) else it[CHARGING_ANIMATION_COLOR_KEY] = color }
     }
 
     val chargingAnimationEnabled: Flow<Boolean> = dataStore.data.map { it[CHARGING_ANIMATION_ENABLED_KEY] ?: true }
@@ -133,6 +139,13 @@ class SettingsRepository @Inject constructor(
     val searchResultsAppearance: Flow<ElementAppearance?> = customElementAppearanceFor(SEARCH_RESULTS_PREFIX, ElementAppearance())
 
     suspend fun setSearchResultsAppearance(appearance: ElementAppearance) = setElementAppearanceFor(SEARCH_RESULTS_PREFIX, appearance)
+
+    /** Off by default: the cards keep the same fine side margin as every other element. */
+    val searchResultsEdgeToEdge: Flow<Boolean> = dataStore.data.map { it[SEARCH_RESULTS_EDGE_TO_EDGE_KEY] ?: false }
+
+    suspend fun setSearchResultsEdgeToEdge(edgeToEdge: Boolean) {
+        dataStore.edit { it[SEARCH_RESULTS_EDGE_TO_EDGE_KEY] = edgeToEdge }
+    }
 
     /** Null = fully rounded, the cards' original look. */
     val searchResultsCornerRadiusPercent: Flow<Int?> = dataStore.data.map { it[SEARCH_RESULTS_CORNER_RADIUS_KEY] }
@@ -327,7 +340,7 @@ class SettingsRepository @Inject constructor(
 
     fun gestureAction(gesture: HomeGesture): Flow<GestureAction> = dataStore.data.map { prefs ->
         // No more hardcoded per-gesture fallback here — this repository has no page-id knowledge,
-        // so the real SWIPE_UP/SWIPE_DOWN defaults (pointing at the App overview/Sidebar pages) are
+        // so the real SWIPE_UP default (pointing at the App overview page) is
         // seeded once, with real ids, by PageContentRepository.ensureSeeded() instead.
         val type = prefs[gestureTypeKey(gesture)]?.let { runCatching { GestureActionType.valueOf(it) }.getOrNull() }
             ?: GestureActionType.NONE
@@ -445,13 +458,7 @@ class SettingsRepository @Inject constructor(
 
     suspend fun resetAppListSearchButtonAppearance() = resetElementAppearanceFor("app_list_search_button")
 
-    suspend fun setSidebarPanelAppearance(appearance: ElementAppearance) = setElementAppearanceFor("sidebar_panel", appearance)
-
     suspend fun setFolderCardAppearance(appearance: ElementAppearance) = setElementAppearanceFor("folder_card", appearance)
-
-    suspend fun setQuickOverviewBackground(config: BackgroundConfig) = setBackgroundConfigFor("quick_overview", config)
-
-    suspend fun clearQuickOverviewBackground() = clearBackgroundConfigFor("quick_overview")
 
     suspend fun setSearchAppearance(appearance: ElementAppearance) = setElementAppearanceFor("search_appearance", appearance)
 
@@ -591,7 +598,7 @@ class SettingsRepository @Inject constructor(
     companion object {
         private const val GLOBAL_BACKGROUND_KEY = "global"
         const val SEARCH_BACKGROUND_KEY = "search_page"
-        private val DEFAULT_ACCENT_COLOR = 0xFF3B82F6.toInt()
+        private val DEFAULT_ACCENT_COLOR = com.bisc.flauncher.ui.theme.DEFAULT_ACCENT_COLOR
 
         private val THEME_KEY = stringPreferencesKey("theme")
         private val APP_OVERVIEW_HANDEDNESS_KEY = stringPreferencesKey("app_overview_handedness")
@@ -608,6 +615,7 @@ class SettingsRepository @Inject constructor(
         private val FOLDER_SHOW_LABELS_KEY = booleanPreferencesKey("folder_show_labels")
         private val ACCENT_COLOR_KEY = intPreferencesKey("accent_color")
         private val CHARGING_ANIMATION_COLOR_KEY = intPreferencesKey("charging_animation_color")
+        private val APP_LIST_ACCENT_COLOR_KEY = intPreferencesKey("app_list_accent_color")
         private val CHARGING_ANIMATION_ENABLED_KEY = booleanPreferencesKey("charging_animation_enabled")
         private val SEARCH_SHOW_AZ_INDEX_KEY = booleanPreferencesKey("search_show_az_index")
         private val SEARCH_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("search_hide_status_bar")
@@ -624,6 +632,7 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_BAR_CORNER_RADIUS_KEY = intPreferencesKey("search_bar_corner_radius_percent")
         private const val SEARCH_RESULTS_PREFIX = "search_results"
         private val SEARCH_RESULTS_CORNER_RADIUS_KEY = intPreferencesKey("search_results_corner_radius_percent")
+        private val SEARCH_RESULTS_EDGE_TO_EDGE_KEY = booleanPreferencesKey("search_results_edge_to_edge")
         private val SEARCH_KEYBOARD_CAP_ENABLED_KEY = booleanPreferencesKey("search_keyboard_cap_enabled")
         private val SEARCH_KEYBOARD_CAP_COLOR_KEY = intPreferencesKey("search_keyboard_cap_color")
         private val SEARCH_KEYBOARD_CAP_CORNER_RADIUS_KEY = intPreferencesKey("search_keyboard_cap_corner_radius_percent")

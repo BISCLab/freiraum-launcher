@@ -103,18 +103,7 @@ fun SettingsAppsScreen(navController: NavController, onBack: () -> Unit, onNavig
             modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            item {
-                SettingsPreferenceGroup {
-                    SettingsPreference(
-                        icon = null,
-                        title = stringResource(R.string.settings_apps_global_label),
-                        summary = stringResource(R.string.settings_apps_global_subtitle),
-                        onClick = { onNavigate("global") }
-                    )
-                }
-            }
-            item { Spacer24() }
-
+            // The icon presets every app shares (shape, size, pack) live under Design → Icons.
             if (customizedApps.isNotEmpty()) {
                 item { SettingsGroupLabel(stringResource(R.string.settings_manage_apps_customized_label)) }
                 itemsIndexed(customizedApps, key = { _, app -> app.componentName.flattenToString() }) { index, app ->

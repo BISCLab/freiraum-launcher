@@ -34,7 +34,7 @@ data class FolderItem(
     val elementOpacity: Float = 1f,
     val borderEnabled: Boolean = false,
     // 0 = sharp 90° corners, 100 = fully rounded — see PageRow.cornerRadiusPercent.
-    val cornerRadiusPercent: Int = 25,
+    val cornerRadiusPercent: Int = com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT,
     val elementBorderColor: Int? = null,
     val elementBorderWidth: Float = 1f,
     val elementContentColor: Int? = null

@@ -171,14 +171,14 @@ fun HomeScreen(
     val searchBarCornerRadiusPercent by viewModel.searchBarCornerRadiusPercent.collectAsState()
     val searchResultsAppearance by viewModel.searchResultsAppearance.collectAsState()
     val searchResultsCornerRadiusPercent by viewModel.searchResultsCornerRadiusPercent.collectAsState()
+    val searchResultsEdgeToEdge by viewModel.searchResultsEdgeToEdge.collectAsState()
     val searchKeyboardCapEnabled by viewModel.searchKeyboardCapEnabled.collectAsState()
     val searchKeyboardCapColor by viewModel.searchKeyboardCapColor.collectAsState()
     val searchKeyboardCapCornerRadiusPercent by viewModel.searchKeyboardCapCornerRadiusPercent.collectAsState()
     val searchKeyboardAutoOpen by viewModel.searchKeyboardAutoOpen.collectAsState()
     val appListSearchButtonAppearance by viewModel.appListSearchButtonAppearance.collectAsState()
     val appListShowSearchButton by viewModel.appListShowSearchButton.collectAsState()
-    val accentColor by viewModel.accentColor.collectAsState()
-    val sidebarPanelAppearance by viewModel.sidebarPanelAppearance.collectAsState()
+    val appListAccentColor by viewModel.appListAccentColor.collectAsState()
     val folderHideDock by viewModel.folderHideDock.collectAsState()
     val folderCardAppearance by viewModel.folderCardAppearance.collectAsState()
     val folderShowLabels by viewModel.folderShowLabels.collectAsState()
@@ -324,7 +324,6 @@ fun HomeScreen(
             com.bisc.flauncher.data.model.LauncherPageKind.ROWS -> openPageById(pageId)
             com.bisc.flauncher.data.model.LauncherPageKind.APP_LIST -> viewModel.openAppList()
             com.bisc.flauncher.data.model.LauncherPageKind.SEARCH -> viewModel.openSearch()
-            com.bisc.flauncher.data.model.LauncherPageKind.SIDEBAR -> viewModel.openOverview()
         }
     }
     // An Action button's action: open a page (same dispatch as a plain page-link entry), trigger
@@ -561,7 +560,6 @@ fun HomeScreen(
                                 onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) },
                                 iconShape = iconShape,
                                 iconSizeScale = iconSizeScale,
-                                accentColor = Color(accentColor),
                                 modifier = contentModifier.graphicsLayer { alpha = pageContentAlpha }
                             ) }
                     }
@@ -750,14 +748,14 @@ fun HomeScreen(
             // Top square — flush and seamless against the screen's own top edge, no gap at the device's
             // rounded corners. Bottom stays rounded (the panel's "resting" edge, not attached to
             // anything) — the percent scales how far towards the 28dp max it goes, same as the Dock.
-            val panelCornerRadius = 28.dp * ((homePanelRow?.cornerRadiusPercent ?: 25).coerceIn(0, 100) / 100f)
+            val panelCornerRadius = 28.dp * ((homePanelRow?.cornerRadiusPercent ?: com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT).coerceIn(0, 100) / 100f)
             val panelShape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = panelCornerRadius, bottomEnd = panelCornerRadius)
             val panelRowShape = homePanelRow?.panelRows() ?: listOf(4, 4, 4)
             // A fixed shape the user picked up front (one column count per row), not an estimate
             // from content — predictable size that doesn't jump around as entries are added/removed,
             // same idea as the dock's own fixed pillMaxEntries width.
             val panelHeight = (96.dp * panelRowShape.size + 64.dp).coerceIn(140.dp, maxHeight)
-            val panelAppearance = homePanelRow?.appearance() ?: sidebarPanelAppearance
+            val panelAppearance = homePanelRow?.appearance() ?: com.bisc.flauncher.data.model.ElementAppearance(borderEnabled = true)
             val panelBorderColor = resolveElementColors(panelAppearance).borderColor
 
             AnimatedVisibility(
@@ -885,7 +883,7 @@ fun HomeScreen(
                     headerLetterAppearance = appListHeaderLetterAppearance,
                     pageBackground = appOverviewBackground,
                     railAppearance = railAppearance,
-                    accentColor = accentColor,
+                    accentColor = appListAccentColor,
                     handedness = appOverviewHandedness,
                     cornerRadiusPercent = cornerRadiusPercent,
                     loadIcon = viewModel::loadIcon,
@@ -961,6 +959,7 @@ fun HomeScreen(
             barCornerRadiusPercent = searchBarCornerRadiusPercent,
             resultsAppearance = searchResultsAppearance,
             resultsCornerRadiusPercent = searchResultsCornerRadiusPercent,
+            resultsEdgeToEdge = searchResultsEdgeToEdge,
             keyboardCapColor = if (searchKeyboardCapEnabled) searchKeyboardCapColor else null,
             keyboardCapCornerRadiusPercent = searchKeyboardCapCornerRadiusPercent,
             loadIcon = viewModel::loadIcon,

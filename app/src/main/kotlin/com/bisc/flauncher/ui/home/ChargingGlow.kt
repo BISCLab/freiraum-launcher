@@ -63,7 +63,7 @@ private fun makeBubbles(): List<Bubble> {
 
 /** Rising bubbles and a bottom glow while the device charges; active only while the launcher is resumed. */
 @Composable
-fun ChargingGlow(enabled: Boolean, color: Color = Color(0xFF34D058), modifier: Modifier = Modifier) {
+fun ChargingGlow(enabled: Boolean, color: Color = Color(com.bisc.flauncher.ui.theme.DEFAULT_ACCENT_COLOR), modifier: Modifier = Modifier) {
     val bubbleLight = androidx.compose.ui.graphics.lerp(color, Color.White, 0.55f)
     val context = LocalContext.current
     var charging by remember { mutableStateOf(false) }

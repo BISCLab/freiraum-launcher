@@ -273,6 +273,26 @@ fun ColorPickerSection(title: String, summary: String? = null, info: String? = n
     }
 }
 
+/** An accented surface's own color: follows the global accent ([global]) while [own] is null, with a
+ *  "use global accent" row to go back once it has its own. Rows only — place inside a group. */
+@Composable
+fun AccentOverrideRows(title: String, own: Int?, global: Int, onChange: (Int?) -> Unit) {
+    ColorPickerRow(
+        title = title,
+        summary = if (own == null) stringResource(R.string.settings_accent_follows_global) else null,
+        color = own ?: global,
+        onColorChange = { onChange(it) }
+    )
+    if (own != null) {
+        SettingsPreference(
+            icon = null,
+            title = stringResource(R.string.settings_accent_use_global),
+            onClick = { onChange(null) },
+            trailing = null
+        )
+    }
+}
+
 /** The row+opener content of [ColorPickerSection], without its own [SettingsPreferenceGroup] wrapper —
  *  for attaching directly inside another group's card (e.g. right under a related switch). Tapping it
  *  opens the actual [ColorPickerControls] in their own [SettingsEditPage] rather than expanding inline,

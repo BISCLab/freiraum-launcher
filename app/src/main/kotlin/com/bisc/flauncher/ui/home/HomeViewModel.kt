@@ -112,8 +112,10 @@ class HomeViewModel @Inject constructor(
     val appOverviewHandedness: StateFlow<Handedness> =
         settingsRepository.appOverviewHandedness.stateIn(viewModelScope, SharingStarted.Eagerly, Handedness.RIGHT)
 
+    /** The charging animation's own color, else the global accent. */
     val chargingAnimationColor: StateFlow<Int> =
-        settingsRepository.chargingAnimationColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF34D058.toInt())
+        combine(settingsRepository.chargingAnimationColor, settingsRepository.accentColor) { own, accent -> own ?: accent }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.theme.DEFAULT_ACCENT_COLOR)
 
     val chargingAnimationEnabled: StateFlow<Boolean> =
         settingsRepository.chargingAnimationEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, true)
@@ -127,7 +129,7 @@ class HomeViewModel @Inject constructor(
     // The same global default Dock/Panel/widgets already read via their own row's cornerRadiusPercent
     // — used here for surfaces with no row of their own (search bar, A-Z rail, floating search button).
     val cornerRadiusPercent: StateFlow<Int> =
-        settingsRepository.defaultCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, 25)
+        settingsRepository.defaultCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT)
 
     val appListRailAppearance: StateFlow<ElementAppearance?> =
         settingsRepository.appListRailAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -157,15 +159,10 @@ class HomeViewModel @Inject constructor(
     val appListShowSearchButton: StateFlow<Boolean> =
         settingsRepository.appListShowSearchButton.stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
-    val accentColor: StateFlow<Int> =
-        settingsRepository.accentColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF3B82F6.toInt())
-
-    val sidebarPanelAppearance: StateFlow<ElementAppearance> =
-        settingsRepository.sidebarPanelAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
-
-    fun setSidebarPanelAppearance(appearance: ElementAppearance) {
-        viewModelScope.launch { settingsRepository.setSidebarPanelAppearance(appearance) }
-    }
+    /** The app list's own accent (its scroll bubble), else the global accent. */
+    val appListAccentColor: StateFlow<Int> =
+        combine(settingsRepository.appListAccentColor, settingsRepository.accentColor) { own, accent -> own ?: accent }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.theme.DEFAULT_ACCENT_COLOR)
 
     val folderCardAppearance: StateFlow<ElementAppearance> =
         settingsRepository.folderCardAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
@@ -187,6 +184,9 @@ class HomeViewModel @Inject constructor(
 
     val searchResultsAppearance: StateFlow<ElementAppearance?> =
         settingsRepository.searchResultsAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val searchResultsEdgeToEdge: StateFlow<Boolean> =
+        settingsRepository.searchResultsEdgeToEdge.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val searchResultsCornerRadiusPercent: StateFlow<Int?> =
         settingsRepository.searchResultsCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -220,13 +220,12 @@ class HomeViewModel @Inject constructor(
                 if (parts != null && parts.size >= 2) shortcutRepository.launch(parts[0], parts[1])
             }
             // The sole way to reference a page now — ROWS pages jump the pager via onOpenPage,
-            // the singleton overlays (App overview/Search/Sidebar) open their own overlay directly,
+            // the singleton overlays (App overview/Search) open their own overlay directly,
             // same dispatch PageRowContent's onOpenPageLink already does for a dock/element-box page-link tap.
             GestureActionType.PAGE -> action.payload?.toLongOrNull()?.let { id ->
                 when (allPages.value.find { it.id == id }?.kind) {
                     LauncherPageKind.APP_LIST -> openAppList()
                     LauncherPageKind.SEARCH -> openSearch()
-                    LauncherPageKind.SIDEBAR -> openOverview()
                     else -> onOpenPage(id)
                 }
             }
@@ -550,13 +549,10 @@ class HomeViewModel @Inject constructor(
 
     // ---- Contacts ----
 
-    fun onContactsPermissionResult(granted: Boolean) {
+    fun refreshContactsPermission() {
+        val granted = contactsRepository.hasPermission()
         _contactsPermissionGranted.value = granted
         if (granted) refreshContactResults()
-    }
-
-    fun refreshContactsPermission() {
-        onContactsPermissionResult(contactsRepository.hasPermission())
     }
 
     private fun refreshContactResults() {
@@ -569,7 +565,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { _contactResults.value = contactsRepository.search(query) }
     }
 
-    // --- Sidebar Contacts category --- A curated, pinned list ([PinnedContact]).
+    // --- Pinned contacts --- A curated list ([PinnedContact]) that contact entries pick from.
 
     val pinnedContacts: StateFlow<List<PinnedContact>> =
         contactsRepository.pinnedContacts.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
@@ -744,8 +740,8 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.clearPageBackgroundConfig(pageId) }
     }
 
-    fun reorderPages(ordered: List<LauncherPage>) {
-        viewModelScope.launch { pageContentRepository.reorderPages(ordered) }
+    fun reorderRowsPages(orderedRowsPageIds: List<Long>) {
+        viewModelScope.launch { pageContentRepository.reorderRowsPages(orderedRowsPageIds) }
     }
 
     fun renamePage(pageId: Long, name: String?) {

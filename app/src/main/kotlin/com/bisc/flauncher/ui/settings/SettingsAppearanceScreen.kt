@@ -14,9 +14,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
+import com.bisc.flauncher.data.model.LauncherPageKind
+import com.bisc.flauncher.ui.pageLabel
 import com.bisc.flauncher.ui.theme.FontPreference
 import com.bisc.flauncher.ui.theme.ThemePreference
 
+/** Design: everything that looks the same across the whole launcher — colors, language and font,
+ *  corner shape, icons, background and status bar. Pages and elements can override parts of it on
+ *  their own screens (a page's own background, the app list's own accent, ...). */
 @Composable
 fun SettingsAppearanceScreen(
     navController: NavController,
@@ -26,42 +31,36 @@ fun SettingsAppearanceScreen(
 ) {
     val theme by viewModel.theme.collectAsState()
     val fontPreference by viewModel.fontPreference.collectAsState()
-    val chargingAnimation by viewModel.chargingAnimationEnabled.collectAsState()
-    val chargingColor by viewModel.chargingAnimationColor.collectAsState()
+    val accentColor by viewModel.accentColor.collectAsState()
     val statusBarHiddenEverywhere by viewModel.statusBarHiddenEverywhere.collectAsState()
-    val showSettingsTips by viewModel.showSettingsTips.collectAsState()
     val defaultCornerRadiusPercent by viewModel.defaultCornerRadiusPercent.collectAsState()
-    val browserPackage by viewModel.searchBrowserApp.collectAsState()
-    val mapsPackage by viewModel.searchMapsApp.collectAsState()
-    var browserPickerOpen by remember { mutableStateOf(false) }
-    var mapsPickerOpen by remember { mutableStateOf(false) }
+    val allPages by viewModel.allPages.collectAsState()
+    val searchHideStatusBar by viewModel.searchHideStatusBar.collectAsState()
+    val folderHideStatusBar by viewModel.folderHideStatusBar.collectAsState()
+    // Carousel pages in their order (Home among them), then App list and Text search.
+    val orderedPages = remember(allPages) {
+        allPages.filter { it.kind == LauncherPageKind.ROWS }.sortedBy { it.orderIndex } +
+            allPages.filter { it.kind == LauncherPageKind.APP_LIST } +
+            allPages.filter { it.kind == LauncherPageKind.SEARCH }
+    }
     var confirmingTheme by remember { mutableStateOf<ThemePreference?>(null) }
     var confirmingHideStatusBarEverywhere by remember { mutableStateOf<Boolean?>(null) }
     val context = androidx.compose.ui.platform.LocalContext.current
-    val defaultAppLabel = stringResource(R.string.settings_search_open_with_default)
-    fun appLabel(pkg: String?): String = pkg?.let {
-        runCatching { context.packageManager.getApplicationLabel(context.packageManager.getApplicationInfo(it, 0)).toString() }.getOrNull()
-    } ?: defaultAppLabel
-    var pendingImport by remember { mutableStateOf<android.net.Uri?>(null) }
-    val exportLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/zip")
-    ) { uri ->
-        if (uri != null) viewModel.exportBackup(uri) { ok ->
-            android.widget.Toast.makeText(context, if (ok) R.string.settings_backup_export_done else R.string.settings_backup_export_failed, android.widget.Toast.LENGTH_LONG).show()
-        }
-    }
-    val importLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
-    ) { uri -> if (uri != null) pendingImport = uri }
 
-    SettingsSubScreen(title = stringResource(R.string.settings_section_appearance), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_section_global_background),
-                summary = stringResource(R.string.settings_card_global_background_subtitle),
-                onClick = { onNavigate("appearance/background") },
-                trailing = null
+    SettingsSubScreen(title = stringResource(R.string.settings_design_title), navController = navController, onBack = onBack) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_theme_label)) {
+            RadioPreference(stringResource(R.string.settings_theme_light), ThemePreference.LIGHT, theme, onSelect = { confirmingTheme = it })
+            RadioPreference(stringResource(R.string.settings_theme_dark), ThemePreference.DARK, theme, onSelect = { confirmingTheme = it })
+            RadioPreference(stringResource(R.string.settings_theme_system), ThemePreference.SYSTEM, theme, onSelect = { confirmingTheme = it })
+        }
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_accent_label),
+            info = stringResource(R.string.settings_accent_global_info)
+        ) {
+            ColorPickerRow(
+                title = stringResource(R.string.settings_accent_label),
+                color = accentColor,
+                onColorChange = viewModel::setAccentColor
             )
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_language_label)) {
@@ -74,11 +73,6 @@ fun SettingsAppearanceScreen(
             RadioPreference(stringResource(R.string.settings_language_system), "", language, pick)
             RadioPreference("English", "en", language, pick)
             RadioPreference("Deutsch", "de", language, pick)
-        }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_theme_label)) {
-            RadioPreference(stringResource(R.string.settings_theme_light), ThemePreference.LIGHT, theme, onSelect = { confirmingTheme = it })
-            RadioPreference(stringResource(R.string.settings_theme_dark), ThemePreference.DARK, theme, onSelect = { confirmingTheme = it })
-            RadioPreference(stringResource(R.string.settings_theme_system), ThemePreference.SYSTEM, theme, onSelect = { confirmingTheme = it })
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_font_label)) {
             RadioPreference(stringResource(R.string.settings_font_system), FontPreference.SYSTEM, fontPreference, viewModel::setFontPreference, font = FontPreference.SYSTEM.fontFamily)
@@ -95,26 +89,25 @@ fun SettingsAppearanceScreen(
                 onSettled = viewModel::setDefaultCornerRadiusPercent
             )
         }
-        SettingsPreferenceGroup(
-            title = stringResource(R.string.settings_standard_apps_label),
-            info = stringResource(R.string.settings_search_open_with_info)
-        ) {
+        SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
-                title = stringResource(R.string.settings_search_browser_title),
-                summary = appLabel(browserPackage),
-                onClick = { browserPickerOpen = true }
+                title = stringResource(R.string.settings_icons_label),
+                summary = stringResource(R.string.settings_icons_summary),
+                onClick = { onNavigate("appearance/icons") },
+                trailing = null
             )
             SettingsPreference(
                 icon = null,
-                title = stringResource(R.string.settings_search_maps_title),
-                summary = appLabel(mapsPackage),
-                onClick = { mapsPickerOpen = true }
+                title = stringResource(R.string.settings_section_global_background),
+                summary = stringResource(R.string.settings_card_global_background_subtitle),
+                onClick = { onNavigate("appearance/background") },
+                trailing = null
             )
         }
-        // Home, Pages, Quick overview and Text search each have their own status-bar switch on their own screen.
-        // This one is a bulk action over all of them — checked reflects whether every one of them is
-        // currently hidden, and toggling it off sets every one of them back to shown.
+        // Home, Pages, App list, Text search and folders each have their own status-bar switch on
+        // their own screen. This one is a bulk action over all of them — checked reflects whether
+        // every one of them is currently hidden, and toggling it off sets every one back to shown.
         SettingsPreferenceGroup(
             title = stringResource(R.string.settings_statusbar_label),
             info = stringResource(R.string.settings_statusbar_hide_all_summary)
@@ -128,76 +121,19 @@ fun SettingsAppearanceScreen(
                 }
             )
         }
-        // Turns every "?" tip button across the settings on or off (see LocalShowSettingsTips).
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_tips_label)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_tips_show),
-                onClick = { viewModel.setShowSettingsTips(!showSettingsTips) },
-                trailing = { Switch(checked = showSettingsTips, onCheckedChange = viewModel::setShowSettingsTips) }
-            )
-        }
-        SettingsPreferenceGroup(
-            title = stringResource(R.string.settings_backup_label),
-            info = stringResource(R.string.settings_backup_info)
-        ) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_backup_export),
-                onClick = {
-                    val stamp = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
-                    exportLauncher.launch("flauncher-backup-$stamp.zip")
-                },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_backup_import),
-                onClick = { importLauncher.launch(arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream")) },
-                trailing = null
-            )
-        }
-        SettingsPreferenceGroup(
-            title = stringResource(R.string.settings_charging_label),
-            info = stringResource(R.string.settings_charging_animation_summary)
-        ) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_charging_animation),
-                onClick = { viewModel.setChargingAnimationEnabled(!chargingAnimation) },
-                trailing = { Switch(checked = chargingAnimation, onCheckedChange = viewModel::setChargingAnimationEnabled) }
-            )
-            if (chargingAnimation) {
-                ColorPickerRow(
-                    title = stringResource(R.string.settings_charging_color),
-                    color = chargingColor,
-                    onColorChange = viewModel::setChargingAnimationColor
-                )
+        // Overview of every place with its own status-bar switch — the same switches as on each
+        // page's own screen, just all in one list.
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_statusbar_per_page_label)) {
+            orderedPages.forEach { page ->
+                if (page.kind == LauncherPageKind.SEARCH) {
+                    StatusBarRow(pageLabel(page, allPages), searchHideStatusBar, viewModel::setSearchHideStatusBar)
+                } else {
+                    val hidden by remember(page.id) { viewModel.pageHideStatusBar(page.id) }.collectAsState(initial = false)
+                    StatusBarRow(pageLabel(page, allPages), hidden) { viewModel.setPageHideStatusBar(page.id, it) }
+                }
             }
+            StatusBarRow(stringResource(R.string.settings_section_folder), folderHideStatusBar, viewModel::setFolderHideStatusBar)
         }
-    }
-
-    if (browserPickerOpen) {
-        AppPickerDialog(
-            title = stringResource(R.string.settings_search_browser_pick),
-            clearLabel = stringResource(R.string.settings_search_open_with_clear),
-            apps = remember { appsHandling(context, "https://example.com", browsable = true) },
-            selectedPackage = browserPackage,
-            onPick = { viewModel.setSearchBrowserApp(it); browserPickerOpen = false },
-            onClear = { viewModel.setSearchBrowserApp(null); browserPickerOpen = false },
-            onDismiss = { browserPickerOpen = false }
-        )
-    }
-    if (mapsPickerOpen) {
-        AppPickerDialog(
-            title = stringResource(R.string.settings_search_maps_pick),
-            clearLabel = stringResource(R.string.settings_search_open_with_clear),
-            apps = remember { appsHandling(context, "geo:0,0?q=test", browsable = false) },
-            selectedPackage = mapsPackage,
-            onPick = { viewModel.setSearchMapsApp(it); mapsPickerOpen = false },
-            onClear = { viewModel.setSearchMapsApp(null); mapsPickerOpen = false },
-            onDismiss = { mapsPickerOpen = false }
-        )
     }
 
     confirmingHideStatusBarEverywhere?.let { targetHidden ->
@@ -221,29 +157,6 @@ fun SettingsAppearanceScreen(
             dismissButton = {
                 TextButton(onClick = { confirmingHideStatusBarEverywhere = null }) { Text(stringResource(R.string.widget_notes_cancel)) }
             }
-        )
-    }
-
-    pendingImport?.let { uri ->
-        AlertDialog(
-            onDismissRequest = { pendingImport = null },
-            title = { Text(stringResource(R.string.settings_backup_import_confirm_title)) },
-            text = { Text(stringResource(R.string.settings_backup_import_confirm_message)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    pendingImport = null
-                    viewModel.importBackup(uri) { result ->
-                        val message = when (result) {
-                            com.bisc.flauncher.data.backup.BackupManager.ImportResult.READY -> R.string.settings_backup_import_restarting
-                            com.bisc.flauncher.data.backup.BackupManager.ImportResult.NOT_A_BACKUP -> R.string.settings_backup_import_invalid
-                            com.bisc.flauncher.data.backup.BackupManager.ImportResult.TOO_NEW -> R.string.settings_backup_import_too_new
-                            com.bisc.flauncher.data.backup.BackupManager.ImportResult.FAILED -> R.string.settings_backup_import_failed
-                        }
-                        android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_LONG).show()
-                    }
-                }) { Text(stringResource(R.string.settings_backup_import)) }
-            },
-            dismissButton = { TextButton(onClick = { pendingImport = null }) { Text(stringResource(R.string.widget_notes_cancel)) } }
         )
     }
 
@@ -272,4 +185,14 @@ fun SettingsAppearanceScreen(
             }
         )
     }
+}
+
+@Composable
+private fun StatusBarRow(label: String, hidden: Boolean, onChange: (Boolean) -> Unit) {
+    SettingsPreference(
+        icon = null,
+        title = label,
+        onClick = { onChange(!hidden) },
+        trailing = { Switch(checked = hidden, onCheckedChange = onChange) }
+    )
 }

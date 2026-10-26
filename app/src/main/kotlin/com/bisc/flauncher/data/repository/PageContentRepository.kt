@@ -108,18 +108,7 @@ class PageContentRepository @Inject constructor(
             settingsRepository.setPageHideStatusBar(searchId, true)
         }
 
-        // Same autonomous-singleton pattern again — the Favorites/Quick-overview panel used to be
-        // reachable only via a hardcoded swipe-down gesture (still the case for now); as a real page
-        // it's also placeable in a dock slot like Search/App overview, just not linked there by
-        // default (the swipe-down path already reaches it without needing a dock slot too).
-        if (pageDao.getByKind(LauncherPageKind.SIDEBAR) == null) {
-            val sidebarId = pageDao.insert(
-                LauncherPage(orderIndex = (pageDao.maxOrderIndex() ?: -1) + 1, kind = LauncherPageKind.SIDEBAR)
-            )
-            settingsRepository.setPageHideStatusBar(sidebarId, true)
-        }
-
-        // Gesture defaults, seeded once with real page ids now that Search/App-overview/Sidebar are
+        // Gesture defaults, seeded once with real page ids now that Search/App-overview are
         // all real pages — SettingsRepository has no page-id knowledge, so it can no longer carry a
         // hardcoded SWIPE_UP fallback (removed in the same step as the APP_LIST/SEARCH enum values).
         // Guarded by "nothing configured yet" so this never clobbers a user's own choice.
@@ -128,10 +117,8 @@ class PageContentRepository @Inject constructor(
                 settingsRepository.setGestureAction(HomeGesture.SWIPE_UP, GestureAction(GestureActionType.PAGE, appOverview.id.toString()))
             }
         }
-        // No more default SWIPE_DOWN -> Sidebar binding — the Panel claims plain swipe-down on the
-        // home content outright whenever it's enabled (see HomeScreen's detectHomeGestures wiring),
-        // so a default binding here would just sit unreachable behind it. A user can still bind
-        // SWIPE_DOWN to the Favorites page manually; it only takes effect while the Panel is disabled.
+        // No default SWIPE_DOWN binding — the Panel claims plain swipe-down on the home content
+        // outright whenever it's enabled (see HomeScreen's detectHomeGestures wiring).
 
         // Settings needs a default path from the home screen itself — otherwise, on a fresh install,
         // the only way in would be the system "App info" entry or the static app shortcut (both
@@ -213,11 +200,8 @@ class PageContentRepository @Inject constructor(
 
     /**
      * Adds a new ROWS page immediately to the left or right of Home **within the ROWS subset only**
-     * — the carousel's own "+" tiles. Unlike [reorderPages] (a plain positional reindex over
-     * whatever list it's handed, which is exactly what let the old flat Pages list cosmetically
-     * "reorder" the singleton App-overview/Search/Sidebar tiles relative to swipeable pages without
-     * that having any real effect on the pager, since the pager filters to ROWS before use), this
-     * renumbers every page from scratch: ROWS pages in their new relative order first (the new page
+     * — the carousel's own "+" tiles. Like [reorderRowsPages], this renumbers every page from
+     * scratch: ROWS pages in their new relative order first (the new page
      * inserted at [direction]'s position relative to Home), then every non-ROWS singleton appended
      * after, each keeping its own prior relative order among themselves. Avoids a collision-prone
      * localized index shift — page counts are small, a full stable re-sort is cheap and simple.
@@ -261,7 +245,7 @@ class PageContentRepository @Inject constructor(
      *  with it). Returns the deleted rows so the caller can free their system-widget ids, or null
      *  if this page can't be removed (Home and the utility pages). */
     suspend fun removePage(page: LauncherPage): List<PageRow>? {
-        if (page.isHome || page.isAppOverview || page.kind == LauncherPageKind.SEARCH || page.kind == LauncherPageKind.SIDEBAR) return null
+        if (page.isHome || page.isAppOverview || page.kind == LauncherPageKind.SEARCH) return null
         val rows = rowDao.getForPage(page.id)
         pageDao.delete(page)
         return rows
@@ -272,8 +256,17 @@ class PageContentRepository @Inject constructor(
         pageDao.update(page.copy(iconGlyph = glyph, iconBackgroundColor = backgroundColor, iconColor = iconColor))
     }
 
-    suspend fun reorderPages(ordered: List<LauncherPage>) {
-        ordered.forEachIndexed { index, page ->
+    /** The carousel's drag-to-reorder: [orderedRowsPageIds] is the new order of the swipeable ROWS
+     *  pages (Home included); every page is renumbered from scratch, ROWS first in that order, then
+     *  the non-ROWS singletons in their prior relative order — same scheme as [addPageInDirection]. */
+    suspend fun reorderRowsPages(orderedRowsPageIds: List<Long>) {
+        val all = pageDao.getAllOnce()
+        val byId = all.associateBy { it.id }
+        val rows = orderedRowsPageIds.mapNotNull { byId[it] }.filter { it.kind == LauncherPageKind.ROWS }
+        // Any ROWS page missing from the list (e.g. added meanwhile) keeps its place at the end.
+        val missingRows = all.filter { it.kind == LauncherPageKind.ROWS && it.id !in orderedRowsPageIds }.sortedBy { it.orderIndex }
+        val nonRows = all.filter { it.kind != LauncherPageKind.ROWS }.sortedBy { it.orderIndex }
+        (rows + missingRows + nonRows).forEachIndexed { index, page ->
             if (page.orderIndex != index) pageDao.update(page.copy(orderIndex = index))
         }
     }

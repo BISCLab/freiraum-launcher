@@ -366,12 +366,19 @@ enum class SearchElement(val route: String, val titleRes: Int) {
 
 /** Background/Border hub for one [SearchElement], same split as the Panel's own. */
 @Composable
-fun SettingsSearchElementScreen(element: SearchElement, navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
+fun SettingsSearchElementScreen(
+    element: SearchElement,
+    navController: NavController,
+    onBack: () -> Unit,
+    onNavigate: (String) -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
+    val resultsEdgeToEdge by viewModel.searchResultsEdgeToEdge.collectAsState()
     SettingsSubScreen(title = stringResource(element.titleRes), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
-                title = stringResource(R.string.settings_section_global_background),
+                title = stringResource(R.string.settings_element_fill_label),
                 onClick = { onNavigate("background") },
                 trailing = null
             )
@@ -381,6 +388,17 @@ fun SettingsSearchElementScreen(element: SearchElement, navController: NavContro
                 onClick = { onNavigate("border") },
                 trailing = null
             )
+            // The bar always spans the full width (it's flush with the screen top like the Panel);
+            // only the cards have a side margin to switch off.
+            if (element == SearchElement.RESULTS) {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_widgets_edge_to_edge_label),
+                    info = stringResource(R.string.settings_edge_to_edge_summary),
+                    onClick = { viewModel.setSearchResultsEdgeToEdge(!resultsEdgeToEdge) },
+                    trailing = { Switch(checked = resultsEdgeToEdge, onCheckedChange = viewModel::setSearchResultsEdgeToEdge) }
+                )
+            }
         }
     }
 }
@@ -405,7 +423,7 @@ private fun SettingsViewModel.setSearchElementAppearance(element: SearchElement,
 @Composable
 fun SettingsSearchElementBackgroundScreen(element: SearchElement, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val appearance = effectiveSearchElementAppearance(element, viewModel)
-    SettingsSubScreen(title = stringResource(R.string.settings_section_global_background), navController = navController, onBack = onBack) {
+    SettingsSubScreen(title = stringResource(R.string.settings_element_fill_label), navController = navController, onBack = onBack) {
         ElementBackgroundSection(appearance = appearance, onAppearanceChange = { viewModel.setSearchElementAppearance(element, it) })
     }
 }

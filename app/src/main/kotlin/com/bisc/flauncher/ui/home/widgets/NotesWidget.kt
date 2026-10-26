@@ -61,7 +61,7 @@ private const val COLUMNS = 2
 fun NotesWidget(
     modifier: Modifier = Modifier,
     appearance: ElementAppearance = ElementAppearance(),
-    cornerRadiusPercent: Int = 25,
+    cornerRadiusPercent: Int = com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT,
     horizontalMargin: Dp = 0.dp,
     spanY: Int = 1,
     viewModel: HomeViewModel = hiltViewModel()

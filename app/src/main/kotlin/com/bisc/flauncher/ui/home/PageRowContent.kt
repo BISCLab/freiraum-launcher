@@ -7,7 +7,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -101,8 +100,7 @@ fun PageRowContent(
     onExecuteAction: (GestureAction) -> Unit = {},
     iconShape: IconShape = IconShape.ROUNDED_SQUARE,
     iconSizeScale: Float = 1f,
-    onSystemWidgetViewReady: ((android.view.View) -> Unit)? = null,
-    accentColor: Color = Color(0xFF3B82F6)
+    onSystemWidgetViewReady: ((android.view.View) -> Unit)? = null
 ) {
     when (row.type) {
         PageRowType.WIDGET -> {
@@ -657,8 +655,8 @@ fun pillItemShape(iconShape: IconShape): Shape = when (iconShape) {
  * squircle-button look), for any row with [PageRow.pillMode] set — the dock being the one instance
  * that floats outside the pager (see HomeScreen's floating dock Box, which calls this directly with
  * the home page's pinned SEARCH_BAR row), but any ordinary [PageRowType.ELEMENT_BOX] row can opt into the
- * same layout. Width is either pinned to [PageRow.pillMaxEntries] reference slots or grows with the
- * actual entry count, per [PageRow.pillWidthMode] (see [DockDimens.pillWidth]). When [onAddEmptySlot]
+ * same layout. It spans the full row width, with the fine standard margin or edge to edge per
+ * [PageRow.edgeToEdge]. When [onAddEmptySlot]
  * is non-null, the row pads itself with tappable empty placeholders up to [PageRow.pillMaxEntries] —
  * the dock's classic "tap an empty slot to fill it" invitation; an ordinary in-page pill row (edited
  * from its own Settings screen instead) passes null and simply shows however many real entries it has.
@@ -683,19 +681,20 @@ fun PillRow(
     modifier: Modifier = Modifier
 ) {
     val colors = resolveElementColors(row.appearance())
-    BoxWithConstraints(
+    // Same width rule as every other in-page element: the full row width, either with the fine
+    // standard margin or edge to edge (PageRow.edgeToEdge).
+    val sideMargin = if (row.edgeToEdge) 0.dp else DockDimens.horizontalMargin
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .padding(
-                start = DockDimens.horizontalMargin,
-                end = DockDimens.horizontalMargin,
+                start = sideMargin,
+                end = sideMargin,
                 top = DockDimens.topMargin,
                 bottom = DockDimens.bottomMargin
             ),
         contentAlignment = Alignment.Center
     ) {
-        val displayedCount = if (onAddEmptySlot != null) maxOf(entries.size, row.pillMaxEntries) else entries.size
-        val pillWidth = DockDimens.pillWidth(displayedCount, row.pillWidthMode, maxWidth)
         val itemShape = pillItemShape(iconShape)
         val barShape = remember(row.cornerRadiusPercent) {
             RoundedCornerShape(percent = row.cornerRadiusPercent.coerceIn(0, 100))
@@ -704,7 +703,7 @@ fun PillRow(
 
         Box(
             modifier = Modifier
-                .width(pillWidth)
+                .fillMaxWidth()
                 .height(barHeight)
                 .then(
                     if (colors.backgroundAlpha > 0f) Modifier.clip(barShape).background(colors.background, alpha = colors.backgroundAlpha)
