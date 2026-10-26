@@ -121,6 +121,7 @@ class SettingsViewModel @Inject constructor(
 
     // Includes every page (not just the filtered `pages` above, which excludes the app overview
     // page), so "everywhere" actually means everywhere, including app overview's own flag.
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val statusBarHiddenEverywhere: StateFlow<Boolean> = pageContentRepository.allPages.flatMapLatest { allPages ->
         val perPageFlows = allPages.map { repository.pageHideStatusBar(it.id) }
         val sharedFlows = listOf(repository.searchHideStatusBar, repository.folderHideStatusBar)
@@ -498,19 +499,6 @@ class SettingsViewModel @Inject constructor(
     fun resolveLabel(componentName: ComponentName): String {
         val custom = appOverrides.value[componentName.flattenToString()]?.customLabel
         return if (!custom.isNullOrBlank()) custom else installedAppsRepository.rawLabelFor(componentName)
-    }
-
-    fun overrideFor(componentName: ComponentName): AppOverride =
-        appOverrides.value[componentName.flattenToString()] ?: AppOverride(componentName.flattenToString())
-
-    /** Resolves the effective icon-size scale for one app: its own override if it has one
-     *  ([AppOverride.iconSizePercent]), otherwise the global default. Provided to the home UI via
-     *  [com.bisc.flauncher.ui.home.LocalIconSizeResolver] so every app-icon cell can look this up
-     *  without threading an extra parameter through every grid/row/folder call site. */
-    fun iconSizeScaleFor(componentName: String): Float {
-        val override = appOverrides.value[componentName]?.iconSizePercent
-        val percent = override ?: iconSizePercent.value
-        return percent / 100f
     }
 
     fun saveAppOverride(

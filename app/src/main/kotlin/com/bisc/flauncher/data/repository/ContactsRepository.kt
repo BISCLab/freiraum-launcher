@@ -139,10 +139,6 @@ class ContactsRepository @Inject constructor(
         }
     }
 
-    suspend fun unpin(contact: PinnedContact) {
-        pinnedContactDao.delete(contact)
-    }
-
     private companion object {
         const val MAX_LISTED = 500
         val CONTACT_PROJECTION = arrayOf(

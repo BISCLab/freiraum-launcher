@@ -41,10 +41,6 @@ class ShortcutRepository @Inject constructor(
         return dao.insert(PinnedShortcut(packageName = info.`package`, shortcutId = info.id, label = label))
     }
 
-    suspend fun unpin(shortcut: PinnedShortcut) {
-        dao.delete(shortcut)
-    }
-
     fun launch(shortcut: PinnedShortcut) {
         launch(shortcut.packageName, shortcut.shortcutId)
     }

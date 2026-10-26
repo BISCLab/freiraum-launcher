@@ -225,7 +225,7 @@ class SettingsRepository @Inject constructor(
     }
 
     /** Which edge the app-overview's own alphabet rail and floating search button sit on — the
-     *  App overview page's own setting (see SettingsAppOverviewSection), not a global one: nothing
+     *  App overview page's own setting (see SettingsAppOverviewScreen), not a global one: nothing
      *  else in the launcher has a left/right-dependent layout. */
     val appOverviewHandedness: Flow<Handedness> = dataStore.data.map { prefs ->
         prefs[APP_OVERVIEW_HANDEDNESS_KEY]?.let { runCatching { Handedness.valueOf(it) }.getOrNull() } ?: Handedness.RIGHT

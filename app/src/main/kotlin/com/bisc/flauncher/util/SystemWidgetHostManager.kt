@@ -71,7 +71,14 @@ class SystemWidgetHostManager @Inject constructor(
             putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, heightDp)
         }
         runCatching { appWidgetManager.updateAppWidgetOptions(appWidgetId, options) }
-        runCatching { hostView.updateAppWidgetSize(options, widthDp, heightDp, widthDp, heightDp) }
+        runCatching {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                hostView.updateAppWidgetSize(options, listOf(android.util.SizeF(widthDp.toFloat(), heightDp.toFloat())))
+            } else {
+                @Suppress("DEPRECATION")
+                hostView.updateAppWidgetSize(options, widthDp, heightDp, widthDp, heightDp)
+            }
+        }
     }
 
     private companion object {

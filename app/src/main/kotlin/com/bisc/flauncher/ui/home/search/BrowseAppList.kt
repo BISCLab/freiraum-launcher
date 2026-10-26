@@ -11,7 +11,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.style.TextOverflow
 import com.bisc.flauncher.ui.home.rememberAppIcon
 import kotlinx.coroutines.Job
 import androidx.compose.foundation.Image

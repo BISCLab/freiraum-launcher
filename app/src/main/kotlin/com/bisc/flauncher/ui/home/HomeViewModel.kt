@@ -16,7 +16,6 @@ import com.bisc.flauncher.data.model.AppOverride
 import com.bisc.flauncher.data.model.RowEntry
 import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.ContactInfo
-import com.bisc.flauncher.data.model.DockTapAction
 import com.bisc.flauncher.data.model.Folder
 import com.bisc.flauncher.data.model.FolderIconMode
 import com.bisc.flauncher.data.model.FolderItem
@@ -80,7 +79,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -120,14 +118,6 @@ class HomeViewModel @Inject constructor(
     val chargingAnimationEnabled: StateFlow<Boolean> =
         settingsRepository.chargingAnimationEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
-    fun executeDockTapAction(action: DockTapAction) {
-        when (action) {
-            DockTapAction.NONE -> Unit
-            DockTapAction.QUICK_OVERVIEW -> if (isPanelOpen.value) closeOverview() else openOverview()
-            DockTapAction.FULL_SEARCH -> openSearch()
-        }
-    }
-
     val iconShape: StateFlow<IconShape> =
         settingsRepository.iconShape.stateIn(viewModelScope, SharingStarted.Eagerly, IconShape.ROUNDED_SQUARE)
 
@@ -135,8 +125,7 @@ class HomeViewModel @Inject constructor(
         settingsRepository.iconSizePercent.map { it / 100f }.stateIn(viewModelScope, SharingStarted.Eagerly, 1f)
 
     // The same global default Dock/Panel/widgets already read via their own row's cornerRadiusPercent
-    // — used here for surfaces with no row of their own (search bar, app-overview card, A-Z rail,
-    // floating search button).
+    // — used here for surfaces with no row of their own (search bar, A-Z rail, floating search button).
     val cornerRadiusPercent: StateFlow<Int> =
         settingsRepository.defaultCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, 25)
 
@@ -273,7 +262,6 @@ class HomeViewModel @Inject constructor(
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
     private val _installedApps = MutableStateFlow<List<AppInfo>>(emptyList())
-    val installedApps: StateFlow<List<AppInfo>> = _installedApps.asStateFlow()
 
     private val appOverrides: StateFlow<Map<String, AppOverride>> =
         appOverrideRepository.overrides
@@ -516,10 +504,6 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { noteRepository.delete(note) }
     }
 
-    fun createNote(onCreated: (Long) -> Unit) {
-        viewModelScope.launch { onCreated(noteRepository.save(Note())) }
-    }
-
     fun reorderNotes(ordered: List<Note>) {
         viewModelScope.launch { noteRepository.reorder(ordered) }
     }
@@ -528,16 +512,8 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { mapsRepository.add(label, lat, lon, address) }
     }
 
-    fun removeMapTarget(target: SavedMapTarget) {
-        viewModelScope.launch { mapsRepository.remove(target) }
-    }
-
     fun addWebsite(label: String, url: String) {
         viewModelScope.launch { websiteRepository.add(label, url) }
-    }
-
-    fun removeWebsite(website: PinnedWebsite) {
-        viewModelScope.launch { websiteRepository.remove(website) }
     }
 
     fun loadShortcutIcon(info: ShortcutInfo) = shortcutRepository.loadIcon(info)
@@ -566,10 +542,6 @@ class HomeViewModel @Inject constructor(
             shortcutRepository.pin(info)
             dismissShortcutPicker()
         }
-    }
-
-    fun unpinShortcut(shortcut: PinnedShortcut) {
-        viewModelScope.launch { shortcutRepository.unpin(shortcut) }
     }
 
     fun launchShortcut(shortcut: PinnedShortcut) {
@@ -624,10 +596,6 @@ class HomeViewModel @Inject constructor(
             contactsRepository.pin(contact)
             dismissContactPicker()
         }
-    }
-
-    fun unpinContact(contact: PinnedContact) {
-        viewModelScope.launch { contactsRepository.unpin(contact) }
     }
 
     suspend fun loadContactPhoto(contactId: Long, photoUri: String?): ImageBitmap? =

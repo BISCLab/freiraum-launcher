@@ -2,32 +2,18 @@
 <resources>
     <string name="app_name">FLauncher</string>
 
-    <string name="home_menu_settings">Einstellungen</string>
 
     <string name="folder_icon_auto">App-Vorschau als Symbol verwenden</string>
     <string name="folder_overview_empty">Noch keine Ordner.</string>
-    <string name="folder_add">Ordner hinzufügen</string>
     <string name="folder_item_move">Verschieben</string>
     <string name="folder_item_remove">Entfernen</string>
     <string name="folder_move_hint">Position wählen</string>
     <string name="folder_move_done">Fertig</string>
     <string name="folder_move_left">Nach links verschieben</string>
     <string name="folder_move_right">Nach rechts verschieben</string>
-    <string name="folder_move_up">Nach oben verschieben</string>
-    <string name="folder_move_down">Nach unten verschieben</string>
 
-    <string name="sidebar_apps">Apps</string>
-    <string name="sidebar_folders">Ordner</string>
-    <string name="sidebar_pages">Seiten</string>
-    <string name="sidebar_notes">Notizen</string>
-    <string name="sidebar_websites">Websites</string>
-    <string name="sidebar_maps">Karten</string>
-    <string name="sidebar_shortcuts">Verknüpfungen</string>
-    <string name="sidebar_contacts">Kontakte</string>
 
-    <string name="sidebar_notes_empty">Noch keine Notizen.</string>
     <string name="sidebar_websites_empty">Noch keine Websites.</string>
-    <string name="sidebar_notes_add">Neue Notiz</string>
     <string name="sidebar_website_add">Website hinzufügen</string>
     <string name="sidebar_website_label_hint">Name</string>
     <string name="sidebar_website_url_hint">Webadresse</string>
@@ -41,25 +27,12 @@
     <string name="sidebar_maps_lat_hint">Breitengrad</string>
     <string name="sidebar_maps_lon_hint">Längengrad</string>
 
-    <string name="sidebar_shortcuts_needs_default">Verknüpfungen erfordern FLauncher als Standard-Launcher.</string>
-    <string name="sidebar_shortcuts_empty">Keine Verknüpfungen angeheftet.</string>
-    <string name="sidebar_shortcuts_add">Verknüpfung hinzufügen</string>
     <string name="sidebar_shortcuts_none_for_app">Diese App stellt keine anheftbaren Verknüpfungen bereit.</string>
 
-    <string name="sidebar_apps_empty">Noch keine Apps hinzugefügt.</string>
-    <string name="sidebar_apps_add">Apps hinzufügen</string>
-    <string name="sidebar_apps_add_single">App hinzufügen</string>
-    <string name="sidebar_apps_add_all">Alle installierten Apps hinzufügen</string>
 
-    <string name="sidebar_contacts_empty">Noch keine Kontakte angeheftet.</string>
-    <string name="sidebar_contacts_add">Kontakt hinzufügen</string>
-    <string name="sidebar_contacts_needs_permission">Zum Anheften von Kontakten ist der Kontaktzugriff erforderlich.</string>
-    <string name="sidebar_contacts_allow_access">Zugriff erlauben</string>
     <string name="sidebar_contacts_unnamed">(Ohne Namen)</string>
     <string name="sidebar_contacts_none_found">Keine Kontakte gefunden.</string>
 
-    <string name="sidebar_view_list">Liste</string>
-    <string name="sidebar_view_grid">Raster</string>
 
     <string name="dock_search_hint">Tippen zum Suchen</string>
     <string name="search_field_hint">Suchen…</string>
@@ -87,10 +60,6 @@
     <string name="search_command_web">Im Web nach „%1$s“ suchen</string>
     <string name="search_command_maps">Auf der Karte nach „%1$s“ suchen</string>
     <string name="search_command_email">E-Mail an %1$s</string>
-    <string name="search_action_numbers">Zahlen</string>
-    <string name="search_action_letters">Buchstaben</string>
-    <string name="search_action_space">Leerzeichen</string>
-    <string name="search_cluster_home">Suche schließen und zum Startbildschirm</string>
 
     <string name="settings_shortcut_wifi">WLAN</string>
     <string name="settings_shortcut_bluetooth">Bluetooth</string>
@@ -135,6 +104,7 @@
     <string name="settings_app_overview_alignment_label">Ausrichtung</string>
     <string name="settings_app_overview_align_left">Links</string>
     <string name="settings_app_overview_align_right">Rechts</string>
+    <string name="settings_app_overview_az_index_label">A–Z-Index</string>
 
     <string name="settings_color_eyedropper">Aus Widget übernehmen</string>
     <string name="settings_color_eyedropper_hint">Tippe auf eine Stelle im Widget, um genau diese Farbe zu übernehmen.</string>
@@ -146,19 +116,6 @@
     <string name="settings_colorfill_direction_left_to_right">Links nach rechts</string>
     <string name="settings_colorfill_color_1">Farbe 1</string>
     <string name="settings_colorfill_color_2">Farbe 2</string>
-    <string name="settings_sidebar_items_empty">Keine Einträge in der Seitenleiste. Über „Hinzufügen“ ergänzen.</string>
-    <string name="settings_sidebar_add">Hinzufügen</string>
-    <string name="settings_sidebar_add_category">Kategorie</string>
-    <string name="settings_sidebar_add_app">App</string>
-    <string name="settings_sidebar_add_shortcut">Verknüpfung</string>
-    <string name="settings_sidebar_add_place">Ort</string>
-    <string name="settings_sidebar_add_category_empty">Alle Kategorien sind bereits in der Seitenleiste.</string>
-    <string name="settings_sidebar_edit_title">Seitenleisteneintrag bearbeiten</string>
-    <string name="settings_sidebar_icon_label">Symbol</string>
-    <string name="settings_sidebar_icon_default">Standard</string>
-    <string name="settings_sidebar_category_view_mode_label">Layout</string>
-    <string name="settings_sidebar_category_show_add_row_label">„Hinzufügen …“ in der Schnellübersicht anzeigen</string>
-    <string name="settings_sidebar_remove">Aus Seitenleiste entfernen</string>
 
     <string name="element_fill_mode_none">Ohne</string>
     <string name="element_fill_mode_color">Farbe</string>
@@ -166,9 +123,7 @@
     <string name="settings_element_border_color">Rahmenfarbe</string>
     <string name="settings_element_border_width_value">Stärke: %1$s dp</string>
     <string name="settings_element_color_auto_hint">Automatisch</string>
-    <string name="settings_search_button_follow_rail">Wieder an Buchstabenleiste ausrichten</string>
     <string name="settings_element_color_reset">Auf automatisch zurücksetzen</string>
-    <string name="settings_layer_surface_alphabet_rail">Buchstabenleiste</string>
     <string name="settings_element_text_color_label">Schriftfarbe</string>
     <string name="settings_element_border_label">Rahmen</string>
     <string name="settings_element_show_labels_label">Beschriftung anzeigen</string>
@@ -211,12 +166,8 @@
     <string name="settings_dock_visibility_manual">Mit Wischen nach oben öffnen</string>
     <string name="settings_dock_visibility_auto">Automatisch beim Ankommen</string>
     <string name="settings_layer_surface_screen">Bildschirm</string>
-    <string name="settings_layer_surface_folder">Ordner</string>
-    <string name="settings_layer_surface_search">Textsuche</string>
-    <string name="settings_layer_surface_app_list">App-Liste</string>
     <string name="settings_layer_surface_widget">Widget</string>
     <string name="settings_layer_surface_section_letter">Abschnittsbuchstabe</string>
-    <string name="settings_layer_surface_alphabet_letter">Leistenbuchstabe</string>
 
     <string name="settings_section_icon_pack">Symbolpaket</string>
     <string name="settings_icon_pack_default">Standard</string>
@@ -263,6 +214,7 @@
     <string name="settings_manage_apps_reveal_search_code">Mit Suchcode einblenden</string>
     <string name="settings_manage_apps_reveal_search_code_description">Nur noch über den exakten Code unten auffindbar, statt über den Namen.</string>
     <string name="settings_manage_apps_reveal_code_hint">Suchcode</string>
+    <string name="settings_more_settings_button">Weitere Einstellungen</string>
     <string name="settings_manage_apps_save">Speichern</string>
 
     <string name="settings_section_folder">Ordner</string>
@@ -432,11 +384,6 @@
     <string name="settings_statusbar_label">Statusleiste</string>
     <string name="settings_tips_label">Tipps</string>
     <string name="settings_tips_show">Tipps anzeigen</string>
-    <string name="settings_favorites_bottom_border">Unterer Rand des Apps-Panels</string>
-    <string name="settings_favorites_bottom_border_summary">Standardmäßig aus. Eine dünne Linie am unteren Rand des Apps-Panels, dort wo es auf den abgedunkelten Homescreen trifft.</string>
-    <string name="settings_favorites_group_dividers">Trennlinien im Apps-Panel</string>
-    <string name="settings_favorites_group_dividers_summary">Standardmäßig aus. Dünne Linien zwischen Apps, Ordnern und Shortcuts im Apps-Panel-Raster.</string>
-    <string name="favorites_popup_title">Apps</string>
     <string name="shortcut_settings">Einstellungen</string>
     <string name="shortcut_settings_long">FLauncher-Einstellungen</string>
     <string name="settings_row_entry_new_folder">Neuer Ordner</string>
@@ -460,7 +407,6 @@
     <string name="settings_corner_style_label">Eckenrundung</string>
     <string name="settings_corner_radius_value">%1$d%%</string>
     <string name="settings_statusbar_hide_page">Statusleiste ausblenden</string>
-    <string name="settings_statusbar_hide_quick_search">Statusleiste in der Schnellübersicht ausblenden</string>
     <string name="settings_folder_hide_status_bar">Statusleiste in Ordnern ausblenden</string>
     <string name="settings_folder_hide_dock">Dock in Ordnern ausblenden</string>
     <string name="settings_folder_hide_dock_summary">Standardmäßig aus, sodass das schwebende Dock sichtbar bleibt, während ein Ordner geöffnet ist.</string>
@@ -470,28 +416,14 @@
     <string name="settings_folder_creator_create">Erstellen</string>
 
     <string name="settings_section_search_overview">Schnellübersicht</string>
-    <string name="settings_card_search_overview_subtitle">Reihenfolge der Seitenleiste, Kategorien, Hintergrund</string>
     <string name="settings_section_search_full">Textsuche</string>
-    <string name="settings_card_search_full_subtitle">Hintergründe, Kategorien, Suchmaschine</string>
-    <string name="settings_search_full_browse_label">Navigation</string>
-    <string name="settings_search_show_az_index">A–Z-Leiste</string>
-    <string name="settings_search_index_show_rail_bar">Leistenhintergrund</string>
     <string name="settings_app_list_search_button">Suchbutton</string>
     <string name="settings_app_list_search_button_summary">Schwebender Suchbutton in der App-Übersicht an der Position des Dock-Buttons.</string>
-    <string name="settings_layer_surface_search_button">Suchbutton</string>
-    <string name="settings_app_overview_elements_label">Elemente</string>
-    <string name="settings_app_list_style_label">Anordnung der Einträge</string>
-    <string name="settings_app_list_style_list">Liste</string>
-    <string name="settings_app_list_style_tiles">Kacheln</string>
     <string name="settings_app_icon_label">Symbol</string>
     <string name="settings_app_icon_default">Standard</string>
     <string name="settings_app_icon_reset">Standardsymbol verwenden</string>
     <string name="settings_folder_creator_search">Apps suchen</string>
     <string name="settings_folder_creator_selected">%1$d ausgewählt</string>
-    <string name="settings_search_app_list_mode_label">Anzeigemodus</string>
-    <string name="settings_search_app_list_mode_fullscreen">Vollbild</string>
-    <string name="settings_search_app_list_mode_window">Fenster</string>
-    <string name="touch_feedback_hint_open">Toneinstellungen öffnen</string>
     <string name="settings_permissions_system_group">System</string>
     <string name="settings_permissions_touch_feedback">Berührungsfeedback</string>
     <string name="settings_permissions_touch_feedback_purpose">Tastenvibration der Suchtastatur. Systemeinstellung; öffnet die Toneinstellungen.</string>
@@ -587,7 +519,6 @@
     <string name="widget_notes_empty">Noch keine Notizen</string>
     <string name="widget_notes_untitled">Ohne Titel</string>
     <string name="widget_notes_hide">Im Widget ausblenden</string>
-    <string name="widget_notes_show_in_widget">Im Widget anzeigen</string>
     <string name="widget_notes_add">Neue Notiz</string>
     <string name="widget_notes_edit">Bearbeiten</string>
     <string name="widget_notes_done">Fertig</string>
@@ -605,6 +536,5 @@
     <string name="note_add_item">Eintrag hinzufügen</string>
     <string name="note_item_remove">Eintrag entfernen</string>
 
-    <string name="search_action_backspace">Löschen</string>
     <string name="settings_info_button">Hinweis</string>
 </resources>

@@ -22,13 +22,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CreateNewFolder
-import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ViewCarousel
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,7 +34,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -55,19 +51,13 @@ import com.bisc.flauncher.data.model.AppInfo
 import com.bisc.flauncher.data.model.RowEntry
 import com.bisc.flauncher.data.model.Folder
 import com.bisc.flauncher.data.model.FolderItem
-import com.bisc.flauncher.data.model.GridConstants
 import com.bisc.flauncher.data.model.GridItemType
-import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.LauncherPage
-import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PinnedWebsite
 import com.bisc.flauncher.data.model.SavedMapTarget
-import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.ui.home.FolderIcon
 import com.bisc.flauncher.ui.home.dock.PageIconGlyph
 import com.bisc.flauncher.ui.home.dock.PageIconGlyphImage
-import com.bisc.flauncher.ui.home.dock.PagePickerSheet
-import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 import com.bisc.flauncher.ui.home.dock.defaultColor
 import com.bisc.flauncher.ui.pageLabel
 
