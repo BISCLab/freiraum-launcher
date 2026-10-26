@@ -1,21 +1,20 @@
 package com.bisc.flauncher.util
 
-import android.app.StatusBarManager
 import android.content.Context
 
-/** Expands the notification shade and quick settings through StatusBarManager (reflection). */
+/** Expands the notification shade and quick settings through the status bar service (reflection
+ *  on the service object's own class, so it works the same on every API level). */
 object SystemActionsUtil {
-    fun expandNotifications(context: Context): Boolean = runCatching {
-        val manager = context.getSystemService(Context.STATUS_BAR_SERVICE) ?: return false
-        val method = StatusBarManager::class.java.getMethod("expandNotificationsPanel")
-        method.invoke(manager)
+    fun expandNotifications(context: Context): Boolean = invokeStatusBar(context, "expandNotificationsPanel")
+
+    fun expandQuickSettings(context: Context): Boolean = invokeStatusBar(context, "expandSettingsPanel")
+
+    private fun invokeStatusBar(context: Context, methodName: String): Boolean = runCatching {
+        @Suppress("WrongConstant")
+        val manager = context.getSystemService(STATUS_BAR_SERVICE) ?: return false
+        manager.javaClass.getMethod(methodName).invoke(manager)
         true
     }.getOrDefault(false)
 
-    fun expandQuickSettings(context: Context): Boolean = runCatching {
-        val manager = context.getSystemService(Context.STATUS_BAR_SERVICE) ?: return false
-        val method = StatusBarManager::class.java.getMethod("expandSettingsPanel")
-        method.invoke(manager)
-        true
-    }.getOrDefault(false)
+    private const val STATUS_BAR_SERVICE = "statusbar"
 }

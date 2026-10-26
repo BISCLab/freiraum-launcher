@@ -56,7 +56,6 @@ class PageContentRepository @Inject constructor(
     val pages: Flow<List<LauncherPage>> = allPages.map { list -> list.filter { it.kind == LauncherPageKind.ROWS } }
 
     val appOverviewPageId: Flow<Long?> = allPages.map { list -> list.firstOrNull { it.kind == LauncherPageKind.APP_LIST }?.id }
-    val searchPageId: Flow<Long?> = allPages.map { list -> list.firstOrNull { it.kind == LauncherPageKind.SEARCH }?.id }
     val rows: Flow<List<PageRow>> = rowDao.observeAll()
     val rowEntries: Flow<List<RowEntry>> = entryDao.observeAll()
 

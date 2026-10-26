@@ -308,44 +308,6 @@ fun ColorPickerRow(title: String, summary: String? = null, info: String? = null,
     }
 }
 
-/** Row+opener for the gradient-capable [ColorFillPickerContent], mirroring [ColorPickerRow] but for
- *  the richer solid/gradient [ColorFill] model — tapping it opens the full editor in its own
- *  [SettingsEditPage] instead of expanding inline. */
-@Composable
-fun ColorFillPickerRow(
-    title: String,
-    fill: ColorFill,
-    onFillChange: (ColorFill) -> Unit,
-    onEyedropperCapture: (() -> ImageBitmap?)? = null
-) {
-    var open by remember { mutableStateOf(false) }
-    SettingsPreference(
-        icon = null,
-        title = title,
-        leading = null,
-        onClick = { open = true },
-        trailing = {
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(fill.asBrush())
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
-            )
-        }
-    )
-    if (open) {
-        SettingsEditPage(title = title, onDismiss = { open = false }) {
-            ColorFillPickerContent(
-                fill = fill,
-                onFillChange = onFillChange,
-                modifier = Modifier.fillMaxWidth(),
-                onEyedropperCapture = onEyedropperCapture
-            )
-        }
-    }
-}
-
 /** The gradient-capable case. */
 @Composable
 fun ColorFillPickerContent(

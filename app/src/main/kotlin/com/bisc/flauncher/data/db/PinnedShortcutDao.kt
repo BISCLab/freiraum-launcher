@@ -1,7 +1,6 @@
 package com.bisc.flauncher.data.db
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.bisc.flauncher.data.model.PinnedShortcut
@@ -15,6 +14,4 @@ interface PinnedShortcutDao {
     @Insert
     suspend fun insert(shortcut: PinnedShortcut): Long
 
-    @Delete
-    suspend fun delete(shortcut: PinnedShortcut)
 }

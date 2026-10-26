@@ -6,13 +6,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -20,7 +18,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.HorizontalRule
@@ -32,8 +29,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -51,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
-import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.ClockAlignment
 import com.bisc.flauncher.data.model.ClockStyle
 import com.bisc.flauncher.data.model.ClockTimeFormat
@@ -63,10 +57,6 @@ import com.bisc.flauncher.ui.pageLabel
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.SystemWidgetPickerSheet
 import com.bisc.flauncher.ui.home.WidgetSizeEditor
-import com.bisc.flauncher.ui.home.dock.AddMapTargetDialog
-import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
-import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
-import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
 /** One page's rows — widget rows and element boxes mixed freely in one drag-reorder list (see [PageRow]'s doc comment). */
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,12 +1,8 @@
 package com.bisc.flauncher.ui.settings
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -80,26 +76,5 @@ fun SettingsFolderScreen(navController: NavController, onBack: () -> Unit, viewM
             onCreate = { name, apps -> viewModel.createFolderWithApps(name, apps); showCreateDialog = false },
             onDismiss = { showCreateDialog = false }
         )
-    }
-}
-
-@Composable
-internal fun CreateFolderDialog(onCreate: (String) -> Unit, onDismiss: () -> Unit) {
-    var name by remember { mutableStateOf("") }
-    SettingsEditSheet(title = stringResource(R.string.settings_folder_creator_title), onDismiss = onDismiss) {
-        OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text(stringResource(R.string.settings_folder_creator_name_hint)) },
-            singleLine = true,
-            shape = SettingsTextFieldShape,
-            modifier = Modifier.fillMaxWidth()
-        )
-        TextButton(
-            onClick = { if (name.isNotBlank()) onCreate(name.trim()) },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(stringResource(R.string.settings_folder_creator_create))
-        }
     }
 }

@@ -1,7 +1,6 @@
 package com.bisc.flauncher.data.db
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.bisc.flauncher.data.model.PinnedContact
@@ -18,6 +17,4 @@ interface PinnedContactDao {
     @Insert
     suspend fun insert(contact: PinnedContact): Long
 
-    @Delete
-    suspend fun delete(contact: PinnedContact)
 }

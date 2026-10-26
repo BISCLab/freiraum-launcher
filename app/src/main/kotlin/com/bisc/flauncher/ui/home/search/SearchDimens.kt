@@ -1,7 +1,5 @@
 package com.bisc.flauncher.ui.home.search
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
@@ -24,19 +22,3 @@ object SearchDimens {
     val itemSpacing = 10.dp
     val referenceWidth = 392.dp
 }
-
-/** One resolved snapshot of [SearchDimens] for a given available width. */
-data class ScaledSearch(
-    val pillWidth: Dp,
-    val cornerRadius: Dp = SearchDimens.cornerRadius,
-    val innerHorizontalPadding: Dp = SearchDimens.innerHorizontalPadding,
-    val innerVerticalPadding: Dp = SearchDimens.innerVerticalPadding,
-    val iconSize: Dp = SearchDimens.iconSize,
-    val iconCornerRadius: Dp = SearchDimens.iconCornerRadius,
-    val buttonSize: Dp = SearchDimens.iconSize,
-    val itemSpacing: Dp = SearchDimens.itemSpacing
-)
-
-@Composable
-fun searchDimens(availableWidth: Dp): ScaledSearch =
-    ScaledSearch(pillWidth = SearchDimens.referenceWidth.coerceAtMost(availableWidth))

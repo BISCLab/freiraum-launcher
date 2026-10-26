@@ -25,12 +25,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
+import android.annotation.SuppressLint
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
 import com.bisc.flauncher.ui.pageLabel
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.theme.noRippleClickable
 
+// currentBackStack is the only way to read the whole stack (there's no public equivalent), and the
+// breadcrumbs need every settings entry on it, not just the current/previous one.
+@SuppressLint("RestrictedApi")
 @Composable
 internal fun SettingsBreadcrumbBar(navController: NavController) {
     val backStack by navController.currentBackStack.collectAsState()

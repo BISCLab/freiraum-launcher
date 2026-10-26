@@ -77,9 +77,8 @@ object DockDimens {
     }
 
     /** Non-composable snapshot of the dock's geometry, for surfaces that mirror the dock's footprint
-     *  (the floating search button, the app overview's reserved bottom inset, a folder's dock replica,
-     *  the system-widget height cap) but have no reason to track the user's width-mode/slot-count choice
-     *  themselves — they assume the default fixed 5-slot width, same as [dockDimens] without an override. */
+     *  (a folder's dock replica, the system-widget height cap) but have no reason to track the user's
+     *  width-mode/slot-count choice themselves — they assume the default fixed 5-slot width. */
     fun scaled(availableWidth: Dp): ScaledDock = ScaledDock(
         pillWidth = pillWidth(REFERENCE_SLOT_COUNT, DockWidthMode.FIXED, availableWidth),
         barHeight = barHeight,
@@ -92,9 +91,6 @@ object DockDimens {
         innerVerticalPadding = innerVerticalPadding
     )
 }
-
-/** Corner radius of the Layer-2 widgets/cards (see WidgetCard). */
-val WidgetCornerRadius = 20.dp
 
 /** One consistently-resolved snapshot of the dock's dimensions. */
 data class ScaledDock(
