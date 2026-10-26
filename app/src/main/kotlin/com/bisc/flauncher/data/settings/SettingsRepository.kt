@@ -8,8 +8,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.bisc.flauncher.data.model.AppListDisplayMode
-import com.bisc.flauncher.data.model.AppListLayout
 import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.BackgroundSource
 import com.bisc.flauncher.data.model.ColorFill
@@ -88,21 +86,6 @@ class SettingsRepository @Inject constructor(
         prefs[ACCENT_COLOR_KEY] ?: DEFAULT_ACCENT_COLOR
     }
 
-    fun folderShowAddRow(folderId: Long): Flow<Boolean> =
-        dataStore.data.map { prefs -> prefs[folderShowAddRowKey(folderId)] ?: (prefs[FOLDER_SHOW_ADD_ROW_DEFAULT_KEY] ?: true) }
-
-    private fun folderShowAddRowKey(folderId: Long) = booleanPreferencesKey("folder_show_add_row_$folderId")
-
-    /** Persistent default for whether a not-yet-overridden folder shows its own "Add …" row — unlike
-     *  [hideFolderAddRowEverywhere], which only mass-writes the per-folder keys that already exist,
-     *  this is read by [folderShowAddRow] as the fallback for folders with no per-folder key set yet,
-     *  including ones created after this default is changed. */
-    val folderShowAddRowDefault: Flow<Boolean> = dataStore.data.map { it[FOLDER_SHOW_ADD_ROW_DEFAULT_KEY] ?: true }
-
-    suspend fun setFolderShowAddRowDefault(show: Boolean) {
-        dataStore.edit { it[FOLDER_SHOW_ADD_ROW_DEFAULT_KEY] = show }
-    }
-
     val chargingAnimationColor: Flow<Int> = dataStore.data.map { it[CHARGING_ANIMATION_COLOR_KEY] ?: 0xFF34D058.toInt() }
 
     suspend fun setChargingAnimationColor(color: Int) {
@@ -114,9 +97,16 @@ class SettingsRepository @Inject constructor(
 
     // ---- Text search ----
 
-    val searchShowAzIndex: Flow<Boolean> = dataStore.data.map { it[SEARCH_SHOW_AZ_INDEX_KEY] ?: true }
+    val appListShowAzIndex: Flow<Boolean> = dataStore.data.map { it[SEARCH_SHOW_AZ_INDEX_KEY] ?: true }
 
     val searchHideStatusBar: Flow<Boolean> = dataStore.data.map { it[SEARCH_HIDE_STATUS_BAR_KEY] ?: true }
+
+    /** Whether settings show their "?" tip buttons. Off by default. */
+    val showSettingsTips: Flow<Boolean> = dataStore.data.map { it[SHOW_SETTINGS_TIPS_KEY] ?: false }
+
+    suspend fun setShowSettingsTips(show: Boolean) {
+        dataStore.edit { it[SHOW_SETTINGS_TIPS_KEY] = show }
+    }
 
     /** Whether the system keyboard shows itself immediately when search opens, vs. staying
      *  unfocused until the user taps the input field. */
@@ -124,6 +114,51 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setSearchKeyboardAutoOpen(enabled: Boolean) {
         dataStore.edit { it[SEARCH_KEYBOARD_AUTO_OPEN_KEY] = enabled }
+    }
+
+    /** The search screen's top input bar (field + category row) — its own fill/border, separate
+     *  from [searchAppearance]; null until customized, so the bar keeps following the screen's look. */
+    val searchBarAppearance: Flow<ElementAppearance?> = customElementAppearanceFor(SEARCH_BAR_PREFIX, ElementAppearance())
+
+    suspend fun setSearchBarAppearance(appearance: ElementAppearance) = setElementAppearanceFor(SEARCH_BAR_PREFIX, appearance)
+
+    /** Null = follow the global default corner roundness. */
+    val searchBarCornerRadiusPercent: Flow<Int?> = dataStore.data.map { it[SEARCH_BAR_CORNER_RADIUS_KEY] }
+
+    suspend fun setSearchBarCornerRadiusPercent(percent: Int) {
+        dataStore.edit { it[SEARCH_BAR_CORNER_RADIUS_KEY] = percent }
+    }
+
+    /** The search result cards — same split as [searchBarAppearance]: null until customized. */
+    val searchResultsAppearance: Flow<ElementAppearance?> = customElementAppearanceFor(SEARCH_RESULTS_PREFIX, ElementAppearance())
+
+    suspend fun setSearchResultsAppearance(appearance: ElementAppearance) = setElementAppearanceFor(SEARCH_RESULTS_PREFIX, appearance)
+
+    /** Null = fully rounded, the cards' original look. */
+    val searchResultsCornerRadiusPercent: Flow<Int?> = dataStore.data.map { it[SEARCH_RESULTS_CORNER_RADIUS_KEY] }
+
+    suspend fun setSearchResultsCornerRadiusPercent(percent: Int) {
+        dataStore.edit { it[SEARCH_RESULTS_CORNER_RADIUS_KEY] = percent }
+    }
+
+    /** Keyboard extension: a slim rounded strip drawn right above the system keyboard, colored to
+     *  match it, so the keyboard appears to have rounded top corners. Off by default. */
+    val searchKeyboardCapEnabled: Flow<Boolean> = dataStore.data.map { it[SEARCH_KEYBOARD_CAP_ENABLED_KEY] ?: false }
+
+    val searchKeyboardCapColor: Flow<Int> = dataStore.data.map { it[SEARCH_KEYBOARD_CAP_COLOR_KEY] ?: DEFAULT_KEYBOARD_CAP_COLOR }
+
+    val searchKeyboardCapCornerRadiusPercent: Flow<Int> = dataStore.data.map { it[SEARCH_KEYBOARD_CAP_CORNER_RADIUS_KEY] ?: 100 }
+
+    suspend fun setSearchKeyboardCapEnabled(enabled: Boolean) {
+        dataStore.edit { it[SEARCH_KEYBOARD_CAP_ENABLED_KEY] = enabled }
+    }
+
+    suspend fun setSearchKeyboardCapColor(color: Int) {
+        dataStore.edit { it[SEARCH_KEYBOARD_CAP_COLOR_KEY] = color }
+    }
+
+    suspend fun setSearchKeyboardCapCornerRadiusPercent(percent: Int) {
+        dataStore.edit { it[SEARCH_KEYBOARD_CAP_CORNER_RADIUS_KEY] = percent }
     }
 
     val searchEngine: Flow<SearchEngine> = dataStore.data.map { prefs ->
@@ -189,8 +224,6 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { if (packageName == null) it.remove(SEARCH_MAPS_APP_KEY) else it[SEARCH_MAPS_APP_KEY] = packageName }
     }
 
-    val searchIndexShowRailBar: Flow<Boolean> = dataStore.data.map { it[SEARCH_INDEX_SHOW_RAIL_BAR_KEY] ?: true }
-
     /** Which edge the app-overview's own alphabet rail and floating search button sit on — the
      *  App overview page's own setting (see SettingsAppOverviewSection), not a global one: nothing
      *  else in the launcher has a left/right-dependent layout. */
@@ -198,34 +231,46 @@ class SettingsRepository @Inject constructor(
         prefs[APP_OVERVIEW_HANDEDNESS_KEY]?.let { runCatching { Handedness.valueOf(it) }.getOrNull() } ?: Handedness.RIGHT
     }
 
-    val searchHeaderLetterAppearance: Flow<ElementAppearance> =
+    val appListHeaderLetterAppearance: Flow<ElementAppearance> =
         elementAppearanceFor("search_header_letter", ElementAppearance(fillMode = ElementFillMode.NONE, borderEnabled = true))
-
-    val searchAlphabetLetterAppearance: Flow<ElementAppearance> =
-        elementAppearanceFor("search_alphabet_letter", ElementAppearance(fillMode = ElementFillMode.NONE))
 
     // ---- App overview ----
 
-    val appListLayout: Flow<AppListLayout> = dataStore.data.map { prefs ->
-        prefs[APP_LIST_LAYOUT_KEY]?.let { runCatching { AppListLayout.valueOf(it) }.getOrNull() } ?: AppListLayout.LIST
-    }
-
     val appListShowSearchButton: Flow<Boolean> = dataStore.data.map { it[APP_LIST_SHOW_SEARCH_BUTTON_KEY] ?: true }
-
-    val appListDisplayMode: Flow<AppListDisplayMode> = dataStore.data.map { prefs ->
-        prefs[APP_LIST_DISPLAY_MODE_KEY]?.let { runCatching { AppListDisplayMode.valueOf(it) }.getOrNull() }
-            ?: AppListDisplayMode.FULLSCREEN
-    }
-
-    // Unlike the other Layer-2 elements above, this one paints as a full-screen fill (not a bounded
-    // card) whenever the app list is in fullscreen mode — fullscreen mode is itself the app's own
-    // default, so an opaque default here silently hid every Layer-1 background/image behind it.
-    val appListContentAppearance: Flow<ElementAppearance> =
-        elementAppearanceFor("app_list_content", ElementAppearance(borderEnabled = true, opacity = 0f))
 
     // ---- Page backgrounds, sidebar ----
 
     fun pageBackgroundOverride(pageId: Long): Flow<BackgroundConfig?> = backgroundOverrideFor(pageKey(pageId))
+
+    /** A page's own darken/lighten applied to the *global* background while it has no override of its
+     *  own; null = the global background's own shade. Kept apart from the override so switching back
+     *  to "use global" doesn't lose it. */
+    fun pageGlobalShade(pageId: Long): Flow<Float?> = globalShadeFor(pageKey(pageId))
+
+    suspend fun setPageGlobalShade(pageId: Long, shade: Float) = setGlobalShadeFor(pageKey(pageId), shade)
+
+    suspend fun clearPageGlobalShade(pageId: Long) {
+        dataStore.edit { it.remove(globalShadeKey(pageKey(pageId))) }
+    }
+
+    /** The text search screen's own backdrop, same override/global-shade pair as a page's. */
+    val searchBackgroundOverride: Flow<BackgroundConfig?> = backgroundOverrideFor(SEARCH_BACKGROUND_KEY)
+
+    val searchGlobalShade: Flow<Float?> = globalShadeFor(SEARCH_BACKGROUND_KEY)
+
+    suspend fun setSearchBackgroundConfig(config: BackgroundConfig) = setBackgroundConfigFor(SEARCH_BACKGROUND_KEY, config)
+
+    suspend fun clearSearchBackgroundConfig() = clearBackgroundConfigFor(SEARCH_BACKGROUND_KEY)
+
+    suspend fun setSearchGlobalShade(shade: Float) = setGlobalShadeFor(SEARCH_BACKGROUND_KEY, shade)
+
+    private fun globalShadeKey(key: String) = floatPreferencesKey("bg_${key}_global_shade")
+
+    private fun globalShadeFor(key: String): Flow<Float?> = dataStore.data.map { it[globalShadeKey(key)] }
+
+    private suspend fun setGlobalShadeFor(key: String, shade: Float) {
+        dataStore.edit { it[globalShadeKey(key)] = shade.coerceIn(-1f, 1f) }
+    }
 
     private fun readBackgroundConfig(prefs: Preferences, key: String, default: BackgroundConfig): BackgroundConfig = BackgroundConfig(
         source = prefs[backgroundSourceKey(key)]?.let { runCatching { BackgroundSource.valueOf(it) }.getOrNull() }
@@ -248,10 +293,7 @@ class SettingsRepository @Inject constructor(
 
     // Null exactly when this surface has never been given its own explicit background — the surface
     // then falls back to the single global background instead. Same "null means untouched, fall back to
-    // the shared default" shape already used for dockSearchButtonAppearance etc., just applied to layer 1
-    // now that per-surface *images* went away in favor of one global image with only a per-surface color
-    // override remaining (a color-to-color or color-to-(cached, already GPU-resident) global-image
-    // crossfade never showed the flicker a custom-image-to-custom-image one did).
+    // the shared default" shape already used for dockSearchButtonAppearance etc., just applied to layer 1.
     private fun backgroundOverrideFor(key: String): Flow<BackgroundConfig?> = dataStore.data.map { prefs ->
         if (prefs[backgroundSourceKey(key)] == null) null else readBackgroundConfig(prefs, key, BackgroundConfig())
     }
@@ -270,9 +312,10 @@ class SettingsRepository @Inject constructor(
 
     private fun pageKey(pageId: Long) = "page_$pageId"
 
-    // ---- Layer 1: one global background shared by every surface (pages, app overview, both search
-    // surfaces), with an optional per-surface color-only override. See backgroundOverrideFor above for
-    // why images are global-only now.
+    // ---- Layer 1: one global background shared by every surface (pages, app overview, text search),
+    // with an optional per-surface override (own color or own image) or, without one, a per-surface
+    // darken/lighten of the global one. The image-to-image crossfade flicker that once got per-surface
+    // images removed is handled at draw time now (see BackgroundCrossfade).
 
     val globalBackground: Flow<BackgroundConfig> = backgroundConfigFor(GLOBAL_BACKGROUND_KEY, BackgroundConfig())
 
@@ -391,11 +434,11 @@ class SettingsRepository @Inject constructor(
         }
     }
 
-    val searchAlphabetRailAppearance: Flow<ElementAppearance?> = customElementAppearanceFor(RAIL_PREFIX, ElementAppearance(borderEnabled = true))
+    val appListRailAppearance: Flow<ElementAppearance?> = customElementAppearanceFor(RAIL_PREFIX, ElementAppearance(borderEnabled = true))
 
-    suspend fun setSearchAlphabetRailAppearance(appearance: ElementAppearance) = setElementAppearanceFor(RAIL_PREFIX, appearance)
+    suspend fun setAppListRailAppearance(appearance: ElementAppearance) = setElementAppearanceFor(RAIL_PREFIX, appearance)
 
-    suspend fun resetSearchAlphabetRailAppearance() = resetElementAppearanceFor(RAIL_PREFIX)
+    suspend fun resetAppListRailAppearance() = resetElementAppearanceFor(RAIL_PREFIX)
 
     val appListSearchButtonAppearance: Flow<ElementAppearance?> =
         customElementAppearanceFor("app_list_search_button", ElementAppearance(borderEnabled = true))
@@ -476,20 +519,11 @@ class SettingsRepository @Inject constructor(
     }
 
 
-    suspend fun setFolderShowAddRow(folderId: Long, show: Boolean) {
-        dataStore.edit { it[folderShowAddRowKey(folderId)] = show }
-    }
-
-    /** One-shot command: turns the "Add…" row off for every folder that exists right now. */
-    suspend fun hideFolderAddRowEverywhere(folderIds: List<Long>) {
-        dataStore.edit { prefs -> folderIds.forEach { prefs[folderShowAddRowKey(it)] = false } }
-    }
-
     suspend fun setChargingAnimationEnabled(enabled: Boolean) {
         dataStore.edit { it[CHARGING_ANIMATION_ENABLED_KEY] = enabled }
     }
 
-    suspend fun setSearchShowAzIndex(show: Boolean) {
+    suspend fun setAppListShowAzIndex(show: Boolean) {
         dataStore.edit { it[SEARCH_SHOW_AZ_INDEX_KEY] = show }
     }
 
@@ -505,13 +539,8 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[SEARCH_ENGINE_CUSTOM_URL_KEY] = url }
     }
 
-    suspend fun setSearchIndexShowRailBar(show: Boolean) {
-        dataStore.edit { it[SEARCH_INDEX_SHOW_RAIL_BAR_KEY] = show }
-    }
+    suspend fun setAppListHeaderLetterAppearance(appearance: ElementAppearance) = setElementAppearanceFor("search_header_letter", appearance)
 
-    suspend fun setSearchHeaderLetterAppearance(appearance: ElementAppearance) = setElementAppearanceFor("search_header_letter", appearance)
-
-    suspend fun setSearchAlphabetLetterAppearance(appearance: ElementAppearance) = setElementAppearanceFor("search_alphabet_letter", appearance)
 
     suspend fun setAppListSearchButtonAppearance(appearance: ElementAppearance) =
         setElementAppearanceFor("app_list_search_button", appearance)
@@ -519,16 +548,6 @@ class SettingsRepository @Inject constructor(
     suspend fun setAppListShowSearchButton(show: Boolean) {
         dataStore.edit { it[APP_LIST_SHOW_SEARCH_BUTTON_KEY] = show }
     }
-
-    suspend fun setAppListLayout(layout: AppListLayout) {
-        dataStore.edit { it[APP_LIST_LAYOUT_KEY] = layout.name }
-    }
-
-    suspend fun setAppListDisplayMode(mode: AppListDisplayMode) {
-        dataStore.edit { it[APP_LIST_DISPLAY_MODE_KEY] = mode.name }
-    }
-
-    suspend fun setAppListContentAppearance(appearance: ElementAppearance) = setElementAppearanceFor("app_list_content", appearance)
 
     // ---- Setters: backgrounds, gestures ----
 
@@ -571,6 +590,7 @@ class SettingsRepository @Inject constructor(
 
     companion object {
         private const val GLOBAL_BACKGROUND_KEY = "global"
+        const val SEARCH_BACKGROUND_KEY = "search_page"
         private val DEFAULT_ACCENT_COLOR = 0xFF3B82F6.toInt()
 
         private val THEME_KEY = stringPreferencesKey("theme")
@@ -586,7 +606,6 @@ class SettingsRepository @Inject constructor(
         private val FOLDER_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("folder_hide_status_bar")
         private val FOLDER_HIDE_DOCK_KEY = booleanPreferencesKey("folder_hide_dock")
         private val FOLDER_SHOW_LABELS_KEY = booleanPreferencesKey("folder_show_labels")
-        private val FOLDER_SHOW_ADD_ROW_DEFAULT_KEY = booleanPreferencesKey("folder_show_add_row_default")
         private val ACCENT_COLOR_KEY = intPreferencesKey("accent_color")
         private val CHARGING_ANIMATION_COLOR_KEY = intPreferencesKey("charging_animation_color")
         private val CHARGING_ANIMATION_ENABLED_KEY = booleanPreferencesKey("charging_animation_enabled")
@@ -600,10 +619,16 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_MAPS_APP_KEY = stringPreferencesKey("search_maps_app")
         private fun searchIncludeKey(storageKey: String) = booleanPreferencesKey("search_include_$storageKey")
         private val SEARCH_KEYBOARD_AUTO_OPEN_KEY = booleanPreferencesKey("search_keyboard_auto_open")
-        private val SEARCH_INDEX_SHOW_RAIL_BAR_KEY = booleanPreferencesKey("search_index_show_rail_bar")
+        private val SHOW_SETTINGS_TIPS_KEY = booleanPreferencesKey("show_settings_tips")
+        private const val SEARCH_BAR_PREFIX = "search_bar"
+        private val SEARCH_BAR_CORNER_RADIUS_KEY = intPreferencesKey("search_bar_corner_radius_percent")
+        private const val SEARCH_RESULTS_PREFIX = "search_results"
+        private val SEARCH_RESULTS_CORNER_RADIUS_KEY = intPreferencesKey("search_results_corner_radius_percent")
+        private val SEARCH_KEYBOARD_CAP_ENABLED_KEY = booleanPreferencesKey("search_keyboard_cap_enabled")
+        private val SEARCH_KEYBOARD_CAP_COLOR_KEY = intPreferencesKey("search_keyboard_cap_color")
+        private val SEARCH_KEYBOARD_CAP_CORNER_RADIUS_KEY = intPreferencesKey("search_keyboard_cap_corner_radius_percent")
+        const val DEFAULT_KEYBOARD_CAP_COLOR = 0xFFECEEF4.toInt()
         private const val RAIL_PREFIX = "search_alphabet_rail"
-        private val APP_LIST_DISPLAY_MODE_KEY = stringPreferencesKey("app_list_display_mode")
-        private val APP_LIST_LAYOUT_KEY = stringPreferencesKey("app_list_layout")
         private val APP_LIST_SHOW_SEARCH_BUTTON_KEY = booleanPreferencesKey("app_list_show_search_button")
     }
 }

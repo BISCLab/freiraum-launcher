@@ -33,12 +33,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.automirrored.filled.Shortcut
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -110,7 +107,6 @@ fun FolderView(
     folderItemsByFolder: Map<Long, List<FolderItem>>,
     savedMapTargets: List<SavedMapTarget> = emptyList(),
     pinnedWebsites: List<PinnedWebsite> = emptyList(),
-    showAddRow: Boolean = true,
     showLabels: Boolean = false,
     loadIcon: (ComponentName) -> ImageBitmap?,
     loadPackIcon: (String, String) -> ImageBitmap? = { _, _ -> null },
@@ -119,12 +115,6 @@ fun FolderView(
     onFolderClick: (FolderItem) -> Unit,
     onRemoveItem: (FolderItem) -> Unit,
     onReorderItems: (List<FolderItem>) -> Unit = {},
-    onAddAppClick: () -> Unit,
-    onAddShortcutClick: () -> Unit,
-    onAddWidgetClick: () -> Unit,
-    onAddSubfolderClick: () -> Unit,
-    onAddMapTargetClick: () -> Unit = {},
-    onAddWebsiteClick: () -> Unit = {},
     onBack: () -> Unit,
     cardAppearance: ElementAppearance,
     modifier: Modifier = Modifier
@@ -231,20 +221,6 @@ fun FolderView(
                         }
                     }
                 }
-
-                if (showAddRow && movingItemId == null) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        AddButton(Icons.Filled.Add, stringResource(R.string.folder_add_app), onAddAppClick, Modifier.weight(1f))
-                        AddButton(Icons.AutoMirrored.Filled.Shortcut, stringResource(R.string.folder_add_shortcut), onAddShortcutClick, Modifier.weight(1f))
-                        AddButton(Icons.Filled.Place, stringResource(R.string.settings_row_entry_add_map_target), onAddMapTargetClick, Modifier.weight(1f))
-                        AddButton(Icons.Filled.Language, stringResource(R.string.settings_row_entry_add_website), onAddWebsiteClick, Modifier.weight(1f))
-                        AddButton(Icons.Filled.Widgets, stringResource(R.string.folder_add_widget), onAddWidgetClick, Modifier.weight(1f))
-                        AddButton(Icons.Filled.CreateNewFolder, stringResource(R.string.folder_add_subfolder), onAddSubfolderClick, Modifier.weight(1f))
-                    }
-                }
             }
         }
     }
@@ -272,23 +248,6 @@ private fun folderItemLabel(
     GridItemType.MAP_TARGET -> savedMapTargets.find { it.id == item.payload.toLongOrNull() }?.label.orEmpty()
     GridItemType.WEBSITE -> pinnedWebsites.find { it.id == item.payload.toLongOrNull() }?.label.orEmpty()
     GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE, GridItemType.CONTACT, GridItemType.ACTION_BUTTON -> ""
-}
-
-@Composable
-private fun AddButton(icon: ImageVector, label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.combinedClickable(onClick = onClick).padding(vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(imageVector = icon, contentDescription = label)
-        Text(
-            label,
-            style = MaterialTheme.typography.labelSmall,
-            maxLines = 1,
-            softWrap = false,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
 }
 
 @Composable

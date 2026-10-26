@@ -3,7 +3,6 @@ package com.bisc.flauncher.ui.home.search
 import com.bisc.flauncher.util.matchesWordStart
 import android.content.ComponentName
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -18,9 +17,14 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
@@ -44,6 +48,8 @@ import com.bisc.flauncher.data.model.SettingsShortcuts
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.ui.home.dock.resolveElementColors
+import com.bisc.flauncher.ui.home.dock.BackgroundFill
+import com.bisc.flauncher.data.model.BackgroundConfig
 
 /**
  * Full-screen search, decoupled from the dock — reachable from a dock action button, a gesture, or
@@ -69,6 +75,18 @@ fun SearchOverlay(
     contactsPermissionGranted: Boolean,
     appearance: ElementAppearance,
     cornerRadiusPercent: Int,
+    /** Backdrop under [appearance]'s fill; null = none (whatever is behind shows through). */
+    background: BackgroundConfig? = null,
+    /** The input bar's own look; null = same as [appearance] / [cornerRadiusPercent]. */
+    barAppearance: ElementAppearance? = null,
+    barCornerRadiusPercent: Int? = null,
+    /** The result cards' own look; null = same as [appearance], fully rounded. */
+    resultsAppearance: ElementAppearance? = null,
+    resultsCornerRadiusPercent: Int? = null,
+    /** Keyboard extension strip color; null = off. While shown, it is the keyboard's top edge for
+     *  the results above it. */
+    keyboardCapColor: Int? = null,
+    keyboardCapCornerRadiusPercent: Int = 100,
     statusBarHidden: Boolean,
     categoryOrder: List<SearchCategory>,
     activeCategories: Set<SearchCategory>,
@@ -115,7 +133,14 @@ fun SearchOverlay(
         }
     }
 
-    val colors = resolveElementColors(appearance)
+    // The page has no fill of its own over its background any more — [appearance] only contributes
+    // the background's opacity and the text color, automatic = readable against that background.
+    val noFill = appearance.copy(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE)
+    val colors = if (background != null) {
+        resolveElementColors(noFill, rememberSurfaceIsDark(noFill, background))
+    } else {
+        resolveElementColors(noFill)
+    }
 
     // The results take whatever height is left above the system keyboard; hiding it (back
     // gesture) leaves the search.
@@ -125,27 +150,22 @@ fun SearchOverlay(
         if (imeVisible) imeWasShown = true else if (imeWasShown) onHome()
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colors.background, alpha = colors.backgroundAlpha)
-            .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor) else Modifier)
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        // The screen's own backdrop (global, own image or own color); below full opacity whatever
+        // is behind the search shows through it.
+        if (background != null) {
+            BackgroundFill(background, Modifier.matchParentSize().graphicsLayer { alpha = appearance.opacity.coerceIn(0f, 1f) })
+        }
         CompositionLocalProvider(LocalContentColor provides colors.contentColor) {
-            BoxWithConstraints(
-                modifier = Modifier
-                    .fillMaxSize()
-                    // Even with the status bar logically hidden, real hardware still has a physical camera cutout/notch.
-                    .then(
-                        if (statusBarHidden) {
-                            Modifier
-                                .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top))
-                                .padding(top = 16.dp)
-                        } else {
-                            Modifier.statusBarsPadding()
-                        }
-                    )
-            ) {
+            // The top inset goes *inside* the input bar (its background fills it up to the screen
+            // edge, like the Panel), not around it. Even with the status bar logically hidden, real
+            // hardware still has a physical camera cutout/notch.
+            val topInset = if (statusBarHidden) {
+                WindowInsets.displayCutout.only(WindowInsetsSides.Top).asPaddingValues().calculateTopPadding() + 16.dp
+            } else {
+                WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+            }
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -157,13 +177,14 @@ fun SearchOverlay(
                         onQueryChange = onQueryChange,
                         onSubmit = { appResults.firstOrNull()?.let(onAppClick) ?: onWebCommand() },
                         onHome = onHome,
-                        appearance = appearance,
+                        appearance = barAppearance ?: appearance,
                         autoOpen = keyboardAutoOpen,
                         categories = categoryOrder.filter { it != SearchCategory.AI || aiAppLabel != null },
                         categoryColors = categoryColors,
                         selectedCategory = categoryFilter,
                         onToggleCategory = onToggleFilter,
-                        cornerRadiusPercent = cornerRadiusPercent
+                        cornerRadiusPercent = barCornerRadiusPercent ?: cornerRadiusPercent,
+                        topInset = topInset
                     )
                     SearchResultsColumn(
                         query = query,
@@ -180,7 +201,7 @@ fun SearchOverlay(
                         order = categoryOrder,
                         active = activeCategories,
                         aiAppLabel = aiAppLabel,
-                        cardAppearance = appearance,
+                        cardAppearance = resultsAppearance ?: appearance,
                         categoryColors = categoryColors,
                         loadIcon = loadIcon,
                         onAppClick = onAppClick,
@@ -195,10 +216,25 @@ fun SearchOverlay(
                         onEmailCommand = onEmailCommand,
                         onAiCommand = onAiCommand,
                         onCalculatorResultClick = { result -> onQueryChange(result) },
-                        modifier = Modifier.weight(1f).fillMaxWidth()
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        cardCornerRadiusPercent = resultsCornerRadiusPercent
                     )
+                    // Sits directly on top of the keyboard (this Column is IME-padded), so the
+                    // results' bottom edge and fade end at the strip instead of the keyboard itself.
+                    if (keyboardCapColor != null && imeVisible) {
+                        val capRadius = KEYBOARD_CAP_HEIGHT * (keyboardCapCornerRadiusPercent.coerceIn(0, 100) / 100f)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(KEYBOARD_CAP_HEIGHT)
+                                .clip(RoundedCornerShape(topStart = capRadius, topEnd = capRadius))
+                                .background(Color(keyboardCapColor))
+                        )
+                    }
                 }
             }
         }
     }
 }
+
+private val KEYBOARD_CAP_HEIGHT = 20.dp

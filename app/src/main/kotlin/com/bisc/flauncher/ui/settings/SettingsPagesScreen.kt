@@ -107,12 +107,11 @@ fun SettingsPagesScreen(
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_pages), navController = navController, onBack = onBack) {
         SettingsGroupLabel(stringResource(R.string.settings_pages_carousel_label))
+        // Icon and name live in each page's own Appearance screen (see PageIdentityRows), removal at
+        // the bottom of its settings screen.
         PagesCarousel(
             pages = rowsPages,
             onTileClick = onOpenPage,
-            onEditIcon = { page -> onOpenIcon(page.id) },
-            onRename = { page -> renamingPage = page },
-            onRemove = { page -> viewModel.removePage(context, page) },
             onAddLeft = { pickingTemplateForDirection = PageDirection.LEFT },
             onAddRight = { pickingTemplateForDirection = PageDirection.RIGHT }
         )
@@ -201,27 +200,89 @@ fun SettingsPagesScreen(
     }
 
     renamingPage?.let { page ->
-        var name by remember(page.id) { mutableStateOf(page.name.orEmpty()) }
-        AlertDialog(
-            onDismissRequest = { renamingPage = null },
-            title = { Text(stringResource(R.string.settings_pages_rename)) },
-            text = {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    singleLine = true,
-                    label = { Text(stringResource(R.string.settings_pages_rename_hint)) }
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.renamePage(page.id, name)
-                    renamingPage = null
-                }) { Text(stringResource(R.string.settings_rows_save)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { renamingPage = null }) { Text(stringResource(R.string.widget_notes_cancel)) }
+        RenamePageDialog(
+            page = page,
+            onSave = { name -> viewModel.renamePage(page.id, name); renamingPage = null },
+            onDismiss = { renamingPage = null }
+        )
+    }
+}
+
+@Composable
+private fun RenamePageDialog(page: LauncherPage, onSave: (String) -> Unit, onDismiss: () -> Unit) {
+    var name by remember(page.id) { mutableStateOf(page.name.orEmpty()) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_pages_rename)) },
+        text = {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                singleLine = true,
+                label = { Text(stringResource(R.string.settings_pages_rename_hint)) }
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onSave(name) }) { Text(stringResource(R.string.settings_rows_save)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.widget_notes_cancel)) }
+        }
+    )
+}
+
+/** A carousel page's own Icon and Name rows, for the top of its Appearance screen's card. */
+@Composable
+internal fun PageIdentityRows(page: LauncherPage, pages: List<LauncherPage>, onOpenIcon: () -> Unit, onRename: (String) -> Unit) {
+    var renaming by remember { mutableStateOf(false) }
+    val glyph = page.iconGlyph?.let { runCatching { PageIconGlyph.valueOf(it) }.getOrNull() } ?: PageIconGlyph.forPageKind(page.kind)
+    val bg = page.iconBackgroundColor?.let { Color(it) } ?: glyph.defaultColor()
+    val tint = page.iconColor?.let { Color(it) } ?: Color.White
+    run {
+        SettingsPreference(
+            icon = null,
+            title = stringResource(R.string.settings_page_icon_title),
+            onClick = onOpenIcon,
+            trailing = {
+                Box(
+                    modifier = Modifier.size(32.dp).clip(RoundedCornerShape(10.dp)).background(bg),
+                    contentAlignment = Alignment.Center
+                ) {
+                    PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(18.dp))
+                }
             }
+        )
+        SettingsPreference(
+            icon = null,
+            title = stringResource(R.string.settings_pages_rename),
+            summary = pageLabel(page, pages),
+            onClick = { renaming = true },
+            trailing = null
+        )
+    }
+    if (renaming) {
+        RenamePageDialog(page = page, onSave = { onRename(it); renaming = false }, onDismiss = { renaming = false })
+    }
+}
+
+/** "Remove page" at the bottom of a removable page's settings — asks first, since everything on
+ *  the page goes with it. */
+@Composable
+internal fun RemovePageGroup(label: String, onRemove: () -> Unit) {
+    var confirming by remember { mutableStateOf(false) }
+    SettingsPreferenceGroup {
+        SettingsPreference(
+            icon = Icons.Filled.DeleteOutline,
+            title = stringResource(R.string.settings_pages_remove),
+            onClick = { confirming = true },
+            trailing = null
+        )
+    }
+    if (confirming) {
+        com.bisc.flauncher.ui.home.ConfirmRemoveDialog(
+            label = label,
+            onConfirm = { confirming = false; onRemove() },
+            onDismiss = { confirming = false }
         )
     }
 }
@@ -236,9 +297,6 @@ private val CAROUSEL_SPACING = 12.dp
 private fun PagesCarousel(
     pages: List<LauncherPage>,
     onTileClick: (LauncherPage) -> Unit,
-    onEditIcon: (LauncherPage) -> Unit,
-    onRename: (LauncherPage) -> Unit,
-    onRemove: (LauncherPage) -> Unit,
     onAddLeft: () -> Unit,
     onAddRight: () -> Unit
 ) {
@@ -269,10 +327,7 @@ private fun PagesCarousel(
                     page = page,
                     pages = pages,
                     width = tileWidth,
-                    onClick = { onTileClick(page) },
-                    onEditIcon = { onEditIcon(page) },
-                    onRename = { onRename(page) },
-                    onRemove = { onRemove(page) }
+                    onClick = { onTileClick(page) }
                 )
             }
             item { GhostTile(width = tileWidth, onClick = onAddRight) }
@@ -285,21 +340,17 @@ private fun PageTile(
     page: LauncherPage,
     pages: List<LauncherPage>,
     width: androidx.compose.ui.unit.Dp,
-    onClick: () -> Unit,
-    onEditIcon: () -> Unit,
-    onRename: () -> Unit,
-    onRemove: () -> Unit
+    onClick: () -> Unit
 ) {
     val label = pageLabel(page, pages)
     val glyph = page.iconGlyph?.let { runCatching { PageIconGlyph.valueOf(it) }.getOrNull() } ?: PageIconGlyph.forPageKind(page.kind)
     val bg = page.iconBackgroundColor?.let { Color(it) } ?: glyph.defaultColor()
     val tint = page.iconColor?.let { Color(it) } ?: Color.White
-    var menuExpanded by remember { mutableStateOf(false) }
     Box {
         Column(
             modifier = Modifier
                 .width(width)
-                .combinedClickable(onClick = onClick, onLongClick = { menuExpanded = true })
+                .clickable(onClick = onClick)
                 .padding(vertical = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -322,25 +373,6 @@ private fun PageTile(
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
-        }
-        DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.settings_page_icon_title)) },
-                leadingIcon = { Icon(Icons.Filled.Palette, contentDescription = null) },
-                onClick = { onEditIcon(); menuExpanded = false }
-            )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.settings_pages_rename)) },
-                leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
-                onClick = { onRename(); menuExpanded = false }
-            )
-            if (!page.isHome) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.settings_pages_remove)) },
-                    leadingIcon = { Icon(Icons.Filled.DeleteOutline, contentDescription = null) },
-                    onClick = { onRemove(); menuExpanded = false }
-                )
-            }
         }
     }
 }

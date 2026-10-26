@@ -121,6 +121,12 @@ fun SettingsDockBorderScreen(pageId: Long, navController: NavController, onBack:
     val row = rememberDockRow(pageId, viewModel) ?: return
     SettingsSubScreen(title = stringResource(R.string.settings_element_border_label), navController = navController, onBack = onBack) {
         ElementBorderSection(appearance = row.appearance(), onAppearanceChange = { viewModel.setRowAppearance(row, it) })
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
+            ExpandablePercentSlider(
+                percent = row.cornerRadiusPercent,
+                onSettled = { viewModel.setRowCornerRadiusPercent(row, it) }
+            )
+        }
     }
 }
 

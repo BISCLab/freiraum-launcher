@@ -7,8 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.AppInfo
-import com.bisc.flauncher.data.model.AppListDisplayMode
-import com.bisc.flauncher.data.model.AppListLayout
 import com.bisc.flauncher.data.model.AppOverride
 import com.bisc.flauncher.data.model.GestureAction
 import com.bisc.flauncher.data.model.HomeGesture
@@ -104,15 +102,15 @@ class SettingsViewModel @Inject constructor(
     val defaultCornerRadiusPercent: StateFlow<Int> =
         repository.defaultCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, 25)
 
-    val searchAlphabetRailAppearance: StateFlow<ElementAppearance?> =
-        repository.searchAlphabetRailAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    val appListRailAppearance: StateFlow<ElementAppearance?> =
+        repository.appListRailAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    fun setSearchAlphabetRailAppearance(appearance: ElementAppearance) {
-        viewModelScope.launch { repository.setSearchAlphabetRailAppearance(appearance) }
+    fun setAppListRailAppearance(appearance: ElementAppearance) {
+        viewModelScope.launch { repository.setAppListRailAppearance(appearance) }
     }
 
-    fun resetSearchAlphabetRailAppearance() {
-        viewModelScope.launch { repository.resetSearchAlphabetRailAppearance() }
+    fun resetAppListRailAppearance() {
+        viewModelScope.launch { repository.resetAppListRailAppearance() }
     }
 
     fun pageHideStatusBar(pageId: Long): Flow<Boolean> = repository.pageHideStatusBar(pageId)
@@ -162,23 +160,6 @@ class SettingsViewModel @Inject constructor(
 
     val folderCardAppearance: StateFlow<ElementAppearance> =
         repository.folderCardAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
-
-    fun folderShowAddRow(folderId: Long): Flow<Boolean> = repository.folderShowAddRow(folderId)
-
-    fun setFolderShowAddRow(folderId: Long, show: Boolean) {
-        viewModelScope.launch { repository.setFolderShowAddRow(folderId, show) }
-    }
-
-    fun hideFolderAddRowEverywhere() {
-        viewModelScope.launch { repository.hideFolderAddRowEverywhere(folders.value.map { it.id }) }
-    }
-
-    val folderShowAddRowDefault: StateFlow<Boolean> =
-        repository.folderShowAddRowDefault.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-
-    fun setFolderShowAddRowDefault(show: Boolean) {
-        viewModelScope.launch { repository.setFolderShowAddRowDefault(show) }
-    }
 
     val folders: StateFlow<List<com.bisc.flauncher.data.model.Folder>> =
         folderRepository.folders.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
@@ -234,6 +215,10 @@ class SettingsViewModel @Inject constructor(
 
     fun addMapTargetToFolder(folderId: Long, targetId: Long) {
         viewModelScope.launch { folderRepository.addMapTargetToFolder(folderId, targetId) }
+    }
+
+    fun addWidgetToFolder(folderId: Long, kind: String, spanY: Int) {
+        viewModelScope.launch { folderRepository.addWidgetToFolder(folderId, kind, spanY) }
     }
 
     fun addNewMapTargetToFolder(folderId: Long, label: String, lat: Double, lon: Double, address: String = "") {
@@ -357,11 +342,57 @@ class SettingsViewModel @Inject constructor(
     val searchKeyboardAutoOpen: StateFlow<Boolean> =
         repository.searchKeyboardAutoOpen.stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
+    val showSettingsTips: StateFlow<Boolean> =
+        repository.showSettingsTips.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun setShowSettingsTips(show: Boolean) {
+        viewModelScope.launch { repository.setShowSettingsTips(show) }
+    }
+
+    val searchBarAppearance: StateFlow<ElementAppearance?> =
+        repository.searchBarAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val searchBarCornerRadiusPercent: StateFlow<Int?> =
+        repository.searchBarCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val searchBackgroundOverride: StateFlow<BackgroundConfig?> =
+        repository.searchBackgroundOverride.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val searchGlobalShade: StateFlow<Float?> =
+        repository.searchGlobalShade.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    fun setSearchBackgroundConfig(config: BackgroundConfig) {
+        viewModelScope.launch { repository.setSearchBackgroundConfig(config) }
+    }
+
+    fun clearSearchBackgroundConfig() {
+        viewModelScope.launch { repository.clearSearchBackgroundConfig() }
+    }
+
+    fun setSearchGlobalShade(shade: Float) {
+        viewModelScope.launch { repository.setSearchGlobalShade(shade) }
+    }
+
+    val searchResultsAppearance: StateFlow<ElementAppearance?> =
+        repository.searchResultsAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val searchResultsCornerRadiusPercent: StateFlow<Int?> =
+        repository.searchResultsCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val searchKeyboardCapEnabled: StateFlow<Boolean> =
+        repository.searchKeyboardCapEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val searchKeyboardCapColor: StateFlow<Int> =
+        repository.searchKeyboardCapColor.stateIn(viewModelScope, SharingStarted.Eagerly, SettingsRepository.DEFAULT_KEYBOARD_CAP_COLOR)
+
+    val searchKeyboardCapCornerRadiusPercent: StateFlow<Int> =
+        repository.searchKeyboardCapCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, 100)
+
     val globalBackground: StateFlow<BackgroundConfig> =
         repository.globalBackground.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig())
 
-    val searchShowAzIndex: StateFlow<Boolean> =
-        repository.searchShowAzIndex.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val appListShowAzIndex: StateFlow<Boolean> =
+        repository.appListShowAzIndex.stateIn(viewModelScope, SharingStarted.Eagerly, true)
     val searchHideStatusBar: StateFlow<Boolean> =
         repository.searchHideStatusBar.stateIn(viewModelScope, SharingStarted.Eagerly, true)
     val searchIncluded: StateFlow<Set<SearchCategory>> =
@@ -381,25 +412,11 @@ class SettingsViewModel @Inject constructor(
         repository.searchEngine.stateIn(viewModelScope, SharingStarted.Eagerly, SearchEngine.DUCKDUCKGO)
     val searchEngineCustomUrl: StateFlow<String> =
         repository.searchEngineCustomUrl.stateIn(viewModelScope, SharingStarted.Eagerly, "")
-    val searchIndexShowRailBar: StateFlow<Boolean> =
-        repository.searchIndexShowRailBar.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-    val searchHeaderLetterAppearance: StateFlow<ElementAppearance> =
-        repository.searchHeaderLetterAppearance.stateIn(
+    val appListHeaderLetterAppearance: StateFlow<ElementAppearance> =
+        repository.appListHeaderLetterAppearance.stateIn(
             viewModelScope, SharingStarted.Eagerly, ElementAppearance(fillMode = ElementFillMode.NONE, borderEnabled = true)
         )
-    val searchAlphabetLetterAppearance: StateFlow<ElementAppearance> =
-        repository.searchAlphabetLetterAppearance.stateIn(
-            viewModelScope, SharingStarted.Eagerly, ElementAppearance(fillMode = ElementFillMode.NONE)
-        )
-    val appListLayout: StateFlow<AppListLayout> =
-        repository.appListLayout.stateIn(viewModelScope, SharingStarted.Eagerly, AppListLayout.LIST)
 
-    fun setAppListLayout(layout: AppListLayout) {
-        viewModelScope.launch { repository.setAppListLayout(layout) }
-    }
-
-    val appListDisplayMode: StateFlow<AppListDisplayMode> =
-        repository.appListDisplayMode.stateIn(viewModelScope, SharingStarted.Eagerly, AppListDisplayMode.FULLSCREEN)
     val appListSearchButtonAppearance: StateFlow<ElementAppearance?> =
         repository.appListSearchButtonAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
@@ -417,9 +434,6 @@ class SettingsViewModel @Inject constructor(
     fun setAppListShowSearchButton(show: Boolean) {
         viewModelScope.launch { repository.setAppListShowSearchButton(show) }
     }
-
-    val appListContentAppearance: StateFlow<ElementAppearance> =
-        repository.appListContentAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
 
     val chargingAnimationColor: StateFlow<Int> =
         repository.chargingAnimationColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF34D058.toInt())
@@ -647,12 +661,40 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setSearchKeyboardAutoOpen(enabled) }
     }
 
+    fun setSearchBarAppearance(appearance: ElementAppearance) {
+        viewModelScope.launch { repository.setSearchBarAppearance(appearance) }
+    }
+
+    fun setSearchBarCornerRadiusPercent(percent: Int) {
+        viewModelScope.launch { repository.setSearchBarCornerRadiusPercent(percent) }
+    }
+
+    fun setSearchResultsAppearance(appearance: ElementAppearance) {
+        viewModelScope.launch { repository.setSearchResultsAppearance(appearance) }
+    }
+
+    fun setSearchResultsCornerRadiusPercent(percent: Int) {
+        viewModelScope.launch { repository.setSearchResultsCornerRadiusPercent(percent) }
+    }
+
+    fun setSearchKeyboardCapEnabled(enabled: Boolean) {
+        viewModelScope.launch { repository.setSearchKeyboardCapEnabled(enabled) }
+    }
+
+    fun setSearchKeyboardCapColor(color: Int) {
+        viewModelScope.launch { repository.setSearchKeyboardCapColor(color) }
+    }
+
+    fun setSearchKeyboardCapCornerRadiusPercent(percent: Int) {
+        viewModelScope.launch { repository.setSearchKeyboardCapCornerRadiusPercent(percent) }
+    }
+
     fun setAccentColor(argb: Int) {
         viewModelScope.launch { repository.setAccentColor(argb) }
     }
 
-    fun setSearchShowAzIndex(show: Boolean) {
-        viewModelScope.launch { repository.setSearchShowAzIndex(show) }
+    fun setAppListShowAzIndex(show: Boolean) {
+        viewModelScope.launch { repository.setAppListShowAzIndex(show) }
     }
 
     fun setSearchHideStatusBar(hide: Boolean) {
@@ -691,35 +733,8 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setSearchEngineCustomUrl(url) }
     }
 
-    fun setSearchIndexShowRailBar(show: Boolean) {
-        viewModelScope.launch { repository.setSearchIndexShowRailBar(show) }
-    }
-
-    fun setSearchHeaderLetterAppearance(appearance: ElementAppearance) {
-        viewModelScope.launch { repository.setSearchHeaderLetterAppearance(appearance) }
-    }
-
-    fun setSearchAlphabetLetterAppearance(appearance: ElementAppearance) {
-        viewModelScope.launch { repository.setSearchAlphabetLetterAppearance(appearance) }
-    }
-
-    fun setAppListDisplayMode(mode: AppListDisplayMode) {
-        // Layer 2's own background otherwise still renders (now covering the whole screen, since
-        // fullscreen mode paints it as a full-bleed fill rather than a bounded card) and can make it
-        // look like a background image change did nothing, when it's actually just hidden behind it.
-        // Unconditional on every select of FULLSCREEN (not just an actual mode change) so this also
-        // recovers a page that's *already* stuck with an explicit non-zero opacity from before — e.g.
-        // fullscreen is the app's own default, so most people never see an actual mode-switch event.
-        viewModelScope.launch {
-            repository.setAppListDisplayMode(mode)
-            if (mode == AppListDisplayMode.FULLSCREEN) {
-                repository.setAppListContentAppearance(appListContentAppearance.value.copy(opacity = 0f))
-            }
-        }
-    }
-
-    fun setAppListContentAppearance(appearance: ElementAppearance) {
-        viewModelScope.launch { repository.setAppListContentAppearance(appearance) }
+    fun setAppListHeaderLetterAppearance(appearance: ElementAppearance) {
+        viewModelScope.launch { repository.setAppListHeaderLetterAppearance(appearance) }
     }
 
     fun setGestureAction(gesture: HomeGesture, action: GestureAction) {

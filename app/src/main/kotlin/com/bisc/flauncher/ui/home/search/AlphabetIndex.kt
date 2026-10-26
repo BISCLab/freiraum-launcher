@@ -11,9 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,12 +24,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.LocalContentColor
-import com.bisc.flauncher.data.model.ElementFillMode
-import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.settings.Handedness
-import com.bisc.flauncher.ui.home.dock.DockDimens
-import com.bisc.flauncher.ui.home.dock.resolveElementColors
 import com.bisc.flauncher.ui.theme.noRippleClickable
 
 /** One entry in the [AlphabetIndex] rail. */
@@ -46,17 +39,18 @@ fun IndexEntry.label(): String = when (this) {
     IndexEntry.Other -> "#"
 }
 
-internal val FLUSH_INSET = DockDimens.horizontalMargin
+internal val FLUSH_INSET = AppOverviewDimens.horizontalMargin
 
 internal val RAIL_BAR_WIDTH = 28.dp
 
-/** Right-edge fast-scroll rail for the browse app list. */
+/** Right-edge fast-scroll rail for the browse app list. Box fill/border/letter-text color all come
+ *  from [LocalRailColors] (resolved from the single A–Z index appearance setting) — a fill mode of
+ *  None already makes the box itself invisible, so there's no separate "show the box" switch to
+ *  keep in sync with it. */
 @Composable
 fun AlphabetIndex(
     letters: List<Char>,
     hasOtherGroup: Boolean,
-    showRailBar: Boolean,
-    letterAppearance: ElementAppearance,
     handedness: Handedness,
     cornerRadiusPercent: Int,
     onSelect: (IndexEntry) -> Unit,
@@ -71,11 +65,7 @@ fun AlphabetIndex(
             if (hasOtherGroup) add(IndexEntry.Other)
         }
     }
-    val letterColors = resolveElementColors(letterAppearance)
     val railColors = LocalRailColors.current
-    val railTextColor = railColors.text
-    val ownLetterFill = letterAppearance.fillMode == ElementFillMode.COLOR
-    val letterCircleSize = 20.dp
 
     BoxWithConstraints(modifier = modifier) {
         val density = LocalDensity.current
@@ -109,18 +99,11 @@ fun AlphabetIndex(
                     )
                     .width(RAIL_BAR_WIDTH)
                     .fillMaxHeight()
+                    .clip(RoundedCornerShape(railBarCorner))
+                    .background(railColors.box, alpha = railColors.boxAlpha)
                     .then(
-                        if (showRailBar) {
-                            Modifier
-                                .clip(RoundedCornerShape(railBarCorner))
-                                .background(railColors.box, alpha = railColors.boxAlpha)
-                                .then(
-                                    if (railColors.showBorder) Modifier.border(railColors.borderWidth, railColors.border, RoundedCornerShape(railBarCorner))
-                                    else Modifier
-                                )
-                        } else {
-                            Modifier
-                        }
+                        if (railColors.showBorder) Modifier.border(railColors.borderWidth, railColors.border, RoundedCornerShape(railBarCorner))
+                        else Modifier
                     ),
                 verticalArrangement = Arrangement.SpaceEvenly,
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -133,22 +116,7 @@ fun AlphabetIndex(
                             .padding(vertical = 1.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(letterCircleSize)
-                                .clip(CircleShape)
-                                .background(letterColors.background, alpha = letterColors.backgroundAlpha)
-                                .then(
-                                    if (letterAppearance.borderEnabled) Modifier.border(letterColors.borderWidth, if (ownLetterFill || letterAppearance.borderColor != null) letterColors.borderColor else railTextColor.copy(alpha = 0.3f), CircleShape) else Modifier
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                entry.label(),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = if (ownLetterFill) letterColors.contentColor else if (showRailBar) railTextColor else LocalContentColor.current
-                            )
-                        }
+                        Text(entry.label(), style = MaterialTheme.typography.labelSmall, color = railColors.text)
                     }
                 }
             }

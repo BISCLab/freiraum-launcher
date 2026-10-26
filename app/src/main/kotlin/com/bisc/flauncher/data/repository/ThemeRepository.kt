@@ -47,11 +47,10 @@ class ThemeRepository @Inject constructor(
         // new one (e.g. a light icon stuck on a now-light dock). Resetting them back to automatic
         // is what makes this a coherent, fully-consistent look rather than "everything except
         // whatever you'd customized before".
-        settingsRepository.resetSearchAlphabetRailAppearance()
+        settingsRepository.resetAppListRailAppearance()
         settingsRepository.resetAppListSearchButtonAppearance()
         settingsRepository.setFolderCardAppearance(boxAppearance)
         settingsRepository.setSearchAppearance(boxAppearance)
-        settingsRepository.setAppListContentAppearance(boxAppearance)
 
         val rows = pageRowDao.observeAll().first().map { it.withAppearance(boxAppearance) }
         pageRowDao.updateAll(rows)

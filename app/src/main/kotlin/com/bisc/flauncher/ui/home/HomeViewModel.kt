@@ -40,8 +40,6 @@ import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.data.model.SearchEngine
 import com.bisc.flauncher.util.launchAiApp
 import com.bisc.flauncher.data.model.WeatherSnapshot
-import com.bisc.flauncher.data.model.AppListDisplayMode
-import com.bisc.flauncher.data.model.AppListLayout
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.ElementFillMode
 import com.bisc.flauncher.data.repository.AppOverrideRepository
@@ -113,9 +111,6 @@ class HomeViewModel @Inject constructor(
 
     val iconLoader: AppIconLoader get() = appIconLoader
 
-    val appListLayout: StateFlow<AppListLayout> =
-        settingsRepository.appListLayout.stateIn(viewModelScope, SharingStarted.Eagerly, AppListLayout.LIST)
-
     val appOverviewHandedness: StateFlow<Handedness> =
         settingsRepository.appOverviewHandedness.stateIn(viewModelScope, SharingStarted.Eagerly, Handedness.RIGHT)
 
@@ -124,8 +119,6 @@ class HomeViewModel @Inject constructor(
 
     val chargingAnimationEnabled: StateFlow<Boolean> =
         settingsRepository.chargingAnimationEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-
-    fun folderShowAddRow(folderId: Long): Flow<Boolean> = settingsRepository.folderShowAddRow(folderId)
 
     fun executeDockTapAction(action: DockTapAction) {
         when (action) {
@@ -147,8 +140,8 @@ class HomeViewModel @Inject constructor(
     val cornerRadiusPercent: StateFlow<Int> =
         settingsRepository.defaultCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, 25)
 
-    val searchAlphabetRailAppearance: StateFlow<ElementAppearance?> =
-        settingsRepository.searchAlphabetRailAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    val appListRailAppearance: StateFlow<ElementAppearance?> =
+        settingsRepository.appListRailAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     fun pageHideStatusBar(pageId: Long): Flow<Boolean> = settingsRepository.pageHideStatusBar(pageId)
 
@@ -169,17 +162,11 @@ class HomeViewModel @Inject constructor(
     val globalBackground: StateFlow<BackgroundConfig> =
         settingsRepository.globalBackground.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig())
 
-    val appListDisplayMode: StateFlow<AppListDisplayMode> =
-        settingsRepository.appListDisplayMode.stateIn(viewModelScope, SharingStarted.Eagerly, AppListDisplayMode.FULLSCREEN)
-
     val appListSearchButtonAppearance: StateFlow<ElementAppearance?> =
         settingsRepository.appListSearchButtonAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val appListShowSearchButton: StateFlow<Boolean> =
         settingsRepository.appListShowSearchButton.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-
-    val appListContentAppearance: StateFlow<ElementAppearance> =
-        settingsRepository.appListContentAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
 
     val accentColor: StateFlow<Int> =
         settingsRepository.accentColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF3B82F6.toInt())
@@ -202,6 +189,27 @@ class HomeViewModel @Inject constructor(
 
     val searchKeyboardAutoOpen: StateFlow<Boolean> =
         settingsRepository.searchKeyboardAutoOpen.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    val searchBarAppearance: StateFlow<ElementAppearance?> =
+        settingsRepository.searchBarAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val searchBarCornerRadiusPercent: StateFlow<Int?> =
+        settingsRepository.searchBarCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val searchResultsAppearance: StateFlow<ElementAppearance?> =
+        settingsRepository.searchResultsAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val searchResultsCornerRadiusPercent: StateFlow<Int?> =
+        settingsRepository.searchResultsCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val searchKeyboardCapEnabled: StateFlow<Boolean> =
+        settingsRepository.searchKeyboardCapEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val searchKeyboardCapColor: StateFlow<Int> =
+        settingsRepository.searchKeyboardCapColor.stateIn(viewModelScope, SharingStarted.Eagerly, SettingsRepository.DEFAULT_KEYBOARD_CAP_COLOR)
+
+    val searchKeyboardCapCornerRadiusPercent: StateFlow<Int> =
+        settingsRepository.searchKeyboardCapCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, 100)
 
     // ---- Gestures ----
 
@@ -320,8 +328,8 @@ class HomeViewModel @Inject constructor(
 
     // ---- Text search settings and filters ----
 
-    val searchShowAzIndex: StateFlow<Boolean> =
-        settingsRepository.searchShowAzIndex.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val appListShowAzIndex: StateFlow<Boolean> =
+        settingsRepository.appListShowAzIndex.stateIn(viewModelScope, SharingStarted.Eagerly, true)
     val searchHideStatusBar: StateFlow<Boolean> =
         settingsRepository.searchHideStatusBar.stateIn(viewModelScope, SharingStarted.Eagerly, true)
     private val searchEngine: StateFlow<SearchEngine> =
@@ -358,15 +366,9 @@ class HomeViewModel @Inject constructor(
         refreshContactResults()
     }
 
-    val searchIndexShowRailBar: StateFlow<Boolean> =
-        settingsRepository.searchIndexShowRailBar.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-    val searchHeaderLetterAppearance: StateFlow<ElementAppearance> =
-        settingsRepository.searchHeaderLetterAppearance.stateIn(
+    val appListHeaderLetterAppearance: StateFlow<ElementAppearance> =
+        settingsRepository.appListHeaderLetterAppearance.stateIn(
             viewModelScope, SharingStarted.Eagerly, ElementAppearance(fillMode = ElementFillMode.NONE, borderEnabled = true)
-        )
-    val searchAlphabetLetterAppearance: StateFlow<ElementAppearance> =
-        settingsRepository.searchAlphabetLetterAppearance.stateIn(
-            viewModelScope, SharingStarted.Eagerly, ElementAppearance(fillMode = ElementFillMode.NONE)
         )
 
     // ---- Search results ----
@@ -728,19 +730,43 @@ class HomeViewModel @Inject constructor(
 
     fun removePage(context: Context, page: LauncherPage) {
         viewModelScope.launch {
-            if (pageContentRepository.removePageIfEmpty(page)) {
+            val removedRows = pageContentRepository.removePage(page)
+            if (removedRows != null) {
+                removedRows.filter { it.type == PageRowType.SYSTEM_WIDGET }
+                    .forEach { row -> row.payload.toIntOrNull()?.let { widgetHostManager.deleteId(it) } }
                 settingsRepository.clearPageBackgroundConfig(page.id)
+                settingsRepository.clearPageGlobalShade(page.id)
                 BackgroundImageStore.delete(context, "page_${page.id}")
             }
         }
     }
 
     fun pageBackgroundConfig(pageId: Long): Flow<BackgroundConfig> =
-        combine(settingsRepository.pageBackgroundOverride(pageId), settingsRepository.globalBackground) { override, global ->
-            override ?: global
+        combine(
+            settingsRepository.pageBackgroundOverride(pageId),
+            settingsRepository.globalBackground,
+            settingsRepository.pageGlobalShade(pageId)
+        ) { override, global, shade ->
+            override ?: global.copy(shade = shade ?: global.shade)
         }
 
     fun pageBackgroundOverride(pageId: Long): Flow<BackgroundConfig?> = settingsRepository.pageBackgroundOverride(pageId)
+
+    fun pageGlobalShade(pageId: Long): Flow<Float?> = settingsRepository.pageGlobalShade(pageId)
+
+    fun setPageGlobalShade(pageId: Long, shade: Float) {
+        viewModelScope.launch { settingsRepository.setPageGlobalShade(pageId, shade) }
+    }
+
+    /** The text search screen's resolved backdrop, same rules as [pageBackgroundConfig]. */
+    val searchBackground: StateFlow<BackgroundConfig> =
+        combine(
+            settingsRepository.searchBackgroundOverride,
+            settingsRepository.globalBackground,
+            settingsRepository.searchGlobalShade
+        ) { override, global, shade ->
+            override ?: global.copy(shade = shade ?: global.shade)
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig())
 
     fun setPageBackgroundConfig(pageId: Long, config: BackgroundConfig) {
         viewModelScope.launch { settingsRepository.setPageBackgroundConfig(pageId, config) }
@@ -1102,54 +1128,9 @@ class HomeViewModel @Inject constructor(
     fun loadPackIcon(iconPackPackage: String, drawableName: String): ImageBitmap? =
         appIconLoader.loadPackIcon(iconPackPackage, drawableName)
 
-    fun addWidgetToFolder(folderId: Long, kind: String, spanY: Int) {
-        viewModelScope.launch { folderRepository.addWidgetToFolder(folderId, kind, spanY) }
-    }
-
-    fun addAppToFolder(folderId: Long, app: AppInfo) {
-        viewModelScope.launch { folderRepository.addItemToFolder(folderId, GridItemType.APP, app.componentName.flattenToString()) }
-    }
-
-    fun addShortcutToFolder(folderId: Long, info: ShortcutInfo) {
-        viewModelScope.launch {
-            val label = (info.shortLabel ?: info.longLabel ?: info.id).toString()
-            folderRepository.addShortcutToFolder(folderId, info.`package`, info.id, label)
-            dismissShortcutPicker()
-        }
-    }
-
-    fun addMapTargetToFolder(folderId: Long, targetId: Long) {
-        viewModelScope.launch { folderRepository.addMapTargetToFolder(folderId, targetId) }
-    }
-
-    fun addWebsiteToFolder(folderId: Long, websiteId: Long) {
-        viewModelScope.launch { folderRepository.addWebsiteToFolder(folderId, websiteId) }
-    }
-
-    fun addNewMapTargetToFolder(folderId: Long, label: String, lat: Double, lon: Double, address: String = "") {
-        viewModelScope.launch {
-            val targetId = mapsRepository.add(label, lat, lon, address)
-            folderRepository.addMapTargetToFolder(folderId, targetId)
-        }
-    }
-
-    fun addNewWebsiteToFolder(folderId: Long, label: String, url: String) {
-        viewModelScope.launch {
-            val websiteId = websiteRepository.add(label, url)
-            folderRepository.addWebsiteToFolder(folderId, websiteId)
-        }
-    }
-
     fun launchFolderShortcut(payload: String) {
         val parts = payload.split("|")
         if (parts.size >= 2) shortcutRepository.launch(parts[0], parts[1])
-    }
-
-    fun addNestedFolder(parentFolderId: Long, name: String) {
-        viewModelScope.launch {
-            val childId = folderRepository.addNestedFolder(parentFolderId, name)
-            openFolder(childId)
-        }
     }
 
     fun reorderFolderItems(orderedItems: List<FolderItem>) {

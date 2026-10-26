@@ -92,7 +92,6 @@ fun SettingsPageRowsScreen(
     val pageTitle = page?.let { pageLabel(it, pages) } ?: stringResource(R.string.settings_rows_title)
 
     var showAddSheet by remember { mutableStateOf(false) }
-    var showBackgroundSheet by remember { mutableStateOf(false) }
     var sizingKind by remember { mutableStateOf<String?>(null) }
     var sizingSpan by remember { mutableStateOf(1) }
 
@@ -105,23 +104,16 @@ fun SettingsPageRowsScreen(
     LaunchedEffect(pendingBindIntent) { pendingBindIntent?.let { bindWidgetLauncher.launch(it) } }
     LaunchedEffect(pendingConfigureIntent) { pendingConfigureIntent?.let { configureWidgetLauncher.launch(it) } }
 
-    val pageHideStatusBar by remember(pageId) { viewModel.pageHideStatusBar(pageId) }.collectAsState(initial = false)
 
     SettingsSubScreen(title = pageTitle, navController = navController, onBack = onBack) {
+        // Icon, name, background and status bar all live in the page's own Appearance screen, same
+        // split as Home's own hub.
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
-                title = surfaceLabel(R.string.settings_layer_surface_screen),
-                onClick = { showBackgroundSheet = true },
+                title = stringResource(R.string.settings_home_appearance_title),
+                onClick = { navController.navigate("settings/pages/$pageId/appearance") },
                 trailing = null
-            )
-        }
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_statusbar_hide_page),
-                onClick = { viewModel.setPageHideStatusBar(pageId, !pageHideStatusBar) },
-                trailing = { Switch(checked = pageHideStatusBar, onCheckedChange = { viewModel.setPageHideStatusBar(pageId, it) }) }
             )
         }
         run {
@@ -165,18 +157,12 @@ fun SettingsPageRowsScreen(
                 )
             }
         }
-    }
-
-    if (showBackgroundSheet) {
-        val pageBackgroundOverride by remember(pageId) { viewModel.pageBackgroundOverride(pageId) }.collectAsState(initial = null)
-        val globalBackground by viewModel.globalBackground.collectAsState()
-        SettingsEditPage(title = surfaceLabel(R.string.settings_layer_surface_screen), onDismiss = { showBackgroundSheet = false }) {
-            BackgroundOverrideSection(
-                override = pageBackgroundOverride,
-                global = globalBackground,
-                onUseGlobal = { viewModel.clearPageBackgroundConfig(pageId) },
-                onCustomColor = { viewModel.setPageBackgroundConfig(pageId, it) }
-            )
+        if (page != null && !page.isHome) {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            RemovePageGroup(label = pageTitle) {
+                viewModel.removePage(context, page)
+                onBack()
+            }
         }
     }
 

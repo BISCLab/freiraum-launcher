@@ -45,6 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.ElementAppearance
@@ -81,7 +82,10 @@ fun SearchInputBar(
     selectedCategory: SearchCategory?,
     onToggleCategory: (SearchCategory) -> Unit,
     cornerRadiusPercent: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** Space above the input row that the bar's own background still fills — lets the bar reach
+     *  the screen's top edge (like the Panel) while its content stays below the status bar. */
+    topInset: Dp = 0.dp
 ) {
     val colors = resolveElementColors(appearance)
     val focusRequester = remember { FocusRequester() }
@@ -107,6 +111,7 @@ fun SearchInputBar(
                 .clip(shape)
                 .background(colors.background, alpha = colors.backgroundAlpha)
                 .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)
+                .padding(top = topInset)
         ) {
                 Row(
                     modifier = Modifier.fillMaxWidth().height(ROW_HEIGHT).padding(horizontal = 8.dp),

@@ -33,7 +33,7 @@ import com.bisc.flauncher.ui.settings.SettingsPageRowsScreen
 import com.bisc.flauncher.ui.settings.SettingsPageIconScreen
 import com.bisc.flauncher.ui.settings.SettingsPagesScreen
 import com.bisc.flauncher.ui.settings.SettingsHomeScreenHub
-import com.bisc.flauncher.ui.settings.SettingsHomeAppearanceScreen
+import com.bisc.flauncher.ui.settings.SettingsPageAppearanceScreen
 import com.bisc.flauncher.ui.settings.SettingsHomeLayoutScreen
 import com.bisc.flauncher.ui.settings.SettingsHomePanelScreen
 import com.bisc.flauncher.ui.settings.SettingsPanelBackgroundScreen
@@ -119,6 +119,7 @@ class MainActivity : ComponentActivity() {
             val globalIconSizePercent by settingsVm.iconSizePercent.collectAsState()
             val globalIconShape by settingsVm.iconShape.collectAsState()
             val appOverridesForIconSize by settingsVm.appOverrides.collectAsState()
+            val showSettingsTips by settingsVm.showSettingsTips.collectAsState()
             // New lambda identity whenever either input changes, so LocalIconSizeResolver consumers
             // (AppIconCell) recompose — a StateFlow's plain .value read wouldn't do that on its own.
             val iconSizeResolver = androidx.compose.runtime.remember(globalIconSizePercent, appOverridesForIconSize) {
@@ -150,7 +151,8 @@ class MainActivity : ComponentActivity() {
             androidx.compose.runtime.CompositionLocalProvider(
                 com.bisc.flauncher.ui.home.LocalAppIconLoader provides appIconLoader,
                 com.bisc.flauncher.ui.home.LocalIconSizeResolver provides iconSizeResolver,
-                com.bisc.flauncher.ui.home.LocalIconShape provides globalIconShape
+                com.bisc.flauncher.ui.home.LocalIconShape provides globalIconShape,
+                com.bisc.flauncher.ui.settings.LocalShowSettingsTips provides showSettingsTips
             ) {
             FLauncherTheme(themePreference = theme, fontPreference = font) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -179,7 +181,43 @@ class MainActivity : ComponentActivity() {
                             com.bisc.flauncher.ui.settings.SettingsGlobalBackgroundScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable("settings/search") {
-                            SettingsSearchFullScreen(navController = navController, onBack = { navController.popBackStack() })
+                            SettingsSearchFullScreen(
+                                navController = navController,
+                                onBack = { navController.popBackStack() },
+                                onNavigate = { sub -> navController.navigate("settings/search/$sub") }
+                            )
+                        }
+                        com.bisc.flauncher.ui.settings.SearchElement.entries.forEach { element ->
+                            composable("settings/search/${element.route}") {
+                                com.bisc.flauncher.ui.settings.SettingsSearchElementScreen(
+                                    element = element,
+                                    navController = navController,
+                                    onBack = { navController.popBackStack() },
+                                    onNavigate = { sub -> navController.navigate("settings/search/${element.route}/$sub") }
+                                )
+                            }
+                            composable("settings/search/${element.route}/background") {
+                                com.bisc.flauncher.ui.settings.SettingsSearchElementBackgroundScreen(element = element, navController = navController, onBack = { navController.popBackStack() })
+                            }
+                            composable("settings/search/${element.route}/border") {
+                                com.bisc.flauncher.ui.settings.SettingsSearchElementBorderScreen(element = element, navController = navController, onBack = { navController.popBackStack() })
+                            }
+                        }
+                        composable("settings/search/appearance") {
+                            com.bisc.flauncher.ui.settings.SettingsSearchAppearanceScreen(
+                                navController = navController,
+                                onBack = { navController.popBackStack() },
+                                onNavigate = { sub -> navController.navigate("settings/search/$sub") }
+                            )
+                        }
+                        composable("settings/search/page") {
+                            com.bisc.flauncher.ui.settings.SettingsSearchPageScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable("settings/search/keyboard") {
+                            com.bisc.flauncher.ui.settings.SettingsSearchKeyboardScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable("settings/search/behavior") {
+                            com.bisc.flauncher.ui.settings.SettingsSearchBehaviorScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable("settings/pages") {
                             SettingsPagesScreen(
@@ -228,11 +266,18 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable(
+                            "settings/pages/{pageId}/appearance",
+                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@composable
+                            SettingsPageAppearanceScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable(
                             "settings/pages/{pageId}/home/appearance",
                             arguments = listOf(navArgument("pageId") { type = NavType.LongType })
                         ) { backStackEntry ->
                             val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@composable
-                            SettingsHomeAppearanceScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
+                            SettingsPageAppearanceScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable(
                             "settings/pages/{pageId}/home/layout",
@@ -360,7 +405,20 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("settings/app_overview") {
-                            com.bisc.flauncher.ui.settings.SettingsAppOverviewScreen(navController = navController, onBack = { navController.popBackStack() })
+                            com.bisc.flauncher.ui.settings.SettingsAppOverviewScreen(
+                                navController = navController,
+                                onBack = { navController.popBackStack() },
+                                onNavigate = { sub -> navController.navigate("settings/app_overview/$sub") }
+                            )
+                        }
+                        composable("settings/app_overview/appearance") {
+                            com.bisc.flauncher.ui.settings.SettingsAppOverviewAppearanceScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable("settings/app_overview/section_letters") {
+                            com.bisc.flauncher.ui.settings.SettingsAppOverviewSectionLettersScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable("settings/app_overview/az_index") {
+                            com.bisc.flauncher.ui.settings.SettingsAppOverviewAzIndexScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable("settings/permissions") {
                             SettingsPermissionsScreen(navController = navController, onBack = { navController.popBackStack() })

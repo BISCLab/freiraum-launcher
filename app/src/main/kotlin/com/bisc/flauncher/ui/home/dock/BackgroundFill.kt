@@ -9,6 +9,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import com.bisc.flauncher.data.model.BackgroundConfig
@@ -44,6 +45,27 @@ fun BackgroundFill(config: BackgroundConfig, modifier: Modifier = Modifier) {
             Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = -shade)))
         } else if (shade > 0f) {
             Box(Modifier.matchParentSize().background(Color.White.copy(alpha = shade)))
+        }
+    }
+}
+
+/** Two neighboring backgrounds blended by [fraction] (0 = [lower] only). When both show the same
+ *  image, only their shades differ — the image is drawn once and just the shade is blended, instead
+ *  of alpha-blending two full-screen photos every frame (the expensive case that used to flicker). */
+@Composable
+fun BackgroundCrossfade(lower: BackgroundConfig, upper: BackgroundConfig?, fraction: Float, modifier: Modifier = Modifier) {
+    if (upper == null || fraction <= 0f) {
+        BackgroundFill(lower, modifier)
+        return
+    }
+    val sameImage = lower.source == BackgroundSource.IMAGE && upper.source == BackgroundSource.IMAGE &&
+        lower.imagePath == upper.imagePath
+    if (sameImage) {
+        BackgroundFill(lower.copy(shade = lower.shade + (upper.shade - lower.shade) * fraction), modifier)
+    } else {
+        Box(modifier = modifier) {
+            BackgroundFill(lower, Modifier.matchParentSize())
+            BackgroundFill(upper, Modifier.matchParentSize().graphicsLayer { alpha = fraction })
         }
     }
 }

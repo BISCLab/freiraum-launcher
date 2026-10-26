@@ -13,9 +13,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -33,6 +33,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -95,8 +99,11 @@ fun SearchResultsColumn(
     onEmailCommand: () -> Unit,
     onAiCommand: () -> Unit,
     onCalculatorResultClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** Card corner roundness, 0-100% of [SearchDimens.cornerRadius]; null = fully rounded. */
+    cardCornerRadiusPercent: Int? = null
 ) {
+    val cardShape = RoundedCornerShape(SearchDimens.cornerRadius * ((cardCornerRadiusPercent ?: 100).coerceIn(0, 100) / 100f))
     var expandedCategories by remember(query) { mutableStateOf(emptySet<SearchCategory>()) }
     fun isExpanded(category: SearchCategory) = category in expandedCategories
     fun toggleExpanded(category: SearchCategory) {
@@ -120,11 +127,24 @@ fun SearchResultsColumn(
 
     fun categoryColor(category: SearchCategory): Color = categoryColors[category]?.let { Color(it) } ?: category.defaultColor
 
+    CompositionLocalProvider(LocalResultCardShape provides cardShape) {
     BoxWithConstraints(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-        val d = searchDimens(maxWidth)
+        // Same edge fades as the app list: cards fade out toward the keyboard while there's more to
+        // scroll, and toward the input bar once scrolled away from the top.
+        val listState = rememberLazyListState()
+        val fadeStart = (1f - FADE_TRANSITION_DISTANCE / maxHeight).coerceIn(0f, 1f)
+        val canScrollFurther by remember { derivedStateOf { listState.canScrollForward } }
+        val topFadePx = with(LocalDensity.current) { TOP_FADE_HEIGHT.toPx() }
+        // Full screen width like the input bar above; the gap to that bar equals the gap between cards.
         LazyColumn(
-            modifier = Modifier.width(d.pillWidth).fillMaxSize(),
-            contentPadding = PaddingValues(vertical = 4.dp),
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize()
+                .then(if (canScrollFurther) Modifier.fadeBackgroundToBottom(fadeStart, 1f) else Modifier)
+                .fadeListTop(TOP_FADE_HEIGHT) {
+                    if (listState.firstVisibleItemIndex > 0) 1f else (listState.firstVisibleItemScrollOffset / topFadePx).coerceIn(0f, 1f)
+                },
+            contentPadding = PaddingValues(top = CARD_GAP, bottom = 4.dp),
             verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(CARD_GAP)
         ) {
             if (calculatorResult != null) {
@@ -215,6 +235,7 @@ fun SearchResultsColumn(
             }
         }
     }
+    }
 }
 
 /** One category's section as its own card: title + up to [SECTION_COLLAPSED_LIMIT] rows + a "More" toggle. */
@@ -256,11 +277,14 @@ private val SearchCategory.sectionTitleRes: Int
         SearchCategory.AI -> R.string.search_section_apps
     }
 
+/** Every card's shape, provided once by [SearchResultsColumn] instead of threaded through each call. */
+private val LocalResultCardShape = staticCompositionLocalOf { RoundedCornerShape(SearchDimens.cornerRadius) }
+
 @Composable
 private fun ResultCard(appearance: ElementAppearance, content: @Composable () -> Unit) {
     DockPanelSurface(
         appearance = appearance,
-        shape = RoundedCornerShape(SearchDimens.cornerRadius),
+        shape = LocalResultCardShape.current,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) { content() }

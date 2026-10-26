@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,6 +35,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -117,17 +119,21 @@ fun SettingsPreferenceGroup(title: String? = null, info: String? = null, content
             SettingsGroupLabel(title, info = info)
         }
         Column(
-            modifier = Modifier.clip(MaterialTheme.shapes.medium),
+            modifier = Modifier.clip(SettingsCardShape),
             verticalArrangement = Arrangement.spacedBy(2.dp),
             content = content
         )
     }
 }
 
+/** Whether the "?" tip buttons next to settings show at all — the global "Tips" switch, off by default. */
+val LocalShowSettingsTips = compositionLocalOf { false }
+
 /** The small secondary-colored label [SettingsPreferenceGroup] renders above its own card, with an
- *  optional expandable [info] text next to it. */
+ *  optional expandable [info] text next to it (hidden while tips are off, see [LocalShowSettingsTips]). */
 @Composable
 fun SettingsGroupLabel(title: String, info: String? = null) {
+    @Suppress("NAME_SHADOWING") val info = info.takeIf { LocalShowSettingsTips.current }
     var infoOpen by rememberSaveable { mutableStateOf(false) }
     Column(modifier = Modifier.padding(bottom = 8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -180,15 +186,23 @@ fun SettingsPreference(
         }
     },
     trailing: (@Composable () -> Unit)? = { ChevronIndicator() },
+    /** Tip behind a "?" button — only shown while tips are on, see [LocalShowSettingsTips]. */
     info: String? = null,
     infoAction: Pair<String, () -> Unit>? = null,
+    /** Extra icon button rendered just left of the info "?" button — for a row-specific action
+     *  (e.g. opening a dedicated settings subpage) that doesn't fit [onClick] or [trailing]. */
+    extra: (@Composable () -> Unit)? = null,
     enabled: Boolean = true
 ) {
+    val shownInfo = info.takeIf { LocalShowSettingsTips.current }
     var infoOpen by rememberSaveable { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth().alpha(if (enabled) 1f else 0.5f)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                // Same height as a row with a Switch (48dp touch target + padding), so rows with and
+                // without a trailing control line up as equals inside one group.
+                .heightIn(min = 80.dp)
                 .background(MaterialTheme.colorScheme.surfaceContainer)
                 .then(if (enabled) Modifier.noRippleClickable(onClick = onClick) else Modifier)
                 .padding(horizontal = 16.dp, vertical = 16.dp),
@@ -205,7 +219,10 @@ fun SettingsPreference(
                     )
                 }
             }
-            if (info != null) {
+            if (extra != null) {
+                extra()
+            }
+            if (shownInfo != null) {
                 IconButton(onClick = { infoOpen = !infoOpen }, modifier = Modifier.padding(start = 4.dp).size(32.dp)) {
                     Icon(
                         Icons.AutoMirrored.Outlined.HelpOutline,
@@ -221,7 +238,7 @@ fun SettingsPreference(
                 }
             }
         }
-        if (info != null) {
+        if (shownInfo != null) {
             AnimatedVisibility(visible = infoOpen) {
                 Column(
                     modifier = Modifier
@@ -229,7 +246,7 @@ fun SettingsPreference(
                         .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
-                    Text(info, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(shownInfo, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     if (infoAction != null) {
                         TextButton(onClick = infoAction.second) { Text(infoAction.first) }
                     }

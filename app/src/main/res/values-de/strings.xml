@@ -7,9 +7,6 @@
     <string name="folder_icon_auto">App-Vorschau als Symbol verwenden</string>
     <string name="folder_overview_empty">Noch keine Ordner.</string>
     <string name="folder_add">Ordner hinzufügen</string>
-    <string name="folder_add_app">App</string>
-    <string name="folder_add_shortcut">Verknüpfung</string>
-    <string name="folder_add_widget">Widget</string>
     <string name="folder_item_move">Verschieben</string>
     <string name="folder_item_remove">Entfernen</string>
     <string name="folder_move_hint">Position wählen</string>
@@ -18,7 +15,6 @@
     <string name="folder_move_right">Nach rechts verschieben</string>
     <string name="folder_move_up">Nach oben verschieben</string>
     <string name="folder_move_down">Nach unten verschieben</string>
-    <string name="folder_add_subfolder">Ordner</string>
 
     <string name="sidebar_apps">Apps</string>
     <string name="sidebar_folders">Ordner</string>
@@ -217,7 +213,6 @@
     <string name="settings_layer_surface_screen">Bildschirm</string>
     <string name="settings_layer_surface_folder">Ordner</string>
     <string name="settings_layer_surface_search">Textsuche</string>
-    <string name="settings_search_appearance_summary">Das Erscheinungsbild des gesamten Suchbildschirms — Hintergrund und Ergebnisse schweben direkt darauf, keine separaten Karten mehr.</string>
     <string name="settings_layer_surface_app_list">App-Liste</string>
     <string name="settings_layer_surface_widget">Widget</string>
     <string name="settings_layer_surface_section_letter">Abschnittsbuchstabe</string>
@@ -279,11 +274,6 @@
     <string name="settings_folder_appearance_reset_label">Auf globales Aussehen zurücksetzen</string>
     <string name="settings_folder_border_reset_label">Auf globalen Rahmen zurücksetzen</string>
     <string name="settings_folder_visibility_label">Sichtbarkeit</string>
-    <string name="settings_folder_show_add_row_label">Zeile „Hinzufügen …“ anzeigen</string>
-    <string name="settings_folder_show_add_row_default_label">Zeile „Hinzufügen …“ standardmäßig anzeigen</string>
-    <string name="settings_folder_show_add_row_summary">Zeile mit den Schaltflächen zum Hinzufügen von App, Verknüpfung, Widget, Ort, Website oder Unterordner am unteren Rand eines geöffneten Ordners.</string>
-    <string name="settings_folder_show_add_row_everywhere_off">Zeile „Hinzufügen …“ überall ausblenden</string>
-    <string name="settings_folder_show_add_row_everywhere_off_summary">Blendet die Zeile „Hinzufügen …“ bei allen aktuell vorhandenen Ordnern aus. Danach kann sie pro Ordner einzeln wieder eingeschaltet werden.</string>
     <string name="settings_folder_list_label">Ordner</string>
     <string name="settings_folder_create">Ordner erstellen</string>
     <string name="settings_folder_items_count">%1$d Elemente</string>
@@ -300,6 +290,7 @@
     <string name="settings_folder_icon_pack_no_results">Keine passenden Symbole</string>
 
     <string name="settings_background_source_custom_image">Eigenes Bild</string>
+    <string name="settings_background_change_image">Bild ändern</string>
     <string name="settings_background_source_color">Farbe</string>
     <string name="settings_background_use_global">Globaler Hintergrund</string>
     <string name="settings_background_use_global_summary">Derselbe Hintergrund überall, einmal unter Globale Einstellungen eingestellt.</string>
@@ -332,6 +323,7 @@
     <string name="settings_card_pages_subtitle">Widgets, Elementenboxen, Hintergründe</string>
     <string name="settings_pages_home">Startbildschirm</string>
     <string name="settings_home_appearance_title">Erscheinungsbild</string>
+    <string name="settings_page_appearance_title">Seiten-Erscheinungsbild</string>
     <string name="settings_home_appearance_subtitle">Hintergrund, Statusleiste</string>
     <string name="settings_home_layout_title">Aufbau</string>
     <string name="settings_home_layout_subtitle">Panel, Widgets, Dock</string>
@@ -425,6 +417,7 @@
     <string name="settings_row_entry_add_shortcut">Verknüpfung hinzufügen</string>
     <string name="settings_row_entry_add_map_target">Adresse</string>
     <string name="settings_row_entry_add_website">Website</string>
+    <string name="settings_row_entry_add_widget">Widget hinzufügen</string>
     <string name="settings_row_entry_add_page_link">Seite verlinken</string>
     <string name="settings_row_entry_add_contact">Kontakt hinzufügen</string>
     <string name="settings_row_entry_add_actionbutton">Aktionsbutton hinzufügen</string>
@@ -437,6 +430,8 @@
     <string name="settings_map_city_hint">Ort / Stadt</string>
     <string name="settings_map_country_hint">Land</string>
     <string name="settings_statusbar_label">Statusleiste</string>
+    <string name="settings_tips_label">Tipps</string>
+    <string name="settings_tips_show">Tipps anzeigen</string>
     <string name="settings_favorites_bottom_border">Unterer Rand des Apps-Panels</string>
     <string name="settings_favorites_bottom_border_summary">Standardmäßig aus. Eine dünne Linie am unteren Rand des Apps-Panels, dort wo es auf den abgedunkelten Homescreen trifft.</string>
     <string name="settings_favorites_group_dividers">Trennlinien im Apps-Panel</string>
@@ -496,9 +491,6 @@
     <string name="settings_search_app_list_mode_label">Anzeigemodus</string>
     <string name="settings_search_app_list_mode_fullscreen">Vollbild</string>
     <string name="settings_search_app_list_mode_window">Fenster</string>
-    <string name="settings_search_appearance_label">Darstellung</string>
-    <string name="settings_search_hide_status_bar">Statusleiste beim Suchen ausblenden</string>
-    <string name="settings_search_hide_status_bar_summary">Gilt für Schnellübersicht, Textsuche und App-Übersicht.</string>
     <string name="touch_feedback_hint_open">Toneinstellungen öffnen</string>
     <string name="settings_permissions_system_group">System</string>
     <string name="settings_permissions_touch_feedback">Berührungsfeedback</string>
@@ -506,6 +498,15 @@
     <string name="settings_permissions_on">An</string>
     <string name="settings_permissions_off">Aus</string>
     <string name="settings_search_keyboard_auto_open">Tastatur automatisch öffnen</string>
+    <string name="settings_search_bar_label">Suchleiste</string>
+    <string name="settings_search_page_label">Seite</string>
+    <string name="settings_search_keyboard_label">Tastatur</string>
+    <string name="settings_search_behavior_label">Verhalten</string>
+    <string name="settings_search_results_label">Ergebniskästen</string>
+    <string name="settings_search_keyboard_cap_label">Tastatur-Verlängerung</string>
+    <string name="settings_search_keyboard_cap_info">Ein schmaler Streifen mit abgerundeten Ecken direkt über der Tastatur. Passe seine Farbe an deine Tastatur an, damit sie oben abgerundet wirkt. Solange er an ist, gilt er als oberer Rand der Tastatur.</string>
+    <string name="settings_search_keyboard_cap_color">Farbe</string>
+    <string name="settings_search_keyboard_cap_color_info">Tipp für eine exakte Farbe: Öffne irgendwo die Tastatur und mach einen Screenshot. Lies die Tastaturfarbe im Screenshot mit einer beliebigen Farbwähler-App aus und füge den Hex-Code (z. B. #ECEEF4) hier ins Hex-Feld ein.</string>
     <string name="settings_search_keyboard_auto_open_summary">Aus: Die Suche öffnet nur mit dem Eingabefeld; antippen zeigt die Tastatur.</string>
     <string name="search_filter_ai">KI-App</string>
     <string name="settings_search_include_ai">KI-App</string>
@@ -523,11 +524,7 @@
     <string name="settings_search_ai_clear">Entfernen</string>
     <string name="settings_search_ai_info">Die Suchanfrage wird wie beim Teilen an diese App übergeben. Sie erscheint als eigene Kategorie mit eigenem Symbol; mit dem Schalter darunter schaltest du sie ein oder aus. Der Launcher selbst greift nicht auf das Netz zu.</string>
     <string name="settings_search_categories_info">Ziehe die Kategorien, um die Reihenfolge der Ergebnisse zu ändern. Der Schalter legt fest, ob eine Kategorie standardmäßig durchsucht wird. Im Ergebnisfeld kannst du unten trotzdem ein Kategorie-Symbol antippen, um nur diese Kategorie zu zeigen – auch wenn sie hier ausgeschaltet ist. Web und Karten übergeben die Anfrage nur an deinen Browser bzw. deine Karten-App; der Launcher selbst greift nicht auf das Netz zu.</string>
-    <string name="settings_search_categories_order_title">Reihenfolge und Standardsuche</string>
     <string name="settings_search_categories_label">Suchkategorien</string>
-    <string name="settings_search_tools_label">Werkzeuge</string>
-    <string name="settings_search_tools_info_title">Taschenrechner und Einheiten-Umrechner</string>
-    <string name="settings_search_tools_info_summary">Gib einen Ausdruck (z. B. "12 * 7") oder eine Umrechnung (z. B. "10 km to mi") in die Suche ein, um das Ergebnis direkt zu sehen — keine Einstellung nötig, funktioniert automatisch.</string>
     <string name="settings_search_include_apps">Apps</string>
     <string name="settings_search_include_contacts">Kontakte</string>
     <string name="settings_search_include_settings">Einstellungsverknüpfungen</string>
@@ -536,7 +533,6 @@
     <string name="settings_search_include_shortcuts">Verknüpfungen</string>
     <string name="settings_search_engine_label">Suchmaschine</string>
     <string name="settings_search_engine_custom">Eigene URL</string>
-    <string name="settings_search_open_with_label">Ergebnisse öffnen mit</string>
     <string name="settings_search_open_with_default">Systemstandard</string>
     <string name="settings_search_open_with_clear">Systemstandard verwenden</string>
     <string name="settings_search_open_with_info">Standardmäßig werden der Browser und die Karten-App aus den Android-Einstellungen verwendet. Hier kannst du nur für FLauncher eine andere App wählen. Kann sie eine Anfrage nicht öffnen, wird stattdessen der Systemstandard genutzt.</string>
