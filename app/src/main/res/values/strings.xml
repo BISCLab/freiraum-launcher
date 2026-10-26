@@ -7,9 +7,6 @@
     <string name="folder_icon_auto">Use app preview as icon</string>
     <string name="folder_overview_empty">No folders yet.</string>
     <string name="folder_add">Add folder</string>
-    <string name="folder_add_app">App</string>
-    <string name="folder_add_shortcut">Shortcut</string>
-    <string name="folder_add_widget">Widget</string>
     <string name="folder_item_move">Move</string>
     <string name="folder_item_remove">Remove</string>
     <string name="folder_move_hint">Choose a position</string>
@@ -18,7 +15,6 @@
     <string name="folder_move_right">Move right</string>
     <string name="folder_move_up">Move up</string>
     <string name="folder_move_down">Move down</string>
-    <string name="folder_add_subfolder">Folder</string>
 
     <string name="sidebar_apps">Apps</string>
     <string name="sidebar_folders">Folders</string>
@@ -170,9 +166,7 @@
     <string name="settings_element_border_color">Border color</string>
     <string name="settings_element_border_width_value">Thickness: %1$s dp</string>
     <string name="settings_element_color_auto_hint">Automatic</string>
-    <string name="settings_search_button_follow_rail">Follow letter rail again</string>
     <string name="settings_element_color_reset">Reset to automatic</string>
-    <string name="settings_layer_surface_alphabet_rail">Letter rail</string>
     <string name="settings_element_text_color_label">Text color</string>
     <string name="settings_element_border_label">Border</string>
     <string name="settings_element_show_labels_label">Show captions</string>
@@ -217,11 +211,8 @@
     <string name="settings_layer_surface_screen">Screen</string>
     <string name="settings_layer_surface_folder">Folder</string>
     <string name="settings_layer_surface_search">Text search</string>
-    <string name="settings_search_appearance_summary">The whole search screen\'s look — background and results float directly on it, no separate cards.</string>
-    <string name="settings_layer_surface_app_list">App list</string>
     <string name="settings_layer_surface_widget">Widget</string>
-    <string name="settings_layer_surface_section_letter">Section letter</string>
-    <string name="settings_layer_surface_alphabet_letter">Rail letter</string>
+    <string name="settings_layer_surface_section_letter">Section letters</string>
 
     <string name="settings_section_icon_pack">Icon pack</string>
     <string name="settings_icon_pack_default">Default</string>
@@ -268,11 +259,6 @@
     <string name="settings_folder_appearance_reset_label">Reset to global appearance</string>
     <string name="settings_folder_border_reset_label">Reset to global border</string>
     <string name="settings_folder_visibility_label">Visibility</string>
-    <string name="settings_folder_show_add_row_label">Show “Add …” row</string>
-    <string name="settings_folder_show_add_row_default_label">Show “Add …” row by default</string>
-    <string name="settings_folder_show_add_row_summary">Row with the buttons for adding an app, shortcut, widget, place, website or subfolder at the bottom of an open folder.</string>
-    <string name="settings_folder_show_add_row_everywhere_off">Hide “Add …” row everywhere</string>
-    <string name="settings_folder_show_add_row_everywhere_off_summary">Turns off the “Add …” row on every folder that exists right now. You can turn it back on individually per folder afterwards.</string>
     <string name="settings_folder_list_label">Folders</string>
     <string name="settings_folder_create">Create folder</string>
     <string name="settings_folder_items_count">%1$d items</string>
@@ -289,6 +275,7 @@
     <string name="settings_folder_icon_pack_no_results">No matching icons</string>
 
     <string name="settings_background_source_custom_image">Custom image</string>
+    <string name="settings_background_change_image">Change image</string>
     <string name="settings_background_source_color">Color</string>
     <string name="settings_background_use_global">Global background</string>
     <string name="settings_background_use_global_summary">The same background used everywhere, set once in Global settings.</string>
@@ -308,6 +295,7 @@
     <string name="settings_manage_apps_reveal_search_code">Reveal with search code</string>
     <string name="settings_manage_apps_reveal_search_code_description">Findable only by typing the exact code below, instead of by name.</string>
     <string name="settings_manage_apps_reveal_code_hint">Search code</string>
+    <string name="settings_more_settings_button">More settings</string>
     <string name="settings_manage_apps_save">Save</string>
 
     <string name="settings_section_gestures">Gestures</string>
@@ -328,17 +316,18 @@
     <string name="settings_gesture_already_used">Already used elsewhere</string>
 
     <string name="settings_section_pages">Pages</string>
-    <string name="settings_section_app_overview">App overview</string>
+    <string name="settings_section_app_overview">App list</string>
     <string name="settings_card_pages_subtitle">Widgets, element boxes, backgrounds</string>
     <string name="settings_pages_home">Home screen</string>
     <string name="settings_home_appearance_title">Appearance</string>
+    <string name="settings_page_appearance_title">Page appearance</string>
     <string name="settings_home_appearance_subtitle">Background, status bar</string>
     <string name="settings_home_layout_title">Layout</string>
     <string name="settings_home_layout_subtitle">Panel, widgets, dock</string>
     <string name="settings_home_panel_label">Panel</string>
     <string name="settings_home_dock_label">Dock</string>
     <string name="settings_dock_elements_title">Elements</string>
-    <string name="settings_pages_app_overview">App overview</string>
+    <string name="settings_pages_app_overview">App list</string>
     <string name="settings_pages_search">Text search</string>
     <string name="settings_pages_sidebar">Quick overview</string>
     <string name="settings_pages_page">Page %1$d</string>
@@ -425,6 +414,7 @@
     <string name="settings_row_entry_add_shortcut">Add shortcut</string>
     <string name="settings_row_entry_add_map_target">Address</string>
     <string name="settings_row_entry_add_website">Website</string>
+    <string name="settings_row_entry_add_widget">Add widget</string>
     <string name="settings_row_entry_add_page_link">Link a page</string>
     <string name="settings_row_entry_add_contact">Add contact</string>
     <string name="settings_row_entry_add_actionbutton">Add action button</string>
@@ -437,6 +427,8 @@
     <string name="settings_map_city_hint">City / place</string>
     <string name="settings_map_country_hint">Country</string>
     <string name="settings_statusbar_label">Status bar</string>
+    <string name="settings_tips_label">Tips</string>
+    <string name="settings_tips_show">Show tips</string>
     <string name="settings_favorites_bottom_border">Apps panel bottom border</string>
     <string name="settings_favorites_bottom_border_summary">Off by default. A thin line along the bottom edge of the Apps panel, where it meets the dimmed home screen.</string>
     <string name="settings_favorites_group_dividers">Apps panel group dividers</string>
@@ -478,27 +470,16 @@
     <string name="settings_card_search_overview_subtitle">Sidebar order, categories, background</string>
     <string name="settings_section_search_full">Text search</string>
     <string name="settings_card_search_full_subtitle">Backgrounds, categories, search engine</string>
-    <string name="settings_search_full_browse_label">Navigation</string>
-    <string name="settings_search_show_az_index">A–Z rail</string>
-    <string name="settings_search_index_show_rail_bar">Rail background</string>
+    <string name="settings_search_show_az_index">Show A–Z index</string>
     <string name="settings_app_list_search_button">Search button</string>
-    <string name="settings_app_list_search_button_summary">Floating search button in the app overview, positioned like the dock button.</string>
-    <string name="settings_layer_surface_search_button">Search button</string>
-    <string name="settings_app_overview_elements_label">Elements</string>
-    <string name="settings_app_list_style_label">Item layout</string>
-    <string name="settings_app_list_style_list">List</string>
-    <string name="settings_app_list_style_tiles">Tiles</string>
+    <string name="settings_app_list_search_button_summary">Floating search button in the app list, positioned like the dock button.</string>
+    <string name="settings_app_overview_az_index_label">A–Z index</string>
+    <string name="settings_app_overview_search_button_group_label">Search button</string>
     <string name="settings_app_icon_label">Icon</string>
     <string name="settings_app_icon_default">Default</string>
     <string name="settings_app_icon_reset">Use default icon</string>
     <string name="settings_folder_creator_search">Search apps</string>
     <string name="settings_folder_creator_selected">%1$d selected</string>
-    <string name="settings_search_app_list_mode_label">Display mode</string>
-    <string name="settings_search_app_list_mode_fullscreen">Fullscreen</string>
-    <string name="settings_search_app_list_mode_window">Window</string>
-    <string name="settings_search_appearance_label">Appearance</string>
-    <string name="settings_search_hide_status_bar">Hide status bar while searching</string>
-    <string name="settings_search_hide_status_bar_summary">Applies to the quick overview, text search and app overview.</string>
     <string name="touch_feedback_hint_open">Open sound settings</string>
     <string name="settings_permissions_system_group">System</string>
     <string name="settings_permissions_touch_feedback">Touch feedback</string>
@@ -506,6 +487,15 @@
     <string name="settings_permissions_on">On</string>
     <string name="settings_permissions_off">Off</string>
     <string name="settings_search_keyboard_auto_open">Open keyboard automatically</string>
+    <string name="settings_search_bar_label">Search bar</string>
+    <string name="settings_search_page_label">Page</string>
+    <string name="settings_search_keyboard_label">Keyboard</string>
+    <string name="settings_search_behavior_label">Behavior</string>
+    <string name="settings_search_results_label">Result cards</string>
+    <string name="settings_search_keyboard_cap_label">Keyboard extension</string>
+    <string name="settings_search_keyboard_cap_info">A slim strip with rounded corners right above the keyboard. Match its color to your keyboard to give the keyboard rounded top corners. While it is on, it counts as the top edge of the keyboard.</string>
+    <string name="settings_search_keyboard_cap_color">Color</string>
+    <string name="settings_search_keyboard_cap_color_info">Tip for an exact match: open the keyboard anywhere and take a screenshot. Read the keyboard color from the screenshot with any color picker app, then paste the hex code (e.g. #ECEEF4) into the hex field here.</string>
     <string name="settings_search_keyboard_auto_open_summary">Off: search opens with just the input field; tap it to show the keyboard.</string>
     <string name="search_filter_ai">AI app</string>
     <string name="settings_search_include_ai">AI app</string>
@@ -523,11 +513,7 @@
     <string name="settings_search_ai_clear">Remove</string>
     <string name="settings_search_ai_info">The query is handed to this app like a share. It appears as its own category with its own icon; the switch below turns it on or off. The launcher itself does not access the network.</string>
     <string name="settings_search_categories_info">Drag to change the order of the result sections. The switch decides whether a category is searched by default. In the results you can still tap a category icon at the bottom to show only that category, even if it is switched off here. Web and maps only hand the query to your browser or maps app; the launcher itself does not access the network.</string>
-    <string name="settings_search_categories_order_title">Order and default search</string>
     <string name="settings_search_categories_label">Search categories</string>
-    <string name="settings_search_tools_label">Tools</string>
-    <string name="settings_search_tools_info_title">Calculator and unit converter</string>
-    <string name="settings_search_tools_info_summary">Type an expression (e.g. "12 * 7") or a conversion (e.g. "10 km to mi") into search to see the result inline — no settings needed, they just work.</string>
     <string name="settings_search_include_apps">Apps</string>
     <string name="settings_search_include_contacts">Contacts</string>
     <string name="settings_search_include_settings">Settings shortcuts</string>
@@ -536,7 +522,6 @@
     <string name="settings_search_include_shortcuts">Shortcuts</string>
     <string name="settings_search_engine_label">Search engine</string>
     <string name="settings_search_engine_custom">Custom URL</string>
-    <string name="settings_search_open_with_label">Open results with</string>
     <string name="settings_search_open_with_default">System default</string>
     <string name="settings_search_open_with_clear">Use system default</string>
     <string name="settings_search_open_with_info">By default the browser and maps app set in Android are used. Here you can pick a different one just for FLauncher. If it cannot open a request, the system default is used instead.</string>

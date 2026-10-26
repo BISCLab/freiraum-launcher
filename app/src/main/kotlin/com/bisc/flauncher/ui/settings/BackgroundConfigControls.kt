@@ -177,10 +177,10 @@ fun BackgroundConfigSection(
 }
 
 /**
- * Editor for one surface's background when it can only ever be "the shared global background" or
- * "my own color" — no per-surface image anymore (see SettingsRepository.backgroundOverrideFor for
- * why: a custom image only ever flickered against *another* custom image, never against a color or
- * the already-GPU-resident global image, so images only live at the global level now).
+ * Editor for one surface's background: the shared global background (optionally darkened/lightened
+ * just for this surface), its own image, or its own color — laid out like [BackgroundConfigSection].
+ * Selecting "Color" opens its own window directly, same as every other color picker in the app,
+ * with that color's Darken/Lighten inside it; the global and image options show theirs inline.
  */
 @Composable
 fun BackgroundOverrideSection(
@@ -188,17 +188,43 @@ fun BackgroundOverrideSection(
     global: BackgroundConfig,
     onUseGlobal: () -> Unit,
     onCustomColor: (BackgroundConfig) -> Unit,
-    // Off for callers whose own page is already titled "Background" (Home's own Appearance screen,
-    // for one) — repeating a "Screen" group title right underneath would just be redundant there.
-    // Still on by default for every other caller (a page's row editor, a folder, etc.) where this
-    // section sits alongside other content on a differently-titled screen and the caption is the
-    // only thing saying what it's for.
-    showLayerHeader: Boolean = true
+    /** Storage key for this surface's own picked image (see [BackgroundImageStore]). */
+    imageKey: String,
+    /** This surface's own shade over the global background; null = the global one's own. */
+    globalShade: Float?,
+    onGlobalShadeChange: (Float) -> Unit,
+    // Null for callers whose own page is already titled "Background" (Home's own Appearance screen,
+    // for one) — repeating the title right underneath would just be redundant there. Defaults to
+    // "Screen" for every other caller (a page's row editor, a folder, etc.) where this section sits
+    // alongside other content on a differently-titled screen and the caption is the only thing
+    // saying what it's for.
+    groupTitle: String? = surfaceLabel(R.string.settings_layer_surface_screen)
 ) {
     val usesGlobal = override == null
     val current = override ?: BackgroundConfig(source = BackgroundSource.COLOR)
+    val ownImagePath = override?.imagePath
+    val usesOwnImage = override?.source == BackgroundSource.IMAGE && ownImagePath != null
+    var colorEditorOpen by remember { mutableStateOf(false) }
+    val openColorEditor = { onCustomColor(current.copy(source = BackgroundSource.COLOR)); colorEditorOpen = true }
 
-    SettingsPreferenceGroup(title = if (showLayerHeader) surfaceLabel(R.string.settings_layer_surface_screen) else null) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
+        if (uri != null) {
+            scope.launch {
+                val path = withContext(Dispatchers.IO) { BackgroundImageStore.save(context, uri, imageKey) }
+                if (path != null) onCustomColor(current.withImage(path))
+            }
+        }
+    }
+    val launchImagePicker = { pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
+    // Re-selecting keeps an already-picked image; only the first time (or via the big preview card
+    // below) opens the system picker.
+    val selectOwnImage = {
+        if (ownImagePath != null) onCustomColor(current.withImage(ownImagePath)) else launchImagePicker()
+    }
+
+    SettingsPreferenceGroup(title = groupTitle) {
         SettingsPreference(
             icon = null,
             title = stringResource(R.string.settings_background_use_global),
@@ -222,6 +248,26 @@ fun BackgroundOverrideSection(
         )
         SettingsPreference(
             icon = null,
+            title = stringResource(R.string.settings_background_source_custom_image),
+            leading = {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                ) {
+                    if (ownImagePath != null) {
+                        val bitmap = rememberBackgroundBitmap(ownImagePath)
+                        if (bitmap != null) Image(bitmap, null, contentScale = ContentScale.Crop, modifier = Modifier.matchParentSize())
+                    }
+                }
+            },
+            onClick = selectOwnImage,
+            trailing = { RadioButton(selected = usesOwnImage, onClick = selectOwnImage) }
+        )
+        SettingsPreference(
+            icon = null,
             title = stringResource(R.string.settings_background_source_color),
             leading = {
                 Box(
@@ -232,29 +278,58 @@ fun BackgroundOverrideSection(
                         .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
                 )
             },
-            onClick = { onCustomColor(current.copy(source = BackgroundSource.COLOR)) },
-            trailing = {
-                RadioButton(
-                    selected = !usesGlobal,
-                    onClick = { onCustomColor(current.copy(source = BackgroundSource.COLOR)) }
-                )
-            }
+            onClick = openColorEditor,
+            trailing = { RadioButton(selected = !usesGlobal && !usesOwnImage, onClick = openColorEditor) }
         )
-        if (!usesGlobal) {
-            ColorFillPickerContent(
-                fill = current.fill,
-                onFillChange = { fill -> onCustomColor(current.copy(fill = fill)) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+    }
+
+    if (usesGlobal) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_shade_label)) {
+            ExpandableShadePercentSlider(
+                percent = ((globalShade ?: global.shade) * 100).roundToInt(),
+                onSettled = { onGlobalShadeChange(it / 100f) }
             )
         }
     }
 
-    if (!usesGlobal) {
+    if (usesOwnImage) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_source_custom_image)) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Tapping the big preview picks a different image.
+                WallpaperCard(
+                    selected = true,
+                    label = stringResource(R.string.settings_background_change_image),
+                    onClick = launchImagePicker
+                ) {
+                    val bitmap = rememberBackgroundBitmap(ownImagePath)
+                    if (bitmap != null) Image(bitmap, null, contentScale = ContentScale.Crop, modifier = Modifier.matchParentSize())
+                }
+            }
+        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_background_shade_label)) {
             ExpandableShadePercentSlider(
                 percent = (current.shade * 100).roundToInt(),
                 onSettled = { onCustomColor(current.copy(shade = it / 100f)) }
             )
+        }
+    }
+
+    if (colorEditorOpen) {
+        SettingsEditPage(title = stringResource(R.string.settings_background_source_color), onDismiss = { colorEditorOpen = false }) {
+            ColorFillPickerContent(
+                fill = current.fill,
+                onFillChange = { fill -> onCustomColor(current.copy(fill = fill)) },
+                modifier = Modifier.fillMaxWidth()
+            )
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_background_shade_label)) {
+                ExpandableShadePercentSlider(
+                    percent = (current.shade * 100).roundToInt(),
+                    onSettled = { onCustomColor(current.copy(shade = it / 100f)) }
+                )
+            }
         }
     }
 }

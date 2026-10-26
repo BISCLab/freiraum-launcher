@@ -29,6 +29,7 @@ fun SettingsAppearanceScreen(
     val chargingAnimation by viewModel.chargingAnimationEnabled.collectAsState()
     val chargingColor by viewModel.chargingAnimationColor.collectAsState()
     val statusBarHiddenEverywhere by viewModel.statusBarHiddenEverywhere.collectAsState()
+    val showSettingsTips by viewModel.showSettingsTips.collectAsState()
     val defaultCornerRadiusPercent by viewModel.defaultCornerRadiusPercent.collectAsState()
     val browserPackage by viewModel.searchBrowserApp.collectAsState()
     val mapsPackage by viewModel.searchMapsApp.collectAsState()
@@ -125,6 +126,15 @@ fun SettingsAppearanceScreen(
                 trailing = {
                     Switch(checked = statusBarHiddenEverywhere, onCheckedChange = { confirmingHideStatusBarEverywhere = it })
                 }
+            )
+        }
+        // Turns every "?" tip button across the settings on or off (see LocalShowSettingsTips).
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_tips_label)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_tips_show),
+                onClick = { viewModel.setShowSettingsTips(!showSettingsTips) },
+                trailing = { Switch(checked = showSettingsTips, onCheckedChange = viewModel::setShowSettingsTips) }
             )
         }
         SettingsPreferenceGroup(

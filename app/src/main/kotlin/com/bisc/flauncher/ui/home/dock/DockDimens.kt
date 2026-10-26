@@ -22,6 +22,11 @@ object DockDimens {
     val innerHorizontalPadding = 12.dp
     val itemGap = 12.dp
     val innerVerticalPadding = 16.dp
+    // Gap from the top row's icons to the Dock's own top edge — matches the gap from the leftmost
+    // icon all the way to the *phone's* left edge (horizontalMargin, the pill's own outer inset,
+    // plus innerHorizontalPadding, the icon's inset from the pill's edge), not just
+    // innerHorizontalPadding alone, since that gap by itself is shorter than the true side gap.
+    val topPadding = horizontalMargin + innerHorizontalPadding
     // Vertical gap between the Dock's own sub-rows when it's 2 rows tall — bigger than the near-zero
     // gap GridEntries' rowColumns path uses by default (rows just stacked back to back), since a
     // flush 2-row dock reads as cramped.

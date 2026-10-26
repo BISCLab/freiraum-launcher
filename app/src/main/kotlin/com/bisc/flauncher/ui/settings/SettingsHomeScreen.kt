@@ -54,7 +54,7 @@ import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
-/** Entry point for the Home page's own settings — split into [SettingsHomeAppearanceScreen] (the
+/** Entry point for the Home page's own settings — split into [SettingsPageAppearanceScreen] (the
  *  page's background/status-bar) and [SettingsHomeLayoutScreen] (what's actually placed on it),
  *  instead of one long flat screen like every other page still uses (see [SettingsPageRowsScreen]). */
 @Composable
@@ -79,17 +79,26 @@ fun SettingsHomeScreenHub(navController: NavController, onBack: () -> Unit, onNa
     }
 }
 
-/** The Home page's own background and status-bar switch — just "Background" now (not the old
- *  "Layer 1 · Screen" wording, which leaked internal Layer-model terminology into the UI). "Hide
- *  status bar" sits as its own row right below Background on this hub page — not nested inside
- *  the Background detail page, which is one level further in than it belongs. */
+/** A carousel page's own Appearance screen (Home and every other page alike): its icon and name,
+ *  then its background and status-bar switch — all one card. "Hide status bar" sits right below
+ *  Background here, not nested inside the Background detail page, which is one level further in
+ *  than it belongs. */
 @Composable
-fun SettingsHomeAppearanceScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+fun SettingsPageAppearanceScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
     val pageHideStatusBar by remember(pageId) { viewModel.pageHideStatusBar(pageId) }.collectAsState(initial = false)
+    val pages by viewModel.pages.collectAsState()
     var showBackgroundSheet by remember { mutableStateOf(false) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
+            pages.find { it.id == pageId }?.let { page ->
+                PageIdentityRows(
+                    page = page,
+                    pages = pages,
+                    onOpenIcon = { navController.navigate("settings/pages/$pageId/icon") },
+                    onRename = { name -> viewModel.renamePage(pageId, name) }
+                )
+            }
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_section_global_background),
@@ -107,6 +116,7 @@ fun SettingsHomeAppearanceScreen(pageId: Long, navController: NavController, onB
 
     if (showBackgroundSheet) {
         val pageBackgroundOverride by remember(pageId) { viewModel.pageBackgroundOverride(pageId) }.collectAsState(initial = null)
+        val pageGlobalShade by remember(pageId) { viewModel.pageGlobalShade(pageId) }.collectAsState(initial = null)
         val globalBackground by viewModel.globalBackground.collectAsState()
         SettingsEditPage(title = stringResource(R.string.settings_section_global_background), onDismiss = { showBackgroundSheet = false }) {
             BackgroundOverrideSection(
@@ -114,10 +124,12 @@ fun SettingsHomeAppearanceScreen(pageId: Long, navController: NavController, onB
                 global = globalBackground,
                 onUseGlobal = { viewModel.clearPageBackgroundConfig(pageId) },
                 onCustomColor = { viewModel.setPageBackgroundConfig(pageId, it) },
-                // The page's own title already says "Background" — repeating a "Layer 1 · Screen"
-                // caption (plus a help icon explaining the old Layer 1/2/3 model) inside it too is
-                // redundant clutter, not extra clarity.
-                showLayerHeader = false
+                imageKey = "page_$pageId",
+                globalShade = pageGlobalShade,
+                onGlobalShadeChange = { viewModel.setPageGlobalShade(pageId, it) },
+                // The page's own title already says "Background" — repeating it inside too would
+                // just be redundant clutter, not extra clarity.
+                groupTitle = null
             )
         }
     }
@@ -340,6 +352,12 @@ fun SettingsPanelBorderScreen(pageId: Long, navController: NavController, onBack
     val row = rememberPanelRow(pageId, viewModel) ?: return
     SettingsSubScreen(title = stringResource(R.string.settings_element_border_label), navController = navController, onBack = onBack) {
         ElementBorderSection(appearance = row.appearance(), onAppearanceChange = { viewModel.setRowAppearance(row, it) })
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
+            ExpandablePercentSlider(
+                percent = row.cornerRadiusPercent,
+                onSettled = { viewModel.setRowCornerRadiusPercent(row, it) }
+            )
+        }
     }
 }
 

@@ -91,6 +91,8 @@ import com.bisc.flauncher.util.setStatusBarHidden
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.BackgroundConfig
+import com.bisc.flauncher.data.model.ElementAppearance
+import com.bisc.flauncher.data.model.ElementFillMode
 import com.bisc.flauncher.data.model.GridItemType
 import com.bisc.flauncher.data.model.Note
 import com.bisc.flauncher.data.model.ContactInfo
@@ -106,7 +108,10 @@ import com.bisc.flauncher.ui.home.dock.AddMapTargetDialog
 import com.bisc.flauncher.ui.home.dock.ContactPickerSheet
 import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
+import com.bisc.flauncher.ui.home.dock.BackgroundCrossfade
 import com.bisc.flauncher.ui.home.dock.BackgroundFill
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.bisc.flauncher.ui.home.dock.DockDimens
 import com.bisc.flauncher.ui.home.dock.DockPanelSurface
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
@@ -176,31 +181,34 @@ fun HomeScreen(
     val availableShortcuts by viewModel.availableShortcuts.collectAsState()
     val iconShape by viewModel.iconShape.collectAsState()
     val iconSizeScale by viewModel.iconSizeScale.collectAsState()
-    val railAppearance by viewModel.searchAlphabetRailAppearance.collectAsState()
+    val railAppearance by viewModel.appListRailAppearance.collectAsState()
     val chargingAnimationEnabled by viewModel.chargingAnimationEnabled.collectAsState()
     val chargingAnimationColor by viewModel.chargingAnimationColor.collectAsState()
     val searchAppearance by viewModel.searchAppearance.collectAsState()
+    val searchBarAppearance by viewModel.searchBarAppearance.collectAsState()
+    val searchBackground by viewModel.searchBackground.collectAsState()
+    val searchBarCornerRadiusPercent by viewModel.searchBarCornerRadiusPercent.collectAsState()
+    val searchResultsAppearance by viewModel.searchResultsAppearance.collectAsState()
+    val searchResultsCornerRadiusPercent by viewModel.searchResultsCornerRadiusPercent.collectAsState()
+    val searchKeyboardCapEnabled by viewModel.searchKeyboardCapEnabled.collectAsState()
+    val searchKeyboardCapColor by viewModel.searchKeyboardCapColor.collectAsState()
+    val searchKeyboardCapCornerRadiusPercent by viewModel.searchKeyboardCapCornerRadiusPercent.collectAsState()
     val searchKeyboardAutoOpen by viewModel.searchKeyboardAutoOpen.collectAsState()
-    val appListDisplayMode by viewModel.appListDisplayMode.collectAsState()
-    val appListLayout by viewModel.appListLayout.collectAsState()
     val appListSearchButtonAppearance by viewModel.appListSearchButtonAppearance.collectAsState()
     val appListShowSearchButton by viewModel.appListShowSearchButton.collectAsState()
-    val appListContentAppearance by viewModel.appListContentAppearance.collectAsState()
     val accentColor by viewModel.accentColor.collectAsState()
     val sidebarPanelAppearance by viewModel.sidebarPanelAppearance.collectAsState()
     val folderHideDock by viewModel.folderHideDock.collectAsState()
     val folderCardAppearance by viewModel.folderCardAppearance.collectAsState()
     val folderShowLabels by viewModel.folderShowLabels.collectAsState()
     val cornerRadiusPercent by viewModel.cornerRadiusPercent.collectAsState()
-    val searchShowAzIndex by viewModel.searchShowAzIndex.collectAsState()
+    val appListShowAzIndex by viewModel.appListShowAzIndex.collectAsState()
     val searchHideStatusBar by viewModel.searchHideStatusBar.collectAsState()
     val websiteResults by viewModel.websiteResults.collectAsState()
     val shortcutResults by viewModel.shortcutResults.collectAsState()
     val folderResults by viewModel.folderResults.collectAsState()
     val mapTargetResults by viewModel.mapTargetResults.collectAsState()
-    val searchIndexShowRailBar by viewModel.searchIndexShowRailBar.collectAsState()
-    val searchHeaderLetterAppearance by viewModel.searchHeaderLetterAppearance.collectAsState()
-    val searchAlphabetLetterAppearance by viewModel.searchAlphabetLetterAppearance.collectAsState()
+    val appListHeaderLetterAppearance by viewModel.appListHeaderLetterAppearance.collectAsState()
     val searchCategoryOrder by viewModel.searchCategoryOrder.collectAsState()
     val activeSearchCategories by viewModel.activeSearchCategories.collectAsState()
     val searchFilter by viewModel.searchFilter.collectAsState()
@@ -211,7 +219,7 @@ fun HomeScreen(
     val pagerState = rememberPagerState(pageCount = { pages.size.coerceAtLeast(1) })
 
     val onAppOverviewPage = appListOpen
-    val overviewSurfaceDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(appListContentAppearance, appOverviewBackground)
+    val overviewSurfaceDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), appOverviewBackground)
     val currentPageId = pages.getOrNull(pagerState.currentPage)?.id ?: -1L
     val currentPageHideStatusBar by remember(currentPageId) { viewModel.pageHideStatusBar(currentPageId) }
         .collectAsState(initial = false)
@@ -251,11 +259,9 @@ fun HomeScreen(
     }
     val currentPageBackground by remember(currentPageId) { viewModel.pageBackgroundConfig(currentPageId) }
         .collectAsState(initial = BackgroundConfig())
-    // Search has no separate page-level backdrop any more (see searchAppearance) — its own single
-    // full-bleed ElementAppearance is the "fill" layer here, blended against the current page's
-    // background behind it exactly like any other translucent/glass surface would be.
+    // Search draws its own backdrop (searchBackground); its ElementAppearance only adds opacity and text color.
     val backdropDark = if (searchOpen) {
-        com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(searchAppearance, currentPageBackground)
+        com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(searchAppearance.copy(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE), searchBackground)
     } else {
         val statusBarBackdrop = when {
             appListOpen -> appOverviewBackground
@@ -280,16 +286,6 @@ fun HomeScreen(
     var showAddMapTargetDialog by remember { mutableStateOf(false) }
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
     var showFolderCreator by remember { mutableStateOf(false) }
-    var addingAppToFolderId by remember { mutableStateOf<Long?>(null) }
-    var addingWidgetKindToFolderId by remember { mutableStateOf<Long?>(null) }
-    var sizingWidgetForFolder by remember { mutableStateOf<Pair<Long, String>?>(null) }
-    var sizingFolderWidgetSpanY by remember { mutableStateOf(1) }
-    var addingSubfolderToId by remember { mutableStateOf<Long?>(null) }
-    var pendingShortcutFolderId by remember { mutableStateOf<Long?>(null) }
-    var mapTargetPickerForFolderId by remember { mutableStateOf<Long?>(null) }
-    var websitePickerForFolderId by remember { mutableStateOf<Long?>(null) }
-    var addNewMapTargetForFolderId by remember { mutableStateOf<Long?>(null) }
-    var addNewWebsiteForFolderId by remember { mutableStateOf<Long?>(null) }
 
     // See the background-crossfade layer below for why this exists: a stable, append-only cache instead
     // of re-subscribing a Flow every time a page's role (lower/upper) in the crossfade changes.
@@ -456,11 +452,10 @@ fun HomeScreen(
                 val lowerPageId = pages.getOrNull(lowerIndex)?.id
                 val upperPageId = pages.getOrNull(upperIndex)?.id
                 val lowerBackground = lowerPageId?.let { pageBackgroundCache[it] } ?: BackgroundConfig()
-                BackgroundFill(lowerBackground, Modifier.fillMaxSize())
-                if (upperPageId != null && upperPageId != lowerPageId && crossfadeFraction > 0f) {
-                    val upperBackground = pageBackgroundCache[upperPageId] ?: BackgroundConfig()
-                    BackgroundFill(upperBackground, Modifier.fillMaxSize().graphicsLayer { alpha = crossfadeFraction })
-                }
+                val upperBackground = if (upperPageId != null && upperPageId != lowerPageId) {
+                    pageBackgroundCache[upperPageId] ?: BackgroundConfig()
+                } else null
+                BackgroundCrossfade(lowerBackground, upperBackground, crossfadeFraction, Modifier.fillMaxSize())
 
                 HorizontalPager(
                     state = pagerState,
@@ -538,7 +533,14 @@ fun HomeScreen(
                             WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + DockDimens.contentGap
                         val pageBackgroundConfigOrNull by remember(page.id) { viewModel.pageBackgroundConfig(page.id) }.collectAsState(initial = null)
                         LaunchedEffect(page.id, pageBackgroundConfigOrNull) {
-                            pageBackgroundConfigOrNull?.let { pageBackgroundCache[page.id] = it }
+                            pageBackgroundConfigOrNull?.let { config ->
+                                // Decode a page's own image before the shared layer ever crossfades to
+                                // it — a still-loading upper layer is what read as flicker.
+                                config.imagePath?.takeIf { config.source == com.bisc.flauncher.data.model.BackgroundSource.IMAGE }?.let { path ->
+                                    withContext(Dispatchers.Default) { com.bisc.flauncher.util.BackgroundImageStore.load(context, path) }
+                                }
+                                pageBackgroundCache[page.id] = config
+                            }
                         }
                         val loadedPageBackgroundConfig = pageBackgroundConfigOrNull
                         // Null (not yet loaded from disk) until proven otherwise, so a hosted system widget
@@ -621,7 +623,7 @@ fun HomeScreen(
             // Arrangement.Top has to center into, pushing the top row down from the top edge.
             val dockRowShape = homeDockRow.dockRows()
             val dockRowContentHeight = if (homeDockRow.showLabels) DockDimens.rowHeightWithLabel else DockDimens.rowHeight
-            val dockHeight = DockDimens.innerHorizontalPadding + DockDimens.innerVerticalPadding +
+            val dockHeight = DockDimens.topPadding + DockDimens.innerVerticalPadding +
                 dockRowContentHeight * dockRowShape.size +
                 DockDimens.rowGap * (dockRowShape.size - 1).coerceAtLeast(0)
             androidx.compose.animation.AnimatedVisibility(
@@ -652,13 +654,15 @@ fun HomeScreen(
                         verticalArrangement = Arrangement.Top,
                         modifier = Modifier
                             .fillMaxSize()
-                            // Top gap matches the icon-to-side-edge gap (innerHorizontalPadding) rather
-                            // than the taller innerVerticalPadding — see DockDimens.rowGap for the
-                            // (separate) gap this creates *between* the Dock's own sub-rows.
+                            // Top gap matches the full icon-to-phone-edge gap (DockDimens.topPadding,
+                            // i.e. the pill's own outer horizontalMargin plus innerHorizontalPadding)
+                            // rather than innerHorizontalPadding alone, which undershoots it — see
+                            // DockDimens.rowGap for the (separate) gap this creates *between* the
+                            // Dock's own sub-rows.
                             .padding(
                                 start = DockDimens.innerHorizontalPadding,
                                 end = DockDimens.innerHorizontalPadding,
-                                top = DockDimens.innerHorizontalPadding,
+                                top = DockDimens.topPadding,
                                 bottom = DockDimens.innerVerticalPadding
                             )
                             .navigationBarsPadding()
@@ -894,15 +898,10 @@ fun HomeScreen(
             BackgroundFill(appOverviewBackground, Modifier.fillMaxSize())
             CompositionLocalProvider(LocalAppIconLoader provides viewModel.iconLoader) {
                 AppOverviewContent(
-                    layout = appListLayout,
                     showSearchButton = appListShowSearchButton,
                     allApps = browsableApps,
-                    showAzIndex = searchShowAzIndex,
-                    indexShowRailBar = searchIndexShowRailBar,
-                    headerLetterAppearance = searchHeaderLetterAppearance,
-                    alphabetLetterAppearance = searchAlphabetLetterAppearance,
-                    displayMode = appListDisplayMode,
-                    contentAppearance = appListContentAppearance,
+                    showAzIndex = appListShowAzIndex,
+                    headerLetterAppearance = appListHeaderLetterAppearance,
                     pageBackground = appOverviewBackground,
                     railAppearance = railAppearance,
                     accentColor = accentColor,
@@ -923,8 +922,8 @@ fun HomeScreen(
                         .padding(top = 16.dp)
                 )
                 if (appListShowSearchButton) {
-                    com.bisc.flauncher.ui.home.dock.FloatingSearchButton(
-                        onClick = { viewModel.executeDockTapAction(com.bisc.flauncher.data.model.DockTapAction.FULL_SEARCH) },
+                    com.bisc.flauncher.ui.home.search.AppOverviewSearchButton(
+                        onClick = { viewModel.openSearch() },
                         handedness = appOverviewHandedness,
                         cornerRadiusPercent = cornerRadiusPercent,
                         appearance = appListSearchButtonAppearance ?: railAppearance ?: automaticRailAppearance(overviewSurfaceDark)
@@ -976,6 +975,13 @@ fun HomeScreen(
             keyboardAutoOpen = searchKeyboardAutoOpen,
             appearance = searchAppearance,
             cornerRadiusPercent = cornerRadiusPercent,
+            background = searchBackground,
+            barAppearance = searchBarAppearance,
+            barCornerRadiusPercent = searchBarCornerRadiusPercent,
+            resultsAppearance = searchResultsAppearance,
+            resultsCornerRadiusPercent = searchResultsCornerRadiusPercent,
+            keyboardCapColor = if (searchKeyboardCapEnabled) searchKeyboardCapColor else null,
+            keyboardCapCornerRadiusPercent = searchKeyboardCapCornerRadiusPercent,
             loadIcon = viewModel::loadIcon,
             onQueryChange = viewModel::updateSearchQuery,
             onAppClick = { app ->
@@ -1088,26 +1094,14 @@ fun HomeScreen(
             appLabel = app.label,
             shortcuts = availableShortcuts,
             loadIcon = viewModel::loadShortcutIcon,
-            onShortcutSelected = { info ->
-                val folderId = pendingShortcutFolderId
-                if (folderId != null) {
-                    viewModel.addShortcutToFolder(folderId, info)
-                    pendingShortcutFolderId = null
-                } else {
-                    viewModel.pinShortcut(info)
-                }
-            },
-            onDismiss = {
-                pendingShortcutFolderId = null
-                viewModel.dismissShortcutPicker()
-            }
+            onShortcutSelected = { info -> viewModel.pinShortcut(info) },
+            onDismiss = viewModel::dismissShortcutPicker
         )
     }
 
     openFolderPath.lastOrNull()?.let { folderId ->
         val folder = folders.find { it.id == folderId }
         if (folder != null) {
-            val folderShowAddRow by remember(folderId) { viewModel.folderShowAddRow(folderId) }.collectAsState(initial = true)
             FolderView(
                 folder = folder,
                 items = folderItemsByFolder[folderId].orEmpty(),
@@ -1115,7 +1109,6 @@ fun HomeScreen(
                 folderItemsByFolder = folderItemsByFolder,
                 savedMapTargets = savedMapTargets,
                 pinnedWebsites = pinnedWebsites,
-                showAddRow = folderShowAddRow,
                 loadIcon = viewModel::loadIcon,
                 loadPackIcon = viewModel::loadPackIcon,
                 resolveLabel = resolveLabel,
@@ -1137,15 +1130,6 @@ fun HomeScreen(
                 onFolderClick = { item -> item.payload.toLongOrNull()?.let(viewModel::openFolder) },
                 onRemoveItem = viewModel::removeFromFolder,
                 onReorderItems = viewModel::reorderFolderItems,
-                onAddAppClick = { addingAppToFolderId = folderId },
-                onAddShortcutClick = {
-                    pendingShortcutFolderId = folderId
-                    viewModel.openShortcutAppPicker()
-                },
-                onAddWidgetClick = { addingWidgetKindToFolderId = folderId },
-                onAddSubfolderClick = { addingSubfolderToId = folderId },
-                onAddMapTargetClick = { mapTargetPickerForFolderId = folderId },
-                onAddWebsiteClick = { websitePickerForFolderId = folderId },
                 onBack = viewModel::closeFolder,
                 cardAppearance = folder.effectiveAppearance(folderCardAppearance),
                 showLabels = if (folder.showLabelsOverrideEnabled) folder.showLabels else folderShowLabels
@@ -1153,185 +1137,5 @@ fun HomeScreen(
         }
     }
 
-    addingAppToFolderId?.let { folderId ->
-        ShortcutSourceAppSheet(
-            apps = browsableApps,
-            loadIcon = viewModel::loadIcon,
-            onAppSelected = { app ->
-                viewModel.addAppToFolder(folderId, app)
-                addingAppToFolderId = null
-            },
-            onDismiss = { addingAppToFolderId = null }
-        )
-    }
-
-    addingWidgetKindToFolderId?.let { folderId ->
-        FolderWidgetKindSheet(
-            onKindSelected = { kind ->
-                addingWidgetKindToFolderId = null
-                sizingFolderWidgetSpanY = WidgetKind.defaultSpan(kind)
-                sizingWidgetForFolder = folderId to kind
-            },
-            onDismiss = { addingWidgetKindToFolderId = null }
-        )
-    }
-
-    sizingWidgetForFolder?.let { (folderId, kind) ->
-        FolderWidgetSizeSheet(
-            row = PageRow(pageId = 0, orderIndex = 0, type = PageRowType.WIDGET, payload = kind, spanY = sizingFolderWidgetSpanY),
-            spanY = sizingFolderWidgetSpanY,
-            minSpan = WidgetKind.minSpan(kind),
-            maxSpan = WidgetKind.maxSpan(kind),
-            onSpanChange = { sizingFolderWidgetSpanY = it },
-            onSave = {
-                viewModel.addWidgetToFolder(folderId, kind, sizingFolderWidgetSpanY)
-                sizingWidgetForFolder = null
-            },
-            onDismiss = { sizingWidgetForFolder = null }
-        )
-    }
-
-    addingSubfolderToId?.let { folderId ->
-        NameSubfolderDialog(
-            onConfirm = { name ->
-                viewModel.addNestedFolder(folderId, name)
-                addingSubfolderToId = null
-            },
-            onDismiss = { addingSubfolderToId = null }
-        )
-    }
-
-    mapTargetPickerForFolderId?.let { folderId ->
-        SavedMapTargetPickerSheet(
-            targets = savedMapTargets,
-            onSelect = { target ->
-                viewModel.addMapTargetToFolder(folderId, target.id)
-                mapTargetPickerForFolderId = null
-            },
-            onAddNew = {
-                mapTargetPickerForFolderId = null
-                addNewMapTargetForFolderId = folderId
-            },
-            onDismiss = { mapTargetPickerForFolderId = null }
-        )
-    }
-
-    websitePickerForFolderId?.let { folderId ->
-        SavedWebsitePickerSheet(
-            websites = pinnedWebsites,
-            onSelect = { website ->
-                viewModel.addWebsiteToFolder(folderId, website.id)
-                websitePickerForFolderId = null
-            },
-            onAddNew = {
-                websitePickerForFolderId = null
-                addNewWebsiteForFolderId = folderId
-            },
-            onDismiss = { websitePickerForFolderId = null }
-        )
-    }
-
-    addNewMapTargetForFolderId?.let { folderId ->
-        AddMapTargetDialog(
-            onSave = { label, lat, lon, address ->
-                viewModel.addNewMapTargetToFolder(folderId, label, lat, lon, address)
-                addNewMapTargetForFolderId = null
-            },
-            onDismiss = { addNewMapTargetForFolderId = null }
-        )
-    }
-
-    addNewWebsiteForFolderId?.let { folderId ->
-        AddWebsiteDialog(
-            onSave = { label, url ->
-                viewModel.addNewWebsiteToFolder(folderId, label, url)
-                addNewWebsiteForFolderId = null
-            },
-            onDismiss = { addNewWebsiteForFolderId = null }
-        )
-    }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-@ExperimentalMaterial3Api
-@Composable
-private fun FolderWidgetKindSheet(onKindSelected: (String) -> Unit, onDismiss: () -> Unit) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            listOf(WidgetKind.MUSIC, WidgetKind.WEATHER, WidgetKind.NOTES).forEach { kind ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onKindSelected(kind) }
-                        .padding(horizontal = 4.dp, vertical = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(imageVector = folderWidgetKindIcon(kind), contentDescription = null)
-                    Text(folderWidgetKindLabel(kind), modifier = Modifier.padding(start = 16.dp))
-                }
-            }
-        }
-    }
-}
-
-@ExperimentalMaterial3Api
-@Composable
-private fun FolderWidgetSizeSheet(
-    row: PageRow,
-    spanY: Int,
-    minSpan: Int,
-    maxSpan: Int,
-    onSpanChange: (Int) -> Unit,
-    onSave: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text(stringResource(R.string.settings_rows_size_title), style = MaterialTheme.typography.titleLarge)
-            WidgetSizeEditor(row = row.copy(spanY = spanY), minSpan = minSpan, maxSpan = maxSpan, onSpanChange = onSpanChange)
-            TextButton(onClick = onSave, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.settings_rows_save))
-            }
-        }
-    }
-}
-
-@Composable
-private fun NameSubfolderDialog(onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
-    var name by remember { mutableStateOf("") }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.folder_add_subfolder)) },
-        text = {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                singleLine = true,
-                label = { Text(stringResource(R.string.settings_folder_creator_name_hint)) }
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(name) }, enabled = name.isNotBlank()) {
-                Text(stringResource(R.string.settings_folder_creator_create))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.widget_notes_cancel)) }
-        }
-    )
-}
-
-private fun folderWidgetKindIcon(kind: String) = when (kind) {
-    WidgetKind.MUSIC -> Icons.Filled.MusicNote
-    WidgetKind.WEATHER -> Icons.Filled.Cloud
-    WidgetKind.NOTES -> Icons.Filled.EditNote
-    else -> Icons.Filled.MusicNote
-}
-
-@Composable
-private fun folderWidgetKindLabel(kind: String): String = when (kind) {
-    WidgetKind.MUSIC -> stringResource(R.string.picker_widget_music)
-    WidgetKind.WEATHER -> stringResource(R.string.picker_widget_weather)
-    WidgetKind.NOTES -> stringResource(R.string.picker_widget_notes)
-    else -> kind
-}

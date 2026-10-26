@@ -258,11 +258,14 @@ class PageContentRepository @Inject constructor(
         return newId
     }
 
-    suspend fun removePageIfEmpty(page: LauncherPage): Boolean {
-        if (page.isHome || page.isAppOverview || page.kind == LauncherPageKind.SEARCH || page.kind == LauncherPageKind.SIDEBAR) return false
-        if (rowDao.countForPage(page.id) > 0) return false
+    /** Deletes a removable page together with everything on it (its rows and their entries cascade
+     *  with it). Returns the deleted rows so the caller can free their system-widget ids, or null
+     *  if this page can't be removed (Home and the utility pages). */
+    suspend fun removePage(page: LauncherPage): List<PageRow>? {
+        if (page.isHome || page.isAppOverview || page.kind == LauncherPageKind.SEARCH || page.kind == LauncherPageKind.SIDEBAR) return null
+        val rows = rowDao.getForPage(page.id)
         pageDao.delete(page)
-        return true
+        return rows
     }
 
     suspend fun setPageIcon(pageId: Long, glyph: String?, backgroundColor: Int?, iconColor: Int?) {

@@ -65,7 +65,11 @@ import kotlin.math.roundToInt
 fun surfaceLabel(surfaceNameRes: Int): String = stringResource(surfaceNameRes)
 
 /** Corner shape of all text fields in the settings. */
-val SettingsTextFieldShape = RoundedCornerShape(16.dp)
+/** The one corner rounding every settings card uses (preference groups, reorderable lists, app
+ *  rows, text fields), so no box rounds differently from the one next to it. */
+val SettingsCardShape = RoundedCornerShape(12.dp)
+
+val SettingsTextFieldShape = SettingsCardShape
 
 /**
  * A [Slider] whose value is only persisted once the drag ends, not on every intermediate frame.
@@ -101,7 +105,7 @@ fun SettledSlider(
  *  and only reveals the slider once tapped, so a compact numeric setting doesn't always take up the
  *  extra vertical space in a settings list. */
 @Composable
-private fun ExpandableSlider(
+internal fun ExpandableSlider(
     value: Float,
     onSettled: (Float) -> Unit,
     valueRange: ClosedFloatingPointRange<Float>,
@@ -248,14 +252,19 @@ fun FillModePreference(
     )
 }
 
-/** Editor for a layer 2/3 appearance: fill, opacity, border, text color. */
+/** Editor for a layer 2/3 appearance: fill, opacity, border, text color. [styleGroupTitle] is
+ *  nullable for a caller whose own already-visible context (a page title, a related on/off switch
+ *  right above) already names it — a repeated heading right underneath would just be noise, same
+ *  as [ElementBorderSection]'s own doc on this. */
 @Composable
 fun ElementAppearanceSection(
     appearance: ElementAppearance,
     onAppearanceChange: (ElementAppearance) -> Unit,
-    styleGroupTitle: String,
+    styleGroupTitle: String?,
     allowNone: Boolean = true,
-    onEyedropperCapture: (() -> androidx.compose.ui.graphics.ImageBitmap?)? = null
+    onEyedropperCapture: (() -> androidx.compose.ui.graphics.ImageBitmap?)? = null,
+    /** False for full-screen surfaces (e.g. the search page), which have no edge to frame. */
+    showBorder: Boolean = true
 ) {
     var colorEditorOpen by remember { mutableStateOf(false) }
 
@@ -314,7 +323,7 @@ fun ElementAppearanceSection(
 
     // Border, all in one connected card under its own heading: on/off, then (once on) thickness and
     // color stacked right underneath — mirrors ElementBorderSection's own dedicated-screen layout.
-    SettingsPreferenceGroup(title = stringResource(R.string.settings_element_border_label)) {
+    if (showBorder) SettingsPreferenceGroup(title = stringResource(R.string.settings_element_border_label)) {
         SettingsPreference(
             icon = null,
             title = stringResource(R.string.settings_element_border_label),
@@ -358,52 +367,56 @@ fun ElementAppearanceSection(
  *  screens instead of the old one-sheet-does-everything editor. */
 @Composable
 fun ElementBackgroundSection(appearance: ElementAppearance, onAppearanceChange: (ElementAppearance) -> Unit, allowNone: Boolean = true) {
+    // Selecting "Color" opens its own window directly — no separate "Color" row to tap through
+    // first, same as every other color picker in the app. Opacity lives inside that same window
+    // rather than as its own section, since it's meaningless without a color/fill to apply to.
+    var colorEditorOpen by remember { mutableStateOf(false) }
     SettingsPreferenceGroup {
         ElementFillMode.entries.filter { allowNone || it != ElementFillMode.NONE }.forEach { mode ->
             FillModePreference(
                 value = mode,
                 selected = appearance.fillMode,
                 customFill = appearance.fill.asBrush(),
-                onSelect = { selected -> onAppearanceChange(appearance.copy(fillMode = selected)) }
+                onSelect = { selected ->
+                    onAppearanceChange(appearance.copy(fillMode = selected))
+                    if (selected == ElementFillMode.COLOR) colorEditorOpen = true
+                }
             )
         }
     }
-    if (appearance.fillMode != ElementFillMode.NONE) {
-        // The picker shows directly as soon as Color is selected above — no separate collapsed
-        // "Color" summary row to tap through first.
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_source_color)) {
+    if (colorEditorOpen) {
+        SettingsEditPage(title = stringResource(R.string.settings_background_source_color), onDismiss = { colorEditorOpen = false }) {
             ColorFillPickerContent(
                 fill = appearance.fill,
                 onFillChange = { fill -> onAppearanceChange(appearance.copy(fill = fill)) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+                modifier = Modifier.fillMaxWidth()
             )
-        }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_opacity_label)) {
-            SettledSlider(
-                value = appearance.opacity,
-                onSettled = { onAppearanceChange(appearance.copy(opacity = it)) },
-                valueRange = 0f..1f,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                label = { live ->
-                    Text(
-                        stringResource(R.string.settings_background_opacity_value, (live * 100).roundToInt()),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            )
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_background_opacity_label)) {
+                SettledSlider(
+                    value = appearance.opacity,
+                    onSettled = { onAppearanceChange(appearance.copy(opacity = it)) },
+                    valueRange = 0f..1f,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    label = { live ->
+                        Text(
+                            stringResource(R.string.settings_background_opacity_value, (live * 100).roundToInt()),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                )
+            }
         }
     }
 }
 
 /** Border-only half of [ElementAppearanceSection] — enable switch, thickness and color all live
  *  in one connected card (no repeated "Border" sub-heading, since the page itself is already
- *  titled "Border"). Thickness and color both expand their controls inline when tapped, same
- *  interaction as any other color row. Used by the Dock and Favorites Panel's own dedicated
+ *  titled "Border"). Thickness expands inline when tapped; color opens in its own window like
+ *  every other color picker in the app. Used by the Dock and Favorites Panel's own dedicated
  *  Border screens. */
 @Composable
 fun ElementBorderSection(appearance: ElementAppearance, onAppearanceChange: (ElementAppearance) -> Unit) {
     var thicknessExpanded by remember { mutableStateOf(false) }
-    var colorExpanded by remember { mutableStateOf(false) }
     SettingsPreferenceGroup {
         SettingsPreference(
             icon = null,
@@ -440,29 +453,12 @@ fun ElementBorderSection(appearance: ElementAppearance, onAppearanceChange: (Ele
             }
             val borderColorSeed = autoBorderSeed(appearance)
             val borderColorValue = appearance.borderColor ?: borderColorSeed
-            SettingsPreference(
-                icon = null,
+            ColorPickerRow(
                 title = stringResource(R.string.settings_element_border_color),
                 summary = if (appearance.borderColor == null) stringResource(R.string.settings_element_color_auto_hint) else null,
-                leading = null,
-                onClick = { colorExpanded = !colorExpanded },
-                trailing = {
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clip(CircleShape)
-                            .background(Color(borderColorValue))
-                            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                    )
-                }
+                color = borderColorValue,
+                onColorChange = { onAppearanceChange(appearance.copy(borderColor = it)) }
             )
-            if (colorExpanded) {
-                ColorPickerControls(
-                    color = Color(borderColorValue),
-                    onColorChange = { onAppearanceChange(appearance.copy(borderColor = it.toArgb())) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
             if (appearance.borderColor != null) {
                 SettingsPreference(
                     icon = null,
@@ -487,7 +483,6 @@ fun CaptionsSection(
     onAppearanceChange: (ElementAppearance) -> Unit,
     title: String? = null
 ) {
-    var colorExpanded by remember { mutableStateOf(false) }
     SettingsPreferenceGroup(title = title) {
         SettingsPreference(
             icon = null,
@@ -498,29 +493,12 @@ fun CaptionsSection(
         if (showLabels) {
             val textColorSeed = autoTextSeed(appearance)
             val textColorValue = appearance.contentColor ?: textColorSeed
-            SettingsPreference(
-                icon = null,
+            ColorPickerRow(
                 title = stringResource(R.string.settings_element_text_color_label),
                 summary = if (appearance.contentColor == null) stringResource(R.string.settings_element_color_auto_hint) else null,
-                leading = null,
-                onClick = { colorExpanded = !colorExpanded },
-                trailing = {
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clip(CircleShape)
-                            .background(Color(textColorValue))
-                            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                    )
-                }
+                color = textColorValue,
+                onColorChange = { onAppearanceChange(appearance.copy(contentColor = it)) }
             )
-            if (colorExpanded) {
-                ColorPickerControls(
-                    color = Color(textColorValue),
-                    onColorChange = { onAppearanceChange(appearance.copy(contentColor = it.toArgb())) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
             if (appearance.contentColor != null) {
                 SettingsPreference(
                     icon = null,
@@ -539,15 +517,16 @@ private fun autoTextSeed(appearance: ElementAppearance): Int {
 }
 
 @Composable
-fun AutomaticColorPicker(title: String, custom: Int?, automaticSeed: Int, onChange: (Int?) -> Unit) {
+fun AutomaticColorPicker(title: String, custom: Int?, automaticSeed: Int, onChange: (Int?) -> Unit, ownGroup: Boolean = true) {
     ColorPickerSection(
         title = title,
         summary = if (custom == null) stringResource(R.string.settings_element_color_auto_hint) else null,
         color = custom ?: automaticSeed,
-        onColorChange = { onChange(it) }
+        onColorChange = { onChange(it) },
+        ownGroup = ownGroup
     )
     if (custom != null) {
-        SettingsPreferenceGroup {
+        val resetRow = @Composable {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_element_color_reset),
@@ -555,6 +534,7 @@ fun AutomaticColorPicker(title: String, custom: Int?, automaticSeed: Int, onChan
                 trailing = null
             )
         }
+        if (ownGroup) SettingsPreferenceGroup { resetRow() } else resetRow()
     }
 }
 

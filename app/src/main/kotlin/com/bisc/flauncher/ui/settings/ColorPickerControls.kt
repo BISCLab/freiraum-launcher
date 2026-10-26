@@ -257,10 +257,18 @@ private fun EyedropperDialog(bitmap: ImageBitmap, onPick: (Color) -> Unit, onDis
     }
 }
 
-/** A titled row (with a live swatch) that expands [ColorPickerControls] inline beneath itself when tapped. */
+/** A titled row (with a live swatch) that opens [ColorPickerControls] in its own window when tapped.
+ *  Wrapped in its own [SettingsPreferenceGroup] card by default; pass [ownGroup] = false to instead
+ *  emit just the row, for attaching inside a card a caller already has open (e.g. a shared "Colors"
+ *  group with other rows) so the rows merge into one connected card instead of each getting their
+ *  own separate rounded box. */
 @Composable
-fun ColorPickerSection(title: String, summary: String? = null, info: String? = null, color: Int, onColorChange: (Int) -> Unit) {
-    SettingsPreferenceGroup {
+fun ColorPickerSection(title: String, summary: String? = null, info: String? = null, color: Int, onColorChange: (Int) -> Unit, ownGroup: Boolean = true) {
+    if (ownGroup) {
+        SettingsPreferenceGroup {
+            ColorPickerRow(title = title, summary = summary, info = info, color = color, onColorChange = onColorChange)
+        }
+    } else {
         ColorPickerRow(title = title, summary = summary, info = info, color = color, onColorChange = onColorChange)
     }
 }

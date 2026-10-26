@@ -15,10 +15,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -56,10 +58,8 @@ import com.bisc.flauncher.data.model.AppOverride
 import com.bisc.flauncher.data.model.RevealMode
 import com.bisc.flauncher.data.settings.IconShape
 
-private val GROUP_CORNER_RADIUS = 12.dp
-
 private fun groupItemShape(index: Int, count: Int): Shape {
-    val full = CornerSize(GROUP_CORNER_RADIUS)
+    val full = SettingsCardShape.topStart
     val flat = CornerSize(0.dp)
     return when {
         count <= 1 -> RoundedCornerShape(full, full, full, full)
@@ -151,7 +151,7 @@ fun SettingsAppsScreen(navController: NavController, onBack: () -> Unit, onNavig
                     placeholder = { Text(stringResource(R.string.settings_manage_apps_search_hint)) },
                     singleLine = true,
                     shape = SettingsTextFieldShape,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
                 )
             }
             if (remainingApps.isEmpty()) {
@@ -271,6 +271,7 @@ private fun AppOverrideEditSheetContent(
     var revealMode by remember(override.componentName) { mutableStateOf(override.revealMode) }
     var revealCode by remember(override.componentName) { mutableStateOf(override.revealCode.orEmpty()) }
     var pickingIcon by remember { mutableStateOf(false) }
+    var revealSettingsOpen by remember { mutableStateOf(false) }
 
     SettingsEditPage(title = stringResource(R.string.settings_manage_apps_edit_title), onDismiss = onDismiss) {
         OutlinedTextField(
@@ -329,9 +330,8 @@ private fun AppOverrideEditSheetContent(
         // unaffected either way. Once other page types exist, a "Pages" row belongs in this same
         // group alongside App list/Text search. Reveal-with-search-code only makes sense once Text
         // search is ON — if the app is already out of Text search entirely, there's no code that
-        // could bypass that — so it's nested right under Text search and only shown then; turning
-        // it on *replaces* name matching rather than adding to it, the app then only turns up for
-        // the exact code.
+        // could bypass that — so its own settings button only shows then; turning it on *replaces*
+        // name matching rather than adding to it, the app then only turns up for the exact code.
         SettingsPreferenceGroup(title = stringResource(R.string.settings_manage_apps_visibility_label)) {
             SettingsPreference(
                 icon = null,
@@ -345,34 +345,36 @@ private fun AppOverrideEditSheetContent(
                 title = stringResource(R.string.settings_manage_apps_visibility_search_label),
                 info = stringResource(R.string.settings_manage_apps_visibility_search_description),
                 onClick = { hiddenFromSearch = !hiddenFromSearch },
-                trailing = { Switch(checked = !hiddenFromSearch, onCheckedChange = { hiddenFromSearch = !it }) }
-            )
-            if (!hiddenFromSearch) {
-                val revealEnabled = revealMode == RevealMode.SEARCH_CODE
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_manage_apps_reveal_search_code),
-                    info = stringResource(R.string.settings_manage_apps_reveal_search_code_description),
-                    onClick = { revealMode = if (revealEnabled) RevealMode.NONE else RevealMode.SEARCH_CODE },
-                    trailing = {
-                        Switch(
-                            checked = revealEnabled,
-                            onCheckedChange = { revealMode = if (it) RevealMode.SEARCH_CODE else RevealMode.NONE }
-                        )
+                trailing = { Switch(checked = !hiddenFromSearch, onCheckedChange = { hiddenFromSearch = !it }) },
+                extra = if (!hiddenFromSearch) {
+                    {
+                        IconButton(onClick = { revealSettingsOpen = true }, modifier = Modifier.size(32.dp)) {
+                            Icon(
+                                Icons.Filled.Tune,
+                                contentDescription = stringResource(R.string.settings_more_settings_button),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
-                )
-            }
+                } else null
+            )
         }
 
-        if (!hiddenFromSearch && revealMode == RevealMode.SEARCH_CODE) {
-            OutlinedTextField(
-                value = revealCode,
-                onValueChange = { revealCode = it },
-                label = { Text(stringResource(R.string.settings_manage_apps_reveal_code_hint)) },
-                singleLine = true,
-                shape = SettingsTextFieldShape,
-                modifier = Modifier.fillMaxWidth()
-            )
+        if (revealSettingsOpen) {
+            SettingsEditPage(title = stringResource(R.string.settings_manage_apps_reveal_search_code), onDismiss = { revealSettingsOpen = false }) {
+                Text(
+                    stringResource(R.string.settings_manage_apps_reveal_search_code_description),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                RevealSearchCodeCard(
+                    enabled = revealMode == RevealMode.SEARCH_CODE,
+                    onEnabledChange = { revealMode = if (it) RevealMode.SEARCH_CODE else RevealMode.NONE },
+                    code = revealCode,
+                    onCodeChange = { revealCode = it }
+                )
+            }
         }
 
         TextButton(
@@ -400,6 +402,43 @@ private fun AppOverrideEditSheetContent(
                     viewModel.setAppIcon(app.componentName, null, null)
                     pickingIcon = false
                 }
+            )
+        }
+    }
+}
+
+/** The on/off toggle and its search-code input as one unbroken card, instead of a separate
+ *  indented row plus a detached text field below it. */
+@Composable
+private fun RevealSearchCodeCard(enabled: Boolean, onEnabledChange: (Boolean) -> Unit, code: String, onCodeChange: (String) -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(SettingsCardShape)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .noRippleClickable(onClick = { onEnabledChange(!enabled) })
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                stringResource(R.string.settings_manage_apps_reveal_search_code),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f)
+            )
+            Switch(checked = enabled, onCheckedChange = onEnabledChange)
+        }
+        if (enabled) {
+            OutlinedTextField(
+                value = code,
+                onValueChange = onCodeChange,
+                label = { Text(stringResource(R.string.settings_manage_apps_reveal_code_hint)) },
+                singleLine = true,
+                shape = SettingsTextFieldShape,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 16.dp)
             )
         }
     }

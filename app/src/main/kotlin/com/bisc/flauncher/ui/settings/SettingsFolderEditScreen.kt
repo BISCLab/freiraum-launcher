@@ -2,8 +2,8 @@ package com.bisc.flauncher.ui.settings
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -26,10 +26,14 @@ import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -122,8 +126,9 @@ fun SettingsFolderEditScreen(
     var pickingFolderIcon by remember { mutableStateOf(false) }
     var appearanceOpen by remember { mutableStateOf(false) }
     var borderOpen by remember { mutableStateOf(false) }
-    var visibilityOpen by remember { mutableStateOf(false) }
-    val showAddRow by remember(folderId) { viewModel.folderShowAddRow(folderId) }.collectAsState(initial = true)
+    var showWidgetKindPicker by remember { mutableStateOf(false) }
+    var sizingWidgetKind by remember { mutableStateOf<String?>(null) }
+    var sizingWidgetSpanY by remember { mutableStateOf(1) }
     val globalShowLabels by viewModel.folderShowLabels.collectAsState()
 
     val latestEdited by rememberUpdatedState(edited)
@@ -138,19 +143,6 @@ fun SettingsFolderEditScreen(
     SettingsSubScreen(title = stringResource(R.string.settings_folder_edit_title), navController = navController, onBack = onBack) {
         if (folder == null) return@SettingsSubScreen
 
-        Row(
-            modifier = Modifier.fillMaxWidth().clickable { pickingFolderIcon = true },
-            horizontalArrangement = Arrangement.Center
-        ) {
-            FolderIcon(
-                folder = folder,
-                previewItems = folderItems.filter { it.folderId == folderId },
-                loadIcon = viewModel::loadIcon,
-                loadPackIcon = viewModel::loadPackIcon,
-                modifier = Modifier.size(72.dp)
-            )
-        }
-
         OutlinedTextField(
             value = edited ?: folder.name,
             onValueChange = { edited = it },
@@ -163,6 +155,28 @@ fun SettingsFolderEditScreen(
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
+                title = stringResource(R.string.settings_app_icon_label),
+                summary = if (folder.iconMode == FolderIconMode.ICON_PACK) {
+                    iconPacks.find { it.packageName == folder.iconPackPackage }?.label ?: folder.iconPackPackage
+                } else {
+                    stringResource(R.string.settings_app_icon_default)
+                },
+                onClick = { pickingFolderIcon = true },
+                trailing = {
+                    FolderIcon(
+                        folder = folder,
+                        previewItems = folderItems.filter { it.folderId == folderId },
+                        loadIcon = viewModel::loadIcon,
+                        loadPackIcon = viewModel::loadPackIcon,
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+            )
+        }
+
+        SettingsPreferenceGroup {
+            SettingsPreference(
+                icon = null,
                 title = stringResource(R.string.settings_folder_appearance_label),
                 onClick = { appearanceOpen = true },
                 trailing = null
@@ -171,12 +185,6 @@ fun SettingsFolderEditScreen(
                 icon = null,
                 title = stringResource(R.string.settings_element_border_label),
                 onClick = { borderOpen = true },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_folder_visibility_label),
-                onClick = { visibilityOpen = true },
                 trailing = null
             )
         }
@@ -298,20 +306,6 @@ fun SettingsFolderEditScreen(
         }
     }
 
-    if (visibilityOpen) {
-        SettingsEditPage(title = stringResource(R.string.settings_folder_visibility_label), onDismiss = { visibilityOpen = false }) {
-            SettingsPreferenceGroup {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_folder_show_add_row_label),
-                    info = stringResource(R.string.settings_folder_show_add_row_summary),
-                    onClick = { viewModel.setFolderShowAddRow(folderId, !showAddRow) },
-                    trailing = { Switch(checked = showAddRow, onCheckedChange = { viewModel.setFolderShowAddRow(folderId, it) }) }
-                )
-            }
-        }
-    }
-
     if (pickingFolderIcon) {
         SettingsFixedDialog(title = stringResource(R.string.settings_app_icon_label), onDismiss = { pickingFolderIcon = false }) {
             SettingsPreferenceGroup {
@@ -368,8 +362,41 @@ fun SettingsFolderEditScreen(
                 SettingsPreference(icon = Icons.AutoMirrored.Filled.Shortcut, title = stringResource(R.string.settings_row_entry_add_shortcut), onClick = { showAddChooser = false; viewModel.openFolderShortcutAppPicker(folderId) }, trailing = null)
                 SettingsPreference(icon = Icons.Filled.Place, title = stringResource(R.string.settings_row_entry_add_map_target), onClick = { showAddChooser = false; showMapTargetPicker = true }, trailing = null)
                 SettingsPreference(icon = Icons.Filled.Language, title = stringResource(R.string.settings_row_entry_add_website), onClick = { showAddChooser = false; showWebsitePicker = true }, trailing = null)
+                SettingsPreference(icon = Icons.Filled.Widgets, title = stringResource(R.string.settings_row_entry_add_widget), onClick = { showAddChooser = false; showWidgetKindPicker = true }, trailing = null)
             }
         }
+    }
+
+    if (showWidgetKindPicker) {
+        FolderWidgetKindSheet(
+            onKindSelected = { kind ->
+                showWidgetKindPicker = false
+                sizingWidgetSpanY = com.bisc.flauncher.data.model.WidgetKind.defaultSpan(kind)
+                sizingWidgetKind = kind
+            },
+            onDismiss = { showWidgetKindPicker = false }
+        )
+    }
+
+    sizingWidgetKind?.let { kind ->
+        FolderWidgetSizeSheet(
+            row = com.bisc.flauncher.data.model.PageRow(
+                pageId = 0,
+                orderIndex = 0,
+                type = com.bisc.flauncher.data.model.PageRowType.WIDGET,
+                payload = kind,
+                spanY = sizingWidgetSpanY
+            ),
+            spanY = sizingWidgetSpanY,
+            minSpan = com.bisc.flauncher.data.model.WidgetKind.minSpan(kind),
+            maxSpan = com.bisc.flauncher.data.model.WidgetKind.maxSpan(kind),
+            onSpanChange = { sizingWidgetSpanY = it },
+            onSave = {
+                viewModel.addWidgetToFolder(folderId, kind, sizingWidgetSpanY)
+                sizingWidgetKind = null
+            },
+            onDismiss = { sizingWidgetKind = null }
+        )
     }
 
     if (showAppPicker) {
@@ -482,6 +509,74 @@ fun SettingsFolderEditScreen(
             }
         )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FolderWidgetKindSheet(onKindSelected: (String) -> Unit, onDismiss: () -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        androidx.compose.foundation.layout.Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            listOf(
+                com.bisc.flauncher.data.model.WidgetKind.MUSIC,
+                com.bisc.flauncher.data.model.WidgetKind.WEATHER,
+                com.bisc.flauncher.data.model.WidgetKind.NOTES
+            ).forEach { kind ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onKindSelected(kind) }
+                        .padding(horizontal = 4.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(imageVector = folderWidgetKindIcon(kind), contentDescription = null)
+                    Text(folderWidgetKindLabel(kind), modifier = Modifier.padding(start = 16.dp))
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FolderWidgetSizeSheet(
+    row: com.bisc.flauncher.data.model.PageRow,
+    spanY: Int,
+    minSpan: Int,
+    maxSpan: Int,
+    onSpanChange: (Int) -> Unit,
+    onSave: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        androidx.compose.foundation.layout.Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(stringResource(R.string.settings_rows_size_title), style = MaterialTheme.typography.titleLarge)
+            com.bisc.flauncher.ui.home.WidgetSizeEditor(row = row.copy(spanY = spanY), minSpan = minSpan, maxSpan = maxSpan, onSpanChange = onSpanChange)
+            TextButton(onClick = onSave, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.settings_rows_save))
+            }
+        }
+    }
+}
+
+private fun folderWidgetKindIcon(kind: String) = when (kind) {
+    com.bisc.flauncher.data.model.WidgetKind.MUSIC -> Icons.Filled.MusicNote
+    com.bisc.flauncher.data.model.WidgetKind.WEATHER -> Icons.Filled.Cloud
+    com.bisc.flauncher.data.model.WidgetKind.NOTES -> Icons.Filled.EditNote
+    else -> Icons.Filled.MusicNote
+}
+
+@Composable
+private fun folderWidgetKindLabel(kind: String): String = when (kind) {
+    com.bisc.flauncher.data.model.WidgetKind.MUSIC -> stringResource(R.string.picker_widget_music)
+    com.bisc.flauncher.data.model.WidgetKind.WEATHER -> stringResource(R.string.picker_widget_weather)
+    com.bisc.flauncher.data.model.WidgetKind.NOTES -> stringResource(R.string.picker_widget_notes)
+    else -> ""
 }
 
 /** Full-screen icon picker (settings/folder/{folderId}/icon). */

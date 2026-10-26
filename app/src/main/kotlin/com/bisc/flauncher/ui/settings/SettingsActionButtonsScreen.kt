@@ -226,13 +226,15 @@ fun SettingsActionButtonDetailScreen(buttonId: Long, navController: NavControlle
                 title = stringResource(R.string.settings_section_global_background),
                 custom = button.backgroundColor,
                 automaticSeed = android.graphics.Color.DKGRAY,
-                onChange = { viewModel.updateActionButton(button.copy(backgroundColor = it)) }
+                onChange = { viewModel.updateActionButton(button.copy(backgroundColor = it)) },
+                ownGroup = false
             )
             AutomaticColorPicker(
                 title = stringResource(R.string.settings_element_text_color_label),
                 custom = button.iconColor,
                 automaticSeed = android.graphics.Color.WHITE,
-                onChange = { viewModel.updateActionButton(button.copy(iconColor = it)) }
+                onChange = { viewModel.updateActionButton(button.copy(iconColor = it)) },
+                ownGroup = false
             )
         }
         SettingsPreferenceGroup {

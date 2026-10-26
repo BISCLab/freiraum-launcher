@@ -6,20 +6,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import com.bisc.flauncher.data.model.AppListLayout
 import com.bisc.flauncher.ui.home.rememberAppIcon
 import kotlinx.coroutines.Job
 import androidx.compose.foundation.Image
@@ -68,7 +60,6 @@ import androidx.compose.material3.LocalContentColor
 import com.bisc.flauncher.data.model.ElementFillMode
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.settings.Handedness
-import com.bisc.flauncher.ui.home.dock.DockDimens
 import com.bisc.flauncher.ui.home.dock.resolveElementColors
 import com.bisc.flauncher.ui.theme.noRippleClickable
 import kotlinx.coroutines.CoroutineScope
@@ -110,7 +101,7 @@ internal fun Modifier.fadeListTop(height: Dp, strength: () -> Float): Modifier =
         }
     }
 
-private val TOP_FADE_HEIGHT = 56.dp
+internal val TOP_FADE_HEIGHT = 56.dp
 
 /** App list grouped by initial letter with sticky headers, A-Z rail and scrub magnifier. */
 @Composable
@@ -118,9 +109,7 @@ fun BrowseAppList(
     allApps: List<AppInfo>,
     grouping: BrowseGrouping,
     showAzIndex: Boolean,
-    indexShowRailBar: Boolean,
     headerLetterAppearance: ElementAppearance,
-    alphabetLetterAppearance: ElementAppearance,
     listState: LazyListState,
     loadIcon: (ComponentName) -> ImageBitmap?,
     onAppClick: (AppInfo) -> Unit,
@@ -128,15 +117,12 @@ fun BrowseAppList(
     reservedZoneHeight: Dp,
     handedness: Handedness,
     accentColor: Int,
-    edgeInset: Dp = DockDimens.horizontalMargin,
-    layout: AppListLayout = AppListLayout.LIST,
-    iconSize: Dp = TILE_ICON_SIZE,
+    edgeInset: Dp = AppOverviewDimens.horizontalMargin,
+    iconSize: Dp = APP_ICON_SIZE,
     cornerRadiusPercent: Int = 25
 ) {
     val scrub = remember { BrowseScrubState() }
-    val gridState = rememberLazyGridState()
     val haptic = LocalHapticFeedback.current
-    val tiles = layout == AppListLayout.TILES
 
     val highlight = remember { mutableStateOf(IntRange.EMPTY) }
     val othersAlpha = animateFloatAsState(
@@ -162,67 +148,31 @@ fun BrowseAppList(
         val fadeEnd = (listHeight / maxHeight).coerceIn(0f, 1f)
         val fadeStart = ((listHeight - FADE_TRANSITION_DISTANCE) / maxHeight).coerceIn(0f, fadeEnd)
 
-        val canScrollFurther by remember(tiles) {
-            derivedStateOf {
-                reservedZoneHeight > 0.dp && (if (tiles) gridState.canScrollForward else listState.canScrollForward)
-            }
+        val canScrollFurther by remember {
+            derivedStateOf { reservedZoneHeight > 0.dp && listState.canScrollForward }
         }
         val topFadePx = with(LocalDensity.current) { TOP_FADE_HEIGHT.toPx() }
         val listModifier = Modifier
             .fillMaxSize()
             .then(if (canScrollFurther) Modifier.fadeBackgroundToBottom(fadeStart, fadeEnd) else Modifier)
             .fadeListTop(TOP_FADE_HEIGHT) {
-                val index = if (tiles) gridState.firstVisibleItemIndex else listState.firstVisibleItemIndex
-                val offset = if (tiles) gridState.firstVisibleItemScrollOffset else listState.firstVisibleItemScrollOffset
-                if (index > 0) 1f else (offset / topFadePx).coerceIn(0f, 1f)
+                if (listState.firstVisibleItemIndex > 0) 1f else (listState.firstVisibleItemScrollOffset / topFadePx).coerceIn(0f, 1f)
             }
 
-        if (tiles) {
-            // The rail floats over the grid's own edge.
-            val railSpace = edgeInset + RAIL_BAR_WIDTH + 8.dp
-            val railOnLeft = handedness == Handedness.LEFT
-            LazyVerticalGrid(
-                state = gridState,
-                columns = GridCells.Adaptive(TILE_MIN_WIDTH),
-                modifier = listModifier,
-                contentPadding = PaddingValues(
-                    start = edgeInset + if (showAzIndex && railOnLeft) railSpace - edgeInset else 0.dp,
-                    end = edgeInset + if (showAzIndex && !railOnLeft) railSpace - edgeInset else 0.dp,
-                    bottom = reservedZoneHeight
-                )
-            ) {
-                itemsIndexed(
-                    items = grouping.items,
-                    key = { _, item -> browseItemKey(item) },
-                    span = { _, item ->
-                        if (item is BrowseItem.Header) GridItemSpan(maxLineSpan) else GridItemSpan(1)
-                    },
-                    contentType = { _, item -> item is BrowseItem.Header }
-                ) { index, item ->
-                    Box(modifier = Modifier.graphicsLayer { alpha = if (index in highlight.value) 1f else othersAlpha.value }) {
-                        when (item) {
-                            is BrowseItem.Header -> BrowseSectionHeader(item.letter, headerLetterAppearance, handedness, 0.dp)
-                            is BrowseItem.Row -> AppTile(item.app, loadIcon, iconSize) { onAppClick(item.app) }
-                        }
-                    }
-                }
-            }
-        } else {
-            LazyColumn(
-                state = listState,
-                modifier = listModifier,
-                contentPadding = PaddingValues(bottom = reservedZoneHeight)
-            ) {
-                itemsIndexed(
-                    items = grouping.items,
-                    key = { _, item -> browseItemKey(item) },
-                    contentType = { _, item -> item is BrowseItem.Header }
-                ) { index, item ->
-                    Box(modifier = Modifier.graphicsLayer { alpha = if (index in highlight.value) 1f else othersAlpha.value }) {
-                        when (item) {
-                            is BrowseItem.Header -> BrowseSectionHeader(item.letter, headerLetterAppearance, handedness, edgeInset)
-                            is BrowseItem.Row -> AppBrowseRow(item.app, loadIcon, handedness, edgeInset, iconSize) { onAppClick(item.app) }
-                        }
+        LazyColumn(
+            state = listState,
+            modifier = listModifier,
+            contentPadding = PaddingValues(bottom = reservedZoneHeight)
+        ) {
+            itemsIndexed(
+                items = grouping.items,
+                key = { _, item -> browseItemKey(item) },
+                contentType = { _, item -> item is BrowseItem.Header }
+            ) { index, item ->
+                Box(modifier = Modifier.graphicsLayer { alpha = if (index in highlight.value) 1f else othersAlpha.value }) {
+                    when (item) {
+                        is BrowseItem.Header -> BrowseSectionHeader(item.letter, headerLetterAppearance, handedness, edgeInset)
+                        is BrowseItem.Row -> AppBrowseRow(item.app, loadIcon, handedness, edgeInset, iconSize) { onAppClick(item.app) }
                     }
                 }
             }
@@ -232,8 +182,6 @@ fun BrowseAppList(
             AlphabetIndex(
                 letters = ('A'..'Z').toList(),
                 hasOtherGroup = grouping.hasOther,
-                showRailBar = indexShowRailBar,
-                letterAppearance = alphabetLetterAppearance,
                 handedness = handedness,
                 cornerRadiusPercent = cornerRadiusPercent,
                 modifier = Modifier
@@ -251,7 +199,7 @@ fun BrowseAppList(
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         scrollJob[0]?.cancel()
                         scrollJob[0] = coroutineScope.launch {
-                            if (tiles) gridState.scrollToItem(target) else listState.scrollToItem(target)
+                            listState.scrollToItem(target)
                             highlight.value = sectionRange(target)
                         }
                     }
@@ -304,33 +252,7 @@ private fun browseItemKey(item: BrowseItem): String = when (item) {
 
 private const val SCRUB_OTHERS_ALPHA = 0.06f
 
-private val TILE_MIN_WIDTH = 78.dp
-
-private val TILE_ICON_SIZE = 56.dp
-
-@Composable
-private fun AppTile(app: AppInfo, loadIcon: (ComponentName) -> ImageBitmap?, iconSize: Dp, onClick: () -> Unit) {
-    val bitmap = rememberAppIcon(app.componentName, loadIcon)
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .noRippleClickable(onClick = onClick)
-            .padding(horizontal = 2.dp, vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(modifier = Modifier.size(iconSize)) {
-            if (bitmap != null) Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.fillMaxSize())
-        }
-        Text(
-            text = app.label,
-            modifier = Modifier.padding(top = 6.dp),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.labelMedium
-        )
-    }
-}
+private val APP_ICON_SIZE = 56.dp
 
 private val HEADER_CIRCLE_SIZE = 32.dp
 
@@ -348,7 +270,10 @@ private fun BrowseSectionHeader(letter: Char, appearance: ElementAppearance, han
             .padding(
                 start = edgeInset,
                 end = edgeInset,
-                top = 6.dp,
+                // Bigger than the bottom gap on purpose — this is the break from the *previous*
+                // section's last app, not from this header's own apps right below it (that gap is
+                // the row's own top padding plus this header's bottom padding, unchanged).
+                top = 22.dp,
                 bottom = 6.dp
             ),
         verticalAlignment = Alignment.CenterVertically

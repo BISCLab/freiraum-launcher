@@ -71,23 +71,8 @@ fun SettingsFolderGlobalBorderScreen(navController: NavController, onBack: () ->
 fun SettingsFolderGlobalVisibilityScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val hideStatusBar by viewModel.folderHideStatusBar.collectAsState()
     val hideDock by viewModel.folderHideDock.collectAsState()
-    val showAddRowDefault by viewModel.folderShowAddRowDefault.collectAsState()
     SettingsSubScreen(title = stringResource(R.string.settings_folder_visibility_label), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_folder_show_add_row_default_label),
-                info = stringResource(R.string.settings_folder_show_add_row_summary),
-                onClick = { viewModel.setFolderShowAddRowDefault(!showAddRowDefault) },
-                trailing = { Switch(checked = showAddRowDefault, onCheckedChange = viewModel::setFolderShowAddRowDefault) }
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_folder_show_add_row_everywhere_off),
-                info = stringResource(R.string.settings_folder_show_add_row_everywhere_off_summary),
-                onClick = { viewModel.hideFolderAddRowEverywhere() },
-                trailing = null
-            )
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_folder_hide_status_bar),

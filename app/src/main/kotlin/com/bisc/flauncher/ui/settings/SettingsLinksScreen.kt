@@ -114,13 +114,15 @@ fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBa
                 title = stringResource(R.string.settings_section_global_background),
                 custom = website.backgroundColor,
                 automaticSeed = android.graphics.Color.DKGRAY,
-                onChange = { viewModel.updateWebsite(website.copy(backgroundColor = it)) }
+                onChange = { viewModel.updateWebsite(website.copy(backgroundColor = it)) },
+                ownGroup = false
             )
             AutomaticColorPicker(
                 title = stringResource(R.string.settings_element_text_color_label),
                 custom = website.iconColor,
                 automaticSeed = android.graphics.Color.WHITE,
-                onChange = { viewModel.updateWebsite(website.copy(iconColor = it)) }
+                onChange = { viewModel.updateWebsite(website.copy(iconColor = it)) },
+                ownGroup = false
             )
         }
         SettingsPreferenceGroup {

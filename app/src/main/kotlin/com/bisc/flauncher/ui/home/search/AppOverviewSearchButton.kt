@@ -1,10 +1,9 @@
-package com.bisc.flauncher.ui.home.dock
+package com.bisc.flauncher.ui.home.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,10 +20,12 @@ import androidx.compose.ui.unit.dp
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.settings.Handedness
+import com.bisc.flauncher.ui.home.dock.resolveElementColors
 
-/** The dock's search button, floating free: the same size, shape and. */
+/** App overview's own floating search button — jumps straight into the Text-search utility page.
+ *  Its own fixed-size, fixed-inset footprint (see [AppOverviewDimens]), independent of the Dock. */
 @Composable
-fun FloatingSearchButton(
+fun AppOverviewSearchButton(
     onClick: () -> Unit,
     handedness: Handedness,
     cornerRadiusPercent: Int,
@@ -32,20 +33,20 @@ fun FloatingSearchButton(
     modifier: Modifier = Modifier
 ) {
     val colors = resolveElementColors(appearance)
-    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        val d = DockDimens.scaled((maxWidth - DockDimens.horizontalMargin * 2).coerceAtLeast(0.dp))
-        val slack = ((maxWidth - DockDimens.horizontalMargin * 2 - d.pillWidth) / 2).coerceAtLeast(0.dp)
-        val edge = DockDimens.horizontalMargin + slack + d.innerHorizontalPadding
-        val shape = RoundedCornerShape(percent = cornerRadiusPercent.coerceIn(0, 100))
+    val shape = RoundedCornerShape(percent = cornerRadiusPercent.coerceIn(0, 100))
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(
+                start = if (handedness == Handedness.LEFT) AppOverviewDimens.horizontalMargin else 0.dp,
+                end = if (handedness == Handedness.LEFT) 0.dp else AppOverviewDimens.horizontalMargin,
+                bottom = AppOverviewDimens.bottomMargin + AppOverviewDimens.innerVerticalPadding
+            ),
+        contentAlignment = if (handedness == Handedness.LEFT) Alignment.BottomStart else Alignment.BottomEnd
+    ) {
         Box(
             modifier = Modifier
-                .align(if (handedness == Handedness.LEFT) Alignment.BottomStart else Alignment.BottomEnd)
-                .padding(
-                    start = if (handedness == Handedness.LEFT) edge else 0.dp,
-                    end = if (handedness == Handedness.LEFT) 0.dp else edge,
-                    bottom = DockDimens.bottomMargin + d.innerVerticalPadding
-                )
-                .size(d.buttonSize)
+                .size(AppOverviewDimens.buttonSize)
                 .clip(shape)
                 .background(colors.background, alpha = colors.backgroundAlpha)
                 .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)

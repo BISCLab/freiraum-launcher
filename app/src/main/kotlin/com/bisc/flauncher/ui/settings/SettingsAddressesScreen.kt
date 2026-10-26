@@ -116,13 +116,15 @@ fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, on
                 title = stringResource(R.string.settings_section_global_background),
                 custom = target.backgroundColor,
                 automaticSeed = android.graphics.Color.DKGRAY,
-                onChange = { viewModel.updateMapTarget(target.copy(backgroundColor = it)) }
+                onChange = { viewModel.updateMapTarget(target.copy(backgroundColor = it)) },
+                ownGroup = false
             )
             AutomaticColorPicker(
                 title = stringResource(R.string.settings_element_text_color_label),
                 custom = target.iconColor,
                 automaticSeed = android.graphics.Color.WHITE,
-                onChange = { viewModel.updateMapTarget(target.copy(iconColor = it)) }
+                onChange = { viewModel.updateMapTarget(target.copy(iconColor = it)) },
+                ownGroup = false
             )
         }
         SettingsPreferenceGroup {
