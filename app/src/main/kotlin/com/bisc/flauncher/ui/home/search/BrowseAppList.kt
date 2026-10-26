@@ -118,7 +118,7 @@ fun BrowseAppList(
     accentColor: Int,
     edgeInset: Dp = AppOverviewDimens.horizontalMargin,
     iconSize: Dp = APP_ICON_SIZE,
-    cornerRadiusPercent: Int = 25
+    cornerRadiusPercent: Int = com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT
 ) {
     val scrub = remember { BrowseScrubState() }
     val haptic = LocalHapticFeedback.current

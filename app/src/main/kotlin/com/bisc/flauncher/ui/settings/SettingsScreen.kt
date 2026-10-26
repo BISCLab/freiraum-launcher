@@ -71,21 +71,15 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
         bottomBar = { SettingsBreadcrumbBar(navController) }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(16.dp)) {
-            // Masterplan's final nav (Phase 9): Globale Einstellungen / Elemente / Seiten /
-            // Berechtigungen. Apps/Folder live only under Elements now; Gestures/App overview only
-            // under Pages — see SettingsElementsScreen/SettingsPagesScreen for those sub-links.
+            // Three levels, global to specific: Design (looks the same everywhere), Pages (each page
+            // and utility page, plus gestures), Elements (the library of apps, folders, places,
+            // links and action buttons) — then System for everything about fitting into the phone.
             SettingsPreferenceGroup {
                 SettingsPreference(
                     icon = Icons.Filled.Palette,
-                    title = stringResource(R.string.settings_section_appearance),
-                    summary = stringResource(R.string.settings_card_appearance_subtitle),
+                    title = stringResource(R.string.settings_design_title),
+                    summary = stringResource(R.string.settings_card_design_subtitle),
                     onClick = { onNavigate("appearance") }
-                )
-                SettingsPreference(
-                    icon = Icons.Filled.Apps,
-                    title = stringResource(R.string.settings_section_elements),
-                    summary = stringResource(R.string.settings_card_elements_subtitle),
-                    onClick = { onNavigate("elements") }
                 )
                 SettingsPreference(
                     icon = Icons.Filled.ViewCarousel,
@@ -94,14 +88,20 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                     onClick = { onNavigate("pages") }
                 )
                 SettingsPreference(
+                    icon = Icons.Filled.Apps,
+                    title = stringResource(R.string.settings_section_elements),
+                    summary = stringResource(R.string.settings_card_elements_subtitle),
+                    onClick = { onNavigate("elements") }
+                )
+                SettingsPreference(
                     icon = Icons.Filled.PhoneAndroid,
-                    title = stringResource(R.string.settings_section_permissions),
+                    title = stringResource(R.string.settings_system_title),
                     summary = if (isDefault) {
-                        stringResource(R.string.settings_default_launcher_already_set)
+                        stringResource(R.string.settings_card_system_subtitle)
                     } else {
                         stringResource(R.string.settings_default_launcher_description)
                     },
-                    onClick = { onNavigate("permissions") }
+                    onClick = { onNavigate("system") }
                 )
             }
         }

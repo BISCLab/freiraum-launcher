@@ -126,6 +126,13 @@ fun SettingsElementBoxEditScreen(
                     onClick = { viewModel.setRowPillMode(row, !row.pillMode) },
                     trailing = { Switch(checked = row.pillMode, onCheckedChange = { viewModel.setRowPillMode(row, it) }) }
                 )
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_widgets_edge_to_edge_label),
+                    info = stringResource(R.string.settings_edge_to_edge_summary),
+                    onClick = { viewModel.setRowEdgeToEdge(row, !row.edgeToEdge) },
+                    trailing = { Switch(checked = row.edgeToEdge, onCheckedChange = { viewModel.setRowEdgeToEdge(row, it) }) }
+                )
             }
         }
 

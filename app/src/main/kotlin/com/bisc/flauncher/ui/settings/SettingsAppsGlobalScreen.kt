@@ -31,7 +31,7 @@ fun SettingsAppsGlobalScreen(navController: NavController, onBack: () -> Unit, v
     val activeIconPack by viewModel.activeIconPack.collectAsState()
     val iconPacks by viewModel.iconPacks.collectAsState()
 
-    SettingsSubScreen(title = stringResource(R.string.settings_apps_global_label), navController = navController, onBack = onBack) {
+    SettingsSubScreen(title = stringResource(R.string.settings_icons_label), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_shape_label)) {
             IconShapePreference(stringResource(R.string.settings_icon_shape_rounded_square), IconShape.ROUNDED_SQUARE, iconShape, viewModel::setIconShape)
             IconShapePreference(stringResource(R.string.settings_icon_shape_circle), IconShape.CIRCLE, iconShape, viewModel::setIconShape)

@@ -75,8 +75,6 @@
     <string name="settings_shortcut_about">About phone</string>
 
     <string name="settings_title">Settings</string>
-    <string name="settings_section_appearance">Global settings</string>
-    <string name="settings_card_appearance_subtitle">Language, color mode, font</string>
     <string name="settings_theme_confirm_title">Apply “%1$s”?</string>
     <string name="settings_theme_confirm_message">Overwrites the background and all customized color and style settings throughout the launcher. Every surface remains individually editable afterwards. This action cannot be undone automatically.</string>
     <string name="settings_theme_apply">Apply</string>
@@ -86,8 +84,19 @@
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_theme_system">System</string>
-    <string name="settings_accent_color_row">Highlight color</string>
-    <string name="settings_accent_color_summary">Color of the enlarged letter shown while dragging on the A–Z rail.</string>
+    <string name="settings_accent_color_summary">Color of the enlarged letter bubble shown while dragging on the A–Z index.</string>
+    <string name="settings_accent_label">Accent color</string>
+    <string name="settings_accent_global_info">Used by the app list\'s scroll bubble and the charging animation. Each of them can also get its own color in its own settings.</string>
+    <string name="settings_accent_follows_global">Follows the global accent color</string>
+    <string name="settings_accent_use_global">Use global accent color</string>
+    <string name="settings_search_button_follow_rail">Same look as the A–Z index</string>
+    <string name="settings_design_title">Design</string>
+    <string name="settings_card_design_subtitle">Colors, language, font, shapes, icons, background</string>
+    <string name="settings_icons_label">Icons</string>
+    <string name="settings_icons_summary">Shape, size and icon pack for every app</string>
+    <string name="settings_system_title">System</string>
+    <string name="settings_card_system_subtitle">Permissions, default apps, charging, backup</string>
+    <string name="settings_element_fill_label">Fill</string>
     <string name="settings_font_label">Font</string>
     <string name="settings_font_system">System default</string>
     <string name="settings_font_serif">Serif</string>
@@ -192,8 +201,6 @@
 
     <string name="settings_section_manage_apps">Apps</string>
     <string name="settings_card_manage_apps_subtitle">Hide and rename apps, icons, icon pack</string>
-    <string name="settings_apps_global_label">Global app settings</string>
-    <string name="settings_apps_global_subtitle">Icon shape, size, pack</string>
     <string name="settings_manage_apps_search_hint">Search apps…</string>
     <string name="settings_manage_apps_hidden_summary">Hidden</string>
     <string name="settings_manage_apps_hidden_from_list_summary">Hidden from app list</string>
@@ -267,14 +274,12 @@
     <string name="settings_gesture_action_settings">Open settings</string>
     <string name="settings_gesture_action_notifications">Open notifications</string>
     <string name="settings_gesture_action_quick_settings">Open quick settings</string>
-    <string name="settings_gesture_already_used">Already used elsewhere</string>
 
     <string name="settings_section_pages">Pages</string>
     <string name="settings_section_app_overview">App list</string>
     <string name="settings_card_pages_subtitle">Widgets, element boxes, backgrounds</string>
     <string name="settings_pages_home">Home screen</string>
     <string name="settings_home_appearance_title">Appearance</string>
-    <string name="settings_page_appearance_title">Page appearance</string>
     <string name="settings_home_appearance_subtitle">Background, status bar</string>
     <string name="settings_home_layout_title">Layout</string>
     <string name="settings_home_layout_subtitle">Panel, widgets, dock</string>
@@ -283,13 +288,11 @@
     <string name="settings_dock_elements_title">Elements</string>
     <string name="settings_pages_app_overview">App list</string>
     <string name="settings_pages_search">Text search</string>
-    <string name="settings_pages_sidebar">Quick overview</string>
     <string name="settings_pages_page">Page %1$d</string>
     <string name="settings_pages_add">Add page</string>
     <string name="settings_pages_carousel_label">Carousel</string>
     <string name="settings_pages_other_label">Utility pages</string>
     <string name="settings_pages_behavior_label">Behavior</string>
-    <string name="settings_pages_invocation_title">How this page is opened</string>
     <string name="settings_pages_invocation_none">Not bound to a gesture</string>
     <string name="settings_pages_add_template_label">Start from</string>
     <string name="settings_pages_add_template_blank">Blank page</string>
@@ -331,6 +334,7 @@
     <string name="settings_widgets_corner_shape_label">Corner roundness</string>
     <string name="settings_widgets_edge_to_edge_label">Edge to edge</string>
     <string name="settings_widgets_edge_to_edge_summary">Removes the side margin so the widget spans the full screen width. Off by default; the width then matches the dock.</string>
+    <string name="settings_edge_to_edge_summary">Removes the side margin so it spans the full screen width. Off by default: a fine margin to the screen edge stays.</string>
 
     <string name="settings_clock_alignment_label">Alignment</string>
     <string name="settings_clock_alignment_center">Center</string>
@@ -400,6 +404,7 @@
     <string name="settings_backup_import_too_new">Backup was created with a newer FLauncher version</string>
     <string name="settings_backup_import_failed">File could not be read</string>
     <string name="settings_statusbar_hide_all">Hide everywhere</string>
+    <string name="settings_statusbar_per_page_label">Hidden on</string>
     <string name="settings_statusbar_hide_all_summary">Turns the status bar off on every page, quick overview, text search and folders. You can turn it back on individually per screen afterwards. A swipe down from the top edge always shows it briefly.</string>
     <string name="settings_statusbar_confirm_hide_message">This hides the status bar on every page, quick overview, text search and folders at once, overriding whatever each one is currently set to.</string>
     <string name="settings_statusbar_confirm_show_message">This shows the status bar on every page, quick overview, text search and folders at once, overriding whatever each one is currently set to.</string>

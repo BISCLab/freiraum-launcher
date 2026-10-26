@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Gesture
-import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -42,6 +41,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.zIndex
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -51,7 +54,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
-import com.bisc.flauncher.data.model.GestureAction
 import com.bisc.flauncher.data.model.GestureActionType
 import com.bisc.flauncher.data.model.HomeGesture
 import com.bisc.flauncher.data.model.LauncherPage
@@ -88,9 +90,7 @@ fun SettingsPagesScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val rowsPages = remember(allPages) { allPages.filter { it.kind == LauncherPageKind.ROWS }.sortedBy { it.orderIndex } }
-    // Quick overview (SIDEBAR) is disabled for now — hidden here rather than deleted, pending a
-    // bigger rework; see SettingsListScreen's own root card for the other place this is hidden.
-    val otherPages = remember(allPages) { allPages.filter { it.kind != LauncherPageKind.ROWS && it.kind != LauncherPageKind.SIDEBAR } }
+    val otherPages = remember(allPages) { allPages.filter { it.kind != LauncherPageKind.ROWS } }
 
     fun gestureForPage(pageId: Long): HomeGesture? = HomeGesture.entries.firstOrNull { gesture ->
         gestureActions[gesture]?.type == GestureActionType.PAGE && gestureActions[gesture]?.payload?.toLongOrNull() == pageId
@@ -98,7 +98,6 @@ fun SettingsPagesScreen(
 
     var renamingPage by remember { mutableStateOf<LauncherPage?>(null) }
     var pickingTemplateForDirection by remember { mutableStateOf<PageDirection?>(null) }
-    var pickingInvocationForPage by remember { mutableStateOf<LauncherPage?>(null) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_pages), navController = navController, onBack = onBack) {
         SettingsGroupLabel(stringResource(R.string.settings_pages_carousel_label))
@@ -107,6 +106,7 @@ fun SettingsPagesScreen(
         PagesCarousel(
             pages = rowsPages,
             onTileClick = onOpenPage,
+            onReorder = viewModel::reorderRowsPages,
             onAddLeft = { pickingTemplateForDirection = PageDirection.LEFT },
             onAddRight = { pickingTemplateForDirection = PageDirection.RIGHT }
         )
@@ -137,9 +137,7 @@ fun SettingsPagesScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    IconButton(onClick = { pickingInvocationForPage = page }) {
-                        Icon(Icons.Filled.TouchApp, contentDescription = stringResource(R.string.settings_pages_invocation_title))
-                    }
+                    // Which gesture opens it is shown above but set in one place only: Gestures.
                     IconButton(onClick = { renamingPage = page }) {
                         Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.settings_pages_rename))
                     }
@@ -147,11 +145,8 @@ fun SettingsPagesScreen(
             }
         }
 
-        // Folded in here per the masterplan's final nav (Phase 9) — Gestures is no longer its own
-        // top-level Settings entry, since it's fundamentally page/navigation behavior rather than a
-        // separate concern. App overview used to have its own shortcut row here too, duplicating the
-        // "Utility pages" row above (same destination, same route) but with less functionality (that
-        // row also offers rename/icon/gesture-invocation) — removed in favor of just that one row.
+        // Gestures live here, not as their own top-level entry — they're page/navigation behavior.
+        // They're the only place a gesture is assigned; the utility-page rows above just show it.
         SettingsPreferenceGroup(title = stringResource(R.string.settings_pages_behavior_label)) {
             SettingsPreference(
                 icon = Icons.Filled.Gesture,
@@ -160,21 +155,6 @@ fun SettingsPagesScreen(
                 onClick = { navController.navigate("settings/gestures") }
             )
         }
-    }
-
-    pickingInvocationForPage?.let { page ->
-        val current = gestureForPage(page.id)
-        val taken = gestureActions.filterValues { it.type != GestureActionType.NONE }.keys - setOfNotNull(current)
-        PageInvocationPickerSheet(
-            current = current,
-            takenGestures = taken,
-            onSelect = { gesture ->
-                if (current != null && current != gesture) viewModel.setGestureAction(current, GestureAction.NONE)
-                if (gesture != null) viewModel.setGestureAction(gesture, GestureAction(GestureActionType.PAGE, page.id.toString()))
-                pickingInvocationForPage = null
-            },
-            onDismiss = { pickingInvocationForPage = null }
-        )
     }
 
     pickingTemplateForDirection?.let { direction ->
@@ -288,13 +268,22 @@ private const val SCREEN_ASPECT_RATIO = 0.47f
 private val CAROUSEL_OUTER_PADDING = 16.dp
 private val CAROUSEL_SPACING = 12.dp
 
+/** The swipeable pages side by side, a "+" ghost tile on each end. Long-press a page and drag it
+ *  sideways to move it: it swaps with a neighbor once dragged past half a tile, and the new order
+ *  is saved on release. */
 @Composable
 private fun PagesCarousel(
     pages: List<LauncherPage>,
     onTileClick: (LauncherPage) -> Unit,
+    onReorder: (List<Long>) -> Unit,
     onAddLeft: () -> Unit,
     onAddRight: () -> Unit
 ) {
+    // Local working order while dragging; reset whenever the saved order arrives.
+    var order by remember(pages) { mutableStateOf(pages) }
+    var draggingId by remember { mutableStateOf<Long?>(null) }
+    var dragOffset by remember { mutableStateOf(0f) }
+    val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
     val homeIndex = pages.indexOfFirst { it.isHome }.coerceAtLeast(0)
     val listState = rememberLazyListState()
     var didInitialScroll by remember { mutableStateOf(false) }
@@ -310,6 +299,7 @@ private fun PagesCarousel(
     // aspect-ratio page preview instead of a small icon-sized square.
     androidx.compose.foundation.layout.BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val tileWidth = (maxWidth - CAROUSEL_OUTER_PADDING * 2 - CAROUSEL_SPACING * 2) / 3
+        val stepPx = with(androidx.compose.ui.platform.LocalDensity.current) { (tileWidth + CAROUSEL_SPACING).toPx() }
         LazyRow(
             state = listState,
             modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
@@ -317,12 +307,53 @@ private fun PagesCarousel(
             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = CAROUSEL_OUTER_PADDING)
         ) {
             item { GhostTile(width = tileWidth, onClick = onAddLeft) }
-            items(pages, key = { it.id }) { page ->
+            items(order, key = { it.id }) { page ->
+                val dragging = page.id == draggingId
                 PageTile(
                     page = page,
-                    pages = pages,
+                    pages = order,
                     width = tileWidth,
-                    onClick = { onTileClick(page) }
+                    onClick = { onTileClick(page) },
+                    modifier = Modifier
+                        .then(if (dragging) Modifier else Modifier.animateItem())
+                        .zIndex(if (dragging) 1f else 0f)
+                        .graphicsLayer {
+                            translationX = if (dragging) dragOffset else 0f
+                            val scale = if (dragging) 1.06f else 1f
+                            scaleX = scale
+                            scaleY = scale
+                        }
+                        .pointerInput(page.id) {
+                            detectDragGesturesAfterLongPress(
+                                onDragStart = {
+                                    haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                                    draggingId = page.id
+                                    dragOffset = 0f
+                                },
+                                onDrag = { change, amount ->
+                                    change.consume()
+                                    dragOffset += amount.x
+                                    val index = order.indexOfFirst { it.id == page.id }
+                                    if (dragOffset > stepPx / 2 && index < order.lastIndex) {
+                                        order = order.toMutableList().apply { add(index + 1, removeAt(index)) }
+                                        dragOffset -= stepPx
+                                    } else if (dragOffset < -stepPx / 2 && index > 0) {
+                                        order = order.toMutableList().apply { add(index - 1, removeAt(index)) }
+                                        dragOffset += stepPx
+                                    }
+                                },
+                                onDragEnd = {
+                                    draggingId = null
+                                    dragOffset = 0f
+                                    if (order.map { it.id } != pages.map { it.id }) onReorder(order.map { it.id })
+                                },
+                                onDragCancel = {
+                                    draggingId = null
+                                    dragOffset = 0f
+                                    order = pages
+                                }
+                            )
+                        }
                 )
             }
             item { GhostTile(width = tileWidth, onClick = onAddRight) }
@@ -335,13 +366,14 @@ private fun PageTile(
     page: LauncherPage,
     pages: List<LauncherPage>,
     width: androidx.compose.ui.unit.Dp,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val label = pageLabel(page, pages)
     val glyph = page.iconGlyph?.let { runCatching { PageIconGlyph.valueOf(it) }.getOrNull() } ?: PageIconGlyph.forPageKind(page.kind)
     val bg = page.iconBackgroundColor?.let { Color(it) } ?: glyph.defaultColor()
     val tint = page.iconColor?.let { Color(it) } ?: Color.White
-    Box {
+    Box(modifier = modifier) {
         Column(
             modifier = Modifier
                 .width(width)
@@ -395,36 +427,6 @@ private fun GhostTile(width: androidx.compose.ui.unit.Dp, onClick: () -> Unit) {
         }
         Spacer(Modifier.height(6.dp))
         Text("", style = MaterialTheme.typography.labelMedium)
-    }
-}
-
-/** Which, if any, of the 4 rebindable [HomeGesture]s jumps straight to this page — the same global
- *  binding Settings -> Gestures manages, just surfaced from the page's own side. Picking a gesture
- *  already bound elsewhere isn't offered (see [takenGestures]); picking "None" clears this page's
- *  current binding, if it has one, without touching anything else. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun PageInvocationPickerSheet(
-    current: HomeGesture?,
-    takenGestures: Set<HomeGesture>,
-    onSelect: (HomeGesture?) -> Unit,
-    onDismiss: () -> Unit
-) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(modifier = Modifier.padding(vertical = 8.dp)) {
-            RadioPreference(stringResource(R.string.settings_pages_invocation_none), null, current, onSelect)
-            HomeGesture.entries.forEach { gesture ->
-                val taken = gesture in takenGestures
-                RadioPreference(
-                    label = gestureLabel(gesture),
-                    value = gesture,
-                    selected = current,
-                    onSelect = onSelect,
-                    enabled = !taken,
-                    summary = if (taken) stringResource(R.string.settings_gesture_already_used) else null
-                )
-            }
-        }
     }
 }
 

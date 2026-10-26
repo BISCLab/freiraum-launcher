@@ -2,10 +2,6 @@ package com.bisc.flauncher.ui.settings
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -29,16 +25,10 @@ import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.search.automaticRailAppearance
 
-/** Hub for the app-list page's own settings — one entry point per element (Appearance, Section
- *  letters, A–Z index), each its own screen, instead of one long flat page where it's impossible
- *  to tell which card belongs to which element while scrolling. Mirrors [SettingsDockScreen]. */
+/** App list hub — same split as Text search: everything about how it looks under Appearance,
+ *  everything about how it works under Behavior. */
 @Composable
-fun SettingsAppOverviewScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val showAzIndex by viewModel.appListShowAzIndex.collectAsState()
-    val showSearchButton by viewModel.appListShowSearchButton.collectAsState()
-    val accentColor by viewModel.accentColor.collectAsState()
-    val handedness by viewModel.appOverviewHandedness.collectAsState()
-
+fun SettingsAppOverviewScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
     SettingsSubScreen(title = stringResource(R.string.settings_section_app_overview), navController = navController, onBack = onBack) {
         Text(
             stringResource(R.string.settings_page_app_overview_description),
@@ -46,21 +36,35 @@ fun SettingsAppOverviewScreen(navController: NavController, onBack: () -> Unit, 
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 4.dp)
         )
-
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
-                title = stringResource(R.string.settings_page_appearance_title),
+                title = stringResource(R.string.settings_home_appearance_title),
                 onClick = { onNavigate("appearance") },
                 trailing = null
             )
             SettingsPreference(
                 icon = null,
-                title = stringResource(R.string.settings_app_overview_alignment_label),
-                onClick = {
-                    viewModel.setAppOverviewHandedness(if (handedness == Handedness.LEFT) Handedness.RIGHT else Handedness.LEFT)
-                },
-                trailing = { HandednessToggle(selected = handedness, onSelect = viewModel::setAppOverviewHandedness) }
+                title = stringResource(R.string.settings_search_behavior_label),
+                onClick = { onNavigate("behavior") },
+                trailing = null
+            )
+        }
+    }
+}
+
+/** Appearance hub: the page itself, then each of its elements, then its accent. */
+@Composable
+fun SettingsAppOverviewAppearanceHubScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+    val accentColor by viewModel.accentColor.collectAsState()
+    val appListAccentColor by viewModel.appListAccentColor.collectAsState()
+    SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
+        SettingsPreferenceGroup {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_search_page_label),
+                onClick = { onNavigate("page") },
+                trailing = null
             )
             SettingsPreference(
                 icon = null,
@@ -71,18 +75,51 @@ fun SettingsAppOverviewScreen(navController: NavController, onBack: () -> Unit, 
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_app_overview_az_index_label),
+                onClick = { onNavigate("az_index") },
+                trailing = null
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_app_list_search_button),
+                onClick = { onNavigate("search_button") },
+                trailing = null
+            )
+        }
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_accent_label),
+            info = stringResource(R.string.settings_accent_color_summary)
+        ) {
+            AccentOverrideRows(
+                title = stringResource(R.string.settings_accent_label),
+                own = appListAccentColor,
+                global = accentColor,
+                onChange = viewModel::setAppListAccentColor
+            )
+        }
+    }
+}
+
+/** Behavior: which side the list's controls sit on, and which of them are shown at all. */
+@Composable
+fun SettingsAppOverviewBehaviorScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+    val showAzIndex by viewModel.appListShowAzIndex.collectAsState()
+    val showSearchButton by viewModel.appListShowSearchButton.collectAsState()
+    val handedness by viewModel.appOverviewHandedness.collectAsState()
+    SettingsSubScreen(title = stringResource(R.string.settings_search_behavior_label), navController = navController, onBack = onBack) {
+        SettingsPreferenceGroup {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_app_overview_alignment_label),
+                onClick = {
+                    viewModel.setAppOverviewHandedness(if (handedness == Handedness.LEFT) Handedness.RIGHT else Handedness.LEFT)
+                },
+                trailing = { HandednessToggle(selected = handedness, onSelect = viewModel::setAppOverviewHandedness) }
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_app_overview_az_index_label),
                 onClick = { viewModel.setAppListShowAzIndex(!showAzIndex) },
-                trailing = { Switch(checked = showAzIndex, onCheckedChange = viewModel::setAppListShowAzIndex) },
-                extra = {
-                    IconButton(onClick = { onNavigate("az_index") }, modifier = Modifier.size(32.dp)) {
-                        Icon(
-                            Icons.Filled.Tune,
-                            contentDescription = stringResource(R.string.settings_more_settings_button),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
+                trailing = { Switch(checked = showAzIndex, onCheckedChange = viewModel::setAppListShowAzIndex) }
             )
             SettingsPreference(
                 icon = null,
@@ -91,13 +128,39 @@ fun SettingsAppOverviewScreen(navController: NavController, onBack: () -> Unit, 
                 onClick = { viewModel.setAppListShowSearchButton(!showSearchButton) },
                 trailing = { Switch(checked = showSearchButton, onCheckedChange = viewModel::setAppListShowSearchButton) }
             )
-            ColorPickerSection(
-                title = stringResource(R.string.settings_accent_color_row),
-                info = stringResource(R.string.settings_accent_color_summary),
-                color = accentColor,
-                onColorChange = viewModel::setAccentColor,
-                ownGroup = false
-            )
+        }
+    }
+}
+
+/** The floating search button's own look — follows the A–Z index's until customized here. */
+@Composable
+fun SettingsAppOverviewSearchButtonScreen(
+    navController: NavController,
+    onBack: () -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel(),
+    homeViewModel: HomeViewModel = hiltViewModel()
+) {
+    val own by viewModel.appListSearchButtonAppearance.collectAsState()
+    val railAppearance by viewModel.appListRailAppearance.collectAsState()
+    val pageId by homeViewModel.appOverviewPageId.collectAsState()
+    val pageBackground by remember(pageId) { homeViewModel.pageBackgroundConfig(pageId ?: -1L) }.collectAsState(initial = BackgroundConfig())
+    val surfaceIsDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), pageBackground)
+
+    SettingsSubScreen(title = stringResource(R.string.settings_app_list_search_button), navController = navController, onBack = onBack) {
+        ElementAppearanceSection(
+            appearance = own ?: railAppearance ?: automaticRailAppearance(surfaceIsDark),
+            onAppearanceChange = viewModel::setAppListSearchButtonAppearance,
+            styleGroupTitle = null
+        )
+        if (own != null) {
+            SettingsPreferenceGroup {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_search_button_follow_rail),
+                    onClick = viewModel::resetAppListSearchButtonAppearance,
+                    trailing = null
+                )
+            }
         }
     }
 }
@@ -123,10 +186,10 @@ private fun HandednessToggle(selected: Handedness, onSelect: (Handedness) -> Uni
     }
 }
 
-/** The app-list page's own background and status-bar switch — same pairing as
+/** The app-list page itself: its own background and status-bar switch — same pairing as
  *  [SettingsPageAppearanceScreen]. */
 @Composable
-fun SettingsAppOverviewAppearanceScreen(navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+fun SettingsAppOverviewPageScreen(navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
     val pageId by viewModel.appOverviewPageId.collectAsState()
     val id = pageId ?: return
     val hideStatusBar by remember(id) { viewModel.pageHideStatusBar(id) }.collectAsState(initial = false)
@@ -134,15 +197,7 @@ fun SettingsAppOverviewAppearanceScreen(navController: NavController, onBack: ()
     val globalShade by remember(id) { viewModel.pageGlobalShade(id) }.collectAsState(initial = null)
     val globalBackground by viewModel.globalBackground.collectAsState()
 
-    SettingsSubScreen(title = stringResource(R.string.settings_page_appearance_title), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_statusbar_hide_page),
-                onClick = { viewModel.setPageHideStatusBar(id, !hideStatusBar) },
-                trailing = { Switch(checked = hideStatusBar, onCheckedChange = { viewModel.setPageHideStatusBar(id, it) }) }
-            )
-        }
+    SettingsSubScreen(title = stringResource(R.string.settings_search_page_label), navController = navController, onBack = onBack) {
         BackgroundOverrideSection(
             override = override,
             global = globalBackground,
@@ -153,6 +208,14 @@ fun SettingsAppOverviewAppearanceScreen(navController: NavController, onBack: ()
             onGlobalShadeChange = { viewModel.setPageGlobalShade(id, it) },
             groupTitle = stringResource(R.string.settings_section_global_background)
         )
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_statusbar_label)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_statusbar_hide_page),
+                onClick = { viewModel.setPageHideStatusBar(id, !hideStatusBar) },
+                trailing = { Switch(checked = hideStatusBar, onCheckedChange = { viewModel.setPageHideStatusBar(id, it) }) }
+            )
+        }
     }
 }
 

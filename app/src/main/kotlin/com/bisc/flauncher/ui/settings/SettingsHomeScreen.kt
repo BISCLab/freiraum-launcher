@@ -311,7 +311,7 @@ fun SettingsHomePanelScreen(navController: NavController, onBack: () -> Unit, on
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = Icons.Filled.Palette,
-                title = stringResource(R.string.settings_section_global_background),
+                title = stringResource(R.string.settings_element_fill_label),
                 onClick = { onNavigate("background") },
                 trailing = null
             )
@@ -342,7 +342,7 @@ private fun rememberPanelRow(pageId: Long, viewModel: HomeViewModel): PageRow? {
 @Composable
 fun SettingsPanelBackgroundScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
     val row = rememberPanelRow(pageId, viewModel) ?: return
-    SettingsSubScreen(title = stringResource(R.string.settings_section_global_background), navController = navController, onBack = onBack) {
+    SettingsSubScreen(title = stringResource(R.string.settings_element_fill_label), navController = navController, onBack = onBack) {
         ElementBackgroundSection(appearance = row.appearance(), onAppearanceChange = { viewModel.setRowAppearance(row, it) })
     }
 }

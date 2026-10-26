@@ -65,7 +65,7 @@ fun SettingsDockScreen(pageId: Long, navController: NavController, onBack: () ->
             )
             SettingsPreference(
                 icon = Icons.Filled.Palette,
-                title = stringResource(R.string.settings_section_global_background),
+                title = stringResource(R.string.settings_element_fill_label),
                 onClick = { onNavigate("background") },
                 trailing = null
             )
@@ -109,7 +109,7 @@ fun SettingsDockVisibilityScreen(pageId: Long, navController: NavController, onB
 @Composable
 fun SettingsDockBackgroundScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
     val row = rememberDockRow(pageId, viewModel) ?: return
-    SettingsSubScreen(title = stringResource(R.string.settings_section_global_background), navController = navController, onBack = onBack) {
+    SettingsSubScreen(title = stringResource(R.string.settings_element_fill_label), navController = navController, onBack = onBack) {
         ElementBackgroundSection(appearance = row.appearance(), onAppearanceChange = { viewModel.setRowAppearance(row, it) })
     }
 }

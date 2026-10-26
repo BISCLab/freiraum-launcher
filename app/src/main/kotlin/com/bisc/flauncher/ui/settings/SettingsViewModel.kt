@@ -12,6 +12,7 @@ import com.bisc.flauncher.data.model.GestureAction
 import com.bisc.flauncher.data.model.HomeGesture
 import com.bisc.flauncher.data.model.IconPackInfo
 import com.bisc.flauncher.data.model.LauncherPage
+import com.bisc.flauncher.data.model.LauncherPageKind
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.RevealMode
@@ -100,7 +101,7 @@ class SettingsViewModel @Inject constructor(
         repository.iconSizePercent.stateIn(viewModelScope, SharingStarted.Eagerly, 100)
 
     val defaultCornerRadiusPercent: StateFlow<Int> =
-        repository.defaultCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, 25)
+        repository.defaultCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT)
 
     val appListRailAppearance: StateFlow<ElementAppearance?> =
         repository.appListRailAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -120,10 +121,11 @@ class SettingsViewModel @Inject constructor(
     }
 
     // Includes every page (not just the filtered `pages` above, which excludes the app overview
-    // page), so "everywhere" actually means everywhere, including app overview's own flag.
+    // page), so "everywhere" actually means everywhere, including app overview's own flag. Text
+    // search is the exception: it uses its own searchHideStatusBar, not its page's flag.
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val statusBarHiddenEverywhere: StateFlow<Boolean> = pageContentRepository.allPages.flatMapLatest { allPages ->
-        val perPageFlows = allPages.map { repository.pageHideStatusBar(it.id) }
+        val perPageFlows = allPages.filter { it.kind != LauncherPageKind.SEARCH }.map { repository.pageHideStatusBar(it.id) }
         val sharedFlows = listOf(repository.searchHideStatusBar, repository.folderHideStatusBar)
         combine(perPageFlows + sharedFlows) { values -> values.all { it } }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
@@ -157,7 +159,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     val accentColor: StateFlow<Int> =
-        repository.accentColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF3B82F6.toInt())
+        repository.accentColor.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.theme.DEFAULT_ACCENT_COLOR)
 
     val folderCardAppearance: StateFlow<ElementAppearance> =
         repository.folderCardAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
@@ -436,11 +438,19 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setAppListShowSearchButton(show) }
     }
 
-    val chargingAnimationColor: StateFlow<Int> =
-        repository.chargingAnimationColor.stateIn(viewModelScope, SharingStarted.Eagerly, 0xFF34D058.toInt())
+    /** Own colors of the two accented surfaces; null = follow [accentColor]. */
+    val chargingAnimationColor: StateFlow<Int?> =
+        repository.chargingAnimationColor.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    fun setChargingAnimationColor(color: Int) {
+    fun setChargingAnimationColor(color: Int?) {
         viewModelScope.launch { repository.setChargingAnimationColor(color) }
+    }
+
+    val appListAccentColor: StateFlow<Int?> =
+        repository.appListAccentColor.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    fun setAppListAccentColor(color: Int?) {
+        viewModelScope.launch { repository.setAppListAccentColor(color) }
     }
 
     val chargingAnimationEnabled: StateFlow<Boolean> =
@@ -633,14 +643,6 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setGlobalBackground(config) }
     }
 
-    fun setQuickOverviewBackground(config: BackgroundConfig) {
-        viewModelScope.launch { repository.setQuickOverviewBackground(config) }
-    }
-
-    fun clearQuickOverviewBackground() {
-        viewModelScope.launch { repository.clearQuickOverviewBackground() }
-    }
-
     fun setSearchAppearance(appearance: ElementAppearance) {
         viewModelScope.launch { repository.setSearchAppearance(appearance) }
     }
@@ -659,6 +661,13 @@ class SettingsViewModel @Inject constructor(
 
     fun setSearchResultsAppearance(appearance: ElementAppearance) {
         viewModelScope.launch { repository.setSearchResultsAppearance(appearance) }
+    }
+
+    val searchResultsEdgeToEdge: StateFlow<Boolean> =
+        repository.searchResultsEdgeToEdge.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun setSearchResultsEdgeToEdge(edgeToEdge: Boolean) {
+        viewModelScope.launch { repository.setSearchResultsEdgeToEdge(edgeToEdge) }
     }
 
     fun setSearchResultsCornerRadiusPercent(percent: Int) {

@@ -82,6 +82,7 @@ fun SearchOverlay(
     /** The result cards' own look; null = same as [appearance], fully rounded. */
     resultsAppearance: ElementAppearance? = null,
     resultsCornerRadiusPercent: Int? = null,
+    resultsEdgeToEdge: Boolean = false,
     /** Keyboard extension strip color; null = off. While shown, it is the keyboard's top edge for
      *  the results above it. */
     keyboardCapColor: Int? = null,
@@ -216,7 +217,8 @@ fun SearchOverlay(
                         onAiCommand = onAiCommand,
                         onCalculatorResultClick = { result -> onQueryChange(result) },
                         modifier = Modifier.weight(1f).fillMaxWidth(),
-                        cardCornerRadiusPercent = resultsCornerRadiusPercent
+                        cardCornerRadiusPercent = resultsCornerRadiusPercent,
+                        edgeToEdge = resultsEdgeToEdge
                     )
                     // Sits directly on top of the keyboard (this Column is IME-padded), so the
                     // results' bottom edge and fade end at the strip instead of the keyboard itself.

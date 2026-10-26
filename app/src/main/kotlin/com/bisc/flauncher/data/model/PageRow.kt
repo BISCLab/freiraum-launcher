@@ -37,7 +37,7 @@ data class PageRow(
     val borderEnabled: Boolean = false,
     // 0 = sharp 90° corners, 100 = fully rounded (a capsule/pill on the shape's shorter axis) — see
     // RoundedCornerShape(percent = ...), used directly everywhere this is rendered.
-    val cornerRadiusPercent: Int = 25,
+    val cornerRadiusPercent: Int = com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT,
     val edgeToEdge: Boolean = false,
     val columns: Int = 5,
     val clockStyle: String = ClockStyle.DIGITAL,
@@ -53,9 +53,10 @@ data class PageRow(
     val elementBorderWidth: Float = 1f,
     val elementContentColor: Int? = null,
     // Single-line/pill layout, opt-in on any row (not just the dock's own SEARCH_BAR row) — entries
-    // laid out in one non-wrapping line instead of ElementBoxGrid's usual column-wrapped grid, sized per
-    // pillWidthMode (only meaningful while pillMode is true) and capped to pillMaxEntries.
+    // laid out in one non-wrapping line instead of ElementBoxGrid's usual column-wrapped grid, as wide
+    // as the row (edgeToEdge decides the side margin) and capped to pillMaxEntries.
     val pillMode: Boolean = false,
+    // Unused, see DockWidthMode — kept only as an existing column.
     val pillWidthMode: DockWidthMode = DockWidthMode.FIXED,
     val pillMaxEntries: Int = 5,
     // Only meaningful for the pinned dock row (type == SEARCH_BAR) — see HomeScreen's dock panel Box

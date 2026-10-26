@@ -99,8 +99,11 @@ fun SearchResultsColumn(
     onCalculatorResultClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     /** Card corner roundness, 0-100% of [SearchDimens.cornerRadius]; null = fully rounded. */
-    cardCornerRadiusPercent: Int? = null
+    cardCornerRadiusPercent: Int? = null,
+    /** Off = the same fine side margin every other element keeps. */
+    edgeToEdge: Boolean = false
 ) {
+    val sideMargin = if (edgeToEdge) 0.dp else com.bisc.flauncher.ui.home.dock.DockDimens.horizontalMargin
     val cardShape = RoundedCornerShape(SearchDimens.cornerRadius * ((cardCornerRadiusPercent ?: 100).coerceIn(0, 100) / 100f))
     var expandedCategories by remember(query) { mutableStateOf(emptySet<SearchCategory>()) }
     fun isExpanded(category: SearchCategory) = category in expandedCategories
@@ -133,7 +136,7 @@ fun SearchResultsColumn(
         val fadeStart = (1f - FADE_TRANSITION_DISTANCE / maxHeight).coerceIn(0f, 1f)
         val canScrollFurther by remember { derivedStateOf { listState.canScrollForward } }
         val topFadePx = with(LocalDensity.current) { TOP_FADE_HEIGHT.toPx() }
-        // Full screen width like the input bar above; the gap to that bar equals the gap between cards.
+        // Fine side margin (or edge to edge); the gap to the input bar equals the gap between cards.
         LazyColumn(
             state = listState,
             modifier = Modifier
@@ -142,7 +145,9 @@ fun SearchResultsColumn(
                 .fadeListTop(TOP_FADE_HEIGHT) {
                     if (listState.firstVisibleItemIndex > 0) 1f else (listState.firstVisibleItemScrollOffset / topFadePx).coerceIn(0f, 1f)
                 },
-            contentPadding = PaddingValues(top = CARD_GAP, bottom = 4.dp),
+            contentPadding = PaddingValues(
+                start = sideMargin, end = sideMargin, top = CARD_GAP, bottom = 4.dp
+            ),
             verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(CARD_GAP)
         ) {
             if (calculatorResult != null) {

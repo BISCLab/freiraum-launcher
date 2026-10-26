@@ -111,6 +111,19 @@ private val MIGRATION_36_37 = object : Migration(36, 37) {
     }
 }
 
+// The old Quick-overview page kind (SIDEBAR) is gone: drop that page and everything pointing at it
+// — its own rows/entries, and page-link entries in docks, element boxes and folders.
+private val MIGRATION_60_61 = object : Migration(60, 61) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        val sidebarIds = "SELECT id FROM launcher_pages WHERE kind = 'SIDEBAR'"
+        db.execSQL("DELETE FROM row_entries WHERE type = 'PAGE' AND payload IN (SELECT CAST(id AS TEXT) FROM launcher_pages WHERE kind = 'SIDEBAR')")
+        db.execSQL("DELETE FROM folder_items WHERE type = 'PAGE' AND payload IN (SELECT CAST(id AS TEXT) FROM launcher_pages WHERE kind = 'SIDEBAR')")
+        db.execSQL("DELETE FROM row_entries WHERE pageRowId IN (SELECT id FROM page_rows WHERE pageId IN ($sidebarIds))")
+        db.execSQL("DELETE FROM page_rows WHERE pageId IN ($sidebarIds)")
+        db.execSQL("DELETE FROM launcher_pages WHERE kind = 'SIDEBAR'")
+    }
+}
+
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "flauncher_settings")
 
 @Module
@@ -126,7 +139,7 @@ object AppModule {
         Room.databaseBuilder(ctx, FLauncherDatabase::class.java, "flauncher.db")
             .addMigrations(
                 MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33,
-                MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36, MIGRATION_36_37
+                MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36, MIGRATION_36_37, MIGRATION_60_61
             )
             // Only a last resort now for jumps with no migration path above (e.g. a much older install
             // skipping several versions at once, or a version older than 27). Every future version bump

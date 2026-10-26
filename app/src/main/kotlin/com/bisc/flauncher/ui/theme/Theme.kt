@@ -15,6 +15,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import com.bisc.flauncher.data.model.ColorFill
@@ -38,17 +39,25 @@ const val MATTE_DARK_COLOR = 0xFF121212.toInt()
 /** The page background for the given effective mode. */
 fun backgroundColorFor(isDark: Boolean): Int = if (isDark) MATTE_DARK_COLOR else android.graphics.Color.WHITE
 
-/** The fill color every box/card/widget/dock/panel defaults to: the opposite tone from the page
- *  background, so it reads as a distinct layer floating over the page. */
-fun defaultBoxFillColorFor(isDark: Boolean): Int = if (isDark) android.graphics.Color.WHITE else MATTE_DARK_COLOR
+/** FLauncher's standard blue — the default accent, and the settings UI's own primary color. */
+const val DEFAULT_ACCENT_COLOR = 0xFF0758F5.toInt()
+
+/** Every element's default corner roundness: fully rounded. */
+const val DEFAULT_CORNER_RADIUS_PERCENT = 100
+
+/** The one transparency every default element fill uses. */
+const val DEFAULT_ELEMENT_OPACITY = 0.8f
+
+/** The fill color every box/card/widget/dock/panel defaults to: black in dark mode, white in light
+ *  mode — the same tone as the page, set apart from it by [DEFAULT_ELEMENT_OPACITY] and a border. */
+fun defaultBoxFillColorFor(isDark: Boolean): Int = if (isDark) android.graphics.Color.BLACK else android.graphics.Color.WHITE
 
 /** The shared default look for every box/card/widget/dock/panel when it has no customization of
- *  its own — [defaultBoxFillColorFor] at 80% opacity with a border, a frosted layer that reads as
- *  a distinct surface floating over the page. The same treatment the dock always had bespoke, now
- *  the one shared default everywhere. */
+ *  its own — [defaultBoxFillColorFor] at [DEFAULT_ELEMENT_OPACITY] with a border. The one shared
+ *  default everywhere, for dark and light mode alike. */
 fun defaultBoxAppearanceFor(isDark: Boolean): ElementAppearance = ElementAppearance(
     fill = ColorFill(color = defaultBoxFillColorFor(isDark)),
-    opacity = 0.8f,
+    opacity = DEFAULT_ELEMENT_OPACITY,
     borderEnabled = true
 )
 
@@ -56,6 +65,7 @@ fun defaultBoxAppearanceFor(isDark: Boolean): ElementAppearance = ElementAppeara
 fun FLauncherTheme(
     themePreference: ThemePreference = ThemePreference.SYSTEM,
     fontPreference: FontPreference = FontPreference.SYSTEM,
+    accentColor: Int = DEFAULT_ACCENT_COLOR,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -66,12 +76,23 @@ fun FLauncherTheme(
         ThemePreference.SYSTEM -> systemDark
     }
 
-    val colorScheme = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+    val baseScheme = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
     } else {
         // Dynamic color requires Android 12; older versions use the static scheme.
         if (isDark) darkColorScheme() else lightColorScheme()
     }
+    // Neutral surfaces stay from the base scheme; every accent (switches, radio buttons, sliders,
+    // group titles) is the launcher's own accent color instead of a wallpaper-derived one.
+    val accent = Color(accentColor)
+    val colorScheme = baseScheme.copy(
+        primary = accent,
+        onPrimary = Color.White,
+        secondary = accent,
+        onSecondary = Color.White,
+        tertiary = accent,
+        surfaceTint = accent
+    )
 
     MaterialTheme(
         colorScheme = colorScheme,

@@ -2,14 +2,13 @@ package com.bisc.flauncher.ui.home.dock
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.bisc.flauncher.data.model.DockWidthMode
 
 /**
  * Geometry of a single-line/pill row (the dock being the one that floats; any other row can opt into
  * the same layout). Icon size is fixed — not scaled by screen width — tuned so exactly
- * [REFERENCE_SLOT_COUNT] entries (the default width target) comfortably fill a typical ~400dp-wide phone
- * screen with icons at a generous, consistent size; see [DockWidthMode] for how the bar's own width is
- * derived from that per-icon size, and [pillWidth]/[widthForSlotCount] for the actual calculation.
+ * [REFERENCE_SLOT_COUNT] entries comfortably fill a typical ~400dp-wide phone screen at a generous,
+ * consistent size. [horizontalMargin] is the fine standard side margin every in-page element keeps
+ * unless it's set edge to edge.
  */
 object DockDimens {
     val horizontalMargin = 6.dp
@@ -60,27 +59,11 @@ object DockDimens {
         return innerHorizontalPadding * 2 + iconSize * n + itemGap * (n - 1)
     }
 
-    /**
-     * [DockWidthMode.FIXED] (default): the bar is always exactly [REFERENCE_SLOT_COUNT] slots wide,
-     * regardless of how many are actually filled — fewer slots spread out within that width via
-     * `Arrangement.SpaceBetween`, which is what makes 5 slots "find maximum space" the default look.
-     * [DockWidthMode.GROW]: the bar's width tracks the actual slot count instead, growing wider as more
-     * are added rather than ever compressing icon size. Either way the result is capped to
-     * [availableWidth] as a narrow-screen safety net.
-     */
-    fun pillWidth(slotCount: Int, mode: DockWidthMode, availableWidth: Dp): Dp {
-        val content = when (mode) {
-            DockWidthMode.FIXED -> widthForSlotCount(REFERENCE_SLOT_COUNT)
-            DockWidthMode.GROW -> widthForSlotCount(slotCount)
-        }
-        return content.coerceAtMost(availableWidth)
-    }
-
     /** Non-composable snapshot of the dock's geometry, for surfaces that mirror the dock's footprint
      *  (a folder's dock replica, the system-widget height cap) but have no reason to track the user's
      *  width-mode/slot-count choice themselves — they assume the default fixed 5-slot width. */
     fun scaled(availableWidth: Dp): ScaledDock = ScaledDock(
-        pillWidth = pillWidth(REFERENCE_SLOT_COUNT, DockWidthMode.FIXED, availableWidth),
+        pillWidth = widthForSlotCount(REFERENCE_SLOT_COUNT).coerceAtMost(availableWidth),
         barHeight = barHeight,
         cornerRadius = defaultCornerRadius,
         innerHorizontalPadding = innerHorizontalPadding,

@@ -12,7 +12,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import com.bisc.flauncher.data.model.ElementAppearance
 
-/** Shared card shell for the Sidebar overview's floating panels and the Folder card. */
+/** Shared card shell for the Panel, the Dock and the Folder card. */
 @Composable
 fun DockPanelSurface(
     appearance: ElementAppearance,
