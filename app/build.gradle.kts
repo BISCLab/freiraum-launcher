@@ -6,17 +6,6 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
-// versionCode is the git commit count; versionMajorMinor is bumped manually.
-val gitCommitCount: Int = try {
-    ProcessBuilder("git", "rev-list", "--count", "HEAD")
-        .directory(rootDir)
-        .start()
-        .inputStream.bufferedReader().readText().trim().toInt()
-} catch (e: Exception) {
-    1
-}
-val versionMajorMinor = "0.1"
-
 android {
     namespace = "com.bisc.flauncher"
     compileSdk = 35
@@ -25,8 +14,9 @@ android {
         applicationId = "com.bisc.flauncher"
         minSdk = 26
         targetSdk = 35
-        versionCode = gitCommitCount
-        versionName = "$versionMajorMinor.$gitCommitCount"
+        // Bump both for every release; F-Droid reads them from here (and expects a matching v<versionName> tag).
+        versionCode = 100
+        versionName = "0.2.0"
 
         ksp {
             arg("room.schemaLocation", "$projectDir/schemas")
@@ -35,8 +25,7 @@ android {
 
     buildTypes {
         release {
-            // Signed with the debug key so that it installs over debug builds without an uninstall.
-            signingConfig = signingConfigs.getByName("debug")
+            // Unsigned here: stores like F-Droid sign release builds with their own key.
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

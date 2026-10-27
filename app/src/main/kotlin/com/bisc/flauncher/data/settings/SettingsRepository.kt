@@ -256,7 +256,7 @@ class SettingsRepository @Inject constructor(
 
     val appListShowSearchButton: Flow<Boolean> = dataStore.data.map { it[APP_LIST_SHOW_SEARCH_BUTTON_KEY] ?: true }
 
-    // ---- Page backgrounds, sidebar ----
+    // ---- Page backgrounds ----
 
     fun pageBackgroundOverride(pageId: Long): Flow<BackgroundConfig?> = backgroundOverrideFor(pageKey(pageId))
 

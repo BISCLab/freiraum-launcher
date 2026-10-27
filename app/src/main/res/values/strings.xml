@@ -84,9 +84,8 @@
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_theme_system">System</string>
-    <string name="settings_accent_color_summary">Color of the enlarged letter bubble shown while dragging on the A–Z index.</string>
     <string name="settings_accent_label">Accent color</string>
-    <string name="settings_accent_global_info">Used by the app list\'s scroll bubble and the charging animation. Each of them can also get its own color in its own settings.</string>
+    <string name="settings_accent_global_info">Used by the app list\'s scroll bubble and the charging animation. The charging animation can also get its own color in its own settings.</string>
     <string name="settings_accent_follows_global">Follows the global accent color</string>
     <string name="settings_accent_use_global">Use global accent color</string>
     <string name="settings_accent_custom">Custom color</string>
@@ -420,8 +419,6 @@
     <string name="settings_folder_creator_title">New folder</string>
     <string name="settings_folder_creator_name_hint">Folder name</string>
     <string name="settings_folder_creator_create">Create</string>
-
-    <string name="settings_section_search_overview">Quick overview</string>
     <string name="settings_section_search_full">Text search</string>
     <string name="settings_app_list_search_button">Search button</string>
     <string name="settings_app_list_search_button_summary">Floating search button in the app list, positioned like the dock button.</string>

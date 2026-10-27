@@ -284,7 +284,7 @@ fun GridEntries(
     // The Dock's own need: every sub-row centered within the same fixed reference width (sized for
     // this many columns) instead of its own actual content width, so a shorter row (e.g. 4 icons)
     // gets the same edge-to-icon gap as a full row (5 icons) rather than extra Arrangement.Center
-    // slack making its edges sit further in. Null (the Panel's case) keeps the old per-row width.
+    // slack making its edges sit further in. Null (the Panel's case) sizes each row to its content.
     referenceColumnCount: Int? = null,
     // Vertical gap between sub-rows — also Dock-only (0 keeps the Panel's rows flush, as before).
     rowGap: androidx.compose.ui.unit.Dp = 0.dp,
@@ -656,8 +656,8 @@ fun pillItemShape(iconShape: IconShape): Shape = when (iconShape) {
 }
 
 /**
- * A single non-wrapping line of entries (no per-cell text labels — matches the old dock's uniform
- * squircle-button look), for any row with [PageRow.pillMode] set — the dock being the one instance
+ * A single non-wrapping line of entries (no per-cell text labels, uniform squircle buttons), for
+ * any row with [PageRow.pillMode] set — the dock being the one instance
  * that floats outside the pager (see HomeScreen's floating dock Box, which calls this directly with
  * the home page's pinned SEARCH_BAR row), but any ordinary [PageRowType.ELEMENT_BOX] row can opt into the
  * same layout. It spans the full row width, with the fine standard margin or edge to edge per

@@ -206,12 +206,11 @@ fun HomeScreen(
     val currentPageId = pages.getOrNull(pagerState.currentPage)?.id ?: -1L
     val currentPageHideStatusBar by remember(currentPageId) { viewModel.pageHideStatusBar(currentPageId) }
         .collectAsState(initial = false)
-    // Its own page-scoped flag, independent of text search's — previously it silently borrowed
-    // search's setting, with no way to configure it separately from the app overview's own screen.
+    // Its own page-scoped flag, independent of text search's.
     val appOverviewHideStatusBar by remember(appOverviewPageId) { viewModel.pageHideStatusBar(appOverviewPageId ?: -1L) }
         .collectAsState(initial = false)
-    // The Panel is part of the home page now (no separate "quick overview" appearance layer), so
-    // it just inherits currentPageHideStatusBar like everything else on Home — no dedicated branch.
+    // The Panel is part of the home page, so it inherits currentPageHideStatusBar like everything
+    // else on Home — no dedicated branch.
     val hideStatusBar = when {
         folderOpen -> folderHideStatusBar
         onAppOverviewPage -> appOverviewHideStatusBar
@@ -345,10 +344,8 @@ fun HomeScreen(
             com.bisc.flauncher.data.model.ActionButtonActionType.LAUNCHER_SETTINGS -> onNavigateToSettings()
         }
     }
-    // The one place "go back to home" is defined — closes every overlay and, crucially, also scrolls
-    // the pager itself back to home. Closing an overlay alone used to leave the pager wherever it
-    // already was, which is how the system home gesture (and back-swiping out of search/app overview)
-    // could silently strand you on a non-home page instead of actually going home.
+    // The one place "go back to home" is defined: closes every overlay and also scrolls the pager
+    // back to home, so the system home gesture and back-swipes never leave you on another page.
     val returnHome: () -> Unit = {
         viewModel.closeSearch()
         viewModel.closeAppList()
@@ -382,10 +379,8 @@ fun HomeScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         if (pages.isNotEmpty()) {
             Box(modifier = Modifier.fillMaxSize().then(if (blurRadius > 0.dp) Modifier.blur(blurRadius) else Modifier)) {
-                // Layer 1 used to live *inside* each page's pager slot, so it physically slid along with
-                // that page's content — fine when neighboring pages share the same background, but a hard,
-                // sudden seam wherever two pages carry genuinely different images/colors (you'd see both
-                // full images sliding edge-to-edge). Pulled out here as one shared layer behind the pager.
+                // Layer 1 (the background) is one shared layer behind the pager rather than part of
+                // each page, so pages with different images/colors blend instead of showing a seam.
                 //
                 // Backgrounds are read from pageBackgroundCache (filled below, per page slot) rather than
                 // each collecting their own Flow — a page's background is fetched once and cached, then
@@ -449,9 +444,8 @@ fun HomeScreen(
                     // scrolling, all of it — not just the one swipe this was meant to fix. Back to only
                     // keeping the immediate neighbor pre-warmed, matching how Pager is meant to be used.
                     beyondViewportPageCount = 1,
-                    // Left/right swipe between Home and its Ergänzungsseiten — the carousel is finite
-                    // (no wrap-around) for now, matching the masterplan's stated default; an opt-in
-                    // endless mode is a later addition, not required for the default behavior. Overlays
+                    // Left/right swipe between Home and its other pages; the carousel is finite
+                    // (no wrap-around). Overlays
                     // (search/app list/Panel/folder) each already render a full-size catch-all Box on
                     // top of the pager (see overlayHidesPage/folderOpen below), which intercepts the
                     // touch before it ever reaches the pager, so no extra gating is needed here for them.
@@ -575,8 +569,8 @@ fun HomeScreen(
         // instead of floating as its own pill (that look is now exclusive to an ordinary *inline*
         // pillMode row, see PillRow). Mirrors the Panel's own shape/border treatment below, just
         // upside down: rounded only at the top (flush/square at the bottom), a border only on the
-        // top edge (the row's own borderEnabled column now means exactly that for this row). No
-        // permanent on-screen affordance any more — in MANUAL mode a swipe-up from the home content
+        // top edge (the row's own borderEnabled column means exactly that for this row). No
+        // permanent on-screen affordance — in MANUAL mode a swipe-up from the home content
         // (see detectHomeGestures above) is the only way to open it, never a visible notch. Placed
         // before the search/app-list overlays below so those naturally cover it when open;
         // folderHideDock keeps the existing "hide the dock while a folder is open" behavior.
@@ -743,8 +737,7 @@ fun HomeScreen(
         // BoxWithConstraints sits *outside* the AnimatedVisibility, and the AnimatedVisibility below
         // gets a fixed width/height instead of sizing to its content — expandVertically would otherwise
         // force a full remeasure (a subcompose pass, since BoxWithConstraints is backed by
-        // SubcomposeLayout) on every single animation frame, which used to make opening the panel feel
-        // choppy compared to text search's own, already pre-sized overlay.
+        // SubcomposeLayout) on every animation frame, which makes opening the panel choppy.
         BoxWithConstraints(modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth()) {
             // Top square — flush and seamless against the screen's own top edge, no gap at the device's
             // rounded corners. Bottom stays rounded (the panel's "resting" edge, not attached to
@@ -838,10 +831,7 @@ fun HomeScreen(
     BackHandler(enabled = appListOpen && !searchOpen) { returnHome() }
     BackHandler(enabled = searchOpen) { returnHome() }
     BackHandler(enabled = !appListOpen && !searchOpen && !folderOpen && pagerState.currentPage != homeIndex) { returnHome() }
-    // Was missing entirely before — back while the Apps panel (sidebar overview) was open fell through
-    // past the activity and out of the app instead of just closing the panel. Easy to miss while it was
-    // only reachable via the dock's drag gesture; much more noticeable now that a notification-shade-style
-    // swipe down opens it, since a physical/gesture back press is the expected way to dismiss that.
+    // Back closes an open Panel rather than leaving the app.
     BackHandler(enabled = isPanelOpen) { viewModel.closeOverview() }
     LaunchedEffect(homeButtonPressCount) { if (homeButtonPressCount > 0) returnHome() }
     AnimatedVisibility(
@@ -850,9 +840,7 @@ fun HomeScreen(
         enter = fadeIn(tween(110)) + slideInVertically(animationSpec = tween(130)) { it / 8 },
         exit = fadeOut(tween(110)) + slideOutVertically(animationSpec = tween(130)) { it / 8 }
     ) {
-        // Pulling out of the app overview this way used to only call closeAppList() — it never touched
-        // the pager, so it could silently leave you on whatever page the pager happened to already be on
-        // instead of home, exactly like the system-back path did before returnHome() was introduced.
+        // Pulling out of the app overview goes through returnHome(), so it always lands on home.
         // rememberUpdatedState (not a plain closure over returnHome) because this connection object is
         // remembered once via `viewModel` and must keep calling the *current* returnHome — which closes
         // over pagerState/homeIndex/pages that are only valid for the composition that created them —

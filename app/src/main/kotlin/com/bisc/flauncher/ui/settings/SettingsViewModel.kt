@@ -578,8 +578,8 @@ class SettingsViewModel @Inject constructor(
     /** Persists the chosen Light/Dark/System and immediately re-stamps the background and every
      *  box/card/widget/dock/panel's default fill to match it (see ThemeRepository.reapplyTheme) —
      *  Light/Dark/System is FLauncher's only appearance control, there's no separate preset layered
-     *  on top of it, so switching it is exactly as consequential as the old preset switch was
-     *  (clears per-surface customizations back to automatic), hence the same confirm-dialog UX. */
+     *  on top of it. Switching it clears per-surface customizations back to automatic, hence the
+     *  confirm dialog. */
     fun applyTheme(theme: ThemePreference) {
         viewModelScope.launch {
             repository.setTheme(theme)

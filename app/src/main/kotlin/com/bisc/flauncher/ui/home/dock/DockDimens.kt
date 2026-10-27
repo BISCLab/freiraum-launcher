@@ -49,8 +49,8 @@ object DockDimens {
 
     /** Max corner radius for "dock-matched" surfaces that have no [com.bisc.flauncher.data.model.PageRow]
      *  of their own to read a real `cornerRadiusPercent` from (the app overview's window-mode panel) —
-     *  scaled by the global corner-roundness default instead. The dock bar itself no longer uses this,
-     *  it reads its own row's `cornerRadiusPercent` (see the pill rendering in PageRowContent.kt). */
+     *  scaled by the global corner-roundness default instead. The dock bar itself reads its own
+     *  row's `cornerRadiusPercent` (see the pill rendering in PageRowContent.kt). */
     val defaultCornerRadius = 32.dp
 
     /** Width needed to fit exactly [count] icons at their fixed size, with the bar's own edge padding and inter-icon gaps. */

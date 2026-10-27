@@ -187,8 +187,7 @@ fun SettingsAppOverviewSectionLettersScreen(navController: NavController, onBack
 }
 
 /** The right-edge fast-scroll rail — its box fill/border and letter text color are one appearance
- *  (see [com.bisc.flauncher.ui.home.search.AlphabetIndex]'s own doc on why there's no separate
- *  "show the box" switch or per-letter color anymore). */
+ *  (see [com.bisc.flauncher.ui.home.search.AlphabetIndex]). */
 @Composable
 fun SettingsAppOverviewAzIndexScreen(
     navController: NavController,

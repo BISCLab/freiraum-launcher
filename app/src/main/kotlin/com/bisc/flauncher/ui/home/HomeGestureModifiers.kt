@@ -16,11 +16,8 @@ import androidx.compose.ui.unit.dp
  * Recognizes the four rebindable [com.bisc.flauncher.data.model.HomeGesture]s directly on the home
  * screen background.
  *
- * Swipe up/down used to be read off [androidx.compose.ui.input.nestedscroll.NestedScrollConnection]'s
- * onPostScroll — leftover scroll a descendant *didn't* consume. That relied on some descendant actually
- * being a scrollable that drives the nested-scroll dispatch in the first place; once pages stopped
- * scrolling (no more [PageRowsColumn]-level verticalScroll) there was nothing left to drive it, so the
- * gesture silently stopped firing everywhere. This instead reads raw pointer moves directly.
+ * Reads raw pointer moves directly rather than nested-scroll leftovers: pages don't scroll, so there
+ * is no scrollable descendant that would drive a nested-scroll dispatch.
  *
  * Uses [PointerEventPass.Main], not [PointerEventPass.Final]. Pointer passes for one event run
  * Initial (root → leaf), then Main (leaf → root), then Final (root → leaf) again. This modifier sits on
@@ -54,15 +51,10 @@ fun Modifier.detectHomeGestures(
     // real horizontal swipes still won't accumulate meaningful Y delta here, so this rarely fires by
     // accident on one.
     val thresholdPx = remember(density) { with(density) { 36.dp.toPx() } }
-    // pointerInput(key) cancels and restarts its whole coroutine — including any gesture already
-    // mid-flight — every time `key` changes identity. Keying directly on the callback lambdas (as this
-    // used to) meant every recomposition of the caller (HomeScreen recomposes constantly: appListOpen,
-    // overviewEntry, pages, ... all churn) handed in a *new* lambda instance, silently tearing down and
-    // restarting this detector — losing whatever partial swipe was already being tracked. That's exactly
-    // why this got noticeably less reliable specifically on repeat swipes in the same session (first one
-    // after a fresh recomposition-quiet moment worked, later ones raced against a restart) rather than
-    // being uniformly flaky. rememberUpdatedState always calls the *latest* callback without needing the
-    // coroutine itself to restart, so the detector now only restarts when the threshold actually changes.
+    // pointerInput(key) restarts its coroutine, dropping any swipe in progress, whenever `key`
+    // changes. The callbacks are new lambdas on every recomposition of HomeScreen, so they are read
+    // through rememberUpdatedState instead of being keys: the detector only restarts when the
+    // threshold changes.
     val currentOnSwipeUp = rememberUpdatedState(onSwipeUp)
     val currentOnSwipeDown = rememberUpdatedState(onSwipeDown)
     val currentOnLongPress = rememberUpdatedState(onLongPress)

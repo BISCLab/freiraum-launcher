@@ -28,10 +28,8 @@ fun safeSystemWidgetMaxHeightPx(
             .let { it.barHeight + DockDimens.topMargin + DockDimens.bottomMargin }.toPx() + DockDimens.contentGap.toPx()
         val topChromePx = statusBarPx + 16.dp.toPx()
         val bottomReservePx = if (pageHasDock) dockFootprintPx else navigationBarPx + 16.dp.toPx()
-        // Was 24dp — that on top of an *already* accurate top-chrome reservation (real status bar +
-        // display cutout, not a guess) ate enough budget to reject page layouts that visibly fit fine,
-        // like 3+2+1 row-unit built-in widgets stacked above a dock. A small margin is enough now that
-        // the inputs themselves are no longer the imprecise part.
+        // The top chrome above is measured exactly (real status bar + display cutout), so a small
+        // margin is enough; a larger one rejects layouts that visibly fit.
         val safetyMarginPx = 4.dp.toPx()
         val viewportPx = screenHeightPx - topChromePx - bottomReservePx - safetyMarginPx
         return viewportPx.roundToInt().coerceAtLeast(PageRowDimens.rowUnitHeight.toPx().roundToInt())

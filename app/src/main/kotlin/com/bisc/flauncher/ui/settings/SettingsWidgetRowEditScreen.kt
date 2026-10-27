@@ -95,9 +95,8 @@ fun SettingsWidgetRowEditScreen(
     // This is a page-level approximation (it doesn't know what other rows sit above this one, which
     // page-overflow rebalancing accounts for separately when this row no longer fits alongside them).
     // Mirrors HomeScreen's actual reserved chrome exactly (real status/nav bar insets, not flat
-    // guesses) plus a safety margin, so this cap is never more generous than what genuinely fits — a
-    // too-generous cap here previously let widgets be sized taller than the screen, which is what
-    // caused real overflow/crashes now that a page never scrolls to compensate.
+    // guesses) plus a safety margin, so this cap is never more generous than what genuinely fits —
+    // a page doesn't scroll, so a widget taller than the screen would overflow it.
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
     // A display cutout (punch-hole camera) can be taller than the plain status bar inset alone on some

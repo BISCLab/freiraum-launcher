@@ -22,7 +22,7 @@ import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.ContactInfo
 import com.bisc.flauncher.ui.theme.noRippleClickable
 
-/** Contact selection for pinning to the sidebar. */
+/** Contact selection for pinning a contact as an element. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContactPickerSheet(

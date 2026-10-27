@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.bisc.flauncher.R
 
-/** Confirms before a long-press removal (sidebar, folder, ...) takes effect. */
+/** Confirms before a long-press removal (element, folder, ...) takes effect. */
 @Composable
 fun ConfirmRemoveDialog(label: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(

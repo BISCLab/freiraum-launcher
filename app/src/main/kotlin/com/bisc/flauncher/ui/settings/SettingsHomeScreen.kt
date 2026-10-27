@@ -220,9 +220,7 @@ fun SettingsHomeLayoutScreen(
                     }
                 }
             }
-            // Replaces the old standalone "Add row" card below the whole group (and the old
-            // "No rows on this page" empty-state text) — one connected list from Panel to Dock,
-            // with the add action sitting right where new rows actually land.
+            // One connected list from Panel to Dock, with the add action right where new rows land.
             Row(
                 modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer)
                     .clickable { showAddSheet = true }.padding(16.dp),

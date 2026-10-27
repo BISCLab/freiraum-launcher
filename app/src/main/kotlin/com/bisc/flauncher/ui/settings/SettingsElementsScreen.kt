@@ -13,9 +13,8 @@ import com.bisc.flauncher.R
 
 /** Global "Elemente" hub (Settings -> Elements) — Apps/Ordner/Adressen/Internetadressen/Shortcuts/
  *  Action buttons, each configured once here and used everywhere that Element type can be placed
- *  (Panel, Dock, Elementenbox rows, folders). Shortcuts has no entry of its own per the masterplan
- *  (2.5: "kein eigenes Untermenü nötig" — they're not meaningfully editable beyond add/remove,
- *  which already happens wherever they're placed). */
+ *  (Panel, Dock, Elementenbox rows, folders). Shortcuts have no entry of their own: they're not
+ *  editable beyond add/remove, which happens wherever they're placed. */
 @Composable
 fun SettingsElementsScreen(navController: NavController, onBack: () -> Unit) {
     SettingsSubScreen(title = stringResource(R.string.settings_section_elements), navController = navController, onBack = onBack) {

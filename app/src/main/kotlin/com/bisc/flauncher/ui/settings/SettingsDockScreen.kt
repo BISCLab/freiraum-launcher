@@ -51,9 +51,7 @@ import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
-/** The Dock's own settings — a hub (mirrors the Home page's own Appearance/Layout split) instead
- *  of the old single cluttered "Edit element box" sheet, which mixed a Visibility picker, background
- *  fill/opacity, border controls and a flat entries list with no clear grouping. */
+/** The Dock's own settings — a hub, mirroring the Home page's own Appearance/Layout split. */
 @Composable
 fun SettingsDockScreen(pageId: Long, navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
     SettingsSubScreen(title = stringResource(R.string.settings_home_dock_label), navController = navController, onBack = onBack) {
@@ -358,10 +356,8 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
     }
 }
 
-/** Shared "what do you want to add" chooser — the entry point for tapping an empty preview slot
- *  in [SettingsDockElementsScreen] (and, eventually, the same for the Favorites Panel), replacing
- *  what used to be a permanently-visible row of 6 "Add X" buttons with one picker reached by
- *  tapping a "+" the same way the dock's own live empty slots already work. */
+/** Shared "what do you want to add" chooser, opened by tapping an empty "+" slot in the Dock's or
+ *  Panel's element preview. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AddElementChooserSheet(

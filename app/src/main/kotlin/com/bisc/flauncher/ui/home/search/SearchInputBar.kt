@@ -62,11 +62,10 @@ private val FILTER_CHIP_GAP = 6.dp
 /**
  * Search field + category filter row as one element: a single rounded frame, two internally
  * equal-height rows separated by a thin divider — the input field (with the Home button) on top,
- * the category filter chips below. Replaces the old separate SystemSearchField pill and the
- * category row that used to live at the bottom of the results list.
+ * the category filter chips below.
  *
- * Sits flush at the very top of the search screen (its caller no longer gives it any outer
- * margin), the same "permanently-shown Panel" treatment as the home screen's own Panel: square top
+ * Sits flush at the very top of the search screen (no outer margin), the same
+ * "permanently-shown Panel" treatment as the home screen's own Panel: square top
  * corners (flush with the screen/cutout-safe edge above it), bottom corners scaled by
  * [cornerRadiusPercent] the same way Dock/Panel scale theirs.
  */

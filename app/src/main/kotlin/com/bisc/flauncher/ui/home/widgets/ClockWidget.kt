@@ -88,14 +88,8 @@ fun ClockWidget(
 ) {
     val context = LocalContext.current
     var now by remember { mutableStateOf(LocalDateTime.now()) }
-    // Was a self-driven delay() loop re-arming itself for the next minute boundary — correct on paper,
-    // but a coroutine delay like that is exactly the kind of background work Android defers/throttles
-    // under Doze, so after the screen had been off for a while the clock could sit on a stale time until
-    // the delayed resume eventually caught up. ACTION_TIME_TICK is the same system broadcast the real
-    // lock screen clock relies on: delivered once a minute while the screen is actually on, immune to
-    // Doze since the system itself wakes it, and re-registering (and resyncing immediately) every time
-    // this composable re-enters composition resyncs it right away (see the resume resync below for the
-    // screen-just-turned-on case).
+    // Driven by ACTION_TIME_TICK, the broadcast the system clock relies on: delivered once a minute
+    // while the screen is on and not deferred under Doze the way a delay() loop would be.
     DisposableEffect(Unit) {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(receiverContext: Context, intent: Intent) {
@@ -111,9 +105,8 @@ fun ClockWidget(
         now = LocalDateTime.now()
         onDispose { context.unregisterReceiver(receiver) }
     }
-    // The tick above doesn't arrive while the screen is off, and this widget stays composed through
-    // that — so after unlocking it showed the old time until the next minute boundary (up to ~59s).
-    // Resync the moment the home screen is visible again.
+    // The tick doesn't arrive while the screen is off and this widget stays composed through that,
+    // so resync the moment the home screen is visible again.
     androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
         now = LocalDateTime.now()
         onPauseOrDispose { }

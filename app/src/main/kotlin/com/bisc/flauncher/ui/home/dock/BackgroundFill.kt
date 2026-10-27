@@ -51,7 +51,7 @@ fun BackgroundFill(config: BackgroundConfig, modifier: Modifier = Modifier) {
 
 /** Two neighboring backgrounds blended by [fraction] (0 = [lower] only). When both show the same
  *  image, only their shades differ — the image is drawn once and just the shade is blended, instead
- *  of alpha-blending two full-screen photos every frame (the expensive case that used to flicker). */
+ *  of alpha-blending two full-screen photos every frame (expensive, and it flickers). */
 @Composable
 fun BackgroundCrossfade(lower: BackgroundConfig, upper: BackgroundConfig?, fraction: Float, modifier: Modifier = Modifier) {
     if (upper == null || fraction <= 0f) {

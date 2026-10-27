@@ -84,9 +84,8 @@
     <string name="settings_theme_light">Hell</string>
     <string name="settings_theme_dark">Dunkel</string>
     <string name="settings_theme_system">System</string>
-    <string name="settings_accent_color_summary">Farbe des vergrößerten Buchstabens beim Ziehen auf der A–Z-Leiste.</string>
     <string name="settings_accent_label">Akzentfarbe</string>
-    <string name="settings_accent_global_info">Gilt für die Blase beim Scrollen in der App-Liste und die Ladeanimation. Beide können in ihren eigenen Einstellungen auch eine eigene Farbe bekommen.</string>
+    <string name="settings_accent_global_info">Gilt für die Blase beim Scrollen in der App-Liste und die Ladeanimation. Die Ladeanimation kann in ihren eigenen Einstellungen auch eine eigene Farbe bekommen.</string>
     <string name="settings_accent_follows_global">Folgt der globalen Akzentfarbe</string>
     <string name="settings_accent_use_global">Globale Akzentfarbe verwenden</string>
     <string name="settings_accent_custom">Eigene Farbe</string>
@@ -411,7 +410,7 @@
     <string name="settings_statusbar_confirm_hide_message">Dadurch wird die Statusleiste auf jeder Seite, der Schnellübersicht, der Textsuche und in Ordnern auf einmal ausgeblendet — unabhängig davon, wie jede einzeln aktuell eingestellt ist.</string>
     <string name="settings_statusbar_confirm_show_message">Dadurch wird die Statusleiste auf jeder Seite, der Schnellübersicht, der Textsuche und in Ordnern auf einmal eingeblendet — unabhängig davon, wie jede einzeln aktuell eingestellt ist.</string>
     <string name="settings_corner_style_label">Eckenrundung</string>
-    <string name="settings_corner_style_info">Gilt für alle Elemente auf einmal, auch für Widgets, die neu mit 10 % starten. Bei ganz runden Ecken können Widgets ziemlich witzig aussehen, weil die Rundung in ihren Inhalt schneidet. Jedes Element kann in seinen eigenen Einstellungen trotzdem eigene Ecken bekommen.</string>
+    <string name="settings_corner_style_info">Gilt für alle Elemente auf einmal, auch für Widgets, die neu mit 10 Prozent starten. Bei ganz runden Ecken können Widgets ziemlich witzig aussehen, weil die Rundung in ihren Inhalt schneidet. Jedes Element kann in seinen eigenen Einstellungen trotzdem eigene Ecken bekommen.</string>
     <string name="settings_corner_radius_value">%1$d%%</string>
     <string name="settings_statusbar_hide_page">Statusleiste ausblenden</string>
     <string name="settings_folder_hide_status_bar">Statusleiste in Ordnern ausblenden</string>
@@ -421,8 +420,6 @@
     <string name="settings_folder_creator_title">Neuer Ordner</string>
     <string name="settings_folder_creator_name_hint">Ordnername</string>
     <string name="settings_folder_creator_create">Erstellen</string>
-
-    <string name="settings_section_search_overview">Schnellübersicht</string>
     <string name="settings_section_search_full">Textsuche</string>
     <string name="settings_app_list_search_button">Suchbutton</string>
     <string name="settings_app_list_search_button_summary">Schwebender Suchbutton in der App-Übersicht an der Position des Dock-Buttons.</string>

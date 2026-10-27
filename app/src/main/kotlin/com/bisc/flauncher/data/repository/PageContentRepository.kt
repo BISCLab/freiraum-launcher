@@ -108,9 +108,7 @@ class PageContentRepository @Inject constructor(
             settingsRepository.setPageHideStatusBar(searchId, true)
         }
 
-        // Gesture defaults, seeded once with real page ids now that Search/App-overview are
-        // all real pages — SettingsRepository has no page-id knowledge, so it can no longer carry a
-        // hardcoded SWIPE_UP fallback (removed in the same step as the APP_LIST/SEARCH enum values).
+        // Gesture defaults, seeded with real page ids (SettingsRepository knows no page ids).
         // Guarded by "nothing configured yet" so this never clobbers a user's own choice.
         if (!settingsRepository.isGestureConfigured(HomeGesture.SWIPE_UP)) {
             pageDao.getAppOverviewPage()?.let { appOverview ->
@@ -154,9 +152,8 @@ class PageContentRepository @Inject constructor(
             entryDao.insert(RowEntry(pageRowId = dockRowId, orderIndex = order++, type = GridItemType.ACTION_BUTTON, payload = settingsButtonId.toString()))
         }
 
-        // Self-healing check on every start: pages used to scroll, so content sized against that
-        // no longer fits now that a page is a hard, fixed screen. A no-op once everything's already
-        // rebalanced (the common case), so safe to run unconditionally rather than only once ever.
+        // Self-healing check on every start: a page is one fixed screen, so anything that doesn't fit
+        // moves on. A no-op once everything fits (the common case), so safe to run every time.
         pageDao.getAllOnce().filter { it.kind == LauncherPageKind.ROWS }.forEach { rebalancePageOverflow(it.id) }
     }
 
@@ -189,9 +186,7 @@ class PageContentRepository @Inject constructor(
     suspend fun addPage(): Long {
         val next = (pageDao.maxOrderIndex() ?: -1) + 1
         val newId = pageDao.insert(LauncherPage(orderIndex = next))
-        // No per-page background to seed anymore — a page with no override of its own just falls back
-        // to the global background automatically, which is exactly what every fresh page should look
-        // like (matches home) until the user deliberately picks its own color.
+        // No background to seed: a page without its own override uses the global background.
         // Hidden status bar is the app-wide default now; a page that silently defaulted to *shown*
         // is exactly the kind of per-page mismatch that made switching to it visibly jump/settle.
         settingsRepository.setPageHideStatusBar(newId, true)
@@ -206,7 +201,7 @@ class PageContentRepository @Inject constructor(
      * after, each keeping its own prior relative order among themselves. Avoids a collision-prone
      * localized index shift — page counts are small, a full stable re-sort is cheap and simple.
      */
-    // Ergänzungsseiten start as an independent copy of Home's current *structure* — same row types,
+    // New pages start as an independent copy of Home's current *structure* — same row types,
     // order, appearance and background — not of its actual content. Copying the user's pinned apps/
     // folders onto a brand-new page by default would be a confusing surprise, not a sensible
     // starting point; copying the empty scaffold (Dock/Panel/widget rows with their configured
@@ -334,8 +329,8 @@ class PageContentRepository @Inject constructor(
     }
 
     /**
-     * Pages no longer scroll — a page is exactly one screen, full stop, so whatever doesn't fit needs
-     * a home somewhere else instead of silently overflowing off-screen. Walks [pageId]'s rows (the
+     * A page is exactly one screen, so whatever doesn't fit needs a home somewhere else instead of
+     * silently overflowing off-screen. Walks [pageId]'s rows (the
      * dock/search bar row excluded — it floats separately, not part of this stack) in order, and the
      * moment the running total would exceed what's actually available (accounting for status bar, the
      * dock if present, and a safety margin — the exact same budget the height stepper enforces per
@@ -367,8 +362,8 @@ class PageContentRepository @Inject constructor(
     }
 
     /**
-     * Dry-run check for the "this page is full" prompt (see masterplan Phase 7: offer a new page
-     * instead of silently relocating rows there): would a not-yet-inserted row shaped like
+     * Dry-run check for the "this page is full" prompt (offer a new page instead of silently
+     * relocating rows there): would a not-yet-inserted row shaped like
      * [candidateRow] still fit on [pageId] alongside what's already there? Mirrors
      * [rebalancePageOverflow]'s own budget math exactly, just without writing anything.
      */

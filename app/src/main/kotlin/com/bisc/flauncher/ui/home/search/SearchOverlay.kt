@@ -146,8 +146,8 @@ fun SearchOverlay(
         }
     }
 
-    // The page has no fill of its own over its background any more — [appearance] only contributes
-    // the background's opacity and the text color, automatic = readable against that background.
+    // The page has no fill of its own over its background — [appearance] only contributes the text
+    // color, automatic = readable against that background.
     val noFill = appearance.copy(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE)
     // Not yet customized, the bar and the cards look like every other element (Dock, Panel, …):
     // the theme's default box, not the page's own (fill-less) appearance.

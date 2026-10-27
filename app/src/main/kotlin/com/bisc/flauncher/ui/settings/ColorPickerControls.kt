@@ -104,12 +104,9 @@ fun ColorPickerControls(
                 .clip(RoundedCornerShape(12.dp))
                 .background(hueColor)
                 .pointerInput(Unit) {
-                    // onColorChange only fires once the drag ends, not per pointer-move frame — each
-                    // call flows into a settings write that rewrites the whole shared preferences
-                    // file, so doing that continuously while dragging is what made this picker (and
-                    // anything using it — every color in the app) feel severely laggy. The marker and
-                    // swatch above still track the drag live since they read the local hue/saturation/
-                    // value state directly, not onColorChange's result.
+                    // onColorChange only fires once the drag ends, not per pointer-move frame, so a
+                    // caller that writes settings isn't flooded while dragging. The marker and swatch
+                    // above still track the drag live from the local hue/saturation/value state.
                     detectDragGestures(
                         onDragEnd = { updateFromHsv() },
                         onDrag = { change, _ ->

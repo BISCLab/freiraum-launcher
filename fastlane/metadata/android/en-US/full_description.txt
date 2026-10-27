@@ -1,0 +1,37 @@
+<p>FLauncher is a home screen app that keeps things calm and lets you decide exactly what goes where. It needs no internet access and collects no data.</p>
+
+<p><b>Pages</b></p>
+<ul>
+<li>A home page plus as many extra pages as you like, each with its own background</li>
+<li>Rows of apps, folders, contacts, addresses, links, shortcuts and action buttons</li>
+<li>Built-in widgets: clock, music, weather, notes and spacers, plus regular Android widgets</li>
+<li>A dock at the bottom and a pull-down panel at the top, both with fixed slots</li>
+</ul>
+
+<p><b>App list and search</b></p>
+<ul>
+<li>Alphabetical app list with a fast-scroll A–Z index</li>
+<li>Text search across apps, folders, contacts, settings, shortcuts, links and addresses, with web, maps, e-mail and calculator commands</li>
+<li>Hide apps from the list or from search, rename them, or reveal them only with a search code</li>
+</ul>
+
+<p><b>Look and feel</b></p>
+<ul>
+<li>Light and dark mode, an accent color, corner shapes and icon packs</li>
+<li>Fill, border and text color for every element, with live previews</li>
+<li>Configurable gestures for swipes, double tap and long press</li>
+<li>Optional keyboard extension strip and charging animation</li>
+</ul>
+
+<p><b>Your data</b></p>
+<ul>
+<li>Export and import all settings, pages, widgets, folders and backgrounds as one backup file</li>
+<li>Weather comes from apps that send the Gadgetbridge weather format; FLauncher itself does not go online</li>
+</ul>
+
+<p><b>Permissions</b></p>
+<ul>
+<li>Contacts (optional): to find and pin contacts</li>
+<li>Notification access (optional): only to control music playback in the music widget; notification content is not read</li>
+<li>Expand status bar: for the gesture that opens the notification shade</li>
+</ul>

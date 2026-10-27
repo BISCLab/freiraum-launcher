@@ -46,14 +46,9 @@ import com.bisc.flauncher.ui.home.dock.PagePickerSheet
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
 /**
- * Full-screen editor for one [PageRowType.ELEMENT_BOX] (or, for the dock, [PageRowType.SEARCH_BAR]) row —
- * the masterplan Phase 9 template for converting the remaining ModalBottomSheet row editors to real
- * nav screens: same chrome ([SettingsSubScreen]) and immediate-apply behavior (no Save/Discard) as
- * its sibling [SettingsWidgetRowEditScreen], which already established that pattern for widget rows.
- * A draft+Save/Discard model was deliberately not introduced here — every other settings screen in
- * the app, including the one editing the exact same [com.bisc.flauncher.data.model.PageRow] entity
- * for widget rows, applies changes immediately, and this screen diverging alone would be
- * inconsistent rather than a genuine improvement.
+ * Full-screen editor for one [PageRowType.ELEMENT_BOX] (or, for the dock, [PageRowType.SEARCH_BAR])
+ * row. Like [SettingsWidgetRowEditScreen], the row itself is edited as a draft and written on Save;
+ * its entries are added and removed immediately.
  */
 @Composable
 fun SettingsElementBoxEditScreen(
@@ -105,8 +100,7 @@ fun SettingsElementBoxEditScreen(
     // toggle (off) and the irrelevant Columns stepper for the dock would be actively misleading.
     val isDock = row.type == PageRowType.SEARCH_BAR
     val isPillLayout = row.pillMode || isDock
-    // The home page's own dock row is permanent — same protection the row used to get from the old,
-    // now-merged SearchBarRowEditSheet.
+    // The home page's own dock row is permanent.
     val canRemoveRow = row.type != PageRowType.SEARCH_BAR || pages.find { it.id == pageId }?.isHome != true
 
     SettingsSubScreen(title = stringResource(R.string.settings_element_box_edit_title), navController = navController, onBack = onBack, onSave = { viewModel.saveRow(row) }, dirty = row != savedRow) {

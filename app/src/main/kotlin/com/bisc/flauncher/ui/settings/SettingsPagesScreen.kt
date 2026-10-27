@@ -67,13 +67,10 @@ import com.bisc.flauncher.ui.pageLabel
 import kotlinx.coroutines.launch
 
 /**
- * Two distinct groups, no longer one flat drag-reorderable list: a horizontal carousel preview of
- * the swipeable ROWS pages (Home always centered, a "+" ghost tile on each end to add a page in
- * that direction), and below it a plain list of the pages that don't swipe at all (App overview,
- * Text search, Quick overview — autonomous singletons, reachable by link/gesture rather than by
- * paging). The old flat list let you drag a singleton tile in among the swipeable ones with no
- * real effect on the pager (which only ever reads the ROWS subset) — this split makes that
- * distinction visible instead of silently cosmetic.
+ * Two distinct groups: a horizontal carousel preview of the swipeable ROWS pages (Home always
+ * centered, a "+" ghost tile on each end to add a page in that direction), and below it the pages
+ * that don't swipe at all (App overview, Text search — singletons reached by link or gesture
+ * rather than by paging).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -507,9 +504,8 @@ private fun GhostTile(width: androidx.compose.ui.unit.Dp, onClick: () -> Unit) {
     }
 }
 
-/** Step 1 of adding a carousel page: which kind to start from. Only one real option today ("blank
- *  page", matching the old [HomeViewModel.addPage] behavior), but kept as its own step/sheet so
- *  more starting templates can be added later without reshuffling the call site. */
+/** Step 1 of adding a carousel page: which kind to start from (currently a blank page, see
+ *  [HomeViewModel.addPage]); its own step so more starting templates fit in without changes here. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PageTemplatePickerSheet(onBlankPageSelected: () -> Unit, onDismiss: () -> Unit) {

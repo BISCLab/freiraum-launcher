@@ -51,9 +51,8 @@ import com.bisc.flauncher.data.settings.IconShape
 import kotlin.math.roundToInt
 
 /** Human-readable name for the surface an appearance/background section's group title is for
- *  (e.g. "Widget", "Folder", "Text search"). Kept as its own function only so every call site uses
- *  the same pattern — it's a plain passthrough, not a formatted label, now that the old numbered
- *  "Layer 1/2/3" framing is gone. */
+ *  (e.g. "Widget", "Folder", "Text search"). A plain passthrough, kept so every call site uses the
+ *  same pattern. */
 @Composable
 fun surfaceLabel(surfaceNameRes: Int): String = stringResource(surfaceNameRes)
 
@@ -357,8 +356,7 @@ fun ElementAppearanceSection(
 
 /** Background-only half of [ElementAppearanceSection] — fill mode, color and opacity, with no
  *  group title of its own (the page it's placed on is already titled "Background", so a repeated
- *  heading would just add noise back in). Used by the Dock's and Panel's own dedicated Background
- *  screens instead of the old one-sheet-does-everything editor. */
+ *  heading would just add noise). Used by the Fill screens of the Dock, Panel, folders and search. */
 @Composable
 fun ElementBackgroundSection(appearance: ElementAppearance, onAppearanceChange: (ElementAppearance) -> Unit, allowNone: Boolean = true) {
     // Selecting "Color" opens its own window directly — no separate "Color" row to tap through

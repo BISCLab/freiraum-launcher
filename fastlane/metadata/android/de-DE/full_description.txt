@@ -1,0 +1,37 @@
+<p>FLauncher ist ein Startbildschirm, der ruhig bleibt und dich genau festlegen lässt, was wo liegt. Er braucht keinen Internetzugang und sammelt keine Daten.</p>
+
+<p><b>Seiten</b></p>
+<ul>
+<li>Eine Startseite und beliebig viele weitere Seiten, jede mit eigenem Hintergrund</li>
+<li>Zeilen mit Apps, Ordnern, Kontakten, Adressen, Links, Shortcuts und Aktionsbuttons</li>
+<li>Eigene Widgets: Uhr, Musik, Wetter, Notizen und Abstandshalter, dazu normale Android-Widgets</li>
+<li>Ein Dock unten und ein herunterziehbares Panel oben, beide mit festen Plätzen</li>
+</ul>
+
+<p><b>App-Liste und Suche</b></p>
+<ul>
+<li>Alphabetische App-Liste mit A–Z-Index zum schnellen Scrollen</li>
+<li>Textsuche über Apps, Ordner, Kontakte, Einstellungen, Shortcuts, Links und Adressen, mit Befehlen für Web, Karten, E-Mail und Rechner</li>
+<li>Apps in Liste oder Suche ausblenden, umbenennen oder nur per Suchcode anzeigen</li>
+</ul>
+
+<p><b>Aussehen</b></p>
+<ul>
+<li>Hell- und Dunkelmodus, Akzentfarbe, Eckenform und Icon-Packs</li>
+<li>Füllung, Rahmen und Textfarbe für jedes Element, mit Live-Vorschau</li>
+<li>Einstellbare Gesten für Wischen, Doppeltippen und langes Drücken</li>
+<li>Optionale Tastatur-Verlängerung und Ladeanimation</li>
+</ul>
+
+<p><b>Deine Daten</b></p>
+<ul>
+<li>Alle Einstellungen, Seiten, Widgets, Ordner und Hintergründe als eine Sicherungsdatei exportieren und importieren</li>
+<li>Wetterdaten kommen von Apps, die das Gadgetbridge-Wetterformat senden; FLauncher selbst geht nicht online</li>
+</ul>
+
+<p><b>Berechtigungen</b></p>
+<ul>
+<li>Kontakte (optional): um Kontakte zu finden und anzuheften</li>
+<li>Benachrichtigungszugriff (optional): nur zur Steuerung der Musikwiedergabe im Musik-Widget; Benachrichtigungsinhalte werden nicht gelesen</li>
+<li>Statusleiste ausklappen: für die Geste, die die Benachrichtigungsleiste öffnet</li>
+</ul>

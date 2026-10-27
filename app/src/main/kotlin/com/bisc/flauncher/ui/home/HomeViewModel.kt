@@ -248,8 +248,7 @@ class HomeViewModel @Inject constructor(
         pageContentRepository.pages.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     /** Every page, including the singleton App overview/Search pages (unlike [pages], which only
-     *  has the swipeable ROWS ones) — used by the Pages settings list so those two are no longer
-     *  hidden/implicit. */
+     *  has the swipeable ROWS ones) — used by the Pages settings list, which shows them too. */
     val allPages: StateFlow<List<LauncherPage>> =
         pageContentRepository.allPages.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
@@ -290,7 +289,7 @@ class HomeViewModel @Inject constructor(
         return if (!custom.isNullOrBlank()) custom else installedAppsRepository.rawLabelFor(componentName)
     }
 
-    // ---- Overlay state: quick overview, app overview, text search ----
+    // ---- Overlay state: panel, app overview, text search ----
 
     private val _isPanelOpen = MutableStateFlow(false)
     val isPanelOpen: StateFlow<Boolean> = _isPanelOpen.asStateFlow()
@@ -792,8 +791,8 @@ class HomeViewModel @Inject constructor(
         _widgetRelocationWarningCount.value = 0
     }
 
-    /** A would-be apps/widget row that doesn't fit this page as-is — see masterplan Phase 7: offer a
-     *  new page for it instead of silently relocating something there, [wouldOverflow]-gated in
+    /** A would-be apps/widget row that doesn't fit this page as-is: offer a new page for it instead
+     *  of silently relocating something there, [wouldOverflow]-gated in
      *  [addElementBox]/[addWidgetRow]. Resolved by [confirmPendingOverflowAdd]/[cancelPendingOverflowAdd]. */
     sealed class PendingOverflowAdd {
         data class ElementBox(val pageId: Long) : PendingOverflowAdd()
