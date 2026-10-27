@@ -148,18 +148,19 @@ fun ActionButtonPickerSheet(buttons: List<ActionButton>, onSelect: (ActionButton
 @Composable
 fun SettingsActionButtonDetailScreen(buttonId: Long, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val buttons by viewModel.actionButtons.collectAsState()
-    val button = buttons.find { it.id == buttonId } ?: return
+    val saved = buttons.find { it.id == buttonId } ?: return
+    var button by rememberDraft(saved)
     val allPages by viewModel.allPages.collectAsState()
     var showPagePicker by remember { mutableStateOf(false) }
     var showSettingPicker by remember { mutableStateOf(false) }
     var showIconPicker by remember { mutableStateOf(false) }
     var confirmingDelete by remember { mutableStateOf(false) }
 
-    SettingsSubScreen(title = button.label, navController = navController, onBack = onBack) {
+    SettingsSubScreen(title = saved.label, navController = navController, onBack = onBack, onSave = { viewModel.updateActionButton(button) }, dirty = button != saved) {
         SettingsPreferenceGroup {
             OutlinedTextField(
                 value = button.label,
-                onValueChange = { viewModel.updateActionButton(button.copy(label = it)) },
+                onValueChange = { button = button.copy(label = it) },
                 label = { Text(stringResource(R.string.settings_elements_actionbutton_name_hint)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
@@ -170,19 +171,19 @@ fun SettingsActionButtonDetailScreen(buttonId: Long, navController: NavControlle
                 stringResource(R.string.settings_elements_actionbutton_action_panel),
                 ActionButtonActionType.PANEL,
                 button.actionType,
-                { viewModel.updateActionButton(button.copy(actionType = it, actionPageId = null)) }
+                { button = button.copy(actionType = it, actionPageId = null) }
             )
             RadioPreference(
                 stringResource(R.string.settings_elements_actionbutton_action_dock),
                 ActionButtonActionType.DOCK,
                 button.actionType,
-                { viewModel.updateActionButton(button.copy(actionType = it, actionPageId = null)) }
+                { button = button.copy(actionType = it, actionPageId = null) }
             )
             RadioPreference(
                 stringResource(R.string.settings_elements_actionbutton_action_page),
                 ActionButtonActionType.PAGE,
                 button.actionType,
-                { viewModel.updateActionButton(button.copy(actionType = it)) }
+                { button = button.copy(actionType = it) }
             )
             if (button.actionType == ActionButtonActionType.PAGE) {
                 val targetPage = allPages.find { it.id == button.actionPageId }
@@ -197,7 +198,7 @@ fun SettingsActionButtonDetailScreen(buttonId: Long, navController: NavControlle
                 stringResource(R.string.settings_elements_actionbutton_action_setting),
                 ActionButtonActionType.ANDROID_SETTING,
                 button.actionType,
-                { viewModel.updateActionButton(button.copy(actionType = it, actionPageId = null)) }
+                { button = button.copy(actionType = it, actionPageId = null) }
             )
             if (button.actionType == ActionButtonActionType.ANDROID_SETTING) {
                 val targetShortcut = SettingsShortcuts.all.find { it.action == button.androidSettingAction }
@@ -212,7 +213,7 @@ fun SettingsActionButtonDetailScreen(buttonId: Long, navController: NavControlle
                 stringResource(R.string.settings_elements_actionbutton_action_launcher_settings),
                 ActionButtonActionType.LAUNCHER_SETTINGS,
                 button.actionType,
-                { viewModel.updateActionButton(button.copy(actionType = it, actionPageId = null)) }
+                { button = button.copy(actionType = it, actionPageId = null) }
             )
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_colors_label)) {
@@ -226,14 +227,14 @@ fun SettingsActionButtonDetailScreen(buttonId: Long, navController: NavControlle
                 title = stringResource(R.string.settings_section_global_background),
                 custom = button.backgroundColor,
                 automaticSeed = android.graphics.Color.DKGRAY,
-                onChange = { viewModel.updateActionButton(button.copy(backgroundColor = it)) },
+                onChange = { button = button.copy(backgroundColor = it) },
                 ownGroup = false
             )
             AutomaticColorPicker(
                 title = stringResource(R.string.settings_element_text_color_label),
                 custom = button.iconColor,
                 automaticSeed = android.graphics.Color.WHITE,
-                onChange = { viewModel.updateActionButton(button.copy(iconColor = it)) },
+                onChange = { button = button.copy(iconColor = it) },
                 ownGroup = false
             )
         }
@@ -250,14 +251,14 @@ fun SettingsActionButtonDetailScreen(buttonId: Long, navController: NavControlle
     if (showPagePicker) {
         PagePickerSheet(
             pages = allPages,
-            onPageSelected = { page -> viewModel.updateActionButton(button.copy(actionPageId = page.id)); showPagePicker = false },
+            onPageSelected = { page -> button = button.copy(actionPageId = page.id); showPagePicker = false },
             onDismiss = { showPagePicker = false }
         )
     }
 
     if (showSettingPicker) {
         AndroidSettingPickerSheet(
-            onSelect = { shortcut -> viewModel.updateActionButton(button.copy(androidSettingAction = shortcut.action)); showSettingPicker = false },
+            onSelect = { shortcut -> button = button.copy(androidSettingAction = shortcut.action); showSettingPicker = false },
             onDismiss = { showSettingPicker = false }
         )
     }
@@ -265,7 +266,7 @@ fun SettingsActionButtonDetailScreen(buttonId: Long, navController: NavControlle
     if (showIconPicker) {
         PictogramPickerSheet(
             selected = button.iconKey,
-            onSelect = { key -> viewModel.updateActionButton(button.copy(iconKey = key)); showIconPicker = false },
+            onSelect = { key -> button = button.copy(iconKey = key); showIconPicker = false },
             onDismiss = { showIconPicker = false }
         )
     }

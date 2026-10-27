@@ -88,24 +88,6 @@ fun SettingsPermissionsScreen(navController: NavController, onBack: () -> Unit, 
                 onClick = { if (!shortcuts) requestDefault() }
             )
         }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_permissions_system_group)) {
-            val touchFeedback = refreshTick.let { isTouchFeedbackOn(context) }
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_permissions_touch_feedback),
-                summary = stringResource(if (touchFeedback) R.string.settings_permissions_on else R.string.settings_permissions_off),
-                info = stringResource(R.string.settings_permissions_touch_feedback_purpose),
-                onClick = { openSoundSettings(context) },
-                leading = {
-                    Icon(
-                        imageVector = if (touchFeedback) Icons.Filled.CheckCircle else Icons.Filled.ErrorOutline,
-                        contentDescription = null,
-                        tint = if (touchFeedback) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                    )
-                },
-                trailing = null
-            )
-        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_permissions_access_group)) {
             PermissionRow(
                 title = stringResource(R.string.settings_permissions_contacts),
@@ -117,7 +99,7 @@ fun SettingsPermissionsScreen(navController: NavController, onBack: () -> Unit, 
                 title = stringResource(R.string.settings_permissions_notifications),
                 purpose = stringResource(R.string.settings_permissions_notifications_purpose),
                 granted = notifications,
-                onClick = { context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) }
+                onClick = { com.bisc.flauncher.util.openNotificationAccessSettings(context) }
             )
         }
     }

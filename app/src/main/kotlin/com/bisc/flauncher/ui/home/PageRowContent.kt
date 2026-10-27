@@ -287,7 +287,10 @@ fun GridEntries(
     // slack making its edges sit further in. Null (the Panel's case) keeps the old per-row width.
     referenceColumnCount: Int? = null,
     // Vertical gap between sub-rows — also Dock-only (0 keeps the Panel's rows flush, as before).
-    rowGap: androidx.compose.ui.unit.Dp = 0.dp
+    rowGap: androidx.compose.ui.unit.Dp = 0.dp,
+    // Dock/Panel: each entry sits in the slot its orderIndex names, so removing one leaves a gap
+    // instead of shifting the rest along. Otherwise entries simply fill the slots in order.
+    fixedSlots: Boolean = false
 ) {
     @Composable
     fun Cell(entry: RowEntry?, slotIndex: Int) {
@@ -348,6 +351,8 @@ fun GridEntries(
     }
 
     if (rowColumns != null) {
+        val bySlot = if (fixedSlots) entries.associateBy { it.orderIndex } else null
+        fun entryAt(slot: Int): RowEntry? = bySlot?.get(slot) ?: if (bySlot == null) entries.getOrNull(slot) else null
         var consumed = 0
         val cellWidth = 64.dp * iconSizeScale
         val columnGap = 16.dp
@@ -364,7 +369,7 @@ fun GridEntries(
                     repeat(safeCols) { slot ->
                         if (slot > 0) Spacer(Modifier.width(columnGap))
                         Box(modifier = Modifier.width(cellWidth)) {
-                            Cell(entries.getOrNull(rowStart + slot), rowStart + slot)
+                            Cell(entryAt(rowStart + slot), rowStart + slot)
                         }
                     }
                 }

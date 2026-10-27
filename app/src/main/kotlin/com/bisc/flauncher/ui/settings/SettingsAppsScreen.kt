@@ -28,7 +28,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -167,8 +166,8 @@ fun SettingsAppsScreen(navController: NavController, onBack: () -> Unit, onNavig
             app = app,
             viewModel = viewModel,
             override = overrides[app.componentName.flattenToString()] ?: AppOverride(app.componentName.flattenToString()),
-            onSave = { customLabel, hiddenFromAppList, hiddenFromSearch, revealMode, revealCode ->
-                viewModel.saveAppOverride(app.componentName, customLabel, hiddenFromAppList, hiddenFromSearch, revealMode, revealCode)
+            onSave = { draft ->
+                viewModel.saveAppOverride(app.componentName, draft.customLabel, draft.hiddenFromAppList, draft.hiddenFromSearch, draft.revealMode, draft.revealCode, draft.iconShape, draft.iconSizePercent)
                 editingApp = null
             },
             onDismiss = { editingApp = null }
@@ -231,7 +230,7 @@ private fun AppOverrideEditSheet(
     app: AppInfo,
     viewModel: SettingsViewModel,
     override: AppOverride,
-    onSave: (customLabel: String?, hiddenFromAppList: Boolean, hiddenFromSearch: Boolean, revealMode: RevealMode, revealCode: String?) -> Unit,
+    onSave: (AppOverride) -> Unit,
     onDismiss: () -> Unit
 ) {
     CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalAppIconLoader provides viewModel.iconLoader) {
@@ -244,7 +243,7 @@ private fun AppOverrideEditSheetContent(
     app: AppInfo,
     viewModel: SettingsViewModel,
     override: AppOverride,
-    onSave: (customLabel: String?, hiddenFromAppList: Boolean, hiddenFromSearch: Boolean, revealMode: RevealMode, revealCode: String?) -> Unit,
+    onSave: (AppOverride) -> Unit,
     onDismiss: () -> Unit
 ) {
     val globalIconSizePercent by viewModel.iconSizePercent.collectAsState()
@@ -254,10 +253,29 @@ private fun AppOverrideEditSheetContent(
     var hiddenFromSearch by remember(override.componentName) { mutableStateOf(override.hiddenFromSearch) }
     var revealMode by remember(override.componentName) { mutableStateOf(override.revealMode) }
     var revealCode by remember(override.componentName) { mutableStateOf(override.revealCode.orEmpty()) }
+    var iconShape by remember(override.componentName) { mutableStateOf(override.iconShape) }
+    var iconSizePercent by remember(override.componentName) { mutableStateOf(override.iconSizePercent) }
     var pickingIcon by remember { mutableStateOf(false) }
     var revealSettingsOpen by remember { mutableStateOf(false) }
 
-    SettingsEditPage(title = stringResource(R.string.settings_manage_apps_edit_title), onDismiss = onDismiss) {
+    val draft = override.copy(
+        customLabel = customLabel,
+        hiddenFromAppList = hiddenFromAppList,
+        hiddenFromSearch = hiddenFromSearch,
+        revealMode = revealMode,
+        revealCode = revealCode,
+        iconShape = iconShape,
+        iconSizePercent = iconSizePercent
+    )
+    val dirty = customLabel != override.customLabel.orEmpty() ||
+        hiddenFromAppList != override.hiddenFromAppList ||
+        hiddenFromSearch != override.hiddenFromSearch ||
+        revealMode != override.revealMode ||
+        revealCode != override.revealCode.orEmpty() ||
+        iconShape != override.iconShape ||
+        iconSizePercent != override.iconSizePercent
+
+    SettingsEditPage(title = stringResource(R.string.settings_manage_apps_edit_title), onDismiss = onDismiss, onSave = { onSave(draft) }, dirty = dirty) {
         OutlinedTextField(
             value = customLabel,
             onValueChange = { customLabel = it },
@@ -284,28 +302,28 @@ private fun AppOverrideEditSheetContent(
             RadioPreference(
                 label = stringResource(R.string.settings_element_color_auto_hint),
                 value = null,
-                selected = override.iconShape,
-                onSelect = { viewModel.setAppIconShape(app.componentName, it) }
+                selected = iconShape,
+                onSelect = { iconShape = it }
             )
             IconShapePreference(
                 stringResource(R.string.settings_icon_shape_rounded_square),
                 IconShape.ROUNDED_SQUARE,
-                override.iconShape,
-                { viewModel.setAppIconShape(app.componentName, it) }
+                iconShape,
+                { iconShape = it }
             )
             IconShapePreference(
                 stringResource(R.string.settings_icon_shape_circle),
                 IconShape.CIRCLE,
-                override.iconShape,
-                { viewModel.setAppIconShape(app.componentName, it) }
+                iconShape,
+                { iconShape = it }
             )
         }
 
         SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_size_label)) {
             ExpandableOptionalIconSizeSlider(
-                percent = override.iconSizePercent,
+                percent = iconSizePercent,
                 globalDefault = globalIconSizePercent,
-                onSettled = { viewModel.setAppIconSizePercent(app.componentName, it) }
+                onSettled = { iconSizePercent = it }
             )
         }
 
@@ -359,13 +377,6 @@ private fun AppOverrideEditSheetContent(
                     onCodeChange = { revealCode = it }
                 )
             }
-        }
-
-        TextButton(
-            onClick = { onSave(customLabel, hiddenFromAppList, hiddenFromSearch, revealMode, revealCode) },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(stringResource(R.string.settings_manage_apps_save))
         }
     }
 

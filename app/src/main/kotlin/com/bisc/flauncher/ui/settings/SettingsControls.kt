@@ -293,10 +293,11 @@ fun ElementAppearanceSection(
         }
     }
     if (colorEditorOpen) {
-        SettingsEditPage(title = stringResource(R.string.settings_background_source_color), onDismiss = { colorEditorOpen = false }) {
+        var draft by rememberDraft(appearance)
+        SettingsEditPage(title = stringResource(R.string.settings_background_source_color), onDismiss = { colorEditorOpen = false }, onSave = { onAppearanceChange(draft) }, dirty = draft != appearance) {
             ColorFillPickerContent(
-                fill = appearance.fill,
-                onFillChange = { fill -> onAppearanceChange(appearance.copy(fill = fill)) },
+                fill = draft.fill,
+                onFillChange = { fill -> draft = draft.copy(fill = fill) },
                 modifier = Modifier.fillMaxWidth(),
                 onEyedropperCapture = onEyedropperCapture
             )
@@ -378,16 +379,17 @@ fun ElementBackgroundSection(appearance: ElementAppearance, onAppearanceChange: 
         }
     }
     if (colorEditorOpen) {
-        SettingsEditPage(title = stringResource(R.string.settings_background_source_color), onDismiss = { colorEditorOpen = false }) {
+        var draft by rememberDraft(appearance)
+        SettingsEditPage(title = stringResource(R.string.settings_background_source_color), onDismiss = { colorEditorOpen = false }, onSave = { onAppearanceChange(draft) }, dirty = draft != appearance) {
             ColorFillPickerContent(
-                fill = appearance.fill,
-                onFillChange = { fill -> onAppearanceChange(appearance.copy(fill = fill)) },
+                fill = draft.fill,
+                onFillChange = { fill -> draft = draft.copy(fill = fill) },
                 modifier = Modifier.fillMaxWidth()
             )
             SettingsPreferenceGroup(title = stringResource(R.string.settings_background_opacity_label)) {
                 SettledSlider(
-                    value = appearance.opacity,
-                    onSettled = { onAppearanceChange(appearance.copy(opacity = it)) },
+                    value = draft.opacity,
+                    onSettled = { draft = draft.copy(opacity = it) },
                     valueRange = 0f..1f,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     label = { live ->
@@ -477,6 +479,19 @@ fun CaptionsSection(
     title: String? = null
 ) {
     SettingsPreferenceGroup(title = title) {
+        CaptionsRows(showLabels, onShowLabelsChange, appearance, onAppearanceChange)
+    }
+}
+
+/** The rows of [CaptionsSection] without its own card — for joining a card with other switches. */
+@Composable
+fun CaptionsRows(
+    showLabels: Boolean,
+    onShowLabelsChange: (Boolean) -> Unit,
+    appearance: ElementAppearance,
+    onAppearanceChange: (ElementAppearance) -> Unit
+) {
+    run {
         SettingsPreference(
             icon = null,
             title = stringResource(R.string.settings_element_show_labels_label),
@@ -533,12 +548,22 @@ fun AutomaticColorPicker(title: String, custom: Int?, automaticSeed: Int, onChan
 
 private fun autoBorderSeed(appearance: ElementAppearance): Int = autoTextSeed(appearance)
 
-/** A titled full-screen editor page (color pickers and other detail editors). */
+/** A titled full-screen editor page (color pickers and other detail editors). With [onSave] it
+ *  edits a draft: a Save bar commits it and closes, and leaving while [dirty] asks first. */
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsEditPage(title: String, onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+fun SettingsEditPage(title: String, onDismiss: () -> Unit, onSave: (() -> Unit)? = null, dirty: Boolean = false, content: @Composable ColumnScope.() -> Unit) {
+    var confirmLeave by remember { mutableStateOf(false) }
+    val guardedDismiss = { if (onSave != null && dirty) confirmLeave = true else onDismiss() }
+    if (confirmLeave) {
+        UnsavedChangesDialog(
+            onSave = { confirmLeave = false; onSave?.invoke(); onDismiss() },
+            onDiscard = { confirmLeave = false; onDismiss() },
+            onKeepEditing = { confirmLeave = false }
+        )
+    }
     androidx.compose.ui.window.Dialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = guardedDismiss,
         properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
     ) {
         val view = androidx.compose.ui.platform.LocalView.current
@@ -558,11 +583,14 @@ fun SettingsEditPage(title: String, onDismiss: () -> Unit, content: @Composable 
                         windowInsets = settingsTopBarInsets(),
                         title = { Text(title) },
                         navigationIcon = {
-                            androidx.compose.material3.IconButton(onClick = onDismiss) {
+                            androidx.compose.material3.IconButton(onClick = guardedDismiss) {
                                 androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                             }
                         }
                     )
+                },
+                bottomBar = {
+                    if (onSave != null) SettingsSaveBar(enabled = dirty, onSave = { onSave(); onDismiss() })
                 }
             ) { padding ->
                 Column(

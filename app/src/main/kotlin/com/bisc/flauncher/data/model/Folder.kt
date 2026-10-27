@@ -39,12 +39,15 @@ data class Folder(
     val showLabels: Boolean = false
 )
 
+/** Most elements one folder sub-row holds — as many as fit across the folder view. */
+const val MAX_FOLDER_ROW_COLUMNS = 5
+
 /** Parses [Folder.rowColumns] into one column count per sub-row; always at least one row. */
 fun Folder.rows(): List<Int> =
-    rowColumns.split(",").mapNotNull { it.trim().toIntOrNull()?.coerceIn(1, 6) }.ifEmpty { listOf(4) }
+    rowColumns.split(",").mapNotNull { it.trim().toIntOrNull()?.coerceIn(1, MAX_FOLDER_ROW_COLUMNS) }.ifEmpty { listOf(4) }
 
 fun Folder.withRows(rows: List<Int>): Folder =
-    copy(rowColumns = rows.ifEmpty { listOf(4) }.joinToString(",") { it.coerceIn(1, 6).toString() })
+    copy(rowColumns = rows.ifEmpty { listOf(4) }.joinToString(",") { it.coerceIn(1, MAX_FOLDER_ROW_COLUMNS).toString() })
 
 /** Content half (fill/opacity/text color) of this folder's appearance override, independent of
  *  [borderAppearance]. Assembled regardless of whether [Folder.appearanceOverrideEnabled] is

@@ -37,6 +37,7 @@ import com.bisc.flauncher.data.model.GridConstants
 import com.bisc.flauncher.data.model.GridItemType
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.appearance
+import com.bisc.flauncher.data.model.withAppearance
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.dock.AddMapTargetDialog
 import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
@@ -75,17 +76,18 @@ fun SettingsElementBoxEditScreen(
     val shortcutPickerForApp by viewModel.shortcutPickerForApp.collectAsState()
     val availableShortcuts by viewModel.availableShortcuts.collectAsState()
 
-    val row = rowsByPage[pageId]?.find { it.id == rowId }
+    val savedRow = rowsByPage[pageId]?.find { it.id == rowId }
     // Only auto-navigate back once we've definitely seen this row exist and then watched it
     // disappear (e.g. removed from another screen) — reacting to a transient null on the very
     // first composition, before rowsByPage has had a chance to settle for this exact row, would
     // pop the screen before its real content ever gets a chance to render.
     var everSawRow by remember { mutableStateOf(false) }
-    LaunchedEffect(row) {
-        if (row != null) everSawRow = true
+    LaunchedEffect(savedRow) {
+        if (savedRow != null) everSawRow = true
         else if (everSawRow) onBack()
     }
-    if (row == null) return
+    if (savedRow == null) return
+    var row by rememberDraft(savedRow)
     val entries = rowEntriesByRow[row.id].orEmpty()
 
     var showAppPicker by remember { mutableStateOf(false) }
@@ -107,12 +109,12 @@ fun SettingsElementBoxEditScreen(
     // now-merged SearchBarRowEditSheet.
     val canRemoveRow = row.type != PageRowType.SEARCH_BAR || pages.find { it.id == pageId }?.isHome != true
 
-    SettingsSubScreen(title = stringResource(R.string.settings_element_box_edit_title), navController = navController, onBack = onBack) {
+    SettingsSubScreen(title = stringResource(R.string.settings_element_box_edit_title), navController = navController, onBack = onBack, onSave = { viewModel.saveRow(row) }, dirty = row != savedRow) {
         if (isDock) {
             val visibilityMode = row.dockVisibilityMode
             SettingsPreferenceGroup(title = stringResource(R.string.settings_dock_visibility_label)) {
                 com.bisc.flauncher.data.model.DockVisibilityMode.entries.forEach { mode ->
-                    RadioPreference(dockVisibilityModeLabel(mode), mode, visibilityMode, { viewModel.setRowDockVisibilityMode(row, it) })
+                    RadioPreference(dockVisibilityModeLabel(mode), mode, visibilityMode, { row = row.copy(dockVisibilityMode = it) })
                 }
             }
         }
@@ -123,15 +125,15 @@ fun SettingsElementBoxEditScreen(
                     icon = null,
                     title = stringResource(R.string.settings_element_box_pill_mode_label),
                     summary = stringResource(R.string.settings_element_box_pill_mode_summary),
-                    onClick = { viewModel.setRowPillMode(row, !row.pillMode) },
-                    trailing = { Switch(checked = row.pillMode, onCheckedChange = { viewModel.setRowPillMode(row, it) }) }
+                    onClick = { row = row.copy(pillMode = !row.pillMode) },
+                    trailing = { Switch(checked = row.pillMode, onCheckedChange = { row = row.copy(pillMode = it) }) }
                 )
                 SettingsPreference(
                     icon = null,
                     title = stringResource(R.string.settings_widgets_edge_to_edge_label),
                     info = stringResource(R.string.settings_edge_to_edge_summary),
-                    onClick = { viewModel.setRowEdgeToEdge(row, !row.edgeToEdge) },
-                    trailing = { Switch(checked = row.edgeToEdge, onCheckedChange = { viewModel.setRowEdgeToEdge(row, it) }) }
+                    onClick = { row = row.copy(edgeToEdge = !row.edgeToEdge) },
+                    trailing = { Switch(checked = row.edgeToEdge, onCheckedChange = { row = row.copy(edgeToEdge = it) }) }
                 )
             }
         }
@@ -145,11 +147,11 @@ fun SettingsElementBoxEditScreen(
                     trailing = {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             IconButton(
-                                onClick = { viewModel.setRowColumns(row, row.columns - 1) },
+                                onClick = { row = row.copy(columns = row.columns - 1) },
                                 enabled = row.columns > GridConstants.MIN_ELEMENT_BOX_COLUMNS
                             ) { Icon(Icons.Filled.Remove, contentDescription = null) }
                             IconButton(
-                                onClick = { viewModel.setRowColumns(row, row.columns + 1) },
+                                onClick = { row = row.copy(columns = row.columns + 1) },
                                 enabled = row.columns < GridConstants.MAX_ELEMENT_BOX_COLUMNS
                             ) { Icon(Icons.Filled.Add, contentDescription = null) }
                         }
@@ -160,7 +162,7 @@ fun SettingsElementBoxEditScreen(
 
         ElementAppearanceSection(
             appearance = row.appearance(),
-            onAppearanceChange = { viewModel.setRowAppearance(row, it) },
+            onAppearanceChange = { row = row.withAppearance(it) },
             styleGroupTitle = stringResource(R.string.settings_dock_background_label)
         )
 

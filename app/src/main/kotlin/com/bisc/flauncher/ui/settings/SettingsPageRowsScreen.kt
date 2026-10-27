@@ -96,6 +96,8 @@ fun SettingsPageRowsScreen(
 
 
     SettingsSubScreen(title = pageTitle, navController = navController, onBack = onBack) {
+        // Tap a part of the miniature to edit it; the list below stays as the second way in.
+        PagePreview(pageId = pageId, isHome = false, navController = navController, viewModel = viewModel)
         // Icon, name, background and status bar all live in the page's own Appearance screen, same
         // split as Home's own hub.
         SettingsPreferenceGroup {
@@ -246,7 +248,7 @@ internal fun AddRowSheet(
             modifier = Modifier.fillMaxWidth().heightIn(max = 640.dp).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            listOf(WidgetKind.MUSIC, WidgetKind.WEATHER, WidgetKind.NOTES, WidgetKind.SPACER).forEach { kind ->
+            listOf(WidgetKind.CLOCK, WidgetKind.MUSIC, WidgetKind.WEATHER, WidgetKind.NOTES, WidgetKind.SPACER).forEach { kind ->
                 SettingsPreference(icon = widgetKindIcon(kind), title = widgetKindLabel(kind), onClick = { onWidgetKindSelected(kind) }, trailing = null)
             }
             SettingsPreference(icon = Icons.Filled.Widgets, title = stringResource(R.string.picker_widget_more), onClick = onMoreWidgetsSelected, trailing = null)

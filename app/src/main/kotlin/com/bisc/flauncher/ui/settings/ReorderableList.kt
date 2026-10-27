@@ -24,13 +24,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import kotlin.math.roundToInt
 
-/** A vertical drag-to-reorder list. */
+/** A vertical drag-to-reorder list. Rounded like every settings card on its own; pass
+ *  [RectangleShape] when it sits *inside* a card with other rows, so it doesn't round itself again. */
 @Composable
 fun <T> ReorderableList(
     items: List<T>,
@@ -38,6 +41,7 @@ fun <T> ReorderableList(
     onReorder: (List<T>) -> Unit,
     modifier: Modifier = Modifier,
     itemHeight: Dp = 64.dp,
+    shape: Shape = SettingsCardShape,
     itemContent: @Composable (T) -> Unit
 ) {
     val density = LocalDensity.current
@@ -55,7 +59,7 @@ fun <T> ReorderableList(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(SettingsCardShape)
+            .clip(shape)
             .background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
         items.forEach { item ->

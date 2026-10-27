@@ -42,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
@@ -120,8 +121,15 @@ private fun WeatherContent(weather: WeatherSnapshot) {
     val context = LocalContext.current
     val locale = LocalConfiguration.current.locales.get(0)
     val zone = remember { ZoneId.systemDefault() }
-    val nowMillis = remember(weather) { System.currentTimeMillis() }
-    val today = remember(weather) { LocalDate.now(zone) }
+    // "Now" and "today" are re-read every time the home screen comes back, not only when new
+    // weather arrives — otherwise a widget left open overnight kept yesterday as "today".
+    var resumeTick by remember { mutableIntStateOf(0) }
+    LifecycleResumeEffect(Unit) {
+        resumeTick++
+        onPauseOrDispose { }
+    }
+    val nowMillis = remember(weather, resumeTick) { System.currentTimeMillis() }
+    val today = remember(weather, resumeTick) { LocalDate.now(zone) }
 
     var selectedDay by remember(weather.updatedAtMillis) { mutableIntStateOf(0) }
     var selectedHour by remember(weather.updatedAtMillis) { mutableStateOf<Long?>(null) }
@@ -262,8 +270,20 @@ private fun Header(
                 )
             }
             if (showUpdated && weather.updatedAtMillis > 0L) {
+                val context = LocalContext.current
+                // Older than today: with the date, so stale data doesn't pass for fresh.
+                val updatedDate = Instant.ofEpochMilli(weather.updatedAtMillis).atZone(ZoneId.systemDefault()).toLocalDate()
+                val updatedText = if (updatedDate == LocalDate.now()) {
+                    stringResource(R.string.widget_weather_updated, formatClock(context, weather.updatedAtMillis))
+                } else {
+                    stringResource(
+                        R.string.widget_weather_updated_on,
+                        DateFormat.getDateFormat(context).format(java.util.Date(weather.updatedAtMillis)),
+                        formatClock(context, weather.updatedAtMillis)
+                    )
+                }
                 Text(
-                    stringResource(R.string.widget_weather_updated, formatClock(LocalContext.current, weather.updatedAtMillis)),
+                    updatedText,
                     color = content.copy(alpha = 0.5f),
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
                     modifier = Modifier.padding(top = 2.dp)

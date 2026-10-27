@@ -20,6 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -82,13 +83,19 @@ fun NotesWidget(
     // Same automatic black/white the rest of the app uses so the grid lines read against any background.
     val gridLineColor = resolveElementColors(appearance).borderColor
 
+    // Moves past the next *visible* neighbor — stepping through the full list instead would swap
+    // with a hidden note next to it, a move nobody can see.
     fun moveBy(delta: Int) {
+        val visibleIndex = visibleNotes.indexOfFirst { it.id == movingNoteId }
+        val neighbor = visibleNotes.getOrNull(visibleIndex + delta) ?: return
         val from = notes.indexOfFirst { it.id == movingNoteId }
-        val to = (from + delta).coerceIn(0, notes.lastIndex)
-        if (from < 0 || from == to) return
+        val to = notes.indexOfFirst { it.id == neighbor.id }
+        if (from < 0 || to < 0) return
         val reordered = notes.toMutableList().apply { add(to, removeAt(from)) }
         viewModel.reorderNotes(reordered)
     }
+    val hiddenNotes = remember(notes) { notes.filter { it.hiddenInWidget } }
+    var hiddenMenuOpen by remember { mutableStateOf(false) }
 
     WidgetCard(modifier = modifier, appearance = appearance, cornerRadiusPercent = cornerRadiusPercent, horizontalMargin = horizontalMargin, contentPadding = 0.dp) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -119,6 +126,25 @@ fun NotesWidget(
                 ) {
                     Icon(Icons.Filled.EditNote, contentDescription = null, tint = LocalContentColor.current.copy(alpha = 0.8f), modifier = Modifier.padding(end = 8.dp))
                     Text(stringResource(R.string.widget_notes_title), style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+                    // Notes hidden from this widget, to show again — otherwise hiding would be a dead end.
+                    if (hiddenNotes.isNotEmpty()) {
+                        Box {
+                            IconButton(onClick = { hiddenMenuOpen = true }, modifier = Modifier.size(32.dp)) {
+                                Icon(Icons.Filled.VisibilityOff, contentDescription = stringResource(R.string.widget_notes_hidden), modifier = Modifier.size(18.dp))
+                            }
+                            DropdownMenu(expanded = hiddenMenuOpen, onDismissRequest = { hiddenMenuOpen = false }) {
+                                hiddenNotes.forEach { note ->
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.widget_notes_show_again, note.title.ifBlank { stringResource(R.string.widget_notes_untitled) })) },
+                                        onClick = {
+                                            viewModel.saveNote(note.copy(hiddenInWidget = false))
+                                            if (hiddenNotes.size == 1) hiddenMenuOpen = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
                     IconButton(onClick = { editingNote = null; showEditor = true }, modifier = Modifier.size(32.dp)) {
                         Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.widget_notes_add), modifier = Modifier.size(18.dp))
                     }

@@ -17,6 +17,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
@@ -102,6 +106,12 @@ internal fun Modifier.fadeListTop(height: Dp, strength: () -> Float): Modifier =
 
 internal val TOP_FADE_HEIGHT = 56.dp
 
+/** Gap above a letter header — also part of the first header's distance from the top. */
+private val HEADER_TOP_PADDING = 22.dp
+
+/** The list's own offset below the status bar (HomeScreen's app-list padding). */
+private val APP_LIST_TOP_OFFSET = 16.dp
+
 /** App list grouped by initial letter with sticky headers, A-Z rail and scrub magnifier. */
 @Composable
 fun BrowseAppList(
@@ -142,17 +152,27 @@ fun BrowseAppList(
     val railColors = if (railAppearance == null) automaticRailColors(surfaceIsDark) else customRailColors(railAppearance, surfaceIsDark)
     CompositionLocalProvider(LocalRailColors provides railColors) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        // The A–Z rail stops above the reserved zone (so it never runs into the search button); the
+        // list itself runs down to the same distance from the bottom edge as the first letter header
+        // ("A") sits from the top, and fades out there. The reserved zone stays as bottom scroll room,
+        // so the last apps can still be scrolled up above the search button.
         val listHeight = (maxHeight - reservedZoneHeight).coerceAtLeast(0.dp)
+        val bottomGap = maxOf(
+            WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
+            WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
+        ) + APP_LIST_TOP_OFFSET + HEADER_TOP_PADDING
+        val visibleHeight = (maxHeight - bottomGap).coerceAtLeast(1.dp)
 
-        val fadeEnd = (listHeight / maxHeight).coerceIn(0f, 1f)
-        val fadeStart = ((listHeight - FADE_TRANSITION_DISTANCE) / maxHeight).coerceIn(0f, fadeEnd)
+        val fadeEnd = 1f
+        val fadeStart = ((visibleHeight - FADE_TRANSITION_DISTANCE) / visibleHeight).coerceIn(0f, fadeEnd)
 
         val canScrollFurther by remember {
-            derivedStateOf { reservedZoneHeight > 0.dp && listState.canScrollForward }
+            derivedStateOf { listState.canScrollForward }
         }
         val topFadePx = with(LocalDensity.current) { TOP_FADE_HEIGHT.toPx() }
         val listModifier = Modifier
             .fillMaxSize()
+            .padding(bottom = bottomGap)
             .then(if (canScrollFurther) Modifier.fadeBackgroundToBottom(fadeStart, fadeEnd) else Modifier)
             .fadeListTop(TOP_FADE_HEIGHT) {
                 if (listState.firstVisibleItemIndex > 0) 1f else (listState.firstVisibleItemScrollOffset / topFadePx).coerceIn(0f, 1f)
@@ -161,7 +181,7 @@ fun BrowseAppList(
         LazyColumn(
             state = listState,
             modifier = listModifier,
-            contentPadding = PaddingValues(bottom = reservedZoneHeight)
+            contentPadding = PaddingValues(bottom = (reservedZoneHeight - bottomGap).coerceAtLeast(0.dp))
         ) {
             itemsIndexed(
                 items = grouping.items,
@@ -272,7 +292,7 @@ private fun BrowseSectionHeader(letter: Char, appearance: ElementAppearance, han
                 // Bigger than the bottom gap on purpose — this is the break from the *previous*
                 // section's last app, not from this header's own apps right below it (that gap is
                 // the row's own top padding plus this header's bottom padding, unchanged).
-                top = 22.dp,
+                top = HEADER_TOP_PADDING,
                 bottom = 6.dp
             ),
         verticalAlignment = Alignment.CenterVertically

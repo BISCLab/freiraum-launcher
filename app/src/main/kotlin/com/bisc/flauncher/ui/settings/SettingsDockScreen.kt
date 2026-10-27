@@ -41,6 +41,7 @@ import com.bisc.flauncher.data.model.DockVisibilityMode
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.appearance
+import com.bisc.flauncher.data.model.withAppearance
 import com.bisc.flauncher.data.model.dockRows
 import com.bisc.flauncher.ui.home.ConfirmRemoveDialog
 import com.bisc.flauncher.ui.home.HomeViewModel
@@ -108,21 +109,23 @@ fun SettingsDockVisibilityScreen(pageId: Long, navController: NavController, onB
 
 @Composable
 fun SettingsDockBackgroundScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val row = rememberDockRow(pageId, viewModel) ?: return
-    SettingsSubScreen(title = stringResource(R.string.settings_element_fill_label), navController = navController, onBack = onBack) {
-        ElementBackgroundSection(appearance = row.appearance(), onAppearanceChange = { viewModel.setRowAppearance(row, it) })
+    val saved = rememberDockRow(pageId, viewModel) ?: return
+    var row by rememberDraft(saved)
+    SettingsSubScreen(title = stringResource(R.string.settings_element_fill_label), navController = navController, onBack = onBack, onSave = { viewModel.saveRow(row) }, dirty = row != saved) {
+        ElementBackgroundSection(appearance = row.appearance(), onAppearanceChange = { row = row.withAppearance(it) })
     }
 }
 
 @Composable
 fun SettingsDockBorderScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val row = rememberDockRow(pageId, viewModel) ?: return
-    SettingsSubScreen(title = stringResource(R.string.settings_element_border_label), navController = navController, onBack = onBack) {
-        ElementBorderSection(appearance = row.appearance(), onAppearanceChange = { viewModel.setRowAppearance(row, it) })
+    val saved = rememberDockRow(pageId, viewModel) ?: return
+    var row by rememberDraft(saved)
+    SettingsSubScreen(title = stringResource(R.string.settings_element_border_label), navController = navController, onBack = onBack, onSave = { viewModel.saveRow(row) }, dirty = row != saved) {
+        ElementBorderSection(appearance = row.appearance(), onAppearanceChange = { row = row.withAppearance(it) })
         SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
             ExpandablePercentSlider(
                 percent = row.cornerRadiusPercent,
-                onSettled = { viewModel.setRowCornerRadiusPercent(row, it) }
+                onSettled = { row = row.copy(cornerRadiusPercent = it) }
             )
         }
     }
@@ -171,6 +174,7 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
                     entries = entries,
                     columns = 1,
                     rowColumns = rowShape,
+                    fixedSlots = true,
                     folders = folders,
                     folderItemsByFolder = folderItemsByFolder,
                     savedMapTargets = savedMapTargets,
@@ -189,7 +193,7 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
                     onActionButtonClick = {},
                     showLabels = row.showLabels,
                     labelColor = row.appearance().contentColor?.let { androidx.compose.ui.graphics.Color(it) } ?: androidx.compose.ui.graphics.Color.White,
-                    onAddEmptySlot = { showAddChooser = true },
+                    onAddEmptySlot = { slot -> viewModel.reserveRowSlot(row.id, slot); showAddChooser = true },
                     onEditEntry = { entry -> pendingRemoval = entry }
                 )
             }
@@ -212,7 +216,7 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
                             ) { androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Filled.Remove, contentDescription = null) }
                             androidx.compose.material3.IconButton(
                                 onClick = { viewModel.setDockRowColumns(row, rowShape.toMutableList().apply { this[index] = cols + 1 }) },
-                                enabled = cols < 6
+                                enabled = cols < 5
                             ) { androidx.compose.material3.Icon(Icons.Filled.Add, contentDescription = null) }
                             androidx.compose.material3.IconButton(
                                 onClick = { viewModel.setDockRowColumns(row, rowShape.filterIndexed { i, _ -> i != index }) },

@@ -8,6 +8,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -23,7 +24,7 @@ fun SettingsFolderGlobalScreen(navController: NavController, onBack: () -> Unit,
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = Icons.Filled.Palette,
-                title = stringResource(R.string.settings_folder_appearance_label),
+                title = stringResource(R.string.settings_element_fill_label),
                 onClick = { onNavigate("appearance") },
                 trailing = null
             )
@@ -45,25 +46,19 @@ fun SettingsFolderGlobalScreen(navController: NavController, onBack: () -> Unit,
 
 @Composable
 fun SettingsFolderGlobalAppearanceScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val cardAppearance by viewModel.folderCardAppearance.collectAsState()
-    val showLabels by viewModel.folderShowLabels.collectAsState()
-    SettingsSubScreen(title = stringResource(R.string.settings_folder_appearance_label), navController = navController, onBack = onBack) {
-        ElementBackgroundSection(appearance = cardAppearance, onAppearanceChange = viewModel::setFolderCardAppearance)
-        CaptionsSection(
-            showLabels = showLabels,
-            onShowLabelsChange = viewModel::setFolderShowLabels,
-            appearance = cardAppearance,
-            onAppearanceChange = viewModel::setFolderCardAppearance,
-            title = stringResource(R.string.settings_captions_label)
-        )
+    val saved by viewModel.folderCardAppearance.collectAsState()
+    var cardAppearance by rememberDraft(saved)
+    SettingsSubScreen(title = stringResource(R.string.settings_element_fill_label), navController = navController, onBack = onBack, onSave = { viewModel.setFolderCardAppearance(cardAppearance) }, dirty = cardAppearance != saved) {
+        ElementBackgroundSection(appearance = cardAppearance, onAppearanceChange = { cardAppearance = it })
     }
 }
 
 @Composable
 fun SettingsFolderGlobalBorderScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val cardAppearance by viewModel.folderCardAppearance.collectAsState()
-    SettingsSubScreen(title = stringResource(R.string.settings_element_border_label), navController = navController, onBack = onBack) {
-        ElementBorderSection(appearance = cardAppearance, onAppearanceChange = viewModel::setFolderCardAppearance)
+    val saved by viewModel.folderCardAppearance.collectAsState()
+    var cardAppearance by rememberDraft(saved)
+    SettingsSubScreen(title = stringResource(R.string.settings_element_border_label), navController = navController, onBack = onBack, onSave = { viewModel.setFolderCardAppearance(cardAppearance) }, dirty = cardAppearance != saved) {
+        ElementBorderSection(appearance = cardAppearance, onAppearanceChange = { cardAppearance = it })
     }
 }
 
@@ -71,8 +66,18 @@ fun SettingsFolderGlobalBorderScreen(navController: NavController, onBack: () ->
 fun SettingsFolderGlobalVisibilityScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val hideStatusBar by viewModel.folderHideStatusBar.collectAsState()
     val hideDock by viewModel.folderHideDock.collectAsState()
+    val showLabels by viewModel.folderShowLabels.collectAsState()
+    val cardAppearance by viewModel.folderCardAppearance.collectAsState()
     SettingsSubScreen(title = stringResource(R.string.settings_folder_visibility_label), navController = navController, onBack = onBack) {
+        // Everything about what's shown while a folder is open, in one card: its items' captions
+        // (each folder can override this right under its own items), status bar and dock.
         SettingsPreferenceGroup {
+            CaptionsRows(
+                showLabels = showLabels,
+                onShowLabelsChange = viewModel::setFolderShowLabels,
+                appearance = cardAppearance,
+                onAppearanceChange = viewModel::setFolderCardAppearance
+            )
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_folder_hide_status_bar),

@@ -86,12 +86,6 @@ class SettingsRepository @Inject constructor(
         prefs[ACCENT_COLOR_KEY] ?: DEFAULT_ACCENT_COLOR
     }
 
-    val appListAccentColor: Flow<Int?> = dataStore.data.map { it[APP_LIST_ACCENT_COLOR_KEY] }
-
-    suspend fun setAppListAccentColor(color: Int?) {
-        dataStore.edit { if (color == null) it.remove(APP_LIST_ACCENT_COLOR_KEY) else it[APP_LIST_ACCENT_COLOR_KEY] = color }
-    }
-
     val chargingAnimationColor: Flow<Int?> = dataStore.data.map { it[CHARGING_ANIMATION_COLOR_KEY] }
 
     suspend fun setChargingAnimationColor(color: Int?) {
@@ -128,6 +122,8 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setSearchBarAppearance(appearance: ElementAppearance) = setElementAppearanceFor(SEARCH_BAR_PREFIX, appearance)
 
+    suspend fun resetSearchBarAppearance() = resetElementAppearanceFor(SEARCH_BAR_PREFIX)
+
     /** Null = follow the global default corner roundness. */
     val searchBarCornerRadiusPercent: Flow<Int?> = dataStore.data.map { it[SEARCH_BAR_CORNER_RADIUS_KEY] }
 
@@ -139,6 +135,8 @@ class SettingsRepository @Inject constructor(
     val searchResultsAppearance: Flow<ElementAppearance?> = customElementAppearanceFor(SEARCH_RESULTS_PREFIX, ElementAppearance())
 
     suspend fun setSearchResultsAppearance(appearance: ElementAppearance) = setElementAppearanceFor(SEARCH_RESULTS_PREFIX, appearance)
+
+    suspend fun resetSearchResultsAppearance() = resetElementAppearanceFor(SEARCH_RESULTS_PREFIX)
 
     /** Off by default: the cards keep the same fine side margin as every other element. */
     val searchResultsEdgeToEdge: Flow<Boolean> = dataStore.data.map { it[SEARCH_RESULTS_EDGE_TO_EDGE_KEY] ?: false }
@@ -172,6 +170,13 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setSearchKeyboardCapCornerRadiusPercent(percent: Int) {
         dataStore.edit { it[SEARCH_KEYBOARD_CAP_CORNER_RADIUS_KEY] = percent }
+    }
+
+    /** A small arrow in the keyboard extension strip; tapping the strip then closes the keyboard. */
+    val searchKeyboardCapArrow: Flow<Boolean> = dataStore.data.map { it[SEARCH_KEYBOARD_CAP_ARROW_KEY] ?: false }
+
+    suspend fun setSearchKeyboardCapArrow(enabled: Boolean) {
+        dataStore.edit { it[SEARCH_KEYBOARD_CAP_ARROW_KEY] = enabled }
     }
 
     val searchEngine: Flow<SearchEngine> = dataStore.data.map { prefs ->
@@ -615,7 +620,6 @@ class SettingsRepository @Inject constructor(
         private val FOLDER_SHOW_LABELS_KEY = booleanPreferencesKey("folder_show_labels")
         private val ACCENT_COLOR_KEY = intPreferencesKey("accent_color")
         private val CHARGING_ANIMATION_COLOR_KEY = intPreferencesKey("charging_animation_color")
-        private val APP_LIST_ACCENT_COLOR_KEY = intPreferencesKey("app_list_accent_color")
         private val CHARGING_ANIMATION_ENABLED_KEY = booleanPreferencesKey("charging_animation_enabled")
         private val SEARCH_SHOW_AZ_INDEX_KEY = booleanPreferencesKey("search_show_az_index")
         private val SEARCH_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("search_hide_status_bar")
@@ -636,6 +640,7 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_KEYBOARD_CAP_ENABLED_KEY = booleanPreferencesKey("search_keyboard_cap_enabled")
         private val SEARCH_KEYBOARD_CAP_COLOR_KEY = intPreferencesKey("search_keyboard_cap_color")
         private val SEARCH_KEYBOARD_CAP_CORNER_RADIUS_KEY = intPreferencesKey("search_keyboard_cap_corner_radius_percent")
+        private val SEARCH_KEYBOARD_CAP_ARROW_KEY = booleanPreferencesKey("search_keyboard_cap_arrow")
         const val DEFAULT_KEYBOARD_CAP_COLOR = 0xFFECEEF4.toInt()
         private const val RAIL_PREFIX = "search_alphabet_rail"
         private val APP_LIST_SHOW_SEARCH_BUTTON_KEY = booleanPreferencesKey("app_list_show_search_button")

@@ -14,7 +14,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import com.bisc.flauncher.R
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -75,7 +76,13 @@ fun SystemWidgetView(
     val surfaceLoading = LocalSurfaceIsDarkLoading.current
     if (info == null || surfaceLoading) {
         WidgetCard(modifier = modifier, appearance = appearance, cornerRadiusPercent = cornerRadiusPercent, horizontalMargin = horizontalMargin) {
-            Text("···", color = Color.White.copy(alpha = 0.5f), style = MaterialTheme.typography.bodySmall)
+            // No provider info means the widget is gone for good (its app was uninstalled, or the id
+            // came from a backup restored on a fresh install) — say so instead of a forever "···".
+            Text(
+                if (info == null) stringResource(R.string.widget_system_unavailable) else "···",
+                color = androidx.compose.material3.LocalContentColor.current.copy(alpha = 0.6f),
+                style = MaterialTheme.typography.bodySmall
+            )
         }
         return
     }

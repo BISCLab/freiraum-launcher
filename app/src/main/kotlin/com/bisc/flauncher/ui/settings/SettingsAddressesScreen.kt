@@ -72,24 +72,25 @@ fun SettingsAddressesScreen(navController: NavController, onBack: () -> Unit, vi
 @Composable
 fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val targets by viewModel.savedMapTargets.collectAsState()
-    val target = targets.find { it.id == targetId } ?: return
+    val saved = targets.find { it.id == targetId } ?: return
+    var target by rememberDraft(saved)
     val browsableApps by viewModel.browsableApps.collectAsState()
     var showAppPicker by remember { mutableStateOf(false) }
     var showIconPicker by remember { mutableStateOf(false) }
     var confirmingDelete by remember { mutableStateOf(false) }
 
-    SettingsSubScreen(title = target.label, navController = navController, onBack = onBack) {
+    SettingsSubScreen(title = saved.label, navController = navController, onBack = onBack, onSave = { viewModel.updateMapTarget(target) }, dirty = target != saved) {
         SettingsPreferenceGroup {
             OutlinedTextField(
                 value = target.label,
-                onValueChange = { viewModel.updateMapTarget(target.copy(label = it)) },
+                onValueChange = { target = target.copy(label = it) },
                 label = { Text(stringResource(R.string.sidebar_maps_label_hint)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
             )
             OutlinedTextField(
                 value = target.address,
-                onValueChange = { viewModel.updateMapTarget(target.copy(address = it)) },
+                onValueChange = { target = target.copy(address = it) },
                 label = { Text(stringResource(R.string.settings_elements_address_hint)) },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
             )
@@ -101,7 +102,7 @@ fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, on
                 title = appLabel ?: stringResource(R.string.settings_elements_app_default),
                 onClick = { showAppPicker = true },
                 trailing = if (target.navigationApp != null) {
-                    { TextButton(onClick = { viewModel.updateMapTarget(target.copy(navigationApp = null)) }) { Text(stringResource(R.string.settings_elements_use_default)) } }
+                    { TextButton(onClick = { target = target.copy(navigationApp = null) }) { Text(stringResource(R.string.settings_elements_use_default)) } }
                 } else null
             )
         }
@@ -116,14 +117,14 @@ fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, on
                 title = stringResource(R.string.settings_section_global_background),
                 custom = target.backgroundColor,
                 automaticSeed = android.graphics.Color.DKGRAY,
-                onChange = { viewModel.updateMapTarget(target.copy(backgroundColor = it)) },
+                onChange = { target = target.copy(backgroundColor = it) },
                 ownGroup = false
             )
             AutomaticColorPicker(
                 title = stringResource(R.string.settings_element_text_color_label),
                 custom = target.iconColor,
                 automaticSeed = android.graphics.Color.WHITE,
-                onChange = { viewModel.updateMapTarget(target.copy(iconColor = it)) },
+                onChange = { target = target.copy(iconColor = it) },
                 ownGroup = false
             )
         }
@@ -140,7 +141,7 @@ fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, on
     if (showIconPicker) {
         PictogramPickerSheet(
             selected = target.iconKey,
-            onSelect = { key -> viewModel.updateMapTarget(target.copy(iconKey = key)); showIconPicker = false },
+            onSelect = { key -> target = target.copy(iconKey = key); showIconPicker = false },
             onDismiss = { showIconPicker = false }
         )
     }
@@ -149,7 +150,7 @@ fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, on
         ShortcutSourceAppSheet(
             apps = browsableApps,
             loadIcon = viewModel::loadIcon,
-            onAppSelected = { app -> viewModel.updateMapTarget(target.copy(navigationApp = app.componentName.packageName)); showAppPicker = false },
+            onAppSelected = { app -> target = target.copy(navigationApp = app.componentName.packageName); showAppPicker = false },
             onDismiss = { showAppPicker = false }
         )
     }

@@ -1,6 +1,16 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.unit.dp
+import com.bisc.flauncher.ui.theme.noRippleClickable
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -10,6 +20,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -44,6 +56,7 @@ fun SettingsAppearanceScreen(
             allPages.filter { it.kind == LauncherPageKind.SEARCH }
     }
     var confirmingTheme by remember { mutableStateOf<ThemePreference?>(null) }
+    var accentPickerOpen by remember { mutableStateOf(false) }
     var confirmingHideStatusBarEverywhere by remember { mutableStateOf<Boolean?>(null) }
     val context = androidx.compose.ui.platform.LocalContext.current
 
@@ -57,11 +70,9 @@ fun SettingsAppearanceScreen(
             title = stringResource(R.string.settings_accent_label),
             info = stringResource(R.string.settings_accent_global_info)
         ) {
-            ColorPickerRow(
-                title = stringResource(R.string.settings_accent_label),
-                color = accentColor,
-                onColorChange = viewModel::setAccentColor
-            )
+            // Tapping a swatch recolors this very screen at once (the settings UI uses the accent
+            // as its own primary color) — that's the preview.
+            AccentPalette(selected = accentColor, onSelect = viewModel::setAccentColor, onCustom = { accentPickerOpen = true })
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_language_label)) {
             var language by remember { mutableStateOf(com.bisc.flauncher.util.AppLanguage.current(context)) }
@@ -83,13 +94,18 @@ fun SettingsAppearanceScreen(
         // Changing this immediately re-stamps every existing row/folder item to match (see
         // SettingsViewModel.setDefaultCornerRadiusPercent) — each element's own Appearance screen
         // can still override it individually afterwards.
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_corner_style_label)) {
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_corner_style_label),
+            info = stringResource(R.string.settings_corner_style_info)
+        ) {
+            CornerShapeTiles(percent = defaultCornerRadiusPercent, onSelect = viewModel::setDefaultCornerRadiusPercent)
+            // Fine-tuning between the presets.
             ExpandablePercentSlider(
                 percent = defaultCornerRadiusPercent,
                 onSettled = viewModel::setDefaultCornerRadiusPercent
             )
         }
-        SettingsPreferenceGroup {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_home_appearance_title)) {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_icons_label),
@@ -120,10 +136,9 @@ fun SettingsAppearanceScreen(
                     Switch(checked = statusBarHiddenEverywhere, onCheckedChange = { confirmingHideStatusBarEverywhere = it })
                 }
             )
-        }
-        // Overview of every place with its own status-bar switch — the same switches as on each
-        // page's own screen, just all in one list.
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_statusbar_per_page_label)) {
+            // Right under it, in the same card: every place with its own status-bar switch (the
+            // same switches as on each page's own screen), as slimmer rows so they read as the
+            // detail of the switch above.
             orderedPages.forEach { page ->
                 if (page.kind == LauncherPageKind.SEARCH) {
                     StatusBarRow(pageLabel(page, allPages), searchHideStatusBar, viewModel::setSearchHideStatusBar)
@@ -133,6 +148,17 @@ fun SettingsAppearanceScreen(
                 }
             }
             StatusBarRow(stringResource(R.string.settings_section_folder), folderHideStatusBar, viewModel::setFolderHideStatusBar)
+        }
+    }
+
+    if (accentPickerOpen) {
+        var draft by rememberDraft(accentColor)
+        SettingsEditPage(title = stringResource(R.string.settings_accent_custom), onDismiss = { accentPickerOpen = false }, onSave = { viewModel.setAccentColor(draft) }, dirty = draft != accentColor) {
+            ColorPickerControls(
+                color = androidx.compose.ui.graphics.Color(draft),
+                onColorChange = { draft = it.toArgb() },
+                modifier = androidx.compose.ui.Modifier.fillMaxWidth()
+            )
         }
     }
 
@@ -189,10 +215,16 @@ fun SettingsAppearanceScreen(
 
 @Composable
 private fun StatusBarRow(label: String, hidden: Boolean, onChange: (Boolean) -> Unit) {
-    SettingsPreference(
-        icon = null,
-        title = label,
-        onClick = { onChange(!hidden) },
-        trailing = { Switch(checked = hidden, onCheckedChange = onChange) }
-    )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .noRippleClickable { onChange(!hidden) }
+            .padding(start = 16.dp, end = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+        Switch(checked = hidden, onCheckedChange = onChange, modifier = Modifier.scale(0.75f))
+    }
 }

@@ -44,7 +44,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.filled.Settings
@@ -93,6 +92,8 @@ import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.BackgroundCrossfade
 import com.bisc.flauncher.ui.home.dock.BackgroundFill
+import com.bisc.flauncher.ui.home.dock.FreeEdge
+import com.bisc.flauncher.ui.home.dock.freeEdgeBorder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.bisc.flauncher.ui.home.dock.DockDimens
@@ -175,6 +176,7 @@ fun HomeScreen(
     val searchKeyboardCapEnabled by viewModel.searchKeyboardCapEnabled.collectAsState()
     val searchKeyboardCapColor by viewModel.searchKeyboardCapColor.collectAsState()
     val searchKeyboardCapCornerRadiusPercent by viewModel.searchKeyboardCapCornerRadiusPercent.collectAsState()
+    val searchKeyboardCapArrow by viewModel.searchKeyboardCapArrow.collectAsState()
     val searchKeyboardAutoOpen by viewModel.searchKeyboardAutoOpen.collectAsState()
     val appListSearchButtonAppearance by viewModel.appListSearchButtonAppearance.collectAsState()
     val appListShowSearchButton by viewModel.appListShowSearchButton.collectAsState()
@@ -618,9 +620,7 @@ fun HomeScreen(
                         .fillMaxSize()
                         .then(
                             if (dockAppearance.borderEnabled) {
-                                Modifier.drawBehind {
-                                    drawLine(dockBorderColor, Offset(0f, 0f), Offset(size.width, 0f), strokeWidth = 1.dp.toPx())
-                                }
+                                Modifier.freeEdgeBorder(1.dp, dockBorderColor, dockCornerRadius, FreeEdge.TOP)
                             } else {
                                 Modifier
                             }
@@ -650,6 +650,7 @@ fun HomeScreen(
                             entries = rowEntriesByRow[homeDockRow.id].orEmpty(),
                             columns = 1,
                             rowColumns = dockRowShape,
+                            fixedSlots = true,
                             referenceColumnCount = DockDimens.REFERENCE_SLOT_COUNT,
                             rowGap = DockDimens.rowGap,
                             folders = folders,
@@ -771,9 +772,7 @@ fun HomeScreen(
                         .fillMaxSize()
                         .then(
                             if (panelAppearance.borderEnabled) {
-                                Modifier.drawBehind {
-                                    drawLine(panelBorderColor, Offset(0f, size.height), Offset(size.width, size.height), strokeWidth = 1.dp.toPx())
-                                }
+                                Modifier.freeEdgeBorder(1.dp, panelBorderColor, panelCornerRadius, FreeEdge.BOTTOM)
                             } else {
                                 Modifier
                             }
@@ -792,6 +791,7 @@ fun HomeScreen(
                                     entries = rowEntriesByRow[row.id].orEmpty(),
                                     columns = 1,
                                     rowColumns = panelRowShape,
+                                    fixedSlots = true,
                                     folders = folders,
                                     folderItemsByFolder = folderItemsByFolder,
                                     savedMapTargets = savedMapTargets,
@@ -962,6 +962,7 @@ fun HomeScreen(
             resultsEdgeToEdge = searchResultsEdgeToEdge,
             keyboardCapColor = if (searchKeyboardCapEnabled) searchKeyboardCapColor else null,
             keyboardCapCornerRadiusPercent = searchKeyboardCapCornerRadiusPercent,
+            keyboardCapArrow = searchKeyboardCapArrow,
             loadIcon = viewModel::loadIcon,
             onQueryChange = viewModel::updateSearchQuery,
             onAppClick = { app ->

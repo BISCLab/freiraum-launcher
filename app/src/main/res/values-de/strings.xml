@@ -89,7 +89,7 @@
     <string name="settings_accent_global_info">Gilt für die Blase beim Scrollen in der App-Liste und die Ladeanimation. Beide können in ihren eigenen Einstellungen auch eine eigene Farbe bekommen.</string>
     <string name="settings_accent_follows_global">Folgt der globalen Akzentfarbe</string>
     <string name="settings_accent_use_global">Globale Akzentfarbe verwenden</string>
-    <string name="settings_search_button_follow_rail">Wie der A–Z-Index aussehen</string>
+    <string name="settings_accent_custom">Eigene Farbe</string>
     <string name="settings_design_title">Design</string>
     <string name="settings_card_design_subtitle">Farben, Sprache, Schrift, Formen, Icons, Hintergrund</string>
     <string name="settings_icons_label">Icons</string>
@@ -222,15 +222,13 @@
     <string name="settings_manage_apps_reveal_search_code_description">Nur noch über den exakten Code unten auffindbar, statt über den Namen.</string>
     <string name="settings_manage_apps_reveal_code_hint">Suchcode</string>
     <string name="settings_more_settings_button">Weitere Einstellungen</string>
-    <string name="settings_manage_apps_save">Speichern</string>
 
     <string name="settings_section_folder">Ordner</string>
     <string name="settings_card_folder_subtitle">Anzeigeoptionen und Ordnerliste</string>
     <string name="settings_folder_title">Ordner</string>
     <string name="settings_folder_global_label">Globale Ordner-Einstellungen</string>
     <string name="settings_folder_global_subtitle">Aussehen, Rahmen und Sichtbarkeit für alle Ordner</string>
-    <string name="settings_folder_appearance_label">Aussehen</string>
-    <string name="settings_folder_appearance_reset_label">Auf globales Aussehen zurücksetzen</string>
+    <string name="settings_folder_appearance_reset_label">Auf globale Fläche zurücksetzen</string>
     <string name="settings_folder_border_reset_label">Auf globalen Rahmen zurücksetzen</string>
     <string name="settings_folder_visibility_label">Sichtbarkeit</string>
     <string name="settings_folder_list_label">Ordner</string>
@@ -294,7 +292,6 @@
     <string name="settings_pages_carousel_label">Karussell</string>
     <string name="settings_pages_other_label">Funktionsseiten</string>
     <string name="settings_pages_behavior_label">Verhalten</string>
-    <string name="settings_pages_invocation_none">Keiner Geste zugewiesen</string>
     <string name="settings_pages_add_template_label">Ausgangspunkt</string>
     <string name="settings_pages_add_template_blank">Leere Seite</string>
     <string name="settings_pages_remove">Seite entfernen</string>
@@ -357,7 +354,7 @@
     <string name="settings_clock_time_format_12h">12-Stunden</string>
     <string name="settings_clock_date_format_label">Datumsformat</string>
     <string name="settings_clock_date_format_placeholder">EEEE, dd.MM.yyyy</string>
-    <string name="settings_clock_date_format_summary">Leer: Standardformat. Sonst ein Datumsmuster, zum Beispiel „EEEE, dd.MM.yyyy“ oder „d. MMM“.</string>
+    <string name="settings_clock_date_format_summary">Leer: übliches Format deiner Sprache, z. B. „Montag, 26.10.2026“. Sonst ein Datumsmuster, zum Beispiel „EEEE, dd.MM.yyyy“ oder „d. MMM“.</string>
     <string name="settings_clock_show_next_alarm">Nächsten Alarm anzeigen</string>
     <string name="settings_clock_show_next_alarm_summary">Zeigt den nächsten Alarm unter dem Datum. Keine zusätzliche Berechtigung erforderlich.</string>
 
@@ -388,6 +385,11 @@
     <string name="settings_statusbar_label">Statusleiste</string>
     <string name="settings_tips_label">Tipps</string>
     <string name="settings_tips_show">Tipps anzeigen</string>
+    <string name="settings_save">Speichern</string>
+    <string name="settings_unsaved_title">Nicht gespeicherte Änderungen</string>
+    <string name="settings_unsaved_message">Möchtest du deine Änderungen vor dem Verlassen speichern?</string>
+    <string name="settings_unsaved_discard">Verwerfen</string>
+    <string name="settings_unsaved_keep_editing">Weiter bearbeiten</string>
     <string name="shortcut_settings">Einstellungen</string>
     <string name="shortcut_settings_long">FLauncher-Einstellungen</string>
     <string name="settings_row_entry_new_folder">Neuer Ordner</string>
@@ -405,11 +407,11 @@
     <string name="settings_backup_import_too_new">Sicherung stammt aus einer neueren FLauncher-Version</string>
     <string name="settings_backup_import_failed">Datei konnte nicht gelesen werden</string>
     <string name="settings_statusbar_hide_all">Überall ausblenden</string>
-    <string name="settings_statusbar_per_page_label">Ausgeblendet auf</string>
     <string name="settings_statusbar_hide_all_summary">Schaltet die Statusleiste auf jeder Seite, der Schnellübersicht, der Textsuche und in Ordnern aus. Danach kann sie pro Bildschirm einzeln wieder eingeschaltet werden. Wischen vom oberen Rand zeigt sie immer kurzzeitig an.</string>
     <string name="settings_statusbar_confirm_hide_message">Dadurch wird die Statusleiste auf jeder Seite, der Schnellübersicht, der Textsuche und in Ordnern auf einmal ausgeblendet — unabhängig davon, wie jede einzeln aktuell eingestellt ist.</string>
     <string name="settings_statusbar_confirm_show_message">Dadurch wird die Statusleiste auf jeder Seite, der Schnellübersicht, der Textsuche und in Ordnern auf einmal eingeblendet — unabhängig davon, wie jede einzeln aktuell eingestellt ist.</string>
     <string name="settings_corner_style_label">Eckenrundung</string>
+    <string name="settings_corner_style_info">Gilt für alle Elemente auf einmal, auch für Widgets, die neu mit 10 % starten. Bei ganz runden Ecken können Widgets ziemlich witzig aussehen, weil die Rundung in ihren Inhalt schneidet. Jedes Element kann in seinen eigenen Einstellungen trotzdem eigene Ecken bekommen.</string>
     <string name="settings_corner_radius_value">%1$d%%</string>
     <string name="settings_statusbar_hide_page">Statusleiste ausblenden</string>
     <string name="settings_folder_hide_status_bar">Statusleiste in Ordnern ausblenden</string>
@@ -429,11 +431,6 @@
     <string name="settings_app_icon_reset">Standardsymbol verwenden</string>
     <string name="settings_folder_creator_search">Apps suchen</string>
     <string name="settings_folder_creator_selected">%1$d ausgewählt</string>
-    <string name="settings_permissions_system_group">System</string>
-    <string name="settings_permissions_touch_feedback">Berührungsfeedback</string>
-    <string name="settings_permissions_touch_feedback_purpose">Tastenvibration der Suchtastatur. Systemeinstellung; öffnet die Toneinstellungen.</string>
-    <string name="settings_permissions_on">An</string>
-    <string name="settings_permissions_off">Aus</string>
     <string name="settings_search_keyboard_auto_open">Tastatur automatisch öffnen</string>
     <string name="settings_search_bar_label">Suchleiste</string>
     <string name="settings_search_page_label">Seite</string>
@@ -444,6 +441,9 @@
     <string name="settings_search_keyboard_cap_info">Ein schmaler Streifen mit abgerundeten Ecken direkt über der Tastatur. Passe seine Farbe an deine Tastatur an, damit sie oben abgerundet wirkt. Solange er an ist, gilt er als oberer Rand der Tastatur.</string>
     <string name="settings_search_keyboard_cap_color">Farbe</string>
     <string name="settings_search_keyboard_cap_color_info">Tipp für eine exakte Farbe: Öffne irgendwo die Tastatur und mach einen Screenshot. Lies die Tastaturfarbe im Screenshot mit einer beliebigen Farbwähler-App aus und füge den Hex-Code (z. B. #ECEEF4) hier ins Hex-Feld ein.</string>
+    <string name="settings_search_keyboard_cap_arrow">Pfeil zum Schließen</string>
+    <string name="settings_search_keyboard_cap_arrow_info">Zeigt einen kleinen Pfeil im Streifen. Tippen auf den Streifen klappt die Tastatur ein; Zurückwischen funktioniert weiterhin wie gewohnt.</string>
+    <string name="search_keyboard_close">Tastatur schließen</string>
     <string name="settings_search_keyboard_auto_open_summary">Aus: Die Suche öffnet nur mit dem Eingabefeld; antippen zeigt die Tastatur.</string>
     <string name="search_filter_ai">KI-App</string>
     <string name="settings_search_include_ai">KI-App</string>
@@ -524,6 +524,10 @@
     <string name="widget_notes_empty">Noch keine Notizen</string>
     <string name="widget_notes_untitled">Ohne Titel</string>
     <string name="widget_notes_hide">Im Widget ausblenden</string>
+    <string name="widget_notes_hidden">Ausgeblendete Notizen</string>
+    <string name="widget_notes_show_again">„%1$s“ wieder einblenden</string>
+    <string name="widget_weather_updated_on">Aktualisiert %1$s, %2$s</string>
+    <string name="widget_system_unavailable">Dieses Widget ist nicht mehr verfügbar. Seine App wurde entfernt oder es stammt aus einem Backup – entferne es und füge es neu hinzu.</string>
     <string name="widget_notes_add">Neue Notiz</string>
     <string name="widget_notes_edit">Bearbeiten</string>
     <string name="widget_notes_done">Fertig</string>

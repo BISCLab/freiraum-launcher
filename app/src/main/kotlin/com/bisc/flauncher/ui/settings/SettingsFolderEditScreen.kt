@@ -22,6 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
@@ -45,7 +46,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -53,7 +53,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -130,16 +129,15 @@ fun SettingsFolderEditScreen(
     var sizingWidgetSpanY by remember { mutableStateOf(1) }
     val globalShowLabels by viewModel.folderShowLabels.collectAsState()
 
-    val latestEdited by rememberUpdatedState(edited)
-    val latestName by rememberUpdatedState(folder?.name)
-    DisposableEffect(folderId) {
-        onDispose {
-            val name = latestEdited?.trim()
-            if (!name.isNullOrBlank() && name != latestName) viewModel.renameFolder(folderId, name)
-        }
-    }
-
-    SettingsSubScreen(title = stringResource(R.string.settings_folder_edit_title), navController = navController, onBack = onBack) {
+    val newName = edited?.trim()
+    val nameChanged = folder != null && !newName.isNullOrBlank() && newName != folder.name
+    SettingsSubScreen(
+        title = stringResource(R.string.settings_folder_edit_title),
+        navController = navController,
+        onBack = onBack,
+        onSave = { if (nameChanged && newName != null) viewModel.renameFolder(folderId, newName) },
+        dirty = nameChanged
+    ) {
         if (folder == null) return@SettingsSubScreen
 
         OutlinedTextField(
@@ -176,7 +174,7 @@ fun SettingsFolderEditScreen(
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
-                title = stringResource(R.string.settings_folder_appearance_label),
+                title = stringResource(R.string.settings_element_fill_label),
                 onClick = { appearanceOpen = true },
                 trailing = null
             )
@@ -235,7 +233,7 @@ fun SettingsFolderEditScreen(
                             ) { Icon(Icons.Filled.Remove, contentDescription = null) }
                             IconButton(
                                 onClick = { viewModel.setFolderRowColumns(folderId, rowShape.toMutableList().apply { this[index] = cols + 1 }) },
-                                enabled = cols < 6
+                                enabled = cols < com.bisc.flauncher.data.model.MAX_FOLDER_ROW_COLUMNS
                             ) { Icon(Icons.Filled.Add, contentDescription = null) }
                             IconButton(
                                 onClick = { viewModel.setFolderRowColumns(folderId, rowShape.filterIndexed { i, _ -> i != index }) },
@@ -253,6 +251,16 @@ fun SettingsFolderEditScreen(
             )
         }
 
+        // Captions belong with the items, like the Dock's and Panel's own (right under their grid).
+        val contentAppearance = if (folder.appearanceOverrideEnabled) folder.contentAppearance() else globalCardAppearance
+        CaptionsSection(
+            showLabels = if (folder.showLabelsOverrideEnabled) folder.showLabels else globalShowLabels,
+            onShowLabelsChange = { viewModel.setFolderItemsShowLabels(folderId, it) },
+            appearance = contentAppearance,
+            onAppearanceChange = { viewModel.setFolderAppearance(folderId, it) },
+            title = stringResource(R.string.settings_captions_label)
+        )
+
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = Icons.Filled.DeleteOutline,
@@ -265,9 +273,14 @@ fun SettingsFolderEditScreen(
 
     if (appearanceOpen) {
         val effectiveContentAppearance = if (folder?.appearanceOverrideEnabled == true) folder.contentAppearance() else globalCardAppearance
-        val effectiveShowLabels = if (folder?.showLabelsOverrideEnabled == true) folder.showLabels else globalShowLabels
-        SettingsEditPage(title = stringResource(R.string.settings_folder_appearance_label), onDismiss = { appearanceOpen = false }) {
-            ElementBackgroundSection(appearance = effectiveContentAppearance, onAppearanceChange = { viewModel.setFolderAppearance(folderId, it) })
+        var draft by rememberDraft(effectiveContentAppearance)
+        SettingsEditPage(
+            title = stringResource(R.string.settings_element_fill_label),
+            onDismiss = { appearanceOpen = false },
+            onSave = { viewModel.setFolderAppearance(folderId, draft) },
+            dirty = draft != effectiveContentAppearance
+        ) {
+            ElementBackgroundSection(appearance = draft, onAppearanceChange = { draft = it })
             if (folder?.appearanceOverrideEnabled == true) {
                 SettingsPreferenceGroup {
                     SettingsPreference(
@@ -278,20 +291,19 @@ fun SettingsFolderEditScreen(
                     )
                 }
             }
-            CaptionsSection(
-                showLabels = effectiveShowLabels,
-                onShowLabelsChange = { viewModel.setFolderItemsShowLabels(folderId, it) },
-                appearance = effectiveContentAppearance,
-                onAppearanceChange = { viewModel.setFolderAppearance(folderId, it) },
-                title = stringResource(R.string.settings_captions_label)
-            )
         }
     }
 
     if (borderOpen) {
         val effectiveBorderAppearance = if (folder?.borderOverrideEnabled == true) folder.borderAppearance() else globalCardAppearance
-        SettingsEditPage(title = stringResource(R.string.settings_element_border_label), onDismiss = { borderOpen = false }) {
-            ElementBorderSection(appearance = effectiveBorderAppearance, onAppearanceChange = { viewModel.setFolderBorderAppearance(folderId, it) })
+        var draft by rememberDraft(effectiveBorderAppearance)
+        SettingsEditPage(
+            title = stringResource(R.string.settings_element_border_label),
+            onDismiss = { borderOpen = false },
+            onSave = { viewModel.setFolderBorderAppearance(folderId, draft) },
+            dirty = draft != effectiveBorderAppearance
+        ) {
+            ElementBorderSection(appearance = draft, onAppearanceChange = { draft = it })
             if (folder?.borderOverrideEnabled == true) {
                 SettingsPreferenceGroup {
                     SettingsPreference(
@@ -519,6 +531,7 @@ private fun FolderWidgetKindSheet(onKindSelected: (String) -> Unit, onDismiss: (
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             listOf(
+                com.bisc.flauncher.data.model.WidgetKind.CLOCK,
                 com.bisc.flauncher.data.model.WidgetKind.MUSIC,
                 com.bisc.flauncher.data.model.WidgetKind.WEATHER,
                 com.bisc.flauncher.data.model.WidgetKind.NOTES
@@ -564,6 +577,7 @@ private fun FolderWidgetSizeSheet(
 }
 
 private fun folderWidgetKindIcon(kind: String) = when (kind) {
+    com.bisc.flauncher.data.model.WidgetKind.CLOCK -> Icons.Filled.Schedule
     com.bisc.flauncher.data.model.WidgetKind.MUSIC -> Icons.Filled.MusicNote
     com.bisc.flauncher.data.model.WidgetKind.WEATHER -> Icons.Filled.Cloud
     com.bisc.flauncher.data.model.WidgetKind.NOTES -> Icons.Filled.EditNote
@@ -572,6 +586,7 @@ private fun folderWidgetKindIcon(kind: String) = when (kind) {
 
 @Composable
 private fun folderWidgetKindLabel(kind: String): String = when (kind) {
+    com.bisc.flauncher.data.model.WidgetKind.CLOCK -> stringResource(R.string.picker_widget_clock)
     com.bisc.flauncher.data.model.WidgetKind.MUSIC -> stringResource(R.string.picker_widget_music)
     com.bisc.flauncher.data.model.WidgetKind.WEATHER -> stringResource(R.string.picker_widget_weather)
     com.bisc.flauncher.data.model.WidgetKind.NOTES -> stringResource(R.string.picker_widget_notes)

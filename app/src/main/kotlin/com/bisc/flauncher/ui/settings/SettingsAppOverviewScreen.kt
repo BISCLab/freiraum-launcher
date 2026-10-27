@@ -1,16 +1,13 @@
 package com.bisc.flauncher.ui.settings
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -21,7 +18,7 @@ import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.ElementFillMode
-import com.bisc.flauncher.data.settings.Handedness
+import com.bisc.flauncher.data.model.LauncherPageKind
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.search.automaticRailAppearance
 
@@ -53,11 +50,9 @@ fun SettingsAppOverviewScreen(navController: NavController, onBack: () -> Unit, 
     }
 }
 
-/** Appearance hub: the page itself, then each of its elements, then its accent. */
+/** Appearance hub: the page itself, then each of its elements. Its accents follow the global one. */
 @Composable
-fun SettingsAppOverviewAppearanceHubScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val accentColor by viewModel.accentColor.collectAsState()
-    val appListAccentColor by viewModel.appListAccentColor.collectAsState()
+fun SettingsAppOverviewAppearanceHubScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
     SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
             SettingsPreference(
@@ -85,17 +80,6 @@ fun SettingsAppOverviewAppearanceHubScreen(navController: NavController, onBack:
                 trailing = null
             )
         }
-        SettingsPreferenceGroup(
-            title = stringResource(R.string.settings_accent_label),
-            info = stringResource(R.string.settings_accent_color_summary)
-        ) {
-            AccentOverrideRows(
-                title = stringResource(R.string.settings_accent_label),
-                own = appListAccentColor,
-                global = accentColor,
-                onChange = viewModel::setAppListAccentColor
-            )
-        }
     }
 }
 
@@ -106,15 +90,10 @@ fun SettingsAppOverviewBehaviorScreen(navController: NavController, onBack: () -
     val showSearchButton by viewModel.appListShowSearchButton.collectAsState()
     val handedness by viewModel.appOverviewHandedness.collectAsState()
     SettingsSubScreen(title = stringResource(R.string.settings_search_behavior_label), navController = navController, onBack = onBack) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_app_overview_alignment_label)) {
+            HandednessPreviews(selected = handedness, onSelect = viewModel::setAppOverviewHandedness)
+        }
         SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_app_overview_alignment_label),
-                onClick = {
-                    viewModel.setAppOverviewHandedness(if (handedness == Handedness.LEFT) Handedness.RIGHT else Handedness.LEFT)
-                },
-                trailing = { HandednessToggle(selected = handedness, onSelect = viewModel::setAppOverviewHandedness) }
-            )
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_app_overview_az_index_label),
@@ -146,43 +125,16 @@ fun SettingsAppOverviewSearchButtonScreen(
     val pageBackground by remember(pageId) { homeViewModel.pageBackgroundConfig(pageId ?: -1L) }.collectAsState(initial = BackgroundConfig())
     val surfaceIsDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), pageBackground)
 
-    SettingsSubScreen(title = stringResource(R.string.settings_app_list_search_button), navController = navController, onBack = onBack) {
+    // Keyed on the stored values only: the automatic look is re-derived once the page background
+    // has loaded, and that must not wipe what is being edited.
+    val saved = remember(own, railAppearance) { own ?: railAppearance ?: automaticRailAppearance(surfaceIsDark) }
+    var draft by rememberDraft(saved)
+    SettingsSubScreen(title = stringResource(R.string.settings_app_list_search_button), navController = navController, onBack = onBack, onSave = { viewModel.setAppListSearchButtonAppearance(draft) }, dirty = draft != saved) {
         ElementAppearanceSection(
-            appearance = own ?: railAppearance ?: automaticRailAppearance(surfaceIsDark),
-            onAppearanceChange = viewModel::setAppListSearchButtonAppearance,
+            appearance = draft,
+            onAppearanceChange = { draft = it },
             styleGroupTitle = null
         )
-        if (own != null) {
-            SettingsPreferenceGroup {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_search_button_follow_rail),
-                    onClick = viewModel::resetAppListSearchButtonAppearance,
-                    trailing = null
-                )
-            }
-        }
-    }
-}
-
-/** Compact Left | Right switch for a row's trailing slot — replaces the two separate radio rows. */
-@Composable
-private fun HandednessToggle(selected: Handedness, onSelect: (Handedness) -> Unit) {
-    val options = listOf(
-        Handedness.LEFT to stringResource(R.string.settings_app_overview_align_left),
-        Handedness.RIGHT to stringResource(R.string.settings_app_overview_align_right)
-    )
-    SingleChoiceSegmentedButtonRow {
-        options.forEachIndexed { index, (value, label) ->
-            SegmentedButton(
-                selected = selected == value,
-                onClick = { onSelect(value) },
-                shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
-                icon = {}
-            ) {
-                Text(label)
-            }
-        }
     }
 }
 
@@ -198,6 +150,7 @@ fun SettingsAppOverviewPageScreen(navController: NavController, onBack: () -> Un
     val globalBackground by viewModel.globalBackground.collectAsState()
 
     SettingsSubScreen(title = stringResource(R.string.settings_search_page_label), navController = navController, onBack = onBack) {
+        UtilityPageIdentityGroup(kind = LauncherPageKind.APP_LIST, navController = navController, viewModel = viewModel)
         BackgroundOverrideSection(
             override = override,
             global = globalBackground,
@@ -222,11 +175,12 @@ fun SettingsAppOverviewPageScreen(navController: NavController, onBack: () -> Un
 /** The letter-group header circles (e.g. "A", "B", "C" above each section). */
 @Composable
 fun SettingsAppOverviewSectionLettersScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val headerLetterAppearance by viewModel.appListHeaderLetterAppearance.collectAsState()
-    SettingsSubScreen(title = surfaceLabel(R.string.settings_layer_surface_section_letter), navController = navController, onBack = onBack) {
+    val saved by viewModel.appListHeaderLetterAppearance.collectAsState()
+    var draft by rememberDraft(saved)
+    SettingsSubScreen(title = surfaceLabel(R.string.settings_layer_surface_section_letter), navController = navController, onBack = onBack, onSave = { viewModel.setAppListHeaderLetterAppearance(draft) }, dirty = draft != saved) {
         ElementAppearanceSection(
-            appearance = headerLetterAppearance,
-            onAppearanceChange = viewModel::setAppListHeaderLetterAppearance,
+            appearance = draft,
+            onAppearanceChange = { draft = it },
             styleGroupTitle = null
         )
     }
@@ -247,10 +201,12 @@ fun SettingsAppOverviewAzIndexScreen(
     val pageBackground by remember(pageId) { homeViewModel.pageBackgroundConfig(pageId ?: -1L) }.collectAsState(initial = BackgroundConfig())
     val surfaceIsDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), pageBackground)
 
-    SettingsSubScreen(title = stringResource(R.string.settings_app_overview_az_index_label), navController = navController, onBack = onBack) {
+    val saved = remember(railAppearance) { railAppearance ?: automaticRailAppearance(surfaceIsDark) }
+    var draft by rememberDraft(saved)
+    SettingsSubScreen(title = stringResource(R.string.settings_app_overview_az_index_label), navController = navController, onBack = onBack, onSave = { viewModel.setAppListRailAppearance(draft) }, dirty = draft != saved) {
         ElementAppearanceSection(
-            appearance = railAppearance ?: automaticRailAppearance(surfaceIsDark),
-            onAppearanceChange = viewModel::setAppListRailAppearance,
+            appearance = draft,
+            onAppearanceChange = { draft = it },
             styleGroupTitle = null
         )
         if (railAppearance != null) {

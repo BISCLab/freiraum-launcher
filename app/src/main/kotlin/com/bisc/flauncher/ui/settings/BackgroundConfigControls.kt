@@ -318,16 +318,17 @@ fun BackgroundOverrideSection(
     }
 
     if (colorEditorOpen) {
-        SettingsEditPage(title = stringResource(R.string.settings_background_source_color), onDismiss = { colorEditorOpen = false }) {
+        var draft by rememberDraft(current)
+        SettingsEditPage(title = stringResource(R.string.settings_background_source_color), onDismiss = { colorEditorOpen = false }, onSave = { onCustomColor(draft) }, dirty = draft != current) {
             ColorFillPickerContent(
-                fill = current.fill,
-                onFillChange = { fill -> onCustomColor(current.copy(fill = fill)) },
+                fill = draft.fill,
+                onFillChange = { fill -> draft = draft.copy(fill = fill) },
                 modifier = Modifier.fillMaxWidth()
             )
             SettingsPreferenceGroup(title = stringResource(R.string.settings_background_shade_label)) {
                 ExpandableShadePercentSlider(
-                    percent = (current.shade * 100).roundToInt(),
-                    onSettled = { onCustomColor(current.copy(shade = it / 100f)) }
+                    percent = (draft.shade * 100).roundToInt(),
+                    onSettled = { draft = draft.copy(shade = it / 100f) }
                 )
             }
         }

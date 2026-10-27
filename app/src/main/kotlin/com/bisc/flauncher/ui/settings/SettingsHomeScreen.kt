@@ -45,6 +45,7 @@ import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.model.appearance
+import com.bisc.flauncher.data.model.withAppearance
 import com.bisc.flauncher.data.model.panelRows
 import com.bisc.flauncher.ui.home.ConfirmRemoveDialog
 import com.bisc.flauncher.ui.home.HomeViewModel
@@ -58,8 +59,10 @@ import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
  *  page's background/status-bar) and [SettingsHomeLayoutScreen] (what's actually placed on it),
  *  instead of one long flat screen like every other page still uses (see [SettingsPageRowsScreen]). */
 @Composable
-fun SettingsHomeScreenHub(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
+fun SettingsHomeScreenHub(pageId: Long, navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
     SettingsSubScreen(title = stringResource(R.string.settings_pages_home), navController = navController, onBack = onBack) {
+        // Tap a part of the miniature (background, Panel, a row, the Dock) to edit it.
+        PagePreview(pageId = pageId, isHome = true, navController = navController)
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = Icons.Filled.Palette,
@@ -195,7 +198,9 @@ fun SettingsHomeLayoutScreen(
                     // The Dock and Panel rows are excluded from this list (fixed as their own bookends
                     // above/below) but must still be re-persisted alongside it — reorderRows renumbers
                     // orderIndex 0..n-1 over whatever list it's handed.
-                    onReorder = { reordered -> viewModel.reorderRows(reordered + listOfNotNull(dockRow, panelRow)) }
+                    onReorder = { reordered -> viewModel.reorderRows(reordered + listOfNotNull(dockRow, panelRow)) },
+                    // Inside the Panel…Dock card: square, so it joins the block instead of rounding itself.
+                    shape = androidx.compose.ui.graphics.RectangleShape
                 ) { row ->
                     Row(
                         modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer)
@@ -341,21 +346,23 @@ private fun rememberPanelRow(pageId: Long, viewModel: HomeViewModel): PageRow? {
 
 @Composable
 fun SettingsPanelBackgroundScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val row = rememberPanelRow(pageId, viewModel) ?: return
-    SettingsSubScreen(title = stringResource(R.string.settings_element_fill_label), navController = navController, onBack = onBack) {
-        ElementBackgroundSection(appearance = row.appearance(), onAppearanceChange = { viewModel.setRowAppearance(row, it) })
+    val saved = rememberPanelRow(pageId, viewModel) ?: return
+    var row by rememberDraft(saved)
+    SettingsSubScreen(title = stringResource(R.string.settings_element_fill_label), navController = navController, onBack = onBack, onSave = { viewModel.saveRow(row) }, dirty = row != saved) {
+        ElementBackgroundSection(appearance = row.appearance(), onAppearanceChange = { row = row.withAppearance(it) })
     }
 }
 
 @Composable
 fun SettingsPanelBorderScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val row = rememberPanelRow(pageId, viewModel) ?: return
-    SettingsSubScreen(title = stringResource(R.string.settings_element_border_label), navController = navController, onBack = onBack) {
-        ElementBorderSection(appearance = row.appearance(), onAppearanceChange = { viewModel.setRowAppearance(row, it) })
+    val saved = rememberPanelRow(pageId, viewModel) ?: return
+    var row by rememberDraft(saved)
+    SettingsSubScreen(title = stringResource(R.string.settings_element_border_label), navController = navController, onBack = onBack, onSave = { viewModel.saveRow(row) }, dirty = row != saved) {
+        ElementBorderSection(appearance = row.appearance(), onAppearanceChange = { row = row.withAppearance(it) })
         SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
             ExpandablePercentSlider(
                 percent = row.cornerRadiusPercent,
-                onSettled = { viewModel.setRowCornerRadiusPercent(row, it) }
+                onSettled = { row = row.copy(cornerRadiusPercent = it) }
             )
         }
     }
@@ -410,6 +417,7 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
                     entries = entries,
                     columns = 1,
                     rowColumns = rowShape,
+                    fixedSlots = true,
                     folders = folders,
                     folderItemsByFolder = folderItemsByFolder,
                     savedMapTargets = savedMapTargets,
@@ -428,7 +436,7 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
                     onActionButtonClick = {},
                     showLabels = row.showLabels,
                     labelColor = row.appearance().contentColor?.let { androidx.compose.ui.graphics.Color(it) } ?: androidx.compose.ui.graphics.Color.White,
-                    onAddEmptySlot = { showAddChooser = true },
+                    onAddEmptySlot = { slot -> viewModel.reserveRowSlot(row.id, slot); showAddChooser = true },
                     onEditEntry = { entry -> pendingRemoval = entry }
                 )
             }
@@ -448,7 +456,7 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
                             ) { Icon(androidx.compose.material.icons.Icons.Filled.Remove, contentDescription = null) }
                             androidx.compose.material3.IconButton(
                                 onClick = { viewModel.setPanelRowColumns(row, rowShape.toMutableList().apply { this[index] = cols + 1 }) },
-                                enabled = cols < 6
+                                enabled = cols < 5
                             ) { Icon(androidx.compose.material.icons.Icons.Filled.Add, contentDescription = null) }
                             androidx.compose.material3.IconButton(
                                 onClick = { viewModel.setPanelRowColumns(row, rowShape.filterIndexed { i, _ -> i != index }) },

@@ -1,9 +1,7 @@
 package com.bisc.flauncher.ui.home.widgets
 
-import android.content.Intent
 import android.media.session.PlaybackState
 import android.os.SystemClock
-import android.provider.Settings
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -50,6 +48,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
@@ -81,7 +80,12 @@ fun MusicWidget(
     horizontalMargin: Dp = 0.dp,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    LaunchedEffect(Unit) { viewModel.refreshWidgetData() }
+    // Re-syncs with the media sessions every time the home screen comes back, not just once —
+    // a player started or switched while the launcher was in the background shows up right away.
+    LifecycleResumeEffect(Unit) {
+        viewModel.refreshWidgetData()
+        onPauseOrDispose { }
+    }
     val nowPlaying by viewModel.nowPlaying.collectAsState()
     val notificationAccessGranted by viewModel.notificationAccessGranted.collectAsState()
     val context = LocalContext.current
@@ -98,7 +102,7 @@ fun MusicWidget(
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clickable { context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) },
+                    .clickable { com.bisc.flauncher.util.openNotificationAccessSettings(context) },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(Icons.AutoMirrored.Filled.QueueMusic, contentDescription = null, tint = LocalContentColor.current.copy(alpha = 0.6f))

@@ -3,6 +3,7 @@ package com.bisc.flauncher.ui.settings
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
@@ -290,20 +291,43 @@ fun SettingsFixedScreen(title: String, navController: NavController, onBack: () 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsSubScreen(title: String, navController: NavController, onBack: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+fun SettingsSubScreen(
+    title: String,
+    navController: NavController,
+    onBack: () -> Unit,
+    /** Editor mode: changes are kept as a draft and only written by this, from a Save button pinned
+     *  to the bottom. Null = a plain screen whose changes apply right away. */
+    onSave: (() -> Unit)? = null,
+    /** Whether the draft differs from what's saved — enables Save and makes leaving ask first. */
+    dirty: Boolean = false,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    // Every way out (back gesture, the arrow, a breadcrumb) goes through this: with unsaved changes
+    // it asks Save / Discard / Keep editing first, otherwise it just leaves.
+    var pendingLeave by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val guardLeave: (() -> Unit) -> Unit = { leave -> if (onSave != null && dirty) pendingLeave = leave else leave() }
+    androidx.activity.compose.BackHandler(enabled = onSave != null && dirty) { pendingLeave = onBack }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 windowInsets = settingsTopBarInsets(),
                 title = { Text(title) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { guardLeave(onBack) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 }
             )
         },
-        bottomBar = { SettingsBreadcrumbBar(navController) }
+        bottomBar = {
+            Column {
+                if (onSave != null) {
+                    SettingsSaveBar(enabled = dirty, onSave = { onSave(); onBack() })
+                }
+                SettingsBreadcrumbBar(navController, guardLeave)
+            }
+        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -315,4 +339,54 @@ fun SettingsSubScreen(title: String, navController: NavController, onBack: () ->
             content = content
         )
     }
+
+    pendingLeave?.let { leave ->
+        UnsavedChangesDialog(
+            onSave = { pendingLeave = null; onSave?.invoke(); leave() },
+            onDiscard = { pendingLeave = null; leave() },
+            onKeepEditing = { pendingLeave = null }
+        )
+    }
 }
+
+/** The editor's Save button, pinned above the breadcrumbs; only active once something changed. */
+@Composable
+internal fun SettingsSaveBar(enabled: Boolean, onSave: () -> Unit) {
+    androidx.compose.foundation.layout.Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .padding(horizontal = 16.dp, vertical = 10.dp)
+    ) {
+        androidx.compose.material3.Button(
+            onClick = onSave,
+            enabled = enabled,
+            shape = SettingsCardShape,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)
+        ) {
+            Text(stringResource(R.string.settings_save))
+        }
+    }
+}
+
+/** Asked when leaving an editor with unsaved changes. */
+@Composable
+internal fun UnsavedChangesDialog(onSave: () -> Unit, onDiscard: () -> Unit, onKeepEditing: () -> Unit) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onKeepEditing,
+        title = { Text(stringResource(R.string.settings_unsaved_title)) },
+        text = { Text(stringResource(R.string.settings_unsaved_message)) },
+        confirmButton = { TextButton(onClick = onSave) { Text(stringResource(R.string.settings_save)) } },
+        dismissButton = {
+            Row {
+                TextButton(onClick = onDiscard) { Text(stringResource(R.string.settings_unsaved_discard)) }
+                TextButton(onClick = onKeepEditing) { Text(stringResource(R.string.settings_unsaved_keep_editing)) }
+            }
+        }
+    )
+}
+
+/** A working copy of [saved] for an editor screen: starts as (and resets to) the saved value
+ *  whenever that changes, e.g. right after saving. */
+@Composable
+fun <T> rememberDraft(saved: T): androidx.compose.runtime.MutableState<T> = remember(saved) { mutableStateOf(saved) }

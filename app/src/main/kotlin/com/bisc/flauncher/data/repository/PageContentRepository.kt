@@ -290,7 +290,9 @@ class PageContentRepository @Inject constructor(
     suspend fun addWidgetRow(pageId: Long, kind: String, spanY: Int = WidgetKind.defaultSpan(kind)): Long {
         var row = PageRow(
             pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.WIDGET, payload = kind, spanY = spanY,
-            cornerRadiusPercent = settingsRepository.defaultCornerRadiusPercent.first()
+            // Widgets start only slightly rounded, whatever the global corner style; the global
+            // corner setting still restamps them when it's changed (see its hint in Design).
+            cornerRadiusPercent = com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT
         )
         row = row.withAppearance(defaultBoxAppearanceFor(isDark()))
         val id = rowDao.insert(row)
@@ -301,7 +303,9 @@ class PageContentRepository @Inject constructor(
     suspend fun addSystemWidgetRow(pageId: Long, appWidgetId: Int, spanY: Int): Long {
         var row = PageRow(
             pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.SYSTEM_WIDGET, payload = appWidgetId.toString(), spanY = spanY,
-            cornerRadiusPercent = settingsRepository.defaultCornerRadiusPercent.first()
+            // Widgets start only slightly rounded, whatever the global corner style; the global
+            // corner setting still restamps them when it's changed (see its hint in Design).
+            cornerRadiusPercent = com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT
         )
         row = row.withAppearance(defaultBoxAppearanceFor(isDark()))
         val id = rowDao.insert(row)
@@ -453,6 +457,13 @@ class PageContentRepository @Inject constructor(
         return if (resId > 0) context.resources.getDimensionPixelSize(resId) else 0
     }
 
+    /** Writes every field of an edited row at once (an editor screen's Save), then re-fits the
+     *  page since size, height or column changes can push it over its budget. */
+    suspend fun saveRow(row: PageRow) {
+        rowDao.update(row.copy(columns = row.columns.coerceIn(GridConstants.MIN_ELEMENT_BOX_COLUMNS, GridConstants.MAX_ELEMENT_BOX_COLUMNS)))
+        rebalancePageOverflow(row.pageId)
+    }
+
     suspend fun setRowSpanY(row: PageRow, spanY: Int) {
         rowDao.update(row.copy(spanY = spanY))
         rebalancePageOverflow(row.pageId)
@@ -530,22 +541,22 @@ class PageContentRepository @Inject constructor(
         rowDao.getById(pageRowId)?.let { rebalancePageOverflow(it.pageId) }
     }
 
-    suspend fun addAppEntry(pageRowId: Long, componentName: String): Long {
-        val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
+    suspend fun addAppEntry(pageRowId: Long, componentName: String, orderIndex: Int? = null): Long {
+        val next = orderIndex ?: ((entryDao.maxOrderIndex(pageRowId) ?: -1) + 1)
         val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.APP, payload = componentName))
         rebalanceForRow(pageRowId)
         return id
     }
 
-    suspend fun addFolderEntry(pageRowId: Long, folderId: Long): Long {
-        val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
+    suspend fun addFolderEntry(pageRowId: Long, folderId: Long, orderIndex: Int? = null): Long {
+        val next = orderIndex ?: ((entryDao.maxOrderIndex(pageRowId) ?: -1) + 1)
         val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.FOLDER, payload = folderId.toString()))
         rebalanceForRow(pageRowId)
         return id
     }
 
-    suspend fun addShortcutEntry(pageRowId: Long, packageName: String, shortcutId: String, label: String): Long {
-        val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
+    suspend fun addShortcutEntry(pageRowId: Long, packageName: String, shortcutId: String, label: String, orderIndex: Int? = null): Long {
+        val next = orderIndex ?: ((entryDao.maxOrderIndex(pageRowId) ?: -1) + 1)
         val id = entryDao.insert(
             RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.SHORTCUT, payload = "$packageName|$shortcutId|$label")
         )
@@ -553,22 +564,22 @@ class PageContentRepository @Inject constructor(
         return id
     }
 
-    suspend fun addMapTargetEntry(pageRowId: Long, targetId: Long): Long {
-        val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
+    suspend fun addMapTargetEntry(pageRowId: Long, targetId: Long, orderIndex: Int? = null): Long {
+        val next = orderIndex ?: ((entryDao.maxOrderIndex(pageRowId) ?: -1) + 1)
         val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.MAP_TARGET, payload = targetId.toString()))
         rebalanceForRow(pageRowId)
         return id
     }
 
-    suspend fun addWebsiteEntry(pageRowId: Long, websiteId: Long): Long {
-        val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
+    suspend fun addWebsiteEntry(pageRowId: Long, websiteId: Long, orderIndex: Int? = null): Long {
+        val next = orderIndex ?: ((entryDao.maxOrderIndex(pageRowId) ?: -1) + 1)
         val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.WEBSITE, payload = websiteId.toString()))
         rebalanceForRow(pageRowId)
         return id
     }
 
-    suspend fun addPageLinkEntry(pageRowId: Long, pageId: Long): Long {
-        val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
+    suspend fun addPageLinkEntry(pageRowId: Long, pageId: Long, orderIndex: Int? = null): Long {
+        val next = orderIndex ?: ((entryDao.maxOrderIndex(pageRowId) ?: -1) + 1)
         val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.PAGE, payload = pageId.toString()))
         rebalanceForRow(pageRowId)
         return id
@@ -577,15 +588,15 @@ class PageContentRepository @Inject constructor(
     /** [contactId] is a [com.bisc.flauncher.data.model.PinnedContact.contactId] — the caller (see
      *  HomeViewModel.addContactEntryToRow) ensures that pin exists first, same as this row just
      *  referencing an existing folder/website/map target by id. */
-    suspend fun addContactEntry(pageRowId: Long, contactId: Long): Long {
-        val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
+    suspend fun addContactEntry(pageRowId: Long, contactId: Long, orderIndex: Int? = null): Long {
+        val next = orderIndex ?: ((entryDao.maxOrderIndex(pageRowId) ?: -1) + 1)
         val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.CONTACT, payload = contactId.toString()))
         rebalanceForRow(pageRowId)
         return id
     }
 
-    suspend fun addActionButtonEntry(pageRowId: Long, actionButtonId: Long): Long {
-        val next = (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
+    suspend fun addActionButtonEntry(pageRowId: Long, actionButtonId: Long, orderIndex: Int? = null): Long {
+        val next = orderIndex ?: ((entryDao.maxOrderIndex(pageRowId) ?: -1) + 1)
         val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.ACTION_BUTTON, payload = actionButtonId.toString()))
         rebalanceForRow(pageRowId)
         return id

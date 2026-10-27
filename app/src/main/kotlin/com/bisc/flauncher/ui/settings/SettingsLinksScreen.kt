@@ -69,24 +69,25 @@ fun SettingsLinksScreen(navController: NavController, onBack: () -> Unit, viewMo
 @Composable
 fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val websites by viewModel.pinnedWebsites.collectAsState()
-    val website = websites.find { it.id == websiteId } ?: return
+    val saved = websites.find { it.id == websiteId } ?: return
+    var website by rememberDraft(saved)
     val browsableApps by viewModel.browsableApps.collectAsState()
     var showAppPicker by remember { mutableStateOf(false) }
     var showIconPicker by remember { mutableStateOf(false) }
     var confirmingDelete by remember { mutableStateOf(false) }
 
-    SettingsSubScreen(title = website.label, navController = navController, onBack = onBack) {
+    SettingsSubScreen(title = saved.label, navController = navController, onBack = onBack, onSave = { viewModel.updateWebsite(website) }, dirty = website != saved) {
         SettingsPreferenceGroup {
             OutlinedTextField(
                 value = website.label,
-                onValueChange = { viewModel.updateWebsite(website.copy(label = it)) },
+                onValueChange = { website = website.copy(label = it) },
                 label = { Text(stringResource(R.string.sidebar_website_label_hint)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
             )
             OutlinedTextField(
                 value = website.url,
-                onValueChange = { viewModel.updateWebsite(website.copy(url = it)) },
+                onValueChange = { website = website.copy(url = it) },
                 label = { Text(stringResource(R.string.sidebar_website_url_hint)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
@@ -99,7 +100,7 @@ fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBa
                 title = appLabel ?: stringResource(R.string.settings_elements_app_default),
                 onClick = { showAppPicker = true },
                 trailing = if (website.browserApp != null) {
-                    { TextButton(onClick = { viewModel.updateWebsite(website.copy(browserApp = null)) }) { Text(stringResource(R.string.settings_elements_use_default)) } }
+                    { TextButton(onClick = { website = website.copy(browserApp = null) }) { Text(stringResource(R.string.settings_elements_use_default)) } }
                 } else null
             )
         }
@@ -114,14 +115,14 @@ fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBa
                 title = stringResource(R.string.settings_section_global_background),
                 custom = website.backgroundColor,
                 automaticSeed = android.graphics.Color.DKGRAY,
-                onChange = { viewModel.updateWebsite(website.copy(backgroundColor = it)) },
+                onChange = { website = website.copy(backgroundColor = it) },
                 ownGroup = false
             )
             AutomaticColorPicker(
                 title = stringResource(R.string.settings_element_text_color_label),
                 custom = website.iconColor,
                 automaticSeed = android.graphics.Color.WHITE,
-                onChange = { viewModel.updateWebsite(website.copy(iconColor = it)) },
+                onChange = { website = website.copy(iconColor = it) },
                 ownGroup = false
             )
         }
@@ -138,7 +139,7 @@ fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBa
     if (showIconPicker) {
         PictogramPickerSheet(
             selected = website.iconKey,
-            onSelect = { key -> viewModel.updateWebsite(website.copy(iconKey = key)); showIconPicker = false },
+            onSelect = { key -> website = website.copy(iconKey = key); showIconPicker = false },
             onDismiss = { showIconPicker = false }
         )
     }
@@ -147,7 +148,7 @@ fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBa
         ShortcutSourceAppSheet(
             apps = browsableApps,
             loadIcon = viewModel::loadIcon,
-            onAppSelected = { app -> viewModel.updateWebsite(website.copy(browserApp = app.componentName.packageName)); showAppPicker = false },
+            onAppSelected = { app -> website = website.copy(browserApp = app.componentName.packageName); showAppPicker = false },
             onDismiss = { showAppPicker = false }
         )
     }

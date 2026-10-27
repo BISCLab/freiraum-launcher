@@ -39,10 +39,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -54,6 +50,8 @@ import androidx.compose.ui.unit.dp
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.SearchCategory
+import com.bisc.flauncher.ui.home.dock.FreeEdge
+import com.bisc.flauncher.ui.home.dock.freeEdgeBorder
 import com.bisc.flauncher.ui.home.dock.resolveElementColors
 import com.bisc.flauncher.ui.theme.noRippleClickable
 
@@ -112,14 +110,17 @@ fun SearchInputBar(
         Column(
             modifier = modifier
                 .fillMaxWidth()
+                // Flush with the screen's top and side edges, so the border only traces the free
+                // bottom edge — drawn just outside the bar (hence before the clip), so around the
+                // rounded corners it runs on into the screen's side edges instead of ending visibly.
+                .then(if (appearance.borderEnabled) Modifier.freeEdgeBorder(colors.borderWidth, colors.borderColor, radius, FreeEdge.BOTTOM) else Modifier)
                 .clip(shape)
                 .background(colors.background, alpha = colors.backgroundAlpha)
-                // Flush with the screen's top and side edges, so the border only traces the free
-                // bottom edge (around its rounded corners) — a full outline would draw a thin line
-                // right along the screen edges that reads as a gap.
-                .then(if (appearance.borderEnabled) Modifier.bottomEdgeBorder(colors.borderWidth, colors.borderColor, radius) else Modifier)
                 .padding(top = topInset)
         ) {
+                // Same divider as the one between the field and the categories, so the field row
+                // sits framed between two lines.
+                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(colors.dividerColor.copy(alpha = 0.15f)))
                 Row(
                     modifier = Modifier.fillMaxWidth().height(ROW_HEIGHT).padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -222,23 +223,4 @@ private fun CategoryFilterChip(
             modifier = Modifier.size(20.dp)
         )
     }
-}
-
-/** A border along only the bottom edge of a shape whose bottom corners are rounded by [radius]:
- *  up each side to where the corner starts, around both corners and straight across the bottom. */
-private fun Modifier.bottomEdgeBorder(width: Dp, color: Color, radius: Dp): Modifier = drawWithContent {
-    drawContent()
-    val stroke = width.toPx()
-    val half = stroke / 2f
-    val r = radius.toPx().coerceAtMost(size.height / 2f).coerceAtLeast(half)
-    val left = half
-    val right = size.width - half
-    val bottom = size.height - half
-    val path = Path().apply {
-        moveTo(left, size.height - r)
-        arcTo(Rect(left, bottom - 2 * (r - half), left + 2 * (r - half), bottom), 180f, -90f, false)
-        lineTo(right - (r - half), bottom)
-        arcTo(Rect(right - 2 * (r - half), bottom - 2 * (r - half), right, bottom), 90f, -90f, false)
-    }
-    drawPath(path, color, style = Stroke(width = stroke))
 }

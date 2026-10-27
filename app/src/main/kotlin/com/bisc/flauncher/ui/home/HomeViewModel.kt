@@ -159,9 +159,9 @@ class HomeViewModel @Inject constructor(
     val appListShowSearchButton: StateFlow<Boolean> =
         settingsRepository.appListShowSearchButton.stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
-    /** The app list's own accent (its scroll bubble), else the global accent. */
+    /** The app list's accent (its scroll bubble): always the global accent. */
     val appListAccentColor: StateFlow<Int> =
-        combine(settingsRepository.appListAccentColor, settingsRepository.accentColor) { own, accent -> own ?: accent }
+        settingsRepository.accentColor
             .stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.theme.DEFAULT_ACCENT_COLOR)
 
     val folderCardAppearance: StateFlow<ElementAppearance> =
@@ -199,6 +199,9 @@ class HomeViewModel @Inject constructor(
 
     val searchKeyboardCapCornerRadiusPercent: StateFlow<Int> =
         settingsRepository.searchKeyboardCapCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, 100)
+
+    val searchKeyboardCapArrow: StateFlow<Boolean> =
+        settingsRepository.searchKeyboardCapArrow.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     // ---- Gestures ----
 
@@ -827,6 +830,20 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { pageContentRepository.setRowAppearance(row, appearance) }
     }
 
+    /** The Dock's and Panel's slots are fixed positions: an entry added from a tapped empty slot
+     *  goes into exactly that slot (its orderIndex), instead of after the last entry. */
+    private val pendingRowSlots = mutableMapOf<Long, Int>()
+
+    fun reserveRowSlot(pageRowId: Long, slot: Int) {
+        pendingRowSlots[pageRowId] = slot
+    }
+
+    private fun takeRowSlot(pageRowId: Long): Int? = pendingRowSlots.remove(pageRowId)
+
+    fun saveRow(row: PageRow) {
+        viewModelScope.launch { pageContentRepository.saveRow(row) }
+    }
+
     fun setRowEdgeToEdge(row: PageRow, edgeToEdge: Boolean) {
         viewModelScope.launch { pageContentRepository.setRowEdgeToEdge(row, edgeToEdge) }
     }
@@ -881,17 +898,17 @@ class HomeViewModel @Inject constructor(
     }
 
     fun addAppEntryToRow(pageRowId: Long, app: AppInfo) {
-        viewModelScope.launch { pageContentRepository.addAppEntry(pageRowId, app.componentName.flattenToString()) }
+        viewModelScope.launch { pageContentRepository.addAppEntry(pageRowId, app.componentName.flattenToString(), orderIndex = takeRowSlot(pageRowId)) }
     }
 
     fun addExistingFolderToRow(pageRowId: Long, folderId: Long) {
-        viewModelScope.launch { pageContentRepository.addFolderEntry(pageRowId, folderId) }
+        viewModelScope.launch { pageContentRepository.addFolderEntry(pageRowId, folderId, orderIndex = takeRowSlot(pageRowId)) }
     }
 
     fun createFolderInRow(pageRowId: Long, name: String) {
         viewModelScope.launch {
             val folderId = folderRepository.createFolder(name)
-            pageContentRepository.addFolderEntry(pageRowId, folderId)
+            pageContentRepository.addFolderEntry(pageRowId, folderId, orderIndex = takeRowSlot(pageRowId))
         }
     }
 
@@ -905,21 +922,21 @@ class HomeViewModel @Inject constructor(
     fun addShortcutEntryToRow(pageRowId: Long, info: ShortcutInfo) {
         viewModelScope.launch {
             val label = (info.shortLabel ?: info.longLabel ?: info.id).toString()
-            pageContentRepository.addShortcutEntry(pageRowId, info.`package`, info.id, label)
+            pageContentRepository.addShortcutEntry(pageRowId, info.`package`, info.id, label, orderIndex = takeRowSlot(pageRowId))
             dismissShortcutPicker()
         }
     }
 
     fun addMapTargetEntryToRow(pageRowId: Long, targetId: Long) {
-        viewModelScope.launch { pageContentRepository.addMapTargetEntry(pageRowId, targetId) }
+        viewModelScope.launch { pageContentRepository.addMapTargetEntry(pageRowId, targetId, orderIndex = takeRowSlot(pageRowId)) }
     }
 
     fun addWebsiteEntryToRow(pageRowId: Long, websiteId: Long) {
-        viewModelScope.launch { pageContentRepository.addWebsiteEntry(pageRowId, websiteId) }
+        viewModelScope.launch { pageContentRepository.addWebsiteEntry(pageRowId, websiteId, orderIndex = takeRowSlot(pageRowId)) }
     }
 
     fun addPageLinkEntryToRow(pageRowId: Long, pageId: Long) {
-        viewModelScope.launch { pageContentRepository.addPageLinkEntry(pageRowId, pageId) }
+        viewModelScope.launch { pageContentRepository.addPageLinkEntry(pageRowId, pageId, orderIndex = takeRowSlot(pageRowId)) }
     }
 
     /** Pinning a contact into a row also ensures a [PinnedContact] snapshot exists for it (name/photo
@@ -928,12 +945,12 @@ class HomeViewModel @Inject constructor(
     fun addContactEntryToRow(pageRowId: Long, contact: ContactInfo) {
         viewModelScope.launch {
             contactsRepository.pin(contact)
-            pageContentRepository.addContactEntry(pageRowId, contact.id)
+            pageContentRepository.addContactEntry(pageRowId, contact.id, orderIndex = takeRowSlot(pageRowId))
         }
     }
 
     fun addActionButtonEntryToRow(pageRowId: Long, actionButtonId: Long) {
-        viewModelScope.launch { pageContentRepository.addActionButtonEntry(pageRowId, actionButtonId) }
+        viewModelScope.launch { pageContentRepository.addActionButtonEntry(pageRowId, actionButtonId, orderIndex = takeRowSlot(pageRowId)) }
     }
 
     fun setRowPillMode(row: PageRow, pillMode: Boolean) {
@@ -963,14 +980,14 @@ class HomeViewModel @Inject constructor(
     fun addNewMapTargetToRow(pageRowId: Long, label: String, lat: Double, lon: Double, address: String = "") {
         viewModelScope.launch {
             val targetId = mapsRepository.add(label, lat, lon, address)
-            pageContentRepository.addMapTargetEntry(pageRowId, targetId)
+            pageContentRepository.addMapTargetEntry(pageRowId, targetId, orderIndex = takeRowSlot(pageRowId))
         }
     }
 
     fun addNewWebsiteToRow(pageRowId: Long, label: String, url: String) {
         viewModelScope.launch {
             val websiteId = websiteRepository.add(label, url)
-            pageContentRepository.addWebsiteEntry(pageRowId, websiteId)
+            pageContentRepository.addWebsiteEntry(pageRowId, websiteId, orderIndex = takeRowSlot(pageRowId))
         }
     }
 

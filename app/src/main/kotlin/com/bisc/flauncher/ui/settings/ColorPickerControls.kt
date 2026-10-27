@@ -318,10 +318,11 @@ fun ColorPickerRow(title: String, summary: String? = null, info: String? = null,
         }
     )
     if (open) {
-        SettingsEditPage(title = title, onDismiss = { open = false }) {
+        var draft by rememberDraft(color)
+        SettingsEditPage(title = title, onDismiss = { open = false }, onSave = { onColorChange(draft) }, dirty = draft != color) {
             ColorPickerControls(
-                color = Color(color),
-                onColorChange = { onColorChange(it.toArgb()) },
+                color = Color(draft),
+                onColorChange = { draft = it.toArgb() },
                 modifier = Modifier.fillMaxWidth()
             )
         }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,15 +37,22 @@ fun SettingsPageIconScreen(pageId: Long, navController: NavController, onBack: (
         return
     }
 
-    val glyph = page.iconGlyph?.let { runCatching { PageIconGlyph.valueOf(it) }.getOrNull() } ?: PageIconGlyph.forPageKind(page.kind)
-    val bgColor = page.iconBackgroundColor ?: glyph.defaultColor().toArgb()
-    val iconColor = page.iconColor ?: android.graphics.Color.WHITE
+    val savedGlyph = page.iconGlyph?.let { runCatching { PageIconGlyph.valueOf(it) }.getOrNull() } ?: PageIconGlyph.forPageKind(page.kind)
+    val saved = Triple(savedGlyph, page.iconBackgroundColor ?: savedGlyph.defaultColor().toArgb(), page.iconColor ?: android.graphics.Color.WHITE)
+    var draft by rememberDraft(saved)
+    val (glyph, bgColor, iconColor) = draft
 
     fun update(newGlyph: PageIconGlyph = glyph, newBg: Int = bgColor, newIcon: Int = iconColor) {
-        viewModel.setPageIcon(pageId, newGlyph, newBg, newIcon)
+        draft = Triple(newGlyph, newBg, newIcon)
     }
 
-    SettingsSubScreen(title = stringResource(R.string.settings_page_icon_title), navController = navController, onBack = onBack) {
+    SettingsSubScreen(
+        title = stringResource(R.string.settings_page_icon_title),
+        navController = navController,
+        onBack = onBack,
+        onSave = { viewModel.setPageIcon(pageId, glyph, bgColor, iconColor) },
+        dirty = draft != saved
+    ) {
         Box(
             modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
             contentAlignment = Alignment.Center

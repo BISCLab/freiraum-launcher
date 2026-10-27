@@ -16,16 +16,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteOutline
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Gesture
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -45,6 +44,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.zIndex
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -81,7 +81,6 @@ fun SettingsPagesScreen(
     navController: NavController,
     onBack: () -> Unit,
     onOpenPage: (LauncherPage) -> Unit,
-    onOpenIcon: (Long) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val allPages by viewModel.allPages.collectAsState()
@@ -96,7 +95,6 @@ fun SettingsPagesScreen(
         gestureActions[gesture]?.type == GestureActionType.PAGE && gestureActions[gesture]?.payload?.toLongOrNull() == pageId
     }
 
-    var renamingPage by remember { mutableStateOf<LauncherPage?>(null) }
     var pickingTemplateForDirection by remember { mutableStateOf<PageDirection?>(null) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_pages), navController = navController, onBack = onBack) {
@@ -105,48 +103,25 @@ fun SettingsPagesScreen(
         // the bottom of its settings screen.
         PagesCarousel(
             pages = rowsPages,
+            gestureFor = ::gestureForPage,
             onTileClick = onOpenPage,
             onReorder = viewModel::reorderRowsPages,
             onAddLeft = { pickingTemplateForDirection = PageDirection.LEFT },
             onAddRight = { pickingTemplateForDirection = PageDirection.RIGHT }
         )
 
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_pages_other_label)) {
-            otherPages.forEach { page ->
-                val label = pageLabel(page, allPages)
-                val glyph = page.iconGlyph?.let { runCatching { PageIconGlyph.valueOf(it) }.getOrNull() } ?: PageIconGlyph.forPageKind(page.kind)
-                val bg = page.iconBackgroundColor?.let { Color(it) } ?: glyph.defaultColor()
-                val tint = page.iconColor?.let { Color(it) } ?: Color.White
-                Row(
-                    modifier = Modifier.fillMaxWidth().clickable { onOpenPage(page) },
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Box(
-                        modifier = Modifier.size(32.dp).clip(RoundedCornerShape(10.dp)).background(bg).clickable { onOpenIcon(page.id) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(18.dp))
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(label, style = MaterialTheme.typography.titleMedium)
-                        val boundGesture = gestureForPage(page.id)
-                        Text(
-                            boundGesture?.let { gestureLabel(it) } ?: stringResource(R.string.settings_pages_invocation_none),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    // Which gesture opens it is shown above but set in one place only: Gestures.
-                    IconButton(onClick = { renamingPage = page }) {
-                        Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.settings_pages_rename))
-                    }
-                }
-            }
-        }
+        // App list and Text search don't swipe — set apart in their own row of the same tiles.
+        // Their icon and name live in their own Appearance → Page screen.
+        SettingsGroupLabel(stringResource(R.string.settings_pages_other_label))
+        UtilityPagesRow(
+            pages = otherPages,
+            allPages = allPages,
+            gestureFor = ::gestureForPage,
+            onTileClick = onOpenPage
+        )
 
         // Gestures live here, not as their own top-level entry — they're page/navigation behavior.
-        // They're the only place a gesture is assigned; the utility-page rows above just show it.
+        // They're the only place a gesture is assigned; the page tiles above just show it.
         SettingsPreferenceGroup(title = stringResource(R.string.settings_pages_behavior_label)) {
             SettingsPreference(
                 icon = Icons.Filled.Gesture,
@@ -171,14 +146,6 @@ fun SettingsPagesScreen(
                 }
             },
             onDismiss = { pickingTemplateForDirection = null }
-        )
-    }
-
-    renamingPage?.let { page ->
-        RenamePageDialog(
-            page = page,
-            onSave = { name -> viewModel.renamePage(page.id, name); renamingPage = null },
-            onDismiss = { renamingPage = null }
         )
     }
 }
@@ -240,6 +207,22 @@ internal fun PageIdentityRows(page: LauncherPage, pages: List<LauncherPage>, onO
     }
 }
 
+/** Icon and name of a utility page (App list, Text search), as its own card at the top of its
+ *  Appearance → Page screen — the same rows a carousel page has in its Appearance screen. */
+@Composable
+internal fun UtilityPageIdentityGroup(kind: LauncherPageKind, navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
+    val allPages by viewModel.allPages.collectAsState()
+    val page = allPages.find { it.kind == kind } ?: return
+    SettingsPreferenceGroup {
+        PageIdentityRows(
+            page = page,
+            pages = allPages,
+            onOpenIcon = { navController.navigate("settings/pages/${page.id}/icon") },
+            onRename = { name -> viewModel.renamePage(page.id, name) }
+        )
+    }
+}
+
 /** "Remove page" at the bottom of a removable page's settings — asks first, since everything on
  *  the page goes with it. */
 @Composable
@@ -267,6 +250,8 @@ internal fun RemovePageGroup(label: String, onRemove: () -> Unit) {
 private const val SCREEN_ASPECT_RATIO = 0.47f
 private val CAROUSEL_OUTER_PADDING = 16.dp
 private val CAROUSEL_SPACING = 12.dp
+/** How far the carousel scrolls per frame while a dragged page is held at its edge. */
+private const val AUTO_SCROLL_STEP_PX = 14f
 
 /** The swipeable pages side by side, a "+" ghost tile on each end. Long-press a page and drag it
  *  sideways to move it: it swaps with a neighbor once dragged past half a tile, and the new order
@@ -274,6 +259,7 @@ private val CAROUSEL_SPACING = 12.dp
 @Composable
 private fun PagesCarousel(
     pages: List<LauncherPage>,
+    gestureFor: (Long) -> HomeGesture?,
     onTileClick: (LauncherPage) -> Unit,
     onReorder: (List<Long>) -> Unit,
     onAddLeft: () -> Unit,
@@ -300,6 +286,57 @@ private fun PagesCarousel(
     androidx.compose.foundation.layout.BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val tileWidth = (maxWidth - CAROUSEL_OUTER_PADDING * 2 - CAROUSEL_SPACING * 2) / 3
         val stepPx = with(androidx.compose.ui.platform.LocalDensity.current) { (tileWidth + CAROUSEL_SPACING).toPx() }
+
+        // Swaps the dragged page with a neighbor once it's been dragged past half a tile.
+        fun swapIfPastHalf(pageId: Long) {
+            val index = order.indexOfFirst { it.id == pageId }
+            if (dragOffset > stepPx / 2 && index < order.lastIndex) {
+                order = order.toMutableList().apply { add(index + 1, removeAt(index)) }
+                dragOffset -= stepPx
+            } else if (dragOffset < -stepPx / 2 && index > 0) {
+                order = order.toMutableList().apply { add(index - 1, removeAt(index)) }
+                dragOffset += stepPx
+            }
+        }
+
+        // While the dragged page is held near either edge, the carousel scrolls along so it can be
+        // carried past every other page in one drag. Scrolling moves the page's own slot, so the
+        // drag offset takes the scrolled distance to keep the tile under the finger.
+        val scope = rememberCoroutineScope()
+        var autoScroll by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+        fun updateAutoScroll(pageId: Long) {
+            val layout = listState.layoutInfo
+            val info = layout.visibleItemsInfo.find { it.key == pageId } ?: return
+            val start = info.offset + dragOffset
+            val end = start + info.size
+            val edgeZone = stepPx / 4
+            val direction = when {
+                start < layout.viewportStartOffset + edgeZone -> -1f
+                end > layout.viewportEndOffset - edgeZone -> 1f
+                else -> 0f
+            }
+            if (direction == 0f) {
+                autoScroll?.cancel()
+                autoScroll = null
+            } else if (autoScroll?.isActive != true) {
+                autoScroll = scope.launch {
+                    while (draggingId == pageId) {
+                        val scrolled = listState.scrollBy(direction * AUTO_SCROLL_STEP_PX)
+                        if (scrolled == 0f) break
+                        dragOffset += scrolled
+                        swapIfPastHalf(pageId)
+                        kotlinx.coroutines.delay(16)
+                    }
+                }
+            }
+        }
+        fun endDrag() {
+            autoScroll?.cancel()
+            autoScroll = null
+            draggingId = null
+            dragOffset = 0f
+        }
+
         LazyRow(
             state = listState,
             modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
@@ -314,6 +351,7 @@ private fun PagesCarousel(
                     pages = order,
                     width = tileWidth,
                     onClick = { onTileClick(page) },
+                    gesture = gestureFor(page.id),
                     modifier = Modifier
                         .then(if (dragging) Modifier else Modifier.animateItem())
                         .zIndex(if (dragging) 1f else 0f)
@@ -333,23 +371,15 @@ private fun PagesCarousel(
                                 onDrag = { change, amount ->
                                     change.consume()
                                     dragOffset += amount.x
-                                    val index = order.indexOfFirst { it.id == page.id }
-                                    if (dragOffset > stepPx / 2 && index < order.lastIndex) {
-                                        order = order.toMutableList().apply { add(index + 1, removeAt(index)) }
-                                        dragOffset -= stepPx
-                                    } else if (dragOffset < -stepPx / 2 && index > 0) {
-                                        order = order.toMutableList().apply { add(index - 1, removeAt(index)) }
-                                        dragOffset += stepPx
-                                    }
+                                    swapIfPastHalf(page.id)
+                                    updateAutoScroll(page.id)
                                 },
                                 onDragEnd = {
-                                    draggingId = null
-                                    dragOffset = 0f
+                                    endDrag()
                                     if (order.map { it.id } != pages.map { it.id }) onReorder(order.map { it.id })
                                 },
                                 onDragCancel = {
-                                    draggingId = null
-                                    dragOffset = 0f
+                                    endDrag()
                                     order = pages
                                 }
                             )
@@ -361,13 +391,42 @@ private fun PagesCarousel(
     }
 }
 
+/** App list and Text search as tiles, sized exactly like the carousel's so the two rows line up. */
+@Composable
+private fun UtilityPagesRow(
+    pages: List<LauncherPage>,
+    allPages: List<LauncherPage>,
+    gestureFor: (Long) -> HomeGesture?,
+    onTileClick: (LauncherPage) -> Unit
+) {
+    androidx.compose.foundation.layout.BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val tileWidth = (maxWidth - CAROUSEL_OUTER_PADDING * 2 - CAROUSEL_SPACING * 2) / 3
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = CAROUSEL_OUTER_PADDING, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(CAROUSEL_SPACING)
+        ) {
+            pages.forEach { page ->
+                PageTile(
+                    page = page,
+                    pages = allPages,
+                    width = tileWidth,
+                    onClick = { onTileClick(page) },
+                    gesture = gestureFor(page.id)
+                )
+            }
+        }
+    }
+}
+
 @Composable
 private fun PageTile(
     page: LauncherPage,
     pages: List<LauncherPage>,
     width: androidx.compose.ui.unit.Dp,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** The gesture that opens this page, shown as a small badge in the tile's corner. */
+    gesture: HomeGesture? = null
 ) {
     val label = pageLabel(page, pages)
     val glyph = page.iconGlyph?.let { runCatching { PageIconGlyph.valueOf(it) }.getOrNull() } ?: PageIconGlyph.forPageKind(page.kind)
@@ -390,6 +449,24 @@ private fun PageTile(
                 contentAlignment = Alignment.Center
             ) {
                 PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(width * 0.4f))
+                if (gesture != null) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surface),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            gestureIcon(gesture),
+                            contentDescription = gestureLabel(gesture),
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
             }
             Spacer(Modifier.height(6.dp))
             Text(

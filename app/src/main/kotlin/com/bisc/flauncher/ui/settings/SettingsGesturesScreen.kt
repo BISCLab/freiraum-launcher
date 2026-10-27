@@ -1,7 +1,27 @@
 package com.bisc.flauncher.ui.settings
 
 import android.content.ComponentName
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SwipeDown
@@ -63,19 +83,16 @@ fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, vie
     var pendingShortcutGesture by remember { mutableStateOf<HomeGesture?>(null) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_gestures), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup {
-            HomeGesture.entries.forEach { gesture ->
-                val action = gestureActions[gesture] ?: GestureAction.NONE
-                val locked = lockedReason(gesture)
-                SettingsPreference(
-                    icon = gestureIcon(gesture),
-                    title = gestureLabel(gesture),
-                    summary = locked ?: gestureActionSummary(action, allPages, labeledApps),
-                    onClick = { editingGesture = gesture },
-                    enabled = locked == null
-                )
-            }
+        // A phone with each gesture marked where it happens, instead of a list — tap a marker to
+        // change what it does.
+        val markers = HomeGesture.entries.associateWith { gesture ->
+            val locked = lockedReason(gesture)
+            GestureMarker(
+                summary = locked ?: gestureActionSummary(gestureActions[gesture] ?: GestureAction.NONE, allPages, labeledApps),
+                enabled = locked == null
+            )
         }
+        GesturePhone(markers = markers, onEdit = { editingGesture = it })
     }
 
     editingGesture?.let { gesture ->
@@ -201,4 +218,70 @@ internal fun gestureActionSummary(action: GestureAction, pages: List<LauncherPag
         page?.let { pageLabel(it, pages) } ?: gestureActionTypeLabel(action.type)
     }
     else -> gestureActionTypeLabel(action.type)
+}
+
+/** What one gesture's marker on [GesturePhone] shows. */
+internal data class GestureMarker(val summary: String, val enabled: Boolean)
+
+/** A phone outline with the four home gestures marked where they happen: swipe down at the top,
+ *  double tap and long press in the middle, swipe up at the bottom. */
+@Composable
+private fun GesturePhone(markers: Map<HomeGesture, GestureMarker>, onEdit: (HomeGesture) -> Unit) {
+    Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(0.82f)
+                .aspectRatio(0.52f)
+                .clip(RoundedCornerShape(40.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .border(3.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(40.dp))
+                .padding(horizontal = 16.dp, vertical = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            // The camera hole, so it reads as a phone at a glance.
+            Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(MaterialTheme.colorScheme.outline))
+            GestureMarkerChip(HomeGesture.SWIPE_DOWN, Icons.Filled.ArrowDownward, markers, onEdit)
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                GestureMarkerChip(HomeGesture.DOUBLE_TAP, Icons.Filled.TouchApp, markers, onEdit)
+                GestureMarkerChip(HomeGesture.LONG_PRESS, Icons.Filled.TouchApp, markers, onEdit)
+            }
+            GestureMarkerChip(HomeGesture.SWIPE_UP, Icons.Filled.ArrowUpward, markers, onEdit)
+            // The gesture bar.
+            Box(modifier = Modifier.fillMaxWidth(0.35f).height(4.dp).clip(CircleShape).background(MaterialTheme.colorScheme.outline))
+        }
+    }
+}
+
+@Composable
+private fun GestureMarkerChip(
+    gesture: HomeGesture,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    markers: Map<HomeGesture, GestureMarker>,
+    onEdit: (HomeGesture) -> Unit
+) {
+    val marker = markers[gesture] ?: return
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+            .then(if (marker.enabled) Modifier.clickable { onEdit(gesture) } else Modifier)
+            .alpha(if (marker.enabled) 1f else 0.5f)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+            Text(gestureLabel(gesture), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Text(
+            marker.summary,
+            style = MaterialTheme.typography.titleSmall,
+            color = if (marker.enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+    }
 }

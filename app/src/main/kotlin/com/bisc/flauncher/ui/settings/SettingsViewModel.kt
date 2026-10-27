@@ -391,6 +391,9 @@ class SettingsViewModel @Inject constructor(
     val searchKeyboardCapCornerRadiusPercent: StateFlow<Int> =
         repository.searchKeyboardCapCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, 100)
 
+    val searchKeyboardCapArrow: StateFlow<Boolean> =
+        repository.searchKeyboardCapArrow.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
     val globalBackground: StateFlow<BackgroundConfig> =
         repository.globalBackground.stateIn(viewModelScope, SharingStarted.Eagerly, BackgroundConfig())
 
@@ -423,10 +426,6 @@ class SettingsViewModel @Inject constructor(
     val appListSearchButtonAppearance: StateFlow<ElementAppearance?> =
         repository.appListSearchButtonAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    fun resetAppListSearchButtonAppearance() {
-        viewModelScope.launch { repository.resetAppListSearchButtonAppearance() }
-    }
-
     fun setAppListSearchButtonAppearance(appearance: ElementAppearance) {
         viewModelScope.launch { repository.setAppListSearchButtonAppearance(appearance) }
     }
@@ -444,13 +443,6 @@ class SettingsViewModel @Inject constructor(
 
     fun setChargingAnimationColor(color: Int?) {
         viewModelScope.launch { repository.setChargingAnimationColor(color) }
-    }
-
-    val appListAccentColor: StateFlow<Int?> =
-        repository.appListAccentColor.stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
-    fun setAppListAccentColor(color: Int?) {
-        viewModelScope.launch { repository.setAppListAccentColor(color) }
     }
 
     val chargingAnimationEnabled: StateFlow<Boolean> =
@@ -517,7 +509,9 @@ class SettingsViewModel @Inject constructor(
         hiddenFromAppList: Boolean,
         hiddenFromSearch: Boolean,
         revealMode: RevealMode,
-        revealCode: String?
+        revealCode: String?,
+        iconShape: IconShape?,
+        iconSizePercent: Int?
     ) {
         viewModelScope.launch {
             val effectiveMode = if (!hiddenFromSearch) revealMode else RevealMode.NONE
@@ -527,8 +521,8 @@ class SettingsViewModel @Inject constructor(
                     componentName = componentName.flattenToString(),
                     iconPackPackage = existing?.iconPackPackage,
                     iconPackDrawable = existing?.iconPackDrawable,
-                    iconShape = existing?.iconShape,
-                    iconSizePercent = existing?.iconSizePercent,
+                    iconShape = iconShape,
+                    iconSizePercent = iconSizePercent?.coerceIn(0, 200),
                     customLabel = customLabel?.trim()?.takeIf { it.isNotEmpty() },
                     hiddenFromAppList = hiddenFromAppList,
                     hiddenFromSearch = hiddenFromSearch,
@@ -547,21 +541,7 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun setAppIconShape(componentName: ComponentName, shape: IconShape?) {
-        viewModelScope.launch {
-            val key = componentName.flattenToString()
-            val current = appOverrides.value[key] ?: AppOverride(key)
-            appOverrideRepository.save(current.copy(iconShape = shape))
-        }
-    }
 
-    fun setAppIconSizePercent(componentName: ComponentName, percent: Int?) {
-        viewModelScope.launch {
-            val key = componentName.flattenToString()
-            val current = appOverrides.value[key] ?: AppOverride(key)
-            appOverrideRepository.save(current.copy(iconSizePercent = percent?.coerceIn(0, 200)))
-        }
-    }
 
     private val pinnedShortcuts: StateFlow<List<com.bisc.flauncher.data.model.PinnedShortcut>> =
         shortcutRepository.pinnedShortcuts.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
@@ -684,6 +664,10 @@ class SettingsViewModel @Inject constructor(
 
     fun setSearchKeyboardCapCornerRadiusPercent(percent: Int) {
         viewModelScope.launch { repository.setSearchKeyboardCapCornerRadiusPercent(percent) }
+    }
+
+    fun setSearchKeyboardCapArrow(enabled: Boolean) {
+        viewModelScope.launch { repository.setSearchKeyboardCapArrow(enabled) }
     }
 
     fun setAccentColor(argb: Int) {

@@ -235,8 +235,7 @@ class MainActivity : ComponentActivity() {
                                         page.kind == com.bisc.flauncher.data.model.LauncherPageKind.SEARCH ->
                                             navController.navigate("settings/search")
                                     }
-                                },
-                                onOpenIcon = { pageId -> navController.navigate("settings/pages/$pageId/icon") }
+                                }
                             )
                         }
                         composable(
@@ -257,6 +256,7 @@ class MainActivity : ComponentActivity() {
                         ) { backStackEntry ->
                             val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@composable
                             SettingsHomeScreenHub(
+                                pageId = pageId,
                                 navController = navController,
                                 onBack = { navController.popBackStack() },
                                 onNavigate = { sub -> navController.navigate("settings/pages/$pageId/home/$sub") }

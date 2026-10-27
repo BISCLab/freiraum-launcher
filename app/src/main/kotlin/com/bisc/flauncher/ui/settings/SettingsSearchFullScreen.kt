@@ -16,12 +16,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
-import kotlin.math.roundToInt
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -70,6 +70,8 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, o
 @Composable
 fun SettingsSearchAppearanceScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
     SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
+        // Tap a part of the miniature to edit it; the list below stays as the second way in.
+        SearchPreview(onNavigate = onNavigate)
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
@@ -99,17 +101,19 @@ fun SettingsSearchAppearanceScreen(navController: NavController, onBack: () -> U
     }
 }
 
-/** The search page itself: its background (with that background's opacity — below 100% the page
- *  underneath shows through), the text color drawn on it, and its status bar. */
+/** The search page itself: its background (always opaque), the text color drawn on it, and its
+ *  status bar. */
 @Composable
 fun SettingsSearchPageScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val searchAppearance by viewModel.searchAppearance.collectAsState()
+    val savedAppearance by viewModel.searchAppearance.collectAsState()
+    var searchAppearance by rememberDraft(savedAppearance)
     val backgroundOverride by viewModel.searchBackgroundOverride.collectAsState()
     val globalShade by viewModel.searchGlobalShade.collectAsState()
     val globalBackground by viewModel.globalBackground.collectAsState()
     val hideStatusBar by viewModel.searchHideStatusBar.collectAsState()
 
-    SettingsSubScreen(title = stringResource(R.string.settings_search_page_label), navController = navController, onBack = onBack) {
+    SettingsSubScreen(title = stringResource(R.string.settings_search_page_label), navController = navController, onBack = onBack, onSave = { viewModel.setSearchAppearance(searchAppearance) }, dirty = searchAppearance != savedAppearance) {
+        UtilityPageIdentityGroup(kind = com.bisc.flauncher.data.model.LauncherPageKind.SEARCH, navController = navController)
         BackgroundOverrideSection(
             override = backgroundOverride,
             global = globalBackground,
@@ -120,26 +124,18 @@ fun SettingsSearchPageScreen(navController: NavController, onBack: () -> Unit, v
             onGlobalShadeChange = viewModel::setSearchGlobalShade,
             groupTitle = stringResource(R.string.settings_section_global_background)
         )
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_opacity_label)) {
-            ExpandableSlider(
-                value = searchAppearance.opacity,
-                onSettled = { viewModel.setSearchAppearance(searchAppearance.copy(opacity = it)) },
-                valueRange = 0f..1f,
-                valueLabel = { stringResource(R.string.settings_background_opacity_value, (it * 100).roundToInt()) }
-            )
-        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_element_text_color_label)) {
             ColorPickerRow(
                 title = stringResource(R.string.settings_element_text_color_label),
                 summary = if (searchAppearance.contentColor == null) stringResource(R.string.settings_element_color_auto_hint) else null,
                 color = searchAppearance.contentColor ?: MaterialTheme.colorScheme.onSurface.toArgb(),
-                onColorChange = { viewModel.setSearchAppearance(searchAppearance.copy(contentColor = it)) }
+                onColorChange = { searchAppearance = searchAppearance.copy(contentColor = it) }
             )
             if (searchAppearance.contentColor != null) {
                 SettingsPreference(
                     icon = null,
                     title = stringResource(R.string.settings_element_color_reset),
-                    onClick = { viewModel.setSearchAppearance(searchAppearance.copy(contentColor = null)) },
+                    onClick = { searchAppearance = searchAppearance.copy(contentColor = null) },
                     trailing = null
                 )
             }
@@ -162,6 +158,7 @@ fun SettingsSearchKeyboardScreen(navController: NavController, onBack: () -> Uni
     val capEnabled by viewModel.searchKeyboardCapEnabled.collectAsState()
     val capColor by viewModel.searchKeyboardCapColor.collectAsState()
     val capCornerPercent by viewModel.searchKeyboardCapCornerRadiusPercent.collectAsState()
+    val capArrow by viewModel.searchKeyboardCapArrow.collectAsState()
 
     SettingsSubScreen(title = stringResource(R.string.settings_search_keyboard_label), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
@@ -187,6 +184,13 @@ fun SettingsSearchKeyboardScreen(navController: NavController, onBack: () -> Uni
                     info = stringResource(R.string.settings_search_keyboard_cap_color_info),
                     color = capColor,
                     onColorChange = viewModel::setSearchKeyboardCapColor
+                )
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_search_keyboard_cap_arrow),
+                    info = stringResource(R.string.settings_search_keyboard_cap_arrow_info),
+                    onClick = { viewModel.setSearchKeyboardCapArrow(!capArrow) },
+                    trailing = { Switch(checked = capArrow, onCheckedChange = viewModel::setSearchKeyboardCapArrow) }
                 )
             }
         }
@@ -346,13 +350,16 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
 
     pickingColorFor?.let { category ->
         val current = categoryColors[category]?.let { Color(it) } ?: category.defaultColor
+        var draft by rememberDraft(current)
         SettingsEditPage(
             title = stringResource(category.settingsLabelRes),
-            onDismiss = { pickingColorFor = null }
+            onDismiss = { pickingColorFor = null },
+            onSave = { viewModel.setCategoryColor(category, draft.toArgb()) },
+            dirty = draft != current
         ) {
             ColorPickerControls(
-                color = current,
-                onColorChange = { viewModel.setCategoryColor(category, it.toArgb()) }
+                color = draft,
+                onColorChange = { draft = it }
             )
         }
     }
@@ -403,15 +410,14 @@ fun SettingsSearchElementScreen(
     }
 }
 
-/** Until customized here, an element follows the search screen's own appearance. */
+/** Until customized here, an element looks like every other element: the theme's default box. */
 @Composable
 private fun effectiveSearchElementAppearance(element: SearchElement, viewModel: SettingsViewModel): com.bisc.flauncher.data.model.ElementAppearance {
     val own by when (element) {
         SearchElement.BAR -> viewModel.searchBarAppearance
         SearchElement.RESULTS -> viewModel.searchResultsAppearance
     }.collectAsState()
-    val searchAppearance by viewModel.searchAppearance.collectAsState()
-    return own ?: searchAppearance
+    return own ?: com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor(MaterialTheme.colorScheme.background.luminance() < 0.5f)
 }
 
 private fun SettingsViewModel.setSearchElementAppearance(element: SearchElement, appearance: com.bisc.flauncher.data.model.ElementAppearance) =
@@ -422,34 +428,39 @@ private fun SettingsViewModel.setSearchElementAppearance(element: SearchElement,
 
 @Composable
 fun SettingsSearchElementBackgroundScreen(element: SearchElement, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val appearance = effectiveSearchElementAppearance(element, viewModel)
-    SettingsSubScreen(title = stringResource(R.string.settings_element_fill_label), navController = navController, onBack = onBack) {
-        ElementBackgroundSection(appearance = appearance, onAppearanceChange = { viewModel.setSearchElementAppearance(element, it) })
+    val saved = effectiveSearchElementAppearance(element, viewModel)
+    var appearance by rememberDraft(saved)
+    SettingsSubScreen(title = stringResource(R.string.settings_element_fill_label), navController = navController, onBack = onBack, onSave = { viewModel.setSearchElementAppearance(element, appearance) }, dirty = appearance != saved) {
+        ElementBackgroundSection(appearance = appearance, onAppearanceChange = { appearance = it })
     }
 }
 
 @Composable
 fun SettingsSearchElementBorderScreen(element: SearchElement, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val appearance = effectiveSearchElementAppearance(element, viewModel)
+    val saved = effectiveSearchElementAppearance(element, viewModel)
+    var appearance by rememberDraft(saved)
     // Unset defaults: the bar follows the global corner roundness, the cards start fully rounded.
     val barCorner by viewModel.searchBarCornerRadiusPercent.collectAsState()
     val resultsCorner by viewModel.searchResultsCornerRadiusPercent.collectAsState()
     val defaultCornerPercent by viewModel.defaultCornerRadiusPercent.collectAsState()
-    val cornerPercent = when (element) {
+    val savedCornerPercent = when (element) {
         SearchElement.BAR -> barCorner ?: defaultCornerPercent
         SearchElement.RESULTS -> resultsCorner ?: 100
     }
-    SettingsSubScreen(title = stringResource(R.string.settings_element_border_label), navController = navController, onBack = onBack) {
-        ElementBorderSection(appearance = appearance, onAppearanceChange = { viewModel.setSearchElementAppearance(element, it) })
+    var cornerPercent by rememberDraft(savedCornerPercent)
+    val save = {
+        if (appearance != saved) viewModel.setSearchElementAppearance(element, appearance)
+        if (cornerPercent != savedCornerPercent) when (element) {
+            SearchElement.BAR -> viewModel.setSearchBarCornerRadiusPercent(cornerPercent)
+            SearchElement.RESULTS -> viewModel.setSearchResultsCornerRadiusPercent(cornerPercent)
+        }
+    }
+    SettingsSubScreen(title = stringResource(R.string.settings_element_border_label), navController = navController, onBack = onBack, onSave = save, dirty = appearance != saved || cornerPercent != savedCornerPercent) {
+        ElementBorderSection(appearance = appearance, onAppearanceChange = { appearance = it })
         SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
             ExpandablePercentSlider(
                 percent = cornerPercent,
-                onSettled = {
-                    when (element) {
-                        SearchElement.BAR -> viewModel.setSearchBarCornerRadiusPercent(it)
-                        SearchElement.RESULTS -> viewModel.setSearchResultsCornerRadiusPercent(it)
-                    }
-                }
+                onSettled = { cornerPercent = it }
             )
         }
     }

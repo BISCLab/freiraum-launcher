@@ -13,6 +13,7 @@ import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
+import android.service.notification.NotificationListenerService
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -53,17 +54,27 @@ class NowPlayingRepository @Inject constructor(
     fun hasPermission(): Boolean =
         NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
 
+    /** (Re)connects to the media sessions and re-reads them. Cheap, so it runs whenever the widget
+     *  shows, the home screen resumes, the listener (re)connects, and before every button press —
+     *  a one-off connect went stale after app updates (the system unbinds the listener, reading
+     *  sessions fails until it's rebound) and when a player replaced its session. */
     fun refresh() {
         val granted = hasPermission()
-        if (granted && !listening) {
+        if (granted) {
             try {
-                mediaSessionManager?.addOnActiveSessionsChangedListener(sessionListener, listenerComponent)
+                if (!listening) {
+                    mediaSessionManager?.addOnActiveSessionsChangedListener(sessionListener, listenerComponent)
+                    listening = true
+                }
                 onSessionsChanged(mediaSessionManager?.getActiveSessions(listenerComponent))
-                listening = true
             } catch (e: SecurityException) {
+                // Access is granted but the listener isn't bound (yet) — ask the system to rebind it;
+                // its onListenerConnected calls back into here once it is.
+                runCatching { mediaSessionManager?.removeOnActiveSessionsChangedListener(sessionListener) }
                 listening = false
+                runCatching { NotificationListenerService.requestRebind(listenerComponent) }
             }
-        } else if (!granted && listening) {
+        } else if (listening) {
             mediaSessionManager?.removeOnActiveSessionsChangedListener(sessionListener)
             controllers = emptyList()
             attach(null)
@@ -80,19 +91,35 @@ class NowPlayingRepository @Inject constructor(
     }
 
     fun togglePlayPause() {
+        refresh()
         val controller = activeController ?: return sendMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
-        if (controller.playbackState?.state == PlaybackState.STATE_PLAYING) {
-            controller.transportControls.pause()
-        } else {
-            controller.transportControls.play()
+        val state = controller.playbackState
+        val actions = state?.actions ?: 0L
+        val playing = state?.state == PlaybackState.STATE_PLAYING
+        // Use play()/pause() only when the session says it supports them; otherwise (some players,
+        // e.g. Media3-based ones, only advertise play/pause as a toggle) send that session itself a
+        // play/pause media button, which every player handles.
+        when {
+            playing && actions and PlaybackState.ACTION_PAUSE != 0L -> controller.transportControls.pause()
+            !playing && actions and PlaybackState.ACTION_PLAY != 0L -> controller.transportControls.play()
+            else -> sendMediaButtonTo(controller, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
+        }
+    }
+
+    private fun sendMediaButtonTo(controller: MediaController, code: Int) {
+        runCatching {
+            controller.dispatchMediaButtonEvent(KeyEvent(KeyEvent.ACTION_DOWN, code))
+            controller.dispatchMediaButtonEvent(KeyEvent(KeyEvent.ACTION_UP, code))
         }
     }
 
     fun skipNext() {
+        refresh()
         activeController?.transportControls?.skipToNext() ?: sendMediaKey(KeyEvent.KEYCODE_MEDIA_NEXT)
     }
 
     fun skipPrevious() {
+        refresh()
         activeController?.transportControls?.skipToPrevious() ?: sendMediaKey(KeyEvent.KEYCODE_MEDIA_PREVIOUS)
     }
 
@@ -110,9 +137,24 @@ class NowPlayingRepository @Inject constructor(
         onSessionsChanged(controllers)
     }
 
+    /** Opens the player — its own "now playing" screen (the session's activity) when it has one,
+     *  otherwise the app itself. */
     fun openPlayer() {
+        refresh()
         val controller = activeController
-        val opened = controller != null && runCatching { controller.sessionActivity?.send() }.isSuccess && controller.sessionActivity != null
+        val sessionActivity = controller?.sessionActivity
+        val opened = sessionActivity != null && runCatching {
+            // Since Android 14 the sender has to explicitly allow the other app's activity to start
+            // from its PendingIntent; without this the start is silently blocked (and still looks
+            // like a successful send, so no fallback ever ran).
+            val options = android.app.ActivityOptions.makeBasic().apply {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    @Suppress("DEPRECATION")
+                    setPendingIntentBackgroundActivityStartMode(android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                }
+            }
+            sessionActivity.send(context, 0, null, null, null, null, options.toBundle())
+        }.isSuccess
         if (!opened) {
             val pkg = controller?.packageName ?: remembered?.packageName ?: return
             context.packageManager.getLaunchIntentForPackage(pkg)
@@ -140,8 +182,13 @@ class NowPlayingRepository @Inject constructor(
 
     private fun onSessionsChanged(list: List<MediaController>?) {
         controllers = list.orEmpty()
+        // The player the user picked, else whichever is playing right now, else the one already shown
+        // (so a re-sync before a button press can't silently hand the buttons to another paused app),
+        // else the most recently active.
+        val currentPackage = activeController?.packageName
         val next = preferredPackage?.let { pkg -> controllers.firstOrNull { it.packageName == pkg } }
             ?: controllers.firstOrNull { it.playbackState?.state == PlaybackState.STATE_PLAYING }
+            ?: currentPackage?.let { pkg -> controllers.firstOrNull { it.packageName == pkg } }
             ?: controllers.firstOrNull()
         attach(next)
     }

@@ -37,6 +37,7 @@ import com.bisc.flauncher.data.model.GestureActionType
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.model.appearance
+import com.bisc.flauncher.data.model.withAppearance
 import com.bisc.flauncher.data.model.clockDateAction
 import com.bisc.flauncher.data.model.clockTimeAction
 import com.bisc.flauncher.ui.home.HomeViewModel
@@ -62,10 +63,11 @@ fun SettingsWidgetRowEditScreen(
     val rowsByPage by viewModel.rowsByPage.collectAsState()
     val allPages by viewModel.allPages.collectAsState()
     val browsableApps by viewModel.browsableApps.collectAsState()
-    val row = rowsByPage[pageId]?.find { it.id == rowId }
+    val savedRow = rowsByPage[pageId]?.find { it.id == rowId }
 
-    LaunchedEffect(row) { if (row == null) onBack() }
-    if (row == null) return
+    LaunchedEffect(savedRow) { if (savedRow == null) onBack() }
+    if (savedRow == null) return
+    var row by rememberDraft(savedRow)
 
     var hostedWidgetView by remember { mutableStateOf<android.view.View?>(null) }
     var confirmingRemove by remember { mutableStateOf(false) }
@@ -74,8 +76,8 @@ fun SettingsWidgetRowEditScreen(
     var pickingPageFor by remember { mutableStateOf<ClockActionSlot?>(null) }
     fun applyClockAction(slot: ClockActionSlot, action: GestureAction) {
         when (slot) {
-            ClockActionSlot.DATE -> viewModel.setRowClockDateAction(row, action)
-            ClockActionSlot.TIME -> viewModel.setRowClockTimeAction(row, action)
+            ClockActionSlot.DATE -> row = row.copy(clockDateActionType = action.type.name, clockDateActionPayload = action.payload)
+            ClockActionSlot.TIME -> row = row.copy(clockTimeActionType = action.type.name, clockTimeActionPayload = action.payload)
         }
     }
 
@@ -121,20 +123,20 @@ fun SettingsWidgetRowEditScreen(
         }
     }
 
-    SettingsSubScreen(title = rowLabel(row), navController = navController, onBack = onBack) {
+    SettingsSubScreen(title = rowLabel(row), navController = navController, onBack = onBack, onSave = { viewModel.saveRow(row) }, dirty = row != savedRow) {
         WidgetSizeEditor(
             row = row,
             minSpan = minSpan,
             maxSpan = maxSpan,
-            onSpanChange = { viewModel.setRowSpanY(row, it) },
+            onSpanChange = { row = row.copy(spanY = it) },
             onSystemWidgetViewReady = { hostedWidgetView = it },
             heightPxRange = heightPxRange,
-            onHeightPxChange = { viewModel.setRowHeightPx(row, it) }
+            onHeightPxChange = { row = row.copy(heightPx = it) }
         )
         if (showsStyleControls) {
             ElementAppearanceSection(
                 appearance = row.appearance(),
-                onAppearanceChange = { viewModel.setRowAppearance(row, it) },
+                onAppearanceChange = { row = row.withAppearance(it) },
                 styleGroupTitle = surfaceLabel(R.string.settings_layer_surface_widget),
                 onEyedropperCapture = if (row.type == PageRowType.SYSTEM_WIDGET) {
                     { hostedWidgetView?.let(::captureViewBitmap) }
@@ -143,7 +145,7 @@ fun SettingsWidgetRowEditScreen(
             SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
                 ExpandablePercentSlider(
                     percent = row.cornerRadiusPercent,
-                    onSettled = { viewModel.setRowCornerRadiusPercent(row, it) }
+                    onSettled = { row = row.copy(cornerRadiusPercent = it) }
                 )
             }
             SettingsPreferenceGroup {
@@ -151,20 +153,20 @@ fun SettingsWidgetRowEditScreen(
                     icon = null,
                     title = stringResource(R.string.settings_widgets_edge_to_edge_label),
                     info = stringResource(R.string.settings_widgets_edge_to_edge_summary),
-                    onClick = { viewModel.setRowEdgeToEdge(row, !row.edgeToEdge) },
-                    trailing = { Switch(checked = row.edgeToEdge, onCheckedChange = { viewModel.setRowEdgeToEdge(row, it) }) }
+                    onClick = { row = row.copy(edgeToEdge = !row.edgeToEdge) },
+                    trailing = { Switch(checked = row.edgeToEdge, onCheckedChange = { row = row.copy(edgeToEdge = it) }) }
                 )
             }
         }
         if (isBuiltIn && row.payload == WidgetKind.CLOCK) {
             SettingsPreferenceGroup(title = stringResource(R.string.settings_clock_style_label)) {
                 ClockStyle.entries.forEach { style ->
-                    RadioPreference(clockStyleLabel(style), style, row.clockStyle, { viewModel.setRowClockStyle(row, it) })
+                    RadioPreference(clockStyleLabel(style), style, row.clockStyle, { row = row.copy(clockStyle = it) })
                 }
             }
             SettingsPreferenceGroup(title = stringResource(R.string.settings_clock_alignment_label)) {
                 ClockAlignment.entries.forEach { alignment ->
-                    RadioPreference(clockAlignmentLabel(alignment), alignment, row.clockAlignment, { viewModel.setRowClockAlignment(row, it) })
+                    RadioPreference(clockAlignmentLabel(alignment), alignment, row.clockAlignment, { row = row.copy(clockAlignment = it) })
                 }
             }
             // The clock isn't a card like the other built-in widgets (no fill/border/corner-shape), so
@@ -177,7 +179,7 @@ fun SettingsWidgetRowEditScreen(
                 title = stringResource(R.string.settings_element_text_color_label),
                 custom = row.appearance().contentColor,
                 automaticSeed = android.graphics.Color.WHITE,
-                onChange = { viewModel.setRowAppearance(row, row.appearance().copy(contentColor = it)) }
+                onChange = { row = row.withAppearance(row.appearance().copy(contentColor = it)) }
             )
             SettingsPreferenceGroup(title = stringResource(R.string.settings_clock_actions_label)) {
                 SettingsPreference(
@@ -195,14 +197,14 @@ fun SettingsWidgetRowEditScreen(
             }
             SettingsPreferenceGroup(title = stringResource(R.string.settings_clock_time_format_label)) {
                 ClockTimeFormat.entries.forEach { format ->
-                    RadioPreference(clockTimeFormatLabel(format), format, row.clockTimeFormat, { viewModel.setRowClockTimeFormat(row, it) })
+                    RadioPreference(clockTimeFormatLabel(format), format, row.clockTimeFormat, { row = row.copy(clockTimeFormat = it) })
                 }
             }
             SettingsPreferenceGroup(title = stringResource(R.string.settings_clock_date_format_label)) {
                 var dateFormatText by remember(row.id) { mutableStateOf(row.clockDateFormat) }
                 OutlinedTextField(
                     value = dateFormatText,
-                    onValueChange = { dateFormatText = it; viewModel.setRowClockDateFormat(row, it) },
+                    onValueChange = { dateFormatText = it; row = row.copy(clockDateFormat = it) },
                     placeholder = { Text(stringResource(R.string.settings_clock_date_format_placeholder)) },
                     supportingText = { Text(stringResource(R.string.settings_clock_date_format_summary)) },
                     singleLine = true,
@@ -215,8 +217,8 @@ fun SettingsWidgetRowEditScreen(
                     icon = null,
                     title = stringResource(R.string.settings_clock_show_next_alarm),
                     info = stringResource(R.string.settings_clock_show_next_alarm_summary),
-                    onClick = { viewModel.setRowClockShowNextAlarm(row, !row.clockShowNextAlarm) },
-                    trailing = { Switch(checked = row.clockShowNextAlarm, onCheckedChange = { viewModel.setRowClockShowNextAlarm(row, it) }) }
+                    onClick = { row = row.copy(clockShowNextAlarm = !row.clockShowNextAlarm) },
+                    trailing = { Switch(checked = row.clockShowNextAlarm, onCheckedChange = { row = row.copy(clockShowNextAlarm = it) }) }
                 )
             }
         }

@@ -64,6 +64,9 @@ import java.time.format.FormatStyle
 
 private const val DATE_GAP = 20f
 
+/** The stacked serif style's date sits a little closer under its two-line time. */
+private const val STACKED_DATE_GAP = 14f
+
 private const val CAP_HEIGHT = 0.72f
 
 private const val EDGE_PADDING = 24f
@@ -91,8 +94,8 @@ fun ClockWidget(
     // the delayed resume eventually caught up. ACTION_TIME_TICK is the same system broadcast the real
     // lock screen clock relies on: delivered once a minute while the screen is actually on, immune to
     // Doze since the system itself wakes it, and re-registering (and resyncing immediately) every time
-    // this composable re-enters composition also catches the screen-just-turned-on case before the next
-    // tick even arrives.
+    // this composable re-enters composition resyncs it right away (see the resume resync below for the
+    // screen-just-turned-on case).
     DisposableEffect(Unit) {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(receiverContext: Context, intent: Intent) {
@@ -108,6 +111,23 @@ fun ClockWidget(
         now = LocalDateTime.now()
         onDispose { context.unregisterReceiver(receiver) }
     }
+    // The tick above doesn't arrive while the screen is off, and this widget stays composed through
+    // that — so after unlocking it showed the old time until the next minute boundary (up to ~59s).
+    // Resync the moment the home screen is visible again.
+    androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
+        now = LocalDateTime.now()
+        onPauseOrDispose { }
+    }
+    // The analog face draws a second hand, which the once-a-minute tick above would leave frozen
+    // for a whole minute — while that face is on screen, update every second as well.
+    if (style == ClockStyle.ANALOG) {
+        androidx.compose.runtime.LaunchedEffect(Unit) {
+            while (true) {
+                kotlinx.coroutines.delay(1000L - System.currentTimeMillis() % 1000L)
+                now = LocalDateTime.now()
+            }
+        }
+    }
 
     val locale = LocalConfiguration.current.locales.get(0)
     val use24h = remember(timeFormat, context) {
@@ -119,9 +139,12 @@ fun ClockWidget(
     }
     val timePattern = if (use24h) "HH:mm" else "h:mm a"
     val dateText = remember(now, locale, dateFormat) {
-        val pattern = dateFormat.ifBlank { "EEEE, dd.MM.yyyy" }
+        // Default: weekday plus numeric date in the language's own order and separators
+        // ("Montag, 26.10.2026", "Monday, 10/26/2026") rather than one hardcoded German pattern.
+        val localDefault = android.text.format.DateFormat.getBestDateTimePattern(locale, "EEEEddMMyyyy")
+        val pattern = dateFormat.ifBlank { localDefault }
         runCatching { DateTimeFormatter.ofPattern(pattern, locale).format(now) }
-            .getOrElse { DateTimeFormatter.ofPattern("EEEE, dd.MM.yyyy", locale).format(now) }
+            .getOrElse { DateTimeFormatter.ofPattern(localDefault, locale).format(now) }
             .replaceFirstChar { it.titlecase(locale) }
     }
     val longDateText = remember(now, locale, dateFormat) {
@@ -197,7 +220,7 @@ fun ClockWidget(
                         lineHeightFactor = 0.8f,
                         maxLines = 2
                     )
-                    DateText(longDateText, dateFs, FontFamily.Serif, FontWeight.Bold, ink.copy(alpha = 0.9f), shadow, textAlign, ::sp, dateModifier)
+                    DateText(longDateText, dateFs, FontFamily.Serif, FontWeight.Bold, ink.copy(alpha = 0.9f), shadow, textAlign, ::sp, dateModifier, gap = STACKED_DATE_GAP)
                 }
 
                 ClockStyle.ANALOG -> {
@@ -283,11 +306,12 @@ private fun DateText(
     shadow: Shadow,
     textAlign: TextAlign,
     sp: (Float) -> TextUnit,
-    modifier: Modifier
+    modifier: Modifier,
+    gap: Float = DATE_GAP
 ) {
     Text(
         text = text,
-        modifier = Modifier.paddingFromBaseline(top = (DATE_GAP + CAP_HEIGHT * fontSizeDp).dp).then(modifier),
+        modifier = Modifier.paddingFromBaseline(top = (gap + CAP_HEIGHT * fontSizeDp).dp).then(modifier),
         textAlign = textAlign,
         maxLines = 1,
         style = MaterialTheme.typography.titleMedium.copy(

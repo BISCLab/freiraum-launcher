@@ -36,7 +36,11 @@ import com.bisc.flauncher.ui.theme.noRippleClickable
 // breadcrumbs need every settings entry on it, not just the current/previous one.
 @SuppressLint("RestrictedApi")
 @Composable
-internal fun SettingsBreadcrumbBar(navController: NavController) {
+internal fun SettingsBreadcrumbBar(
+    navController: NavController,
+    /** Lets an editor with unsaved changes ask before a breadcrumb takes the user away. */
+    guardLeave: (() -> Unit) -> Unit = { it() }
+) {
     val backStack by navController.currentBackStack.collectAsState()
     val crumbs = backStack.filter { entry -> entry.destination.route?.startsWith("settings") == true }
     if (crumbs.size <= 1) return
@@ -62,7 +66,7 @@ internal fun SettingsBreadcrumbBar(navController: NavController) {
                     Modifier
                 } else {
                     Modifier.noRippleClickable {
-                        navController.popBackStack(entry.destination.id, inclusive = false)
+                        guardLeave { navController.popBackStack(entry.destination.id, inclusive = false) }
                     }
                 }
             )
@@ -141,7 +145,7 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
         "settings/system" -> stringResource(R.string.settings_system_title)
         "settings/folder" -> stringResource(R.string.settings_section_folder)
         "settings/folder/global" -> stringResource(R.string.settings_folder_global_label)
-        "settings/folder/global/appearance" -> stringResource(R.string.settings_folder_appearance_label)
+        "settings/folder/global/appearance" -> stringResource(R.string.settings_element_fill_label)
         "settings/folder/global/border" -> stringResource(R.string.settings_element_border_label)
         "settings/folder/global/visibility" -> stringResource(R.string.settings_folder_visibility_label)
         "settings/folder/{folderId}" -> {

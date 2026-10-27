@@ -3,6 +3,17 @@ package com.bisc.flauncher.ui.home.search
 import com.bisc.flauncher.util.matchesWordStart
 import android.content.ComponentName
 import androidx.compose.foundation.background
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.imeAnimationTarget
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.Icon
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -10,7 +21,6 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
@@ -21,7 +31,6 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -33,11 +42,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.bisc.flauncher.R
+import com.bisc.flauncher.ui.theme.noRippleClickable
 import com.bisc.flauncher.data.model.AppInfo
 import com.bisc.flauncher.data.model.ContactInfo
 import com.bisc.flauncher.data.model.PinnedShortcut
@@ -87,6 +98,8 @@ fun SearchOverlay(
      *  the results above it. */
     keyboardCapColor: Int? = null,
     keyboardCapCornerRadiusPercent: Int = 100,
+    /** Shows a small arrow in the strip and makes tapping the strip close the keyboard. */
+    keyboardCapArrow: Boolean = false,
     statusBarHidden: Boolean,
     categoryOrder: List<SearchCategory>,
     activeCategories: Set<SearchCategory>,
@@ -136,25 +149,27 @@ fun SearchOverlay(
     // The page has no fill of its own over its background any more — [appearance] only contributes
     // the background's opacity and the text color, automatic = readable against that background.
     val noFill = appearance.copy(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE)
+    // Not yet customized, the bar and the cards look like every other element (Dock, Panel, …):
+    // the theme's default box, not the page's own (fill-less) appearance.
+    val defaultElement = com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor(
+        androidx.compose.material3.MaterialTheme.colorScheme.background.luminance() < 0.5f
+    )
     val colors = if (background != null) {
         resolveElementColors(noFill, rememberSurfaceIsDark(noFill, background))
     } else {
         resolveElementColors(noFill)
     }
 
-    // The results take whatever height is left above the system keyboard; hiding it (back
-    // gesture) leaves the search.
+    // The results take whatever height is left above the system keyboard. The first back gesture
+    // only closes the keyboard (the system handles that itself), so the results get the whole
+    // screen; the next one leaves the search (HomeScreen's own BackHandler for it).
     val imeVisible = WindowInsets.isImeVisible
-    var imeWasShown by remember { mutableStateOf(false) }
-    LaunchedEffect(imeVisible) {
-        if (imeVisible) imeWasShown = true else if (imeWasShown) onHome()
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // The screen's own backdrop (global, own image or own color); below full opacity whatever
-        // is behind the search shows through it.
+        // The screen's own backdrop (global, own image or own color), always fully opaque so the
+        // home page and its dock never show through — same as the app list.
         if (background != null) {
-            BackgroundFill(background, Modifier.matchParentSize().graphicsLayer { alpha = appearance.opacity.coerceIn(0f, 1f) })
+            BackgroundFill(background, Modifier.matchParentSize())
         }
         CompositionLocalProvider(LocalContentColor provides colors.contentColor) {
             // The top inset goes *inside* the input bar (its background fills it up to the screen
@@ -177,7 +192,7 @@ fun SearchOverlay(
                         onQueryChange = onQueryChange,
                         onSubmit = { appResults.firstOrNull()?.let(onAppClick) ?: onWebCommand() },
                         onHome = onHome,
-                        appearance = barAppearance ?: appearance,
+                        appearance = barAppearance ?: defaultElement,
                         autoOpen = keyboardAutoOpen,
                         categories = categoryOrder.filter { it != SearchCategory.AI || aiAppLabel != null },
                         categoryColors = categoryColors,
@@ -201,7 +216,7 @@ fun SearchOverlay(
                         order = categoryOrder,
                         active = activeCategories,
                         aiAppLabel = aiAppLabel,
-                        cardAppearance = resultsAppearance ?: appearance,
+                        cardAppearance = resultsAppearance ?: defaultElement,
                         categoryColors = categoryColors,
                         loadIcon = loadIcon,
                         onAppClick = onAppClick,
@@ -222,15 +237,32 @@ fun SearchOverlay(
                     )
                     // Sits directly on top of the keyboard (this Column is IME-padded), so the
                     // results' bottom edge and fade end at the strip instead of the keyboard itself.
+                    // It fades out as soon as the keyboard *starts* closing (the animation target,
+                    // not the current inset), riding down with it, so both leave in one motion.
                     if (keyboardCapColor != null && imeVisible) {
+                        val closing = WindowInsets.imeAnimationTarget.getBottom(LocalDensity.current) == 0
+                        val capAlpha by animateFloatAsState(if (closing) 0f else 1f, tween(150), label = "capAlpha")
                         val capRadius = KEYBOARD_CAP_HEIGHT * (keyboardCapCornerRadiusPercent.coerceIn(0, 100) / 100f)
+                        val keyboardController = LocalSoftwareKeyboardController.current
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(KEYBOARD_CAP_HEIGHT)
+                                .graphicsLayer { alpha = capAlpha }
                                 .clip(RoundedCornerShape(topStart = capRadius, topEnd = capRadius))
                                 .background(Color(keyboardCapColor))
-                        )
+                                .then(if (keyboardCapArrow) Modifier.noRippleClickable { keyboardController?.hide() } else Modifier),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (keyboardCapArrow) {
+                                Icon(
+                                    Icons.Filled.KeyboardArrowDown,
+                                    contentDescription = stringResource(R.string.search_keyboard_close),
+                                    tint = if (Color(keyboardCapColor).luminance() > 0.5f) Color.Black.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.6f),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }

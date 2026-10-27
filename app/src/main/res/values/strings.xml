@@ -89,7 +89,7 @@
     <string name="settings_accent_global_info">Used by the app list\'s scroll bubble and the charging animation. Each of them can also get its own color in its own settings.</string>
     <string name="settings_accent_follows_global">Follows the global accent color</string>
     <string name="settings_accent_use_global">Use global accent color</string>
-    <string name="settings_search_button_follow_rail">Same look as the A–Z index</string>
+    <string name="settings_accent_custom">Custom color</string>
     <string name="settings_design_title">Design</string>
     <string name="settings_card_design_subtitle">Colors, language, font, shapes, icons, background</string>
     <string name="settings_icons_label">Icons</string>
@@ -216,8 +216,7 @@
 <string name="settings_folder_title">Folder</string>
     <string name="settings_folder_global_label">Global folder settings</string>
     <string name="settings_folder_global_subtitle">Appearance, border and visibility shared by every folder</string>
-    <string name="settings_folder_appearance_label">Appearance</string>
-    <string name="settings_folder_appearance_reset_label">Reset to global appearance</string>
+    <string name="settings_folder_appearance_reset_label">Reset to global fill</string>
     <string name="settings_folder_border_reset_label">Reset to global border</string>
     <string name="settings_folder_visibility_label">Visibility</string>
     <string name="settings_folder_list_label">Folders</string>
@@ -257,7 +256,6 @@
     <string name="settings_manage_apps_reveal_search_code_description">Findable only by typing the exact code below, instead of by name.</string>
     <string name="settings_manage_apps_reveal_code_hint">Search code</string>
     <string name="settings_more_settings_button">More settings</string>
-    <string name="settings_manage_apps_save">Save</string>
 
     <string name="settings_section_gestures">Gestures</string>
     <string name="settings_card_gestures_subtitle">Long press, double tap, swipes, home button</string>
@@ -293,7 +291,6 @@
     <string name="settings_pages_carousel_label">Carousel</string>
     <string name="settings_pages_other_label">Utility pages</string>
     <string name="settings_pages_behavior_label">Behavior</string>
-    <string name="settings_pages_invocation_none">Not bound to a gesture</string>
     <string name="settings_pages_add_template_label">Start from</string>
     <string name="settings_pages_add_template_blank">Blank page</string>
     <string name="settings_pages_remove">Remove page</string>
@@ -355,8 +352,8 @@
     <string name="settings_clock_time_format_24h">24-hour</string>
     <string name="settings_clock_time_format_12h">12-hour</string>
     <string name="settings_clock_date_format_label">Date format</string>
-    <string name="settings_clock_date_format_placeholder">EEEE, dd.MM.yyyy</string>
-    <string name="settings_clock_date_format_summary">Empty: default format. Otherwise a date pattern, for example “EEEE, dd.MM.yyyy” or “MMM d”.</string>
+    <string name="settings_clock_date_format_placeholder">EEEE, MM/dd/yyyy</string>
+    <string name="settings_clock_date_format_summary">Empty: your language\'s usual format, e.g. “Monday, 10/26/2026”. Otherwise a date pattern, for example “EEEE, MM/dd/yyyy” or “MMM d”.</string>
     <string name="settings_clock_show_next_alarm">Show next alarm</string>
     <string name="settings_clock_show_next_alarm_summary">Shows the next alarm below the date. Requires no additional permission.</string>
 
@@ -387,6 +384,11 @@
     <string name="settings_statusbar_label">Status bar</string>
     <string name="settings_tips_label">Tips</string>
     <string name="settings_tips_show">Show tips</string>
+    <string name="settings_save">Save</string>
+    <string name="settings_unsaved_title">Unsaved changes</string>
+    <string name="settings_unsaved_message">Save your changes before leaving?</string>
+    <string name="settings_unsaved_discard">Discard</string>
+    <string name="settings_unsaved_keep_editing">Keep editing</string>
     <string name="shortcut_settings">Settings</string>
     <string name="shortcut_settings_long">FLauncher settings</string>
     <string name="settings_row_entry_new_folder">New folder</string>
@@ -404,11 +406,11 @@
     <string name="settings_backup_import_too_new">Backup was created with a newer FLauncher version</string>
     <string name="settings_backup_import_failed">File could not be read</string>
     <string name="settings_statusbar_hide_all">Hide everywhere</string>
-    <string name="settings_statusbar_per_page_label">Hidden on</string>
     <string name="settings_statusbar_hide_all_summary">Turns the status bar off on every page, quick overview, text search and folders. You can turn it back on individually per screen afterwards. A swipe down from the top edge always shows it briefly.</string>
     <string name="settings_statusbar_confirm_hide_message">This hides the status bar on every page, quick overview, text search and folders at once, overriding whatever each one is currently set to.</string>
     <string name="settings_statusbar_confirm_show_message">This shows the status bar on every page, quick overview, text search and folders at once, overriding whatever each one is currently set to.</string>
     <string name="settings_corner_style_label">Corner roundness</string>
+    <string name="settings_corner_style_info">Applies to every element at once, widgets included — new widgets start at 10%. With fully round corners, widgets can look rather funny, since the rounding cuts into their content. Each element can still get its own corners in its own settings.</string>
     <string name="settings_corner_radius_value">%1$d%%</string>
     <string name="settings_statusbar_hide_page">Hide status bar</string>
     <string name="settings_folder_hide_status_bar">Hide status bar in folders</string>
@@ -429,11 +431,6 @@
     <string name="settings_app_icon_reset">Use default icon</string>
     <string name="settings_folder_creator_search">Search apps</string>
     <string name="settings_folder_creator_selected">%1$d selected</string>
-    <string name="settings_permissions_system_group">System</string>
-    <string name="settings_permissions_touch_feedback">Touch feedback</string>
-    <string name="settings_permissions_touch_feedback_purpose">Key vibration of the search keyboard. System setting; opens the sound settings.</string>
-    <string name="settings_permissions_on">On</string>
-    <string name="settings_permissions_off">Off</string>
     <string name="settings_search_keyboard_auto_open">Open keyboard automatically</string>
     <string name="settings_search_bar_label">Search bar</string>
     <string name="settings_search_page_label">Page</string>
@@ -444,6 +441,9 @@
     <string name="settings_search_keyboard_cap_info">A slim strip with rounded corners right above the keyboard. Match its color to your keyboard to give the keyboard rounded top corners. While it is on, it counts as the top edge of the keyboard.</string>
     <string name="settings_search_keyboard_cap_color">Color</string>
     <string name="settings_search_keyboard_cap_color_info">Tip for an exact match: open the keyboard anywhere and take a screenshot. Read the keyboard color from the screenshot with any color picker app, then paste the hex code (e.g. #ECEEF4) into the hex field here.</string>
+    <string name="settings_search_keyboard_cap_arrow">Close arrow</string>
+    <string name="settings_search_keyboard_cap_arrow_info">Shows a small arrow in the strip. Tapping the strip closes the keyboard; swiping back still works as before.</string>
+    <string name="search_keyboard_close">Close keyboard</string>
     <string name="settings_search_keyboard_auto_open_summary">Off: search opens with just the input field; tap it to show the keyboard.</string>
     <string name="search_filter_ai">AI app</string>
     <string name="settings_search_include_ai">AI app</string>
@@ -524,6 +524,10 @@
     <string name="widget_notes_empty">No notes yet</string>
     <string name="widget_notes_untitled">Untitled</string>
     <string name="widget_notes_hide">Hide in widget</string>
+    <string name="widget_notes_hidden">Hidden notes</string>
+    <string name="widget_notes_show_again">Show “%1$s” again</string>
+    <string name="widget_weather_updated_on">Updated %1$s, %2$s</string>
+    <string name="widget_system_unavailable">This widget is no longer available. Its app was removed or the widget was restored from a backup — remove it and add it again.</string>
     <string name="widget_notes_add">New note</string>
     <string name="widget_notes_edit">Edit</string>
     <string name="widget_notes_done">Done</string>
