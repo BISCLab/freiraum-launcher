@@ -29,6 +29,9 @@ fun BackgroundFill(config: BackgroundConfig, modifier: Modifier = Modifier) {
                 Box(Modifier.matchParentSize().background(config.fill.asBrush()))
             }
             BackgroundSource.IMAGE -> {
+                // Opaque even while the image is loading (or if it's missing), so whatever lies
+                // below — the home screen and its Dock under the app list or search — never shows.
+                Box(Modifier.matchParentSize().background(config.fill.asBrush()))
                 val bitmap = rememberBackgroundBitmap(config.imagePath)
                 if (bitmap != null) {
                     Image(

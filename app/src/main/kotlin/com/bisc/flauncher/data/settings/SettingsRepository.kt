@@ -323,7 +323,7 @@ class SettingsRepository @Inject constructor(
             direction = prefs[backgroundDirectionKey(key)]?.let { runCatching { GradientDirection.valueOf(it) }.getOrNull() }
                 ?: default.fill.direction
         ),
-        imagePath = prefs[backgroundImagePathKey(key)],
+        imagePath = prefs[backgroundImagePathKey(key)]?.let { com.bisc.flauncher.util.BackgroundImageStore.resolve(context, it) },
         shade = (prefs[backgroundShadeKey(key)] ?: default.shade).coerceIn(-1f, 1f)
     )
 

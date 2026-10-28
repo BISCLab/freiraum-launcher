@@ -35,6 +35,15 @@ object BackgroundImageStore {
 
     private fun decodeFull(path: String): Bitmap? = BitmapFactory.decodeFile(path)
 
+    /** [path] as stored, or — when that file isn't there — the same file name in this app's own
+     *  backgrounds folder. Stored paths are absolute, so ones written under a different app id
+     *  (a backup from before the rename) point into a folder this app can't read. */
+    fun resolve(context: Context, path: String): String {
+        if (File(path).exists()) return path
+        val local = File(backgroundsDir(context), File(path).name)
+        return if (local.exists()) local.absolutePath else path
+    }
+
     private fun writeToStore(context: Context, bitmap: Bitmap, key: String): String {
         val dir = backgroundsDir(context)
         dir.mkdirs()
