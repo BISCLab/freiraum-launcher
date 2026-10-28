@@ -481,9 +481,10 @@ fun HomeScreen(
                     // actually made *everything* feel worse afterward — the app-list transition, general
                     // scrolling, all of it — not just the one swipe this was meant to fix. Back to only
                     // keeping the immediate neighbor pre-warmed, matching how Pager is meant to be used.
-                    // With only two pages wrapping around, both neighbors are the same page — keeping
-                    // them pre-composed would host its app widgets twice at once.
-                    beyondViewportPageCount = if (endless && pages.size < 3) 0 else 1,
+                    // While swiping, up to four consecutive virtual pages are composed (the two in view
+                    // plus one neighbor each side). An endless carousel of fewer than four pages would
+                    // then compose one page twice, and its app widgets would fight over their one view.
+                    beyondViewportPageCount = if (endless && pages.size < 4) 0 else 1,
                     // Left/right swipe between Home and its other pages; wraps around when the
                     // carousel is endless. Overlays
                     // (search/app list/Panel/folder) each already render a full-size catch-all Box on
