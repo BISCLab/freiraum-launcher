@@ -96,7 +96,7 @@ fun ChargingGlow(enabled: Boolean, color: Color = Color(com.bisc.flauncher.ui.th
             animationSpec = infiniteRepeatable(tween(CYCLE_MILLIS, easing = LinearEasing), RepeatMode.Restart),
             label = "chargingBubblesTime"
         )
-        // Steady, not pulsing: a fixed alpha between the old animation's low and high points.
+        // Steady, not pulsing.
         val glowAlpha = 0.19f
         Box(
             modifier = modifier

@@ -6,8 +6,7 @@ import androidx.room.PrimaryKey
 /** What a [LauncherPage] renders as its own content. [ROWS] is a normal swipeable pager page;
  *  [APP_LIST]/[SEARCH] are singleton pages (auto-seeded, not deletable) that live in the pages list
  *  for identity/icon/settings purposes but render as their own overlay instead of pager content —
- *  see [com.bisc.flauncher.ui.home.HomeViewModel.openAppList]/`openSearch`. (The old Quick-overview
- *  page kind is gone, see the 60→61 migration; the Home page's own Panel replaced it.) */
+ *  see [com.bisc.flauncher.ui.home.HomeViewModel.openAppList]/`openSearch`. */
 enum class LauncherPageKind { ROWS, APP_LIST, SEARCH }
 
 /** A home-screen page. [iconGlyph]/[iconBackgroundColor]/[iconColor] control how this page looks

@@ -2,10 +2,11 @@
 
 <p><b>Seiten</b></p>
 <ul>
-<li>Eine Startseite und beliebig viele weitere Seiten, jede mit eigenem Hintergrund</li>
+<li>Eine Startseite und beliebig viele weitere Seiten, jede mit eigenem Hintergrund, auf Wunsch als Endlos-Karussell</li>
 <li>Zeilen mit Apps, Ordnern, Kontakten, Adressen, Links, Shortcuts und Aktionsbuttons</li>
-<li>Eigene Widgets: Uhr, Musik, Wetter, Notizen und Abstandshalter, dazu normale Android-Widgets</li>
-<li>Ein Dock unten und ein herunterziehbares Panel oben, beide mit festen Plätzen</li>
+<li>Eigene Widgets: Uhr, Musik, Wetter, Notizen und Abstandshalter, dazu normale Android-Widgets – alles in einem sauberen Zeilenraster</li>
+<li>Ein Dock unten und ein herunterziehbares Panel oben, beide mit festen Plätzen und auf jeder Seite sichtbar</li>
+<li>Ordner mit Apps, Links, Kontakten und Widgets</li>
 </ul>
 
 <p><b>App-Liste und Suche</b></p>
@@ -20,6 +21,7 @@
 <li>Hell- und Dunkelmodus, Akzentfarbe, Eckenform und Icon-Packs</li>
 <li>Füllung, Rahmen und Textfarbe für jedes Element, mit Live-Vorschau</li>
 <li>Einstellbare Gesten für Wischen, Doppeltippen und langes Drücken</li>
+<li>Musik-Widget nur für die Player, die du auswählst</li>
 <li>Optionale Tastatur-Verlängerung und Ladeanimation</li>
 </ul>
 

@@ -2,10 +2,11 @@
 
 <p><b>Pages</b></p>
 <ul>
-<li>A home page plus as many extra pages as you like, each with its own background</li>
+<li>A home page plus as many extra pages as you like, each with its own background, optionally as an endless carousel</li>
 <li>Rows of apps, folders, contacts, addresses, links, shortcuts and action buttons</li>
-<li>Built-in widgets: clock, music, weather, notes and spacers, plus regular Android widgets</li>
-<li>A dock at the bottom and a pull-down panel at the top, both with fixed slots</li>
+<li>Built-in widgets: clock, music, weather, notes and spacers, plus regular Android widgets — all on a tidy row grid</li>
+<li>A dock at the bottom and a pull-down panel at the top, both with fixed slots and shown on every page</li>
+<li>Folders with apps, links, contacts and widgets</li>
 </ul>
 
 <p><b>App list and search</b></p>
@@ -20,6 +21,7 @@
 <li>Light and dark mode, an accent color, corner shapes and icon packs</li>
 <li>Fill, border and text color for every element, with live previews</li>
 <li>Configurable gestures for swipes, double tap and long press</li>
+<li>Music widget limited to the players you choose</li>
 <li>Optional keyboard extension strip and charging animation</li>
 </ul>
 

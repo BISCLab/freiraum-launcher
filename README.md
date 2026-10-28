@@ -6,10 +6,13 @@ libraries.
 ## Features
 
 - **Pages** – a home page plus extra pages, each with its own background, built from rows of apps,
-  folders, contacts, addresses, links, shortcuts and action buttons
+  folders, contacts, addresses, links, shortcuts and action buttons on a row grid; optionally an
+  endless carousel
 - **Widgets** – clock, music, weather (Gadgetbridge weather format), notes and spacers, plus regular
   Android app widgets
 - **Dock and Panel** – a dock at the bottom and a pull-down panel at the top, both with fixed slots
+  and shown on every page
+- **Folders** – apps, links, contacts and widgets (including Android app widgets)
 - **App list** – alphabetical, with a fast-scroll A–Z index; apps can be renamed, hidden from the
   list or search, or revealed only by a search code
 - **Text search** – apps, folders, contacts, settings, shortcuts, links and addresses, with web,
@@ -34,11 +37,21 @@ Languages: English, German.
 Requirements: JDK 17 and the Android SDK (compileSdk 35).
 
 ```sh
-./gradlew assembleRelease   # unsigned release APK in app/build/outputs/apk/release/
+./gradlew assembleRelease   # release APK in app/build/outputs/apk/release/
 ./gradlew assembleDebug     # debug APK
 ```
 
-The release build is unsigned; sign it with your own key or let the store sign it.
+The release build is unsigned unless a `keystore.properties` file exists in the project root
+(never commit it):
+
+```properties
+storeFile=/path/to/release.jks
+storePassword=…
+keyAlias=…
+keyPassword=…
+```
+
+F-Droid builds and signs the app itself, so it ignores this file.
 
 ## Releasing
 
