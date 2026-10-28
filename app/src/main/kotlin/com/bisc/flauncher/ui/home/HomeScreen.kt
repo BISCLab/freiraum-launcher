@@ -482,9 +482,10 @@ fun HomeScreen(
                     // scrolling, all of it — not just the one swipe this was meant to fix. Back to only
                     // keeping the immediate neighbor pre-warmed, matching how Pager is meant to be used.
                     // While swiping, up to four consecutive virtual pages are composed (the two in view
-                    // plus one neighbor each side). An endless carousel of fewer than four pages would
-                    // then compose one page twice, and its app widgets would fight over their one view.
-                    beyondViewportPageCount = if (endless && pages.size < 4) 0 else 1,
+                    // plus one neighbor each side), so an endless carousel of three pages composes one
+                    // page twice — only one copy hosts its app widgets (see hostsAppWidgets below). With
+                    // two pages the copies would both be in view at times, so nothing is pre-composed.
+                    beyondViewportPageCount = if (endless && pages.size < 3) 0 else 1,
                     // Left/right swipe between Home and its other pages; wraps around when the
                     // carousel is endless. Overlays
                     // (search/app list/Panel/folder) each already render a full-size catch-all Box on
@@ -592,7 +593,12 @@ fun HomeScreen(
                             LocalSurfaceIsDarkLoading provides (loadedPageBackgroundConfig == null),
                             LocalRowUnitHeight provides rowUnitHeight,
                             LocalHomeGestureExclusion provides homeGestureExclusion,
-                            com.bisc.flauncher.ui.home.widgets.LocalReuseWidgetViews provides true
+                            com.bisc.flauncher.ui.home.widgets.LocalReuseWidgetViews provides true,
+                            // An app widget has one view: of a page composed twice (three-page endless
+                            // carousel), only the copy in view or right next to it hosts it — the
+                            // other one, off-screen, shows an empty card.
+                            com.bisc.flauncher.ui.home.widgets.LocalHostAppWidgets provides
+                                (!(endless && pages.size == 3) || (pageIndex - pagerState.currentPage) in -1..1)
                         ) { PageRowsColumn(
                                 rows = withoutPinnedSearchBar,
                                 entriesByRow = rowEntriesByRow,

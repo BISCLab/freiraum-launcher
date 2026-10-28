@@ -77,6 +77,10 @@ fun SystemWidgetView(
     // the native widget view with a guessed dark/light setting can leave it stuck wrong even once the real
     // value arrives (many widgets don't repaint themselves just because our host view gets recreated).
     val surfaceLoading = LocalSurfaceIsDarkLoading.current
+    if (info != null && !surfaceLoading && !LocalHostAppWidgets.current) {
+        WidgetCard(modifier = modifier, appearance = appearance, cornerRadiusPercent = cornerRadiusPercent, horizontalMargin = horizontalMargin) {}
+        return
+    }
     if (info == null || surfaceLoading) {
         WidgetCard(modifier = modifier, appearance = appearance, cornerRadiusPercent = cornerRadiusPercent, horizontalMargin = horizontalMargin) {
             // No provider info means the widget is gone for good (its app was uninstalled, or the id
@@ -147,3 +151,7 @@ fun SystemWidgetView(
 /** True on the home screen: hosted widget views are kept and reused when a page re-enters composition
  *  (see SystemWidgetHostManager.obtainHomeHostView). Settings previews always build their own. */
 val LocalReuseWidgetViews = androidx.compose.runtime.staticCompositionLocalOf { false }
+
+/** False for an off-screen duplicate of a page (see HomeScreen): it shows an empty card instead of
+ *  taking the widget's one view away from the copy in view. */
+val LocalHostAppWidgets = androidx.compose.runtime.compositionLocalOf { true }
