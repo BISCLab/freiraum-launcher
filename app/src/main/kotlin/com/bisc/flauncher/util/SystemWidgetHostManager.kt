@@ -25,6 +25,7 @@ class SystemWidgetHostManager @Inject constructor(
 
     fun deleteId(appWidgetId: Int) {
         reusableViews.remove(appWidgetId)
+        latestViews.remove(appWidgetId)
         runCatching { appWidgetHost.deleteAppWidgetId(appWidgetId) }
     }
 
@@ -33,11 +34,15 @@ class SystemWidgetHostManager @Inject constructor(
     // view instead of inflating the whole widget again — that inflation, mid-swipe, is what stutters.
     private val reusableViews = HashMap<Int, Pair<Boolean, AppWidgetHostView>>()
 
+    // The host only delivers a widget's updates to the view created last for its id, so a kept home
+    // view is only reusable while no other view (e.g. a settings preview) has been created since.
+    private val latestViews = HashMap<Int, AppWidgetHostView>()
+
     /** Like [createHostView], but hands back the home screen's existing view for [appWidgetId] (detached
      *  from wherever it was shown before) when one exists for the same [dark] mode. */
     fun obtainHomeHostView(appWidgetId: Int, info: AppWidgetProviderInfo, dark: Boolean): AppWidgetHostView {
         reusableViews[appWidgetId]?.let { (cachedDark, view) ->
-            if (cachedDark == dark) {
+            if (cachedDark == dark && latestViews[appWidgetId] === view) {
                 (view.parent as? android.view.ViewGroup)?.removeView(view)
                 return view
             }
@@ -63,7 +68,10 @@ class SystemWidgetHostManager @Inject constructor(
      * [dark] change (via `key(dark)` at the call site) is the reliable option, even though it costs a
      * brief blank/white flash right when it happens.
      */
-    fun createHostView(appWidgetId: Int, info: AppWidgetProviderInfo, dark: Boolean): AppWidgetHostView {
+    fun createHostView(appWidgetId: Int, info: AppWidgetProviderInfo, dark: Boolean): AppWidgetHostView =
+        newHostView(appWidgetId, info, dark).also { latestViews[appWidgetId] = it }
+
+    private fun newHostView(appWidgetId: Int, info: AppWidgetProviderInfo, dark: Boolean): AppWidgetHostView {
         val nightMode = if (dark) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
         val configuration = Configuration(context.resources.configuration).apply {
             uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or nightMode
