@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Freiraum</string>
+    <string name="app_name">Freiraum Launcher</string>
 
 
     <string name="folder_icon_auto">Use app preview as icon</string>
