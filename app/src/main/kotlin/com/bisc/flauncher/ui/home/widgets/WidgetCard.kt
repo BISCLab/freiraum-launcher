@@ -2,6 +2,7 @@ package com.bisc.flauncher.ui.home.widgets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,7 @@ fun WidgetCard(
     cornerRadiusPercent: Int = com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT,
     horizontalMargin: Dp = 0.dp,
     contentPadding: Dp = 16.dp,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val colors = resolveElementColors(appearance)
@@ -39,6 +41,7 @@ fun WidgetCard(
                 .background(colors.background, alpha = colors.backgroundAlpha)
                 .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)
                 .padding(contentPadding),
+            verticalArrangement = verticalArrangement,
             content = content
         )
     }

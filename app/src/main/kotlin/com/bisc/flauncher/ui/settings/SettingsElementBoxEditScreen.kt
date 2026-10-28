@@ -114,7 +114,7 @@ fun SettingsElementBoxEditScreen(
         }
 
         if (!isDock) {
-            SettingsPreferenceGroup {
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_element_box_form_label)) {
                 SettingsPreference(
                     icon = null,
                     title = stringResource(R.string.settings_element_box_pill_mode_label),
@@ -122,6 +122,8 @@ fun SettingsElementBoxEditScreen(
                     onClick = { row = row.copy(pillMode = !row.pillMode) },
                     trailing = { Switch(checked = row.pillMode, onCheckedChange = { row = row.copy(pillMode = it) }) }
                 )
+            }
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_edge_label)) {
                 SettingsPreference(
                     icon = null,
                     title = stringResource(R.string.settings_widgets_edge_to_edge_label),

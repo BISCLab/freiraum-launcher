@@ -40,7 +40,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
-import kotlin.math.roundToInt
+import androidx.compose.ui.unit.dp
 
 /** Pages, page rows and row entries, including seeding of the default pages. */
 class PageContentRepository @Inject constructor(
@@ -152,6 +152,14 @@ class PageContentRepository @Inject constructor(
             entryDao.insert(RowEntry(pageRowId = dockRowId, orderIndex = order++, type = GridItemType.ACTION_BUTTON, payload = settingsButtonId.toString()))
         }
 
+        // The Dock and the Panel belong to Home and show on every page; other pages never carry
+        // their own (older versions copied them onto new pages, and a backup may still contain them).
+        pageDao.getAllOnce().filter { !it.isHome }.forEach { page ->
+            rowDao.getForPage(page.id)
+                .filter { it.type == PageRowType.SEARCH_BAR || it.type == PageRowType.PANEL }
+                .forEach { rowDao.delete(it) }
+        }
+
         // Self-healing check on every start: a page is one fixed screen, so anything that doesn't fit
         // moves on. A no-op once everything fits (the common case), so safe to run every time.
         pageDao.getAllOnce().filter { it.kind == LauncherPageKind.ROWS }.forEach { rebalancePageOverflow(it.id) }
@@ -202,12 +210,9 @@ class PageContentRepository @Inject constructor(
      * localized index shift — page counts are small, a full stable re-sort is cheap and simple.
      */
     // New pages start as an independent copy of Home's current *structure* — same row types,
-    // order, appearance and background — not of its actual content. Copying the user's pinned apps/
-    // folders onto a brand-new page by default would be a confusing surprise, not a sensible
-    // starting point; copying the empty scaffold (Dock/Panel/widget rows with their configured
-    // look) matches "Default-Kopie" while staying consistent with this app's existing "home starts
-    // empty" philosophy (see ensureSeeded's own comment on that). Once created, the new page is
-    // fully independent — editing it never touches Home back.
+    // order, appearance and background — not of its actual content (pinned apps/folders stay on
+    // Home). The Dock and Panel aren't copied: they're Home's and show on every page anyway. Once
+    // created, the new page is fully independent — editing it never touches Home back.
     suspend fun addPageInDirection(direction: PageDirection): Long {
         val all = pageDao.getAllOnce()
         val rowsOnly = all.filter { it.kind == LauncherPageKind.ROWS }
@@ -221,9 +226,9 @@ class PageContentRepository @Inject constructor(
         val newPage = pageDao.getById(newId) ?: return newId
 
         if (homePage != null) {
-            rowDao.getForPage(homePage.id).forEach { row ->
-                rowDao.insert(row.copy(id = 0, pageId = newId))
-            }
+            rowDao.getForPage(homePage.id)
+                .filter { it.type != PageRowType.SEARCH_BAR && it.type != PageRowType.PANEL }
+                .forEach { row -> rowDao.insert(row.copy(id = 0, pageId = newId)) }
             settingsRepository.pageBackgroundOverride(homePage.id).first()?.let { override ->
                 settingsRepository.setPageBackgroundConfig(newId, override)
             }
@@ -319,106 +324,90 @@ class PageContentRepository @Inject constructor(
         return id
     }
 
-    /** Returns how many rows on [pageId] had to be relocated to a new page as a result — see [rebalancePageOverflow]. */
-    suspend fun addSearchBarRow(pageId: Long): Int {
-        val next = (rowDao.maxOrderIndex(pageId) ?: -1) + 1
-        val row = PageRow(pageId = pageId, orderIndex = next, type = PageRowType.SEARCH_BAR, borderEnabled = true)
-            .withAppearance(defaultBoxAppearanceFor(isDark()))
-        rowDao.insert(row)
-        return rebalancePageOverflow(pageId).size
-    }
+    /** Home's Dock when it's switched on — it shows on every page, so every page reserves room for it. */
+    private suspend fun shownDockRow(): PageRow? =
+        pageDao.getHomePage()?.let { home -> rowDao.getForPage(home.id).find { it.type == PageRowType.SEARCH_BAR } }
+            ?.takeIf { it.enabled }
 
     /**
-     * A page is exactly one screen, so whatever doesn't fit needs a home somewhere else instead of
-     * silently overflowing off-screen. Walks [pageId]'s rows (the
-     * dock/search bar row excluded — it floats separately, not part of this stack) in order, and the
-     * moment the running total would exceed what's actually available (accounting for status bar, the
-     * dock if present, and a safety margin — the exact same budget the height stepper enforces per
-     * row), that row and everything after it move to a fresh page. A row that's still too tall even by
-     * itself on that fresh (dock-less) page — the most room any row can ever get — is clamped down to
-     * that maximum directly instead of being moved again and again, which would otherwise never
-     * terminate. Recurses in case the fresh page overflows too (e.g. several oversized rows at once).
+     * [pageId]'s row grid, computed exactly like HomeScreen lays the page out: how many row units fit,
+     * and the unit height stretched so they fill the page (see [com.bisc.flauncher.ui.home.PageRowDimens.stretchedUnit]).
      */
-    private suspend fun heightPxOf(row: PageRow, density: androidx.compose.ui.unit.Density): Int = row.heightPx ?: with(density) {
-        val heightDp = if (row.type == PageRowType.ELEMENT_BOX) {
-            com.bisc.flauncher.ui.home.PageRowDimens.elementBoxHeight(entryDao.countForRow(row.id), row.columns.coerceAtLeast(1))
-        } else {
-            com.bisc.flauncher.ui.home.PageRowDimens.rowUnitHeight * row.spanY
-        }
-        heightDp.toPx().roundToInt()
+    private suspend fun pageGrid(pageId: Long): com.bisc.flauncher.ui.home.PageGrid {
+        val density = context.resources.displayMetrics.density
+        val insets = systemInsetsPx()
+        val hidesStatusBar = settingsRepository.pageHideStatusBar(pageId).first()
+        val topInsetPx = if (hidesStatusBar) insets.cutoutTop else maxOf(insets.statusBarTop, insets.cutoutTop)
+        return com.bisc.flauncher.ui.home.PageGrid.of(
+            windowHeight = (windowHeightPx() / density).dp,
+            topInset = (topInsetPx / density).dp,
+            navigationBar = (insets.navigationBottom / density).dp,
+            dock = shownDockRow()
+        )
     }
 
-    private fun stackedRowsBudget(pageId: Long, hasDock: Boolean): Int {
-        val dm = context.resources.displayMetrics
-        val (topInsetPx, bottomInsetPx) = systemInsetsPx()
-        return com.bisc.flauncher.ui.home.safeSystemWidgetMaxHeightPx(
-            pageHasDock = hasDock,
-            screenWidthPx = dm.widthPixels,
-            screenHeightPx = dm.heightPixels,
-            densityValue = dm.density,
-            statusBarPx = topInsetPx,
-            navigationBarPx = bottomInsetPx
-        )
+    /** How many grid units [row] takes on a page with [unit]-tall rows: its span, or for rows whose
+     *  height comes from content or a free pixel value, that height rounded up to whole units. */
+    private suspend fun unitsOf(row: PageRow, unit: androidx.compose.ui.unit.Dp): Int {
+        val dims = com.bisc.flauncher.ui.home.PageRowDimens
+        val density = context.resources.displayMetrics.density
+        val exactPx = row.heightPx
+        return when {
+            row.type == PageRowType.ELEMENT_BOX ->
+                dims.unitsFor(dims.elementBoxHeight(entryDao.countForRow(row.id), row.columns.coerceAtLeast(1)), unit)
+            // 1dp of slack: a height set to exactly N rows in the editor stays N rows despite rounding.
+            exactPx != null && exactPx > 0 -> dims.unitsFor((exactPx / density).dp - 1.dp, unit)
+            else -> row.spanY.coerceAtLeast(1)
+        }
     }
 
     /**
      * Dry-run check for the "this page is full" prompt (offer a new page instead of silently
      * relocating rows there): would a not-yet-inserted row shaped like
      * [candidateRow] still fit on [pageId] alongside what's already there? Mirrors
-     * [rebalancePageOverflow]'s own budget math exactly, just without writing anything.
+     * [rebalancePageOverflow]'s own math exactly, just without writing anything.
      */
     suspend fun wouldOverflow(pageId: Long, candidateRow: PageRow): Boolean {
         if (candidateRow.type == PageRowType.SEARCH_BAR) return false // floats separately, never part of this budget
-        val allRows = rowDao.getForPage(pageId)
-        val dockRow = allRows.lastOrNull { it.type == PageRowType.SEARCH_BAR }
-        val stackedRows = allRows.filter { it.id != dockRow?.id && it.type != PageRowType.PANEL }
-        val density = androidx.compose.ui.unit.Density(context.resources.displayMetrics.density)
-        val budgetPx = stackedRowsBudget(pageId, dockRow != null)
-        val spacingPx = with(density) { com.bisc.flauncher.ui.home.PageRowDimens.rowSpacing.toPx().roundToInt() }
-
-        var used = 0
-        for (row in stackedRows) {
-            used += (if (used > 0) spacingPx else 0) + heightPxOf(row, density)
-        }
-        val needed = used + (if (used > 0) spacingPx else 0) + heightPxOf(candidateRow, density)
-        return needed > budgetPx
+        val grid = pageGrid(pageId)
+        val used = rowDao.getForPage(pageId)
+            .filter { it.type != PageRowType.SEARCH_BAR && it.type != PageRowType.PANEL }
+            .sumOf { unitsOf(it, grid.unit) }
+        return used + unitsOf(candidateRow, grid.unit) > grid.unitCount
     }
 
+    /**
+     * A page is exactly one screen, so whatever doesn't fit needs a home somewhere else instead of
+     * silently overflowing off-screen. Walks [pageId]'s rows in order, counting row units (see
+     * [pageGrid]); the moment they'd exceed the page's unit count, that row and everything after it
+     * move to a fresh page. A free-height widget taller than a whole page is clamped to one, so moving
+     * it always terminates. Recurses in case the fresh page overflows too.
+     */
     private suspend fun rebalancePageOverflow(pageId: Long): List<PageRow> {
-        val allRows = rowDao.getForPage(pageId)
-        val dockRow = allRows.lastOrNull { it.type == PageRowType.SEARCH_BAR }
-        // The Panel (like the dock) floats outside the pager rather than rendering inline — see
-        // HomeScreen's top EdgeNotch Box — so it never counts toward this page's inline height budget.
-        val stackedRows = allRows.filter { it.id != dockRow?.id && it.type != PageRowType.PANEL }
+        // The Dock and the Panel float outside the pager rather than rendering inline, so they never
+        // count toward a page's rows (the Dock's room is reserved by the grid itself).
+        val stackedRows = rowDao.getForPage(pageId).filter { it.type != PageRowType.SEARCH_BAR && it.type != PageRowType.PANEL }
         if (stackedRows.isEmpty()) return emptyList()
 
-        val dm = context.resources.displayMetrics
-        val density = androidx.compose.ui.unit.Density(dm.density)
-        val budgetPx = stackedRowsBudget(pageId, dockRow != null)
-        val spacingPx = with(density) { com.bisc.flauncher.ui.home.PageRowDimens.rowSpacing.toPx().roundToInt() }
-
-        suspend fun heightPxOf(row: PageRow): Int = heightPxOf(row, density)
-
+        val grid = pageGrid(pageId)
         var used = 0
         val overflow = mutableListOf<PageRow>()
         for (row in stackedRows) {
-            val needed = used + (if (used > 0) spacingPx else 0) + heightPxOf(row)
-            if (needed > budgetPx) {
-                overflow.add(row)
-            } else {
-                used = needed
-            }
+            val units = unitsOf(row, grid.unit)
+            if (used + units > grid.unitCount) overflow.add(row) else used += units
         }
         if (overflow.isEmpty()) return emptyList()
 
         val newPageId = addPage()
-        // A fresh page never has a dock yet, so this is the most room any of these rows could ever get.
-        val freshPageBudgetPx = stackedRowsBudget(newPageId, hasDock = false)
+        val freshGrid = pageGrid(newPageId)
+        val fullPagePx = (com.bisc.flauncher.ui.home.PageRowDimens.spanHeight(freshGrid.unit, freshGrid.unitCount).value *
+            context.resources.displayMetrics.density).toInt()
         var nextOrder = (rowDao.maxOrderIndex(newPageId) ?: -1) + 1
         overflow.forEach { row ->
             var moved = row.copy(pageId = newPageId, orderIndex = nextOrder)
-            if (moved.type == PageRowType.SYSTEM_WIDGET && heightPxOf(moved) > freshPageBudgetPx) {
-                moved = moved.copy(heightPx = freshPageBudgetPx)
+            val exactPx = moved.heightPx
+            if (moved.type == PageRowType.SYSTEM_WIDGET && exactPx != null && exactPx > fullPagePx) {
+                moved = moved.copy(heightPx = fullPagePx)
             }
             rowDao.update(moved)
             nextOrder++
@@ -426,26 +415,44 @@ class PageContentRepository @Inject constructor(
         return overflow + rebalancePageOverflow(newPageId)
     }
 
+    private data class SystemInsets(val statusBarTop: Int, val cutoutTop: Int, val navigationBottom: Int)
+
     /**
-     * Real top/bottom system-bar insets in px, for [rebalancePageOverflow]'s budget — this runs outside
-     * any Compose tree, so it can't just read WindowInsets. Falls back to the (less precise) internal
-     * status_bar_height/navigation_bar_height dimens pre-API 30 — those alone can under-report the real
-     * top inset on devices with a display cutout, which is exactly what let a widget be sized taller
-     * than what actually fits.
+     * Real system-bar insets in px — this runs outside any Compose tree, so it can't just read
+     * WindowInsets. The status bar's height counts even while it's hidden (a page decides that on its
+     * own, see [pageGrid]). Falls back to the internal status_bar_height/navigation_bar_height dimens
+     * pre-API 30.
      */
-    private fun systemInsetsPx(): Pair<Int, Int> {
+    private fun systemInsetsPx(): SystemInsets {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
             runCatching {
                 val wm = context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager
                 val insets = wm.currentWindowMetrics.windowInsets
-                val statusBarTop = insets.getInsets(android.view.WindowInsets.Type.statusBars()).top
-                val cutoutTop = insets.displayCutout?.safeInsetTop ?: 0
-                val navBottom = insets.getInsets(android.view.WindowInsets.Type.navigationBars()).bottom
-                return maxOf(statusBarTop, cutoutTop) to navBottom
+                return SystemInsets(
+                    statusBarTop = insets.getInsetsIgnoringVisibility(android.view.WindowInsets.Type.statusBars()).top,
+                    cutoutTop = insets.displayCutout?.safeInsetTop ?: 0,
+                    navigationBottom = insets.getInsetsIgnoringVisibility(android.view.WindowInsets.Type.navigationBars()).bottom
+                )
             }
         }
-        return systemInsetPx("status_bar_height") to systemInsetPx("navigation_bar_height")
+        return SystemInsets(systemInsetPx("status_bar_height"), 0, systemInsetPx("navigation_bar_height"))
     }
+
+    /** The full window height (the launcher draws edge to edge, under both system bars). */
+    private fun windowHeightPx(): Int {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            runCatching {
+                val wm = context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager
+                return wm.currentWindowMetrics.bounds.height()
+            }
+        }
+        return context.resources.displayMetrics.heightPixels
+    }
+
+    /** How many row units fit on each carousel page — HomeScreen and the widget editor stretch the
+     *  unit with exactly this count, so a full page ends exactly one row gap above the Dock. */
+    suspend fun rowUnitCounts(): Map<Long, Int> =
+        pageDao.getAllOnce().filter { it.kind == LauncherPageKind.ROWS }.associate { it.id to pageGrid(it.id).unitCount }
 
     private fun systemInsetPx(name: String): Int {
         val resId = context.resources.getIdentifier(name, "dimen", "android")

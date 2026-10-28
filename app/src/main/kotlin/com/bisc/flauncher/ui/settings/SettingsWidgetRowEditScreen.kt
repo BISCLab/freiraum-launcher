@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsIgnoringVisibility
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material3.AlertDialog
@@ -22,10 +22,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
@@ -43,11 +41,10 @@ import com.bisc.flauncher.data.model.clockTimeAction
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.PageRowDimens
 import com.bisc.flauncher.ui.home.WidgetSizeEditor
-import com.bisc.flauncher.ui.home.safeSystemWidgetMaxHeightPx
+import com.bisc.flauncher.ui.home.PageGrid
 import com.bisc.flauncher.ui.home.dock.PagePickerSheet
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 import com.bisc.flauncher.util.captureViewBitmap
-import kotlin.math.roundToInt
 
 private enum class ClockActionSlot { DATE, TIME }
 
@@ -83,43 +80,38 @@ fun SettingsWidgetRowEditScreen(
 
     val isBuiltIn = row.type == PageRowType.WIDGET
     val minSpan = if (isBuiltIn) WidgetKind.minSpan(row.payload) else 1
-    // A page with its own dock reserves noticeably more space at the bottom than one without, so it
-    // fits roughly one fewer row before page-overflow rebalancing would move the rest to a new page.
-    val pageHasDock = rowsByPage[pageId].orEmpty().any { it.type == PageRowType.SEARCH_BAR }
-    val maxSpan = if (isBuiltIn) WidgetKind.maxSpan(row.payload) else if (pageHasDock) 6 else 8
+    // The page's row grid, computed exactly as HomeScreen lays the page out (see PageGrid): how many
+    // row units fit — fewer with Home's Dock, which shows on every page — and how tall one is drawn.
+    val homePageId = allPages.find { it.isHome }?.id
+    val shownDock = rowsByPage[homePageId].orEmpty().find { it.type == PageRowType.SEARCH_BAR }?.takeIf { it.enabled }
+    val rowUnitCounts by viewModel.rowUnitCounts.collectAsState()
+    val unitCount = rowUnitCounts[pageId] ?: 0
+    val hidesStatusBar by remember(pageId) { viewModel.pageHideStatusBar(pageId) }.collectAsState(initial = true)
+    val density = LocalDensity.current
+    val windowHeight = with(density) { androidx.compose.ui.platform.LocalWindowInfo.current.containerSize.height.toDp() }
+    @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+    val statusBarInset = WindowInsets.statusBarsIgnoringVisibility.asPaddingValues().calculateTopPadding()
+    val cutoutInset = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
+    val navigationBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val gridUnit = PageRowDimens.stretchedUnit(
+        PageGrid.viewport(
+            windowHeight = windowHeight,
+            topInset = if (hidesStatusBar) cutoutInset else maxOf(statusBarInset, cutoutInset),
+            navigationBar = navigationBarInset,
+            dock = shownDock
+        ),
+        unitCount
+    )
+    val maxSpan = if (isBuiltIn) WidgetKind.maxSpan(row.payload) else unitCount.takeIf { it > 0 } ?: 6
 
     val showsStyleControls = row.type == PageRowType.SYSTEM_WIDGET ||
         (isBuiltIn && row.payload != WidgetKind.CLOCK && row.payload != WidgetKind.SPACER)
 
-    // Same dock-aware rule as the coarse maxSpan above, but in exact pixels for the fine stepper.
-    // This is a page-level approximation (it doesn't know what other rows sit above this one, which
-    // page-overflow rebalancing accounts for separately when this row no longer fits alongside them).
-    // Mirrors HomeScreen's actual reserved chrome exactly (real status/nav bar insets, not flat
-    // guesses) plus a safety margin, so this cap is never more generous than what genuinely fits —
-    // a page doesn't scroll, so a widget taller than the screen would overflow it.
-    val configuration = LocalConfiguration.current
-    val density = LocalDensity.current
-    // A display cutout (punch-hole camera) can be taller than the plain status bar inset alone on some
-    // devices, which under-reserved this cap's top chrome and is exactly what let a widget be sized
-    // taller than what actually fits there — same fix FolderView already applies for the same reason.
-    val statusBarInset = maxOf(
-        WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
-        WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
-    )
-    val navigationBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-    val heightPxRange = remember(pageHasDock, configuration.screenWidthDp, configuration.screenHeightDp, density, statusBarInset, navigationBarInset) {
-        with(density) {
-            val minPx = PageRowDimens.rowUnitHeight.toPx().roundToInt()
-            val maxPx = safeSystemWidgetMaxHeightPx(
-                pageHasDock = pageHasDock,
-                screenWidthPx = configuration.screenWidthDp.dp.toPx().roundToInt(),
-                screenHeightPx = configuration.screenHeightDp.dp.toPx().roundToInt(),
-                densityValue = density.density,
-                statusBarPx = statusBarInset.toPx().roundToInt(),
-                navigationBarPx = navigationBarInset.toPx().roundToInt()
-            )
-            minPx..maxOf(maxPx, minPx)
-        }
+    // A free-height widget can be anything from one plain row up to the whole page; taller can't fit,
+    // since a page doesn't scroll.
+    val heightPxRange = with(density) {
+        val minPx = PageRowDimens.rowUnitHeight.roundToPx()
+        minPx..maxOf(PageRowDimens.spanHeight(gridUnit, maxSpan).roundToPx(), minPx)
     }
 
     SettingsSubScreen(title = rowLabel(row), navController = navController, onBack = onBack, onSave = { viewModel.saveRow(row) }, dirty = row != savedRow) {
@@ -130,7 +122,9 @@ fun SettingsWidgetRowEditScreen(
             onSpanChange = { row = row.copy(spanY = it) },
             onSystemWidgetViewReady = { hostedWidgetView = it },
             heightPxRange = heightPxRange,
-            onHeightPxChange = { row = row.copy(heightPx = it) }
+            onHeightPxChange = { row = row.copy(heightPx = it) },
+            gridUnit = gridUnit,
+            gridUnitCount = maxSpan
         )
         if (showsStyleControls) {
             ElementAppearanceSection(
@@ -147,13 +141,29 @@ fun SettingsWidgetRowEditScreen(
                     onSettled = { row = row.copy(cornerRadiusPercent = it) }
                 )
             }
-            SettingsPreferenceGroup {
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_edge_label)) {
                 SettingsPreference(
                     icon = null,
                     title = stringResource(R.string.settings_widgets_edge_to_edge_label),
                     info = stringResource(R.string.settings_widgets_edge_to_edge_summary),
                     onClick = { row = row.copy(edgeToEdge = !row.edgeToEdge) },
                     trailing = { Switch(checked = row.edgeToEdge, onCheckedChange = { row = row.copy(edgeToEdge = it) }) }
+                )
+            }
+        }
+        if (isBuiltIn && row.payload == WidgetKind.MUSIC) {
+            val musicSources by viewModel.musicSources.collectAsState()
+            val coverRounded by viewModel.musicCoverRounded.collectAsState()
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_music_sources)) {
+                MusicSourcesRow(sources = musicSources, apps = browsableApps, loadIcon = viewModel::loadIcon, onSave = viewModel::setMusicSources)
+            }
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_music_cover_label)) {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_music_cover_rounded),
+                    info = stringResource(R.string.settings_music_cover_rounded_info),
+                    onClick = { viewModel.setMusicCoverRounded(!coverRounded) },
+                    trailing = { Switch(checked = coverRounded, onCheckedChange = viewModel::setMusicCoverRounded) }
                 )
             }
         }
@@ -181,17 +191,18 @@ fun SettingsWidgetRowEditScreen(
                 onChange = { row = row.withAppearance(row.appearance().copy(contentColor = it)) }
             )
             SettingsPreferenceGroup(title = stringResource(R.string.settings_clock_actions_label)) {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_clock_date_action),
-                    summary = gestureActionSummary(row.clockDateAction(), allPages, browsableApps),
-                    onClick = { pickingActionTypeFor = ClockActionSlot.DATE }
-                )
+                // Same order as on the widget: the time on top, the date below it.
                 SettingsPreference(
                     icon = null,
                     title = stringResource(R.string.settings_clock_time_action),
                     summary = gestureActionSummary(row.clockTimeAction(), allPages, browsableApps),
                     onClick = { pickingActionTypeFor = ClockActionSlot.TIME }
+                )
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_clock_date_action),
+                    summary = gestureActionSummary(row.clockDateAction(), allPages, browsableApps),
+                    onClick = { pickingActionTypeFor = ClockActionSlot.DATE }
                 )
             }
             SettingsPreferenceGroup(title = stringResource(R.string.settings_clock_time_format_label)) {

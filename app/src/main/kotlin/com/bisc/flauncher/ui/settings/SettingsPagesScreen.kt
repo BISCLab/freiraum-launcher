@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Gesture
+import androidx.compose.material3.Switch
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -82,6 +83,7 @@ fun SettingsPagesScreen(
 ) {
     val allPages by viewModel.allPages.collectAsState()
     val gestureActions by viewModel.gestureActions.collectAsState()
+    val carouselEndless by viewModel.carouselEndless.collectAsState()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -106,6 +108,15 @@ fun SettingsPagesScreen(
             onAddLeft = { pickingTemplateForDirection = PageDirection.LEFT },
             onAddRight = { pickingTemplateForDirection = PageDirection.RIGHT }
         )
+        SettingsPreferenceGroup {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_pages_carousel_endless),
+                info = stringResource(R.string.settings_pages_carousel_endless_info),
+                onClick = { viewModel.setCarouselEndless(!carouselEndless) },
+                trailing = { Switch(checked = carouselEndless, onCheckedChange = viewModel::setCarouselEndless) }
+            )
+        }
 
         // App list and Text search don't swipe — set apart in their own row of the same tiles.
         // Their icon and name live in their own Appearance → Page screen.

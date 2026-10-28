@@ -25,7 +25,8 @@ class FolderRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val folderDao: FolderDao,
     private val folderItemDao: FolderItemDao,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val widgetHostManager: com.bisc.flauncher.util.SystemWidgetHostManager
 ) {
     val folders: Flow<List<Folder>> = folderDao.observeAll()
     val folderItems: Flow<List<FolderItem>> = folderItemDao.observeAll()
@@ -104,9 +105,34 @@ class FolderRepository @Inject constructor(
 
     suspend fun addWidgetToFolder(folderId: Long, kind: String, spanY: Int = WidgetKind.defaultSpan(kind)): Long {
         val isDark = settingsRepository.theme.first().isDark(context)
-        var item = FolderItem(folderId = folderId, type = GridItemType.WIDGET, payload = kind, spanY = spanY, orderIndex = nextOrderIndex(folderId))
+        var item = FolderItem(
+            folderId = folderId, type = GridItemType.WIDGET, payload = kind, spanY = spanY, orderIndex = nextOrderIndex(folderId),
+            // Widgets start only slightly rounded, same as on a page.
+            cornerRadiusPercent = com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT
+        )
         item = item.withAppearance(defaultBoxAppearanceFor(isDark))
         return folderItemDao.insert(item)
+    }
+
+    /** An already bound (and configured) app widget, [appWidgetId], as a folder's widget. */
+    suspend fun addSystemWidgetToFolder(folderId: Long, appWidgetId: Int, spanY: Int): Long {
+        val isDark = settingsRepository.theme.first().isDark(context)
+        var item = FolderItem(
+            folderId = folderId, type = GridItemType.SYSTEM_WIDGET, payload = appWidgetId.toString(), spanY = spanY,
+            orderIndex = nextOrderIndex(folderId),
+            cornerRadiusPercent = com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT
+        )
+        item = item.withAppearance(defaultBoxAppearanceFor(isDark))
+        return folderItemDao.insert(item)
+    }
+
+    suspend fun setFolderItemSpan(item: FolderItem, spanY: Int) {
+        folderItemDao.update(item.copy(spanY = spanY))
+    }
+
+    /** Frees a removed app widget's id with the system, so no orphaned widget stays bound. */
+    private fun releaseWidget(item: FolderItem) {
+        if (item.type == GridItemType.SYSTEM_WIDGET) item.payload.toIntOrNull()?.let(widgetHostManager::deleteId)
     }
 
     suspend fun addShortcutToFolder(folderId: Long, packageName: String, shortcutId: String, label: String): Long =
@@ -135,6 +161,7 @@ class FolderRepository @Inject constructor(
 
     suspend fun removeFolderItem(item: FolderItem): Boolean {
         folderItemDao.delete(item)
+        releaseWidget(item)
         if (folderItemDao.countForFolder(item.folderId) == 0) {
             folderDao.get(item.folderId)?.let { folderDao.delete(it) }
             return true
@@ -143,10 +170,11 @@ class FolderRepository @Inject constructor(
     }
 
     suspend fun deleteFolder(folder: Folder) {
+        folderItemDao.observeAll().first().filter { it.folderId == folder.id }.forEach(::releaseWidget)
         folderDao.delete(folder)
     }
 
     suspend fun deleteFolderById(id: Long) {
-        folderDao.get(id)?.let { folderDao.delete(it) }
+        folderDao.get(id)?.let { deleteFolder(it) }
     }
 }

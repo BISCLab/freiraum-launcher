@@ -251,7 +251,7 @@ private fun folderItemLabel(
 
 @Composable
 private fun FolderWidgetRow(item: FolderItem) {
-    Box(modifier = Modifier.fillMaxWidth().height(PageRowDimens.rowUnitHeight * item.spanY).padding(bottom = 8.dp)) {
+    Box(modifier = Modifier.fillMaxWidth().height(PageRowDimens.spanHeight(PageRowDimens.rowUnitHeight, item.spanY)).padding(bottom = 8.dp)) {
         when (item.type) {
             GridItemType.WIDGET -> when (item.payload) {
                 WidgetKind.CLOCK -> ClockWidget()

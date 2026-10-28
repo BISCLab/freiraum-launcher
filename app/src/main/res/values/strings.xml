@@ -226,6 +226,9 @@
     <string name="settings_folder_delete">Delete folder</string>
     <string name="settings_folder_delete_confirm_message">Deletes the folder and all its contents permanently.</string>
     <string name="settings_folder_items_label">Contents</string>
+    <string name="settings_folder_widgets_label">Widgets</string>
+    <string name="settings_folder_widget_add">Add widget</string>
+    <string name="settings_folder_widget_app_widget">App widget</string>
     <string name="settings_folder_icon_pack_label">Icon pack</string>
     <string name="settings_folder_icon_pack_choose_icon">Choose icon</string>
     <string name="settings_folder_icon_pack_none_installed">No icon packs installed</string>
@@ -288,6 +291,18 @@
     <string name="settings_pages_page">Page %1$d</string>
     <string name="settings_pages_add">Add page</string>
     <string name="settings_pages_carousel_label">Carousel</string>
+    <string name="settings_music_sources">Music sources</string>
+    <string name="settings_music_sources_all">All apps</string>
+    <string name="settings_music_sources_info">Only these apps\' playback shows up in the music widget and is controlled by it. With none checked, every app counts, including browsers and video apps.</string>
+    <string name="settings_music_cover_label">Cover</string>
+    <string name="settings_music_cover_rounded">Rounded cover</string>
+    <string name="settings_music_cover_rounded_info">Gives the large album cover rounded corners instead of square ones.</string>
+    <plurals name="settings_music_sources_count">
+        <item quantity="one">%1$d app</item>
+        <item quantity="other">%1$d apps</item>
+    </plurals>
+    <string name="settings_pages_carousel_endless">Endless carousel</string>
+    <string name="settings_pages_carousel_endless_info">Swiping past the last page continues with the first one, and back, round in a circle.</string>
     <string name="settings_pages_other_label">Utility pages</string>
     <string name="settings_pages_behavior_label">Behavior</string>
     <string name="settings_pages_add_template_label">Start from</string>
@@ -321,13 +336,11 @@
     <string name="settings_rows_save">Save</string>
     <string name="settings_rows_remove">Remove row</string>
     <string name="settings_widgets_edit_title">Edit widget</string>
-    <string name="settings_widget_relocated_title">Widget moved to a new page</string>
-    <string name="settings_widget_relocated_message">This page\'s widget was too tall to fit alongside the dock you just added, which can crash some widgets — it was moved to a new page automatically so it keeps working.</string>
-    <string name="settings_widget_relocated_confirm">OK</string>
     <string name="settings_page_full_title">This page is full</string>
     <string name="settings_page_full_message">It doesn\'t fit here alongside what\'s already on this page. Add a new page for it?</string>
     <string name="settings_page_full_confirm">Add page</string>
     <string name="settings_widgets_corner_shape_label">Corner roundness</string>
+    <string name="settings_widgets_edge_label">Edge</string>
     <string name="settings_widgets_edge_to_edge_label">Edge to edge</string>
     <string name="settings_widgets_edge_to_edge_summary">Removes the side margin so the widget spans the full screen width. Off by default; the width then matches the dock.</string>
     <string name="settings_edge_to_edge_summary">Removes the side margin so it spans the full screen width. Off by default: a fine margin to the screen edge stays.</string>
@@ -368,10 +381,10 @@
     <string name="settings_row_entry_add_shortcut">Add shortcut</string>
     <string name="settings_row_entry_add_map_target">Address</string>
     <string name="settings_row_entry_add_website">Website</string>
-    <string name="settings_row_entry_add_widget">Add widget</string>
     <string name="settings_row_entry_add_page_link">Link a page</string>
     <string name="settings_row_entry_add_contact">Add contact</string>
     <string name="settings_row_entry_add_actionbutton">Add action button</string>
+    <string name="settings_element_box_form_label">Shape</string>
     <string name="settings_element_box_pill_mode_label">Single-line layout</string>
     <string name="settings_element_box_pill_mode_summary">Entries in one non-wrapping row instead of a grid — used by the dock</string>
     <string name="settings_map_mode_address">Address</string>

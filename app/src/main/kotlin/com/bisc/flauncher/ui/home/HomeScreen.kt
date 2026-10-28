@@ -61,6 +61,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -68,6 +69,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
@@ -199,11 +201,25 @@ fun HomeScreen(
     val categoryColors by viewModel.categoryColors.collectAsState()
     val converterResult by viewModel.converterResult.collectAsState()
 
-    val pagerState = rememberPagerState(pageCount = { pages.size.coerceAtLeast(1) })
+    // Endless carousel: the pager runs over many virtual pages that cycle through the real ones
+    // (virtual index mod page count), started in the middle so it can wrap both ways.
+    val carouselEndless by viewModel.carouselEndless.collectAsState()
+    val endless = carouselEndless && pages.size > 1
+    val virtualPageCount = if (endless) pages.size * ENDLESS_CAROUSEL_LOOPS else pages.size.coerceAtLeast(1)
+    val pagerState = rememberPagerState(pageCount = { virtualPageCount })
+    fun realIndex(virtual: Int): Int =
+        if (endless) virtual.mod(pages.size) else virtual.coerceIn(0, pages.lastIndex.coerceAtLeast(0))
+    // The virtual index of real page [real] nearest to the current one, so jumps take the short way round.
+    fun virtualIndexOf(real: Int): Int {
+        if (!endless) return real
+        val current = pagerState.currentPage
+        val base = current - current.mod(pages.size)
+        return listOf(base + real - pages.size, base + real, base + real + pages.size).minBy { kotlin.math.abs(it - current) }
+    }
 
     val onAppOverviewPage = appListOpen
     val overviewSurfaceDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), appOverviewBackground)
-    val currentPageId = pages.getOrNull(pagerState.currentPage)?.id ?: -1L
+    val currentPageId = pages.getOrNull(realIndex(pagerState.currentPage))?.id ?: -1L
     val currentPageHideStatusBar by remember(currentPageId) { viewModel.pageHideStatusBar(currentPageId) }
         .collectAsState(initial = false)
     // Its own page-scoped flag, independent of text search's.
@@ -275,17 +291,33 @@ fun HomeScreen(
 
     val homeIndex = pages.indexOfFirst { it.isHome }.coerceAtLeast(0)
 
+    // Starts on Home; afterwards keeps showing the same page when the page list or the endless mode
+    // changes (both remap virtual indices), and keeps an endless pager away from its outer ends.
     var didInitialPageScroll by remember { mutableStateOf(false) }
-    LaunchedEffect(pages) {
-        if (!didInitialPageScroll && pages.isNotEmpty()) {
-            if (pagerState.currentPage != homeIndex) pagerState.scrollToPage(homeIndex)
-            didInitialPageScroll = true
+    var lastShownPageId by remember { mutableStateOf<Long?>(null) }
+    LaunchedEffect(pages, endless) {
+        if (pages.isEmpty()) return@LaunchedEffect
+        val wantedReal = if (!didInitialPageScroll) homeIndex
+            else pages.indexOfFirst { it.id == lastShownPageId }.takeIf { it >= 0 } ?: homeIndex
+        val current = pagerState.currentPage
+        val offCenter = if (endless) current < pages.size || current >= virtualPageCount - pages.size else current >= pages.size
+        if (!didInitialPageScroll || offCenter || realIndex(current) != wantedReal) {
+            pagerState.scrollToPage(if (endless) (ENDLESS_CAROUSEL_LOOPS / 2) * pages.size + wantedReal else wantedReal)
+        }
+        didInitialPageScroll = true
+    }
+    LaunchedEffect(pages, endless) {
+        snapshotFlow { pagerState.currentPage }.collect { virtual ->
+            if (didInitialPageScroll) pages.getOrNull(realIndex(virtual))?.id?.let { lastShownPageId = it }
         }
     }
 
     // Hoisted above the pager (rather than declared down where the dock itself renders) so the
     // gesture-detector Box below (home-screen background taps) and the dock's own rendering block
     // further down share one dockExpanded state.
+    val rowUnitCounts by viewModel.rowUnitCounts.collectAsState()
+    val homeGestureExclusion = remember { HomeGestureExclusion() }
+    var pagerHeightPx by remember { mutableStateOf(0) }
     val homeDockRow = pages.find { it.isHome }
         ?.let { rowsByPage[it.id] }
         ?.find { it.type == PageRowType.SEARCH_BAR }
@@ -299,7 +331,7 @@ fun HomeScreen(
     var dockExpanded by remember(homeDockRow?.id, dockVisibilityMode) {
         mutableStateOf(dockVisibilityMode != com.bisc.flauncher.data.model.DockVisibilityMode.MANUAL)
     }
-    val isOnHomePage = pagerState.currentPage == homeIndex
+    val isOnHomePage = realIndex(pagerState.currentPage) == homeIndex
     LaunchedEffect(dockVisibilityMode, isOnHomePage) {
         if (dockVisibilityMode == com.bisc.flauncher.data.model.DockVisibilityMode.AUTO_EXPAND_ON_ARRIVAL && isOnHomePage) {
             dockExpanded = true
@@ -316,7 +348,7 @@ fun HomeScreen(
 
     val openPageById: (Long) -> Unit = { pageId ->
         val index = pages.indexOfFirst { it.id == pageId }
-        if (index >= 0) coroutineScope.launch { pagerState.animateScrollToPage(index) }
+        if (index >= 0) coroutineScope.launch { pagerState.animateScrollToPage(virtualIndexOf(index)) }
     }
     // Shared by every page-link entry (an ElementBoxGrid cell, a pill-row cell, the floating dock) —
     // jumps the pager for a swipeable ROWS page, opens the matching overlay for the two singletons.
@@ -351,7 +383,7 @@ fun HomeScreen(
         viewModel.closeAppList()
         viewModel.closeOverview()
         viewModel.closeAllFolders()
-        if (pagerState.currentPage != homeIndex) coroutineScope.launch { pagerState.animateScrollToPage(homeIndex) }
+        if (realIndex(pagerState.currentPage) != homeIndex) coroutineScope.launch { pagerState.animateScrollToPage(virtualIndexOf(homeIndex)) }
     }
     val openSettingsFromGesture: () -> Unit = {
         viewModel.closeOverview()
@@ -378,7 +410,12 @@ fun HomeScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (pages.isNotEmpty()) {
-            Box(modifier = Modifier.fillMaxSize().then(if (blurRadius > 0.dp) Modifier.blur(blurRadius) else Modifier)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .onSizeChanged { pagerHeightPx = it.height }
+                    .then(if (blurRadius > 0.dp) Modifier.blur(blurRadius) else Modifier)
+            ) {
                 // Layer 1 (the background) is one shared layer behind the pager rather than part of
                 // each page, so pages with different images/colors blend instead of showing a seam.
                 //
@@ -417,14 +454,15 @@ fun HomeScreen(
                 val upperIndex: Int
                 val crossfadeFraction: Float
                 if (overlayHidesPage || pageContentAlpha < 0.999f) {
-                    lowerIndex = pagerState.currentPage.coerceIn(0, pages.lastIndex)
+                    lowerIndex = realIndex(pagerState.currentPage)
                     upperIndex = lowerIndex
                     crossfadeFraction = 0f
                 } else {
                     val continuousPage = pagerState.currentPage + pagerState.currentPageOffsetFraction
-                    lowerIndex = kotlin.math.floor(continuousPage).toInt().coerceIn(0, pages.lastIndex)
-                    upperIndex = kotlin.math.ceil(continuousPage).toInt().coerceIn(0, pages.lastIndex)
-                    crossfadeFraction = (continuousPage - lowerIndex).coerceIn(0f, 1f)
+                    val lowerVirtual = kotlin.math.floor(continuousPage).toInt()
+                    lowerIndex = realIndex(lowerVirtual)
+                    upperIndex = realIndex(kotlin.math.ceil(continuousPage).toInt())
+                    crossfadeFraction = (continuousPage - lowerVirtual).coerceIn(0f, 1f)
                 }
                 val lowerPageId = pages.getOrNull(lowerIndex)?.id
                 val upperPageId = pages.getOrNull(upperIndex)?.id
@@ -443,33 +481,34 @@ fun HomeScreen(
                     // actually made *everything* feel worse afterward — the app-list transition, general
                     // scrolling, all of it — not just the one swipe this was meant to fix. Back to only
                     // keeping the immediate neighbor pre-warmed, matching how Pager is meant to be used.
-                    beyondViewportPageCount = 1,
-                    // Left/right swipe between Home and its other pages; the carousel is finite
-                    // (no wrap-around). Overlays
+                    // With only two pages wrapping around, both neighbors are the same page — keeping
+                    // them pre-composed would host its app widgets twice at once.
+                    beyondViewportPageCount = if (endless && pages.size < 3) 0 else 1,
+                    // Left/right swipe between Home and its other pages; wraps around when the
+                    // carousel is endless. Overlays
                     // (search/app list/Panel/folder) each already render a full-size catch-all Box on
                     // top of the pager (see overlayHidesPage/folderOpen below), which intercepts the
                     // touch before it ever reaches the pager, so no extra gating is needed here for them.
                     userScrollEnabled = true,
                     modifier = Modifier.fillMaxSize()
                 ) { pageIndex ->
-                    val page = pages.getOrNull(pageIndex)
+                    val page = pages.getOrNull(realIndex(pageIndex))
                     // A plain Box, not BoxWithConstraints — BoxWithConstraints is backed by SubcomposeLayout,
                     // and subcomposing every page's full widget content (each with its own state, icon
                     // loading, etc.) on first entering the pager's composition range is what made swiping
                     // onto a widget-heavy page feel janky, regardless of whether the widgets were external
                     // or built-in.
                     Box(
-                        // The 4 rebindable HomeGestures (long-press/double-tap/swipe-up/swipe-down),
-                        // restricted to the home page only — closing an overlay they open always lands
-                        // you back on the page you actually started the gesture from (returnHome does
-                        // the actual closing/scrolling). Swipe-up/-down double as the Dock's/Panel's own
+                        // The 4 rebindable HomeGestures (long-press/double-tap/swipe-up/swipe-down), on
+                        // every page — the Dock and the Panel are Home's and show on every page, so their
+                        // open gestures work everywhere too. Swipe-up/-down double as the Dock's/Panel's own
                         // open gesture: when the Dock is in MANUAL mode (or the Panel is enabled), that
                         // gesture is claimed outright instead of running its normally-bound action —
                         // mirrored in SettingsGesturesScreen, which shows that slot locked with a reason
                         // instead of letting it be rebound. A top/bottom safe zone keeps Android's own
                         // edge gestures (hidden status bar reveal; gesture-nav task switcher) reachable.
                         modifier = Modifier.fillMaxSize().then(
-                            if (page?.isHome == true) {
+                            if (page != null) {
                                 Modifier.detectHomeGestures(
                                     onLongPress = { viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.LONG_PRESS, context, openPageById, openSettingsFromGesture) },
                                     onDoubleTap = { viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.DOUBLE_TAP, context, openPageById, openSettingsFromGesture) },
@@ -488,7 +527,8 @@ fun HomeScreen(
                                         }
                                     },
                                     topSafeZonePx = edgeSafeZonePx,
-                                    bottomSafeZonePx = edgeSafeZonePx
+                                    bottomSafeZonePx = edgeSafeZonePx,
+                                    exclusion = homeGestureExclusion
                                 )
                             } else {
                                 Modifier
@@ -497,16 +537,16 @@ fun HomeScreen(
                     ) {
                     if (page != null) {
                         val pageRows = rowsByPage[page.id].orEmpty()
-                        val pinnedSearchBarRow = pageRows.find { it.type == PageRowType.SEARCH_BAR }
                         // Neither the dock nor the Panel render inline — both float outside the pager
                         // as their own overlays (see the floating dock Box and Panel overlay below).
                         val withoutPinnedSearchBar = pageRows.filter { it.type != PageRowType.SEARCH_BAR && it.type != PageRowType.PANEL }
-                        // Flush to the screen's bottom edge now (no floating margin of its own), so
-                        // content reserves the dock's own height (1 or 2 rows, see dockRows()) plus the
-                        // system nav bar inset below it.
-                        val dockRowCount = pinnedSearchBarRow?.dockRows()?.size ?: 1
-                        val reservedForDock = (96.dp * dockRowCount + 32.dp).coerceAtLeast(96.dp) +
-                            WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + DockDimens.contentGap
+                        // Home's Dock floats over every page, flush to the screen's bottom edge: content
+                        // reserves its exact height (1 or 2 rows, captions) plus the nav bar inset, and
+                        // keeps the same gap above it as between its own rows.
+                        val shownDock = homeDockRow?.takeIf { it.enabled }
+                        val reservedForDock = shownDock?.let { DockDimens.height(it) + PageRowDimens.rowSpacing }?.plus(
+                            WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                        )
                         val pageBackgroundConfigOrNull by remember(page.id) { viewModel.pageBackgroundConfig(page.id) }.collectAsState(initial = null)
                         LaunchedEffect(page.id, pageBackgroundConfigOrNull) {
                             pageBackgroundConfigOrNull?.let { config ->
@@ -533,12 +573,21 @@ fun HomeScreen(
                             .padding(top = animatedTopInset)
                             .padding(top = 16.dp)
                             .then(
-                                if (pinnedSearchBarRow != null) Modifier.padding(bottom = reservedForDock)
+                                if (reservedForDock != null) Modifier.padding(bottom = reservedForDock)
                                 else Modifier.navigationBarsPadding().padding(bottom = 16.dp)
                             )
+                        // Row units stretch so that a full page (its unit count, see PageGrid) ends exactly
+                        // one row gap above the Dock, the same gap as between rows.
+                        val bottomReserve = reservedForDock
+                            ?: (WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 16.dp)
+                        val rowUnitHeight = with(LocalDensity.current) {
+                            PageRowDimens.stretchedUnit(pagerHeightPx.toDp() - animatedTopInset - 16.dp - bottomReserve, rowUnitCounts[page.id] ?: 0)
+                        }
                         CompositionLocalProvider(
                             LocalSurfaceIsDark provides pageSurfaceIsDark,
-                            LocalSurfaceIsDarkLoading provides (loadedPageBackgroundConfig == null)
+                            LocalSurfaceIsDarkLoading provides (loadedPageBackgroundConfig == null),
+                            LocalRowUnitHeight provides rowUnitHeight,
+                            LocalHomeGestureExclusion provides homeGestureExclusion
                         ) { PageRowsColumn(
                                 rows = withoutPinnedSearchBar,
                                 entriesByRow = rowEntriesByRow,
@@ -597,10 +646,7 @@ fun HomeScreen(
             // uses below, rather than a flat generous guess — any slack here is slack the Column's
             // Arrangement.Top has to center into, pushing the top row down from the top edge.
             val dockRowShape = homeDockRow.dockRows()
-            val dockRowContentHeight = if (homeDockRow.showLabels) DockDimens.rowHeightWithLabel else DockDimens.rowHeight
-            val dockHeight = DockDimens.topPadding + DockDimens.innerVerticalPadding +
-                dockRowContentHeight * dockRowShape.size +
-                DockDimens.rowGap * (dockRowShape.size - 1).coerceAtLeast(0)
+            val dockHeight = DockDimens.height(homeDockRow)
             androidx.compose.animation.AnimatedVisibility(
                 visible = dockExpanded,
                 enter = fadeIn(tween(160)) + androidx.compose.animation.expandVertically(tween(200), expandFrom = Alignment.Bottom),
@@ -830,7 +876,7 @@ fun HomeScreen(
     // pager wherever it already was.
     BackHandler(enabled = appListOpen && !searchOpen) { returnHome() }
     BackHandler(enabled = searchOpen) { returnHome() }
-    BackHandler(enabled = !appListOpen && !searchOpen && !folderOpen && pagerState.currentPage != homeIndex) { returnHome() }
+    BackHandler(enabled = !appListOpen && !searchOpen && !folderOpen && realIndex(pagerState.currentPage) != homeIndex) { returnHome() }
     // Back closes an open Panel rather than leaving the app.
     BackHandler(enabled = isPanelOpen) { viewModel.closeOverview() }
     LaunchedEffect(homeButtonPressCount) { if (homeButtonPressCount > 0) returnHome() }
@@ -1108,3 +1154,5 @@ fun HomeScreen(
 
 }
 
+/** Virtual rounds an endless carousel spans (it starts in the middle) — far more than anyone swipes. */
+private const val ENDLESS_CAROUSEL_LOOPS = 1000

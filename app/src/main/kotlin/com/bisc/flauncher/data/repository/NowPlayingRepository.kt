@@ -38,6 +38,8 @@ class NowPlayingRepository @Inject constructor(
     private var activeController: MediaController? = null
     private var controllers: List<MediaController> = emptyList()
     private var preferredPackage: String? = null
+    // Apps allowed to show up in the widget (package names); empty = every app.
+    private var allowedSources: Set<String> = emptySet()
     private var customActionsById: Map<String, PlaybackState.CustomAction> = emptyMap()
     private val customIconCache = HashMap<String, Bitmap?>()
     private var listening = false
@@ -50,6 +52,30 @@ class NowPlayingRepository @Inject constructor(
 
     private val _nowPlaying = MutableStateFlow<NowPlayingInfo?>(remembered)
     val nowPlaying: StateFlow<NowPlayingInfo?> = _nowPlaying.asStateFlow()
+
+    private fun isAllowed(packageName: String) = allowedSources.isEmpty() || packageName in allowedSources
+
+    /** Limits the widget to [packages]' playback (empty = every app); a remembered last track from
+     *  any other app is dropped. */
+    fun setAllowedSources(packages: Set<String>) {
+        if (packages == allowedSources) return
+        allowedSources = packages
+        remembered?.let { if (!isAllowed(it.packageName)) forgetRemembered() }
+        refresh()
+        // Without access refresh() publishes nothing new; still drop a no-longer-allowed track.
+        if (!hasPermission()) _nowPlaying.value = remembered?.let(::asIdle)
+    }
+
+    private fun forgetRemembered() {
+        remembered = null
+        lastCachedKey = null
+        cacheWriter.execute {
+            runCatching {
+                cachePrefs.edit().clear().apply()
+                cacheArtFile.delete()
+            }
+        }
+    }
 
     fun hasPermission(): Boolean =
         NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
@@ -83,6 +109,8 @@ class NowPlayingRepository @Inject constructor(
     }
 
     private fun sendMediaKey(code: Int) {
+        // A system-wide media key goes to whichever app played last — possibly one that isn't allowed.
+        if (allowedSources.isNotEmpty()) return
         val audio = context.getSystemService(AudioManager::class.java) ?: return
         runCatching {
             audio.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, code))
@@ -181,7 +209,7 @@ class NowPlayingRepository @Inject constructor(
     }
 
     private fun onSessionsChanged(list: List<MediaController>?) {
-        controllers = list.orEmpty()
+        controllers = list.orEmpty().filter { isAllowed(it.packageName) }
         // The player the user picked, else whichever is playing right now, else the one already shown
         // (so a re-sync before a button press can't silently hand the buttons to another paused app),
         // else the most recently active.

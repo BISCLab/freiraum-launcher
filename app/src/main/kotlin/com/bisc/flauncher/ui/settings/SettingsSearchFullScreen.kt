@@ -395,9 +395,11 @@ fun SettingsSearchElementScreen(
                 onClick = { onNavigate("border") },
                 trailing = null
             )
-            // The bar always spans the full width (it's flush with the screen top like the Panel);
-            // only the cards have a side margin to switch off.
-            if (element == SearchElement.RESULTS) {
+        }
+        // The bar always spans the full width (it's flush with the screen top like the Panel);
+        // only the cards have a side margin to switch off.
+        if (element == SearchElement.RESULTS) {
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_edge_label)) {
                 SettingsPreference(
                     icon = null,
                     title = stringResource(R.string.settings_widgets_edge_to_edge_label),

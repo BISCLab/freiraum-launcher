@@ -59,7 +59,7 @@ fun customRailColors(appearance: ElementAppearance, surfaceIsDark: Boolean): Rai
     return RailColors(c.background, c.backgroundAlpha, c.borderColor, c.borderWidth, appearance.borderEnabled, c.contentColor)
 }
 
-private fun ColorFill.averageLuminance(): Float = when (mode) {
+internal fun ColorFill.averageLuminance(): Float = when (mode) {
     FillMode.SOLID -> Color(color).luminance()
     FillMode.GRADIENT -> (Color(color).luminance() + Color(secondaryColor).luminance()) / 2f
 }

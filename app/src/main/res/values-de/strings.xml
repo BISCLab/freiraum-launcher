@@ -238,6 +238,9 @@
     <string name="settings_folder_delete">Ordner löschen</string>
     <string name="settings_folder_delete_confirm_message">Löscht den Ordner und alle enthaltenen Elemente dauerhaft.</string>
     <string name="settings_folder_items_label">Inhalt</string>
+    <string name="settings_folder_widgets_label">Widgets</string>
+    <string name="settings_folder_widget_add">Widget hinzufügen</string>
+    <string name="settings_folder_widget_app_widget">App-Widget</string>
     <string name="settings_folder_icon_pack_label">Symbolpaket</string>
     <string name="settings_folder_icon_pack_choose_icon">Symbol auswählen</string>
     <string name="settings_folder_icon_pack_none_installed">Keine Symbolpakete installiert</string>
@@ -289,6 +292,18 @@
     <string name="settings_pages_page">Seite %1$d</string>
     <string name="settings_pages_add">Seite hinzufügen</string>
     <string name="settings_pages_carousel_label">Karussell</string>
+    <string name="settings_music_sources">Musikquellen</string>
+    <string name="settings_music_sources_all">Alle Apps</string>
+    <string name="settings_music_sources_info">Nur die Wiedergabe dieser Apps erscheint im Musik-Widget und wird von ihm gesteuert. Ist keine angehakt, zählt jede App, auch Browser und Video-Apps.</string>
+    <string name="settings_music_cover_label">Cover</string>
+    <string name="settings_music_cover_rounded">Abgerundetes Cover</string>
+    <string name="settings_music_cover_rounded_info">Das große Album-Cover bekommt abgerundete statt spitzer Ecken.</string>
+    <plurals name="settings_music_sources_count">
+        <item quantity="one">%1$d App</item>
+        <item quantity="other">%1$d Apps</item>
+    </plurals>
+    <string name="settings_pages_carousel_endless">Endlos-Karussell</string>
+    <string name="settings_pages_carousel_endless_info">Nach der letzten Seite geht es mit der ersten weiter und umgekehrt, wie im Kreis.</string>
     <string name="settings_pages_other_label">Funktionsseiten</string>
     <string name="settings_pages_behavior_label">Verhalten</string>
     <string name="settings_pages_add_template_label">Ausgangspunkt</string>
@@ -322,13 +337,11 @@
     <string name="settings_rows_save">Speichern</string>
     <string name="settings_rows_remove">Zeile entfernen</string>
     <string name="settings_widgets_edit_title">Widget bearbeiten</string>
-    <string name="settings_widget_relocated_title">Widget auf neue Seite verschoben</string>
-    <string name="settings_widget_relocated_message">Das Widget auf dieser Seite war zu hoch, um zusammen mit dem gerade hinzugefügten Dock zu passen — das kann bei manchen Widgets zu Abstürzen führen. Es wurde automatisch auf eine neue Seite verschoben, damit es weiter funktioniert.</string>
-    <string name="settings_widget_relocated_confirm">OK</string>
     <string name="settings_page_full_title">Diese Seite ist voll</string>
     <string name="settings_page_full_message">Es passt hier nicht mehr neben das, was schon auf dieser Seite ist. Eine neue Seite dafür anlegen?</string>
     <string name="settings_page_full_confirm">Seite hinzufügen</string>
     <string name="settings_widgets_corner_shape_label">Eckenrundung</string>
+    <string name="settings_widgets_edge_label">Rand</string>
     <string name="settings_widgets_edge_to_edge_label">Randlos</string>
     <string name="settings_widgets_edge_to_edge_summary">Entfernt den seitlichen Abstand, das Widget nutzt die volle Bildschirmbreite. Standardmäßig aus; die Breite entspricht dann dem Dock.</string>
     <string name="settings_edge_to_edge_summary">Entfernt den seitlichen Abstand, es nutzt die volle Bildschirmbreite. Standardmäßig aus: Ein feiner Abstand zum Bildschirmrand bleibt.</string>
@@ -369,10 +382,10 @@
     <string name="settings_row_entry_add_shortcut">Verknüpfung hinzufügen</string>
     <string name="settings_row_entry_add_map_target">Adresse</string>
     <string name="settings_row_entry_add_website">Website</string>
-    <string name="settings_row_entry_add_widget">Widget hinzufügen</string>
     <string name="settings_row_entry_add_page_link">Seite verlinken</string>
     <string name="settings_row_entry_add_contact">Kontakt hinzufügen</string>
     <string name="settings_row_entry_add_actionbutton">Aktionsbutton hinzufügen</string>
+    <string name="settings_element_box_form_label">Form</string>
     <string name="settings_element_box_pill_mode_label">Einzeiliges Layout</string>
     <string name="settings_element_box_pill_mode_summary">Einträge in einer Zeile ohne Umbruch statt im Raster — so wie das Dock</string>
     <string name="settings_map_mode_address">Adresse</string>

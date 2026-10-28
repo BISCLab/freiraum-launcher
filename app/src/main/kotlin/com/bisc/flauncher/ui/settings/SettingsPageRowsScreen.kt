@@ -28,6 +28,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.luminance
+import com.bisc.flauncher.data.model.withAppearance
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -74,10 +76,10 @@ fun SettingsPageRowsScreen(
     val systemWidgetPickerOpenForPage by viewModel.systemWidgetPickerOpenForPage.collectAsState()
     val pendingBindIntent by viewModel.pendingBindIntent.collectAsState()
     val pendingConfigureIntent by viewModel.pendingConfigureIntent.collectAsState()
-    val widgetRelocationWarningCount by viewModel.widgetRelocationWarningCount.collectAsState()
     val pendingOverflowAdd by viewModel.pendingOverflowAdd.collectAsState()
 
-    val rows = rowsByPage[pageId].orEmpty()
+    // The Dock and the Panel are Home's (shown on every page), never edited from another page.
+    val rows = rowsByPage[pageId].orEmpty().filter { it.type != PageRowType.SEARCH_BAR && it.type != PageRowType.PANEL }
     val page = pages.find { it.id == pageId }
     val pageTitle = page?.let { pageLabel(it, pages) } ?: stringResource(R.string.settings_rows_title)
 
@@ -160,7 +162,6 @@ fun SettingsPageRowsScreen(
 
     if (showAddSheet) {
         AddRowSheet(
-            showSearchBarOption = rows.none { it.type == PageRowType.SEARCH_BAR },
             onWidgetKindSelected = { kind ->
                 showAddSheet = false
                 sizingSpan = WidgetKind.defaultSpan(kind)
@@ -174,22 +175,7 @@ fun SettingsPageRowsScreen(
                 showAddSheet = false
                 viewModel.addElementBox(pageId)
             },
-            onSearchBarSelected = {
-                showAddSheet = false
-                viewModel.addSearchBarRow(pageId)
-            },
             onDismiss = { showAddSheet = false }
-        )
-    }
-
-    if (widgetRelocationWarningCount > 0) {
-        AlertDialog(
-            onDismissRequest = { viewModel.dismissWidgetRelocationWarning() },
-            title = { Text(stringResource(R.string.settings_widget_relocated_title)) },
-            text = { Text(stringResource(R.string.settings_widget_relocated_message)) },
-            confirmButton = {
-                TextButton(onClick = { viewModel.dismissWidgetRelocationWarning() }) { Text(stringResource(R.string.settings_widget_relocated_confirm)) }
-            }
         )
     }
 
@@ -209,7 +195,7 @@ fun SettingsPageRowsScreen(
 
     sizingKind?.let { kind ->
         WidgetSizeSheet(
-            row = PageRow(pageId = pageId, orderIndex = 0, type = PageRowType.WIDGET, payload = kind, spanY = sizingSpan),
+            row = newWidgetPreviewRow(pageId, kind, sizingSpan),
             spanY = sizingSpan,
             minSpan = WidgetKind.minSpan(kind),
             maxSpan = WidgetKind.maxSpan(kind),
@@ -236,11 +222,9 @@ fun SettingsPageRowsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AddRowSheet(
-    showSearchBarOption: Boolean,
     onWidgetKindSelected: (String) -> Unit,
     onMoreWidgetsSelected: () -> Unit,
     onElementBoxSelected: () -> Unit,
-    onSearchBarSelected: () -> Unit,
     onDismiss: () -> Unit
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
@@ -253,11 +237,19 @@ internal fun AddRowSheet(
             }
             SettingsPreference(icon = Icons.Filled.Widgets, title = stringResource(R.string.picker_widget_more), onClick = onMoreWidgetsSelected, trailing = null)
             SettingsPreference(icon = Icons.Filled.Apps, title = stringResource(R.string.settings_rows_add_element_box), onClick = onElementBoxSelected, trailing = null)
-            if (showSearchBarOption) {
-                SettingsPreference(icon = Icons.Filled.Search, title = stringResource(R.string.settings_rows_add_search_bar), onClick = onSearchBarSelected, trailing = null)
-            }
         }
     }
+}
+
+/** A not-yet-added widget row as the sizing step previews it — with the same corner radius and
+ *  fill a new widget actually gets (see PageContentRepository.addWidgetRow), not PageRow's defaults. */
+@Composable
+internal fun newWidgetPreviewRow(pageId: Long, kind: String, spanY: Int): PageRow {
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    return PageRow(
+        pageId = pageId, orderIndex = 0, type = PageRowType.WIDGET, payload = kind, spanY = spanY,
+        cornerRadiusPercent = com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT
+    ).withAppearance(com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor(isDark))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

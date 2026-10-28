@@ -25,6 +25,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Cloud
@@ -67,6 +69,8 @@ import androidx.navigation.NavController
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.FolderIconMode
 import com.bisc.flauncher.data.model.GridItemType
+import com.bisc.flauncher.data.model.appearance
+import com.bisc.flauncher.data.model.withAppearance
 import com.bisc.flauncher.data.model.IconPackIcon
 import com.bisc.flauncher.data.model.RowEntry
 import com.bisc.flauncher.data.model.borderAppearance
@@ -95,7 +99,9 @@ fun SettingsFolderEditScreen(
     folderId: Long,
     navController: NavController,
     onBack: () -> Unit,
-    viewModel: SettingsViewModel = hiltViewModel()
+    viewModel: SettingsViewModel = hiltViewModel(),
+    // Adding app widgets (picker, bind permission, configuration) runs through the same flow as on pages.
+    homeViewModel: com.bisc.flauncher.ui.home.HomeViewModel = hiltViewModel()
 ) {
     val folders by viewModel.folders.collectAsState()
     val folderItems by viewModel.folderItems.collectAsState()
@@ -127,6 +133,18 @@ fun SettingsFolderEditScreen(
     var showWidgetKindPicker by remember { mutableStateOf(false) }
     var sizingWidgetKind by remember { mutableStateOf<String?>(null) }
     var sizingWidgetSpanY by remember { mutableStateOf(1) }
+    var editingWidget by remember { mutableStateOf<com.bisc.flauncher.data.model.FolderItem?>(null) }
+    val systemWidgetPickerForFolder by homeViewModel.systemWidgetPickerOpenForFolder.collectAsState()
+    val pendingBindIntent by homeViewModel.pendingBindIntent.collectAsState()
+    val pendingConfigureIntent by homeViewModel.pendingConfigureIntent.collectAsState()
+    val bindWidgetLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    ) { result -> homeViewModel.onSystemWidgetBindResult(result.resultCode == android.app.Activity.RESULT_OK) }
+    val configureWidgetLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    ) { result -> homeViewModel.onSystemWidgetConfigureResult(result.resultCode == android.app.Activity.RESULT_OK) }
+    LaunchedEffect(pendingBindIntent) { pendingBindIntent?.let { bindWidgetLauncher.launch(it) } }
+    LaunchedEffect(pendingConfigureIntent) { pendingConfigureIntent?.let { configureWidgetLauncher.launch(it) } }
     val globalShowLabels by viewModel.folderShowLabels.collectAsState()
 
     val newName = edited?.trim()
@@ -186,9 +204,43 @@ fun SettingsFolderEditScreen(
             )
         }
 
+        // Widgets sit above the icon grid in full folder width (as FolderView draws them), so they
+        // get their own list here and never take an icon slot.
+        val (widgetItems, iconItems) = items.partition { it.type == GridItemType.WIDGET || it.type == GridItemType.SYSTEM_WIDGET }
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_folder_widgets_label)) {
+            widgetItems.forEachIndexed { index, item ->
+                fun move(delta: Int) {
+                    val reordered = widgetItems.toMutableList().apply { add(index + delta, removeAt(index)) }
+                    homeViewModel.reorderFolderItems(reordered + iconItems)
+                }
+                SettingsPreference(
+                    icon = folderWidgetIcon(item),
+                    title = folderWidgetLabel(item, homeViewModel),
+                    summary = androidx.compose.ui.res.pluralStringResource(R.plurals.settings_widget_size_rows, item.spanY, item.spanY),
+                    onClick = { editingWidget = item },
+                    trailing = {
+                        Row {
+                            IconButton(onClick = { move(-1) }, enabled = index > 0) {
+                                Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null)
+                            }
+                            IconButton(onClick = { move(1) }, enabled = index < widgetItems.lastIndex) {
+                                Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null)
+                            }
+                        }
+                    }
+                )
+            }
+            SettingsPreference(
+                icon = Icons.Filled.Add,
+                title = stringResource(R.string.settings_folder_widget_add),
+                onClick = { showWidgetKindPicker = true },
+                trailing = null
+            )
+        }
+
         val rowShape = folder.rows()
-        val gridEntries = remember(items) {
-            items.map { item -> RowEntry(id = item.id, pageRowId = 0L, orderIndex = item.orderIndex, type = item.type, payload = item.payload) }
+        val gridEntries = remember(iconItems) {
+            iconItems.map { item -> RowEntry(id = item.id, pageRowId = 0L, orderIndex = item.orderIndex, type = item.type, payload = item.payload) }
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_folder_items_label)) {
             androidx.compose.foundation.layout.Column(
@@ -373,7 +425,6 @@ fun SettingsFolderEditScreen(
                 SettingsPreference(icon = Icons.AutoMirrored.Filled.Shortcut, title = stringResource(R.string.settings_row_entry_add_shortcut), onClick = { showAddChooser = false; viewModel.openFolderShortcutAppPicker(folderId) }, trailing = null)
                 SettingsPreference(icon = Icons.Filled.Place, title = stringResource(R.string.settings_row_entry_add_map_target), onClick = { showAddChooser = false; showMapTargetPicker = true }, trailing = null)
                 SettingsPreference(icon = Icons.Filled.Language, title = stringResource(R.string.settings_row_entry_add_website), onClick = { showAddChooser = false; showWebsitePicker = true }, trailing = null)
-                SettingsPreference(icon = Icons.Filled.Widgets, title = stringResource(R.string.settings_row_entry_add_widget), onClick = { showAddChooser = false; showWidgetKindPicker = true }, trailing = null)
             }
         }
     }
@@ -385,19 +436,51 @@ fun SettingsFolderEditScreen(
                 sizingWidgetSpanY = com.bisc.flauncher.data.model.WidgetKind.defaultSpan(kind)
                 sizingWidgetKind = kind
             },
+            onMoreSelected = {
+                showWidgetKindPicker = false
+                homeViewModel.openSystemWidgetPickerForFolder(folderId)
+            },
             onDismiss = { showWidgetKindPicker = false }
+        )
+    }
+
+    systemWidgetPickerForFolder?.let { targetFolderId ->
+        val providers = remember(targetFolderId) { homeViewModel.installedSystemWidgetProviders() }
+        com.bisc.flauncher.ui.home.SystemWidgetPickerSheet(
+            providers = providers,
+            onProviderSelected = { provider -> homeViewModel.startAddSystemWidgetToFolder(targetFolderId, provider) },
+            onDismiss = homeViewModel::dismissSystemWidgetPicker
+        )
+    }
+
+    editingWidget?.let { item ->
+        var spanY by remember(item.id) { mutableStateOf(item.spanY) }
+        val isBuiltIn = item.type == GridItemType.WIDGET
+        FolderWidgetSizeSheet(
+            row = com.bisc.flauncher.data.model.PageRow(
+                pageId = 0, orderIndex = 0,
+                type = if (isBuiltIn) com.bisc.flauncher.data.model.PageRowType.WIDGET else com.bisc.flauncher.data.model.PageRowType.SYSTEM_WIDGET,
+                payload = item.payload, spanY = spanY, cornerRadiusPercent = item.cornerRadiusPercent
+            ).withAppearance(item.appearance()),
+            spanY = spanY,
+            minSpan = if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.minSpan(item.payload) else 1,
+            maxSpan = if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.maxSpan(item.payload) else MAX_FOLDER_APP_WIDGET_SPAN,
+            onSpanChange = { spanY = it },
+            onSave = {
+                viewModel.setFolderItemSpan(item, spanY)
+                editingWidget = null
+            },
+            onRemove = {
+                editingWidget = null
+                pendingRemoval = item
+            },
+            onDismiss = { editingWidget = null }
         )
     }
 
     sizingWidgetKind?.let { kind ->
         FolderWidgetSizeSheet(
-            row = com.bisc.flauncher.data.model.PageRow(
-                pageId = 0,
-                orderIndex = 0,
-                type = com.bisc.flauncher.data.model.PageRowType.WIDGET,
-                payload = kind,
-                spanY = sizingWidgetSpanY
-            ),
+            row = newWidgetPreviewRow(0, kind, sizingWidgetSpanY),
             spanY = sizingWidgetSpanY,
             minSpan = com.bisc.flauncher.data.model.WidgetKind.minSpan(kind),
             maxSpan = com.bisc.flauncher.data.model.WidgetKind.maxSpan(kind),
@@ -522,7 +605,7 @@ fun SettingsFolderEditScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FolderWidgetKindSheet(onKindSelected: (String) -> Unit, onDismiss: () -> Unit) {
+private fun FolderWidgetKindSheet(onKindSelected: (String) -> Unit, onMoreSelected: () -> Unit, onDismiss: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         androidx.compose.foundation.layout.Column(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -545,6 +628,16 @@ private fun FolderWidgetKindSheet(onKindSelected: (String) -> Unit, onDismiss: (
                     Text(folderWidgetKindLabel(kind), modifier = Modifier.padding(start = 16.dp))
                 }
             }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onMoreSelected)
+                    .padding(horizontal = 4.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(imageVector = Icons.Filled.Widgets, contentDescription = null)
+                Text(stringResource(R.string.picker_widget_more), modifier = Modifier.padding(start = 16.dp))
+            }
         }
     }
 }
@@ -558,7 +651,8 @@ private fun FolderWidgetSizeSheet(
     maxSpan: Int,
     onSpanChange: (Int) -> Unit,
     onSave: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onRemove: (() -> Unit)? = null
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         androidx.compose.foundation.layout.Column(
@@ -570,8 +664,28 @@ private fun FolderWidgetSizeSheet(
             TextButton(onClick = onSave, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.settings_rows_save))
             }
+            if (onRemove != null) {
+                TextButton(onClick = onRemove, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.settings_rows_remove), color = MaterialTheme.colorScheme.error)
+                }
+            }
         }
     }
+}
+
+/** Largest an app widget in a folder can be, in rows — the folder scrolls past its own height. */
+private const val MAX_FOLDER_APP_WIDGET_SPAN = 6
+
+private fun folderWidgetIcon(item: com.bisc.flauncher.data.model.FolderItem) =
+    if (item.type == GridItemType.WIDGET) folderWidgetKindIcon(item.payload) else Icons.Filled.Widgets
+
+@Composable
+private fun folderWidgetLabel(item: com.bisc.flauncher.data.model.FolderItem, homeViewModel: com.bisc.flauncher.ui.home.HomeViewModel): String {
+    if (item.type == GridItemType.WIDGET) return folderWidgetKindLabel(item.payload)
+    val context = androidx.compose.ui.platform.LocalContext.current
+    return remember(item.payload) {
+        item.payload.toIntOrNull()?.let(homeViewModel::getSystemWidgetInfo)?.loadLabel(context.packageManager)
+    } ?: stringResource(R.string.settings_folder_widget_app_widget)
 }
 
 private fun folderWidgetKindIcon(kind: String) = when (kind) {

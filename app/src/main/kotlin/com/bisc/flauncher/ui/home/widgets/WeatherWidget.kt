@@ -72,6 +72,8 @@ private val HOURLY_MIN_HEIGHT = 130.dp
 private val DAILY_MIN_HEIGHT = 172.dp
 
 private val ROOMY_MIN_HEIGHT = 260.dp
+// From two rows on: bigger hour and day tiles, the hours filling the height the header leaves.
+private val LARGE_MIN_HEIGHT = 200.dp
 private val COMPACT_MAX_HEIGHT = 120.dp
 
 private const val MAX_DAYS = 7
@@ -194,6 +196,7 @@ private fun WeatherContent(weather: WeatherSnapshot) {
         val timeFormat24 = remember { DateFormat.is24HourFormat(context) }
 
         val roomy = maxHeight >= ROOMY_MIN_HEIGHT
+        val large = maxHeight >= LARGE_MIN_HEIGHT
         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
             Header(
                 weather = weather,
@@ -217,7 +220,9 @@ private fun WeatherContent(weather: WeatherSnapshot) {
                     locale = locale,
                     isNight = ::isNight,
                     zone = zone,
-                    roomy = roomy
+                    roomy = roomy,
+                    large = large,
+                    modifier = if (large) Modifier.weight(1f).padding(vertical = 8.dp) else Modifier
                 )
             }
             if (showDays) {
@@ -228,6 +233,7 @@ private fun WeatherContent(weather: WeatherSnapshot) {
                     today = today,
                     locale = locale,
                     roomy = roomy,
+                    large = large,
                     onSelect = { selectedDay = it; selectedHour = null }
                 )
             }
@@ -356,8 +362,10 @@ private fun HourSelector(
     isNight: (Long) -> Boolean,
     zone: ZoneId,
     roomy: Boolean,
+    large: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val labelStyle = if (large) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelSmall
     val listState: LazyListState = rememberLazyListState()
     LaunchedEffect(hours.firstOrNull()?.timestampMillis) { listState.scrollToItem(0) }
     val formatter = remember(timeFormat24, locale) { DateTimeFormatter.ofPattern(if (timeFormat24) "HH:mm" else "h a", locale) }
@@ -369,30 +377,34 @@ private fun HourSelector(
     ) {
         itemsIndexed(hours, key = { _, h -> h.timestampMillis }) { _, hour ->
             val isSelected = hour.timestampMillis == selected
-            SelectorTile(selected = isSelected, onClick = { onSelect(hour.timestampMillis) }) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.widthIn(min = 44.dp).padding(vertical = if (roomy) 11.dp else 6.dp, horizontal = 4.dp)) {
+            SelectorTile(
+                selected = isSelected,
+                onClick = { onSelect(hour.timestampMillis) },
+                modifier = if (large) Modifier.fillParentMaxHeight() else Modifier
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.widthIn(min = if (large) 56.dp else 44.dp).padding(vertical = if (roomy) 11.dp else 6.dp, horizontal = if (large) 6.dp else 4.dp)) {
                     WeatherGlyph(
                         condition = WeatherCondition.fromCode(hour.conditionCode),
                         night = isNight(hour.timestampMillis),
-                        size = if (roomy) 30.dp else 22.dp,
+                        size = if (roomy || large) 30.dp else 22.dp,
                         tint = LocalContentColor.current
                     )
                     Text(
                         formatter.format(Instant.ofEpochMilli(hour.timestampMillis).atZone(zone)),
-                        style = MaterialTheme.typography.labelSmall,
+                        style = labelStyle,
                         softWrap = false,
                         modifier = Modifier.padding(top = 4.dp)
                     )
                     Text(
                         stringResource(R.string.widget_weather_temp, hour.tempC.roundToInt()),
-                        style = MaterialTheme.typography.labelSmall,
+                        style = labelStyle,
                         softWrap = false
                     )
                     if (roomy) {
                         val precip = hour.precipProbability
                         Text(
                             if (precip != null && precip >= 10) "$precip%" else "\u00A0",
-                            style = MaterialTheme.typography.labelSmall,
+                            style = labelStyle,
                             color = LocalContentColor.current.copy(alpha = 0.6f),
                             softWrap = false
                         )
@@ -411,6 +423,7 @@ private fun DaySelector(
     today: LocalDate,
     locale: Locale,
     roomy: Boolean,
+    large: Boolean,
     onSelect: (Int) -> Unit
 ) {
     val formatter = remember(locale) { DateTimeFormatter.ofPattern("EEE", locale) }
@@ -420,17 +433,17 @@ private fun DaySelector(
             SelectorTile(selected = index == selectedDay, onClick = { onSelect(index) }) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = if (roomy) 10.dp else 6.dp)
+                    modifier = Modifier.padding(horizontal = if (large) 10.dp else 8.dp, vertical = if (roomy || large) 10.dp else 6.dp)
                 ) {
                     if (forecast != null) {
-                        WeatherGlyph(WeatherCondition.fromCode(forecast.conditionCode), night = false, size = if (roomy) 22.dp else 18.dp, tint = LocalContentColor.current)
+                        WeatherGlyph(WeatherCondition.fromCode(forecast.conditionCode), night = false, size = if (roomy || large) 24.dp else 18.dp, tint = LocalContentColor.current)
                     }
                     Text(
                         text = buildString {
                             append(formatter.format(today.plusDays(index.toLong())))
                             if (forecast != null) append(" ${forecast.minC.roundToInt()}° / ${forecast.maxC.roundToInt()}°")
                         },
-                        style = MaterialTheme.typography.labelSmall,
+                        style = if (large) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelSmall,
                         softWrap = false,
                         modifier = Modifier.padding(start = if (forecast != null) 6.dp else 0.dp)
                     )
@@ -441,12 +454,14 @@ private fun DaySelector(
 }
 
 @Composable
-private fun SelectorTile(selected: Boolean, onClick: () -> Unit, content: @Composable () -> Unit) {
+private fun SelectorTile(selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val tint = LocalContentColor.current
     Column(
-        modifier = Modifier
+        modifier = modifier
             .background(tint.copy(alpha = if (selected) 0.22f else 0.08f), RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) { content() }
 }
 

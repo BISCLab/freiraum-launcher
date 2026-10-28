@@ -27,6 +27,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.LocalSurfaceIsDark
+import com.bisc.flauncher.ui.home.claimHomeGestures
+import com.bisc.flauncher.ui.home.search.averageLuminance
 import com.bisc.flauncher.ui.home.LocalSurfaceIsDarkLoading
 
 /**
@@ -93,9 +95,13 @@ fun SystemWidgetView(
         horizontalMargin = horizontalMargin,
         contentPadding = 0.dp
     ) {
-        // Follows the surface the widget sits on (our own dark/light decision), not the system's
-        // separate day/night setting, so it doesn't clash with the rest of the launcher.
-        val dark = LocalSurfaceIsDark.current ?: (MaterialTheme.colorScheme.background.luminance() < 0.5f)
+        // Follows the surface the widget actually sits on (our own dark/light decision), not the
+        // system's separate day/night setting, so it doesn't clash with the rest of the launcher:
+        // its own card fill when that's (mostly) opaque, else the page background behind it.
+        val ownFillDark = if (appearance.fillMode == com.bisc.flauncher.data.model.ElementFillMode.COLOR && appearance.opacity >= 0.5f) {
+            appearance.fill.averageLuminance() < 0.5f
+        } else null
+        val dark = ownFillDark ?: LocalSurfaceIsDark.current ?: (MaterialTheme.colorScheme.background.luminance() < 0.5f)
         // Still no custom pointer handling here. What was actually missing (per Kvaesitso, which gets
         // this right) is that a widget's internal ListView/GridView/ScrollView defaults to nested
         // scrolling *disabled* for legacy compatibility, so it never even entered Android's nested
@@ -111,7 +117,9 @@ fun SystemWidgetView(
         androidx.compose.runtime.key(dark) {
             var hostView by remember { mutableStateOf<AppWidgetHostView?>(null) }
             AndroidView(
-                modifier = Modifier.fillMaxSize().onSizeChanged { size ->
+                // Its touches are its own: a widget that scrolls internally (news lists, …) must
+                // get vertical drags instead of the home screen's swipe gestures.
+                modifier = Modifier.fillMaxSize().claimHomeGestures().onSizeChanged { size ->
                     if (size.width <= 0 || size.height <= 0) return@onSizeChanged
                     val view = hostView ?: return@onSizeChanged
                     // Some widgets only bind their scrollable content (RemoteViewsAdapter lists, etc.)

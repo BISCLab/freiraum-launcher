@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.BackgroundSource
 import com.bisc.flauncher.data.model.ColorFill
@@ -106,6 +107,27 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setShowSettingsTips(show: Boolean) {
         dataStore.edit { it[SHOW_SETTINGS_TIPS_KEY] = show }
+    }
+
+    /** Apps whose playback the music widget shows (package names); empty = every app. */
+    val musicSources: Flow<Set<String>> = dataStore.data.map { it[MUSIC_SOURCES_KEY] ?: emptySet() }
+
+    suspend fun setMusicSources(packages: Set<String>) {
+        dataStore.edit { it[MUSIC_SOURCES_KEY] = packages }
+    }
+
+    /** Whether the music widget's large cover gets rounded corners (square by default). */
+    val musicCoverRounded: Flow<Boolean> = dataStore.data.map { it[MUSIC_COVER_ROUNDED_KEY] ?: false }
+
+    suspend fun setMusicCoverRounded(rounded: Boolean) {
+        dataStore.edit { it[MUSIC_COVER_ROUNDED_KEY] = rounded }
+    }
+
+    /** Whether the page carousel wraps around: swiping past the last page lands on the first. */
+    val carouselEndless: Flow<Boolean> = dataStore.data.map { it[CAROUSEL_ENDLESS_KEY] ?: false }
+
+    suspend fun setCarouselEndless(endless: Boolean) {
+        dataStore.edit { it[CAROUSEL_ENDLESS_KEY] = endless }
     }
 
     /** Whether the system keyboard shows itself immediately when search opens, vs. staying
@@ -632,6 +654,9 @@ class SettingsRepository @Inject constructor(
         private fun searchIncludeKey(storageKey: String) = booleanPreferencesKey("search_include_$storageKey")
         private val SEARCH_KEYBOARD_AUTO_OPEN_KEY = booleanPreferencesKey("search_keyboard_auto_open")
         private val SHOW_SETTINGS_TIPS_KEY = booleanPreferencesKey("show_settings_tips")
+        private val CAROUSEL_ENDLESS_KEY = booleanPreferencesKey("carousel_endless")
+        private val MUSIC_SOURCES_KEY = stringSetPreferencesKey("music_sources")
+        private val MUSIC_COVER_ROUNDED_KEY = booleanPreferencesKey("music_cover_rounded")
         private const val SEARCH_BAR_PREFIX = "search_bar"
         private val SEARCH_BAR_CORNER_RADIUS_KEY = intPreferencesKey("search_bar_corner_radius_percent")
         private const val SEARCH_RESULTS_PREFIX = "search_results"

@@ -1,5 +1,8 @@
 package com.bisc.flauncher.ui.home
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.material3.FilterChip
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -51,7 +54,11 @@ fun WidgetSizeEditor(
     modifier: Modifier = Modifier,
     onSystemWidgetViewReady: ((android.view.View) -> Unit)? = null,
     heightPxRange: IntRange? = null,
-    onHeightPxChange: ((Int) -> Unit)? = null
+    onHeightPxChange: ((Int) -> Unit)? = null,
+    /** The page's row unit as it's drawn there (stretched), and how many fit — the grid a hosted
+     *  widget's free pixel height is matched against. */
+    gridUnit: androidx.compose.ui.unit.Dp = PageRowDimens.rowUnitHeight,
+    gridUnitCount: Int = 0
 ) {
     val density = LocalDensity.current
     val unitPx = remember(density) { with(density) { PageRowDimens.rowUnitHeight.toPx() } }
@@ -68,11 +75,15 @@ fun WidgetSizeEditor(
             onSystemWidgetViewReady = onSystemWidgetViewReady
         )
         if (row.type == PageRowType.SYSTEM_WIDGET && heightPxRange != null && onHeightPxChange != null) {
-            val currentHeightPx = row.heightPx ?: unitPx.roundToInt().let { it * row.spanY }
+            val gridHeightsPx = with(density) {
+                (1..gridUnitCount).map { PageRowDimens.spanHeight(gridUnit, it).roundToPx() }
+            }
+            val currentHeightPx = row.heightPx ?: with(density) { PageRowDimens.spanHeight(gridUnit, row.spanY).roundToPx() }
             PixelHeightStepper(
                 valuePx = currentHeightPx.coerceIn(heightPxRange),
                 range = heightPxRange,
                 onValueChange = onHeightPxChange,
+                gridHeightsPx = gridHeightsPx,
                 modifier = Modifier.padding(top = 8.dp)
             )
             return@Column
@@ -141,19 +152,38 @@ private val PLACE_VALUES = listOf(1000, 100, 10, 1)
  * an exact pixel height. Each nudges [valuePx] by its own place value and clamps to [range].
  */
 @Composable
-fun PixelHeightStepper(valuePx: Int, range: IntRange, onValueChange: (Int) -> Unit, modifier: Modifier = Modifier) {
+fun PixelHeightStepper(
+    valuePx: Int,
+    range: IntRange,
+    onValueChange: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    /** Exact heights of 1, 2, 3, … page rows: hitting one is marked (and felt), and each can be
+     *  jumped to directly, so a free-height widget can sit on the page's row grid. */
+    gridHeightsPx: List<Int> = emptyList()
+) {
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+    val setValue: (Int) -> Unit = { px ->
+        if (px in gridHeightsPx && px != valuePx) haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+        onValueChange(px)
+    }
+    val matchedRows = gridHeightsPx.indexOf(valuePx) + 1
     Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            stringResource(R.string.settings_widget_size_px, valuePx),
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(bottom = 6.dp)
-        )
+        Row(modifier = Modifier.padding(bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.settings_widget_size_px, valuePx), style = MaterialTheme.typography.bodyMedium)
+            if (matchedRows > 0) {
+                Text(
+                    " = " + pluralStringResource(R.plurals.settings_widget_size_rows, matchedRows, matchedRows),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
             PLACE_VALUES.forEach { place ->
                 val digit = (valuePx / place) % 10
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     IconButton(
-                        onClick = { onValueChange((valuePx + place).coerceIn(range)) },
+                        onClick = { setValue((valuePx + place).coerceIn(range)) },
                         enabled = valuePx + place <= range.last
                     ) {
                         Icon(Icons.Filled.KeyboardArrowUp, contentDescription = stringResource(R.string.settings_widget_size_increase, place))
@@ -168,11 +198,26 @@ fun PixelHeightStepper(valuePx: Int, range: IntRange, onValueChange: (Int) -> Un
                         Text(digit.toString(), style = MaterialTheme.typography.titleMedium)
                     }
                     IconButton(
-                        onClick = { onValueChange((valuePx - place).coerceIn(range)) },
+                        onClick = { setValue((valuePx - place).coerceIn(range)) },
                         enabled = valuePx - place >= range.first
                     ) {
                         Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.settings_widget_size_decrease, place))
                     }
+                }
+            }
+        }
+        val reachable = gridHeightsPx.withIndex().filter { it.value in range }
+        if (reachable.isNotEmpty()) {
+            Row(
+                modifier = Modifier.padding(top = 8.dp).horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                reachable.forEach { (index, px) ->
+                    FilterChip(
+                        selected = px == valuePx,
+                        onClick = { setValue(px) },
+                        label = { Text(pluralStringResource(R.plurals.settings_widget_size_rows, index + 1, index + 1)) }
+                    )
                 }
             }
         }

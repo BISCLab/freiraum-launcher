@@ -79,6 +79,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -247,6 +248,13 @@ class HomeViewModel @Inject constructor(
     val pages: StateFlow<List<LauncherPage>> =
         pageContentRepository.pages.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
+    val carouselEndless: StateFlow<Boolean> =
+        settingsRepository.carouselEndless.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun setCarouselEndless(endless: Boolean) {
+        viewModelScope.launch { settingsRepository.setCarouselEndless(endless) }
+    }
+
     /** Every page, including the singleton App overview/Search pages (unlike [pages], which only
      *  has the swipeable ROWS ones) — used by the Pages settings list, which shows them too. */
     val allPages: StateFlow<List<LauncherPage>> =
@@ -255,6 +263,19 @@ class HomeViewModel @Inject constructor(
     val rowsByPage: StateFlow<Map<Long, List<PageRow>>> =
         pageContentRepository.rows
             .map { rows -> rows.groupBy { it.pageId }.mapValues { (_, v) -> v.sortedBy { it.orderIndex } } }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+
+    /** How many row units fit on each carousel page (see PageContentRepository.rowUnitCounts),
+     *  re-derived whenever rows (e.g. the Dock's size) or a page's status-bar setting change. Missing
+     *  until known, meaning "use the plain unit height". */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val rowUnitCounts: StateFlow<Map<Long, Int>> =
+        combine(pageContentRepository.rows, pages) { _, pages -> pages }
+            .flatMapLatest { pages ->
+                if (pages.isEmpty()) kotlinx.coroutines.flow.flowOf(Unit)
+                else combine(pages.map { settingsRepository.pageHideStatusBar(it.id) }) { }
+            }
+            .map { pageContentRepository.rowUnitCounts() }
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
     val rowEntriesByRow: StateFlow<Map<Long, List<RowEntry>>> =
@@ -458,6 +479,8 @@ class HomeViewModel @Inject constructor(
 
     private val _systemWidgetPickerOpenForPage = MutableStateFlow<Long?>(null)
     val systemWidgetPickerOpenForPage: StateFlow<Long?> = _systemWidgetPickerOpenForPage.asStateFlow()
+    private val _systemWidgetPickerOpenForFolder = MutableStateFlow<Long?>(null)
+    val systemWidgetPickerOpenForFolder: StateFlow<Long?> = _systemWidgetPickerOpenForFolder.asStateFlow()
 
     private val _pendingBindIntent = MutableStateFlow<Intent?>(null)
     val pendingBindIntent: StateFlow<Intent?> = _pendingBindIntent.asStateFlow()
@@ -480,6 +503,25 @@ class HomeViewModel @Inject constructor(
                 .combine(_installedApps) { _, apps -> apps }
                 .collectLatest { apps -> if (apps.isNotEmpty()) appIconLoader.warm(apps.map { it.componentName }) }
         }
+    }
+
+    /** Apps the music widget shows (empty = every app), pushed straight into the media session reader. */
+    val musicSources: StateFlow<Set<String>> =
+        settingsRepository.musicSources.stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
+
+    fun setMusicSources(packages: Set<String>) {
+        viewModelScope.launch { settingsRepository.setMusicSources(packages) }
+    }
+
+    init {
+        viewModelScope.launch { settingsRepository.musicSources.collect { nowPlayingRepository.setAllowedSources(it) } }
+    }
+
+    val musicCoverRounded: StateFlow<Boolean> =
+        settingsRepository.musicCoverRounded.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun setMusicCoverRounded(rounded: Boolean) {
+        viewModelScope.launch { settingsRepository.setMusicCoverRounded(rounded) }
     }
 
     fun refreshWidgetData() {
@@ -776,21 +818,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun addSearchBarRow(pageId: Long) {
-        viewModelScope.launch {
-            val relocated = pageContentRepository.addSearchBarRow(pageId)
-            if (relocated > 0) _widgetRelocationWarningCount.value = relocated
-        }
-    }
-
-    /** Non-zero while the "widget(s) moved to a new page" warning from [addSearchBarRow] should be shown. */
-    val widgetRelocationWarningCount: StateFlow<Int> get() = _widgetRelocationWarningCount
-    private val _widgetRelocationWarningCount = MutableStateFlow(0)
-
-    fun dismissWidgetRelocationWarning() {
-        _widgetRelocationWarningCount.value = 0
-    }
-
     /** A would-be apps/widget row that doesn't fit this page as-is: offer a new page for it instead
      *  of silently relocating something there, [wouldOverflow]-gated in
      *  [addElementBox]/[addWidgetRow]. Resolved by [confirmPendingOverflowAdd]/[cancelPendingOverflowAdd]. */
@@ -1019,17 +1046,33 @@ class HomeViewModel @Inject constructor(
         _systemWidgetPickerOpenForPage.value = pageId
     }
 
-    fun dismissSystemWidgetPicker() {
-        _systemWidgetPickerOpenForPage.value = null
+    fun openSystemWidgetPickerForFolder(folderId: Long) {
+        _systemWidgetPickerOpenForFolder.value = folderId
     }
 
-    fun startAddSystemWidget(pageId: Long, provider: AppWidgetProviderInfo) {
+    fun dismissSystemWidgetPicker() {
         _systemWidgetPickerOpenForPage.value = null
+        _systemWidgetPickerOpenForFolder.value = null
+    }
+
+    /** Where a newly added app widget goes: a page (as its own row) or a folder (as a folder widget). */
+    sealed interface SystemWidgetTarget {
+        data class Page(val pageId: Long) : SystemWidgetTarget
+        data class Folder(val folderId: Long) : SystemWidgetTarget
+    }
+
+    fun startAddSystemWidget(pageId: Long, provider: AppWidgetProviderInfo) = startAddSystemWidget(SystemWidgetTarget.Page(pageId), provider)
+
+    fun startAddSystemWidgetToFolder(folderId: Long, provider: AppWidgetProviderInfo) =
+        startAddSystemWidget(SystemWidgetTarget.Folder(folderId), provider)
+
+    private fun startAddSystemWidget(target: SystemWidgetTarget, provider: AppWidgetProviderInfo) {
+        dismissSystemWidgetPicker()
         val appWidgetId = widgetHostManager.allocateId()
         if (widgetHostManager.tryBindWithoutConfirmation(appWidgetId, provider)) {
-            proceedAfterBind(pageId, appWidgetId, provider)
+            proceedAfterBind(target, appWidgetId, provider)
         } else {
-            inFlightSystemWidget = InFlightSystemWidget(pageId, appWidgetId, provider)
+            inFlightSystemWidget = InFlightSystemWidget(target, appWidgetId, provider)
             _pendingBindIntent.value = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, provider.provider)
@@ -1045,20 +1088,20 @@ class HomeViewModel @Inject constructor(
             inFlightSystemWidget = null
             return
         }
-        proceedAfterBind(pending.pageId, pending.appWidgetId, pending.provider)
+        proceedAfterBind(pending.target, pending.appWidgetId, pending.provider)
     }
 
-    private fun proceedAfterBind(pageId: Long, appWidgetId: Int, provider: AppWidgetProviderInfo) {
+    private fun proceedAfterBind(target: SystemWidgetTarget, appWidgetId: Int, provider: AppWidgetProviderInfo) {
         val configureComponent = provider.configure
         if (configureComponent != null) {
-            inFlightSystemWidget = InFlightSystemWidget(pageId, appWidgetId, provider)
+            inFlightSystemWidget = InFlightSystemWidget(target, appWidgetId, provider)
             _pendingConfigureIntent.value = Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE).apply {
                 component = configureComponent
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
             }
         } else {
             inFlightSystemWidget = null
-            placeSystemWidget(pageId, appWidgetId)
+            placeSystemWidget(target, appWidgetId)
         }
     }
 
@@ -1070,15 +1113,20 @@ class HomeViewModel @Inject constructor(
             widgetHostManager.deleteId(pending.appWidgetId)
             return
         }
-        placeSystemWidget(pending.pageId, pending.appWidgetId)
+        placeSystemWidget(pending.target, pending.appWidgetId)
     }
 
-    private fun placeSystemWidget(pageId: Long, appWidgetId: Int) {
-        viewModelScope.launch { pageContentRepository.addSystemWidgetRow(pageId, appWidgetId, spanY = 2) }
+    private fun placeSystemWidget(target: SystemWidgetTarget, appWidgetId: Int) {
+        viewModelScope.launch {
+            when (target) {
+                is SystemWidgetTarget.Page -> pageContentRepository.addSystemWidgetRow(target.pageId, appWidgetId, spanY = 2)
+                is SystemWidgetTarget.Folder -> folderRepository.addSystemWidgetToFolder(target.folderId, appWidgetId, spanY = 2)
+            }
+        }
     }
 
     private data class InFlightSystemWidget(
-        val pageId: Long,
+        val target: SystemWidgetTarget,
         val appWidgetId: Int,
         val provider: AppWidgetProviderInfo
     )

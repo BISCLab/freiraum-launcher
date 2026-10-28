@@ -5,6 +5,11 @@ import android.os.SystemClock
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.clickable
@@ -13,6 +18,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -30,13 +36,11 @@ import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -67,6 +71,18 @@ import com.bisc.flauncher.ui.home.HomeViewModel
 import kotlinx.coroutines.delay
 
 private val FULL_MIN_HEIGHT = 150.dp
+
+// Full (2+ rows) layout: the cover grows with the widget between these sizes, its text a size up
+// from LARGE_TEXT_ART_SIZE; the progress bar and the controls below keep fixed heights.
+private val MIN_ART_SIZE = 72.dp
+private val MAX_ART_SIZE = 180.dp
+private val LARGE_TEXT_ART_SIZE = 108.dp
+private val CONTROLS_HEIGHT = 56.dp
+private val PROGRESS_TOUCH_HEIGHT = 24.dp
+private val PROGRESS_TRACK_HEIGHT = 6.dp
+private val PROGRESS_THUMB_RADIUS = 7.dp
+// Bar plus the time labels under it.
+private val PROGRESS_BLOCK_HEIGHT = 42.dp
 
 private const val MAX_INLINE_CUSTOM_ACTIONS = 2
 
@@ -120,7 +136,7 @@ fun MusicWidget(
                 actions = 0L, customActions = emptyList(), otherPlayers = emptyList(), isLive = false
             )
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                if (maxHeight >= FULL_MIN_HEIGHT) FullPlayer(shown, viewModel) else CompactPlayer(shown, viewModel)
+                if (maxHeight >= FULL_MIN_HEIGHT) FullPlayer(shown, viewModel, maxHeight) else CompactPlayer(shown, viewModel)
             }
         }
     }
@@ -193,35 +209,69 @@ private fun AlbumArt(info: NowPlayingInfo, size: Dp, shape: androidx.compose.ui.
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/** A thick, rounded progress bar with the elapsed part filled in; when the player supports seeking,
+ *  a thumb sits at the current position and the bar can be tapped or dragged to seek. */
 @Composable
 private fun ProgressRow(info: NowPlayingInfo, position: Long, viewModel: HomeViewModel, modifier: Modifier = Modifier) {
     if (info.durationMs <= 0) return
+    val seekable = info.supports(PlaybackState.ACTION_SEEK_TO)
     var dragging by remember { mutableStateOf<Float?>(null) }
-    val fraction = (position.toFloat() / info.durationMs).coerceIn(0f, 1f)
+    val fraction = dragging ?: (position.toFloat() / info.durationMs).coerceIn(0f, 1f)
     val shownMillis = dragging?.let { (it * info.durationMs).toLong() } ?: position
+    val ink = LocalContentColor.current
     Column(modifier = modifier) {
-        if (info.supports(PlaybackState.ACTION_SEEK_TO)) {
-            Slider(
-                value = dragging ?: fraction,
-                onValueChange = { dragging = it },
-                onValueChangeFinished = {
-                    dragging?.let { viewModel.seekNowPlaying((it * info.durationMs).toLong()) }
-                    dragging = null
-                },
-                modifier = Modifier.fillMaxWidth().height(24.dp)
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(PROGRESS_TOUCH_HEIGHT)
+                .then(
+                    if (!seekable) Modifier
+                    else Modifier
+                        .pointerInput(info.durationMs) {
+                            detectTapGestures { offset ->
+                                viewModel.seekNowPlaying(((offset.x / size.width).coerceIn(0f, 1f) * info.durationMs).toLong())
+                            }
+                        }
+                        .pointerInput(info.durationMs) {
+                            detectHorizontalDragGestures(
+                                onDragStart = { offset -> dragging = (offset.x / size.width).coerceIn(0f, 1f) },
+                                onHorizontalDrag = { change, _ ->
+                                    change.consume()
+                                    dragging = (change.position.x / size.width).coerceIn(0f, 1f)
+                                },
+                                onDragEnd = {
+                                    dragging?.let { viewModel.seekNowPlaying((it * info.durationMs).toLong()) }
+                                    dragging = null
+                                },
+                                onDragCancel = { dragging = null }
+                            )
+                        }
+                )
+        ) {
+            val track = PROGRESS_TRACK_HEIGHT.toPx()
+            val thumb = if (seekable) PROGRESS_THUMB_RADIUS.toPx() else 0f
+            val left = thumb
+            val right = size.width - thumb
+            val y = size.height / 2f
+            val radius = androidx.compose.ui.geometry.CornerRadius(track / 2f)
+            drawRoundRect(
+                color = ink.copy(alpha = 0.2f),
+                topLeft = androidx.compose.ui.geometry.Offset(left, y - track / 2f),
+                size = androidx.compose.ui.geometry.Size(right - left, track),
+                cornerRadius = radius
             )
-        } else {
-            LinearProgressIndicator(
-                progress = { fraction },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
-                color = LocalContentColor.current,
-                trackColor = LocalContentColor.current.copy(alpha = 0.2f)
+            val filledEnd = left + (right - left) * fraction
+            drawRoundRect(
+                color = ink,
+                topLeft = androidx.compose.ui.geometry.Offset(left, y - track / 2f),
+                size = androidx.compose.ui.geometry.Size((filledEnd - left).coerceAtLeast(track), track),
+                cornerRadius = radius
             )
+            if (seekable) drawCircle(color = ink, radius = thumb, center = androidx.compose.ui.geometry.Offset(filledEnd, y))
         }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(formatTime(shownMillis), style = MaterialTheme.typography.labelSmall, color = LocalContentColor.current.copy(alpha = 0.6f))
-            Text(formatTime(info.durationMs), style = MaterialTheme.typography.labelSmall, color = LocalContentColor.current.copy(alpha = 0.6f))
+            Text(formatTime(shownMillis), style = MaterialTheme.typography.labelMedium, color = ink.copy(alpha = 0.7f))
+            Text(formatTime(info.durationMs), style = MaterialTheme.typography.labelMedium, color = ink.copy(alpha = 0.7f))
         }
     }
 }
@@ -256,15 +306,23 @@ private fun CustomActionIcon(action: com.bisc.flauncher.data.model.NowPlayingCus
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun FullPlayer(info: NowPlayingInfo, viewModel: HomeViewModel) {
+private fun FullPlayer(info: NowPlayingInfo, viewModel: HomeViewModel, height: Dp) {
     val position = rememberLivePosition(info)
+    // The cover takes whatever height the progress bar and the controls leave; the text beside it
+    // fills that same height, a size up once there's room for it.
+    val artSize = (height - PROGRESS_BLOCK_HEIGHT - CONTROLS_HEIGHT - 16.dp).coerceIn(MIN_ART_SIZE, MAX_ART_SIZE)
+    val large = artSize >= LARGE_TEXT_ART_SIZE
+    val typography = MaterialTheme.typography
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-            Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
+        Row(modifier = Modifier.fillMaxWidth().height(artSize), verticalAlignment = Alignment.Top) {
+            Column(
+                modifier = Modifier.weight(1f).fillMaxHeight().padding(end = 12.dp),
+                verticalArrangement = Arrangement.SpaceEvenly
+            ) {
                 if (info.appLabel.isNotBlank()) {
                     Text(
                         info.appLabel,
-                        style = MaterialTheme.typography.labelSmall,
+                        style = if (large) typography.titleSmall else typography.labelLarge,
                         color = LocalContentColor.current.copy(alpha = 0.5f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -274,7 +332,7 @@ private fun FullPlayer(info: NowPlayingInfo, viewModel: HomeViewModel) {
                     info.title,
                     maxLines = 1,
                     modifier = Modifier.basicMarquee(),
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+                    style = (if (large) typography.headlineSmall else typography.titleLarge).copy(fontWeight = FontWeight.SemiBold)
                 )
                 if (info.artist.isNotBlank()) {
                     Text(
@@ -282,7 +340,7 @@ private fun FullPlayer(info: NowPlayingInfo, viewModel: HomeViewModel) {
                         color = LocalContentColor.current.copy(alpha = 0.7f),
                         maxLines = 1,
                         modifier = Modifier.basicMarquee(),
-                        style = MaterialTheme.typography.bodyMedium
+                        style = if (large) typography.titleLarge else typography.titleMedium
                     )
                 }
                 if (info.album.isNotBlank()) {
@@ -291,37 +349,40 @@ private fun FullPlayer(info: NowPlayingInfo, viewModel: HomeViewModel) {
                         color = LocalContentColor.current.copy(alpha = 0.5f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.bodySmall
+                        style = if (large) typography.titleMedium else typography.bodyMedium
                     )
                 }
-                ProgressRow(info, position, viewModel, modifier = Modifier.padding(top = 6.dp))
             }
-            AlbumArt(info, 96.dp, RoundedCornerShape(16.dp), viewModel)
+            // Square like a real album cover, or rounded (Music widget settings).
+            val rounded by viewModel.musicCoverRounded.collectAsState()
+            AlbumArt(info, artSize, if (rounded) RoundedCornerShape(16.dp) else RectangleShape, viewModel)
         }
+
+        ProgressRow(info, position, viewModel, modifier = Modifier.fillMaxWidth())
 
         val inline = info.customActions.take(MAX_INLINE_CUSTOM_ACTIONS)
         val overflow = info.customActions.drop(MAX_INLINE_CUSTOM_ACTIONS)
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(CONTROLS_HEIGHT),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
             inline.forEach { action -> CustomActionIcon(action) { viewModel.sendNowPlayingCustomAction(action.id) } }
             if (info.supports(PlaybackState.ACTION_SKIP_TO_PREVIOUS) || info.actions == 0L) {
-                IconButton(onClick = viewModel::skipPrevious, modifier = Modifier.size(40.dp)) {
-                    Icon(Icons.Filled.SkipPrevious, contentDescription = stringResource(R.string.widget_music_previous))
+                IconButton(onClick = viewModel::skipPrevious, modifier = Modifier.size(52.dp)) {
+                    Icon(Icons.Filled.SkipPrevious, contentDescription = stringResource(R.string.widget_music_previous), modifier = Modifier.size(34.dp))
                 }
             }
-            PlayPauseButton(info, viewModel, 44.dp)
+            PlayPauseButton(info, viewModel, CONTROLS_HEIGHT)
             if (info.supports(PlaybackState.ACTION_SKIP_TO_NEXT) || info.actions == 0L) {
-                IconButton(onClick = viewModel::skipNext, modifier = Modifier.size(40.dp)) {
-                    Icon(Icons.Filled.SkipNext, contentDescription = stringResource(R.string.widget_music_next))
+                IconButton(onClick = viewModel::skipNext, modifier = Modifier.size(52.dp)) {
+                    Icon(Icons.Filled.SkipNext, contentDescription = stringResource(R.string.widget_music_next), modifier = Modifier.size(34.dp))
                 }
             }
             if (overflow.isNotEmpty()) {
                 var open by remember { mutableStateOf(false) }
                 Box {
-                    IconButton(onClick = { open = true }, modifier = Modifier.size(40.dp)) {
+                    IconButton(onClick = { open = true }, modifier = Modifier.size(48.dp)) {
                         Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.widget_music_more_actions))
                     }
                     DropdownMenu(expanded = open, onDismissRequest = { open = false }) {

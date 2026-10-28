@@ -62,10 +62,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-private const val DATE_GAP = 20f
-
-/** The stacked serif style's date sits a little closer under its two-line time. */
-private const val STACKED_DATE_GAP = 14f
+private const val DATE_GAP = 10f
 
 private const val CAP_HEIGHT = 0.72f
 
@@ -213,7 +210,7 @@ fun ClockWidget(
                         lineHeightFactor = 0.8f,
                         maxLines = 2
                     )
-                    DateText(longDateText, dateFs, FontFamily.Serif, FontWeight.Bold, ink.copy(alpha = 0.9f), shadow, textAlign, ::sp, dateModifier, gap = STACKED_DATE_GAP)
+                    DateText(longDateText, dateFs, FontFamily.Serif, FontWeight.Bold, ink.copy(alpha = 0.9f), shadow, textAlign, ::sp, dateModifier)
                 }
 
                 ClockStyle.ANALOG -> {
@@ -299,12 +296,11 @@ private fun DateText(
     shadow: Shadow,
     textAlign: TextAlign,
     sp: (Float) -> TextUnit,
-    modifier: Modifier,
-    gap: Float = DATE_GAP
+    modifier: Modifier
 ) {
     Text(
         text = text,
-        modifier = Modifier.paddingFromBaseline(top = (gap + CAP_HEIGHT * fontSizeDp).dp).then(modifier),
+        modifier = Modifier.paddingFromBaseline(top = (DATE_GAP + CAP_HEIGHT * fontSizeDp).dp).then(modifier),
         textAlign = textAlign,
         maxLines = 1,
         style = MaterialTheme.typography.titleMedium.copy(

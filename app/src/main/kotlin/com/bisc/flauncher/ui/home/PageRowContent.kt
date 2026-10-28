@@ -108,7 +108,7 @@ fun PageRowContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(PageRowDimens.rowUnitHeight * row.spanY)
+                    .height(PageRowDimens.spanHeight(LocalRowUnitHeight.current, row.spanY))
             ) {
                 when (row.payload) {
                     WidgetKind.CLOCK -> ClockWidget(
@@ -136,7 +136,7 @@ fun PageRowContent(
                 val rowHeight = if (exactHeightPx != null && exactHeightPx > 0) {
                     with(androidx.compose.ui.platform.LocalDensity.current) { exactHeightPx.toDp() }
                 } else {
-                    PageRowDimens.rowUnitHeight * row.spanY
+                    PageRowDimens.spanHeight(LocalRowUnitHeight.current, row.spanY)
                 }
                 SystemWidgetView(
                     appWidgetId = appWidgetId,
@@ -212,12 +212,15 @@ private fun ElementBoxGrid(
     iconSizeScale: Float = 1f
 ) {
     val horizontalMargin = if (row.edgeToEdge) 0.dp else DockDimens.horizontalMargin
+    // Height rounded up to whole row units (icons centered inside), so the box sits on the page's
+    // row grid like every widget does.
     WidgetCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().snapHeightToRowGrid(LocalRowUnitHeight.current),
         appearance = row.appearance(),
         cornerRadiusPercent = row.cornerRadiusPercent,
         horizontalMargin = horizontalMargin,
-        contentPadding = 12.dp
+        contentPadding = 12.dp,
+        verticalArrangement = Arrangement.Center
     ) {
         GridEntries(
             entries = entries,

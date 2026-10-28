@@ -19,13 +19,11 @@ import androidx.compose.material.icons.filled.ViewAgenda
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -158,7 +156,6 @@ fun SettingsHomeLayoutScreen(
     val systemWidgetPickerOpenForPage by viewModel.systemWidgetPickerOpenForPage.collectAsState()
     val pendingBindIntent by viewModel.pendingBindIntent.collectAsState()
     val pendingConfigureIntent by viewModel.pendingConfigureIntent.collectAsState()
-    val widgetRelocationWarningCount by viewModel.widgetRelocationWarningCount.collectAsState()
     val rows = rowsByPage[pageId].orEmpty()
     val dockRow = rows.find { it.type == PageRowType.SEARCH_BAR }
     val panelRow = rows.find { it.type == PageRowType.PANEL }
@@ -211,7 +208,8 @@ fun SettingsHomeLayoutScreen(
                                     PageRowType.PANEL -> Unit
                                 }
                             }
-                            .padding(16.dp),
+                            // Horizontal inset comes from the list row itself — lined up with Panel and Dock.
+                            .padding(vertical = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
@@ -247,9 +245,6 @@ fun SettingsHomeLayoutScreen(
 
     if (showAddSheet) {
         AddRowSheet(
-            // The dock always exists on Home now (see PageContentRepository.ensureSeeded) and is
-            // switched off instead of removed/re-added — never offered here.
-            showSearchBarOption = false,
             onWidgetKindSelected = { kind ->
                 showAddSheet = false
                 sizingSpan = WidgetKind.defaultSpan(kind)
@@ -263,25 +258,13 @@ fun SettingsHomeLayoutScreen(
                 showAddSheet = false
                 viewModel.addElementBox(pageId)
             },
-            onSearchBarSelected = {},
             onDismiss = { showAddSheet = false }
-        )
-    }
-
-    if (widgetRelocationWarningCount > 0) {
-        AlertDialog(
-            onDismissRequest = { viewModel.dismissWidgetRelocationWarning() },
-            title = { Text(stringResource(R.string.settings_widget_relocated_title)) },
-            text = { Text(stringResource(R.string.settings_widget_relocated_message)) },
-            confirmButton = {
-                TextButton(onClick = { viewModel.dismissWidgetRelocationWarning() }) { Text(stringResource(R.string.settings_widget_relocated_confirm)) }
-            }
         )
     }
 
     sizingKind?.let { kind ->
         WidgetSizeSheet(
-            row = PageRow(pageId = pageId, orderIndex = 0, type = PageRowType.WIDGET, payload = kind, spanY = sizingSpan),
+            row = newWidgetPreviewRow(pageId, kind, sizingSpan),
             spanY = sizingSpan,
             minSpan = WidgetKind.minSpan(kind),
             maxSpan = WidgetKind.maxSpan(kind),

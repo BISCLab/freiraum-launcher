@@ -51,9 +51,13 @@ private val MINI_WIDGET_ROW_HEIGHT = 14.dp
 fun PagePreview(pageId: Long, isHome: Boolean, navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
     val rowsByPage by viewModel.rowsByPage.collectAsState()
     val background by remember(pageId) { viewModel.pageBackgroundConfig(pageId) }.collectAsState(initial = BackgroundConfig())
+    val pages by viewModel.pages.collectAsState()
     val rows = rowsByPage[pageId].orEmpty()
-    val dock = rows.find { it.type == PageRowType.SEARCH_BAR }
-    val panel = rows.find { it.type == PageRowType.PANEL }
+    // The Dock and the Panel are Home's and show on every page — previewed everywhere, but only
+    // editable from Home.
+    val homeRows = rowsByPage[pages.find { it.isHome }?.id].orEmpty()
+    val dock = homeRows.find { it.type == PageRowType.SEARCH_BAR }
+    val panel = homeRows.find { it.type == PageRowType.PANEL }
     val contentRows = rows.filter { it.enabled && it.type != PageRowType.SEARCH_BAR && it.type != PageRowType.PANEL }
     val surfaceDark = rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), background)
     val phoneShape = RoundedCornerShape(24.dp)
@@ -76,9 +80,9 @@ fun PagePreview(pageId: Long, isHome: Boolean, navController: NavController, vie
             )
 
             Column(modifier = Modifier.fillMaxSize()) {
-                if (isHome && panel != null && panel.enabled) {
+                if (panel != null && panel.enabled) {
                     // The Panel lives above the page, pulled down on demand — shown as its edge.
-                    MiniPanelEdge(panel, surfaceDark) { navController.navigate("$base/home/panel") }
+                    MiniPanelEdge(panel, surfaceDark, onClick = if (isHome) ({ navController.navigate("$base/home/panel") }) else null)
                 } else {
                     Spacer(modifier = Modifier.height(18.dp))
                 }
@@ -96,8 +100,8 @@ fun PagePreview(pageId: Long, isHome: Boolean, navController: NavController, vie
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                if (isHome && dock != null && dock.enabled) {
-                    MiniDock(dock, surfaceDark) { navController.navigate("$base/home/layout/dock") }
+                if (dock != null && dock.enabled) {
+                    MiniDock(dock, surfaceDark, onClick = if (isHome) ({ navController.navigate("$base/home/layout/dock") }) else null)
                 }
             }
         }
@@ -147,7 +151,7 @@ private fun MiniDots(color: androidx.compose.ui.graphics.Color, count: Int) {
 }
 
 @Composable
-private fun MiniPanelEdge(panel: PageRow, surfaceDark: Boolean, onClick: () -> Unit) {
+private fun MiniPanelEdge(panel: PageRow, surfaceDark: Boolean, onClick: (() -> Unit)?) {
     val colors = resolveElementColors(panel.appearance(), surfaceDark)
     val radius = miniRadius(panel.cornerRadiusPercent)
     val shape = RoundedCornerShape(bottomStart = radius, bottomEnd = radius)
@@ -157,7 +161,7 @@ private fun MiniPanelEdge(panel: PageRow, surfaceDark: Boolean, onClick: () -> U
             .height(18.dp)
             .clip(shape)
             .background(colors.background, alpha = colors.backgroundAlpha)
-            .clickable(onClick = onClick),
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         contentAlignment = Alignment.BottomCenter
     ) {
         // The pull-down handle.
@@ -166,7 +170,7 @@ private fun MiniPanelEdge(panel: PageRow, surfaceDark: Boolean, onClick: () -> U
 }
 
 @Composable
-private fun MiniDock(dock: PageRow, surfaceDark: Boolean, onClick: () -> Unit) {
+private fun MiniDock(dock: PageRow, surfaceDark: Boolean, onClick: (() -> Unit)?) {
     val appearance = dock.appearance()
     val colors = resolveElementColors(appearance, surfaceDark)
     val radius = miniRadius(dock.cornerRadiusPercent)
@@ -176,7 +180,7 @@ private fun MiniDock(dock: PageRow, surfaceDark: Boolean, onClick: () -> Unit) {
             .fillMaxWidth()
             .clip(shape)
             .background(colors.background, alpha = colors.backgroundAlpha)
-            .clickable(onClick = onClick)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(horizontal = 8.dp, vertical = 10.dp)
     ) {
         MiniDots(colors.contentColor, count = 5)
