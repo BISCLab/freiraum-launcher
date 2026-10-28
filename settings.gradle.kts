@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "flauncher"
+rootProject.name = "freiraum"
 include(":app")

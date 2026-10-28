@@ -1,4 +1,4 @@
-<p>FLauncher ist ein Startbildschirm, der ruhig bleibt und dich genau festlegen lässt, was wo liegt. Er braucht keinen Internetzugang und sammelt keine Daten.</p>
+<p>Freiraum ist ein Startbildschirm, der ruhig bleibt und dich genau festlegen lässt, was wo liegt. Er braucht keinen Internetzugang und sammelt keine Daten.</p>
 
 <p><b>Seiten</b></p>
 <ul>
@@ -28,7 +28,7 @@
 <p><b>Deine Daten</b></p>
 <ul>
 <li>Alle Einstellungen, Seiten, Widgets, Ordner und Hintergründe als eine Sicherungsdatei exportieren und importieren</li>
-<li>Wetterdaten kommen von Apps, die das Gadgetbridge-Wetterformat senden; FLauncher selbst geht nicht online</li>
+<li>Wetterdaten kommen von Apps, die das Gadgetbridge-Wetterformat senden; Freiraum selbst geht nicht online</li>
 </ul>
 
 <p><b>Berechtigungen</b></p>

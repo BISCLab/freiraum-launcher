@@ -1,4 +1,4 @@
-# FLauncher
+# Freiraum Launcher
 
 A calm, customizable Android home screen. No internet permission, no tracking, no proprietary
 libraries.
@@ -64,6 +64,6 @@ Store texts and screenshots live in `fastlane/metadata/android/` (screenshots go
 
 ## License
 
-FLauncher is licensed under the [GNU General Public License v3.0](LICENSE).
+Freiraum Launcher is licensed under the [GNU General Public License v3.0](LICENSE).
 Bundled fonts are under the SIL Open Font License 1.1, see
 [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).

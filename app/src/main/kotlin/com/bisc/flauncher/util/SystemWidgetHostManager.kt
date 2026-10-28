@@ -24,7 +24,25 @@ class SystemWidgetHostManager @Inject constructor(
     fun allocateId(): Int = appWidgetHost.allocateAppWidgetId()
 
     fun deleteId(appWidgetId: Int) {
+        reusableViews.remove(appWidgetId)
         runCatching { appWidgetHost.deleteAppWidgetId(appWidgetId) }
+    }
+
+    // The home screen's own host views, one per widget id and light/dark mode: a page leaving and
+    // re-entering the pager's composed range (neighbors are pre-composed while swiping) reuses its
+    // view instead of inflating the whole widget again — that inflation, mid-swipe, is what stutters.
+    private val reusableViews = HashMap<Int, Pair<Boolean, AppWidgetHostView>>()
+
+    /** Like [createHostView], but hands back the home screen's existing view for [appWidgetId] (detached
+     *  from wherever it was shown before) when one exists for the same [dark] mode. */
+    fun obtainHomeHostView(appWidgetId: Int, info: AppWidgetProviderInfo, dark: Boolean): AppWidgetHostView {
+        reusableViews[appWidgetId]?.let { (cachedDark, view) ->
+            if (cachedDark == dark) {
+                (view.parent as? android.view.ViewGroup)?.removeView(view)
+                return view
+            }
+        }
+        return createHostView(appWidgetId, info, dark).also { reusableViews[appWidgetId] = dark to it }
     }
 
     fun tryBindWithoutConfirmation(appWidgetId: Int, provider: AppWidgetProviderInfo): Boolean =
@@ -62,8 +80,14 @@ class SystemWidgetHostManager @Inject constructor(
      * widget never learns how much room it actually has and can fall back to a default/collapsed
      * layout with nothing to scroll, even though our card is sized generously.
      */
+    // Last size told to each host view: telling a widget its unchanged size again makes many of them
+    // rebuild and re-send their whole content, which is costly every time a page comes back into view.
+    private val lastSizes = java.util.WeakHashMap<AppWidgetHostView, Pair<Int, Int>>()
+
     fun updateHostViewSize(appWidgetId: Int, hostView: AppWidgetHostView, widthDp: Int, heightDp: Int) {
         if (widthDp <= 0 || heightDp <= 0) return
+        if (lastSizes[hostView] == (widthDp to heightDp)) return
+        lastSizes[hostView] = widthDp to heightDp
         val options = android.os.Bundle().apply {
             putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, widthDp)
             putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, widthDp)

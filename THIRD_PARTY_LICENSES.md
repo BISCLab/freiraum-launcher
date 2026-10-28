@@ -1,6 +1,6 @@
 # Third-party licenses
 
-FLauncher itself is licensed under GPL-3.0 (see `LICENSE`). It bundles the following third-party
+Freiraum Launcher itself is licensed under GPL-3.0 (see `LICENSE`). It bundles the following third-party
 font files (`app/src/main/res/font/`), each licensed under the SIL Open Font License, Version 1.1
 — unmodified, downloaded from the [google/fonts](https://github.com/google/fonts) repository,
 used for the in-app font selector (Settings → Appearance):

@@ -1,4 +1,4 @@
-<p>FLauncher is a home screen app that keeps things calm and lets you decide exactly what goes where. It needs no internet access and collects no data.</p>
+<p>Freiraum is a home screen app that keeps things calm and lets you decide exactly what goes where. It needs no internet access and collects no data.</p>
 
 <p><b>Pages</b></p>
 <ul>
@@ -28,7 +28,7 @@
 <p><b>Your data</b></p>
 <ul>
 <li>Export and import all settings, pages, widgets, folders and backgrounds as one backup file</li>
-<li>Weather comes from apps that send the Gadgetbridge weather format; FLauncher itself does not go online</li>
+<li>Weather comes from apps that send the Gadgetbridge weather format; Freiraum itself does not go online</li>
 </ul>
 
 <p><b>Permissions</b></p>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">FLauncher</string>
+    <string name="app_name">Freiraum</string>
 
 
     <string name="folder_icon_auto">Use app preview as icon</string>
@@ -161,7 +161,7 @@
     <string name="settings_elements_actionbutton_action_dock">Open Dock</string>
     <string name="settings_elements_actionbutton_action_page">Open a page</string>
     <string name="settings_elements_actionbutton_action_setting">Open an Android settings screen</string>
-    <string name="settings_elements_actionbutton_action_launcher_settings">Open FLauncher settings</string>
+    <string name="settings_elements_actionbutton_action_launcher_settings">Open Freiraum settings</string>
     <string name="settings_elements_actionbutton_pick_page">Choose page</string>
     <string name="settings_elements_actionbutton_pick_setting">Choose settings screen</string>
     <string name="settings_elements_colors_label">Colors</string>
@@ -195,8 +195,8 @@
     <string name="settings_permissions_contacts_purpose">Searching and pinning contacts.</string>
     <string name="settings_permissions_notifications">Notification access</string>
     <string name="settings_permissions_notifications_purpose">Current playback in the music widget.</string>
-    <string name="settings_default_launcher_description">Set FLauncher as the default launcher.</string>
-    <string name="settings_default_launcher_already_set">FLauncher is the default launcher.</string>
+    <string name="settings_default_launcher_description">Set Freiraum as the default launcher.</string>
+    <string name="settings_default_launcher_already_set">Freiraum is the default launcher.</string>
 
     <string name="settings_section_manage_apps">Apps</string>
     <string name="settings_card_manage_apps_subtitle">Hide and rename apps, icons, icon pack</string>
@@ -402,7 +402,7 @@
     <string name="settings_unsaved_discard">Discard</string>
     <string name="settings_unsaved_keep_editing">Keep editing</string>
     <string name="shortcut_settings">Settings</string>
-    <string name="shortcut_settings_long">FLauncher settings</string>
+    <string name="shortcut_settings_long">Freiraum settings</string>
     <string name="settings_row_entry_new_folder">New folder</string>
     <string name="settings_row_entry_no_folders">No other folders. Create one above.</string>
     <string name="settings_backup_label">Backup</string>
@@ -410,12 +410,12 @@
     <string name="settings_backup_export">Export backup</string>
     <string name="settings_backup_import">Import backup</string>
     <string name="settings_backup_import_confirm_title">Import backup?</string>
-    <string name="settings_backup_import_confirm_message">Replaces all current settings, pages, folders and backgrounds with the content of the file. FLauncher restarts afterwards.</string>
+    <string name="settings_backup_import_confirm_message">Replaces all current settings, pages, folders and backgrounds with the content of the file. Freiraum restarts afterwards.</string>
     <string name="settings_backup_export_done">Backup saved</string>
     <string name="settings_backup_export_failed">Backup could not be saved</string>
     <string name="settings_backup_import_restarting">Backup found. Restarting to apply it…</string>
-    <string name="settings_backup_import_invalid">Not a FLauncher backup</string>
-    <string name="settings_backup_import_too_new">Backup was created with a newer FLauncher version</string>
+    <string name="settings_backup_import_invalid">Not a Freiraum backup</string>
+    <string name="settings_backup_import_too_new">Backup was created with a newer Freiraum version</string>
     <string name="settings_backup_import_failed">File could not be read</string>
     <string name="settings_statusbar_hide_all">Hide everywhere</string>
     <string name="settings_statusbar_hide_all_summary">Turns the status bar off on every page, quick overview, text search and folders. You can turn it back on individually per screen afterwards. A swipe down from the top edge always shows it briefly.</string>
@@ -482,7 +482,7 @@
     <string name="settings_search_engine_custom">Custom URL</string>
     <string name="settings_search_open_with_default">System default</string>
     <string name="settings_search_open_with_clear">Use system default</string>
-    <string name="settings_search_open_with_info">By default the browser and maps app set in Android are used. Here you can pick a different one just for FLauncher. If it cannot open a request, the system default is used instead.</string>
+    <string name="settings_search_open_with_info">By default the browser and maps app set in Android are used. Here you can pick a different one just for Freiraum. If it cannot open a request, the system default is used instead.</string>
     <string name="settings_search_browser_title">Browser</string>
     <string name="settings_search_browser_pick">Choose browser</string>
     <string name="settings_search_maps_title">Maps app</string>

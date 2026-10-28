@@ -119,7 +119,7 @@ fun SettingsSystemScreen(
                 title = stringResource(R.string.settings_backup_export),
                 onClick = {
                     val stamp = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
-                    exportLauncher.launch("flauncher-backup-$stamp.zip")
+                    exportLauncher.launch("freiraum-backup-$stamp.zip")
                 },
                 trailing = null
             )

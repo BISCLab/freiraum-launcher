@@ -72,6 +72,7 @@ fun SystemWidgetView(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val info = remember(appWidgetId) { viewModel.getSystemWidgetInfo(appWidgetId) }
+    val reuseHostView = LocalReuseWidgetViews.current
     // While the real page background is still loading, LocalSurfaceIsDark would only be a guess; mounting
     // the native widget view with a guessed dark/light setting can leave it stuck wrong even once the real
     // value arrives (many widgets don't repaint themselves just because our host view gets recreated).
@@ -132,7 +133,7 @@ fun SystemWidgetView(
                     }
                 },
                 factory = {
-                    viewModel.createSystemWidgetView(appWidgetId, info, dark).also {
+                    viewModel.createSystemWidgetView(appWidgetId, info, dark, reuse = reuseHostView).also {
                         enableNestedScroll(it)
                         hostView = it
                         onHostedViewReady?.invoke(it)
@@ -142,3 +143,7 @@ fun SystemWidgetView(
         }
     }
 }
+
+/** True on the home screen: hosted widget views are kept and reused when a page re-enters composition
+ *  (see SystemWidgetHostManager.obtainHomeHostView). Settings previews always build their own. */
+val LocalReuseWidgetViews = androidx.compose.runtime.staticCompositionLocalOf { false }

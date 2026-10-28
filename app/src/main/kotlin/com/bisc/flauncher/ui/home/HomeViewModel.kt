@@ -1036,8 +1036,9 @@ class HomeViewModel @Inject constructor(
 
     fun getSystemWidgetInfo(appWidgetId: Int): AppWidgetProviderInfo? = widgetHostManager.getInfo(appWidgetId)
 
-    fun createSystemWidgetView(appWidgetId: Int, info: AppWidgetProviderInfo, dark: Boolean): AppWidgetHostView =
-        widgetHostManager.createHostView(appWidgetId, info, dark)
+    fun createSystemWidgetView(appWidgetId: Int, info: AppWidgetProviderInfo, dark: Boolean, reuse: Boolean = false): AppWidgetHostView =
+        if (reuse) widgetHostManager.obtainHomeHostView(appWidgetId, info, dark)
+        else widgetHostManager.createHostView(appWidgetId, info, dark)
 
     fun updateSystemWidgetSize(appWidgetId: Int, hostView: AppWidgetHostView, widthDp: Int, heightDp: Int) =
         widgetHostManager.updateHostViewSize(appWidgetId, hostView, widthDp, heightDp)

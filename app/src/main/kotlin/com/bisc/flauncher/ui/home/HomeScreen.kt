@@ -547,7 +547,10 @@ fun HomeScreen(
                         val reservedForDock = shownDock?.let { DockDimens.height(it) + PageRowDimens.rowSpacing }?.plus(
                             WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                         )
-                        val pageBackgroundConfigOrNull by remember(page.id) { viewModel.pageBackgroundConfig(page.id) }.collectAsState(initial = null)
+                        // Starts from the last known config, so a page re-entering composition while swiping
+                        // doesn't flash its widgets' loading state first.
+                        val pageBackgroundConfigOrNull by remember(page.id) { viewModel.pageBackgroundConfig(page.id) }
+                            .collectAsState(initial = pageBackgroundCache[page.id])
                         LaunchedEffect(page.id, pageBackgroundConfigOrNull) {
                             pageBackgroundConfigOrNull?.let { config ->
                                 // Decode a page's own image before the shared layer ever crossfades to
@@ -587,7 +590,8 @@ fun HomeScreen(
                             LocalSurfaceIsDark provides pageSurfaceIsDark,
                             LocalSurfaceIsDarkLoading provides (loadedPageBackgroundConfig == null),
                             LocalRowUnitHeight provides rowUnitHeight,
-                            LocalHomeGestureExclusion provides homeGestureExclusion
+                            LocalHomeGestureExclusion provides homeGestureExclusion,
+                            com.bisc.flauncher.ui.home.widgets.LocalReuseWidgetViews provides true
                         ) { PageRowsColumn(
                                 rows = withoutPinnedSearchBar,
                                 entriesByRow = rowEntriesByRow,

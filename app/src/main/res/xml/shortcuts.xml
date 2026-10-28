@@ -7,7 +7,7 @@
         android:shortcutLongLabel="@string/shortcut_settings_long">
         <intent
             android:action="android.intent.action.APPLICATION_PREFERENCES"
-            android:targetPackage="com.bisc.flauncher"
+            android:targetPackage="com.bisc.freiraum"
             android:targetClass="com.bisc.flauncher.MainActivity" />
     </shortcut>
 </shortcuts>
