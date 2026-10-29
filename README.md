@@ -36,35 +36,9 @@ Languages: English, German.
 | Notification access (optional) | Control music playback in the music widget; notification content is not read |
 | `EXPAND_STATUS_BAR` | Gesture that opens the notification shade |
 
-## Building
+## Download
 
-Requirements: JDK 17 and the Android SDK (compileSdk 35).
-
-```sh
-./gradlew assembleRelease   # release APK in app/build/outputs/apk/release/
-./gradlew assembleDebug     # debug APK
-```
-
-The release build is unsigned unless a `keystore.properties` file exists in the project root
-(never commit it):
-
-```properties
-storeFile=/path/to/release.jks
-storePassword=…
-keyAlias=…
-keyPassword=…
-```
-
-F-Droid builds and signs the app itself, so it ignores this file.
-
-## Releasing
-
-1. Bump `versionCode` and `versionName` in `app/build.gradle.kts`.
-2. Add `fastlane/metadata/android/<locale>/changelogs/<versionCode>.txt` for each locale.
-3. Commit and tag the release as `v<versionName>`, e.g. `v0.2.0`.
-
-Store texts and screenshots live in `fastlane/metadata/android/` (screenshots go in
-`images/phoneScreenshots/`).
+Get the APK from the [releases page](https://github.com/BISCLab/freiraum-launcher/releases). F-Droid is coming soon.
 
 ## Inspired by
 
