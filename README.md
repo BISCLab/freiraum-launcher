@@ -75,7 +75,7 @@ Night and Dollphone.
 
 ## License
 
-Freiraum Launcher is licensed under the [GNU General Public License v3.0](LICENSE).
+Freiraum Launcher is licensed under the [GNU General Public License v3.0 or later](LICENSE).
 Bundled fonts are under the SIL Open Font License 1.1, see
 [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
 
