@@ -114,10 +114,18 @@ fun SettingsAboutScreen(navController: NavController, onBack: () -> Unit) {
             AppLogo(96.dp)
             Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 8.dp))
             Text(
-                stringResource(R.string.about_version, appVersion(context)) + " · " + AboutInfo.DEVELOPER,
+                stringResource(R.string.about_version, appVersion(context)),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Image(painterResource(R.drawable.bisc_logo), contentDescription = null, modifier = Modifier.size(width = 14.dp, height = 28.dp))
+                Text(
+                    stringResource(R.string.about_made_by, AboutInfo.DEVELOPER),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             Text(
                 stringResource(R.string.about_tagline),
                 style = MaterialTheme.typography.bodyMedium,

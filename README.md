@@ -3,6 +3,10 @@
 A calm, customizable Android home screen. No internet permission, no tracking, no proprietary
 libraries.
 
+<p>
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.jpg" width="180" alt="Screenshot 1"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.jpg" width="180" alt="Screenshot 2"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.jpg" width="180" alt="Screenshot 3"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.jpg" width="180" alt="Screenshot 4"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.jpg" width="180" alt="Screenshot 5"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.jpg" width="180" alt="Screenshot 6"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.jpg" width="180" alt="Screenshot 7"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.jpg" width="180" alt="Screenshot 8">
+</p>
+
 ## Features
 
 - **Pages** – a home page plus extra pages, each with its own background, built from rows of apps,
@@ -74,3 +78,7 @@ Night and Dollphone.
 Freiraum Launcher is licensed under the [GNU General Public License v3.0](LICENSE).
 Bundled fonts are under the SIL Open Font License 1.1, see
 [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
+
+---
+
+<img src="visuals/bisc_logo_offiziell.svg" height="48" alt="BISC Lab logo">  Made by BISC Lab

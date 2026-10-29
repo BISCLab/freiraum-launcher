@@ -14,3 +14,4 @@ local.properties
 *.keystore
 .kotlin
 keystore.properties
+visuals/*.png
