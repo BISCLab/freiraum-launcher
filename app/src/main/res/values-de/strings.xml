@@ -556,4 +556,29 @@
     <string name="note_item_remove">Eintrag entfernen</string>
 
     <string name="settings_info_button">Hinweis</string>
+    <string name="about_title">Info</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_tagline">Ein freier, offener Startbildschirm, den du selbst gestaltest. Kein Internetzugriff, kein Tracking, keine Werbung.</string>
+    <string name="about_project_label">Projekt</string>
+    <string name="about_source">Quellcode</string>
+    <string name="about_issues">Problem melden</string>
+    <string name="about_issues_summary">Fehler, Ideen und Fragen</string>
+    <string name="about_support_label">Unterstützen</string>
+    <string name="about_support_info">Freiraum Launcher ist kostenlos und bleibt es. Wenn er dir gefällt, hilft eine Spende bei der Weiterentwicklung.</string>
+    <string name="about_btc">Bitcoin</string>
+    <string name="about_copy">Kopieren</string>
+    <string name="about_copied">Kopiert</string>
+    <string name="about_legal_label">Rechtliches</string>
+    <string name="about_license">Lizenz</string>
+    <string name="about_license_summary">GNU General Public License v3.0</string>
+    <string name="about_license_text">Freiraum Launcher ist freie Software: Du kannst sie unter den Bedingungen der GNU General Public License, Version 3 oder später, weitergeben und verändern. Sie wird in der Hoffnung verbreitet, dass sie nützlich ist, aber ohne jede Gewährleistung.</string>
+    <string name="about_license_full_text">Volltext</string>
+    <string name="about_close">Schließen</string>
+    <string name="about_third_party">Lizenzen Dritter</string>
+    <string name="about_third_party_summary">Schriften und Bibliotheken</string>
+    <string name="about_third_party_text">Schriften PT Serif, Roboto Mono und Comfortaa: SIL Open Font License 1.1.
+
+AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagger Hilt: Apache License 2.0.</string>
+    <string name="about_privacy">Datenschutz</string>
+    <string name="about_privacy_summary">Keine Internetberechtigung, keine Datensammlung. Alles bleibt auf deinem Handy.</string>
 </resources>

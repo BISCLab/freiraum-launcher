@@ -71,7 +71,8 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
         },
         bottomBar = { SettingsBreadcrumbBar(navController) }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding).padding(16.dp)) {
+        Column(modifier = Modifier.padding(padding).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            AboutHeaderCard(onClick = { onNavigate("about") })
             // Three levels, global to specific: Design (looks the same everywhere), Pages (each page
             // and utility page, plus gestures), Elements (the library of apps, folders, places,
             // links and action buttons) — then System for everything about fitting into the phone.
