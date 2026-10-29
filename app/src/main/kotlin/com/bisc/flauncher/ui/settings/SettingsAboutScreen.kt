@@ -52,8 +52,8 @@ import com.bisc.flauncher.R
 /** Project facts shown on the About screen. A row whose value is blank is left out. */
 private object AboutInfo {
     const val DEVELOPER = "BISC Lab"
-    const val SOURCE_URL = ""
-    const val ISSUES_URL = ""
+    const val SOURCE_URL = "https://github.com/BISCLab/freiraum-launcher"
+    const val ISSUES_URL = "https://github.com/BISCLab/freiraum-launcher/issues"
     const val BTC_ADDRESS = ""
     const val LICENSE_URL = "https://www.gnu.org/licenses/gpl-3.0.html"
 }
