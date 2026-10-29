@@ -576,5 +576,4 @@
 AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagger Hilt: Apache License 2.0.</string>
     <string name="about_privacy">Datenschutz</string>
     <string name="about_privacy_summary">Keine Internetberechtigung, keine Datensammlung. Alles bleibt auf deinem Handy.</string>
-    <string name="about_made_by">von %1$s</string>
 </resources>

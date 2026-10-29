@@ -81,4 +81,7 @@ Bundled fonts are under the SIL Open Font License 1.1, see
 
 ---
 
-<img src="visuals/bisc_logo_offiziell.svg" height="48" alt="BISC Lab logo">  Made by BISC Lab
+<p align="center">
+<img src="visuals/bisc_logo_offiziell.svg" height="64" alt="BISC Lab logo"><br>
+<b>BISC Lab</b>
+</p>
