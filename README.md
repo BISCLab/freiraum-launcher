@@ -62,6 +62,13 @@ F-Droid builds and signs the app itself, so it ignores this file.
 Store texts and screenshots live in `fastlane/metadata/android/` (screenshots go in
 `images/phoneScreenshots/`).
 
+## Inspired by
+
+Discreet Launcher · Grace Launcher · Kvaesitso · Victoria Launcher
+
+Thanks to the open-source launcher community. Icon packs shown in the screenshots: Arcticons Day &
+Night and Dollphone.
+
 ## License
 
 Freiraum Launcher is licensed under the [GNU General Public License v3.0](LICENSE).
