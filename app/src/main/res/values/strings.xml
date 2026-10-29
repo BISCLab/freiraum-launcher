@@ -563,11 +563,6 @@
     <string name="about_source">Source code</string>
     <string name="about_issues">Report a problem</string>
     <string name="about_issues_summary">Bugs, ideas and questions</string>
-    <string name="about_support_label">Support</string>
-    <string name="about_support_info">Freiraum Launcher is free and stays free. If you like it, a donation helps keep it going.</string>
-    <string name="about_btc">Bitcoin</string>
-    <string name="about_copy">Copy</string>
-    <string name="about_copied">Copied</string>
     <string name="about_legal_label">Legal</string>
     <string name="about_license">License</string>
     <string name="about_license_summary">GNU General Public License v3.0</string>

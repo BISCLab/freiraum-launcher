@@ -563,11 +563,6 @@
     <string name="about_source">Quellcode</string>
     <string name="about_issues">Problem melden</string>
     <string name="about_issues_summary">Fehler, Ideen und Fragen</string>
-    <string name="about_support_label">Unterstützen</string>
-    <string name="about_support_info">Freiraum Launcher ist kostenlos und bleibt es. Wenn er dir gefällt, hilft eine Spende bei der Weiterentwicklung.</string>
-    <string name="about_btc">Bitcoin</string>
-    <string name="about_copy">Kopieren</string>
-    <string name="about_copied">Kopiert</string>
     <string name="about_legal_label">Rechtliches</string>
     <string name="about_license">Lizenz</string>
     <string name="about_license_summary">GNU General Public License v3.0</string>

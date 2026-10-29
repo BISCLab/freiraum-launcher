@@ -1,11 +1,8 @@
 package com.bisc.flauncher.ui.settings
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,8 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.CurrencyBitcoin
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.Lock
@@ -54,7 +49,6 @@ private object AboutInfo {
     const val DEVELOPER = "BISC Lab"
     const val SOURCE_URL = "https://github.com/BISCLab/freiraum-launcher"
     const val ISSUES_URL = "https://github.com/BISCLab/freiraum-launcher/issues"
-    const val BTC_ADDRESS = ""
     const val LICENSE_URL = "https://www.gnu.org/licenses/gpl-3.0.html"
 }
 
@@ -104,12 +98,7 @@ private fun openUrl(context: Context, url: String) {
     runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
 }
 
-private fun copyToClipboard(context: Context, label: String, text: String) {
-    context.getSystemService(ClipboardManager::class.java)?.setPrimaryClip(ClipData.newPlainText(label, text))
-    Toast.makeText(context, context.getString(R.string.about_copied), Toast.LENGTH_SHORT).show()
-}
-
-/** About: what the app is, its source and license, and how to support it. */
+/** About: what the app is, its source and its license. */
 @Composable
 fun SettingsAboutScreen(navController: NavController, onBack: () -> Unit) {
     val context = LocalContext.current
@@ -158,18 +147,6 @@ fun SettingsAboutScreen(navController: NavController, onBack: () -> Unit) {
                         trailing = { Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null) }
                     )
                 }
-            }
-        }
-
-        if (AboutInfo.BTC_ADDRESS.isNotBlank()) {
-            SettingsPreferenceGroup(title = stringResource(R.string.about_support_label), info = stringResource(R.string.about_support_info)) {
-                SettingsPreference(
-                    icon = Icons.Filled.CurrencyBitcoin,
-                    title = stringResource(R.string.about_btc),
-                    summary = AboutInfo.BTC_ADDRESS,
-                    onClick = { copyToClipboard(context, "Bitcoin", AboutInfo.BTC_ADDRESS) },
-                    trailing = { Icon(Icons.Filled.ContentCopy, contentDescription = stringResource(R.string.about_copy)) }
-                )
             }
         }
 
