@@ -17,6 +17,7 @@ libraries.
 - **Dock and Panel** – a dock at the bottom and a pull-down panel at the top, both with fixed slots
   and shown on every page
 - **Folders** – apps, links, contacts and widgets (including Android app widgets)
+- **App grid** – all apps in a grid with its own search field, optionally with folders
 - **App list** – alphabetical, with a fast-scroll A–Z index; apps can be renamed, hidden from the
   list or search, or revealed only by a search code
 - **Text search** – apps, folders, contacts, system and launcher settings, shortcuts, links and

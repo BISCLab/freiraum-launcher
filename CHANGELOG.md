@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.4.0
+
 - New utility page "App grid": all apps in a grid (3 to 6 columns, icon size, app names on or off),
   with a search field at the bottom, top or off that filters the grid or opens Text search; chosen
   folders can be shown together at the top or sorted in among the apps. Opened by a gesture, an

@@ -12,6 +12,7 @@
 <p><b>App list and search</b></p>
 <ul>
 <li>Alphabetical app list with a fast-scroll A–Z index</li>
+<li>App grid with its own search field and optional folders</li>
 <li>Text search across apps, folders, contacts, system and launcher settings, shortcuts, links and places, with web, maps and calculator commands</li>
 <li>Hide apps from the list or from search, rename them, or reveal them only with a search code</li>
 </ul>

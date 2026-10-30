@@ -1,0 +1,6 @@
+- New page "App grid": all apps in a grid with its own search field; folders optional
+- App list: search button can open its own app search
+- App names under icons are sharp, without shadow
+- Text search is green, Home brown by default
+- Search categories reorder smoothly again
+- Eyedropper centered above "Reset to default"

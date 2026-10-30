@@ -1,0 +1,6 @@
+- Neue Seite „App-Raster“: alle Apps im Raster mit eigenem Suchfeld, Ordner wahlweise
+- App-Liste: Suchbutton kann eine eigene App-Suche öffnen
+- App-Namen unter Icons gestochen scharf, ohne Schatten
+- Textsuche standardmäßig grün, Startbildschirm braun
+- Suchkategorien lassen sich wieder flüssig sortieren
+- Pipette mittig über „Auf Standard zurücksetzen“

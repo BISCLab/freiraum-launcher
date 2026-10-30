@@ -12,6 +12,7 @@
 <p><b>App-Liste und Suche</b></p>
 <ul>
 <li>Alphabetische App-Liste mit A–Z-Index zum schnellen Scrollen</li>
+<li>App-Raster mit eigenem Suchfeld und wahlweise Ordnern</li>
 <li>Textsuche über Apps, Ordner, Kontakte, System- und Launcher-Einstellungen, Shortcuts, Links und Orte, mit Befehlen für Web, Karten und Rechner</li>
 <li>Apps in Liste oder Suche ausblenden, umbenennen oder nur per Suchcode anzeigen</li>
 </ul>
