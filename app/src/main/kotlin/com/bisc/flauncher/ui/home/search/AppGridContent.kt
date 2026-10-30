@@ -31,7 +31,20 @@ import com.bisc.flauncher.data.model.AppInfo
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.Folder
 import com.bisc.flauncher.data.model.FolderItem
-import com.bisc.flauncher.ui.home.AppIconCell
+import com.bisc.flauncher.ui.home.LocalIconSizeResolver
+import com.bisc.flauncher.ui.home.rememberAppIcon
+import com.bisc.flauncher.ui.theme.noRippleClickable
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import com.bisc.flauncher.ui.home.FolderCell
 import com.bisc.flauncher.util.matchesAllWordStarts
 
@@ -59,7 +72,10 @@ fun AppGridContent(
     query: String,
     queryResults: List<AppInfo>,
     columns: Int,
-    iconSizeScale: Float,
+    /** The global icon size; apps with their own size use theirs instead. */
+    globalIconScale: Float,
+    /** The grid's own size on top. */
+    gridIconScale: Float,
     showLabels: Boolean,
     labelColor: Color,
     barPosition: AppGridBarPosition,
@@ -79,6 +95,7 @@ fun AppGridContent(
     modifier: Modifier = Modifier
 ) {
     val searching = query.isNotBlank()
+    val iconSizeResolver = LocalIconSizeResolver.current
     val entries = remember(apps, folders, foldersAlphabetical, query, queryResults) {
         if (searching) {
             folders.filter { matchesAllWordStarts(it.name, query) }.map { GridEntry.FolderEntry(it) } +
@@ -134,14 +151,13 @@ fun AppGridContent(
             ) {
                 items(entries, key = { it.key }, contentType = { it::class }) { entry ->
                     when (entry) {
-                        is GridEntry.App -> AppIconCell(
-                            payload = entry.app.componentName.flattenToString(),
+                        is GridEntry.App -> AppGridCell(
+                            app = entry.app,
                             loadIcon = loadIcon,
-                            resolveLabel = { entry.app.label },
+                            iconSize = APP_ICON_SIZE * ((iconSizeResolver?.invoke(entry.key.removePrefix("app:")) ?: globalIconScale) * gridIconScale),
                             showLabel = showLabels,
                             labelColor = labelColor,
-                            iconSizeScale = iconSizeScale,
-                            onClickOverride = { onAppClick(entry.app) }
+                            onClick = { onAppClick(entry.app) }
                         )
                         is GridEntry.FolderEntry -> FolderCell(
                             folder = entry.folder,
@@ -151,7 +167,7 @@ fun AppGridContent(
                             onClick = { onFolderClick(entry.folder.id) },
                             showLabel = showLabels,
                             labelColor = labelColor,
-                            iconSizeScale = iconSizeScale
+                            iconSizeScale = globalIconScale * gridIconScale
                         )
                     }
                 }
@@ -159,5 +175,41 @@ fun AppGridContent(
         }
         if (barPosition == AppGridBarPosition.BOTTOM) Bar(Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 16.dp))
         if (keyboardCapColor != null) KeyboardCap(keyboardCapColor, keyboardCapCornerRadiusPercent, keyboardCapArrow)
+    }
+}
+
+private val APP_ICON_SIZE = 56.dp
+
+/** Lightweight cell, like the app list's rows: no ripple, no per-cell lookups, plain text. */
+@Composable
+private fun AppGridCell(
+    app: AppInfo,
+    loadIcon: (ComponentName) -> ImageBitmap?,
+    iconSize: Dp,
+    showLabel: Boolean,
+    labelColor: Color,
+    onClick: () -> Unit
+) {
+    val bitmap = rememberAppIcon(app.componentName, loadIcon)
+    Column(
+        modifier = Modifier.fillMaxWidth().noRippleClickable(onClick = onClick).padding(vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(modifier = Modifier.size(iconSize)) {
+            if (bitmap != null) Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.fillMaxSize())
+        }
+        if (showLabel) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = app.label,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+                color = labelColor,
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)
+            )
+        }
     }
 }

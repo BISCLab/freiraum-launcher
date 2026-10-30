@@ -1050,7 +1050,8 @@ fun HomeScreen(
                     query = appQuery,
                     queryResults = appQueryResults,
                     columns = appGridColumns,
-                    iconSizeScale = iconSizeScale * appGridIconSizePercent / 100f,
+                    globalIconScale = iconSizeScale,
+                    gridIconScale = appGridIconSizePercent / 100f,
                     showLabels = appGridShowLabels,
                     labelColor = com.bisc.flauncher.ui.home.dock.resolveElementColors(
                         ElementAppearance(fillMode = ElementFillMode.NONE), gridSurfaceDark
