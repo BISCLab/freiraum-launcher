@@ -7,9 +7,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 val UNSET_APP_SLOT_COLOR = Color(0xFF6B7280)
 
+private val HOME_PAGE_COLOR = Color(0xFF8B5E3C)
+
+/** A page's icon color when none is set: Home has its own, otherwise the glyph's. */
+fun pageDefaultColor(page: com.bisc.flauncher.data.model.LauncherPage?, glyph: PageIconGlyph): Color =
+    if (page?.isHome == true && glyph == PageIconGlyph.WIDGET_PAGE) HOME_PAGE_COLOR else glyph.defaultColor()
+
 /** Default accent color per glyph - distinct, legible colors for each of the 4 built-in page looks. */
 fun PageIconGlyph.defaultColor(): Color = when (this) {
-    PageIconGlyph.SEARCH -> Color(0xFF1AF0FF)
+    PageIconGlyph.SEARCH -> Color(0xFF1F7A5C)
     PageIconGlyph.APP_DRAWER -> Color(0xFF6366F1)
     PageIconGlyph.APP_LIST -> Color(0xFFF43F5E)
     PageIconGlyph.WIDGET_PAGE -> Color(0xFFA14AFF)

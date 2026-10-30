@@ -32,7 +32,7 @@ fun PagePickerSheet(pages: List<LauncherPage>, onPageSelected: (LauncherPage) ->
         LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 480.dp)) {
             items(pages, key = { it.id }) { page ->
                 val glyph = page.iconGlyph?.let { runCatching { PageIconGlyph.valueOf(it) }.getOrNull() } ?: PageIconGlyph.forPageKind(page.kind)
-                val bg = page.iconBackgroundColor?.let { Color(it) } ?: glyph.defaultColor()
+                val bg = page.iconBackgroundColor?.let { Color(it) } ?: pageDefaultColor(page, glyph)
                 val tint = page.iconColor?.let { Color(it) } ?: Color.White
                 Row(
                     modifier = Modifier

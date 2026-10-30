@@ -7,6 +7,7 @@
   folders can be shown together at the top or sorted in among the apps. Opened by a gesture, an
   action button or a dock slot, like the other pages
 - App names under icons are sharp now, without the blurred shadow
+- New default page colors: Text search is a deep green, Home is brown
 - App list: the search button can open its own app search right in the list instead of Text search
 - Search categories can be reordered smoothly again; Folders no longer jumps back behind Apps
 - The eyedropper button in color pickers is centered above "Reset to default"

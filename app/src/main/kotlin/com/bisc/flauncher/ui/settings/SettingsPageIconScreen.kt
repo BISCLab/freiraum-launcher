@@ -38,7 +38,7 @@ fun SettingsPageIconScreen(pageId: Long, navController: NavController, onBack: (
     }
 
     val savedGlyph = page.iconGlyph?.let { runCatching { PageIconGlyph.valueOf(it) }.getOrNull() } ?: PageIconGlyph.forPageKind(page.kind)
-    val saved = Triple(savedGlyph, page.iconBackgroundColor ?: savedGlyph.defaultColor().toArgb(), page.iconColor ?: android.graphics.Color.WHITE)
+    val saved = Triple(savedGlyph, page.iconBackgroundColor ?: com.bisc.flauncher.ui.home.dock.pageDefaultColor(page, savedGlyph).toArgb(), page.iconColor ?: android.graphics.Color.WHITE)
     var draft by rememberDraft(saved)
     val (glyph, bgColor, iconColor) = draft
 

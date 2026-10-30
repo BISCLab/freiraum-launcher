@@ -186,7 +186,7 @@ private fun RenamePageDialog(page: LauncherPage, onSave: (String) -> Unit, onDis
 internal fun PageIdentityRows(page: LauncherPage, pages: List<LauncherPage>, onOpenIcon: () -> Unit, onRename: (String) -> Unit) {
     var renaming by remember { mutableStateOf(false) }
     val glyph = page.iconGlyph?.let { runCatching { PageIconGlyph.valueOf(it) }.getOrNull() } ?: PageIconGlyph.forPageKind(page.kind)
-    val bg = page.iconBackgroundColor?.let { Color(it) } ?: glyph.defaultColor()
+    val bg = page.iconBackgroundColor?.let { Color(it) } ?: com.bisc.flauncher.ui.home.dock.pageDefaultColor(page, glyph)
     val tint = page.iconColor?.let { Color(it) } ?: Color.White
     run {
         SettingsPreference(
@@ -438,7 +438,7 @@ private fun PageTile(
 ) {
     val label = pageLabel(page, pages)
     val glyph = page.iconGlyph?.let { runCatching { PageIconGlyph.valueOf(it) }.getOrNull() } ?: PageIconGlyph.forPageKind(page.kind)
-    val bg = page.iconBackgroundColor?.let { Color(it) } ?: glyph.defaultColor()
+    val bg = page.iconBackgroundColor?.let { Color(it) } ?: com.bisc.flauncher.ui.home.dock.pageDefaultColor(page, glyph)
     val tint = page.iconColor?.let { Color(it) } ?: Color.White
     Box(modifier = modifier) {
         Column(

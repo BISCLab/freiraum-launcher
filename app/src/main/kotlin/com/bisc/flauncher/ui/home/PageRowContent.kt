@@ -559,7 +559,7 @@ internal fun FolderCell(
 private fun PageLinkCell(page: LauncherPage?, pages: List<LauncherPage>, onClick: () -> Unit, showLabel: Boolean = true, labelColor: Color = Color.White, iconSizeScale: Float = 1f) {
     val glyph = page?.iconGlyph?.let { name -> runCatching { PageIconGlyph.valueOf(name) }.getOrNull() }
         ?: page?.let { PageIconGlyph.forPageKind(it.kind) } ?: PageIconGlyph.WIDGET_PAGE
-    val background = page?.iconBackgroundColor?.let { Color(it) } ?: glyph.defaultColor()
+    val background = page?.iconBackgroundColor?.let { Color(it) } ?: com.bisc.flauncher.ui.home.dock.pageDefaultColor(page, glyph)
     val tint = page?.iconColor?.let { Color(it) } ?: Color.White
     Column(
         modifier = Modifier
@@ -842,7 +842,7 @@ fun PillRowEntries(
                             val page = pages.find { it.id == pageId }
                             val glyph = page?.iconGlyph?.let { name -> runCatching { PageIconGlyph.valueOf(name) }.getOrNull() }
                                 ?: page?.let { PageIconGlyph.forPageKind(it.kind) } ?: PageIconGlyph.WIDGET_PAGE
-                            val background = page?.iconBackgroundColor?.let { Color(it) } ?: glyph.defaultColor()
+                            val background = page?.iconBackgroundColor?.let { Color(it) } ?: com.bisc.flauncher.ui.home.dock.pageDefaultColor(page, glyph)
                             val tint = page?.iconColor?.let { Color(it) } ?: Color.White
                             Box(
                                 modifier = Modifier.fillMaxSize().background(background)
