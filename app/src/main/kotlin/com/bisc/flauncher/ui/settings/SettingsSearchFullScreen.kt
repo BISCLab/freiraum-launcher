@@ -414,8 +414,8 @@ fun SettingsSearchElementScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val resultsEdgeToEdge by viewModel.searchResultsEdgeToEdge.collectAsState()
-    val barTopLine by viewModel.searchBarTopLine.collectAsState()
-    val barMiddleLine by viewModel.searchBarMiddleLine.collectAsState()
+    val barAtBottom by viewModel.searchBarAtBottom.collectAsState()
+    val barShowCategories by viewModel.searchBarShowCategories.collectAsState()
     SettingsSubScreen(title = stringResource(element.titleRes), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
             SettingsPreference(
@@ -432,18 +432,17 @@ fun SettingsSearchElementScreen(
             )
         }
         if (element == SearchElement.BAR) {
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_search_bar_dividers_label)) {
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_search_bar_position_label)) {
+                RadioPreference(stringResource(R.string.settings_app_grid_bar_top), false, barAtBottom, viewModel::setSearchBarAtBottom)
+                RadioPreference(stringResource(R.string.settings_app_grid_bar_bottom), true, barAtBottom, viewModel::setSearchBarAtBottom)
+            }
+            SettingsPreferenceGroup {
                 SettingsPreference(
                     icon = null,
-                    title = stringResource(R.string.settings_search_bar_top_line),
-                    onClick = { viewModel.setSearchBarTopLine(!barTopLine) },
-                    trailing = { Switch(checked = barTopLine, onCheckedChange = viewModel::setSearchBarTopLine) }
-                )
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_search_bar_middle_line),
-                    onClick = { viewModel.setSearchBarMiddleLine(!barMiddleLine) },
-                    trailing = { Switch(checked = barMiddleLine, onCheckedChange = viewModel::setSearchBarMiddleLine) }
+                    title = stringResource(R.string.settings_search_bar_show_categories),
+                    info = stringResource(R.string.settings_search_bar_show_categories_info),
+                    onClick = { viewModel.setSearchBarShowCategories(!barShowCategories) },
+                    trailing = { Switch(checked = barShowCategories, onCheckedChange = viewModel::setSearchBarShowCategories) }
                 )
             }
         }

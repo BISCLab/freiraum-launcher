@@ -162,18 +162,18 @@ class SettingsRepository @Inject constructor(
     suspend fun resetSearchResultsAppearance() = resetElementAppearanceFor(SEARCH_RESULTS_PREFIX)
 
     /** Off by default: the cards keep the same fine side margin as every other element. */
-    /** Whether the search bar shows its thin line above the input row. */
-    val searchBarTopLine: Flow<Boolean> = dataStore.data.map { it[SEARCH_BAR_TOP_LINE_KEY] ?: true }
+    /** Whether the search bar sits at the bottom, above the keyboard, instead of at the top. */
+    val searchBarAtBottom: Flow<Boolean> = dataStore.data.map { it[SEARCH_BAR_AT_BOTTOM_KEY] ?: false }
 
-    suspend fun setSearchBarTopLine(show: Boolean) {
-        dataStore.edit { it[SEARCH_BAR_TOP_LINE_KEY] = show }
+    suspend fun setSearchBarAtBottom(show: Boolean) {
+        dataStore.edit { it[SEARCH_BAR_AT_BOTTOM_KEY] = show }
     }
 
-    /** Whether the search bar shows its thin line between the input row and the categories. */
-    val searchBarMiddleLine: Flow<Boolean> = dataStore.data.map { it[SEARCH_BAR_MIDDLE_LINE_KEY] ?: true }
+    /** Whether the search bar shows the category symbols. */
+    val searchBarShowCategories: Flow<Boolean> = dataStore.data.map { it[SEARCH_BAR_SHOW_CATEGORIES_KEY] ?: true }
 
-    suspend fun setSearchBarMiddleLine(show: Boolean) {
-        dataStore.edit { it[SEARCH_BAR_MIDDLE_LINE_KEY] = show }
+    suspend fun setSearchBarShowCategories(show: Boolean) {
+        dataStore.edit { it[SEARCH_BAR_SHOW_CATEGORIES_KEY] = show }
     }
 
     val searchResultsEdgeToEdge: Flow<Boolean> = dataStore.data.map { it[SEARCH_RESULTS_EDGE_TO_EDGE_KEY] ?: false }
@@ -772,8 +772,8 @@ class SettingsRepository @Inject constructor(
         private const val SEARCH_RESULTS_PREFIX = "search_results"
         private val SEARCH_RESULTS_CORNER_RADIUS_KEY = intPreferencesKey("search_results_corner_radius_percent")
         private val SEARCH_RESULTS_EDGE_TO_EDGE_KEY = booleanPreferencesKey("search_results_edge_to_edge")
-        private val SEARCH_BAR_TOP_LINE_KEY = booleanPreferencesKey("search_bar_top_line")
-        private val SEARCH_BAR_MIDDLE_LINE_KEY = booleanPreferencesKey("search_bar_middle_line")
+        private val SEARCH_BAR_AT_BOTTOM_KEY = booleanPreferencesKey("search_bar_at_bottom")
+        private val SEARCH_BAR_SHOW_CATEGORIES_KEY = booleanPreferencesKey("search_bar_show_categories")
         private val SEARCH_KEYBOARD_CAP_ENABLED_KEY = booleanPreferencesKey("search_keyboard_cap_enabled")
         private val SEARCH_KEYBOARD_CAP_COLOR_KEY = intPreferencesKey("search_keyboard_cap_color")
         private val SEARCH_KEYBOARD_CAP_CORNER_RADIUS_KEY = intPreferencesKey("search_keyboard_cap_corner_radius_percent")

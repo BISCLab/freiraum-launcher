@@ -2,7 +2,6 @@ package com.bisc.flauncher.ui.home.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -12,18 +11,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -55,18 +56,15 @@ import com.bisc.flauncher.ui.home.dock.freeEdgeBorder
 import com.bisc.flauncher.ui.home.dock.resolveElementColors
 import com.bisc.flauncher.ui.theme.noRippleClickable
 
-private val ROW_HEIGHT = 56.dp
+private val FIELD_HEIGHT = 52.dp
+private val CATEGORY_ROW_HEIGHT = 48.dp
 private val FILTER_CHIP_SIZE = 36.dp
 
 /**
- * Search field + category filter row as one element: a single rounded frame, two internally
- * equal-height rows separated by a thin divider - the input field (with the Home button) on top,
- * the category filter chips below.
- *
- * Sits flush at the very top of the search screen (no outer margin), the same
- * "permanently-shown Panel" treatment as the home screen's own Panel: square top
- * corners (flush with the screen/cutout-safe edge above it), bottom corners scaled by
- * [cornerRadiusPercent] the same way Dock/Panel scale theirs.
+ * Search field + category filter row as one element. At the top it sits flush with the screen's
+ * top edge (square top corners, rounded bottom ones, like the Panel); at the bottom ([atBottom])
+ * it sits flush on the keyboard, mirrored: categories above the field, [topDecoration] above them.
+ * The field itself has the same look as the App grid's search field.
  */
 @Composable
 fun SearchInputBar(
@@ -74,7 +72,6 @@ fun SearchInputBar(
     placeholder: String,
     onQueryChange: (String) -> Unit,
     onSubmit: () -> Unit,
-    onHome: () -> Unit,
     appearance: ElementAppearance,
     autoOpen: Boolean,
     categories: List<SearchCategory>,
@@ -83,13 +80,14 @@ fun SearchInputBar(
     onToggleCategory: (SearchCategory) -> Unit,
     cornerRadiusPercent: Int,
     modifier: Modifier = Modifier,
-    /** Space above the input row that the bar's own background still fills - lets the bar reach
+    /** Space above the content that the bar's own background still fills - lets the bar reach
      *  the screen's top edge (like the Panel) while its content stays below the status bar. */
     topInset: Dp = 0.dp,
-    /** The thin line above the input row. */
-    showTopLine: Boolean = true,
-    /** The thin line between the input row and the categories. */
-    showMiddleLine: Boolean = true
+    atBottom: Boolean = false,
+    showCategories: Boolean = true,
+    /** Inside the bar's background below its content, e.g. the navigation bar when at the bottom. */
+    bottomInsets: WindowInsets? = null,
+    topDecoration: @Composable () -> Unit = {}
 ) {
     val colors = resolveElementColors(appearance)
     val focusRequester = remember { FocusRequester() }
@@ -106,72 +104,98 @@ fun SearchInputBar(
         }
     }
 
-    val radius = SearchDimens.cornerRadius * (cornerRadiusPercent.coerceIn(0, 100) / 100f)
-    val shape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = radius, bottomEnd = radius)
+    val percent = cornerRadiusPercent.coerceIn(0, 100) / 100f
+    val radius = SearchDimens.cornerRadius * percent
+    val shape = if (atBottom) RoundedCornerShape(topStart = radius, topEnd = radius)
+        else RoundedCornerShape(bottomStart = radius, bottomEnd = radius)
+
+    @Composable
+    fun Field(modifier: Modifier) {
+        val content = LocalContentColor.current
+        val fieldShape = RoundedCornerShape(FIELD_HEIGHT / 2 * percent)
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(FIELD_HEIGHT)
+                .clip(fieldShape)
+                .background(content.copy(alpha = 0.08f))
+                .border(1.dp, content.copy(alpha = 0.18f), fieldShape)
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Icon(Icons.Filled.Search, contentDescription = null)
+            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                if (value.text.isEmpty()) {
+                    Text(placeholder, style = MaterialTheme.typography.bodyLarge, color = content.copy(alpha = 0.6f))
+                }
+                BasicTextField(
+                    value = value,
+                    onValueChange = {
+                        value = it
+                        if (it.text != query) onQueryChange(it.text)
+                    },
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = content),
+                    cursorBrush = SolidColor(content),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(onSearch = { onSubmit() }),
+                    modifier = Modifier.fillMaxWidth().focusRequester(focusRequester)
+                )
+            }
+            if (value.text.isNotEmpty()) {
+                Icon(
+                    Icons.Filled.Close,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp).noRippleClickable { onQueryChange("") }
+                )
+            }
+        }
+    }
+
+    @Composable
+    fun Categories() {
+        Row(
+            modifier = Modifier.fillMaxWidth().height(CATEGORY_ROW_HEIGHT).padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CategoryFilterRow(
+                categories = categories,
+                categoryColors = categoryColors,
+                selected = selectedCategory,
+                onSelect = onToggleCategory
+            )
+        }
+    }
+
     CompositionLocalProvider(LocalContentColor provides colors.contentColor) {
         Column(
             modifier = modifier
                 .fillMaxWidth()
-                // Flush with the screen's top and side edges, so the border only traces the free
-                // bottom edge - drawn just outside the bar (hence before the clip), so around the
-                // rounded corners it runs on into the screen's side edges instead of ending visibly.
-                .then(if (appearance.borderEnabled) Modifier.freeEdgeBorder(colors.borderWidth, colors.borderColor, radius, FreeEdge.BOTTOM) else Modifier)
+                // Flush with the screen's edges, so the border only traces the free edge - drawn
+                // just outside the bar (hence before the clip), so around the rounded corners it
+                // runs on into the screen's side edges instead of ending visibly.
+                .then(
+                    if (appearance.borderEnabled) {
+                        Modifier.freeEdgeBorder(colors.borderWidth, colors.borderColor, radius, if (atBottom) FreeEdge.TOP else FreeEdge.BOTTOM)
+                    } else Modifier
+                )
                 .clip(shape)
                 .background(colors.background, alpha = colors.backgroundAlpha)
                 .padding(top = topInset)
+                .then(if (bottomInsets != null) Modifier.windowInsetsPadding(bottomInsets) else Modifier)
         ) {
-                // Same divider as the one between the field and the categories, so the field row
-                // sits framed between two lines.
-                if (showTopLine) Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(colors.dividerColor.copy(alpha = 0.15f)))
-                Row(
-                    modifier = Modifier.fillMaxWidth().height(ROW_HEIGHT).padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(40.dp)
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(LocalContentColor.current.copy(alpha = 0.08f))
-                            .padding(horizontal = 16.dp),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        if (value.text.isEmpty()) {
-                            Text(placeholder, color = LocalContentColor.current.copy(alpha = 0.6f))
-                        }
-                        BasicTextField(
-                            value = value,
-                            onValueChange = {
-                                value = it
-                                if (it.text != query) onQueryChange(it.text)
-                            },
-                            singleLine = true,
-                            textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
-                            cursorBrush = SolidColor(LocalContentColor.current),
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                            keyboardActions = KeyboardActions(onSearch = { onSubmit() }),
-                            modifier = Modifier.fillMaxWidth().focusRequester(focusRequester)
-                        )
-                    }
-                    IconButton(onClick = onHome) {
-                        Icon(Icons.Filled.Home, contentDescription = stringResource(R.string.search_action_home))
-                    }
-                }
-                if (showMiddleLine) Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(colors.dividerColor.copy(alpha = 0.15f)))
-                Row(
-                    modifier = Modifier.fillMaxWidth().height(ROW_HEIGHT).padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    CategoryFilterRow(
-                        categories = categories,
-                        categoryColors = categoryColors,
-                        selected = selectedCategory,
-                        onSelect = onToggleCategory
-                    )
-                }
+            if (atBottom) {
+                topDecoration()
+                if (showCategories) Categories() else Spacer(Modifier.height(12.dp))
+                Field(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp))
+            } else {
+                Field(Modifier.padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = if (showCategories) 0.dp else 12.dp))
+                if (showCategories) Categories()
             }
         }
     }
+}
 
 @Composable
 private fun CategoryFilterRow(

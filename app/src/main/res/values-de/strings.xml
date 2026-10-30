@@ -473,7 +473,6 @@
     <string name="search_filter_ai">KI-App</string>
     <string name="settings_search_include_ai">KI-App</string>
     <string name="search_command_ai">%1$s fragen: %2$s</string>
-    <string name="search_action_home">Startbildschirm</string>
     <string name="contact_action_call">Anrufen</string>
     <string name="contact_action_message">Nachricht</string>
     <string name="contact_action_whatsapp">WhatsApp</string>
@@ -595,9 +594,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_include_launcher_settings">Freiraum-Einstellungen</string>
     <string name="search_section_launcher_settings">Freiraum-Einstellungen</string>
     <string name="contact_action_email">E-Mail schreiben</string>
-    <string name="settings_search_bar_dividers_label">Linien</string>
-    <string name="settings_search_bar_top_line">Linie über dem Suchfeld</string>
-    <string name="settings_search_bar_middle_line">Linie unter dem Suchfeld</string>
     <string name="settings_pages_app_grid">App-Raster</string>
     <string name="settings_page_app_grid_description">Alle Apps als Raster mit eigenem Suchfeld. Wird per Geste, Aktionsbutton oder Dock-Slot geöffnet.</string>
     <string name="app_search_hint">Apps suchen…</string>
@@ -626,4 +622,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_category_restore">Wieder hinzufügen</string>
     <string name="settings_search_categories_removed_label">Entfernt</string>
     <string name="settings_search_categories_removed_info">Entfernte Kategorien werden nicht durchsucht und erscheinen nicht in der Suchleiste. Tippe eine an, um sie zurückzuholen.</string>
+    <string name="settings_search_bar_position_label">Position</string>
+    <string name="settings_search_bar_show_categories">Kategorie-Symbole</string>
+    <string name="settings_search_bar_show_categories_info">Die Reihe der Kategorie-Symbole, mit denen sich die Suche auf eine Kategorie eingrenzen lässt.</string>
 </resources>

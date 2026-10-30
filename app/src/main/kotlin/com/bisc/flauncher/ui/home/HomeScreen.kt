@@ -178,8 +178,8 @@ fun HomeScreen(
     val searchResultsAppearance by viewModel.searchResultsAppearance.collectAsState()
     val searchResultsCornerRadiusPercent by viewModel.searchResultsCornerRadiusPercent.collectAsState()
     val searchResultsEdgeToEdge by viewModel.searchResultsEdgeToEdge.collectAsState()
-    val searchBarTopLine by viewModel.searchBarTopLine.collectAsState()
-    val searchBarMiddleLine by viewModel.searchBarMiddleLine.collectAsState()
+    val searchBarAtBottom by viewModel.searchBarAtBottom.collectAsState()
+    val searchBarShowCategories by viewModel.searchBarShowCategories.collectAsState()
     val searchKeyboardCapEnabled by viewModel.searchKeyboardCapEnabled.collectAsState()
     val searchKeyboardCapColor by viewModel.searchKeyboardCapColor.collectAsState()
     val searchKeyboardCapCornerRadiusPercent by viewModel.searchKeyboardCapCornerRadiusPercent.collectAsState()
@@ -1132,8 +1132,8 @@ fun HomeScreen(
             resultsAppearance = searchResultsAppearance,
             resultsCornerRadiusPercent = searchResultsCornerRadiusPercent,
             resultsEdgeToEdge = searchResultsEdgeToEdge,
-            barTopLine = searchBarTopLine,
-            barMiddleLine = searchBarMiddleLine,
+            barAtBottom = searchBarAtBottom,
+            barShowCategories = searchBarShowCategories,
             keyboardCapColor = if (searchKeyboardCapEnabled) searchKeyboardCapColor else null,
             keyboardCapCornerRadiusPercent = searchKeyboardCapCornerRadiusPercent,
             keyboardCapArrow = searchKeyboardCapArrow,
@@ -1172,7 +1172,6 @@ fun HomeScreen(
                 viewModel.closeSearch()
             },
             onRefreshContactsPermission = viewModel::refreshContactsPermission,
-            onHome = viewModel::closeSearch,
             onWebCommand = { viewModel.runWebSearchCommand(context) },
             onMapsCommand = { viewModel.runMapsCommand(context) },
             onAiCommand = { viewModel.runAiCommand(context) }

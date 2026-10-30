@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.exclude
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
@@ -100,9 +102,10 @@ fun SearchOverlay(
     keyboardCapCornerRadiusPercent: Int = 100,
     /** Shows a small arrow in the strip and makes tapping the strip close the keyboard. */
     keyboardCapArrow: Boolean = false,
-    /** The thin lines above the search field and between it and the categories (search bar settings). */
-    barTopLine: Boolean = true,
-    barMiddleLine: Boolean = true,
+    /** The search bar at the bottom, on the keyboard, instead of at the top. */
+    barAtBottom: Boolean = false,
+    /** The category symbols in the search bar. */
+    barShowCategories: Boolean = true,
     statusBarHidden: Boolean,
     categoryOrder: List<SearchCategory>,
     activeCategories: Set<SearchCategory>,
@@ -122,7 +125,6 @@ fun SearchOverlay(
     onWebsiteClick: (PinnedWebsite) -> Unit,
     onShortcutClick: (PinnedShortcut) -> Unit,
     onRefreshContactsPermission: () -> Unit,
-    onHome: () -> Unit,
     onWebCommand: () -> Unit,
     onMapsCommand: () -> Unit,
     onAiCommand: () -> Unit
@@ -188,17 +190,13 @@ fun SearchOverlay(
                 WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
             }
             Box(modifier = Modifier.fillMaxSize()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
-                ) {
+                @Composable
+                fun Bar() {
                     SearchInputBar(
                         query = query,
                         placeholder = stringResource(R.string.search_field_hint),
                         onQueryChange = onQueryChange,
                         onSubmit = { appResults.firstOrNull()?.let(onAppClick) ?: onWebCommand() },
-                        onHome = onHome,
                         appearance = barAppearance ?: defaultElement,
                         autoOpen = keyboardAutoOpen,
                         categories = categoryOrder.filter { it != SearchCategory.AI || aiAppLabel != null },
@@ -206,10 +204,23 @@ fun SearchOverlay(
                         selectedCategory = categoryFilter,
                         onToggleCategory = onToggleFilter,
                         cornerRadiusPercent = barCornerRadiusPercent ?: cornerRadiusPercent,
-                        topInset = topInset,
-                        showTopLine = barTopLine,
-                        showMiddleLine = barMiddleLine
+                        topInset = if (barAtBottom) 0.dp else topInset,
+                        atBottom = barAtBottom,
+                        showCategories = barShowCategories,
+                        // At the bottom the bar's own background runs down behind the navigation
+                        // bar; with the keyboard open it sits right on the keyboard.
+                        bottomInsets = if (barAtBottom) WindowInsets.navigationBars.exclude(WindowInsets.ime) else null,
+                        topDecoration = {
+                            if (keyboardCapColor != null) KeyboardCap(keyboardCapColor, keyboardCapCornerRadiusPercent, keyboardCapArrow)
+                        }
                     )
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .windowInsetsPadding(if (barAtBottom) WindowInsets.ime else WindowInsets.ime.union(WindowInsets.navigationBars))
+                ) {
+                    if (!barAtBottom) Bar()
                     SearchResultsColumn(
                         query = query,
                         calculatorResult = calculatorResult,
@@ -241,15 +252,20 @@ fun SearchOverlay(
                         onMapsCommand = onMapsCommand,
                         onAiCommand = onAiCommand,
                         onCalculatorResultClick = { result -> onQueryChange(result) },
-                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .then(if (barAtBottom) Modifier.padding(top = topInset) else Modifier),
                         cardCornerRadiusPercent = resultsCornerRadiusPercent,
                         edgeToEdge = resultsEdgeToEdge
                     )
-                    // Sits directly on top of the keyboard (this Column is IME-padded), so the
-                    // results' bottom edge and fade end at the strip instead of the keyboard itself.
+                    // With the bar at the top, the strip sits directly on top of the keyboard (this
+                    // Column is IME-padded), so the results' bottom edge and fade end at the strip.
                     // It fades out as soon as the keyboard *starts* closing (the animation target,
                     // not the current inset), riding down with it, so both leave in one motion.
-                    if (keyboardCapColor != null) KeyboardCap(keyboardCapColor, keyboardCapCornerRadiusPercent, keyboardCapArrow)
+                    // With the bar at the bottom it tops the bar instead.
+                    if (barAtBottom) Bar()
+                    else if (keyboardCapColor != null) KeyboardCap(keyboardCapColor, keyboardCapCornerRadiusPercent, keyboardCapArrow)
                 }
             }
         }

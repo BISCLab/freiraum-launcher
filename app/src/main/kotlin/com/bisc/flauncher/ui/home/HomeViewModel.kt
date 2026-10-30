@@ -190,11 +190,11 @@ class HomeViewModel @Inject constructor(
     val searchResultsEdgeToEdge: StateFlow<Boolean> =
         settingsRepository.searchResultsEdgeToEdge.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    val searchBarTopLine: StateFlow<Boolean> =
-        settingsRepository.searchBarTopLine.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val searchBarAtBottom: StateFlow<Boolean> =
+        settingsRepository.searchBarAtBottom.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    val searchBarMiddleLine: StateFlow<Boolean> =
-        settingsRepository.searchBarMiddleLine.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val searchBarShowCategories: StateFlow<Boolean> =
+        settingsRepository.searchBarShowCategories.stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     val searchResultsCornerRadiusPercent: StateFlow<Int?> =
         settingsRepository.searchResultsCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, null)

@@ -59,6 +59,8 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
     val capEnabled by viewModel.searchKeyboardCapEnabled.collectAsState()
     val capColor by viewModel.searchKeyboardCapColor.collectAsState()
     val capCorner by viewModel.searchKeyboardCapCornerRadiusPercent.collectAsState()
+    val barAtBottom by viewModel.searchBarAtBottom.collectAsState()
+    val barShowCategories by viewModel.searchBarShowCategories.collectAsState()
 
     // Same resolution rules as the real screen (HomeViewModel.searchBackground, SearchOverlay).
     val background = override ?: globalBackground.copy(shade = globalShade ?: globalBackground.shade)
@@ -86,11 +88,13 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
             Box(modifier = Modifier.fillMaxSize().clickable { onNavigate("page") })
 
             Column(modifier = Modifier.fillMaxSize()) {
-                MiniSearchBar(barAppearance, surfaceDark, RoundedCornerShape(bottomStart = barRadius, bottomEnd = barRadius)) {
-                    onNavigate(SearchElement.BAR.route)
+                if (!barAtBottom) {
+                    MiniSearchBar(barAppearance, surfaceDark, RoundedCornerShape(bottomStart = barRadius, bottomEnd = barRadius), barShowCategories, atBottom = false) {
+                        onNavigate(SearchElement.BAR.route)
+                    }
                 }
                 Column(
-                    modifier = Modifier.padding(start = sideMargin, end = sideMargin, top = 6.dp),
+                    modifier = Modifier.padding(start = sideMargin, end = sideMargin, top = if (barAtBottom) 14.dp else 6.dp),
                     verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     MiniResultCard(cardAppearance, surfaceDark, RoundedCornerShape(cardRadius), rows = 3) {
@@ -101,6 +105,11 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
+                if (barAtBottom) {
+                    MiniSearchBar(barAppearance, surfaceDark, RoundedCornerShape(topStart = barRadius, topEnd = barRadius), barShowCategories, atBottom = true) {
+                        onNavigate(SearchElement.BAR.route)
+                    }
+                }
                 MiniKeyboard(
                     capColor = if (capEnabled) Color(capColor) else null,
                     capRadius = MINI_CAP_HEIGHT * (capCorner.coerceIn(0, 100) / 100f),
@@ -112,7 +121,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
 }
 
 @Composable
-private fun MiniSearchBar(appearance: ElementAppearance, surfaceDark: Boolean, shape: Shape, onClick: () -> Unit) {
+private fun MiniSearchBar(appearance: ElementAppearance, surfaceDark: Boolean, shape: Shape, showCategories: Boolean, atBottom: Boolean, onClick: () -> Unit) {
     val colors = resolveElementColors(appearance, surfaceDark)
     Column(
         modifier = Modifier
@@ -120,15 +129,30 @@ private fun MiniSearchBar(appearance: ElementAppearance, surfaceDark: Boolean, s
             .clip(shape)
             .background(colors.background, alpha = colors.backgroundAlpha)
             .clickable(onClick = onClick)
-            .padding(start = 8.dp, end = 8.dp, top = 14.dp, bottom = 8.dp),
+            .padding(start = 8.dp, end = 8.dp, top = if (atBottom) 8.dp else 14.dp, bottom = 8.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Box(modifier = Modifier.weight(1f).height(12.dp).clip(CircleShape).background(colors.contentColor.copy(alpha = 0.12f)))
-            Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(colors.contentColor.copy(alpha = 0.6f)))
+        val field = @Composable {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(12.dp)
+                    .clip(CircleShape)
+                    .background(colors.contentColor.copy(alpha = 0.12f))
+                    .border(0.5.dp, colors.contentColor.copy(alpha = 0.25f), CircleShape)
+            )
         }
-        Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-            repeat(6) { Box(modifier = Modifier.size(5.dp).clip(CircleShape).background(colors.contentColor.copy(alpha = 0.45f))) }
+        val categories = @Composable {
+            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp)) {
+                repeat(8) { Box(modifier = Modifier.size(5.dp).clip(CircleShape).background(colors.contentColor.copy(alpha = 0.45f))) }
+            }
+        }
+        if (atBottom) {
+            if (showCategories) categories()
+            field()
+        } else {
+            field()
+            if (showCategories) categories()
         }
     }
 }

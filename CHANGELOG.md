@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Text search: the search field has the new look of the App grid's field; the Home button and the
+  lines in the search bar are gone (back gesture closes the search)
+- Text search: the search bar can sit at the bottom, right on the keyboard, with the categories and
+  the keyboard strip above the field
+- Text search: the category symbols in the search bar can be hidden
 - Search categories can be removed entirely, so they are neither searched nor shown in the search bar; removed ones can be added back
 - The search bar's category symbols always fit side by side across the whole bar, without scrolling
 
