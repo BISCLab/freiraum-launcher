@@ -49,12 +49,17 @@ fun <T> ReorderableList(
     val itemsState = rememberUpdatedState(items)
     var draggingKey by remember { mutableStateOf<Any?>(null) }
     var dragOffsetPx by remember { mutableStateOf(0f) }
+    // The order while dragging. Saving is async, so showing [items] mid-drag would jump back.
+    var dragOrder by remember { mutableStateOf<List<T>?>(null) }
     androidx.compose.runtime.LaunchedEffect(items) {
         if (draggingKey != null && items.none { key(it) == draggingKey }) {
             draggingKey = null
             dragOffsetPx = 0f
         }
+        if (draggingKey == null) dragOrder = null
     }
+    val shown = dragOrder ?: items
+    val shownState = rememberUpdatedState(shown)
 
     Column(
         modifier = modifier
@@ -62,7 +67,7 @@ fun <T> ReorderableList(
             .clip(shape)
             .background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
-        items.forEach { item ->
+        shown.forEach { item ->
             val itemKey = key(item)
             androidx.compose.runtime.key(itemKey) {
             val isDragging = itemKey == draggingKey
@@ -87,11 +92,11 @@ fun <T> ReorderableList(
                     modifier = Modifier
                         .padding(start = 8.dp)
                         .pointerInput(itemKey) {
-                            var workingOrder = itemsState.value
+                            var workingOrder = shownState.value
                             try {
                             detectDragGestures(
                                 onDragStart = {
-                                    workingOrder = itemsState.value
+                                    workingOrder = shownState.value
                                     draggingKey = itemKey
                                     dragOffsetPx = 0f
                                 },
@@ -108,6 +113,7 @@ fun <T> ReorderableList(
                                             reordered.add(targetIndex, moved)
                                             dragOffsetPx -= (targetIndex - currentIndex) * itemHeightPx
                                             workingOrder = reordered
+                                            dragOrder = reordered
                                             onReorder(reordered)
                                         }
                                     }
@@ -115,6 +121,7 @@ fun <T> ReorderableList(
                                 onDragEnd = {
                                     draggingKey = null
                                     dragOffsetPx = 0f
+                                    if (dragOrder == itemsState.value) dragOrder = null
                                 },
                                 onDragCancel = {
                                     draggingKey = null

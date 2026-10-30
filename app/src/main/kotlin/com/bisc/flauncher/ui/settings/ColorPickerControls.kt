@@ -188,18 +188,13 @@ fun ColorPickerControls(
         // The default surface color of the current light/dark mode, for when a color was picked by mistake.
         val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
         val default = Color(defaultBoxFillColorFor(isDark))
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            TextButton(onClick = { applyPreset(default) }) {
-                Icon(Icons.Filled.RestartAlt, contentDescription = null, modifier = Modifier.size(18.dp))
-                Text(stringResource(R.string.settings_color_reset_default), modifier = Modifier.padding(start = 6.dp))
-            }
-        }
-
         if (onEyedropperCapture != null) {
             var sample by remember { mutableStateOf<ImageBitmap?>(null) }
-            TextButton(onClick = { sample = onEyedropperCapture() }) {
-                Icon(Icons.Filled.Colorize, contentDescription = null, modifier = Modifier.size(18.dp))
-                Text(stringResource(R.string.settings_color_eyedropper), modifier = Modifier.padding(start = 6.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                TextButton(onClick = { sample = onEyedropperCapture() }) {
+                    Icon(Icons.Filled.Colorize, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Text(stringResource(R.string.settings_color_eyedropper), modifier = Modifier.padding(start = 6.dp))
+                }
             }
             sample?.let { bitmap ->
                 EyedropperDialog(
@@ -207,6 +202,13 @@ fun ColorPickerControls(
                     onPick = { picked -> applyPreset(picked); sample = null },
                     onDismiss = { sample = null }
                 )
+            }
+        }
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+            TextButton(onClick = { applyPreset(default) }) {
+                Icon(Icons.Filled.RestartAlt, contentDescription = null, modifier = Modifier.size(18.dp))
+                Text(stringResource(R.string.settings_color_reset_default), modifier = Modifier.padding(start = 6.dp))
             }
         }
     }

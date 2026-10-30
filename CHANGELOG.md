@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Search categories can be reordered smoothly again; Folders no longer jumps back behind Apps
+- The eyedropper button in color pickers is centered above "Reset to default"
+
 ## 0.3.0
 
 - Text search:

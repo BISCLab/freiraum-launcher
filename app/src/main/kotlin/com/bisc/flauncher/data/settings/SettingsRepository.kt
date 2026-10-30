@@ -234,10 +234,12 @@ class SettingsRepository @Inject constructor(
 
     val searchCategoryOrder: Flow<List<SearchCategory>> = dataStore.data.map { prefs ->
         // Categories that were split later replace their old entry in place.
-        val saved = prefs[SEARCH_CATEGORY_ORDER_KEY].orEmpty().split(',').flatMap { name ->
+        val names = prefs[SEARCH_CATEGORY_ORDER_KEY].orEmpty().split(',')
+        val saved = names.flatMap { name ->
             when (name) {
                 "DOCUMENTS" -> listOf(SearchCategory.WEBSITES)
-                "APPS" -> listOf(SearchCategory.APPS, SearchCategory.FOLDERS)
+                // Only for orders saved before folders had their own entry.
+                "APPS" -> if ("FOLDERS" in names) listOf(SearchCategory.APPS) else listOf(SearchCategory.APPS, SearchCategory.FOLDERS)
                 // The e-mail command's slot went to the launcher's own settings.
                 "EMAIL" -> listOf(SearchCategory.LAUNCHER_SETTINGS)
                 else -> listOfNotNull(SearchCategory.entries.firstOrNull { it.name == name })
