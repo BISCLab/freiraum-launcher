@@ -160,7 +160,12 @@ class MainActivity : ComponentActivity() {
                     NavHost(navController = navController, startDestination = "home") {
                         composable("home") {
                             HomeScreen(
-                                onNavigateToSettings = { navController.navigate("settings") },
+                                onNavigateToSettings = { route ->
+                                    // Deeper screens open on top of the settings start page, so back
+                                    // and the breadcrumbs lead through it as usual.
+                                    if (route != "settings") navController.navigate("settings")
+                                    navController.navigate(route)
+                                },
                                 homeButtonPressCount = homeButtonPressCount
                             )
                         }

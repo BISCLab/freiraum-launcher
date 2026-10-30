@@ -1,6 +1,6 @@
 package com.bisc.flauncher.ui.home.search
 
-import com.bisc.flauncher.util.matchesWordStart
+import com.bisc.flauncher.util.matchesLabelOrKeywords
 import android.content.ComponentName
 import androidx.compose.foundation.background
 import androidx.compose.animation.core.animateFloatAsState
@@ -79,7 +79,7 @@ fun SearchOverlay(
     converterResult: String?,
     contactResults: List<ContactInfo>,
     websiteResults: List<PinnedWebsite>,
-    shortcutResults: List<PinnedShortcut>,
+    shortcutResults: List<com.bisc.flauncher.data.model.ShortcutResult>,
     folderResults: List<com.bisc.flauncher.data.model.Folder> = emptyList(),
     mapTargetResults: List<com.bisc.flauncher.data.model.SavedMapTarget> = emptyList(),
     contactsPermissionGranted: Boolean,
@@ -113,6 +113,7 @@ fun SearchOverlay(
     onAppClick: (AppInfo) -> Unit,
     onContactClick: (ContactInfo) -> Unit,
     onSettingsShortcutClick: (SettingsShortcut) -> Unit,
+    onLauncherSettingsClick: (com.bisc.flauncher.data.model.LauncherSettingsTarget) -> Unit,
     onFolderClick: (com.bisc.flauncher.data.model.Folder) -> Unit = {},
     onMapTargetClick: (com.bisc.flauncher.data.model.SavedMapTarget) -> Unit = {},
     onWebsiteClick: (PinnedWebsite) -> Unit,
@@ -121,7 +122,6 @@ fun SearchOverlay(
     onHome: () -> Unit,
     onWebCommand: () -> Unit,
     onMapsCommand: () -> Unit,
-    onEmailCommand: () -> Unit,
     onAiCommand: () -> Unit
 ) {
     val context = LocalContext.current
@@ -133,16 +133,18 @@ fun SearchOverlay(
 
     LaunchedEffect(Unit) { onRefreshContactsPermission() }
 
-    val settingsResults = remember(query, activeCategories) {
-        if (query.isBlank() || SearchCategory.SETTINGS !in activeCategories) {
-            emptyList()
-        } else {
-            val normalizedQuery = query.filter { it.isLetterOrDigit() }
-            SettingsShortcuts.all.filter {
-                val label = context.getString(it.labelRes)
-                matchesWordStart(label, query) ||
-                    label.filter { c -> c.isLetterOrDigit() }.startsWith(normalizedQuery, ignoreCase = true)
-            }
+    // Only the system settings screens this phone can open — some aren't offered by every maker.
+    val availableSettings = remember {
+        SettingsShortcuts.all.filter { context.packageManager.resolveActivity(android.content.Intent(it.action), 0) != null }
+    }
+    val settingsResults = remember(query, activeCategories, availableSettings) {
+        if (query.isBlank() || SearchCategory.SETTINGS !in activeCategories) emptyList()
+        else availableSettings.filter { matchesLabelOrKeywords(context.getString(it.labelRes), it.keywords, query) }
+    }
+    val launcherSettingsResults = remember(query, activeCategories) {
+        if (query.isBlank() || SearchCategory.LAUNCHER_SETTINGS !in activeCategories) emptyList()
+        else com.bisc.flauncher.data.model.LauncherSettingsTargets.all.filter {
+            matchesLabelOrKeywords(context.getString(it.labelRes), it.keywords, query)
         }
     }
 
@@ -208,6 +210,7 @@ fun SearchOverlay(
                         appResults = appResults,
                         contactResults = contactResults,
                         settingsResults = settingsResults,
+                        launcherSettingsResults = launcherSettingsResults,
                         websiteResults = websiteResults,
                         shortcutResults = shortcutResults,
                         folderResults = folderResults,
@@ -222,13 +225,13 @@ fun SearchOverlay(
                         onAppClick = onAppClick,
                         onContactClick = onContactClick,
                         onSettingsShortcutClick = onSettingsShortcutClick,
+                        onLauncherSettingsClick = onLauncherSettingsClick,
                         onFolderClick = onFolderClick,
                         onMapTargetClick = onMapTargetClick,
                         onWebsiteClick = onWebsiteClick,
                         onShortcutClick = onShortcutClick,
                         onWebCommand = onWebCommand,
                         onMapsCommand = onMapsCommand,
-                        onEmailCommand = onEmailCommand,
                         onAiCommand = onAiCommand,
                         onCalculatorResultClick = { result -> onQueryChange(result) },
                         modifier = Modifier.weight(1f).fillMaxWidth(),

@@ -224,7 +224,8 @@ class SettingsRepository @Inject constructor(
             when (name) {
                 "DOCUMENTS" -> listOf(SearchCategory.WEBSITES)
                 "APPS" -> listOf(SearchCategory.APPS, SearchCategory.FOLDERS)
-                "WEB" -> listOf(SearchCategory.EMAIL, SearchCategory.WEB)
+                // The e-mail command's slot went to the launcher's own settings.
+                "EMAIL" -> listOf(SearchCategory.LAUNCHER_SETTINGS)
                 else -> listOfNotNull(SearchCategory.entries.firstOrNull { it.name == name })
             }
         }

@@ -3,12 +3,15 @@ package com.bisc.flauncher.data.repository
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.provider.ContactsContract
 import androidx.core.content.ContextCompat
 import com.bisc.flauncher.data.db.PinnedContactDao
 import com.bisc.flauncher.data.model.ContactInfo
 import com.bisc.flauncher.data.model.ContactPhoneNumber
 import com.bisc.flauncher.data.model.PinnedContact
+import com.bisc.flauncher.util.matchesAllWordStarts
+import com.bisc.flauncher.util.matchesWordStart
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -26,38 +29,46 @@ class ContactsRepository @Inject constructor(
         ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) ==
             PackageManager.PERMISSION_GRANTED
 
+    /** Contacts whose name has a word starting with each word of [query] (like every other search
+     *  category), whose phone number matches its digits whatever the formatting, or whose e-mail
+     *  address has a part starting with it. */
     suspend fun search(query: String): List<ContactInfo> {
         if (!hasPermission() || query.isBlank()) return emptyList()
+        val q = query.trim()
         return withContext(Dispatchers.IO) {
             val results = LinkedHashMap<Long, ContactInfo>()
 
+            // Names are matched here rather than in SQL, which can't match word starts or ignore accents.
+            val all = LinkedHashMap<Long, ContactInfo>()
             context.contentResolver.query(
                 ContactsContract.Contacts.CONTENT_URI,
                 CONTACT_PROJECTION,
-                "${ContactsContract.Contacts.DISPLAY_NAME_PRIMARY} LIKE ?",
-                arrayOf("%$query%"),
-                "${ContactsContract.Contacts.DISPLAY_NAME_PRIMARY} ASC LIMIT 20"
-            )?.use { cursor -> readContacts(cursor, results) }
+                null,
+                null,
+                "${ContactsContract.Contacts.DISPLAY_NAME_PRIMARY} ASC"
+            )?.use { cursor -> readContacts(cursor, all) }
+            all.values.filter { matchesAllWordStarts(it.displayName, q) }.take(MAX_RESULTS).forEach { results[it.id] = it }
 
-            val digits = query.filter { it.isDigit() }
-            if (digits.length >= 3) {
+            // The filter URI compares normalized numbers: "0151 234…", "0151-234…" and "+49151234…" alike.
+            val digits = q.filter { it.isDigit() }
+            if (digits.length >= 3 && q.none { it.isLetter() }) {
                 context.contentResolver.query(
-                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    Uri.withAppendedPath(ContactsContract.CommonDataKinds.Phone.CONTENT_FILTER_URI, Uri.encode(q)),
                     arrayOf(
                         ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
                         ContactsContract.CommonDataKinds.Phone.LOOKUP_KEY,
                         ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY,
                         ContactsContract.CommonDataKinds.Phone.PHOTO_URI
                     ),
-                    "${ContactsContract.CommonDataKinds.Phone.NUMBER} LIKE ?",
-                    arrayOf("%$query%"),
-                    "${ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY} ASC LIMIT 20"
+                    null,
+                    null,
+                    "${ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY} ASC"
                 )?.use { cursor ->
                     val idIndex = cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)
                     val lookupIndex = cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.LOOKUP_KEY)
                     val nameIndex = cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY)
                     val photoIndex = cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.PHOTO_URI)
-                    while (cursor.moveToNext()) {
+                    while (cursor.moveToNext() && results.size < MAX_RESULTS) {
                         val id = cursor.getLong(idIndex)
                         if (id !in results) {
                             results[id] = ContactInfo(id, cursor.getString(lookupIndex), cursor.getString(nameIndex) ?: "", cursor.getString(photoIndex))
@@ -66,7 +77,42 @@ class ContactsRepository @Inject constructor(
                 }
             }
 
+            // E-mail addresses: a part of the address (split at ".", "@", "-", ...) starting with the query.
+            if (q.length >= 2) {
+                context.contentResolver.query(
+                    ContactsContract.CommonDataKinds.Email.CONTENT_URI,
+                    arrayOf(
+                        ContactsContract.CommonDataKinds.Email.CONTACT_ID,
+                        ContactsContract.CommonDataKinds.Email.LOOKUP_KEY,
+                        ContactsContract.CommonDataKinds.Email.DISPLAY_NAME_PRIMARY,
+                        ContactsContract.CommonDataKinds.Email.PHOTO_URI,
+                        ContactsContract.CommonDataKinds.Email.ADDRESS
+                    ),
+                    "${ContactsContract.CommonDataKinds.Email.ADDRESS} LIKE ?",
+                    arrayOf("%$q%"),
+                    "${ContactsContract.CommonDataKinds.Email.DISPLAY_NAME_PRIMARY} ASC"
+                )?.use { cursor ->
+                    val idIndex = cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Email.CONTACT_ID)
+                    val lookupIndex = cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Email.LOOKUP_KEY)
+                    val nameIndex = cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Email.DISPLAY_NAME_PRIMARY)
+                    val photoIndex = cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Email.PHOTO_URI)
+                    val addressIndex = cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Email.ADDRESS)
+                    while (cursor.moveToNext() && results.size < MAX_RESULTS) {
+                        val address = cursor.getString(addressIndex) ?: continue
+                        if (!matchesWordStart(address, q)) continue
+                        val id = cursor.getLong(idIndex)
+                        if (id !in results) {
+                            results[id] = ContactInfo(
+                                id, cursor.getString(lookupIndex), cursor.getString(nameIndex) ?: "", cursor.getString(photoIndex),
+                                email = address, matchedByEmail = true
+                            )
+                        }
+                    }
+                }
+            }
+
             attachPhoneNumbers(results)
+            attachEmails(results)
             results.values.toList()
         }
     }
@@ -120,6 +166,28 @@ class ContactsRepository @Inject constructor(
         }
     }
 
+    /** Fills in each result's first e-mail address (for the "Send e-mail" action), keeping one the
+     *  search already matched. */
+    private fun attachEmails(results: MutableMap<Long, ContactInfo>) {
+        val missing = results.values.filter { it.email == null }.map { it.id }
+        if (missing.isEmpty()) return
+        context.contentResolver.query(
+            ContactsContract.CommonDataKinds.Email.CONTENT_URI,
+            arrayOf(ContactsContract.CommonDataKinds.Email.CONTACT_ID, ContactsContract.CommonDataKinds.Email.ADDRESS),
+            "${ContactsContract.CommonDataKinds.Email.CONTACT_ID} IN (${missing.joinToString(",") { "?" }})",
+            missing.map { it.toString() }.toTypedArray(),
+            null
+        )?.use { cursor ->
+            val idIndex = cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Email.CONTACT_ID)
+            val addressIndex = cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Email.ADDRESS)
+            while (cursor.moveToNext()) {
+                val id = cursor.getLong(idIndex)
+                val contact = results[id] ?: continue
+                if (contact.email == null) results[id] = contact.copy(email = cursor.getString(addressIndex))
+            }
+        }
+    }
+
     private fun readContacts(cursor: android.database.Cursor, into: MutableMap<Long, ContactInfo>) {
         val idIndex = cursor.getColumnIndexOrThrow(ContactsContract.Contacts._ID)
         val lookupIndex = cursor.getColumnIndexOrThrow(ContactsContract.Contacts.LOOKUP_KEY)
@@ -141,6 +209,7 @@ class ContactsRepository @Inject constructor(
 
     private companion object {
         const val MAX_LISTED = 500
+        const val MAX_RESULTS = 20
         val CONTACT_PROJECTION = arrayOf(
             ContactsContract.Contacts._ID,
             ContactsContract.Contacts.LOOKUP_KEY,

@@ -40,18 +40,16 @@
     <string name="search_section_places">Orte</string>
     <string name="search_section_apps">Apps</string>
     <string name="search_section_contacts">Kontakte</string>
-    <string name="search_section_settings">Einstellungen</string>
+    <string name="search_section_settings">Systemeinstellungen</string>
     <string name="search_section_shortcuts">Verknüpfungen</string>
     <string name="search_section_websites">Websites</string>
     <string name="search_filter_websites">Websites</string>
     <string name="search_filter_folders">Ordner</string>
-    <string name="search_filter_email">E-Mail</string>
     <string name="settings_search_include_websites">Websites</string>
     <string name="settings_search_include_folders">Ordner</string>
-    <string name="settings_search_include_email">E-Mail-Adresse</string>
     <string name="search_filter_apps">Apps</string>
     <string name="search_filter_contacts">Kontakte</string>
-    <string name="search_filter_settings">Einstellungen</string>
+    <string name="search_filter_settings">Systemeinstellungen</string>
     <string name="search_filter_web">Web</string>
     <string name="search_filter_maps">Karten</string>
     <string name="search_filter_shortcuts">Verknüpfungen</string>
@@ -59,7 +57,6 @@
     <string name="search_show_less">Weniger anzeigen</string>
     <string name="search_command_web">Im Web nach „%1$s“ suchen</string>
     <string name="search_command_maps">Auf der Karte nach „%1$s“ suchen</string>
-    <string name="search_command_email">E-Mail an %1$s</string>
 
     <string name="settings_shortcut_wifi">WLAN</string>
     <string name="settings_shortcut_bluetooth">Bluetooth</string>
@@ -73,6 +70,24 @@
     <string name="settings_shortcut_accessibility">Bedienungshilfen</string>
     <string name="settings_shortcut_date_time">Datum &amp; Uhrzeit</string>
     <string name="settings_shortcut_about">Telefoninfo</string>
+    <string name="settings_shortcut_mobile_data">Mobile Daten</string>
+    <string name="settings_shortcut_airplane">Flugmodus</string>
+    <string name="settings_shortcut_hotspot">Hotspot &amp; Tethering</string>
+    <string name="settings_shortcut_nfc">NFC</string>
+    <string name="settings_shortcut_vpn">VPN</string>
+    <string name="settings_shortcut_cast">Streamen</string>
+    <string name="settings_shortcut_dark_mode">Dunkles Design</string>
+    <string name="settings_shortcut_wallpaper">Hintergrund</string>
+    <string name="settings_shortcut_dnd">Bitte nicht stören</string>
+    <string name="settings_shortcut_notifications">Benachrichtigungen</string>
+    <string name="settings_shortcut_battery_saver">Energiesparmodus</string>
+    <string name="settings_shortcut_default_apps">Standard-Apps</string>
+    <string name="settings_shortcut_privacy">Datenschutz</string>
+    <string name="settings_shortcut_accounts">Konten</string>
+    <string name="settings_shortcut_language">Sprachen</string>
+    <string name="settings_shortcut_keyboard">Tastatur</string>
+    <string name="settings_shortcut_system_update">Systemupdate</string>
+    <string name="settings_shortcut_developer">Entwickleroptionen</string>
 
     <string name="settings_title">Einstellungen</string>
     <string name="settings_theme_confirm_title">„%1$s“ anwenden?</string>
@@ -474,7 +489,7 @@
     <string name="settings_search_categories_label">Suchkategorien</string>
     <string name="settings_search_include_apps">Apps</string>
     <string name="settings_search_include_contacts">Kontakte</string>
-    <string name="settings_search_include_settings">Einstellungsverknüpfungen</string>
+    <string name="settings_search_include_settings">Systemeinstellungen</string>
     <string name="settings_search_include_web">Websuche</string>
     <string name="settings_search_include_maps">Karten / Navigation</string>
     <string name="settings_search_include_shortcuts">Verknüpfungen</string>
@@ -576,4 +591,8 @@
 AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagger Hilt: Apache License 2.0.</string>
     <string name="about_privacy">Datenschutz</string>
     <string name="about_privacy_summary">Keine Internetberechtigung, keine Datensammlung. Alles bleibt auf deinem Handy.</string>
+    <string name="search_filter_launcher_settings">Freiraum</string>
+    <string name="settings_search_include_launcher_settings">Freiraum-Einstellungen</string>
+    <string name="search_section_launcher_settings">Freiraum-Einstellungen</string>
+    <string name="contact_action_email">E-Mail schreiben</string>
 </resources>

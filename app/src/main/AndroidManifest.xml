@@ -37,6 +37,10 @@
         <intent>
             <action android:name="android.intent.action.DIAL" />
         </intent>
+        <!-- Settings search: the wallpaper picker is often its own app without a launcher icon. -->
+        <intent>
+            <action android:name="android.intent.action.SET_WALLPAPER" />
+        </intent>
     </queries>
 
     <!-- Contact search and pinned contacts; requested at runtime. -->

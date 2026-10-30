@@ -18,8 +18,3 @@ fun launchEmailTo(context: Context, address: String) {
         )
     }
 }
-
-private val EMAIL_REGEX = Regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$")
-
-/** True when [query] is exactly an email address. */
-fun looksLikeEmail(query: String): Boolean = EMAIL_REGEX.matches(query.trim())

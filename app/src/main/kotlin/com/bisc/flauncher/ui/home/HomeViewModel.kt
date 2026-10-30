@@ -1,7 +1,7 @@
 package com.bisc.flauncher.ui.home
 
+import com.bisc.flauncher.util.foldForSearch
 import com.bisc.flauncher.util.matchesAllWordStarts
-import com.bisc.flauncher.util.matchesWordStart
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
@@ -33,6 +33,7 @@ import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.PinnedContact
 import com.bisc.flauncher.data.model.PinnedShortcut
+import com.bisc.flauncher.data.model.ShortcutResult
 import com.bisc.flauncher.data.model.PinnedWebsite
 import com.bisc.flauncher.data.model.RevealMode
 import com.bisc.flauncher.data.model.SavedMapTarget
@@ -66,11 +67,9 @@ import com.bisc.flauncher.util.SystemWidgetHostManager
 import com.bisc.flauncher.util.evaluateCalculatorExpression
 import com.bisc.flauncher.util.formatCalculatorResult
 import com.bisc.flauncher.util.launchApp
-import com.bisc.flauncher.util.launchEmailTo
 import com.bisc.flauncher.util.launchMapsQuery
 import com.bisc.flauncher.util.launchWebSearch
 import com.bisc.flauncher.util.looksLikeCalculatorExpression
-import com.bisc.flauncher.util.looksLikeEmail
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -396,8 +395,8 @@ class HomeViewModel @Inject constructor(
                 val visible = apps.filter { overrides[it.componentName.flattenToString()]?.hiddenFromSearch != true }
                 val nameMatches = visible.filter { app ->
                     overrides[app.componentName.flattenToString()]?.revealMode != RevealMode.SEARCH_CODE &&
-                        matchesWordStart(app.label, query)
-                }.sortedByDescending { it.label.startsWith(query.trim(), ignoreCase = true) }
+                        matchesAllWordStarts(app.label, query)
+                }.sortedByDescending { foldForSearch(it.label).startsWith(foldForSearch(query.trim())) }
                 val codeMatches = visible.filter { app ->
                     val override = overrides[app.componentName.flattenToString()]
                     override?.revealMode == RevealMode.SEARCH_CODE && override.revealCode == query
@@ -645,7 +644,7 @@ class HomeViewModel @Inject constructor(
     val folderResults: StateFlow<List<Folder>> =
         combine(_searchQuery, folders, activeSearchCategories) { query, list, active ->
             val include = SearchCategory.FOLDERS in active
-            if (query.isBlank() || !include) emptyList() else list.filter { matchesWordStart(it.name, query) }
+            if (query.isBlank() || !include) emptyList() else list.filter { matchesAllWordStarts(it.name, query) }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val mapTargetResults: StateFlow<List<SavedMapTarget>> =
@@ -659,13 +658,28 @@ class HomeViewModel @Inject constructor(
     val websiteResults: StateFlow<List<PinnedWebsite>> =
         combine(_searchQuery, pinnedWebsites, activeSearchCategories) { query, list, active ->
             val include = SearchCategory.WEBSITES in active
-            if (query.isBlank() || !include) emptyList() else list.filter { matchesWordStart(it.label, query) }
+            // By name, or by the site's address ("youtube" finds a link named "YT").
+            if (query.isBlank() || !include) emptyList()
+            else list.filter { matchesAllWordStarts(it.label, query) || matchesAllWordStarts(siteAddress(it.url), query) }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val shortcutResults: StateFlow<List<PinnedShortcut>> =
-        combine(_searchQuery, pinnedShortcuts, activeSearchCategories) { query, list, active ->
+    // Every installed app's shortcuts, re-read each time the search opens (apps change them).
+    private val _appShortcuts = MutableStateFlow<List<PinnedShortcut>>(emptyList())
+
+    /** The apps' own shortcuts plus the ones pinned as elements, matched by the shortcut's name or by
+     *  its app's name together with it ("chrome tab"). */
+    val shortcutResults: StateFlow<List<ShortcutResult>> =
+        combine(_searchQuery, _appShortcuts, pinnedShortcuts, labeledApps, activeSearchCategories) { query, appShortcuts, pinned, apps, active ->
             val include = SearchCategory.SHORTCUTS in active
-            if (query.isBlank() || !include) emptyList() else list.filter { matchesWordStart(it.label, query) }
+            if (query.isBlank() || !include) {
+                emptyList<ShortcutResult>()
+            } else {
+                val appLabels = apps.associate { it.componentName.packageName to it.label }
+                (appShortcuts + pinned)
+                    .distinctBy { it.packageName to it.shortcutId }
+                    .map { ShortcutResult(it, appLabels[it.packageName].orEmpty()) }
+                    .filter { matchesAllWordStarts(it.shortcut.label, query) || matchesAllWordStarts(it.appLabel + " " + it.shortcut.label, query) }
+            }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     // ---- Overlay controls and search commands ----
@@ -682,6 +696,11 @@ class HomeViewModel @Inject constructor(
     }
 
     fun openSearch() {
+        viewModelScope.launch {
+            _appShortcuts.value = shortcutRepository.allShortcuts().map { info ->
+                PinnedShortcut(packageName = info.`package`, shortcutId = info.id, label = (info.shortLabel ?: info.longLabel ?: info.id).toString())
+            }
+        }
         _isPanelOpen.value = false
         // The search backdrop is translucent, so the app overview must not stay open behind it.
         _appListOpen.value = false
@@ -720,12 +739,6 @@ class HomeViewModel @Inject constructor(
         closeSearch()
     }
 
-    fun runEmailCommand(context: Context) {
-        val q = _searchQuery.value.trim()
-        if (!looksLikeEmail(q)) return
-        launchEmailTo(context, q)
-        closeSearch()
-    }
 
     // ---- Page and row editing ----
 
@@ -1186,3 +1199,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 }
+
+/** A link's host without "www." for matching ("https://www.youtube.com/x" -> "youtube.com"). */
+private fun siteAddress(url: String): String =
+    runCatching { android.net.Uri.parse(url.trim()).host }.getOrNull()?.removePrefix("www.") ?: url

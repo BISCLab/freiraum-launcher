@@ -6,10 +6,11 @@ enum class SearchCategory(val storageKey: String, val legacyKey: String? = null)
     FOLDERS("folders", legacyKey = "apps"),
     CONTACTS("contacts"),
     SETTINGS("settings"),
+    // The launcher's own settings screens (see LauncherSettingsTargets).
+    LAUNCHER_SETTINGS("launcher_settings"),
     WEBSITES("websites", legacyKey = "documents"),
     PLACES("maps"),
     SHORTCUTS("shortcuts"),
-    EMAIL("email", legacyKey = "web"),
     WEB("web"),
     AI("ai")
 }

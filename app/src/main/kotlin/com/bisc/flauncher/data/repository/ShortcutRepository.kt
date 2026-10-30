@@ -33,6 +33,16 @@ class ShortcutRepository @Inject constructor(
         runCatching { launcherApps?.getShortcuts(query, Process.myUserHandle()) }.getOrNull().orEmpty()
     }
 
+    /** Every installed app's own shortcuts (what long-pressing its icon shows), for the text search. */
+    suspend fun allShortcuts(): List<ShortcutInfo> = withContext(Dispatchers.IO) {
+        if (!hasPermission()) return@withContext emptyList()
+        val query = LauncherApps.ShortcutQuery().apply {
+            setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_MANIFEST or LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC)
+        }
+        runCatching { launcherApps?.getShortcuts(query, Process.myUserHandle()) }.getOrNull().orEmpty()
+            .filter { it.isEnabled }
+    }
+
     fun loadIcon(info: ShortcutInfo): Drawable? =
         runCatching { launcherApps?.getShortcutIconDrawable(info, context.resources.displayMetrics.densityDpi) }.getOrNull()
 

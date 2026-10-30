@@ -118,7 +118,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onNavigateToSettings: () -> Unit,
+    /** Opens the settings at a navigation route, "settings" being their start page. */
+    onNavigateToSettings: (String) -> Unit,
     homeButtonPressCount: Int = 0,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -373,7 +374,7 @@ fun HomeScreen(
             com.bisc.flauncher.data.model.ActionButtonActionType.ANDROID_SETTING -> {
                 button.androidSettingAction?.let { action -> launchSettingsShortcut(context, action) }
             }
-            com.bisc.flauncher.data.model.ActionButtonActionType.LAUNCHER_SETTINGS -> onNavigateToSettings()
+            com.bisc.flauncher.data.model.ActionButtonActionType.LAUNCHER_SETTINGS -> onNavigateToSettings("settings")
         }
     }
     // The one place "go back to home" is defined: closes every overlay and also scrolls the pager
@@ -387,7 +388,7 @@ fun HomeScreen(
     }
     val openSettingsFromGesture: () -> Unit = {
         viewModel.closeOverview()
-        onNavigateToSettings()
+        onNavigateToSettings("settings")
     }
 
     // Whether *any* level of the folder stack is open.
@@ -1019,6 +1020,13 @@ fun HomeScreen(
                 launchSettingsShortcut(context, shortcut.action)
                 viewModel.closeSearch()
             },
+            onLauncherSettingsClick = { target ->
+                viewModel.closeSearch()
+                val homeId = pages.find { it.isHome }?.id
+                if (homeId != null || com.bisc.flauncher.data.model.LauncherSettingsTarget.HOME !in target.route) {
+                    onNavigateToSettings(target.route.replace(com.bisc.flauncher.data.model.LauncherSettingsTarget.HOME, homeId.toString()))
+                }
+            },
             onFolderClick = { folder ->
                 viewModel.closeSearch()
                 viewModel.openFolder(folder.id)
@@ -1039,7 +1047,6 @@ fun HomeScreen(
             onHome = viewModel::closeSearch,
             onWebCommand = { viewModel.runWebSearchCommand(context) },
             onMapsCommand = { viewModel.runMapsCommand(context) },
-            onEmailCommand = { viewModel.runEmailCommand(context) },
             onAiCommand = { viewModel.runAiCommand(context) }
         )
     }

@@ -7,7 +7,7 @@ import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Mail
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
@@ -28,7 +28,7 @@ val SearchCategory.defaultColor: Color
         SearchCategory.WEBSITES -> Color(0xFFA142F4)
         SearchCategory.PLACES -> Color(0xFFEA4335)
         SearchCategory.SHORTCUTS -> Color(0xFF26A69A)
-        SearchCategory.EMAIL -> Color(0xFF5C6BC0)
+        SearchCategory.LAUNCHER_SETTINGS -> Color(0xFF0758F5)
         SearchCategory.WEB -> Color(0xFF00ACC1)
         SearchCategory.AI -> Color(0xFFEC407A)
     }
@@ -40,7 +40,7 @@ val SearchCategory.icon: ImageVector
         SearchCategory.SETTINGS -> Icons.Filled.Settings
         SearchCategory.WEBSITES -> Icons.Filled.Bookmark
         SearchCategory.FOLDERS -> Icons.Filled.Folder
-        SearchCategory.EMAIL -> Icons.Filled.Mail
+        SearchCategory.LAUNCHER_SETTINGS -> Icons.Filled.Tune
         SearchCategory.PLACES -> Icons.Filled.Place
         SearchCategory.SHORTCUTS -> Icons.AutoMirrored.Filled.Shortcut
         SearchCategory.WEB -> Icons.Filled.Language
@@ -56,7 +56,7 @@ val SearchCategory.filterLabelRes: Int
         SearchCategory.SETTINGS -> R.string.search_filter_settings
         SearchCategory.WEBSITES -> R.string.search_filter_websites
         SearchCategory.FOLDERS -> R.string.search_filter_folders
-        SearchCategory.EMAIL -> R.string.search_filter_email
+        SearchCategory.LAUNCHER_SETTINGS -> R.string.search_filter_launcher_settings
         SearchCategory.PLACES -> R.string.search_filter_maps
         SearchCategory.SHORTCUTS -> R.string.search_filter_shortcuts
         SearchCategory.WEB -> R.string.search_filter_web
@@ -72,7 +72,7 @@ val SearchCategory.settingsLabelRes: Int
         SearchCategory.SETTINGS -> R.string.settings_search_include_settings
         SearchCategory.WEBSITES -> R.string.settings_search_include_websites
         SearchCategory.FOLDERS -> R.string.settings_search_include_folders
-        SearchCategory.EMAIL -> R.string.settings_search_include_email
+        SearchCategory.LAUNCHER_SETTINGS -> R.string.settings_search_include_launcher_settings
         SearchCategory.PLACES -> R.string.settings_search_include_maps
         SearchCategory.SHORTCUTS -> R.string.settings_search_include_shortcuts
         SearchCategory.WEB -> R.string.settings_search_include_web

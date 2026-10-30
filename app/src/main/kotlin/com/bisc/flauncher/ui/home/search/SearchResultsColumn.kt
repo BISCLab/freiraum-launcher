@@ -21,7 +21,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
@@ -57,7 +56,6 @@ import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.data.model.SettingsShortcut
 import com.bisc.flauncher.ui.home.dock.DockPanelSurface
 import com.bisc.flauncher.ui.theme.noRippleClickable
-import com.bisc.flauncher.util.looksLikeEmail
 import androidx.compose.ui.res.stringResource
 
 private const val APP_GRID_COLUMNS = 4
@@ -74,8 +72,9 @@ fun SearchResultsColumn(
     appResults: List<AppInfo>,
     contactResults: List<ContactInfo>,
     settingsResults: List<SettingsShortcut>,
+    launcherSettingsResults: List<com.bisc.flauncher.data.model.LauncherSettingsTarget>,
     websiteResults: List<PinnedWebsite>,
-    shortcutResults: List<PinnedShortcut>,
+    shortcutResults: List<com.bisc.flauncher.data.model.ShortcutResult>,
     folderResults: List<com.bisc.flauncher.data.model.Folder> = emptyList(),
     mapTargetResults: List<com.bisc.flauncher.data.model.SavedMapTarget> = emptyList(),
     contactsPermissionGranted: Boolean,
@@ -88,13 +87,13 @@ fun SearchResultsColumn(
     onAppClick: (AppInfo) -> Unit,
     onContactClick: (ContactInfo) -> Unit,
     onSettingsShortcutClick: (SettingsShortcut) -> Unit,
+    onLauncherSettingsClick: (com.bisc.flauncher.data.model.LauncherSettingsTarget) -> Unit,
     onFolderClick: (com.bisc.flauncher.data.model.Folder) -> Unit = {},
     onMapTargetClick: (com.bisc.flauncher.data.model.SavedMapTarget) -> Unit = {},
     onWebsiteClick: (PinnedWebsite) -> Unit,
     onShortcutClick: (PinnedShortcut) -> Unit,
     onWebCommand: () -> Unit,
     onMapsCommand: () -> Unit,
-    onEmailCommand: () -> Unit,
     onAiCommand: () -> Unit,
     onCalculatorResultClick: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -114,6 +113,7 @@ fun SearchResultsColumn(
     val shownAppResults = if (SearchCategory.APPS in active) appResults else emptyList()
     val shownContactResults = if (SearchCategory.CONTACTS in active && contactsPermissionGranted) contactResults else emptyList()
     val shownSettingsResults = if (SearchCategory.SETTINGS in active) settingsResults else emptyList()
+    val shownLauncherSettingsResults = if (SearchCategory.LAUNCHER_SETTINGS in active) launcherSettingsResults else emptyList()
     val shownWebsiteResults = if (SearchCategory.WEBSITES in active) websiteResults else emptyList()
     val shownShortcutResults = if (SearchCategory.SHORTCUTS in active) shortcutResults else emptyList()
     val shownFolderResults = if (SearchCategory.FOLDERS in active) folderResults else emptyList()
@@ -121,8 +121,8 @@ fun SearchResultsColumn(
     val showWeb = SearchCategory.WEB in active && query.isNotBlank()
     val showMaps = SearchCategory.PLACES in active && query.isNotBlank()
     val showAi = SearchCategory.AI in active && aiAppLabel != null && query.isNotBlank()
-    val showEmail = SearchCategory.EMAIL in active && looksLikeEmail(query)
     val hasDirectResults = shownAppResults.isNotEmpty() || shownContactResults.isNotEmpty() || shownSettingsResults.isNotEmpty() ||
+        shownLauncherSettingsResults.isNotEmpty() ||
         shownWebsiteResults.isNotEmpty() || shownShortcutResults.isNotEmpty() ||
         shownFolderResults.isNotEmpty() || shownMapTargetResults.isNotEmpty()
 
@@ -185,7 +185,12 @@ fun SearchResultsColumn(
                         ResultRow(leading = { Icon(Icons.Filled.Folder, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = folder.name, onClick = { onFolderClick(folder) })
                     }
                     SearchCategory.CONTACTS -> sectionCard(category, shownContactResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { contact ->
-                        ResultRow(leading = { Icon(Icons.Filled.Person, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = contact.displayName, onClick = { onContactClick(contact) })
+                        ResultRow(
+                            leading = { Icon(Icons.Filled.Person, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) },
+                            title = contact.displayName,
+                            subtitle = contact.email?.takeIf { contact.matchedByEmail },
+                            onClick = { onContactClick(contact) }
+                        )
                     }
                     SearchCategory.SETTINGS -> sectionCard(category, shownSettingsResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { shortcut ->
                         ResultRow(leading = { Icon(Icons.Filled.Search, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = stringResource(shortcut.labelRes), onClick = { onSettingsShortcutClick(shortcut) })
@@ -210,27 +215,28 @@ fun SearchResultsColumn(
                             }
                         }
                     }
-                    SearchCategory.SHORTCUTS -> sectionCard(category, shownShortcutResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { shortcut ->
-                        ResultRow(leading = { Icon(Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = shortcut.label, onClick = { onShortcutClick(shortcut) })
+                    SearchCategory.SHORTCUTS -> sectionCard(category, shownShortcutResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { result ->
+                        ResultRow(
+                            leading = { Icon(Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) },
+                            title = result.shortcut.label,
+                            subtitle = result.appLabel.takeIf { it.isNotBlank() },
+                            onClick = { onShortcutClick(result.shortcut) }
+                        )
                     }
-                    SearchCategory.EMAIL -> if (showEmail) {
-                        item {
-                            ResultCard(cardAppearance) {
-                                CommandRow(icon = Icons.Filled.Mail, color = categoryColor(category), text = stringResource(R.string.search_command_email, query), prominent = !hasDirectResults, onClick = onEmailCommand)
-                            }
-                        }
+                    SearchCategory.LAUNCHER_SETTINGS -> sectionCard(category, shownLauncherSettingsResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { target ->
+                        ResultRow(leading = { Icon(category.icon, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = stringResource(target.labelRes), onClick = { onLauncherSettingsClick(target) })
                     }
                     SearchCategory.WEB -> if (showWeb) {
                         item {
                             ResultCard(cardAppearance) {
-                                CommandRow(icon = Icons.Filled.Language, color = categoryColor(category), text = stringResource(R.string.search_command_web, query), prominent = !hasDirectResults && !showEmail, onClick = onWebCommand)
+                                CommandRow(icon = Icons.Filled.Language, color = categoryColor(category), text = stringResource(R.string.search_command_web, query), prominent = !hasDirectResults, onClick = onWebCommand)
                             }
                         }
                     }
                     SearchCategory.AI -> if (showAi) {
                         item {
                             ResultCard(cardAppearance) {
-                                CommandRow(icon = SearchCategory.AI.icon, color = categoryColor(category), text = stringResource(R.string.search_command_ai, aiAppLabel.orEmpty(), query), prominent = !hasDirectResults && !showEmail && !showWeb, onClick = onAiCommand)
+                                CommandRow(icon = SearchCategory.AI.icon, color = categoryColor(category), text = stringResource(R.string.search_command_ai, aiAppLabel.orEmpty(), query), prominent = !hasDirectResults && !showWeb, onClick = onAiCommand)
                             }
                         }
                     }
@@ -275,7 +281,7 @@ private val SearchCategory.sectionTitleRes: Int
         SearchCategory.WEBSITES -> R.string.search_section_websites
         SearchCategory.PLACES -> R.string.search_section_places
         SearchCategory.SHORTCUTS -> R.string.search_section_shortcuts
-        SearchCategory.EMAIL -> R.string.search_section_apps
+        SearchCategory.LAUNCHER_SETTINGS -> R.string.search_section_launcher_settings
         SearchCategory.WEB -> R.string.search_section_apps
         SearchCategory.AI -> R.string.search_section_apps
     }

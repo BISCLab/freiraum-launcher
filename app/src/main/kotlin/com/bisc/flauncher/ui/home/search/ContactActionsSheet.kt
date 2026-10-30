@@ -17,6 +17,7 @@ import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.ContactPage
+import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -94,6 +95,16 @@ fun ContactActionsSheet(
                 Spacer(Modifier.height(10.dp))
             }
 
+            contact.email?.let { email ->
+                ActionTile(
+                    ContactAction(Icons.Filled.Mail, stringResource(R.string.contact_action_email)) {
+                        com.bisc.flauncher.util.launchEmailTo(context, email); onDismiss()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    wide = true
+                )
+                Spacer(Modifier.height(10.dp))
+            }
             ActionTile(
                 ContactAction(Icons.Filled.ContactPage, stringResource(R.string.contact_action_open_in_contacts)) {
                     openContact(context, contact); onDismiss()
