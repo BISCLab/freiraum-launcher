@@ -35,7 +35,9 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
@@ -203,6 +205,28 @@ fun HomeScreen(
     val searchAiApp by viewModel.searchAiApp.collectAsState()
     val categoryColors by viewModel.categoryColors.collectAsState()
     val converterResult by viewModel.converterResult.collectAsState()
+    val appGridOpen by viewModel.appGridOpen.collectAsState()
+    val appGridPageId by viewModel.appGridPageId.collectAsState()
+    val appGridBackground by remember(appGridPageId) { viewModel.pageBackgroundConfig(appGridPageId ?: -1L) }
+        .collectAsState(initial = BackgroundConfig())
+    val appGridHideStatusBar by remember(appGridPageId) { viewModel.pageHideStatusBar(appGridPageId ?: -1L) }
+        .collectAsState(initial = false)
+    val appGridColumns by viewModel.appGridColumns.collectAsState()
+    val appGridIconSizePercent by viewModel.appGridIconSizePercent.collectAsState()
+    val appGridShowLabels by viewModel.appGridShowLabels.collectAsState()
+    val appGridBarPosition by viewModel.appGridBarPosition.collectAsState()
+    val appGridBarOpensTextSearch by viewModel.appGridBarOpensTextSearch.collectAsState()
+    val appGridKeyboardAutoOpen by viewModel.appGridKeyboardAutoOpen.collectAsState()
+    val appGridBarAppearance by viewModel.appGridBarAppearance.collectAsState()
+    val appGridFolderIds by viewModel.appGridFolderIds.collectAsState()
+    val appGridFoldersAlphabetical by viewModel.appGridFoldersAlphabetical.collectAsState()
+    val appGridHideFolderApps by viewModel.appGridHideFolderApps.collectAsState()
+    val appListOwnSearch by viewModel.appListOwnSearch.collectAsState()
+    val appQuery by viewModel.appQuery.collectAsState()
+    val appQueryResults by viewModel.appQueryResults.collectAsState()
+    // The app list's own app search (search button with "own search" on).
+    var appListSearching by remember { mutableStateOf(false) }
+    LaunchedEffect(appListOpen) { if (!appListOpen) appListSearching = false }
 
     // Endless carousel: the pager runs over many virtual pages that cycle through the real ones
     // (virtual index mod page count), started in the middle so it can wrap both ways.
@@ -233,6 +257,7 @@ fun HomeScreen(
     val hideStatusBar = when {
         folderOpen -> folderHideStatusBar
         onAppOverviewPage -> appOverviewHideStatusBar
+        appGridOpen -> appGridHideStatusBar
         searchOpen -> searchHideStatusBar
         else -> currentPageHideStatusBar
     }
@@ -266,6 +291,7 @@ fun HomeScreen(
     } else {
         val statusBarBackdrop = when {
             appListOpen -> appOverviewBackground
+            appGridOpen -> appGridBackground
             else -> currentPageBackground
         }
         com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(
@@ -360,6 +386,7 @@ fun HomeScreen(
             com.bisc.flauncher.data.model.LauncherPageKind.ROWS -> openPageById(pageId)
             com.bisc.flauncher.data.model.LauncherPageKind.APP_LIST -> viewModel.openAppList()
             com.bisc.flauncher.data.model.LauncherPageKind.SEARCH -> viewModel.openSearch()
+            com.bisc.flauncher.data.model.LauncherPageKind.APP_GRID -> viewModel.openAppGrid()
         }
     }
     // An Action button's action: open a page (same dispatch as a plain page-link entry), trigger
@@ -384,6 +411,7 @@ fun HomeScreen(
     val returnHome: () -> Unit = {
         viewModel.closeSearch()
         viewModel.closeAppList()
+        viewModel.closeAppGrid()
         viewModel.closeOverview()
         viewModel.closeAllFolders()
         if (realIndex(pagerState.currentPage) != homeIndex) coroutineScope.launch { pagerState.animateScrollToPage(virtualIndexOf(homeIndex)) }
@@ -399,7 +427,7 @@ fun HomeScreen(
         animationSpec = tween(220),
         label = "folderBackdropBlur"
     )
-    val overlayHidesPage = searchOpen || appListOpen || (isPanelOpen && !folderOpen)
+    val overlayHidesPage = searchOpen || appListOpen || appGridOpen || (isPanelOpen && !folderOpen)
     val pageContentAlpha by animateFloatAsState(
         targetValue = if (overlayHidesPage) 0f else 1f,
         animationSpec = tween(200),
@@ -888,9 +916,14 @@ fun HomeScreen(
     // screen" contract: from either search surface, from plain app overview, and from any other page
     // with nothing open on top - not just closing whatever overlay happens to be up while leaving the
     // pager wherever it already was.
-    BackHandler(enabled = appListOpen && !searchOpen) { returnHome() }
+    BackHandler(enabled = (appListOpen || appGridOpen) && !searchOpen) { returnHome() }
     BackHandler(enabled = searchOpen) { returnHome() }
-    BackHandler(enabled = !appListOpen && !searchOpen && !folderOpen && realIndex(pagerState.currentPage) != homeIndex) { returnHome() }
+    BackHandler(enabled = !appListOpen && !appGridOpen && !searchOpen && !folderOpen && realIndex(pagerState.currentPage) != homeIndex) { returnHome() }
+    // Back first leaves the app list's own search, then the list.
+    BackHandler(enabled = appListOpen && appListSearching && !searchOpen && !folderOpen) {
+        appListSearching = false
+        viewModel.updateAppQuery("")
+    }
     // Back closes an open Panel rather than leaving the app.
     BackHandler(enabled = isPanelOpen) { viewModel.closeOverview() }
     LaunchedEffect(homeButtonPressCount) { if (homeButtonPressCount > 0) returnHome() }
@@ -924,9 +957,14 @@ fun HomeScreen(
         ) {
             BackgroundFill(appOverviewBackground, Modifier.fillMaxSize())
             CompositionLocalProvider(LocalAppIconLoader provides viewModel.iconLoader) {
+              Column(
+                  modifier = Modifier
+                      .fillMaxSize()
+                      .then(if (appListSearching) Modifier.windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars)) else Modifier)
+              ) {
                 AppOverviewContent(
-                    showSearchButton = appListShowSearchButton,
-                    allApps = browsableApps,
+                    showSearchButton = appListShowSearchButton && !appListSearching,
+                    allApps = if (appListSearching && appQuery.isNotBlank()) appQueryResults.sortedBy { it.label.lowercase() } else browsableApps,
                     showAzIndex = appListShowAzIndex,
                     headerLetterAppearance = appListHeaderLetterAppearance,
                     pageBackground = appOverviewBackground,
@@ -941,21 +979,106 @@ fun HomeScreen(
                     },
                     // With a hidden status bar only the display cutout inset remains.
                     modifier = Modifier
-                        .fillMaxSize()
+                        .weight(1f)
+                        .fillMaxWidth()
                         .then(
                             if (immersiveSearch) Modifier.windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top))
                             else Modifier.statusBarsPadding()
                         )
                         .padding(top = 16.dp)
                 )
-                if (appListShowSearchButton) {
+                if (appListSearching) {
+                    com.bisc.flauncher.ui.home.search.AppSearchField(
+                        query = appQuery,
+                        onQueryChange = viewModel::updateAppQuery,
+                        onSubmit = {
+                            appQueryResults.firstOrNull()?.let { app ->
+                                launchApp(context, app.componentName)
+                                viewModel.closeAppList()
+                            }
+                        },
+                        appearance = appListSearchButtonAppearance ?: railAppearance ?: automaticRailAppearance(overviewSurfaceDark),
+                        cornerRadiusPercent = cornerRadiusPercent,
+                        autoOpen = true,
+                        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 16.dp)
+                    )
+                    if (searchKeyboardCapEnabled) {
+                        com.bisc.flauncher.ui.home.search.KeyboardCap(searchKeyboardCapColor, searchKeyboardCapCornerRadiusPercent, searchKeyboardCapArrow)
+                    }
+                }
+              }
+                if (appListShowSearchButton && !appListSearching) {
                     com.bisc.flauncher.ui.home.search.AppOverviewSearchButton(
-                        onClick = { viewModel.openSearch() },
+                        onClick = { if (appListOwnSearch) appListSearching = true else viewModel.openSearch() },
                         handedness = appOverviewHandedness,
                         cornerRadiusPercent = cornerRadiusPercent,
                         appearance = appListSearchButtonAppearance ?: railAppearance ?: automaticRailAppearance(overviewSurfaceDark)
                     )
                 }
+            }
+        }
+    }
+
+    AnimatedVisibility(
+        visible = appGridOpen,
+        modifier = Modifier.fillMaxSize(),
+        enter = fadeIn(tween(110)) + slideInVertically(animationSpec = tween(130)) { it / 8 },
+        exit = fadeOut(tween(110)) + slideOutVertically(animationSpec = tween(130)) { it / 8 }
+    ) {
+        val gridSurfaceDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), appGridBackground)
+        val gridFolders = remember(folders, appGridFolderIds) { appGridFolderIds.mapNotNull { id -> folders.find { it.id == id } } }
+        val gridApps = remember(browsableApps, gridFolders, folderItemsByFolder, appGridHideFolderApps) {
+            if (!appGridHideFolderApps) browsableApps
+            else {
+                val inFolders = gridFolders.flatMap { folderItemsByFolder[it.id].orEmpty() }
+                    .filter { it.type == GridItemType.APP }.map { it.payload }.toSet()
+                browsableApps.filter { it.componentName.flattenToString() !in inFolders }
+            }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {}
+        ) {
+            BackgroundFill(appGridBackground, Modifier.fillMaxSize())
+            CompositionLocalProvider(LocalAppIconLoader provides viewModel.iconLoader) {
+                com.bisc.flauncher.ui.home.search.AppGridContent(
+                    apps = gridApps,
+                    folders = gridFolders,
+                    foldersAlphabetical = appGridFoldersAlphabetical,
+                    folderItemsByFolder = folderItemsByFolder,
+                    query = appQuery,
+                    queryResults = appQueryResults,
+                    columns = appGridColumns,
+                    iconSizeScale = iconSizeScale * appGridIconSizePercent / 100f,
+                    showLabels = appGridShowLabels,
+                    labelColor = com.bisc.flauncher.ui.home.dock.resolveElementColors(
+                        ElementAppearance(fillMode = ElementFillMode.NONE), gridSurfaceDark
+                    ).contentColor,
+                    barPosition = appGridBarPosition,
+                    barOpensTextSearch = appGridBarOpensTextSearch,
+                    keyboardAutoOpen = appGridKeyboardAutoOpen,
+                    barAppearance = appGridBarAppearance ?: automaticRailAppearance(gridSurfaceDark),
+                    cornerRadiusPercent = cornerRadiusPercent,
+                    keyboardCapColor = if (searchKeyboardCapEnabled) searchKeyboardCapColor else null,
+                    keyboardCapCornerRadiusPercent = searchKeyboardCapCornerRadiusPercent,
+                    keyboardCapArrow = searchKeyboardCapArrow,
+                    loadIcon = viewModel::loadIcon,
+                    loadPackIcon = viewModel::loadPackIcon,
+                    onQueryChange = viewModel::updateAppQuery,
+                    onAppClick = { app ->
+                        launchApp(context, app.componentName)
+                        viewModel.closeAppGrid()
+                    },
+                    onFolderClick = viewModel::openFolder,
+                    onOpenTextSearch = viewModel::openSearch,
+                    modifier = Modifier
+                        .then(
+                            if (appGridHideStatusBar) Modifier.windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top))
+                            else Modifier.statusBarsPadding()
+                        )
+                        .padding(top = 16.dp)
+                )
             }
         }
     }

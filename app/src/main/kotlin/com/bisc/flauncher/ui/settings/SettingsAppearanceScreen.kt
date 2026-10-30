@@ -53,7 +53,8 @@ fun SettingsAppearanceScreen(
     val orderedPages = remember(allPages) {
         allPages.filter { it.kind == LauncherPageKind.ROWS }.sortedBy { it.orderIndex } +
             allPages.filter { it.kind == LauncherPageKind.APP_LIST } +
-            allPages.filter { it.kind == LauncherPageKind.SEARCH }
+            allPages.filter { it.kind == LauncherPageKind.SEARCH } +
+            allPages.filter { it.kind == LauncherPageKind.APP_GRID }
     }
     var confirmingTheme by remember { mutableStateOf<ThemePreference?>(null) }
     var accentPickerOpen by remember { mutableStateOf(false) }

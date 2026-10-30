@@ -56,6 +56,7 @@ class PageContentRepository @Inject constructor(
     val pages: Flow<List<LauncherPage>> = allPages.map { list -> list.filter { it.kind == LauncherPageKind.ROWS } }
 
     val appOverviewPageId: Flow<Long?> = allPages.map { list -> list.firstOrNull { it.kind == LauncherPageKind.APP_LIST }?.id }
+    val appGridPageId: Flow<Long?> = allPages.map { list -> list.firstOrNull { it.kind == LauncherPageKind.APP_GRID }?.id }
     val rows: Flow<List<PageRow>> = rowDao.observeAll()
     val rowEntries: Flow<List<RowEntry>> = entryDao.observeAll()
 
@@ -106,6 +107,13 @@ class PageContentRepository @Inject constructor(
                 LauncherPage(orderIndex = (pageDao.maxOrderIndex() ?: -1) + 1, kind = LauncherPageKind.SEARCH)
             )
             settingsRepository.setPageHideStatusBar(searchId, true)
+        }
+
+        if (pageDao.getByKind(LauncherPageKind.APP_GRID) == null) {
+            val gridId = pageDao.insert(
+                LauncherPage(orderIndex = (pageDao.maxOrderIndex() ?: -1) + 1, kind = LauncherPageKind.APP_GRID)
+            )
+            settingsRepository.setPageHideStatusBar(gridId, true)
         }
 
         // Gesture defaults, seeded with real page ids (SettingsRepository knows no page ids).
@@ -245,7 +253,7 @@ class PageContentRepository @Inject constructor(
      *  with it). Returns the deleted rows so the caller can free their system-widget ids, or null
      *  if this page can't be removed (Home and the utility pages). */
     suspend fun removePage(page: LauncherPage): List<PageRow>? {
-        if (page.isHome || page.isAppOverview || page.kind == LauncherPageKind.SEARCH) return null
+        if (page.isHome || page.kind != LauncherPageKind.ROWS) return null
         val rows = rowDao.getForPage(page.id)
         pageDao.delete(page)
         return rows

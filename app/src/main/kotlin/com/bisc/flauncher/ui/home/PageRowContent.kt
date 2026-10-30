@@ -421,7 +421,7 @@ private fun EmptyGridSlotCell(onClick: () -> Unit, iconSizeScale: Float = 1f) {
 }
 
 @Composable
-private fun AppIconCell(
+internal fun AppIconCell(
     payload: String,
     loadIcon: (ComponentName) -> ImageBitmap?,
     resolveLabel: (ComponentName) -> String,
@@ -531,7 +531,7 @@ private fun WebsiteCell(website: PinnedWebsite?, showLabel: Boolean = true, labe
 }
 
 @Composable
-private fun FolderCell(
+internal fun FolderCell(
     folder: Folder?,
     previewItems: List<FolderItem>,
     loadIcon: (ComponentName) -> ImageBitmap?,

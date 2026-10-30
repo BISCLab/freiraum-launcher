@@ -32,6 +32,8 @@ object LauncherSettingsTargets {
             listOf("wischen", "doppeltippen", "lange drücken", "gestures", "swipe", "double tap", "long press")),
         LauncherSettingsTarget(R.string.settings_section_app_overview, "settings/app_overview",
             listOf("app-liste", "a-z", "suchbutton", "app list", "search button")),
+        LauncherSettingsTarget(R.string.settings_pages_app_grid, "settings/app_grid",
+            listOf("app-raster", "raster", "app-drawer", "spalten", "app grid", "grid", "app drawer", "columns")),
         LauncherSettingsTarget(R.string.settings_section_search_full, "settings/search",
             listOf("suche", "suchmaschine", "tastatur", "kategorien", "search", "search engine", "keyboard", "categories")),
         LauncherSettingsTarget(R.string.settings_section_folder, "settings/folder", listOf("ordner", "folders")),

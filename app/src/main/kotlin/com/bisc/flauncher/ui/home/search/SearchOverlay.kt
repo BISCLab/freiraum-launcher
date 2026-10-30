@@ -249,33 +249,40 @@ fun SearchOverlay(
                     // results' bottom edge and fade end at the strip instead of the keyboard itself.
                     // It fades out as soon as the keyboard *starts* closing (the animation target,
                     // not the current inset), riding down with it, so both leave in one motion.
-                    if (keyboardCapColor != null && imeVisible) {
-                        val closing = WindowInsets.imeAnimationTarget.getBottom(LocalDensity.current) == 0
-                        val capAlpha by animateFloatAsState(if (closing) 0f else 1f, tween(150), label = "capAlpha")
-                        val capRadius = KEYBOARD_CAP_HEIGHT * (keyboardCapCornerRadiusPercent.coerceIn(0, 100) / 100f)
-                        val keyboardController = LocalSoftwareKeyboardController.current
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(KEYBOARD_CAP_HEIGHT)
-                                .graphicsLayer { alpha = capAlpha }
-                                .clip(RoundedCornerShape(topStart = capRadius, topEnd = capRadius))
-                                .background(Color(keyboardCapColor))
-                                .then(if (keyboardCapArrow) Modifier.noRippleClickable { keyboardController?.hide() } else Modifier),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (keyboardCapArrow) {
-                                Icon(
-                                    Icons.Filled.KeyboardArrowDown,
-                                    contentDescription = stringResource(R.string.search_keyboard_close),
-                                    tint = if (Color(keyboardCapColor).luminance() > 0.5f) Color.Black.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.6f),
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                        }
-                    }
+                    if (keyboardCapColor != null) KeyboardCap(keyboardCapColor, keyboardCapCornerRadiusPercent, keyboardCapArrow)
                 }
             }
+        }
+    }
+}
+
+/** The colored strip on top of the keyboard (Text search settings), shown while the keyboard is up.
+ *  Place it last in an IME-padded column. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+internal fun KeyboardCap(color: Int, cornerRadiusPercent: Int, arrow: Boolean) {
+    if (!WindowInsets.isImeVisible) return
+    val closing = WindowInsets.imeAnimationTarget.getBottom(LocalDensity.current) == 0
+    val capAlpha by animateFloatAsState(if (closing) 0f else 1f, tween(150), label = "capAlpha")
+    val capRadius = KEYBOARD_CAP_HEIGHT * (cornerRadiusPercent.coerceIn(0, 100) / 100f)
+    val keyboardController = LocalSoftwareKeyboardController.current
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(KEYBOARD_CAP_HEIGHT)
+            .graphicsLayer { alpha = capAlpha }
+            .clip(RoundedCornerShape(topStart = capRadius, topEnd = capRadius))
+            .background(Color(color))
+            .then(if (arrow) Modifier.noRippleClickable { keyboardController?.hide() } else Modifier),
+        contentAlignment = Alignment.Center
+    ) {
+        if (arrow) {
+            Icon(
+                Icons.Filled.KeyboardArrowDown,
+                contentDescription = stringResource(R.string.search_keyboard_close),
+                tint = if (Color(color).luminance() > 0.5f) Color.Black.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.6f),
+                modifier = Modifier.size(16.dp)
+            )
         }
     }
 }

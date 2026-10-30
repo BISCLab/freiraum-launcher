@@ -28,6 +28,7 @@ enum class PageIconGlyph {
             LauncherPageKind.ROWS -> WIDGET_PAGE
             LauncherPageKind.APP_LIST -> APP_LIST
             LauncherPageKind.SEARCH -> SEARCH
+            LauncherPageKind.APP_GRID -> APP_DRAWER
         }
     }
 }

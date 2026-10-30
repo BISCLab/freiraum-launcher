@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import com.bisc.flauncher.data.model.AppGridBarPosition
 import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.BackgroundSource
 import com.bisc.flauncher.data.model.ColorFill
@@ -596,6 +597,85 @@ class SettingsRepository @Inject constructor(
     suspend fun setAppListSearchButtonAppearance(appearance: ElementAppearance) =
         setElementAppearanceFor("app_list_search_button", appearance)
 
+    /** Whether the app list's search button opens its own app-only search instead of Text search. */
+    val appListOwnSearch: Flow<Boolean> = dataStore.data.map { it[APP_LIST_OWN_SEARCH_KEY] ?: false }
+
+    suspend fun setAppListOwnSearch(own: Boolean) {
+        dataStore.edit { it[APP_LIST_OWN_SEARCH_KEY] = own }
+    }
+
+    // ---- App grid page ----
+
+    val appGridColumns: Flow<Int> = dataStore.data.map { (it[APP_GRID_COLUMNS_KEY] ?: 4).coerceIn(3, 6) }
+
+    suspend fun setAppGridColumns(columns: Int) {
+        dataStore.edit { it[APP_GRID_COLUMNS_KEY] = columns.coerceIn(3, 6) }
+    }
+
+    /** Icon size on top of the global one, in percent. */
+    val appGridIconSizePercent: Flow<Int> = dataStore.data.map { (it[APP_GRID_ICON_SIZE_KEY] ?: 100).coerceIn(60, 140) }
+
+    suspend fun setAppGridIconSizePercent(percent: Int) {
+        dataStore.edit { it[APP_GRID_ICON_SIZE_KEY] = percent.coerceIn(60, 140) }
+    }
+
+    val appGridShowLabels: Flow<Boolean> = dataStore.data.map { it[APP_GRID_SHOW_LABELS_KEY] ?: true }
+
+    suspend fun setAppGridShowLabels(show: Boolean) {
+        dataStore.edit { it[APP_GRID_SHOW_LABELS_KEY] = show }
+    }
+
+    val appGridBarPosition: Flow<AppGridBarPosition> = dataStore.data.map { prefs ->
+        prefs[APP_GRID_BAR_POSITION_KEY]?.let { runCatching { AppGridBarPosition.valueOf(it) }.getOrNull() } ?: AppGridBarPosition.BOTTOM
+    }
+
+    suspend fun setAppGridBarPosition(position: AppGridBarPosition) {
+        dataStore.edit { it[APP_GRID_BAR_POSITION_KEY] = position.name }
+    }
+
+    /** Tapping the grid's search field opens Text search instead of filtering the grid. */
+    val appGridBarOpensTextSearch: Flow<Boolean> = dataStore.data.map { it[APP_GRID_BAR_TEXT_SEARCH_KEY] ?: false }
+
+    suspend fun setAppGridBarOpensTextSearch(open: Boolean) {
+        dataStore.edit { it[APP_GRID_BAR_TEXT_SEARCH_KEY] = open }
+    }
+
+    val appGridKeyboardAutoOpen: Flow<Boolean> = dataStore.data.map { it[APP_GRID_KEYBOARD_AUTO_OPEN_KEY] ?: false }
+
+    suspend fun setAppGridKeyboardAutoOpen(open: Boolean) {
+        dataStore.edit { it[APP_GRID_KEYBOARD_AUTO_OPEN_KEY] = open }
+    }
+
+    val appGridBarAppearance: Flow<ElementAppearance?> =
+        customElementAppearanceFor("app_grid_search_bar", ElementAppearance(borderEnabled = true))
+
+    suspend fun setAppGridBarAppearance(appearance: ElementAppearance) = setElementAppearanceFor("app_grid_search_bar", appearance)
+
+    suspend fun resetAppGridBarAppearance() = resetElementAppearanceFor("app_grid_search_bar")
+
+    /** The folders shown on the App grid page, in this order. */
+    val appGridFolderIds: Flow<List<Long>> = dataStore.data.map { prefs ->
+        prefs[APP_GRID_FOLDERS_KEY].orEmpty().split(',').mapNotNull { it.toLongOrNull() }
+    }
+
+    suspend fun setAppGridFolderIds(ids: List<Long>) {
+        dataStore.edit { it[APP_GRID_FOLDERS_KEY] = ids.joinToString(",") }
+    }
+
+    /** Folders sorted in among the apps by name, instead of together at the top. */
+    val appGridFoldersAlphabetical: Flow<Boolean> = dataStore.data.map { it[APP_GRID_FOLDERS_ALPHABETICAL_KEY] ?: false }
+
+    suspend fun setAppGridFoldersAlphabetical(alphabetical: Boolean) {
+        dataStore.edit { it[APP_GRID_FOLDERS_ALPHABETICAL_KEY] = alphabetical }
+    }
+
+    /** Apps inside a shown folder are left out of the grid itself. */
+    val appGridHideFolderApps: Flow<Boolean> = dataStore.data.map { it[APP_GRID_HIDE_FOLDER_APPS_KEY] ?: false }
+
+    suspend fun setAppGridHideFolderApps(hide: Boolean) {
+        dataStore.edit { it[APP_GRID_HIDE_FOLDER_APPS_KEY] = hide }
+    }
+
     suspend fun setAppListShowSearchButton(show: Boolean) {
         dataStore.edit { it[APP_LIST_SHOW_SEARCH_BUTTON_KEY] = show }
     }
@@ -688,5 +768,15 @@ class SettingsRepository @Inject constructor(
         const val DEFAULT_KEYBOARD_CAP_COLOR = 0xFFECEEF4.toInt()
         private const val RAIL_PREFIX = "search_alphabet_rail"
         private val APP_LIST_SHOW_SEARCH_BUTTON_KEY = booleanPreferencesKey("app_list_show_search_button")
+        private val APP_LIST_OWN_SEARCH_KEY = booleanPreferencesKey("app_list_own_search")
+        private val APP_GRID_COLUMNS_KEY = intPreferencesKey("app_grid_columns")
+        private val APP_GRID_ICON_SIZE_KEY = intPreferencesKey("app_grid_icon_size")
+        private val APP_GRID_SHOW_LABELS_KEY = booleanPreferencesKey("app_grid_show_labels")
+        private val APP_GRID_BAR_POSITION_KEY = stringPreferencesKey("app_grid_bar_position")
+        private val APP_GRID_BAR_TEXT_SEARCH_KEY = booleanPreferencesKey("app_grid_bar_text_search")
+        private val APP_GRID_KEYBOARD_AUTO_OPEN_KEY = booleanPreferencesKey("app_grid_keyboard_auto_open")
+        private val APP_GRID_FOLDERS_KEY = stringPreferencesKey("app_grid_folders")
+        private val APP_GRID_FOLDERS_ALPHABETICAL_KEY = booleanPreferencesKey("app_grid_folders_alphabetical")
+        private val APP_GRID_HIDE_FOLDER_APPS_KEY = booleanPreferencesKey("app_grid_hide_folder_apps")
     }
 }

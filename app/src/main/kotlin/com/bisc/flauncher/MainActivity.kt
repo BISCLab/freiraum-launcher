@@ -239,6 +239,8 @@ class MainActivity : ComponentActivity() {
                                             navController.navigate("settings/app_overview")
                                         page.kind == com.bisc.flauncher.data.model.LauncherPageKind.SEARCH ->
                                             navController.navigate("settings/search")
+                                        page.kind == com.bisc.flauncher.data.model.LauncherPageKind.APP_GRID ->
+                                            navController.navigate("settings/app_grid")
                                     }
                                 }
                             )
@@ -434,6 +436,32 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("settings/app_overview/az_index") {
                             com.bisc.flauncher.ui.settings.SettingsAppOverviewAzIndexScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable("settings/app_grid") {
+                            com.bisc.flauncher.ui.settings.SettingsAppGridScreen(
+                                navController = navController,
+                                onBack = { navController.popBackStack() },
+                                onNavigate = { sub -> navController.navigate("settings/app_grid/$sub") }
+                            )
+                        }
+                        composable("settings/app_grid/appearance") {
+                            com.bisc.flauncher.ui.settings.SettingsAppGridAppearanceHubScreen(
+                                navController = navController,
+                                onBack = { navController.popBackStack() },
+                                onNavigate = { sub -> navController.navigate("settings/app_grid/$sub") }
+                            )
+                        }
+                        composable("settings/app_grid/page") {
+                            com.bisc.flauncher.ui.settings.SettingsAppGridPageScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable("settings/app_grid/grid") {
+                            com.bisc.flauncher.ui.settings.SettingsAppGridGridScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable("settings/app_grid/search_field") {
+                            com.bisc.flauncher.ui.settings.SettingsAppGridSearchFieldScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable("settings/app_grid/behavior") {
+                            com.bisc.flauncher.ui.settings.SettingsAppGridBehaviorScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable("settings/permissions") {
                             SettingsPermissionsScreen(navController = navController, onBack = { navController.popBackStack() })

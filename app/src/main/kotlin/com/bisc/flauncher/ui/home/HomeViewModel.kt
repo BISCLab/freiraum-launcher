@@ -26,6 +26,7 @@ import com.bisc.flauncher.data.model.GridConstants
 import com.bisc.flauncher.data.model.GridItemType
 import com.bisc.flauncher.data.model.HomeGesture
 import com.bisc.flauncher.data.model.LauncherPageKind
+import com.bisc.flauncher.data.model.AppGridBarPosition
 import com.bisc.flauncher.data.model.LauncherPage
 import com.bisc.flauncher.data.model.Note
 import com.bisc.flauncher.data.model.NowPlayingInfo
@@ -236,6 +237,7 @@ class HomeViewModel @Inject constructor(
                 when (allPages.value.find { it.id == id }?.kind) {
                     LauncherPageKind.APP_LIST -> openAppList()
                     LauncherPageKind.SEARCH -> openSearch()
+                    LauncherPageKind.APP_GRID -> openAppGrid()
                     else -> onOpenPage(id)
                 }
             }
@@ -329,12 +331,66 @@ class HomeViewModel @Inject constructor(
 
     fun openAppList() {
         _isPanelOpen.value = false
+        _appGridOpen.value = false
+        _appQuery.value = ""
         _appListOpen.value = true
     }
 
     fun closeAppList() {
         _appListOpen.value = false
+        _appQuery.value = ""
     }
+
+    // ---- App grid page ----
+
+    private val _appGridOpen = MutableStateFlow(false)
+    val appGridOpen: StateFlow<Boolean> = _appGridOpen.asStateFlow()
+
+    fun openAppGrid() {
+        _isPanelOpen.value = false
+        _appListOpen.value = false
+        _appQuery.value = ""
+        _appGridOpen.value = true
+    }
+
+    fun closeAppGrid() {
+        _appGridOpen.value = false
+        _appQuery.value = ""
+    }
+
+    val appGridPageId: StateFlow<Long?> =
+        pageContentRepository.appGridPageId.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val appGridColumns: StateFlow<Int> = settingsRepository.appGridColumns.stateIn(viewModelScope, SharingStarted.Eagerly, 4)
+    val appGridIconSizePercent: StateFlow<Int> = settingsRepository.appGridIconSizePercent.stateIn(viewModelScope, SharingStarted.Eagerly, 100)
+    val appGridShowLabels: StateFlow<Boolean> = settingsRepository.appGridShowLabels.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val appGridBarPosition: StateFlow<AppGridBarPosition> =
+        settingsRepository.appGridBarPosition.stateIn(viewModelScope, SharingStarted.Eagerly, AppGridBarPosition.BOTTOM)
+    val appGridBarOpensTextSearch: StateFlow<Boolean> =
+        settingsRepository.appGridBarOpensTextSearch.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val appGridKeyboardAutoOpen: StateFlow<Boolean> =
+        settingsRepository.appGridKeyboardAutoOpen.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val appGridBarAppearance: StateFlow<ElementAppearance?> =
+        settingsRepository.appGridBarAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    val appGridFolderIds: StateFlow<List<Long>> = settingsRepository.appGridFolderIds.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    val appGridFoldersAlphabetical: StateFlow<Boolean> =
+        settingsRepository.appGridFoldersAlphabetical.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val appGridHideFolderApps: StateFlow<Boolean> =
+        settingsRepository.appGridHideFolderApps.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val appListOwnSearch: StateFlow<Boolean> = settingsRepository.appListOwnSearch.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    // The app-only search of the App grid and the app list.
+    private val _appQuery = MutableStateFlow("")
+    val appQuery: StateFlow<String> = _appQuery.asStateFlow()
+
+    fun updateAppQuery(query: String) {
+        _appQuery.value = query
+    }
+
+    val appQueryResults: StateFlow<List<AppInfo>> =
+        combine(_appQuery, labeledApps, appOverrides) { query, apps, overrides ->
+            if (query.isBlank()) emptyList() else matchApps(query, apps, overrides)
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val appOverviewPageId: StateFlow<Long?> =
         pageContentRepository.appOverviewPageId.stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -392,24 +448,24 @@ class HomeViewModel @Inject constructor(
     val searchResults: StateFlow<List<AppInfo>> =
         combine(_searchQuery, labeledApps, appOverrides, activeSearchCategories) { query, apps, overrides, active ->
             val include = SearchCategory.APPS in active
-            if (query.isBlank() || !include) {
-                emptyList()
-            } else {
-                // hiddenFromSearch off the table entirely, code or not - it's the Text-search
-                // toggle itself. Within what's left, SEARCH_CODE *replaces* name matching rather
-                // than adding to it: the app only turns up for the exact code, never by name.
-                val visible = apps.filter { overrides[it.componentName.flattenToString()]?.hiddenFromSearch != true }
-                val nameMatches = visible.filter { app ->
-                    overrides[app.componentName.flattenToString()]?.revealMode != RevealMode.SEARCH_CODE &&
-                        matchesAllWordStarts(app.label, query)
-                }.sortedByDescending { foldForSearch(it.label).startsWith(foldForSearch(query.trim())) }
-                val codeMatches = visible.filter { app ->
-                    val override = overrides[app.componentName.flattenToString()]
-                    override?.revealMode == RevealMode.SEARCH_CODE && override.revealCode == query
-                }
-                (nameMatches + codeMatches).distinctBy { it.componentName }
-            }
+            if (query.isBlank() || !include) emptyList() else matchApps(query, apps, overrides)
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    private fun matchApps(query: String, apps: List<AppInfo>, overrides: Map<String, AppOverride>): List<AppInfo> {
+        // hiddenFromSearch off the table entirely, code or not - it's the Text-search
+        // toggle itself. Within what's left, SEARCH_CODE *replaces* name matching rather
+        // than adding to it: the app only turns up for the exact code, never by name.
+        val visible = apps.filter { overrides[it.componentName.flattenToString()]?.hiddenFromSearch != true }
+        val nameMatches = visible.filter { app ->
+            overrides[app.componentName.flattenToString()]?.revealMode != RevealMode.SEARCH_CODE &&
+                matchesAllWordStarts(app.label, query)
+        }.sortedByDescending { foldForSearch(it.label).startsWith(foldForSearch(query.trim())) }
+        val codeMatches = visible.filter { app ->
+            val override = overrides[app.componentName.flattenToString()]
+            override?.revealMode == RevealMode.SEARCH_CODE && override.revealCode == query
+        }
+        return (nameMatches + codeMatches).distinctBy { it.componentName }
+    }
 
     val calculatorResult: StateFlow<String?> =
         _searchQuery.map { query ->
@@ -710,6 +766,8 @@ class HomeViewModel @Inject constructor(
         _isPanelOpen.value = false
         // The search backdrop is translucent, so the app overview must not stay open behind it.
         _appListOpen.value = false
+        _appGridOpen.value = false
+        _appQuery.value = ""
         _searchOpen.value = true
         _searchFilter.value = null
     }

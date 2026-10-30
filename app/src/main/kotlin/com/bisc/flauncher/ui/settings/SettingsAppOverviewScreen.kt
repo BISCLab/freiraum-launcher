@@ -88,6 +88,7 @@ fun SettingsAppOverviewAppearanceHubScreen(navController: NavController, onBack:
 fun SettingsAppOverviewBehaviorScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val showAzIndex by viewModel.appListShowAzIndex.collectAsState()
     val showSearchButton by viewModel.appListShowSearchButton.collectAsState()
+    val ownSearch by viewModel.appListOwnSearch.collectAsState()
     val handedness by viewModel.appOverviewHandedness.collectAsState()
     SettingsSubScreen(title = stringResource(R.string.settings_search_behavior_label), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup(title = stringResource(R.string.settings_app_overview_alignment_label)) {
@@ -106,6 +107,14 @@ fun SettingsAppOverviewBehaviorScreen(navController: NavController, onBack: () -
                 info = stringResource(R.string.settings_app_list_search_button_summary),
                 onClick = { viewModel.setAppListShowSearchButton(!showSearchButton) },
                 trailing = { Switch(checked = showSearchButton, onCheckedChange = viewModel::setAppListShowSearchButton) }
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_app_list_own_search),
+                info = stringResource(R.string.settings_app_list_own_search_info),
+                enabled = showSearchButton,
+                onClick = { viewModel.setAppListOwnSearch(!ownSearch) },
+                trailing = { Switch(checked = ownSearch, enabled = showSearchButton, onCheckedChange = viewModel::setAppListOwnSearch) }
             )
         }
     }

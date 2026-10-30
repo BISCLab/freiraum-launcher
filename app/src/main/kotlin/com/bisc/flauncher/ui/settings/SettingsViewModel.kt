@@ -13,6 +13,7 @@ import com.bisc.flauncher.data.model.HomeGesture
 import com.bisc.flauncher.data.model.IconPackInfo
 import com.bisc.flauncher.data.model.LauncherPage
 import com.bisc.flauncher.data.model.LauncherPageKind
+import com.bisc.flauncher.data.model.AppGridBarPosition
 import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.RevealMode
@@ -440,6 +441,48 @@ class SettingsViewModel @Inject constructor(
     fun setAppListShowSearchButton(show: Boolean) {
         viewModelScope.launch { repository.setAppListShowSearchButton(show) }
     }
+
+    val appListOwnSearch: StateFlow<Boolean> = repository.appListOwnSearch.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    fun setAppListOwnSearch(own: Boolean) { viewModelScope.launch { repository.setAppListOwnSearch(own) } }
+
+    // ---- App grid page ----
+
+    val appGridColumns: StateFlow<Int> = repository.appGridColumns.stateIn(viewModelScope, SharingStarted.Eagerly, 4)
+    fun setAppGridColumns(columns: Int) { viewModelScope.launch { repository.setAppGridColumns(columns) } }
+
+    val appGridIconSizePercent: StateFlow<Int> = repository.appGridIconSizePercent.stateIn(viewModelScope, SharingStarted.Eagerly, 100)
+    fun setAppGridIconSizePercent(percent: Int) { viewModelScope.launch { repository.setAppGridIconSizePercent(percent) } }
+
+    val appGridShowLabels: StateFlow<Boolean> = repository.appGridShowLabels.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    fun setAppGridShowLabels(show: Boolean) { viewModelScope.launch { repository.setAppGridShowLabels(show) } }
+
+    val appGridBarPosition: StateFlow<AppGridBarPosition> =
+        repository.appGridBarPosition.stateIn(viewModelScope, SharingStarted.Eagerly, AppGridBarPosition.BOTTOM)
+    fun setAppGridBarPosition(position: AppGridBarPosition) { viewModelScope.launch { repository.setAppGridBarPosition(position) } }
+
+    val appGridBarOpensTextSearch: StateFlow<Boolean> =
+        repository.appGridBarOpensTextSearch.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    fun setAppGridBarOpensTextSearch(open: Boolean) { viewModelScope.launch { repository.setAppGridBarOpensTextSearch(open) } }
+
+    val appGridKeyboardAutoOpen: StateFlow<Boolean> =
+        repository.appGridKeyboardAutoOpen.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    fun setAppGridKeyboardAutoOpen(open: Boolean) { viewModelScope.launch { repository.setAppGridKeyboardAutoOpen(open) } }
+
+    val appGridBarAppearance: StateFlow<ElementAppearance?> =
+        repository.appGridBarAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    fun setAppGridBarAppearance(appearance: ElementAppearance) { viewModelScope.launch { repository.setAppGridBarAppearance(appearance) } }
+    fun resetAppGridBarAppearance() { viewModelScope.launch { repository.resetAppGridBarAppearance() } }
+
+    val appGridFolderIds: StateFlow<List<Long>> = repository.appGridFolderIds.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    fun setAppGridFolderIds(ids: List<Long>) { viewModelScope.launch { repository.setAppGridFolderIds(ids) } }
+
+    val appGridFoldersAlphabetical: StateFlow<Boolean> =
+        repository.appGridFoldersAlphabetical.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    fun setAppGridFoldersAlphabetical(alphabetical: Boolean) { viewModelScope.launch { repository.setAppGridFoldersAlphabetical(alphabetical) } }
+
+    val appGridHideFolderApps: StateFlow<Boolean> =
+        repository.appGridHideFolderApps.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    fun setAppGridHideFolderApps(hide: Boolean) { viewModelScope.launch { repository.setAppGridHideFolderApps(hide) } }
 
     /** Own colors of the two accented surfaces; null = follow [accentColor]. */
     val chargingAnimationColor: StateFlow<Int?> =
