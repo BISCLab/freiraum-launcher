@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Search categories can be removed entirely, so they are neither searched nor shown in the search bar; removed ones can be added back
+- The search bar's category symbols always fit side by side across the whole bar, without scrolling
+
 ## 0.4.0
 
 - New utility page "App grid": all apps in a grid (3 to 6 columns, icon size, app names on or off),

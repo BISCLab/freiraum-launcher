@@ -233,6 +233,18 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[searchIncludeKey(category.storageKey)] = include }
     }
 
+    /** Categories removed entirely: not searched and not shown in the search bar. */
+    val searchRemoved: Flow<Set<SearchCategory>> = dataStore.data.map { prefs ->
+        prefs[SEARCH_REMOVED_KEY].orEmpty().split(',').mapNotNull { name -> SearchCategory.entries.firstOrNull { it.name == name } }.toSet()
+    }
+
+    suspend fun setSearchRemoved(category: SearchCategory, removed: Boolean) {
+        dataStore.edit { prefs ->
+            val current = prefs[SEARCH_REMOVED_KEY].orEmpty().split(',').filter { it.isNotBlank() }.toSet()
+            prefs[SEARCH_REMOVED_KEY] = (if (removed) current + category.name else current - category.name).joinToString(",")
+        }
+    }
+
     val searchCategoryOrder: Flow<List<SearchCategory>> = dataStore.data.map { prefs ->
         // Categories that were split later replace their old entry in place.
         val names = prefs[SEARCH_CATEGORY_ORDER_KEY].orEmpty().split(',')
@@ -745,6 +757,7 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_ENGINE_KEY = stringPreferencesKey("search_engine")
         private val SEARCH_ENGINE_CUSTOM_URL_KEY = stringPreferencesKey("search_engine_custom_url")
         private val SEARCH_CATEGORY_ORDER_KEY = stringPreferencesKey("search_category_order")
+        private val SEARCH_REMOVED_KEY = stringPreferencesKey("search_removed_categories")
         private val SEARCH_AI_APP_KEY = stringPreferencesKey("search_ai_app")
         private val SEARCH_BROWSER_APP_KEY = stringPreferencesKey("search_browser_app")
         private val SEARCH_MAPS_APP_KEY = stringPreferencesKey("search_maps_app")

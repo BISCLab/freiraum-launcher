@@ -410,6 +410,12 @@ class SettingsViewModel @Inject constructor(
         repository.searchIncluded.stateIn(viewModelScope, SharingStarted.Eagerly, SearchCategory.entries.toSet())
     val searchCategoryOrder: StateFlow<List<SearchCategory>> =
         repository.searchCategoryOrder.stateIn(viewModelScope, SharingStarted.Eagerly, SearchCategory.entries)
+    val searchRemoved: StateFlow<Set<SearchCategory>> =
+        repository.searchRemoved.stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
+
+    fun setSearchRemoved(category: SearchCategory, removed: Boolean) {
+        viewModelScope.launch { repository.setSearchRemoved(category, removed) }
+    }
     val categoryColors: StateFlow<Map<SearchCategory, Int?>> =
         combine(SearchCategory.entries.map { c -> repository.categoryColor(c).map { color -> c to color } }) { pairs -> pairs.toMap() }
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())

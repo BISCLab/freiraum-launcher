@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -209,6 +211,7 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
     val context = androidx.compose.ui.platform.LocalContext.current
     val included by viewModel.searchIncluded.collectAsState()
     val categoryOrder by viewModel.searchCategoryOrder.collectAsState()
+    val removedCategories by viewModel.searchRemoved.collectAsState()
     val categoryColors by viewModel.categoryColors.collectAsState()
     val aiAppPackage by viewModel.searchAiApp.collectAsState()
     val installedApps by viewModel.browsableApps.collectAsState()
@@ -261,9 +264,10 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
             info = stringResource(R.string.settings_search_categories_info)
         ) {
             ReorderableList(
-                items = categoryOrder,
+                items = categoryOrder.filter { it !in removedCategories },
                 key = { it },
-                onReorder = viewModel::setSearchCategoryOrder
+                // Removed categories keep their place at the end of the saved order.
+                onReorder = { reordered -> viewModel.setSearchCategoryOrder(reordered + categoryOrder.filter { it in removedCategories }) }
             ) { category ->
                 val color = categoryColors[category]?.let { Color(it) } ?: category.defaultColor
                 Row(
@@ -279,6 +283,35 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
                     )
                     Text(stringResource(category.settingsLabelRes), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                     Switch(checked = category in included, onCheckedChange = { viewModel.setSearchIncluded(category, it) })
+                    androidx.compose.material3.IconButton(onClick = { viewModel.setSearchRemoved(category, true) }, modifier = Modifier.size(32.dp)) {
+                        Icon(
+                            androidx.compose.material.icons.Icons.Filled.Close,
+                            contentDescription = stringResource(R.string.settings_search_category_remove),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+        val removedInOrder = categoryOrder.filter { it in removedCategories }
+        if (removedInOrder.isNotEmpty()) {
+            SettingsPreferenceGroup(
+                title = stringResource(R.string.settings_search_categories_removed_label),
+                info = stringResource(R.string.settings_search_categories_removed_info)
+            ) {
+                removedInOrder.forEach { category ->
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(category.settingsLabelRes),
+                        onClick = { viewModel.setSearchRemoved(category, false) },
+                        trailing = {
+                            Icon(
+                                androidx.compose.material.icons.Icons.Filled.Add,
+                                contentDescription = stringResource(R.string.settings_search_category_restore),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    )
                 }
             }
         }

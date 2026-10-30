@@ -622,4 +622,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_app_grid_hide_folder_apps">Apps aus diesen Ordnern ausblenden</string>
     <string name="settings_app_list_own_search">Eigene App-Suche</string>
     <string name="settings_app_list_own_search_info">Der Suchbutton öffnet eine Suche nur nach Apps direkt in der Liste statt der Textsuche.</string>
+    <string name="settings_search_category_remove">Kategorie entfernen</string>
+    <string name="settings_search_category_restore">Wieder hinzufügen</string>
+    <string name="settings_search_categories_removed_label">Entfernt</string>
+    <string name="settings_search_categories_removed_info">Entfernte Kategorien werden nicht durchsucht und erscheinen nicht in der Suchleiste. Tippe eine an, um sie zurückzuholen.</string>
 </resources>

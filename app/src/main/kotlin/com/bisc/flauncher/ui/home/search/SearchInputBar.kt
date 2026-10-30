@@ -57,7 +57,6 @@ import com.bisc.flauncher.ui.theme.noRippleClickable
 
 private val ROW_HEIGHT = 56.dp
 private val FILTER_CHIP_SIZE = 36.dp
-private val FILTER_CHIP_GAP = 6.dp
 
 /**
  * Search field + category filter row as one element: a single rounded frame, two internally
@@ -182,10 +181,12 @@ private fun CategoryFilterRow(
     onSelect: (SearchCategory) -> Unit
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val fits = maxWidth >= FILTER_CHIP_SIZE * categories.size + FILTER_CHIP_GAP * (categories.size - 1)
+        // All symbols always fit side by side across the whole bar: the gaps shrink first, the
+        // symbols themselves only once there's no gap left.
+        val chipSize = if (categories.isEmpty()) FILTER_CHIP_SIZE else minOf(FILTER_CHIP_SIZE, maxWidth / categories.size)
         Row(
-            modifier = Modifier.fillMaxWidth().then(if (fits) Modifier else Modifier.horizontalScroll(rememberScrollState())),
-            horizontalArrangement = if (fits) Arrangement.SpaceEvenly else Arrangement.spacedBy(FILTER_CHIP_GAP),
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             categories.forEach { category ->
@@ -195,6 +196,7 @@ private fun CategoryFilterRow(
                     contentDescription = stringResource(category.filterLabelRes),
                     selected = category == selected,
                     anySelected = selected != null,
+                    size = chipSize,
                     onClick = { onSelect(category) }
                 )
             }
@@ -209,11 +211,12 @@ private fun CategoryFilterChip(
     contentDescription: String,
     selected: Boolean,
     anySelected: Boolean,
+    size: Dp,
     onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
-            .size(FILTER_CHIP_SIZE)
+            .size(size)
             .clip(CircleShape)
             .background(color.copy(alpha = if (selected) 0.22f else 0f))
             .noRippleClickable(onClick = onClick),

@@ -622,4 +622,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_app_grid_hide_folder_apps">Hide apps that are in these folders</string>
     <string name="settings_app_list_own_search">Own app search</string>
     <string name="settings_app_list_own_search_info">The search button opens a search for apps right in the list instead of Text search.</string>
+    <string name="settings_search_category_remove">Remove category</string>
+    <string name="settings_search_category_restore">Add back</string>
+    <string name="settings_search_categories_removed_label">Removed</string>
+    <string name="settings_search_categories_removed_info">Removed categories are not searched and don\'t appear in the search bar. Tap one to add it back.</string>
 </resources>

@@ -411,8 +411,13 @@ class HomeViewModel @Inject constructor(
 
     private val searchIncluded: StateFlow<Set<SearchCategory>> =
         settingsRepository.searchIncluded.stateIn(viewModelScope, SharingStarted.Eagerly, SearchCategory.entries.toSet())
+    private val searchRemoved: StateFlow<Set<SearchCategory>> =
+        settingsRepository.searchRemoved.stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
+
+    /** The search bar's categories in order, without the removed ones. */
     val searchCategoryOrder: StateFlow<List<SearchCategory>> =
-        settingsRepository.searchCategoryOrder.stateIn(viewModelScope, SharingStarted.Eagerly, SearchCategory.entries)
+        combine(settingsRepository.searchCategoryOrder, searchRemoved) { order, removed -> order.filter { it !in removed } }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, SearchCategory.entries)
 
     /** Per-category icon color overrides (null entries fall back to [com.bisc.flauncher.ui.home.search.defaultColor]). */
     val categoryColors: StateFlow<Map<SearchCategory, Int?>> =
@@ -430,7 +435,7 @@ class HomeViewModel @Inject constructor(
     val searchFilter: StateFlow<SearchCategory?> = _searchFilter.asStateFlow()
 
     val activeSearchCategories: StateFlow<Set<SearchCategory>> =
-        combine(_searchFilter, searchIncluded) { filter, included -> filter?.let { setOf(it) } ?: included }
+        combine(_searchFilter, searchIncluded, searchRemoved) { filter, included, removed -> (filter?.let { setOf(it) } ?: included) - removed }
             .stateIn(viewModelScope, SharingStarted.Eagerly, SearchCategory.entries.toSet())
 
     fun toggleSearchFilter(category: SearchCategory) {
