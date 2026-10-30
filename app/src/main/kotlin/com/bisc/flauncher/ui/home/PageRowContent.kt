@@ -926,10 +926,7 @@ private fun GridLabel(text: String, color: Color = Color.White, modifier: Modifi
         overflow = TextOverflow.Ellipsis,
         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
         modifier = modifier,
-        style = MaterialTheme.typography.labelSmall.copy(
-            color = color,
-            shadow = Shadow(color = Color.Black, blurRadius = 6f, offset = Offset(0f, 1f))
-        )
+        style = MaterialTheme.typography.labelSmall.copy(color = color)
     )
 }
 

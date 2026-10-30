@@ -2,6 +2,11 @@ package com.bisc.flauncher.ui.home.search
 
 import android.content.ComponentName
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -108,33 +113,47 @@ fun AppGridContent(
 
     Column(modifier = modifier.fillMaxSize().windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))) {
         if (barPosition == AppGridBarPosition.TOP) Bar(Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(columns),
-            modifier = Modifier.weight(1f).fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(entries, key = { it.key }) { entry ->
-                when (entry) {
-                    is GridEntry.App -> AppIconCell(
-                        payload = entry.app.componentName.flattenToString(),
-                        loadIcon = loadIcon,
-                        resolveLabel = { entry.app.label },
-                        showLabel = showLabels,
-                        labelColor = labelColor,
-                        iconSizeScale = iconSizeScale,
-                        onClickOverride = { onAppClick(entry.app) }
-                    )
-                    is GridEntry.FolderEntry -> FolderCell(
-                        folder = entry.folder,
-                        previewItems = folderItemsByFolder[entry.folder.id].orEmpty(),
-                        loadIcon = loadIcon,
-                        loadPackIcon = loadPackIcon,
-                        onClick = { onFolderClick(entry.folder.id) },
-                        showLabel = showLabels,
-                        labelColor = labelColor,
-                        iconSizeScale = iconSizeScale
-                    )
+        BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            val gridState = rememberLazyGridState()
+            val fadeStart = (1f - FADE_TRANSITION_DISTANCE / maxHeight).coerceIn(0f, 1f)
+            val canScrollFurther by remember { derivedStateOf { gridState.canScrollForward } }
+            val topFadePx = with(LocalDensity.current) { TOP_FADE_HEIGHT.toPx() }
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(columns),
+                state = gridState,
+                // Same edge fades as Text search: toward the bottom while there's more to scroll, toward
+                // the top once scrolled away from it - so the side with the search field always fades.
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(if (canScrollFurther) Modifier.fadeBackgroundToBottom(fadeStart, 1f) else Modifier)
+                    .fadeListTop(TOP_FADE_HEIGHT) {
+                        if (gridState.firstVisibleItemIndex > 0) 1f else (gridState.firstVisibleItemScrollOffset / topFadePx).coerceIn(0f, 1f)
+                    },
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(entries, key = { it.key }, contentType = { it::class }) { entry ->
+                    when (entry) {
+                        is GridEntry.App -> AppIconCell(
+                            payload = entry.app.componentName.flattenToString(),
+                            loadIcon = loadIcon,
+                            resolveLabel = { entry.app.label },
+                            showLabel = showLabels,
+                            labelColor = labelColor,
+                            iconSizeScale = iconSizeScale,
+                            onClickOverride = { onAppClick(entry.app) }
+                        )
+                        is GridEntry.FolderEntry -> FolderCell(
+                            folder = entry.folder,
+                            previewItems = folderItemsByFolder[entry.folder.id].orEmpty(),
+                            loadIcon = loadIcon,
+                            loadPackIcon = loadPackIcon,
+                            onClick = { onFolderClick(entry.folder.id) },
+                            showLabel = showLabels,
+                            labelColor = labelColor,
+                            iconSizeScale = iconSizeScale
+                        )
+                    }
                 }
             }
         }
