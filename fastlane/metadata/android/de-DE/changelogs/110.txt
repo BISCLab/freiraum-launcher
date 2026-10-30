@@ -1,0 +1,7 @@
+- Suche findet viel mehr Systemeinstellungen, auch über Stichwörter
+- Neue Suchkategorie für Freiraums eigene Einstellungen
+- Kontakte über Wortanfang, Telefonnummer in jedem Format und E-Mail-Adresse
+- Shortcuts aller installierten Apps, Links über ihre Webadresse
+- Mehrere Wörter in beliebiger Reihenfolge; Akzente und Umlaute egal
+- Orte über Wortanfang von Name oder Adresse
+- Suchleiste näher an der Frontkamera; ihre Linien einzeln abschaltbar

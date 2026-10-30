@@ -19,8 +19,8 @@ libraries.
 - **Folders** – apps, links, contacts and widgets (including Android app widgets)
 - **App list** – alphabetical, with a fast-scroll A–Z index; apps can be renamed, hidden from the
   list or search, or revealed only by a search code
-- **Text search** – apps, folders, contacts, settings, shortcuts, links and addresses, with web,
-  maps, e-mail and calculator commands
+- **Text search** – apps, folders, contacts, system and launcher settings, shortcuts, links and
+  places, with web, maps and calculator commands
 - **Appearance** – light/dark mode, accent color, corner shapes, icon packs, and fill, border and
   text color for every element
 - **Gestures** – swipe up/down, double tap and long press, each assignable

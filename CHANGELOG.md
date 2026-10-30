@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.3.0
+
 - Text search:
   - Many more system settings (e.g. airplane mode, hotspot, notifications, dark theme, keyboard),
     found by what you look for ("brightness" finds Display); only those your phone offers are shown

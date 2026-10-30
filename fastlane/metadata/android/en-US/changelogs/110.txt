@@ -1,0 +1,7 @@
+- Search finds many more system settings, by what you look for
+- New search category for Freiraum's own settings
+- Contacts by word start, phone number in any format and e-mail address
+- Shortcuts of all installed apps, links by web address
+- Several words in any order; accents and umlauts ignored
+- Places by word start of name or address
+- Search bar closer to the front camera; its lines can be switched off separately
