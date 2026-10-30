@@ -100,6 +100,8 @@ fun SearchOverlay(
     keyboardCapCornerRadiusPercent: Int = 100,
     /** Shows a small arrow in the strip and makes tapping the strip close the keyboard. */
     keyboardCapArrow: Boolean = false,
+    /** The thin lines above and below the search field (search bar settings). */
+    barDividers: Boolean = true,
     statusBarHidden: Boolean,
     categoryOrder: List<SearchCategory>,
     activeCategories: Set<SearchCategory>,
@@ -177,8 +179,10 @@ fun SearchOverlay(
             // The top inset goes *inside* the input bar (its background fills it up to the screen
             // edge, like the Panel), not around it. Even with the status bar logically hidden, real
             // hardware still has a physical camera cutout/notch.
+            val cameraGap = rememberCameraGap()
             val topInset = if (statusBarHidden) {
-                WindowInsets.displayCutout.only(WindowInsetsSides.Top).asPaddingValues().calculateTopPadding() + 16.dp
+                // As much space below the camera as there is above it, when the cutout says where it is.
+                cameraGap ?: (WindowInsets.displayCutout.only(WindowInsetsSides.Top).asPaddingValues().calculateTopPadding() + 16.dp)
             } else {
                 WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
             }
@@ -201,7 +205,8 @@ fun SearchOverlay(
                         selectedCategory = categoryFilter,
                         onToggleCategory = onToggleFilter,
                         cornerRadiusPercent = barCornerRadiusPercent ?: cornerRadiusPercent,
-                        topInset = topInset
+                        topInset = topInset,
+                        showDividers = barDividers
                     )
                     SearchResultsColumn(
                         query = query,
@@ -274,3 +279,17 @@ fun SearchOverlay(
 }
 
 private val KEYBOARD_CAP_HEIGHT = 20.dp
+
+/** The space the search bar keeps at the top so that below the front camera there is as much room
+ *  as above it: the camera's distance from the top edge, twice, plus the camera itself. Null when the
+ *  display reports no camera cutout at the top (or before Android 9). */
+@Composable
+private fun rememberCameraGap(): androidx.compose.ui.unit.Dp? {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.P) return null
+    val view = androidx.compose.ui.platform.LocalView.current
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val cutout = view.rootWindowInsets?.displayCutout ?: return null
+    val camera = cutout.boundingRects.filter { it.top < view.height / 4 && !it.isEmpty }.minByOrNull { it.top } ?: return null
+    // A notch reaching the top edge has no gap above it to mirror — keep a small one below then.
+    return with(density) { if (camera.top > 0) (camera.bottom + camera.top).toDp() else camera.bottom.toDp() + 8.dp }
+}

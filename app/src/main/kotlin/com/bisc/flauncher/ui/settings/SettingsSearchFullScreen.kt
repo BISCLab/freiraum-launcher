@@ -381,6 +381,7 @@ fun SettingsSearchElementScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val resultsEdgeToEdge by viewModel.searchResultsEdgeToEdge.collectAsState()
+    val barDividers by viewModel.searchBarDividers.collectAsState()
     SettingsSubScreen(title = stringResource(element.titleRes), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
             SettingsPreference(
@@ -395,6 +396,16 @@ fun SettingsSearchElementScreen(
                 onClick = { onNavigate("border") },
                 trailing = null
             )
+        }
+        if (element == SearchElement.BAR) {
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_search_bar_dividers_label)) {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_search_bar_dividers),
+                    onClick = { viewModel.setSearchBarDividers(!barDividers) },
+                    trailing = { Switch(checked = barDividers, onCheckedChange = viewModel::setSearchBarDividers) }
+                )
+            }
         }
         // The bar always spans the full width (it's flush with the screen top like the Panel);
         // only the cards have a side margin to switch off.

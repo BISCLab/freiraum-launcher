@@ -14,6 +14,8 @@
   - Every category matches several words in any order (e.g. "klee 23") and ignores accents, umlauts
     and ß ("uber" finds "Über")
   - Places are found from the start of each word of their name or address
+  - The search bar sits closer to the front camera (as much space below it as above), leaving more
+    room for results; its lines above and below the field can be switched off
 
 ## 0.2.0
 

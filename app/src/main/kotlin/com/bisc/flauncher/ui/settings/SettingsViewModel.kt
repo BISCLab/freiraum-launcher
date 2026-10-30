@@ -650,6 +650,13 @@ class SettingsViewModel @Inject constructor(
     val searchResultsEdgeToEdge: StateFlow<Boolean> =
         repository.searchResultsEdgeToEdge.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    val searchBarDividers: StateFlow<Boolean> =
+        repository.searchBarDividers.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    fun setSearchBarDividers(show: Boolean) {
+        viewModelScope.launch { repository.setSearchBarDividers(show) }
+    }
+
     fun setSearchResultsEdgeToEdge(edgeToEdge: Boolean) {
         viewModelScope.launch { repository.setSearchResultsEdgeToEdge(edgeToEdge) }
     }

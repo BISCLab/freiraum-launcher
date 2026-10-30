@@ -86,7 +86,9 @@ fun SearchInputBar(
     modifier: Modifier = Modifier,
     /** Space above the input row that the bar's own background still fills — lets the bar reach
      *  the screen's top edge (like the Panel) while its content stays below the status bar. */
-    topInset: Dp = 0.dp
+    topInset: Dp = 0.dp,
+    /** The thin lines above and below the input row. */
+    showDividers: Boolean = true
 ) {
     val colors = resolveElementColors(appearance)
     val focusRequester = remember { FocusRequester() }
@@ -119,7 +121,7 @@ fun SearchInputBar(
         ) {
                 // Same divider as the one between the field and the categories, so the field row
                 // sits framed between two lines.
-                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(colors.dividerColor.copy(alpha = 0.15f)))
+                if (showDividers) Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(colors.dividerColor.copy(alpha = 0.15f)))
                 Row(
                     modifier = Modifier.fillMaxWidth().height(ROW_HEIGHT).padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -154,7 +156,7 @@ fun SearchInputBar(
                         Icon(Icons.Filled.Home, contentDescription = stringResource(R.string.search_action_home))
                     }
                 }
-                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(colors.dividerColor.copy(alpha = 0.15f)))
+                if (showDividers) Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(colors.dividerColor.copy(alpha = 0.15f)))
                 Row(
                     modifier = Modifier.fillMaxWidth().height(ROW_HEIGHT).padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically

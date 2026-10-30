@@ -161,6 +161,13 @@ class SettingsRepository @Inject constructor(
     suspend fun resetSearchResultsAppearance() = resetElementAppearanceFor(SEARCH_RESULTS_PREFIX)
 
     /** Off by default: the cards keep the same fine side margin as every other element. */
+    /** Whether the search bar shows its thin lines above and below the input row. */
+    val searchBarDividers: Flow<Boolean> = dataStore.data.map { it[SEARCH_BAR_DIVIDERS_KEY] ?: true }
+
+    suspend fun setSearchBarDividers(show: Boolean) {
+        dataStore.edit { it[SEARCH_BAR_DIVIDERS_KEY] = show }
+    }
+
     val searchResultsEdgeToEdge: Flow<Boolean> = dataStore.data.map { it[SEARCH_RESULTS_EDGE_TO_EDGE_KEY] ?: false }
 
     suspend fun setSearchResultsEdgeToEdge(edgeToEdge: Boolean) {
@@ -663,6 +670,7 @@ class SettingsRepository @Inject constructor(
         private const val SEARCH_RESULTS_PREFIX = "search_results"
         private val SEARCH_RESULTS_CORNER_RADIUS_KEY = intPreferencesKey("search_results_corner_radius_percent")
         private val SEARCH_RESULTS_EDGE_TO_EDGE_KEY = booleanPreferencesKey("search_results_edge_to_edge")
+        private val SEARCH_BAR_DIVIDERS_KEY = booleanPreferencesKey("search_bar_dividers")
         private val SEARCH_KEYBOARD_CAP_ENABLED_KEY = booleanPreferencesKey("search_keyboard_cap_enabled")
         private val SEARCH_KEYBOARD_CAP_COLOR_KEY = intPreferencesKey("search_keyboard_cap_color")
         private val SEARCH_KEYBOARD_CAP_CORNER_RADIUS_KEY = intPreferencesKey("search_keyboard_cap_corner_radius_percent")
