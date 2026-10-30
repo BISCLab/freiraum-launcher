@@ -100,8 +100,9 @@ fun SearchOverlay(
     keyboardCapCornerRadiusPercent: Int = 100,
     /** Shows a small arrow in the strip and makes tapping the strip close the keyboard. */
     keyboardCapArrow: Boolean = false,
-    /** The thin lines above and below the search field (search bar settings). */
-    barDividers: Boolean = true,
+    /** The thin lines above the search field and between it and the categories (search bar settings). */
+    barTopLine: Boolean = true,
+    barMiddleLine: Boolean = true,
     statusBarHidden: Boolean,
     categoryOrder: List<SearchCategory>,
     activeCategories: Set<SearchCategory>,
@@ -206,7 +207,8 @@ fun SearchOverlay(
                         onToggleCategory = onToggleFilter,
                         cornerRadiusPercent = barCornerRadiusPercent ?: cornerRadiusPercent,
                         topInset = topInset,
-                        showDividers = barDividers
+                        showTopLine = barTopLine,
+                        showMiddleLine = barMiddleLine
                     )
                     SearchResultsColumn(
                         query = query,

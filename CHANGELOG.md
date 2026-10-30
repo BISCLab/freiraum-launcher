@@ -15,7 +15,7 @@
     and ß ("uber" finds "Über")
   - Places are found from the start of each word of their name or address
   - The search bar sits closer to the front camera (as much space below it as above), leaving more
-    room for results; its lines above and below the field can be switched off
+    room for results; the lines above and below the field can each be switched off
 
 ## 0.2.0
 

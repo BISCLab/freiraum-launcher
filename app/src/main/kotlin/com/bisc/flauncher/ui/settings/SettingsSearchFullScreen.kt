@@ -381,7 +381,8 @@ fun SettingsSearchElementScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val resultsEdgeToEdge by viewModel.searchResultsEdgeToEdge.collectAsState()
-    val barDividers by viewModel.searchBarDividers.collectAsState()
+    val barTopLine by viewModel.searchBarTopLine.collectAsState()
+    val barMiddleLine by viewModel.searchBarMiddleLine.collectAsState()
     SettingsSubScreen(title = stringResource(element.titleRes), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
             SettingsPreference(
@@ -401,9 +402,15 @@ fun SettingsSearchElementScreen(
             SettingsPreferenceGroup(title = stringResource(R.string.settings_search_bar_dividers_label)) {
                 SettingsPreference(
                     icon = null,
-                    title = stringResource(R.string.settings_search_bar_dividers),
-                    onClick = { viewModel.setSearchBarDividers(!barDividers) },
-                    trailing = { Switch(checked = barDividers, onCheckedChange = viewModel::setSearchBarDividers) }
+                    title = stringResource(R.string.settings_search_bar_top_line),
+                    onClick = { viewModel.setSearchBarTopLine(!barTopLine) },
+                    trailing = { Switch(checked = barTopLine, onCheckedChange = viewModel::setSearchBarTopLine) }
+                )
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_search_bar_middle_line),
+                    onClick = { viewModel.setSearchBarMiddleLine(!barMiddleLine) },
+                    trailing = { Switch(checked = barMiddleLine, onCheckedChange = viewModel::setSearchBarMiddleLine) }
                 )
             }
         }

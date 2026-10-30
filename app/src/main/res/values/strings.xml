@@ -596,5 +596,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="search_section_launcher_settings">Freiraum settings</string>
     <string name="contact_action_email">Send e-mail</string>
     <string name="settings_search_bar_dividers_label">Lines</string>
-    <string name="settings_search_bar_dividers">Lines above and below the search field</string>
+    <string name="settings_search_bar_top_line">Line above the search field</string>
+    <string name="settings_search_bar_middle_line">Line below the search field</string>
 </resources>
