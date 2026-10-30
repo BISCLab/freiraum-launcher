@@ -70,7 +70,7 @@ import kotlinx.coroutines.launch
 /**
  * Two distinct groups: a horizontal carousel preview of the swipeable ROWS pages (Home always
  * centered, a "+" ghost tile on each end to add a page in that direction), and below it the pages
- * that don't swipe at all (App overview, Text search — singletons reached by link or gesture
+ * that don't swipe at all (App overview, Text search - singletons reached by link or gesture
  * rather than by paging).
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -118,7 +118,7 @@ fun SettingsPagesScreen(
             )
         }
 
-        // App list and Text search don't swipe — set apart in their own row of the same tiles.
+        // App list and Text search don't swipe - set apart in their own row of the same tiles.
         // Their icon and name live in their own Appearance → Page screen.
         SettingsGroupLabel(stringResource(R.string.settings_pages_other_label))
         UtilityPagesRow(
@@ -128,7 +128,7 @@ fun SettingsPagesScreen(
             onTileClick = onOpenPage
         )
 
-        // Gestures live here, not as their own top-level entry — they're page/navigation behavior.
+        // Gestures live here, not as their own top-level entry - they're page/navigation behavior.
         // They're the only place a gesture is assigned; the page tiles above just show it.
         SettingsPreferenceGroup(title = stringResource(R.string.settings_pages_behavior_label)) {
             SettingsPreference(
@@ -146,7 +146,7 @@ fun SettingsPagesScreen(
                 coroutineScope.launch {
                     val newId = viewModel.addPageInDirection(direction)
                     pickingTemplateForDirection = null
-                    // Built directly from the returned id rather than looked up in `allPages` — that
+                    // Built directly from the returned id rather than looked up in `allPages` - that
                     // state won't have recomposed with the new row yet at this exact point, and
                     // onOpenPage only ever reads .id/.kind for routing (see MainActivity's dispatch),
                     // so a minimal synthetic object is both correct and simpler than waiting on it.
@@ -216,7 +216,7 @@ internal fun PageIdentityRows(page: LauncherPage, pages: List<LauncherPage>, onO
 }
 
 /** Icon and name of a utility page (App list, Text search), as its own card at the top of its
- *  Appearance → Page screen — the same rows a carousel page has in its Appearance screen. */
+ *  Appearance → Page screen - the same rows a carousel page has in its Appearance screen. */
 @Composable
 internal fun UtilityPageIdentityGroup(kind: LauncherPageKind, navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
     val allPages by viewModel.allPages.collectAsState()
@@ -231,7 +231,7 @@ internal fun UtilityPageIdentityGroup(kind: LauncherPageKind, navController: Nav
     }
 }
 
-/** "Remove page" at the bottom of a removable page's settings — asks first, since everything on
+/** "Remove page" at the bottom of a removable page's settings - asks first, since everything on
  *  the page goes with it. */
 @Composable
 internal fun RemovePageGroup(label: String, onRemove: () -> Unit) {
@@ -253,7 +253,7 @@ internal fun RemovePageGroup(label: String, onRemove: () -> Unit) {
     }
 }
 
-/** Width:height of a real phone screen, not an icon swatch — this is what makes a carousel tile
+/** Width:height of a real phone screen, not an icon swatch - this is what makes a carousel tile
  *  read as "a screen" instead of just another app-icon-sized button. */
 private const val SCREEN_ASPECT_RATIO = 0.47f
 private val CAROUSEL_OUTER_PADDING = 16.dp
@@ -289,7 +289,7 @@ private fun PagesCarousel(
         }
     }
     // Sized so exactly 3 tiles (Home plus one ghost "+" on each side, the common case with no
-    // extra pages yet) fill the available width with no sliver of a 4th peeking in — a real
+    // extra pages yet) fill the available width with no sliver of a 4th peeking in - a real
     // aspect-ratio page preview instead of a small icon-sized square.
     androidx.compose.foundation.layout.BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val tileWidth = (maxWidth - CAROUSEL_OUTER_PADDING * 2 - CAROUSEL_SPACING * 2) / 3

@@ -39,7 +39,7 @@ import com.bisc.flauncher.ui.home.ConfirmRemoveDialog
 import com.bisc.flauncher.ui.home.dock.PagePickerSheet
 import com.bisc.flauncher.ui.pageLabel
 
-/** Global "Action button" Element list (Settings -> Elements -> Action buttons) — an [ActionButton]
+/** Global "Action button" Element list (Settings -> Elements -> Action buttons) - an [ActionButton]
  *  opens a page, the Panel/Dock directly, or a curated Android settings screen, and is placeable
  *  anywhere a [com.bisc.flauncher.data.model.GridItemType.ACTION_BUTTON] entry is allowed. Mirrors
  *  [SettingsAddressesScreen]'s list+create-dialog+navigate-to-detail pattern; "create" here is a
@@ -110,7 +110,7 @@ internal fun actionButtonActionIcon(type: ActionButtonActionType) = when (type) 
     ActionButtonActionType.LAUNCHER_SETTINGS -> Icons.Filled.Tune
 }
 
-/** Picks an *existing* [ActionButton] for a row's "+" slot — unlike the Addresses/Links pickers,
+/** Picks an *existing* [ActionButton] for a row's "+" slot - unlike the Addresses/Links pickers,
  *  there's no "create new" shortcut here (an action button's action/colors are involved enough
  *  that it's picked up front via Settings -> Elements -> Action buttons instead, same reasoning as
  *  why apps are picked from the device's existing list rather than created on the spot). */
@@ -143,7 +143,7 @@ fun ActionButtonPickerSheet(buttons: List<ActionButton>, onSelect: (ActionButton
     }
 }
 
-/** Detail/edit screen for one [ActionButton], reached by id — see [SettingsAddressDetailScreen] for
+/** Detail/edit screen for one [ActionButton], reached by id - see [SettingsAddressDetailScreen] for
  *  the same pattern applied to addresses. */
 @Composable
 fun SettingsActionButtonDetailScreen(buttonId: Long, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
@@ -280,7 +280,7 @@ fun SettingsActionButtonDetailScreen(buttonId: Long, navController: NavControlle
     }
 }
 
-/** Picks one of the curated [SettingsShortcuts] — the same preset list the search feature already
+/** Picks one of the curated [SettingsShortcuts] - the same preset list the search feature already
  *  surfaces its own settings results from, reused here rather than duplicated. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

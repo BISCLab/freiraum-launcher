@@ -1,6 +1,6 @@
 package com.bisc.flauncher.util
 
-/** Parses queries like "10 km to mi" / "5 kg in lb" / "100 c to f". Purely static/offline — no
+/** Parses queries like "10 km to mi" / "5 kg in lb" / "100 c to f". Purely static/offline - no
  *  currency conversion here, that needs live exchange rates (a separate, later, API-backed phase). */
 private val CONVERT_REGEX = Regex("""^\s*([-+]?[0-9]*[.,]?[0-9]+)\s*([a-zA-Z°]+)\s+(?:to|in)\s+([a-zA-Z°]+)\s*$""")
 
@@ -34,7 +34,7 @@ private val VOLUME_TO_LITERS = mapOf(
 private val TEMPERATURE_UNITS = setOf("c", "f", "k", "celsius", "fahrenheit", "kelvin")
 
 /** Null if [query] doesn't parse as "<amount> <unit> to|in <unit>" or the units aren't a known,
- *  compatible pair (length, weight, volume or temperature — never mixed categories). */
+ *  compatible pair (length, weight, volume or temperature - never mixed categories). */
 fun tryConvert(query: String): String? {
     val match = CONVERT_REGEX.matchEntire(query.trim()) ?: return null
     val amount = match.groupValues[1].replace(',', '.').toDoubleOrNull() ?: return null

@@ -25,7 +25,7 @@ import com.bisc.flauncher.ui.home.ConfirmRemoveDialog
 import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
-/** Global "Internetadressen" Element list (Settings -> Elements -> Links) — every [PinnedWebsite] in
+/** Global "Internetadressen" Element list (Settings -> Elements -> Links) - every [PinnedWebsite] in
  *  one place, independent of which rows/folders currently pin it. Mirrors [SettingsAddressesScreen]. */
 @Composable
 fun SettingsLinksScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
@@ -64,7 +64,7 @@ fun SettingsLinksScreen(navController: NavController, onBack: () -> Unit, viewMo
     }
 }
 
-/** Detail/edit screen for one [PinnedWebsite], reached by id — see [SettingsAddressDetailScreen]
+/** Detail/edit screen for one [PinnedWebsite], reached by id - see [SettingsAddressDetailScreen]
  *  for the same pattern applied to addresses. */
 @Composable
 fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {

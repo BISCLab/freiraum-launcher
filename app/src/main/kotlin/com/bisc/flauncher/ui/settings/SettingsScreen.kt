@@ -75,7 +75,7 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
             AboutHeaderCard(onClick = { onNavigate("about") })
             // Three levels, global to specific: Design (looks the same everywhere), Pages (each page
             // and utility page, plus gestures), Elements (the library of apps, folders, places,
-            // links and action buttons) — then System for everything about fitting into the phone.
+            // links and action buttons) - then System for everything about fitting into the phone.
             SettingsPreferenceGroup {
                 SettingsPreference(
                     icon = Icons.Filled.Palette,
@@ -112,7 +112,7 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
 
 /** Rounded group of preference rows with an optional title and an optional explanation that covers
  *  the whole group. When [info] is given, a neutral-gray "?" button next to the title expands it
- *  inline — this is the shared spot for a group's explanatory text, so a group's rows generally
+ *  inline - this is the shared spot for a group's explanatory text, so a group's rows generally
  *  shouldn't also carry their own [SettingsPreference.info] (see that param's doc). */
 @Composable
 fun SettingsPreferenceGroup(title: String? = null, info: String? = null, content: @Composable ColumnScope.() -> Unit) {
@@ -128,7 +128,7 @@ fun SettingsPreferenceGroup(title: String? = null, info: String? = null, content
     }
 }
 
-/** Whether the "?" tip buttons next to settings show at all — the global "Tips" switch, off by default. */
+/** Whether the "?" tip buttons next to settings show at all - the global "Tips" switch, off by default. */
 val LocalShowSettingsTips = compositionLocalOf { false }
 
 /** The small secondary-colored label [SettingsPreferenceGroup] renders above its own card, with an
@@ -188,10 +188,10 @@ fun SettingsPreference(
         }
     },
     trailing: (@Composable () -> Unit)? = { ChevronIndicator() },
-    /** Tip behind a "?" button — only shown while tips are on, see [LocalShowSettingsTips]. */
+    /** Tip behind a "?" button - only shown while tips are on, see [LocalShowSettingsTips]. */
     info: String? = null,
     infoAction: Pair<String, () -> Unit>? = null,
-    /** Extra icon button rendered just left of the info "?" button — for a row-specific action
+    /** Extra icon button rendered just left of the info "?" button - for a row-specific action
      *  (e.g. opening a dedicated settings subpage) that doesn't fit [onClick] or [trailing]. */
     extra: (@Composable () -> Unit)? = null,
     enabled: Boolean = true
@@ -299,7 +299,7 @@ fun SettingsSubScreen(
     /** Editor mode: changes are kept as a draft and only written by this, from a Save button pinned
      *  to the bottom. Null = a plain screen whose changes apply right away. */
     onSave: (() -> Unit)? = null,
-    /** Whether the draft differs from what's saved — enables Save and makes leaving ask first. */
+    /** Whether the draft differs from what's saved - enables Save and makes leaving ask first. */
     dirty: Boolean = false,
     content: @Composable ColumnScope.() -> Unit
 ) {

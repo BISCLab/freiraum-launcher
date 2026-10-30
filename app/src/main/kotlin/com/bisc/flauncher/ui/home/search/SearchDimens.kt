@@ -3,10 +3,10 @@ package com.bisc.flauncher.ui.home.search
 import androidx.compose.ui.unit.dp
 
 /**
- * Sizing for the full-text search screen — deliberately independent from the dock's own
+ * Sizing for the full-text search screen - deliberately independent from the dock's own
  * DockDimens, search is a standalone, optional feature with its own footprint. [referenceWidth]
  * is numerically copied from the dock's own default fixed width (`DockDimens.widthForSlotCount(5)`
- * = 392dp) purely as a convenient starting value picked at build time — not a live binding to the
+ * = 392dp) purely as a convenient starting value picked at build time - not a live binding to the
  * dock (search redesign round 2 was explicit about this: "nur zum Programmieren... damit nicht
  * weiter verknüpft"). Only the search field/category bar and the result cards use this width; the
  * keyboard-frame strip is deliberately edge-to-edge instead (see [SearchOverlay]).

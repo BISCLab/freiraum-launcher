@@ -11,7 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
 
-/** Global "Elemente" hub (Settings -> Elements) — Apps/Ordner/Adressen/Internetadressen/Shortcuts/
+/** Global "Elemente" hub (Settings -> Elements) - Apps/Ordner/Adressen/Internetadressen/Shortcuts/
  *  Action buttons, each configured once here and used everywhere that Element type can be placed
  *  (Panel, Dock, Elementenbox rows, folders). Shortcuts have no entry of their own: they're not
  *  editable beyond add/remove, which happens wherever they're placed. */

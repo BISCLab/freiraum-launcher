@@ -124,7 +124,7 @@ private fun WeatherContent(weather: WeatherSnapshot) {
     val locale = LocalConfiguration.current.locales.get(0)
     val zone = remember { ZoneId.systemDefault() }
     // "Now" and "today" are re-read every time the home screen comes back, not only when new
-    // weather arrives — otherwise a widget left open overnight kept yesterday as "today".
+    // weather arrives - otherwise a widget left open overnight kept yesterday as "today".
     var resumeTick by remember { mutableIntStateOf(0) }
     LifecycleResumeEffect(Unit) {
         resumeTick++

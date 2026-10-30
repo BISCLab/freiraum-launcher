@@ -18,7 +18,7 @@ import com.bisc.flauncher.data.model.ElementFillMode
 import com.bisc.flauncher.data.settings.Handedness
 
 /** App overview content: app list with A-Z rail, as a fullscreen fill over the page's own
- *  background (drawn separately by the caller — see [pageBackground], used only to pick a
+ *  background (drawn separately by the caller - see [pageBackground], used only to pick a
  *  readable text color against it). */
 @Composable
 fun AppOverviewContent(

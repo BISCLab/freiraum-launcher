@@ -16,7 +16,7 @@ import androidx.navigation.NavController
 import com.bisc.flauncher.R
 import com.bisc.flauncher.util.DefaultLauncherUtil
 
-/** System: how the launcher fits into the phone — permissions and default launcher, which apps
+/** System: how the launcher fits into the phone - permissions and default launcher, which apps
  *  links and places open in, the charging animation, settings tips and backups. */
 @Composable
 fun SettingsSystemScreen(

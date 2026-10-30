@@ -165,8 +165,8 @@ fun CornerShapeTiles(percent: Int, onSelect: (Int) -> Unit) {
     }
 }
 
-/** Left/right alignment as two miniature app lists — a few app rows plus the A–Z rail on the
- *  chosen side — instead of a Left | Right switch. Rendered as one card row of a group. */
+/** Left/right alignment as two miniature app lists - a few app rows plus the A–Z rail on the
+ *  chosen side - instead of a Left | Right switch. Rendered as one card row of a group. */
 @Composable
 fun HandednessPreviews(selected: com.bisc.flauncher.data.settings.Handedness, onSelect: (com.bisc.flauncher.data.settings.Handedness) -> Unit) {
     Row(

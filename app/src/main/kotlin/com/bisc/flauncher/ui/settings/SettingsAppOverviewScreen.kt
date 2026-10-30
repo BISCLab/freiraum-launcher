@@ -22,7 +22,7 @@ import com.bisc.flauncher.data.model.LauncherPageKind
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.search.automaticRailAppearance
 
-/** App list hub — same split as Text search: everything about how it looks under Appearance,
+/** App list hub - same split as Text search: everything about how it looks under Appearance,
  *  everything about how it works under Behavior. */
 @Composable
 fun SettingsAppOverviewScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
@@ -111,7 +111,7 @@ fun SettingsAppOverviewBehaviorScreen(navController: NavController, onBack: () -
     }
 }
 
-/** The floating search button's own look — follows the A–Z index's until customized here. */
+/** The floating search button's own look - follows the A–Z index's until customized here. */
 @Composable
 fun SettingsAppOverviewSearchButtonScreen(
     navController: NavController,
@@ -138,7 +138,7 @@ fun SettingsAppOverviewSearchButtonScreen(
     }
 }
 
-/** The app-list page itself: its own background and status-bar switch — same pairing as
+/** The app-list page itself: its own background and status-bar switch - same pairing as
  *  [SettingsPageAppearanceScreen]. */
 @Composable
 fun SettingsAppOverviewPageScreen(navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
@@ -186,7 +186,7 @@ fun SettingsAppOverviewSectionLettersScreen(navController: NavController, onBack
     }
 }
 
-/** The right-edge fast-scroll rail — its box fill/border and letter text color are one appearance
+/** The right-edge fast-scroll rail - its box fill/border and letter text color are one appearance
  *  (see [com.bisc.flauncher.ui.home.search.AlphabetIndex]). */
 @Composable
 fun SettingsAppOverviewAzIndexScreen(

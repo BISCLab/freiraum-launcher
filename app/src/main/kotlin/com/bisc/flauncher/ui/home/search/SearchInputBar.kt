@@ -61,7 +61,7 @@ private val FILTER_CHIP_GAP = 6.dp
 
 /**
  * Search field + category filter row as one element: a single rounded frame, two internally
- * equal-height rows separated by a thin divider — the input field (with the Home button) on top,
+ * equal-height rows separated by a thin divider - the input field (with the Home button) on top,
  * the category filter chips below.
  *
  * Sits flush at the very top of the search screen (no outer margin), the same
@@ -84,7 +84,7 @@ fun SearchInputBar(
     onToggleCategory: (SearchCategory) -> Unit,
     cornerRadiusPercent: Int,
     modifier: Modifier = Modifier,
-    /** Space above the input row that the bar's own background still fills — lets the bar reach
+    /** Space above the input row that the bar's own background still fills - lets the bar reach
      *  the screen's top edge (like the Panel) while its content stays below the status bar. */
     topInset: Dp = 0.dp,
     /** The thin line above the input row. */
@@ -114,7 +114,7 @@ fun SearchInputBar(
             modifier = modifier
                 .fillMaxWidth()
                 // Flush with the screen's top and side edges, so the border only traces the free
-                // bottom edge — drawn just outside the bar (hence before the clip), so around the
+                // bottom edge - drawn just outside the bar (hence before the clip), so around the
                 // rounded corners it runs on into the screen's side edges instead of ending visibly.
                 .then(if (appearance.borderEnabled) Modifier.freeEdgeBorder(colors.borderWidth, colors.borderColor, radius, FreeEdge.BOTTOM) else Modifier)
                 .clip(shape)

@@ -31,7 +31,7 @@ class SystemWidgetHostManager @Inject constructor(
 
     // The home screen's own host views, one per widget id and light/dark mode: a page leaving and
     // re-entering the pager's composed range (neighbors are pre-composed while swiping) reuses its
-    // view instead of inflating the whole widget again — that inflation, mid-swipe, is what stutters.
+    // view instead of inflating the whole widget again - that inflation, mid-swipe, is what stutters.
     private val reusableViews = HashMap<Int, Pair<Boolean, AppWidgetHostView>>()
 
     // The host only delivers a widget's updates to the view created last for its id, so a kept home
@@ -60,7 +60,7 @@ class SystemWidgetHostManager @Inject constructor(
     /**
      * [dark] forces the hosted widget's own dark/light resources to follow the launcher's chosen mode
      * for the surface it sits on, instead of the system's separate day/night setting. A themed
-     * [Configuration] context is what actually makes this work broadly — [AppWidgetHostView]'s own
+     * [Configuration] context is what actually makes this work broadly - [AppWidgetHostView]'s own
      * [AppWidgetHostView.setOnLightBackground] (also set below, API 29+) sounds like it should be
      * enough and doesn't require recreating the view on a change, but in practice most third-party
      * widgets simply don't check it and keep rendering with whatever their default theme is; only

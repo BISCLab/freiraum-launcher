@@ -10,11 +10,11 @@ import java.io.File
 
 /** Storage of background images in app-private files, with an in-memory cache. */
 object BackgroundImageStore {
-    // Was 1440 — bigger than most phones actually need (portrait screens are commonly ~1080-1200px
+    // Was 1440 - bigger than most phones actually need (portrait screens are commonly ~1080-1200px
     // wide) and, more importantly, bigger than it needs to be for what this is used for: two of these
     // get alpha-blended over each other for ~220ms during a page-background crossfade. A flat color
     // costs Skia essentially nothing to blend; a large decoded photo bitmap is real per-frame GPU/CPU
-    // work, and that gap — invisible for solid colors, real for custom images — matches exactly what
+    // work, and that gap - invisible for solid colors, real for custom images - matches exactly what
     // was reported (color-to-color transitions stayed smooth, image transitions kept flickering no
     // matter how the crossfade's own timing logic was rewritten). Smaller source bitmaps blend cheaper.
     private const val MAX_DIMENSION = 1080
@@ -23,7 +23,7 @@ object BackgroundImageStore {
         return runCatching {
             val bitmap = decodeSampled(context, uri) ?: return null
             val path = writeToStore(context, bitmap, key)
-            // The freshly-picked bitmap is right here in memory — caching it under its final path now
+            // The freshly-picked bitmap is right here in memory - caching it under its final path now
             // means the very first time a page with this background renders, it already has both the
             // image and its luminance (used to decide icon/widget contrast) instead of showing blank
             // until an async decode-from-disk finishes. That blank-then-pop-in was the flicker seen when
@@ -35,7 +35,7 @@ object BackgroundImageStore {
 
     private fun decodeFull(path: String): Bitmap? = BitmapFactory.decodeFile(path)
 
-    /** [path] as stored, or — when that file isn't there — the same file name in this app's own
+    /** [path] as stored, or - when that file isn't there - the same file name in this app's own
      *  backgrounds folder. Stored paths are absolute, so ones written under a different app id
      *  (a backup from before the rename) point into a folder this app can't read. */
     fun resolve(context: Context, path: String): String {
@@ -104,7 +104,7 @@ object BackgroundImageStore {
     private fun decodeSampled(context: Context, uri: Uri): Bitmap? {
         val boundsOptions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         // decodeStream() always returns null in inJustDecodeBounds mode by design (it only fills
-        // outWidth/outHeight) — the `?: return null` below has to key off whether the stream actually
+        // outWidth/outHeight) - the `?: return null` below has to key off whether the stream actually
         // opened, not off decodeStream's return value, or this bails out on every single image.
         context.contentResolver.openInputStream(uri)?.use { input ->
             BitmapFactory.decodeStream(input, null, boundsOptions)

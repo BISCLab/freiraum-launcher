@@ -22,7 +22,7 @@ object PageRowDimens {
      *  lines up exactly with two 1-unit widgets stacked. */
     fun spanHeight(unit: Dp, span: Int): Dp = unit * span + rowSpacing * (span - 1).coerceAtLeast(0)
 
-    /** The row unit stretched so that [count] units (with their gaps) exactly fill [viewport] — capped,
+    /** The row unit stretched so that [count] units (with their gaps) exactly fill [viewport] - capped,
      *  so a mismatch can never blow rows up. [count] 0 (not known yet) keeps the plain unit. */
     fun stretchedUnit(viewport: Dp, count: Int): Dp =
         if (count <= 0 || viewport <= 0.dp) rowUnitHeight
@@ -34,7 +34,7 @@ object PageRowDimens {
 
     // Matches ElementBoxGrid's actual cell layout (56dp icon + 4dp top/bottom padding + 8dp spacer + a
     // label line) and WidgetCard's own 12dp top/bottom content padding. An element box isn't a fixed
-    // spanY-based size like other rows — it grows with how many icons it holds — so page-overflow
+    // spanY-based size like other rows - it grows with how many icons it holds - so page-overflow
     // rebalancing needs this to predict its real height instead of assuming the spanY default.
     private val elementBoxIconCellHeight = 88.dp
     private val elementBoxCardPadding = 24.dp
@@ -45,7 +45,7 @@ object PageRowDimens {
     }
 }
 
-/** The current page's row unit height — [PageRowDimens.rowUnitHeight] stretched so that the page's
+/** The current page's row unit height - [PageRowDimens.rowUnitHeight] stretched so that the page's
  *  unit count exactly fills its height. */
 val LocalRowUnitHeight = staticCompositionLocalOf { PageRowDimens.rowUnitHeight }
 

@@ -21,7 +21,7 @@ class InstalledAppsRepository @Inject constructor(
 ) {
     /**
      * Emits once per install/uninstall/update. [getLaunchableApps] itself was only ever fetched
-     * once at app start — a fresh install (or uninstall) never touched that snapshot again, so a
+     * once at app start - a fresh install (or uninstall) never touched that snapshot again, so a
      * newly installed app simply never appeared in search or the app list until the next cold
      * start of FLauncher. Collectors re-query on each emission to pick the change up live.
      */

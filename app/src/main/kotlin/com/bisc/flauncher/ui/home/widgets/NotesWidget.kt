@@ -83,7 +83,7 @@ fun NotesWidget(
     // Same automatic black/white the rest of the app uses so the grid lines read against any background.
     val gridLineColor = resolveElementColors(appearance).borderColor
 
-    // Moves past the next *visible* neighbor — stepping through the full list instead would swap
+    // Moves past the next *visible* neighbor - stepping through the full list instead would swap
     // with a hidden note next to it, a move nobody can see.
     fun moveBy(delta: Int) {
         val visibleIndex = visibleNotes.indexOfFirst { it.id == movingNoteId }
@@ -126,7 +126,7 @@ fun NotesWidget(
                 ) {
                     Icon(Icons.Filled.EditNote, contentDescription = null, tint = LocalContentColor.current.copy(alpha = 0.8f), modifier = Modifier.padding(end = 8.dp))
                     Text(stringResource(R.string.widget_notes_title), style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
-                    // Notes hidden from this widget, to show again — otherwise hiding would be a dead end.
+                    // Notes hidden from this widget, to show again - otherwise hiding would be a dead end.
                     if (hiddenNotes.isNotEmpty()) {
                         Box {
                             IconButton(onClick = { hiddenMenuOpen = true }, modifier = Modifier.size(32.dp)) {

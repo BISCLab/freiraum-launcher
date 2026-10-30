@@ -46,7 +46,7 @@ private const val AUTOSAVE_DELAY_MS = 500L
  * A note in a near-fullscreen dialog (top row down to the bottom safe area, independent of the
  * underlying home screen's scroll position): an existing note opens in the read view, where
  * checklist items can be ticked; title, type and content change only in the edit view, which
- * autosaves as you type — there is no explicit Save button. A new note ([note] = null) opens
+ * autosaves as you type - there is no explicit Save button. A new note ([note] = null) opens
  * straight into the edit view. [onSave] reports the stored id through its callback.
  */
 @Composable
@@ -129,7 +129,7 @@ private fun NoteEditForm(
     var type by remember(note?.id) { mutableStateOf(note?.type ?: NoteType.FREITEXT) }
     var content by remember(note?.id) { mutableStateOf(note?.content.orEmpty()) }
     var items by remember(note?.id) { mutableStateOf(note?.items.orEmpty()) }
-    // Nothing has been persisted yet for a brand-new, still-blank note — tracked so "Done"/dismiss
+    // Nothing has been persisted yet for a brand-new, still-blank note - tracked so "Done"/dismiss
     // can tell a genuinely empty draft (discard, nothing to show in the read view) from an edited one.
     var everStored by remember(note?.id) { mutableStateOf(note != null && note.id != 0L) }
 
@@ -212,7 +212,7 @@ private fun NoteEditForm(
     }
 }
 
-/** Delete/Cancel/Save, Cancel centered — a mistaken "Delete" tap mid-edit still lets you either keep
+/** Delete/Cancel/Save, Cancel centered - a mistaken "Delete" tap mid-edit still lets you either keep
  *  editing or explicitly finish (autosave has already captured everything either way). */
 @Composable
 private fun DeleteNoteDialog(title: String, onDelete: () -> Unit, onCancel: () -> Unit, onSave: () -> Unit) {

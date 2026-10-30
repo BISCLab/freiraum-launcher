@@ -73,7 +73,7 @@ fun SettingsElementBoxEditScreen(
 
     val savedRow = rowsByPage[pageId]?.find { it.id == rowId }
     // Only auto-navigate back once we've definitely seen this row exist and then watched it
-    // disappear (e.g. removed from another screen) — reacting to a transient null on the very
+    // disappear (e.g. removed from another screen) - reacting to a transient null on the very
     // first composition, before rowsByPage has had a chance to settle for this exact row, would
     // pop the screen before its real content ever gets a chance to render.
     var everSawRow by remember { mutableStateOf(false) }
@@ -96,7 +96,7 @@ fun SettingsElementBoxEditScreen(
     var confirmingRemoveRow by remember { mutableStateOf(false) }
 
     // The dock row (PageRowType.SEARCH_BAR) always floats as a single-line pill regardless of its
-    // own pillMode column — that flag only matters for an ordinary element box opting in. Showing the
+    // own pillMode column - that flag only matters for an ordinary element box opting in. Showing the
     // toggle (off) and the irrelevant Columns stepper for the dock would be actively misleading.
     val isDock = row.type == PageRowType.SEARCH_BAR
     val isPillLayout = row.pillMode || isDock

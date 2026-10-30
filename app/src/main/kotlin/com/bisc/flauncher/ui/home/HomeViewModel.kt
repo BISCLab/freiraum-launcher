@@ -128,7 +128,7 @@ class HomeViewModel @Inject constructor(
         settingsRepository.iconSizePercent.map { it / 100f }.stateIn(viewModelScope, SharingStarted.Eagerly, 1f)
 
     // The same global default Dock/Panel/widgets already read via their own row's cornerRadiusPercent
-    // — used here for surfaces with no row of their own (search bar, A-Z rail, floating search button).
+    // - used here for surfaces with no row of their own (search bar, A-Z rail, floating search button).
     val cornerRadiusPercent: StateFlow<Int> =
         settingsRepository.defaultCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT)
 
@@ -147,7 +147,7 @@ class HomeViewModel @Inject constructor(
     val folderHideDock: StateFlow<Boolean> =
         settingsRepository.folderHideDock.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    // One global Layer 1 shared by every surface — pages, app overview, both search surfaces — with an
+    // One global Layer 1 shared by every surface - pages, app overview, both search surfaces - with an
     // optional per-surface color-only override falling back to it. See SettingsRepository for why images
     // are global-only now (a color-to-(cached) global-image crossfade never showed the flicker a
     // custom-image-to-custom-image one did).
@@ -229,7 +229,7 @@ class HomeViewModel @Inject constructor(
                 val parts = action.payload?.split("|")
                 if (parts != null && parts.size >= 2) shortcutRepository.launch(parts[0], parts[1])
             }
-            // The sole way to reference a page now — ROWS pages jump the pager via onOpenPage,
+            // The sole way to reference a page now - ROWS pages jump the pager via onOpenPage,
             // the singleton overlays (App overview/Search) open their own overlay directly,
             // same dispatch PageRowContent's onOpenPageLink already does for a dock/element-box page-link tap.
             GestureActionType.PAGE -> action.payload?.toLongOrNull()?.let { id ->
@@ -262,7 +262,7 @@ class HomeViewModel @Inject constructor(
     }
 
     /** Every page, including the singleton App overview/Search pages (unlike [pages], which only
-     *  has the swipeable ROWS ones) — used by the Pages settings list, which shows them too. */
+     *  has the swipeable ROWS ones) - used by the Pages settings list, which shows them too. */
     val allPages: StateFlow<List<LauncherPage>> =
         pageContentRepository.allPages.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
@@ -395,7 +395,7 @@ class HomeViewModel @Inject constructor(
             if (query.isBlank() || !include) {
                 emptyList()
             } else {
-                // hiddenFromSearch off the table entirely, code or not — it's the Text-search
+                // hiddenFromSearch off the table entirely, code or not - it's the Text-search
                 // toggle itself. Within what's left, SEARCH_CODE *replaces* name matching rather
                 // than adding to it: the app only turns up for the exact code, never by name.
                 val visible = apps.filter { overrides[it.componentName.flattenToString()]?.hiddenFromSearch != true }
@@ -987,7 +987,7 @@ class HomeViewModel @Inject constructor(
     }
 
     /** Pinning a contact into a row also ensures a [PinnedContact] snapshot exists for it (name/photo
-     *  cached, not a live content-resolver lookup on every render) — the same mechanism search's own
+     *  cached, not a live content-resolver lookup on every render) - the same mechanism search's own
      *  contact pinning already uses, just reused here instead of invented twice. */
     fun addContactEntryToRow(pageRowId: Long, contact: ContactInfo) {
         viewModelScope.launch {

@@ -51,7 +51,7 @@ class AppIconLoader @Inject constructor(
     @Volatile
     private var overrides: Map<String, Pair<String, String>> = emptyMap()
 
-    // Per-app icon-shape overrides — null for a component means "use the global iconShape".
+    // Per-app icon-shape overrides - null for a component means "use the global iconShape".
     @Volatile
     private var shapeOverrides: Map<String, IconShape> = emptyMap()
 

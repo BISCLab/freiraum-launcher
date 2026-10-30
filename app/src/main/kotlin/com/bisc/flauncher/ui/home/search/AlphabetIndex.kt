@@ -44,7 +44,7 @@ internal val FLUSH_INSET = AppOverviewDimens.horizontalMargin
 internal val RAIL_BAR_WIDTH = 28.dp
 
 /** Right-edge fast-scroll rail for the browse app list. Box fill/border/letter-text color all come
- *  from [LocalRailColors] (resolved from the single A–Z index appearance setting) — a fill mode of
+ *  from [LocalRailColors] (resolved from the single A–Z index appearance setting) - a fill mode of
  *  None already makes the box itself invisible, so there's no separate "show the box" switch to
  *  keep in sync with it. */
 @Composable

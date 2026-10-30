@@ -9,7 +9,7 @@ import com.bisc.flauncher.R
 data class SettingsShortcut(val labelRes: Int, val action: String, val keywords: List<String> = emptyList())
 
 /** Commonly searched system settings screens. Some actions aren't public API or not offered by every
- *  manufacturer — the search only shows those this phone can actually open. */
+ *  manufacturer - the search only shows those this phone can actually open. */
 object SettingsShortcuts {
     val all = listOf(
         SettingsShortcut(R.string.settings_shortcut_wifi, Settings.ACTION_WIFI_SETTINGS,

@@ -40,7 +40,7 @@ import com.bisc.flauncher.util.ContactActions
 import com.bisc.flauncher.util.openContact
 
 /**
- * Contact result tap target: photo+name header, then a grid of real, working actions — call, SMS,
+ * Contact result tap target: photo+name header, then a grid of real, working actions - call, SMS,
  * and (only when actually installed) a WhatsApp/Telegram chat deep link. No fake voice/video-call
  * buttons: neither app exposes a public intent for that, only a documented chat link (see
  * [ContactActions]).

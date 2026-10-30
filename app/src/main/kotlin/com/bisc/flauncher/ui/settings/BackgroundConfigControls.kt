@@ -139,7 +139,7 @@ fun BackgroundConfigSection(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // A large, bordered/checkmarked preview card — feedback that a pick actually worked,
+            // A large, bordered/checkmarked preview card - feedback that a pick actually worked,
             // instead of just the tiny 24x36 thumbnail in the row above.
             val customSelected = imageSelected && customImagePath != null
             WallpaperCard(
@@ -178,7 +178,7 @@ fun BackgroundConfigSection(
 
 /**
  * Editor for one surface's background: the shared global background (optionally darkened/lightened
- * just for this surface), its own image, or its own color — laid out like [BackgroundConfigSection].
+ * just for this surface), its own image, or its own color - laid out like [BackgroundConfigSection].
  * Selecting "Color" opens its own window directly, same as every other color picker in the app,
  * with that color's Darken/Lighten inside it; the global and image options show theirs inline.
  */
@@ -194,7 +194,7 @@ fun BackgroundOverrideSection(
     globalShade: Float?,
     onGlobalShadeChange: (Float) -> Unit,
     // Null for callers whose own page is already titled "Background" (Home's own Appearance screen,
-    // for one) — repeating the title right underneath would just be redundant there. Defaults to
+    // for one) - repeating the title right underneath would just be redundant there. Defaults to
     // "Screen" for every other caller (a page's row editor, a folder, etc.) where this section sits
     // alongside other content on a differently-titled screen and the caption is the only thing
     // saying what it's for.

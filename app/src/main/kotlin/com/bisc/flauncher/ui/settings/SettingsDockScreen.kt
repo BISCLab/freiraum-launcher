@@ -51,7 +51,7 @@ import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
-/** The Dock's own settings — a hub, mirroring the Home page's own Appearance/Layout split. */
+/** The Dock's own settings - a hub, mirroring the Home page's own Appearance/Layout split. */
 @Composable
 fun SettingsDockScreen(pageId: Long, navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
     SettingsSubScreen(title = stringResource(R.string.settings_home_dock_label), navController = navController, onBack = onBack) {
@@ -84,7 +84,7 @@ fun SettingsDockScreen(pageId: Long, navController: NavController, onBack: () ->
     }
 }
 
-/** Finds the Home page's own pinned dock row, wherever it's needed across the 4 Dock sub-screens —
+/** Finds the Home page's own pinned dock row, wherever it's needed across the 4 Dock sub-screens - 
  *  always present once seeded (see PageContentRepository.ensureSeeded), so a null here only means
  *  the data hasn't loaded yet; the caller falls back to an empty screen for that one frame. */
 @Composable
@@ -129,7 +129,7 @@ fun SettingsDockBorderScreen(pageId: Long, navController: NavController, onBack:
     }
 }
 
-/** The Dock's own grid editor — the Dock is a mirrored Panel, so this mirrors
+/** The Dock's own grid editor - the Dock is a mirrored Panel, so this mirrors
  *  [SettingsPanelElementsScreen] exactly (same "+" preview/chooser, same tap-a-filled-slot-to-remove
  *  instead of a separate reorderable list), just capped at 2 sub-rows instead of 6. */
 @OptIn(ExperimentalMaterial3Api::class)

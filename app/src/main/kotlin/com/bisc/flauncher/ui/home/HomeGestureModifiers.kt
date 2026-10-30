@@ -26,14 +26,14 @@ import kotlin.math.abs
  * Uses [PointerEventPass.Main], not [PointerEventPass.Final]. Pointer passes for one event run
  * Initial (root → leaf), then Main (leaf → root), then Final (root → leaf) again. This modifier sits on
  * a page's content Box, which is a *descendant* of [HorizontalPager] but an *ancestor* of any widget on
- * that page. Reading at Main means: any widget's own scrollable — deeper in the tree — already had its
+ * that page. Reading at Main means: any widget's own scrollable - deeper in the tree - already had its
  * Main-pass turn and could've consumed the event before this code runs, so a real widget scroll still
- * wins outright; but the pager itself — further up the tree — hasn't had its Main-pass turn *yet*, so
+ * wins outright; but the pager itself - further up the tree - hasn't had its Main-pass turn *yet*, so
  * this gets first claim on a clearly-vertical drag instead of the pager's own ~8dp horizontal-only touch
  * slop grabbing it first regardless of how much more vertical the motion actually was. Final was tried
  * first specifically to be conservative about not competing with widgets, but it runs after the pager's
  * own Main-pass claim too, so it could only ever react to drags the pager never wanted in the first
- * place — which is exactly why a mostly-vertical swipe kept losing to the pager as a page-swipe.
+ * place - which is exactly why a mostly-vertical swipe kept losing to the pager as a page-swipe.
  */
 @Composable
 fun Modifier.detectHomeGestures(
@@ -64,7 +64,7 @@ fun Modifier.detectHomeGestures(
     return this
         .pointerInput(thresholdPx, topSafeZonePx, bottomSafeZonePx, exclusion) {
             awaitEachGesture {
-                // Captured once, from the very first event of the gesture — used only to check
+                // Captured once, from the very first event of the gesture - used only to check
                 // whether the drag started inside a safe zone, never updated afterward.
                 val firstChange = awaitPointerEvent(PointerEventPass.Main).changes.firstOrNull() ?: return@awaitEachGesture
                 if (!firstChange.pressed) return@awaitEachGesture
@@ -73,7 +73,7 @@ fun Modifier.detectHomeGestures(
                 // Direction lock: the first movement past the touch slop decides the axis. Vertical
                 // claims the whole gesture (its moves are consumed, so the pager never starts a page
                 // swipe alongside); horizontal leaves it to the pager and fires nothing here. So a
-                // diagonal thumb swipe does exactly one thing — never open the Panel *and* change page.
+                // diagonal thumb swipe does exactly one thing - never open the Panel *and* change page.
                 val slop = viewConfiguration.touchSlop
                 var dx = 0f
                 var dy = 0f
@@ -114,8 +114,8 @@ private const val VERTICAL_DOMINANCE = 1.2f
 
 /**
  * Which touch an app widget has claimed for itself. A hosted widget is an Android View: it only
- * starts its own scroll after its touch slop — the very moment [detectHomeGestures]' direction lock
- * would claim a vertical drag first — so it marks its touches as its own from the first finger-down.
+ * starts its own scroll after its touch slop - the very moment [detectHomeGestures]' direction lock
+ * would claim a vertical drag first - so it marks its touches as its own from the first finger-down.
  */
 class HomeGestureExclusion {
     internal var claimedPointer: PointerId? = null

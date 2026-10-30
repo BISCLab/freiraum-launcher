@@ -23,7 +23,7 @@ import com.bisc.flauncher.data.model.LauncherPage
 import com.bisc.flauncher.ui.pageLabel
 import com.bisc.flauncher.ui.theme.noRippleClickable
 
-/** Pure picker — pick which existing page a dock slot should link to. No icon/label editing here,
+/** Pure picker - pick which existing page a dock slot should link to. No icon/label editing here,
  *  that lives on the page's own settings (see its Icon editor). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

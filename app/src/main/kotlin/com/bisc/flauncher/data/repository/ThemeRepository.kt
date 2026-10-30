@@ -16,7 +16,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
-/** Light/Dark/System is the only appearance control FLauncher has — there is no separate "design
+/** Light/Dark/System is the only appearance control FLauncher has - there is no separate "design
  *  preset" layered on top of it. [reapplyTheme] (re)stamps the background and every box/card/
  *  widget/dock/panel's default fill to match the currently active theme (resolving SYSTEM against
  *  the live device setting), called once at first install, whenever the user switches
@@ -33,7 +33,7 @@ class ThemeRepository @Inject constructor(
         val isDark = settingsRepository.theme.first().isDark(context)
         val boxAppearance = defaultBoxAppearanceFor(isDark)
 
-        // One shared global background, not a same-color override stamped onto every page —
+        // One shared global background, not a same-color override stamped onto every page - 
         // clearing every per-page override here means they actually go back to tracking the
         // global background going forward, instead of each carrying its own now-redundant copy.
         settingsRepository.setGlobalBackground(BackgroundConfig(source = BackgroundSource.COLOR, fill = ColorFill(color = backgroundColorFor(isDark))))
@@ -42,7 +42,7 @@ class ThemeRepository @Inject constructor(
             settingsRepository.clearPageBackgroundConfig(page.id)
         }
 
-        // "Layer 3, null means auto light/dark" overrides — a customization made under the old
+        // "Layer 3, null means auto light/dark" overrides - a customization made under the old
         // theme otherwise survives the switch untouched, silently breaking contrast against the
         // new one (e.g. a light icon stuck on a now-light dock). Resetting them back to automatic
         // is what makes this a coherent, fully-consistent look rather than "everything except

@@ -53,7 +53,7 @@ fun PagePreview(pageId: Long, isHome: Boolean, navController: NavController, vie
     val background by remember(pageId) { viewModel.pageBackgroundConfig(pageId) }.collectAsState(initial = BackgroundConfig())
     val pages by viewModel.pages.collectAsState()
     val rows = rowsByPage[pageId].orEmpty()
-    // The Dock and the Panel are Home's and show on every page — previewed everywhere, but only
+    // The Dock and the Panel are Home's and show on every page - previewed everywhere, but only
     // editable from Home.
     val homeRows = rowsByPage[pages.find { it.isHome }?.id].orEmpty()
     val dock = homeRows.find { it.type == PageRowType.SEARCH_BAR }
@@ -71,7 +71,7 @@ fun PagePreview(pageId: Long, isHome: Boolean, navController: NavController, vie
                 .clip(phoneShape)
                 .border(3.dp, MaterialTheme.colorScheme.outline, phoneShape)
         ) {
-            // Background — a tap anywhere no other part covers opens the page's Appearance.
+            // Background - a tap anywhere no other part covers opens the page's Appearance.
             BackgroundFill(background, Modifier.fillMaxSize())
             Box(
                 modifier = Modifier.fillMaxSize().clickable {
@@ -81,7 +81,7 @@ fun PagePreview(pageId: Long, isHome: Boolean, navController: NavController, vie
 
             Column(modifier = Modifier.fillMaxSize()) {
                 if (panel != null && panel.enabled) {
-                    // The Panel lives above the page, pulled down on demand — shown as its edge.
+                    // The Panel lives above the page, pulled down on demand - shown as its edge.
                     MiniPanelEdge(panel, surfaceDark, onClick = if (isHome) ({ navController.navigate("$base/home/panel") }) else null)
                 } else {
                     Spacer(modifier = Modifier.height(18.dp))

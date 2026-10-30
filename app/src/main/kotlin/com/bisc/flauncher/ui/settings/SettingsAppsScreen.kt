@@ -327,12 +327,12 @@ private fun AppOverrideEditSheetContent(
             )
         }
 
-        // Independent per-surface visibility — an app can stay out of the app list while still
+        // Independent per-surface visibility - an app can stay out of the app list while still
         // being searchable, or vice versa; placements on pages, in the dock and in folders are
         // unaffected either way. Once other page types exist, a "Pages" row belongs in this same
         // group alongside App list/Text search. Reveal-with-search-code only makes sense once Text
-        // search is ON — if the app is already out of Text search entirely, there's no code that
-        // could bypass that — so its own settings button only shows then; turning it on *replaces*
+        // search is ON - if the app is already out of Text search entirely, there's no code that
+        // could bypass that - so its own settings button only shows then; turning it on *replaces*
         // name matching rather than adding to it, the app then only turns up for the exact code.
         SettingsPreferenceGroup(title = stringResource(R.string.settings_manage_apps_visibility_label)) {
             SettingsPreference(

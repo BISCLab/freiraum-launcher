@@ -15,7 +15,7 @@ enum class FreeEdge { TOP, BOTTOM }
  * A border along only the free edge of a surface that sits flush against the screen's other edges
  * (the Panel and the search bar at the top, the Dock at the bottom). The stroke runs around the
  * rounded corners ([radius]) and on along both sides to the opposite edge, just outside the
- * surface's sides — which lie off-screen, so the line simply disappears into the screen edges
+ * surface's sides - which lie off-screen, so the line simply disappears into the screen edges
  * instead of ending visibly where the rounding starts. Across the free edge itself it stays within
  * the surface's bounds, so an enter/exit animation clipping to those bounds can't cut it off.
  * Must be applied before the surface's own shape clip.

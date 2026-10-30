@@ -81,7 +81,7 @@ class NowPlayingRepository @Inject constructor(
         NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
 
     /** (Re)connects to the media sessions and re-reads them. Cheap, so it runs whenever the widget
-     *  shows, the home screen resumes, the listener (re)connects, and before every button press —
+     *  shows, the home screen resumes, the listener (re)connects, and before every button press - 
      *  a one-off connect went stale after app updates (the system unbinds the listener, reading
      *  sessions fails until it's rebound) and when a player replaced its session. */
     fun refresh() {
@@ -94,7 +94,7 @@ class NowPlayingRepository @Inject constructor(
                 }
                 onSessionsChanged(mediaSessionManager?.getActiveSessions(listenerComponent))
             } catch (e: SecurityException) {
-                // Access is granted but the listener isn't bound (yet) — ask the system to rebind it;
+                // Access is granted but the listener isn't bound (yet) - ask the system to rebind it;
                 // its onListenerConnected calls back into here once it is.
                 runCatching { mediaSessionManager?.removeOnActiveSessionsChangedListener(sessionListener) }
                 listening = false
@@ -109,7 +109,7 @@ class NowPlayingRepository @Inject constructor(
     }
 
     private fun sendMediaKey(code: Int) {
-        // A system-wide media key goes to whichever app played last — possibly one that isn't allowed.
+        // A system-wide media key goes to whichever app played last - possibly one that isn't allowed.
         if (allowedSources.isNotEmpty()) return
         val audio = context.getSystemService(AudioManager::class.java) ?: return
         runCatching {
@@ -165,7 +165,7 @@ class NowPlayingRepository @Inject constructor(
         onSessionsChanged(controllers)
     }
 
-    /** Opens the player — its own "now playing" screen (the session's activity) when it has one,
+    /** Opens the player - its own "now playing" screen (the session's activity) when it has one,
      *  otherwise the app itself. */
     fun openPlayer() {
         refresh()

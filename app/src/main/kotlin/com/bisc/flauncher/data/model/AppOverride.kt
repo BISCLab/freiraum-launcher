@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 import com.bisc.flauncher.data.settings.IconShape
 
 /** Whether a Text-search-visible app ([AppOverride.hiddenFromSearch] false) matches normally by
- *  name, or [SEARCH_CODE] instead — typing the exact [AppOverride.revealCode] is then the *only*
+ *  name, or [SEARCH_CODE] instead - typing the exact [AppOverride.revealCode] is then the *only*
  *  way to find it there, replacing name matching rather than adding to it. Meaningless once
  *  [AppOverride.hiddenFromSearch] is true: an app not in Text search at all has nothing a code
  *  could bypass. See HomeViewModel.searchResults. */
@@ -15,8 +15,8 @@ enum class RevealMode {
 }
 
 /** Per-app overrides layered on top of the real, installed app. [iconShape] and [iconSizePercent]
- *  null means "inherit the global default" — see SettingsRepository.iconShape/iconSizePercent.
- *  [hiddenFromAppList] and [hiddenFromSearch] are independent — an app can be hidden from one
+ *  null means "inherit the global default" - see SettingsRepository.iconShape/iconSizePercent.
+ *  [hiddenFromAppList] and [hiddenFromSearch] are independent - an app can be hidden from one
  *  surface while staying visible on the other (placements on pages, in the dock and in folders
  *  are unaffected by either). */
 @Entity(tableName = "app_overrides")

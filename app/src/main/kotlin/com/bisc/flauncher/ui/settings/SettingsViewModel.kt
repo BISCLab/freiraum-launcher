@@ -242,7 +242,7 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    // Standalone Elements management (Settings -> Elements -> Addresses/Links) — independent of
+    // Standalone Elements management (Settings -> Elements -> Addresses/Links) - independent of
     // any particular row/folder placement, unlike the *ToFolder methods above.
     fun addMapTarget(label: String, lat: Double, lon: Double, address: String = "") {
         viewModelScope.launch { mapsRepository.add(label, lat, lon, address) }
@@ -467,7 +467,7 @@ class SettingsViewModel @Inject constructor(
             HomeGesture.entries.zip(actions.toList()).toMap()
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
-    // Home's own pinned Dock/Panel rows — surfaced here only so SettingsGesturesScreen can show
+    // Home's own pinned Dock/Panel rows - surfaced here only so SettingsGesturesScreen can show
     // SWIPE_UP/SWIPE_DOWN locked (with a reason) while the Dock/Panel have claimed that gesture for
     // themselves (see HomeScreen's detectHomeGestures wiring, the actual place that reservation is
     // enforced). Not used for editing either row; that still goes through the Home layout screens.
@@ -580,7 +580,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     /** Persists the chosen Light/Dark/System and immediately re-stamps the background and every
-     *  box/card/widget/dock/panel's default fill to match it (see ThemeRepository.reapplyTheme) —
+     *  box/card/widget/dock/panel's default fill to match it (see ThemeRepository.reapplyTheme) - 
      *  Light/Dark/System is FLauncher's only appearance control, there's no separate preset layered
      *  on top of it. Switching it clears per-surface customizations back to automatic, hence the
      *  confirm dialog. */

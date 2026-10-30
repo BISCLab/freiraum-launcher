@@ -109,7 +109,7 @@ fun ClockWidget(
         onPauseOrDispose { }
     }
     // The analog face draws a second hand, which the once-a-minute tick above would leave frozen
-    // for a whole minute — while that face is on screen, update every second as well.
+    // for a whole minute - while that face is on screen, update every second as well.
     if (style == ClockStyle.ANALOG) {
         androidx.compose.runtime.LaunchedEffect(Unit) {
             while (true) {

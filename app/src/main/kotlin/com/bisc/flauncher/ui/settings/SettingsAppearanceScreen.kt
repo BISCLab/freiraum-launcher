@@ -31,7 +31,7 @@ import com.bisc.flauncher.ui.pageLabel
 import com.bisc.flauncher.ui.theme.FontPreference
 import com.bisc.flauncher.ui.theme.ThemePreference
 
-/** Design: everything that looks the same across the whole launcher — colors, language and font,
+/** Design: everything that looks the same across the whole launcher - colors, language and font,
  *  corner shape, icons, background and status bar. Pages and elements can override parts of it on
  *  their own screens (a page's own background, the app list's own accent, ...). */
 @Composable
@@ -71,7 +71,7 @@ fun SettingsAppearanceScreen(
             info = stringResource(R.string.settings_accent_global_info)
         ) {
             // Tapping a swatch recolors this very screen at once (the settings UI uses the accent
-            // as its own primary color) — that's the preview.
+            // as its own primary color) - that's the preview.
             AccentPalette(selected = accentColor, onSelect = viewModel::setAccentColor, onCustom = { accentPickerOpen = true })
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_language_label)) {
@@ -92,7 +92,7 @@ fun SettingsAppearanceScreen(
             RadioPreference(stringResource(R.string.settings_font_rounded), FontPreference.ROUNDED, fontPreference, viewModel::setFontPreference, font = FontPreference.ROUNDED.fontFamily)
         }
         // Changing this immediately re-stamps every existing row/folder item to match (see
-        // SettingsViewModel.setDefaultCornerRadiusPercent) — each element's own Appearance screen
+        // SettingsViewModel.setDefaultCornerRadiusPercent) - each element's own Appearance screen
         // can still override it individually afterwards.
         SettingsPreferenceGroup(
             title = stringResource(R.string.settings_corner_style_label),
@@ -122,7 +122,7 @@ fun SettingsAppearanceScreen(
             )
         }
         // Home, Pages, App list, Text search and folders each have their own status-bar switch on
-        // their own screen. This one is a bulk action over all of them — checked reflects whether
+        // their own screen. This one is a bulk action over all of them - checked reflects whether
         // every one of them is currently hidden, and toggling it off sets every one back to shown.
         SettingsPreferenceGroup(
             title = stringResource(R.string.settings_statusbar_label),

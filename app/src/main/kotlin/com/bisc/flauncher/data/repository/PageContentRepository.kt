@@ -67,21 +67,21 @@ class PageContentRepository @Inject constructor(
         }
         val isDark = isDark()
 
-        // Home starts with just the dock — no clock, no widgets. Widgets (the clock included) only
+        // Home starts with just the dock - no clock, no widgets. Widgets (the clock included) only
         // appear once the user opts in via "Widgets auf dem Homescreen aktivieren" in Settings, matching
         // the Discreet Launcher "empty home screen" principle this app is built on. The dock row's own
         // entries are plain RowEntry rows, same table/machinery as any other row. The dock deliberately
         // takes the *opposite* tone from the page (see defaultBoxAppearanceFor) so it reads as its own
         // distinct surface against the page behind it; borderEnabled here now means "show the top edge
         // line" (the dock panel is flush with the screen's bottom edge, so only that one edge can have
-        // a border at all — see the dock panel rendering in HomeScreen.kt).
+        // a border at all - see the dock panel rendering in HomeScreen.kt).
         val dockRowId = rowDao.getForPage(homeId).find { it.type == PageRowType.SEARCH_BAR }?.id
             ?: rowDao.insert(
                 PageRow(pageId = homeId, orderIndex = 0, type = PageRowType.SEARCH_BAR, borderEnabled = true)
                     .withAppearance(defaultBoxAppearanceFor(isDark))
             )
 
-        // Same structural pattern as the dock row above — a pinned bookend on Home, rendered as its
+        // Same structural pattern as the dock row above - a pinned bookend on Home, rendered as its
         // own floating overlay outside the pager (see HomeScreen's Panel AnimatedVisibility block)
         // rather than inline.
         if (rowDao.getForPage(homeId).none { it.type == PageRowType.PANEL }) {
@@ -98,7 +98,7 @@ class PageContentRepository @Inject constructor(
             settingsRepository.setPageHideStatusBar(appOverviewId, true)
         }
 
-        // Autonomous singleton, same pattern as the app overview above — exists and works whether or
+        // Autonomous singleton, same pattern as the app overview above - exists and works whether or
         // not any dock slot links to it (unlike the old, now-deleted TEXT_SEARCH dock button, which
         // search *was*, predating today's ActionButton Element entirely).
         if (pageDao.getByKind(LauncherPageKind.SEARCH) == null) {
@@ -115,10 +115,10 @@ class PageContentRepository @Inject constructor(
                 settingsRepository.setGestureAction(HomeGesture.SWIPE_UP, GestureAction(GestureActionType.PAGE, appOverview.id.toString()))
             }
         }
-        // No default SWIPE_DOWN binding — the Panel claims plain swipe-down on the home content
+        // No default SWIPE_DOWN binding - the Panel claims plain swipe-down on the home content
         // outright whenever it's enabled (see HomeScreen's detectHomeGestures wiring).
 
-        // Settings needs a default path from the home screen itself — otherwise, on a fresh install,
+        // Settings needs a default path from the home screen itself - otherwise, on a fresh install,
         // the only way in would be the system "App info" entry or the static app shortcut (both
         // outside this app's own UI). Long-press is free by default and matches the Android norm.
         if (!settingsRepository.isGestureConfigured(HomeGesture.LONG_PRESS)) {
@@ -126,7 +126,7 @@ class PageContentRepository @Inject constructor(
         }
 
         // Fresh-install default: the dock (ALWAYS_VISIBLE by default, see PageRow.dockVisibilityMode)
-        // arrives with 5 ready-to-use entries so it doesn't look sparse — Android Settings, Camera,
+        // arrives with 5 ready-to-use entries so it doesn't look sparse - Android Settings, Camera,
         // Browser and Phone (each resolved to this device's actual default handler via
         // resolveLauncherComponentFor, not a hardcoded package name, so it works the same across
         // OEM skins/emulators), plus a button back into FLauncher's own Settings. Only runs once
@@ -166,8 +166,8 @@ class PageContentRepository @Inject constructor(
     }
 
     /** Finds [intent]'s current default handler, then resolves that same package's actual
-     *  ACTION_MAIN/CATEGORY_LAUNCHER activity — not the (possibly different, non-launchable)
-     *  activity that narrowly handles [intent] itself — so the result is always safe to hand to
+     *  ACTION_MAIN/CATEGORY_LAUNCHER activity - not the (possibly different, non-launchable)
+     *  activity that narrowly handles [intent] itself - so the result is always safe to hand to
      *  [com.bisc.flauncher.util.launchApp], which requires a real launcher activity. Returns null
      *  if the device has no default handler for it (e.g. no camera app on some emulator images). */
     private fun resolveLauncherComponentFor(intent: Intent): ComponentName? {
@@ -187,7 +187,7 @@ class PageContentRepository @Inject constructor(
         }
     }
 
-    /** Resolves ThemePreference.SYSTEM against the live device setting — no bundled wallpaper is
+    /** Resolves ThemePreference.SYSTEM against the live device setting - no bundled wallpaper is
      *  shipped, Light/Dark/System (see ui.theme.Theme.kt) is the only appearance control there is. */
     private suspend fun isDark(): Boolean = settingsRepository.theme.first().isDark(context)
 
@@ -203,16 +203,16 @@ class PageContentRepository @Inject constructor(
 
     /**
      * Adds a new ROWS page immediately to the left or right of Home **within the ROWS subset only**
-     * — the carousel's own "+" tiles. Like [reorderRowsPages], this renumbers every page from
+     * - the carousel's own "+" tiles. Like [reorderRowsPages], this renumbers every page from
      * scratch: ROWS pages in their new relative order first (the new page
      * inserted at [direction]'s position relative to Home), then every non-ROWS singleton appended
      * after, each keeping its own prior relative order among themselves. Avoids a collision-prone
-     * localized index shift — page counts are small, a full stable re-sort is cheap and simple.
+     * localized index shift - page counts are small, a full stable re-sort is cheap and simple.
      */
-    // New pages start as an independent copy of Home's current *structure* — same row types,
-    // order, appearance and background — not of its actual content (pinned apps/folders stay on
+    // New pages start as an independent copy of Home's current *structure* - same row types,
+    // order, appearance and background - not of its actual content (pinned apps/folders stay on
     // Home). The Dock and Panel aren't copied: they're Home's and show on every page anyway. Once
-    // created, the new page is fully independent — editing it never touches Home back.
+    // created, the new page is fully independent - editing it never touches Home back.
     suspend fun addPageInDirection(direction: PageDirection): Long {
         val all = pageDao.getAllOnce()
         val rowsOnly = all.filter { it.kind == LauncherPageKind.ROWS }
@@ -258,7 +258,7 @@ class PageContentRepository @Inject constructor(
 
     /** The carousel's drag-to-reorder: [orderedRowsPageIds] is the new order of the swipeable ROWS
      *  pages (Home included); every page is renumbered from scratch, ROWS first in that order, then
-     *  the non-ROWS singletons in their prior relative order — same scheme as [addPageInDirection]. */
+     *  the non-ROWS singletons in their prior relative order - same scheme as [addPageInDirection]. */
     suspend fun reorderRowsPages(orderedRowsPageIds: List<Long>) {
         val all = pageDao.getAllOnce()
         val byId = all.associateBy { it.id }
@@ -324,7 +324,7 @@ class PageContentRepository @Inject constructor(
         return id
     }
 
-    /** Home's Dock when it's switched on — it shows on every page, so every page reserves room for it. */
+    /** Home's Dock when it's switched on - it shows on every page, so every page reserves room for it. */
     private suspend fun shownDockRow(): PageRow? =
         pageDao.getHomePage()?.let { home -> rowDao.getForPage(home.id).find { it.type == PageRowType.SEARCH_BAR } }
             ?.takeIf { it.enabled }
@@ -418,7 +418,7 @@ class PageContentRepository @Inject constructor(
     private data class SystemInsets(val statusBarTop: Int, val cutoutTop: Int, val navigationBottom: Int)
 
     /**
-     * Real system-bar insets in px — this runs outside any Compose tree, so it can't just read
+     * Real system-bar insets in px - this runs outside any Compose tree, so it can't just read
      * WindowInsets. The status bar's height counts even while it's hidden (a page decides that on its
      * own, see [pageGrid]). Falls back to the internal status_bar_height/navigation_bar_height dimens
      * pre-API 30.
@@ -449,7 +449,7 @@ class PageContentRepository @Inject constructor(
         return context.resources.displayMetrics.heightPixels
     }
 
-    /** How many row units fit on each carousel page — HomeScreen and the widget editor stretch the
+    /** How many row units fit on each carousel page - HomeScreen and the widget editor stretch the
      *  unit with exactly this count, so a full page ends exactly one row gap above the Dock. */
     suspend fun rowUnitCounts(): Map<Long, Int> =
         pageDao.getAllOnce().filter { it.kind == LauncherPageKind.ROWS }.associate { it.id to pageGrid(it.id).unitCount }
@@ -496,7 +496,7 @@ class PageContentRepository @Inject constructor(
 
     suspend fun setRowColumns(row: PageRow, columns: Int) {
         rowDao.update(row.copy(columns = columns.coerceIn(GridConstants.MIN_ELEMENT_BOX_COLUMNS, GridConstants.MAX_ELEMENT_BOX_COLUMNS)))
-        // Fewer columns means more icon rows, i.e. taller — can push the page over budget too.
+        // Fewer columns means more icon rows, i.e. taller - can push the page over budget too.
         rebalancePageOverflow(row.pageId)
     }
 
@@ -538,7 +538,7 @@ class PageContentRepository @Inject constructor(
         }
     }
 
-    /** An element box grows taller as entries are added to it — this can push a page over budget too. */
+    /** An element box grows taller as entries are added to it - this can push a page over budget too. */
     private suspend fun rebalanceForRow(pageRowId: Long) {
         rowDao.getById(pageRowId)?.let { rebalancePageOverflow(it.pageId) }
     }
@@ -587,7 +587,7 @@ class PageContentRepository @Inject constructor(
         return id
     }
 
-    /** [contactId] is a [com.bisc.flauncher.data.model.PinnedContact.contactId] — the caller (see
+    /** [contactId] is a [com.bisc.flauncher.data.model.PinnedContact.contactId] - the caller (see
      *  HomeViewModel.addContactEntryToRow) ensures that pin exists first, same as this row just
      *  referencing an existing folder/website/map target by id. */
     suspend fun addContactEntry(pageRowId: Long, contactId: Long, orderIndex: Int? = null): Long {

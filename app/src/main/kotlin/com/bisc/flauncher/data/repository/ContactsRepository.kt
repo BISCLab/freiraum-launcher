@@ -133,7 +133,7 @@ class ContactsRepository @Inject constructor(
     }
 
     /** Fills in [ContactInfo.phoneNumbers] for an already-built result set, one batched query
-     *  instead of one per contact — result sets here are search-sized (<=20), so this stays cheap. */
+     *  instead of one per contact - result sets here are search-sized (<=20), so this stays cheap. */
     private fun attachPhoneNumbers(results: MutableMap<Long, ContactInfo>) {
         if (results.isEmpty()) return
         val placeholders = results.keys.joinToString(",") { "?" }

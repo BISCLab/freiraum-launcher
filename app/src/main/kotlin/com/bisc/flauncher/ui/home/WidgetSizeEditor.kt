@@ -42,8 +42,8 @@ import com.bisc.flauncher.data.model.PageRowType
 import kotlin.math.roundToInt
 
 /**
- * Widget preview with size controls below it: a coarse row-count stepper for our own widgets, or —
- * for a hosted external widget — a fine, per-digit pixel-height stepper (see [PixelHeightStepper]).
+ * Widget preview with size controls below it: a coarse row-count stepper for our own widgets, or - 
+ * for a hosted external widget - a fine, per-digit pixel-height stepper (see [PixelHeightStepper]).
  */
 @Composable
 fun WidgetSizeEditor(
@@ -55,7 +55,7 @@ fun WidgetSizeEditor(
     onSystemWidgetViewReady: ((android.view.View) -> Unit)? = null,
     heightPxRange: IntRange? = null,
     onHeightPxChange: ((Int) -> Unit)? = null,
-    /** The page's row unit as it's drawn there (stretched), and how many fit — the grid a hosted
+    /** The page's row unit as it's drawn there (stretched), and how many fit - the grid a hosted
      *  widget's free pixel height is matched against. */
     gridUnit: androidx.compose.ui.unit.Dp = PageRowDimens.rowUnitHeight,
     gridUnitCount: Int = 0

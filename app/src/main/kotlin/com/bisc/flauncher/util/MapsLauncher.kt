@@ -14,6 +14,6 @@ fun launchMapTarget(context: Context, target: SavedMapTarget) {
     startView(context, uri, target.navigationApp ?: ExternalApps.maps)
 }
 
-/** Free-text place/address search — the maps-search command result. */
+/** Free-text place/address search - the maps-search command result. */
 fun launchMapsQuery(context: Context, query: String): Boolean =
     startView(context, Uri.parse("geo:0,0?q=${Uri.encode(query.trim())}"), ExternalApps.maps)

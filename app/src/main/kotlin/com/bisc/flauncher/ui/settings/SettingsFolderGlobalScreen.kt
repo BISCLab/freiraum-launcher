@@ -14,7 +14,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
 
-/** The folder-wide appearance/border/visibility presets shared by every folder — a hub mirroring
+/** The folder-wide appearance/border/visibility presets shared by every folder - a hub mirroring
  *  the Dock's own Appearance/Border/Visibility split (see SettingsDockScreen.kt), rather than one
  *  long flat screen. An individual folder can still override Appearance and Border independently
  *  for itself (see SettingsFolderEditScreen). */

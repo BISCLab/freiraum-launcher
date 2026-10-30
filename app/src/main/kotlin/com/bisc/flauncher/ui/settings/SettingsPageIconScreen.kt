@@ -25,7 +25,7 @@ import com.bisc.flauncher.ui.home.dock.PageIconGlyph
 import com.bisc.flauncher.ui.home.dock.PageIconGlyphImage
 import com.bisc.flauncher.ui.home.dock.defaultColor
 
-/** A page's own icon — which symbol, background color, symbol color — the look it shows when a
+/** A page's own icon - which symbol, background color, symbol color - the look it shows when a
  *  dock slot links to it. Free choice among the 4 symbols, not tied to the page's own kind. */
 @Composable
 fun SettingsPageIconScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {

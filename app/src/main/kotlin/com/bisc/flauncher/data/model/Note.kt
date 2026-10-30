@@ -20,7 +20,7 @@ data class Note(
     val updatedAt: Long = System.currentTimeMillis(),
     val orderIndex: Int = 0,
     // Only affects the Notes widget's own grid; the note stays visible everywhere else (quick
-    // overview, search, …) — this is a display filter, not a delete.
+    // overview, search, …) - this is a display filter, not a delete.
     val hiddenInWidget: Boolean = false
 )
 

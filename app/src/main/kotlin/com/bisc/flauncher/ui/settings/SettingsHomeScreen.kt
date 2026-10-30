@@ -53,7 +53,7 @@ import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
-/** Entry point for the Home page's own settings — split into [SettingsPageAppearanceScreen] (the
+/** Entry point for the Home page's own settings - split into [SettingsPageAppearanceScreen] (the
  *  page's background/status-bar) and [SettingsHomeLayoutScreen] (what's actually placed on it),
  *  instead of one long flat screen like every other page still uses (see [SettingsPageRowsScreen]). */
 @Composable
@@ -81,7 +81,7 @@ fun SettingsHomeScreenHub(pageId: Long, navController: NavController, onBack: ()
 }
 
 /** A carousel page's own Appearance screen (Home and every other page alike): its icon and name,
- *  then its background and status-bar switch — all one card. "Hide status bar" sits right below
+ *  then its background and status-bar switch - all one card. "Hide status bar" sits right below
  *  Background here, not nested inside the Background detail page, which is one level further in
  *  than it belongs. */
 @Composable
@@ -128,7 +128,7 @@ fun SettingsPageAppearanceScreen(pageId: Long, navController: NavController, onB
                 imageKey = "page_$pageId",
                 globalShade = pageGlobalShade,
                 onGlobalShadeChange = { viewModel.setPageGlobalShade(pageId, it) },
-                // The page's own title already says "Background" — repeating it inside too would
+                // The page's own title already says "Background" - repeating it inside too would
                 // just be redundant clutter, not extra clarity.
                 groupTitle = null
             )
@@ -137,9 +137,9 @@ fun SettingsPageAppearanceScreen(pageId: Long, navController: NavController, onB
 }
 
 /** What's actually placed on Home: the Favorites "Panel" and the "Dock" are drawn as fixed
- *  bookends — always first/last, never draggable, but switchable off without losing their own
+ *  bookends - always first/last, never draggable, but switchable off without losing their own
  *  configuration (see [PageRow.enabled] for the Dock's own case; the Panel has no row of its own,
- *  so it's a plain [SettingsRepository] flag instead) — with ordinary widget/app rows reorderable
+ *  so it's a plain [SettingsRepository] flag instead) - with ordinary widget/app rows reorderable
  *  between them exactly like [SettingsPageRowsScreen]'s own flat list. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -193,7 +193,7 @@ fun SettingsHomeLayoutScreen(
                     items = otherRows,
                     key = { it.id },
                     // The Dock and Panel rows are excluded from this list (fixed as their own bookends
-                    // above/below) but must still be re-persisted alongside it — reorderRows renumbers
+                    // above/below) but must still be re-persisted alongside it - reorderRows renumbers
                     // orderIndex 0..n-1 over whatever list it's handed.
                     onReorder = { reordered -> viewModel.reorderRows(reordered + listOfNotNull(dockRow, panelRow)) },
                     // Inside the Panel…Dock card: square, so it joins the block instead of rounding itself.
@@ -208,7 +208,7 @@ fun SettingsHomeLayoutScreen(
                                     PageRowType.PANEL -> Unit
                                 }
                             }
-                            // Horizontal inset comes from the list row itself — lined up with Panel and Dock.
+                            // Horizontal inset comes from the list row itself - lined up with Panel and Dock.
                             .padding(vertical = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -288,7 +288,7 @@ fun SettingsHomeLayoutScreen(
 
 }
 
-/** The Favorites "Panel"'s own settings hub — Background/Border/Elements, same shape as the Dock's
+/** The Favorites "Panel"'s own settings hub - Background/Border/Elements, same shape as the Dock's
  *  own hub; the enable switch itself lives inline in [SettingsHomeLayoutScreen]'s list, not here,
  *  matching the Dock bookend's own split. */
 @Composable
@@ -317,7 +317,7 @@ fun SettingsHomePanelScreen(navController: NavController, onBack: () -> Unit, on
     }
 }
 
-/** Finds the Home page's own pinned Panel row — mirrors [SettingsDockScreen.kt]'s rememberDockRow,
+/** Finds the Home page's own pinned Panel row - mirrors [SettingsDockScreen.kt]'s rememberDockRow,
  *  same "always present once seeded, null only means not loaded yet" contract. */
 @Composable
 private fun rememberPanelRow(pageId: Long, viewModel: HomeViewModel): PageRow? {
@@ -349,13 +349,13 @@ fun SettingsPanelBorderScreen(pageId: Long, navController: NavController, onBack
     }
 }
 
-/** The Panel's own grid editor — same "+" preview/chooser idea as [SettingsDockElementsScreen], but
+/** The Panel's own grid editor - same "+" preview/chooser idea as [SettingsDockElementsScreen], but
  *  shaped row by row (each sub-row picks its own column count, 1-6) instead of one shared column
  *  count for the whole grid, since the Panel wraps to multiple rows rather than growing/shrinking
- *  width like the dock does — see [com.bisc.flauncher.ui.home.GridEntries]'s rowColumns param
+ *  width like the dock does - see [com.bisc.flauncher.ui.home.GridEntries]'s rowColumns param
  *  for the centered layout this produces. No separate reorderable entries list underneath either:
  *  tapping a filled slot in the preview itself removes it (see onEditEntry there), since every slot
- *  is already individually picked through the "+" chooser — a second list showing the same content
+ *  is already individually picked through the "+" chooser - a second list showing the same content
  *  again underneath was redundant. Adds contacts as a 7th content type (via the same
  *  [AddElementChooserSheet] the Dock now shares). */
 @OptIn(ExperimentalMaterial3Api::class)

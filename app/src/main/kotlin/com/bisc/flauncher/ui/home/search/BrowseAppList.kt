@@ -106,7 +106,7 @@ internal fun Modifier.fadeListTop(height: Dp, strength: () -> Float): Modifier =
 
 internal val TOP_FADE_HEIGHT = 56.dp
 
-/** Gap above a letter header — also part of the first header's distance from the top. */
+/** Gap above a letter header - also part of the first header's distance from the top. */
 private val HEADER_TOP_PADDING = 22.dp
 
 /** The list's own offset below the status bar (HomeScreen's app-list padding). */
@@ -289,7 +289,7 @@ private fun BrowseSectionHeader(letter: Char, appearance: ElementAppearance, han
             .padding(
                 start = edgeInset,
                 end = edgeInset,
-                // Bigger than the bottom gap on purpose — this is the break from the *previous*
+                // Bigger than the bottom gap on purpose - this is the break from the *previous*
                 // section's last app, not from this header's own apps right below it (that gap is
                 // the row's own top padding plus this header's bottom padding, unchanged).
                 top = HEADER_TOP_PADDING,

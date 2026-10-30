@@ -185,7 +185,7 @@ fun PageRowContent(
                 )
             }
         }
-        // Neither the dock nor the Panel ever render inline as a row — HomeScreen strips both out
+        // Neither the dock nor the Panel ever render inline as a row - HomeScreen strips both out
         // before handing the rest to PageRowsColumn and renders them itself, directly, as their own
         // floating layers outside the pager (see HomeScreen's floating dock Box and Panel overlay).
         // These rows only still exist as markers carrying their own per-row appearance/entries;
@@ -247,7 +247,7 @@ private fun ElementBoxGrid(
  *  [totalSlots]/[onAddEmptySlot] pair (pad with tappable "+" cells up to a target grid shape,
  *  the dock's "+" slot idea generalized to two dimensions), [GridItemType.CONTACT], and
  *  [rowColumns]/[onEditEntry] for the Panel's own per-row-column, centered shape (see their own
- *  doc comments below). Ordinary in-page element boxes pass neither of the Panel-only params — a
+ *  doc comments below). Ordinary in-page element boxes pass neither of the Panel-only params - a
  *  single [columns] value, stretched to fill the row's full width, same as before. */
 @Composable
 fun GridEntries(
@@ -275,13 +275,13 @@ fun GridEntries(
     totalSlots: Int? = null,
     onAddEmptySlot: ((Int) -> Unit)? = null,
     // The Panel's own shape: one column count per sub-row (see PageRow.panelRows), each row
-    // centered around the middle with fixed-size cells and a constant gap — rather than stretched
-    // with Arrangement.SpaceEvenly to fill the full width — so a 3-wide row and a 5-wide row both
+    // centered around the middle with fixed-size cells and a constant gap - rather than stretched
+    // with Arrangement.SpaceEvenly to fill the full width - so a 3-wide row and a 5-wide row both
     // read as "centered, evenly spaced" instead of the shorter one looking stretched out. When set,
     // this entirely replaces the [columns]/[totalSlots] flat-chunking path below.
     rowColumns: List<Int>? = null,
     // Settings-only: when set, tapping any *filled* cell calls this instead of its normal live
-    // action (launch the app, open the folder, …) — the Panel's Elements editor uses it to let you
+    // action (launch the app, open the folder, …) - the Panel's Elements editor uses it to let you
     // remove an entry by tapping it directly, instead of a separate reorderable list underneath.
     onEditEntry: ((RowEntry) -> Unit)? = null,
     // The Dock's own need: every sub-row centered within the same fixed reference width (sized for
@@ -289,7 +289,7 @@ fun GridEntries(
     // gets the same edge-to-icon gap as a full row (5 icons) rather than extra Arrangement.Center
     // slack making its edges sit further in. Null (the Panel's case) sizes each row to its content.
     referenceColumnCount: Int? = null,
-    // Vertical gap between sub-rows — also Dock-only (0 keeps the Panel's rows flush, as before).
+    // Vertical gap between sub-rows - also Dock-only (0 keeps the Panel's rows flush, as before).
     rowGap: androidx.compose.ui.unit.Dp = 0.dp,
     // Dock/Panel: each entry sits in the slot its orderIndex names, so removing one leaves a gap
     // instead of shifting the rest along. Otherwise entries simply fill the slots in order.
@@ -398,7 +398,7 @@ fun GridEntries(
 }
 
 /** Clip shape for the cell types whose background box is drawn directly in Compose rather than
- *  baked into a cached bitmap — see [LocalIconShape]'s doc comment for why those need this instead
+ *  baked into a cached bitmap - see [LocalIconShape]'s doc comment for why those need this instead
  *  of just picking up the shape for free the way app icons do. */
 private fun elementCellShape(iconShape: IconShape): Shape = when (iconShape) {
     IconShape.CIRCLE -> CircleShape
@@ -650,7 +650,7 @@ private fun ActionButtonCell(
     }
 }
 
-/** Per-icon clip shape for a pill-style row — shared by [PillRow] and the Dock's own flush panel in
+/** Per-icon clip shape for a pill-style row - shared by [PillRow] and the Dock's own flush panel in
  *  HomeScreen.kt, which lays [PillRowEntries] out directly rather than through [PillRow]. */
 @Composable
 fun pillItemShape(iconShape: IconShape): Shape = when (iconShape) {
@@ -660,12 +660,12 @@ fun pillItemShape(iconShape: IconShape): Shape = when (iconShape) {
 
 /**
  * A single non-wrapping line of entries (no per-cell text labels, uniform squircle buttons), for
- * any row with [PageRow.pillMode] set — the dock being the one instance
+ * any row with [PageRow.pillMode] set - the dock being the one instance
  * that floats outside the pager (see HomeScreen's floating dock Box, which calls this directly with
  * the home page's pinned SEARCH_BAR row), but any ordinary [PageRowType.ELEMENT_BOX] row can opt into the
  * same layout. It spans the full row width, with the fine standard margin or edge to edge per
  * [PageRow.edgeToEdge]. When [onAddEmptySlot]
- * is non-null, the row pads itself with tappable empty placeholders up to [PageRow.pillMaxEntries] —
+ * is non-null, the row pads itself with tappable empty placeholders up to [PageRow.pillMaxEntries] - 
  * the dock's classic "tap an empty slot to fill it" invitation; an ordinary in-page pill row (edited
  * from its own Settings screen instead) passes null and simply shows however many real entries it has.
  */
@@ -746,7 +746,7 @@ fun PillRow(
 }
 
 /** The actual row of icon cells shared by [PillRow] (the floating/inline pill bar) and the Dock's own
- *  flush bottom panel in HomeScreen.kt — extracted so the panel can lay these out full-width inside
+ *  flush bottom panel in HomeScreen.kt - extracted so the panel can lay these out full-width inside
  *  its own [com.bisc.flauncher.ui.home.dock.DockPanelSurface] shell instead of [PillRow]'s pill-shaped
  *  bar Box. */
 @Composable
@@ -933,7 +933,7 @@ private fun GridLabel(text: String, color: Color = Color.White, modifier: Modifi
     )
 }
 
-/** Resolves a display name for any [RowEntry] type — shared by [PillRowEntries]' optional
+/** Resolves a display name for any [RowEntry] type - shared by [PillRowEntries]' optional
  *  captions (PageRow.showLabels) and ElementBoxGrid's own always-on per-cell labels. */
 @Composable
 internal fun entryLabel(

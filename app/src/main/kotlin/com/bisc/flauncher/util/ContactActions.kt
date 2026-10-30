@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 
 /** Deliberately honest about what these platforms actually expose: neither WhatsApp nor Telegram
- *  publish an intent to directly start a voice/video call to a number — only a documented chat
+ *  publish an intent to directly start a voice/video call to a number - only a documented chat
  *  deep link. So each app gets one "open chat" action, not fake voice/video buttons. */
 object ContactActions {
     fun isPackageInstalled(context: Context, packageName: String): Boolean =

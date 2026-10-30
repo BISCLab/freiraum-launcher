@@ -66,11 +66,11 @@ val SettingsTextFieldShape = SettingsCardShape
 /**
  * A [Slider] whose value is only persisted once the drag ends, not on every intermediate frame.
  * Persisted settings live in a single shared DataStore Preferences file, and every write there
- * re-serializes and rewrites the *whole* file to disk — firing that on every drag frame (as plain
+ * re-serializes and rewrites the *whole* file to disk - firing that on every drag frame (as plain
  * `onValueChange` does) can queue up dozens of full-file writes per second while dragging, which is
  * what made these screens feel massively laggy, and could even bury a just-made unrelated change
  * (like picking a background image) behind a long backlog of stale slider writes. The slider itself
- * still tracks the drag smoothly via local state — [label] is handed that live value so any text next
+ * still tracks the drag smoothly via local state - [label] is handed that live value so any text next
  * to the slider (e.g. a percentage) stays in sync while dragging too.
  */
 @Composable
@@ -149,7 +149,7 @@ fun ExpandableShadePercentSlider(percent: Int, onSettled: (Int) -> Unit) {
     )
 }
 
-/** 0..200 percent case for icon size — the icon's actual size relative to normal, 100 being
+/** 0..200 percent case for icon size - the icon's actual size relative to normal, 100 being
  *  neutral/default, smaller below and larger above. */
 @Composable
 fun ExpandableIconSizeSlider(percent: Int, onSettled: (Int) -> Unit) {
@@ -163,7 +163,7 @@ fun ExpandableIconSizeSlider(percent: Int, onSettled: (Int) -> Unit) {
 
 /** Same as [ExpandableIconSizeSlider], but [percent] is nullable (null = inherit the global
  *  default); moving the slider sets an explicit override, and a reset row clears it back to null
- *  once one is set — the same "Automatic until touched" pattern as [AutomaticColorPicker]. */
+ *  once one is set - the same "Automatic until touched" pattern as [AutomaticColorPicker]. */
 @Composable
 fun ExpandableOptionalIconSizeSlider(percent: Int?, globalDefault: Int, onSettled: (Int?) -> Unit) {
     ExpandableSlider(
@@ -246,7 +246,7 @@ fun FillModePreference(
 
 /** Editor for a layer 2/3 appearance: fill, opacity, border, text color. [styleGroupTitle] is
  *  nullable for a caller whose own already-visible context (a page title, a related on/off switch
- *  right above) already names it — a repeated heading right underneath would just be noise, same
+ *  right above) already names it - a repeated heading right underneath would just be noise, same
  *  as [ElementBorderSection]'s own doc on this. */
 @Composable
 fun ElementAppearanceSection(
@@ -261,7 +261,7 @@ fun ElementAppearanceSection(
     var colorEditorOpen by remember { mutableStateOf(false) }
 
     // One connected card for everything color-related: fill mode, then (once a fill mode other than
-    // None needs an actual color) the text color right underneath — no separate untitled "Color" row
+    // None needs an actual color) the text color right underneath - no separate untitled "Color" row
     // to tap through first, tapping "Color" itself opens its own full editor screen directly.
     SettingsPreferenceGroup(title = styleGroupTitle) {
         ElementFillMode.entries.filter { allowNone || it != ElementFillMode.NONE }.forEach { mode ->
@@ -315,7 +315,7 @@ fun ElementAppearanceSection(
     }
 
     // Border, all in one connected card under its own heading: on/off, then (once on) thickness and
-    // color stacked right underneath — mirrors ElementBorderSection's own dedicated-screen layout.
+    // color stacked right underneath - mirrors ElementBorderSection's own dedicated-screen layout.
     if (showBorder) SettingsPreferenceGroup(title = stringResource(R.string.settings_element_border_label)) {
         SettingsPreference(
             icon = null,
@@ -354,12 +354,12 @@ fun ElementAppearanceSection(
     }
 }
 
-/** Background-only half of [ElementAppearanceSection] — fill mode, color and opacity, with no
+/** Background-only half of [ElementAppearanceSection] - fill mode, color and opacity, with no
  *  group title of its own (the page it's placed on is already titled "Background", so a repeated
  *  heading would just add noise). Used by the Fill screens of the Dock, Panel, folders and search. */
 @Composable
 fun ElementBackgroundSection(appearance: ElementAppearance, onAppearanceChange: (ElementAppearance) -> Unit, allowNone: Boolean = true) {
-    // Selecting "Color" opens its own window directly — no separate "Color" row to tap through
+    // Selecting "Color" opens its own window directly - no separate "Color" row to tap through
     // first, same as every other color picker in the app. Opacity lives inside that same window
     // rather than as its own section, since it's meaningless without a color/fill to apply to.
     var colorEditorOpen by remember { mutableStateOf(false) }
@@ -402,7 +402,7 @@ fun ElementBackgroundSection(appearance: ElementAppearance, onAppearanceChange: 
     }
 }
 
-/** Border-only half of [ElementAppearanceSection] — enable switch, thickness and color all live
+/** Border-only half of [ElementAppearanceSection] - enable switch, thickness and color all live
  *  in one connected card (no repeated "Border" sub-heading, since the page itself is already
  *  titled "Border"). Thickness expands inline when tapped; color opens in its own window like
  *  every other color picker in the app. Used by the Dock and Favorites Panel's own dedicated
@@ -464,7 +464,7 @@ fun ElementBorderSection(appearance: ElementAppearance, onAppearanceChange: (Ele
     }
 }
 
-/** Captions toggle + (when on) text color, as one connected card — shared by the Dock's and
+/** Captions toggle + (when on) text color, as one connected card - shared by the Dock's and
  *  Favorites Panel's own Elements screens. The color reuses [ElementAppearance.contentColor],
  *  the same "Text color" already shown elsewhere for a row, so there's only one text-color
  *  setting per row rather than a second one specific to captions. */
@@ -481,7 +481,7 @@ fun CaptionsSection(
     }
 }
 
-/** The rows of [CaptionsSection] without its own card — for joining a card with other switches. */
+/** The rows of [CaptionsSection] without its own card - for joining a card with other switches. */
 @Composable
 fun CaptionsRows(
     showLabels: Boolean,
@@ -663,7 +663,7 @@ fun SettingsFixedDialog(
 }
 
 /** One [IconShape] radio row, with a tiny live preview swatch of the shape itself. [selected] may be
- *  null (e.g. a per-app override that currently inherits the global default — nothing matches it). */
+ *  null (e.g. a per-app override that currently inherits the global default - nothing matches it). */
 @Composable
 fun IconShapePreference(
     label: String,

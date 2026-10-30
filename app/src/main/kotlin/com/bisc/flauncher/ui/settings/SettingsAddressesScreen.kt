@@ -26,7 +26,7 @@ import com.bisc.flauncher.ui.home.ConfirmRemoveDialog
 import com.bisc.flauncher.ui.home.dock.AddMapTargetDialog
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
-/** Global "Adressen" Element list (Settings -> Elements -> Addresses) — every [SavedMapTarget] in
+/** Global "Adressen" Element list (Settings -> Elements -> Addresses) - every [SavedMapTarget] in
  *  one place, independent of which rows/folders currently pin it. Mirrors [SettingsFolderScreen]'s
  *  list+create-dialog+navigate-to-detail pattern. */
 @Composable
@@ -66,7 +66,7 @@ fun SettingsAddressesScreen(navController: NavController, onBack: () -> Unit, vi
     }
 }
 
-/** Detail/edit screen for one [SavedMapTarget], reached by id from [SettingsAddressesScreen] — same
+/** Detail/edit screen for one [SavedMapTarget], reached by id from [SettingsAddressesScreen] - same
  *  "hold only the id, re-derive the live item every recomposition" convention as the rest of
  *  Settings (e.g. [SettingsPageRowsScreen]). */
 @Composable

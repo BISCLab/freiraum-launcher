@@ -5,7 +5,7 @@ import java.text.Normalizer
 private val COMBINING_MARKS = Regex("\\p{Mn}+")
 private val WORD_SEPARATORS = Regex("[\\s,]+")
 
-/** Lowercase, without accents and with ß as ss — so "uber" finds "Über" and "strasse" finds "Straße". */
+/** Lowercase, without accents and with ß as ss - so "uber" finds "Über" and "strasse" finds "Straße". */
 fun foldForSearch(text: String): String =
     Normalizer.normalize(text.lowercase(), Normalizer.Form.NFD).replace(COMBINING_MARKS, "").replace("ß", "ss")
 
@@ -21,7 +21,7 @@ fun matchesWordStart(text: String, query: String): Boolean {
 }
 
 /** Like [matchesWordStart] for queries of several words, in any order: every word of [query] has to
- *  start a word somewhere in [text] — so "klee 23" finds "Kleeberger Straße 23, 35510 Butzbach". */
+ *  start a word somewhere in [text] - so "klee 23" finds "Kleeberger Straße 23, 35510 Butzbach". */
 fun matchesAllWordStarts(text: String, query: String): Boolean {
     val words = query.split(WORD_SEPARATORS).filter { it.isNotEmpty() }
     return words.isNotEmpty() && words.all { matchesWordStart(text, it) }

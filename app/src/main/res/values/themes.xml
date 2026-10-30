@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Layer 1 is mandatory on every page now — there's no case where showing the raw system
+    <!-- Layer 1 is mandatory on every page now - there's no case where showing the raw system
          wallpaper behind us is wanted, and doing so meant any brief gap in our own rendering (an
          async image load, a page/background transition) let the system wallpaper flash through
          instead of our own background. A solid windowBackground (not transparent) closes that gap

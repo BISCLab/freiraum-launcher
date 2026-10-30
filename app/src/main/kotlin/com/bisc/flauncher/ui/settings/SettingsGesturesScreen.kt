@@ -56,13 +56,13 @@ import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 @Composable
 fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val gestureActions by viewModel.gestureActions.collectAsState()
-    // Unfiltered — a gesture already bound to an app keeps showing its.
+    // Unfiltered - a gesture already bound to an app keeps showing its.
     val labeledApps by viewModel.labeledApps.collectAsState()
     val browsableApps by viewModel.browsableApps.collectAsState()
     val allPages by viewModel.allPages.collectAsState()
     val homeDockRow by viewModel.homeDockRow.collectAsState()
     val homePanelRow by viewModel.homePanelRow.collectAsState()
-    // Mirrors the reservation HomeScreen's detectHomeGestures actually enforces — a gesture claimed
+    // Mirrors the reservation HomeScreen's detectHomeGestures actually enforces - a gesture claimed
     // by the Dock/Panel can't also be rebound here, shown locked with a reason instead of hidden.
     val lockedReason: @Composable (HomeGesture) -> String? = { gesture ->
         when {
@@ -83,7 +83,7 @@ fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, vie
     var pendingShortcutGesture by remember { mutableStateOf<HomeGesture?>(null) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_gestures), navController = navController, onBack = onBack) {
-        // A phone with each gesture marked where it happens, instead of a list — tap a marker to
+        // A phone with each gesture marked where it happens, instead of a list - tap a marker to
         // change what it does.
         val markers = HomeGesture.entries.associateWith { gesture ->
             val locked = lockedReason(gesture)

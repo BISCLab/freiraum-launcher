@@ -62,7 +62,7 @@ import com.bisc.flauncher.ui.home.dock.BackgroundFill
 import com.bisc.flauncher.data.model.BackgroundConfig
 
 /**
- * Full-screen search, decoupled from the dock — reachable from a dock action button, a gesture, or
+ * Full-screen search, decoupled from the dock - reachable from a dock action button, a gesture, or
  * (later) a standalone icon, and fully optional/ignorable if none of those is configured. The
  * whole screen shares one flat [appearance]: result cards float on it with a small gap between
  * them (see [SearchResultsColumn]). The search field + category filter is one combined element
@@ -136,7 +136,7 @@ fun SearchOverlay(
 
     LaunchedEffect(Unit) { onRefreshContactsPermission() }
 
-    // Only the system settings screens this phone can open — some aren't offered by every maker.
+    // Only the system settings screens this phone can open - some aren't offered by every maker.
     val availableSettings = remember {
         SettingsShortcuts.all.filter { context.packageManager.resolveActivity(android.content.Intent(it.action), 0) != null }
     }
@@ -151,7 +151,7 @@ fun SearchOverlay(
         }
     }
 
-    // The page has no fill of its own over its background — [appearance] only contributes the text
+    // The page has no fill of its own over its background - [appearance] only contributes the text
     // color, automatic = readable against that background.
     val noFill = appearance.copy(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE)
     // Not yet customized, the bar and the cards look like every other element (Dock, Panel, …):
@@ -172,7 +172,7 @@ fun SearchOverlay(
 
     Box(modifier = Modifier.fillMaxSize()) {
         // The screen's own backdrop (global, own image or own color), always fully opaque so the
-        // home page and its dock never show through — same as the app list.
+        // home page and its dock never show through - same as the app list.
         if (background != null) {
             BackgroundFill(background, Modifier.matchParentSize())
         }
@@ -292,6 +292,6 @@ private fun rememberCameraGap(): androidx.compose.ui.unit.Dp? {
     val density = androidx.compose.ui.platform.LocalDensity.current
     val cutout = view.rootWindowInsets?.displayCutout ?: return null
     val camera = cutout.boundingRects.filter { it.top < view.height / 4 && !it.isEmpty }.minByOrNull { it.top } ?: return null
-    // A notch reaching the top edge has no gap above it to mirror — keep a small one below then.
+    // A notch reaching the top edge has no gap above it to mirror - keep a small one below then.
     return with(density) { if (camera.top > 0) (camera.bottom + camera.top).toDp() else camera.bottom.toDp() + 8.dp }
 }

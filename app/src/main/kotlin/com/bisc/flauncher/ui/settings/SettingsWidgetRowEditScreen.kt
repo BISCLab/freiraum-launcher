@@ -81,7 +81,7 @@ fun SettingsWidgetRowEditScreen(
     val isBuiltIn = row.type == PageRowType.WIDGET
     val minSpan = if (isBuiltIn) WidgetKind.minSpan(row.payload) else 1
     // The page's row grid, computed exactly as HomeScreen lays the page out (see PageGrid): how many
-    // row units fit — fewer with Home's Dock, which shows on every page — and how tall one is drawn.
+    // row units fit - fewer with Home's Dock, which shows on every page - and how tall one is drawn.
     val homePageId = allPages.find { it.isHome }?.id
     val shownDock = rowsByPage[homePageId].orEmpty().find { it.type == PageRowType.SEARCH_BAR }?.takeIf { it.enabled }
     val rowUnitCounts by viewModel.rowUnitCounts.collectAsState()
@@ -179,7 +179,7 @@ fun SettingsWidgetRowEditScreen(
                 }
             }
             // The clock isn't a card like the other built-in widgets (no fill/border/corner-shape), so
-            // it skips ElementAppearanceSection entirely — but its text still reads row.appearance()
+            // it skips ElementAppearanceSection entirely - but its text still reads row.appearance()
             // .contentColor at render time (ClockWidget's customInk), so this one field is exposed
             // directly instead. "Automatic" still means what ClockWidget actually falls back to when
             // unset: contrast-matched to whatever's behind it, not a fixed color, hence the plain white

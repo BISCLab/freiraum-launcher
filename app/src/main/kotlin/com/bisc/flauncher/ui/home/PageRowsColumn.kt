@@ -21,7 +21,7 @@ import com.bisc.flauncher.data.model.SavedMapTarget
 import com.bisc.flauncher.data.settings.IconShape
 
 /**
- * One page's content: [rows] (already sorted by orderIndex) stacked top to bottom, no scrolling — a
+ * One page's content: [rows] (already sorted by orderIndex) stacked top to bottom, no scrolling - a
  * page is exactly one screen. Whatever doesn't fit is moved to a fresh page at the data layer instead
  * (see [com.bisc.flauncher.data.repository.PageContentRepository.rebalancePageOverflow]), so rows here
  * are expected to always fit; this is just a plain stacking layout, no page-snap or clipping tricks.

@@ -96,7 +96,7 @@ class MainActivity : ComponentActivity() {
     }
 
     // uiMode is declared in configChanges (manifest), so a device dark/light flip lands here
-    // instead of recreating the Activity. Only matters for ThemePreference.SYSTEM — Light/Dark
+    // instead of recreating the Activity. Only matters for ThemePreference.SYSTEM - Light/Dark
     // ignore the device setting entirely, so reapplying for them here would just be a no-op
     // rewrite. See ThemeRepository.reapplyTheme for what "System follows the device live" means
     // in practice: it re-stamps the background and every box/card/widget/dock/panel's default
@@ -122,7 +122,7 @@ class MainActivity : ComponentActivity() {
             val showSettingsTips by settingsVm.showSettingsTips.collectAsState()
             val accentColor by settingsVm.accentColor.collectAsState()
             // New lambda identity whenever either input changes, so LocalIconSizeResolver consumers
-            // (AppIconCell) recompose — a StateFlow's plain .value read wouldn't do that on its own.
+            // (AppIconCell) recompose - a StateFlow's plain .value read wouldn't do that on its own.
             val iconSizeResolver = androidx.compose.runtime.remember(globalIconSizePercent, appOverridesForIconSize) {
                 { componentName: String ->
                     val percent = appOverridesForIconSize[componentName]?.iconSizePercent ?: globalIconSizePercent

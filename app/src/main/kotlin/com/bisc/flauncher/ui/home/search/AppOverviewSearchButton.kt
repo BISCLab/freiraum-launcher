@@ -22,7 +22,7 @@ import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.ui.home.dock.resolveElementColors
 
-/** App overview's own floating search button — jumps straight into the Text-search utility page.
+/** App overview's own floating search button - jumps straight into the Text-search utility page.
  *  Its own fixed-size, fixed-inset footprint (see [AppOverviewDimens]), independent of the Dock. */
 @Composable
 fun AppOverviewSearchButton(

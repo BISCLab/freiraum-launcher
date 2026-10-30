@@ -128,7 +128,7 @@ fun HomeScreen(
 
     val pages by viewModel.pages.collectAsState()
     // Page-link entries (GridItemType.PAGE, including the dock's own) need the full list to resolve
-    // an icon for the Search/App-overview singletons too — `pages` above is ROWS-only (the pager's own
+    // an icon for the Search/App-overview singletons too - `pages` above is ROWS-only (the pager's own
     // list), which is why those two always fell back to the generic "unknown page" glyph otherwise.
     val allPages by viewModel.allPages.collectAsState()
     val rowsByPage by viewModel.rowsByPage.collectAsState()
@@ -229,7 +229,7 @@ fun HomeScreen(
     val appOverviewHideStatusBar by remember(appOverviewPageId) { viewModel.pageHideStatusBar(appOverviewPageId ?: -1L) }
         .collectAsState(initial = false)
     // The Panel is part of the home page, so it inherits currentPageHideStatusBar like everything
-    // else on Home — no dedicated branch.
+    // else on Home - no dedicated branch.
     val hideStatusBar = when {
         folderOpen -> folderHideStatusBar
         onAppOverviewPage -> appOverviewHideStatusBar
@@ -239,7 +239,7 @@ fun HomeScreen(
     val immersiveSearch = hideStatusBar && !folderOpen
     // Real inset values only ever arrive once WindowInsets are actually delivered, and are cached here
     // (never reset back to 0) so our own top-padding animation below always has a real, stable target
-    // to animate toward — instead of tracking the *live*, mid-transition system inset while the OS
+    // to animate toward - instead of tracking the *live*, mid-transition system inset while the OS
     // separately animates the real status bar in/out. Two independently-timed animations racing each
     // other is what caused content (e.g. the clock) to visibly slide and "find its place" instead of
     // moving once, cleanly, whenever hideStatusBar differs between two things the user navigates
@@ -328,7 +328,7 @@ fun HomeScreen(
         ?.let { rowsByPage[it.id] }
         ?.find { it.type == PageRowType.PANEL }
     val dockVisibilityMode = homeDockRow?.dockVisibilityMode ?: com.bisc.flauncher.data.model.DockVisibilityMode.ALWAYS_VISIBLE
-    // Ephemeral UI state only, deliberately not persisted — same ephemeral character as the
+    // Ephemeral UI state only, deliberately not persisted - same ephemeral character as the
     // Favorites popup this look mirrors. Resets to its mode's own starting state whenever the
     // row id or the mode itself changes (e.g. the user just switched modes in Settings).
     var dockExpanded by remember(homeDockRow?.id, dockVisibilityMode) {
@@ -344,7 +344,7 @@ fun HomeScreen(
     }
     val dockCanCollapse = dockVisibilityMode != com.bisc.flauncher.data.model.DockVisibilityMode.ALWAYS_VISIBLE
     // Standard edge-gesture hot-zone size (not tied to the live system inset, which collapses to 0
-    // once we hide the status bar — the whole point is keeping Android's own edge swipe reachable
+    // once we hide the status bar - the whole point is keeping Android's own edge swipe reachable
     // even then), used to keep the Dock's/Panel's swipe-gesture claim from eating the top/bottom
     // edge strip Android itself reserves for the status bar reveal and the gesture-nav task switcher.
     val edgeSafeZonePx = with(LocalDensity.current) { 24.dp.toPx() }
@@ -353,7 +353,7 @@ fun HomeScreen(
         val index = pages.indexOfFirst { it.id == pageId }
         if (index >= 0) coroutineScope.launch { pagerState.animateScrollToPage(virtualIndexOf(index)) }
     }
-    // Shared by every page-link entry (an ElementBoxGrid cell, a pill-row cell, the floating dock) —
+    // Shared by every page-link entry (an ElementBoxGrid cell, a pill-row cell, the floating dock) - 
     // jumps the pager for a swipeable ROWS page, opens the matching overlay for the two singletons.
     val onOpenPageLink: (Long, com.bisc.flauncher.data.model.LauncherPageKind) -> Unit = { pageId, kind ->
         when (kind) {
@@ -364,7 +364,7 @@ fun HomeScreen(
     }
     // An Action button's action: open a page (same dispatch as a plain page-link entry), trigger
     // the Panel/Dock directly (the one thing a page-link can't express), jump into a curated
-    // Android settings screen, or open FLauncher's own Settings — see ActionButtonActionType.
+    // Android settings screen, or open FLauncher's own Settings - see ActionButtonActionType.
     val onActionButtonClick: (com.bisc.flauncher.data.model.ActionButton) -> Unit = { button ->
         when (button.actionType) {
             com.bisc.flauncher.data.model.ActionButtonActionType.PAGE -> {
@@ -423,12 +423,12 @@ fun HomeScreen(
                 // each page, so pages with different images/colors blend instead of showing a seam.
                 //
                 // Backgrounds are read from pageBackgroundCache (filled below, per page slot) rather than
-                // each collecting their own Flow — a page's background is fetched once and cached, then
+                // each collecting their own Flow - a page's background is fetched once and cached, then
                 // just read back instantly regardless of how the transition logic below uses it.
                 //
                 // Frame-by-frame capture of an actual swipe (see git history for the two failed attempts
                 // this replaced) confirmed the background has to track the *same* continuous position the
-                // pager itself uses to lay out content — anything that waits for a discrete "arrived" or
+                // pager itself uses to lay out content - anything that waits for a discrete "arrived" or
                 // "committed" signal (currentPage, targetPage) either lags behind the content's own motion
                 // (a visible two-stage "content slides, then bg flashes in afterward") or over-fires on
                 // every direction change during an indecisive drag (targetPage changes many times per
@@ -437,7 +437,7 @@ fun HomeScreen(
                 // background is always exactly where the pager itself says the transition currently is.
                 //
                 // Frozen to the settled page alone whenever an overlay (app overview, search, quick
-                // overview) covers the pager — a page reported flickering to a neighbor's background
+                // overview) covers the pager - a page reported flickering to a neighbor's background
                 // specifically while leaving the app overview, and the pager underneath keeps existing
                 // (composed, not disposed) the whole time an overlay sits on top of it, so anything that
                 // nudged its position while hidden would only become visible right as that overlay's own
@@ -445,11 +445,11 @@ fun HomeScreen(
                 // of the pager is even visible, so this sidesteps that class of bug outright rather than
                 // chasing down whatever specifically causes the position to move while covered.
                 //
-                // Gated on pageContentAlpha, not the raw overlayHidesPage boolean — the boolean flips the
+                // Gated on pageContentAlpha, not the raw overlayHidesPage boolean - the boolean flips the
                 // instant an overlay is told to close, but the overlay's own exit animation (its fadeOut
                 // + slideOutVertically) keeps it visually on screen, gradually revealing the pager
                 // underneath, for another 110-200ms after that. Unfreezing on the boolean alone reactivated
-                // live crossfade math *during* that reveal instead of after it — exactly the window where
+                // live crossfade math *during* that reveal instead of after it - exactly the window where
                 // a transient glitch would read as "clearer"/more noticeable than the same thing happening
                 // behind an instant cut (e.g. the system back gesture, which visually swaps far more
                 // abruptly and gives a glitch nowhere near as much exposed time to be seen).
@@ -477,16 +477,16 @@ fun HomeScreen(
 
                 HorizontalPager(
                     state = pagerState,
-                    // Was (pages.size - 1) — every page composed all the time, specifically to stop home
+                    // Was (pages.size - 1) - every page composed all the time, specifically to stop home
                     // from being disposed/recomposed from scratch when returning to it from a page 2+
                     // away. That traded a narrow, occasional hitch for a permanently heavier composition
                     // (every external widget host alive on every page, all the time), and that's what
-                    // actually made *everything* feel worse afterward — the app-list transition, general
-                    // scrolling, all of it — not just the one swipe this was meant to fix. Back to only
+                    // actually made *everything* feel worse afterward - the app-list transition, general
+                    // scrolling, all of it - not just the one swipe this was meant to fix. Back to only
                     // keeping the immediate neighbor pre-warmed, matching how Pager is meant to be used.
                     // While swiping, up to four consecutive virtual pages are composed (the two in view
                     // plus one neighbor each side), so an endless carousel of three pages composes one
-                    // page twice — only one copy hosts its app widgets (see hostsAppWidgets below). With
+                    // page twice - only one copy hosts its app widgets (see hostsAppWidgets below). With
                     // two pages the copies would both be in view at times, so nothing is pre-composed.
                     beyondViewportPageCount = if (endless && pages.size < 3) 0 else 1,
                     // Left/right swipe between Home and its other pages; wraps around when the
@@ -498,17 +498,17 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxSize()
                 ) { pageIndex ->
                     val page = pages.getOrNull(realIndex(pageIndex))
-                    // A plain Box, not BoxWithConstraints — BoxWithConstraints is backed by SubcomposeLayout,
+                    // A plain Box, not BoxWithConstraints - BoxWithConstraints is backed by SubcomposeLayout,
                     // and subcomposing every page's full widget content (each with its own state, icon
                     // loading, etc.) on first entering the pager's composition range is what made swiping
                     // onto a widget-heavy page feel janky, regardless of whether the widgets were external
                     // or built-in.
                     Box(
                         // The 4 rebindable HomeGestures (long-press/double-tap/swipe-up/swipe-down), on
-                        // every page — the Dock and the Panel are Home's and show on every page, so their
+                        // every page - the Dock and the Panel are Home's and show on every page, so their
                         // open gestures work everywhere too. Swipe-up/-down double as the Dock's/Panel's own
                         // open gesture: when the Dock is in MANUAL mode (or the Panel is enabled), that
-                        // gesture is claimed outright instead of running its normally-bound action —
+                        // gesture is claimed outright instead of running its normally-bound action - 
                         // mirrored in SettingsGesturesScreen, which shows that slot locked with a reason
                         // instead of letting it be rebound. A top/bottom safe zone keeps Android's own
                         // edge gestures (hidden status bar reveal; gesture-nav task switcher) reachable.
@@ -542,7 +542,7 @@ fun HomeScreen(
                     ) {
                     if (page != null) {
                         val pageRows = rowsByPage[page.id].orEmpty()
-                        // Neither the dock nor the Panel render inline — both float outside the pager
+                        // Neither the dock nor the Panel render inline - both float outside the pager
                         // as their own overlays (see the floating dock Box and Panel overlay below).
                         val withoutPinnedSearchBar = pageRows.filter { it.type != PageRowType.SEARCH_BAR && it.type != PageRowType.PANEL }
                         // Home's Dock floats over every page, flush to the screen's bottom edge: content
@@ -559,7 +559,7 @@ fun HomeScreen(
                         LaunchedEffect(page.id, pageBackgroundConfigOrNull) {
                             pageBackgroundConfigOrNull?.let { config ->
                                 // Decode a page's own image before the shared layer ever crossfades to
-                                // it — a still-loading upper layer is what read as flicker.
+                                // it - a still-loading upper layer is what read as flicker.
                                 config.imagePath?.takeIf { config.source == com.bisc.flauncher.data.model.BackgroundSource.IMAGE }?.let { path ->
                                     withContext(Dispatchers.Default) { com.bisc.flauncher.util.BackgroundImageStore.load(context, path) }
                                 }
@@ -598,7 +598,7 @@ fun HomeScreen(
                             LocalHomeGestureExclusion provides homeGestureExclusion,
                             com.bisc.flauncher.ui.home.widgets.LocalReuseWidgetViews provides true,
                             // An app widget has one view: of a page composed twice (three-page endless
-                            // carousel), only the copy in view or right next to it hosts it — the
+                            // carousel), only the copy in view or right next to it hosts it - the
                             // other one, off-screen, shows an empty card.
                             com.bisc.flauncher.ui.home.widgets.LocalHostAppWidgets provides
                                 (!(endless && pages.size == 3) || (pageIndex - pagerState.currentPage) in -1..1)
@@ -627,18 +627,18 @@ fun HomeScreen(
             }
         }
 
-        // The dock is a bottom-anchored, full-width panel flush with the screen's own bottom edge —
+        // The dock is a bottom-anchored, full-width panel flush with the screen's own bottom edge - 
         // the home page's own pinned SEARCH_BAR row, laid out full-width inside a DockPanelSurface
         // instead of floating as its own pill (that look is now exclusive to an ordinary *inline*
         // pillMode row, see PillRow). Mirrors the Panel's own shape/border treatment below, just
         // upside down: rounded only at the top (flush/square at the bottom), a border only on the
         // top edge (the row's own borderEnabled column means exactly that for this row). No
-        // permanent on-screen affordance — in MANUAL mode a swipe-up from the home content
+        // permanent on-screen affordance - in MANUAL mode a swipe-up from the home content
         // (see detectHomeGestures above) is the only way to open it, never a visible notch. Placed
         // before the search/app-list overlays below so those naturally cover it when open;
         // folderHideDock keeps the existing "hide the dock while a folder is open" behavior.
         if (homeDockRow != null && homeDockRow.enabled && !(folderOpen && folderHideDock)) {
-            // Tapping the open background collapses the dock, same as tapping outside any modal —
+            // Tapping the open background collapses the dock, same as tapping outside any modal - 
             // only live while there's actually something to collapse back to.
             if (dockExpanded && dockCanCollapse) {
                 Box(
@@ -648,16 +648,16 @@ fun HomeScreen(
                 )
             }
             val dockAppearance = homeDockRow.appearance()
-            // Only the top corners round (the dock sits flush with the screen's bottom edge) — the
+            // Only the top corners round (the dock sits flush with the screen's bottom edge) - the
             // percent scales how far towards the 28dp max each one goes, 0 staying perfectly flat.
             val dockCornerRadius = 28.dp * (homeDockRow.cornerRadiusPercent.coerceIn(0, 100) / 100f)
             val dockShape = RoundedCornerShape(topStart = dockCornerRadius, topEnd = dockCornerRadius)
             val dockBorderColor = resolveElementColors(dockAppearance).borderColor
             // Mirrors the Panel's own BoxWithConstraints+fixed-height treatment just above (see its
-            // comment) — the Dock can now be 1 or 2 rows tall (dockRowShape), so its size needs to be
+            // comment) - the Dock can now be 1 or 2 rows tall (dockRowShape), so its size needs to be
             // predictable up front rather than estimated from content, same reasoning as the Panel.
             // Computed exactly from the same padding/rowGap/row-height constants the content itself
-            // uses below, rather than a flat generous guess — any slack here is slack the Column's
+            // uses below, rather than a flat generous guess - any slack here is slack the Column's
             // Arrangement.Top has to center into, pushing the top row down from the top edge.
             val dockRowShape = homeDockRow.dockRows()
             val dockHeight = DockDimens.height(homeDockRow)
@@ -681,7 +681,7 @@ fun HomeScreen(
                         )
                 ) {
                     Column(
-                        // Top-anchored, not centered — dockHeight is now computed to match the content
+                        // Top-anchored, not centered - dockHeight is now computed to match the content
                         // exactly, so Center would just be an identity no-op when the estimate is right
                         // and silently reintroduce a gap above the top row if it's ever slightly off.
                         verticalArrangement = Arrangement.Top,
@@ -689,7 +689,7 @@ fun HomeScreen(
                             .fillMaxSize()
                             // Top gap matches the full icon-to-phone-edge gap (DockDimens.topPadding,
                             // i.e. the pill's own outer horizontalMargin plus innerHorizontalPadding)
-                            // rather than innerHorizontalPadding alone, which undershoots it — see
+                            // rather than innerHorizontalPadding alone, which undershoots it - see
                             // DockDimens.rowGap for the (separate) gap this creates *between* the
                             // Dock's own sub-rows.
                             .padding(
@@ -733,7 +733,7 @@ fun HomeScreen(
                             showLabels = homeDockRow.showLabels,
                             labelColor = homeDockRow.appearance().contentColor?.let { Color(it) } ?: Color.White,
                             iconSizeScale = iconSizeScale
-                            // Live dock is display-only now — adding/removing entries only happens in
+                            // Live dock is display-only now - adding/removing entries only happens in
                             // Settings > Home screen > Layout > Dock > Elements.
                         )
                     }
@@ -765,7 +765,7 @@ fun HomeScreen(
         // Charging animation above the pages, below overlays and dock.
         ChargingGlow(enabled = chargingAnimationEnabled, color = Color(chargingAnimationColor))
 
-        // Dims the actual home screen behind the Panel instead of replacing it outright — a scrim keeps
+        // Dims the actual home screen behind the Panel instead of replacing it outright - a scrim keeps
         // the real home screen (and its wallpaper) visible but dimmed underneath, like a standard modal
         // backdrop, instead of painting over the entire screen with a flat color.
         AnimatedVisibility(
@@ -787,26 +787,26 @@ fun HomeScreen(
             )
         }
 
-        // The Panel is a box that slides down from the very top edge of the screen — full width.
+        // The Panel is a box that slides down from the very top edge of the screen - full width.
         // Bottom corners rounded, top corners square since the panel is visually attached to the
         // screen's own top edge. Its content is the same GridEntries grid an ordinary element box
         // uses, just laid out full-width inside DockPanelSurface instead of a WidgetCard, mirroring
-        // exactly how the Dock now uses the same GridEntries grid for its own floating bar —
+        // exactly how the Dock now uses the same GridEntries grid for its own floating bar - 
         // the Dock is a mirrored Panel (only-top-rounded corners, capped at 2 rows instead of 6).
         //
         // BoxWithConstraints sits *outside* the AnimatedVisibility, and the AnimatedVisibility below
-        // gets a fixed width/height instead of sizing to its content — expandVertically would otherwise
+        // gets a fixed width/height instead of sizing to its content - expandVertically would otherwise
         // force a full remeasure (a subcompose pass, since BoxWithConstraints is backed by
         // SubcomposeLayout) on every animation frame, which makes opening the panel choppy.
         BoxWithConstraints(modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth()) {
-            // Top square — flush and seamless against the screen's own top edge, no gap at the device's
+            // Top square - flush and seamless against the screen's own top edge, no gap at the device's
             // rounded corners. Bottom stays rounded (the panel's "resting" edge, not attached to
-            // anything) — the percent scales how far towards the 28dp max it goes, same as the Dock.
+            // anything) - the percent scales how far towards the 28dp max it goes, same as the Dock.
             val panelCornerRadius = 28.dp * ((homePanelRow?.cornerRadiusPercent ?: com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT).coerceIn(0, 100) / 100f)
             val panelShape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = panelCornerRadius, bottomEnd = panelCornerRadius)
             val panelRowShape = homePanelRow?.panelRows() ?: listOf(4, 4, 4)
             // A fixed shape the user picked up front (one column count per row), not an estimate
-            // from content — predictable size that doesn't jump around as entries are added/removed,
+            // from content - predictable size that doesn't jump around as entries are added/removed,
             // same idea as the dock's own fixed pillMaxEntries width.
             val panelHeight = (96.dp * panelRowShape.size + 64.dp).coerceIn(140.dp, maxHeight)
             val panelAppearance = homePanelRow?.appearance() ?: com.bisc.flauncher.data.model.ElementAppearance(borderEnabled = true)
@@ -871,7 +871,7 @@ fun HomeScreen(
                                     showLabels = row.showLabels,
                                     labelColor = row.appearance().contentColor?.let { Color(it) } ?: Color.White,
                                     iconSizeScale = iconSizeScale
-                                    // Live panel is display-only now — adding/removing entries only
+                                    // Live panel is display-only now - adding/removing entries only
                                     // happens in Settings > Home screen > Layout > Panel > Elements.
                                 )
                                 }
@@ -886,7 +886,7 @@ fun HomeScreen(
 
     // All three cover the same "classic back-swipe/home gesture always lands you on the actual home
     // screen" contract: from either search surface, from plain app overview, and from any other page
-    // with nothing open on top — not just closing whatever overlay happens to be up while leaving the
+    // with nothing open on top - not just closing whatever overlay happens to be up while leaving the
     // pager wherever it already was.
     BackHandler(enabled = appListOpen && !searchOpen) { returnHome() }
     BackHandler(enabled = searchOpen) { returnHome() }
@@ -902,8 +902,8 @@ fun HomeScreen(
     ) {
         // Pulling out of the app overview goes through returnHome(), so it always lands on home.
         // rememberUpdatedState (not a plain closure over returnHome) because this connection object is
-        // remembered once via `viewModel` and must keep calling the *current* returnHome — which closes
-        // over pagerState/homeIndex/pages that are only valid for the composition that created them —
+        // remembered once via `viewModel` and must keep calling the *current* returnHome - which closes
+        // over pagerState/homeIndex/pages that are only valid for the composition that created them - 
         // rather than whatever stale one existed the first time this was built.
         val currentReturnHome = rememberUpdatedState(returnHome)
         val pullDownToClose = remember(viewModel) {
@@ -1176,5 +1176,5 @@ fun HomeScreen(
 
 }
 
-/** Virtual rounds an endless carousel spans (it starts in the middle) — far more than anyone swipes. */
+/** Virtual rounds an endless carousel spans (it starts in the middle) - far more than anyone swipes. */
 private const val ENDLESS_CAROUSEL_LOOPS = 1000

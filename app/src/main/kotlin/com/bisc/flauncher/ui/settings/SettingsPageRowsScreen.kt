@@ -60,7 +60,7 @@ import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.SystemWidgetPickerSheet
 import com.bisc.flauncher.ui.home.WidgetSizeEditor
 
-/** One page's rows — widget rows and element boxes mixed freely in one drag-reorder list (see [PageRow]'s doc comment). */
+/** One page's rows - widget rows and element boxes mixed freely in one drag-reorder list (see [PageRow]'s doc comment). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsPageRowsScreen(
@@ -241,7 +241,7 @@ internal fun AddRowSheet(
     }
 }
 
-/** A not-yet-added widget row as the sizing step previews it — with the same corner radius and
+/** A not-yet-added widget row as the sizing step previews it - with the same corner radius and
  *  fill a new widget actually gets (see PageContentRepository.addWidgetRow), not PageRow's defaults. */
 @Composable
 internal fun newWidgetPreviewRow(pageId: Long, kind: String, spanY: Int): PageRow {

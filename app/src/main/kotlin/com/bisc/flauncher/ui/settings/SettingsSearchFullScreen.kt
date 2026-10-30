@@ -45,7 +45,7 @@ import com.bisc.flauncher.ui.home.search.settingsLabelRes
 
 /** Text search settings hub: everything about how it looks under Appearance, everything about
  *  what it searches and where results open under Behavior. The custom in-app keyboard was
- *  removed — search always uses the system keyboard now, see [com.bisc.flauncher.ui.home.search.SearchInputBar]. */
+ *  removed - search always uses the system keyboard now, see [com.bisc.flauncher.ui.home.search.SearchInputBar]. */
 @Composable
 fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
     SettingsSubScreen(title = stringResource(R.string.settings_section_search_full), navController = navController, onBack = onBack) {

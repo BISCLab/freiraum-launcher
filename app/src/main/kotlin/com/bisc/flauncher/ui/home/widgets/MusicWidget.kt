@@ -96,7 +96,7 @@ fun MusicWidget(
     horizontalMargin: Dp = 0.dp,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    // Re-syncs with the media sessions every time the home screen comes back, not just once —
+    // Re-syncs with the media sessions every time the home screen comes back, not just once - 
     // a player started or switched while the launcher was in the background shows up right away.
     LifecycleResumeEffect(Unit) {
         viewModel.refreshWidgetData()

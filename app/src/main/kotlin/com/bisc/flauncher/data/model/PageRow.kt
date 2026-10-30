@@ -35,7 +35,7 @@ data class PageRow(
     val fillDirection: GradientDirection = GradientDirection.TOP_TO_BOTTOM,
     val elementOpacity: Float = 1f,
     val borderEnabled: Boolean = false,
-    // 0 = sharp 90° corners, 100 = fully rounded (a capsule/pill on the shape's shorter axis) — see
+    // 0 = sharp 90° corners, 100 = fully rounded (a capsule/pill on the shape's shorter axis) - see
     // RoundedCornerShape(percent = ...), used directly everywhere this is rendered.
     val cornerRadiusPercent: Int = com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT,
     val edgeToEdge: Boolean = false,
@@ -52,33 +52,33 @@ data class PageRow(
     val elementBorderColor: Int? = null,
     val elementBorderWidth: Float = 1f,
     val elementContentColor: Int? = null,
-    // Single-line/pill layout, opt-in on any row (not just the dock's own SEARCH_BAR row) — entries
+    // Single-line/pill layout, opt-in on any row (not just the dock's own SEARCH_BAR row) - entries
     // laid out in one non-wrapping line instead of ElementBoxGrid's usual column-wrapped grid, as wide
     // as the row (edgeToEdge decides the side margin) and capped to pillMaxEntries.
     val pillMode: Boolean = false,
-    // Unused, see DockWidthMode — kept only as an existing column.
+    // Unused, see DockWidthMode - kept only as an existing column.
     val pillWidthMode: DockWidthMode = DockWidthMode.FIXED,
     val pillMaxEntries: Int = 5,
-    // Only meaningful for the pinned dock row (type == SEARCH_BAR) — see HomeScreen's dock panel Box
+    // Only meaningful for the pinned dock row (type == SEARCH_BAR) - see HomeScreen's dock panel Box
     // for the expand/collapse rendering this drives. ALWAYS_VISIBLE by default, so the dock's
     // default entries (see PageContentRepository.ensureSeeded) are immediately reachable on a fresh
     // install without needing a gesture first.
     val dockVisibilityMode: DockVisibilityMode = DockVisibilityMode.ALWAYS_VISIBLE,
-    // Lets a row be switched off without deleting it (and losing its configuration) — currently
+    // Lets a row be switched off without deleting it (and losing its configuration) - currently
     // only exposed in the UI for the Home screen's own Dock/Panel bookends (see
     // SettingsHomeLayoutScreen), which are otherwise locked in place and never removable.
     val enabled: Boolean = true,
     // Caption under each entry's icon (app/folder/shortcut/website/map target/page link name),
     // off by default to keep the classic icon-only look. Uses elementContentColor as its text
-    // color — the same "Text color" picker already shown for the row — so there's only one
+    // color - the same "Text color" picker already shown for the row - so there's only one
     // color setting per row, not a second one specific to captions.
     val showLabels: Boolean = false,
-    // The Home page's own PANEL row's shape — one entry per sub-row, each holding that sub-row's own
+    // The Home page's own PANEL row's shape - one entry per sub-row, each holding that sub-row's own
     // column count (1-6), comma-separated (e.g. "4,3,4"). Independent per row rather than one shared
     // column count, so a shorter row isn't forced to the same width as a longer one. See
     // [PageRow.panelRows]/[PageRow.withPanelRows]. Meaningless for any other row type.
     val panelRowColumns: String = "4,4,4",
-    // Same idea as [panelRowColumns], for the pinned Dock row (type == SEARCH_BAR) — the Dock is
+    // Same idea as [panelRowColumns], for the pinned Dock row (type == SEARCH_BAR) - the Dock is
     // "a mirrored Panel" capped at 2 sub-rows instead of 6 (enforced where rows are added/removed,
     // not here). Default "5" matches the Dock's existing 5x1 default footprint.
     val dockRowColumns: String = "5"

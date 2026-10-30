@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import com.bisc.flauncher.data.model.LauncherPageKind
 
 /**
- * The 4 page-icon symbols from Figma (`hIu9AMwmphER50czNQGeBe`, frames 81:109/91:2/95:2/95:33) —
+ * The 4 page-icon symbols from Figma (`hIu9AMwmphER50czNQGeBe`, frames 81:109/91:2/95:2/95:33) - 
  * drawn procedurally from their exact proportions rather than imported as multi-color gradient
  * SVGs, since every dock icon is rendered through a single flat [tint] (same as every Material
  * icon used elsewhere in the dock) and the designs are simple enough (a ring, a 3×3 grid, three
@@ -45,7 +45,7 @@ fun PageIconGlyphImage(glyph: PageIconGlyph, tint: Color, modifier: Modifier = M
 }
 
 /** Figma "Search Ring / Smooth Glass Fold" (88:7), reduced to its base ring (outer r=68.34/140,
- *  inner r=39.77/140 of the 140×140 viewBox) — the gradient fold/reflection layers on top of it
+ *  inner r=39.77/140 of the 140×140 viewBox) - the gradient fold/reflection layers on top of it
  *  only make sense in full color, not as a flat tint. */
 private fun DrawScope.drawSearchGlyph(color: Color) {
     val d = size.minDimension
@@ -101,7 +101,7 @@ private fun DrawScope.drawAppListGlyph(color: Color) {
 }
 
 /** Figma "Widgets / Modular Four-Panel Layout" (95:54): one wide top panel, one tall left panel,
- *  two small right panels — exact ratios of the 256×256 frame. */
+ *  two small right panels - exact ratios of the 256×256 frame. */
 private fun DrawScope.drawWidgetPageGlyph(color: Color) {
     val corner = CornerRadius(size.width * 0.0469f, size.height * 0.0469f)
     fun panel(left: Float, top: Float, right: Float, bottom: Float) {

@@ -506,7 +506,7 @@ fun SettingsFolderEditScreen(
         val alreadyInside = remember(items) {
             items.filter { it.type == GridItemType.FOLDER }.mapNotNull { it.payload.toLongOrNull() }.toSet()
         }
-        // Only one level of folder nesting is allowed — a folder already nested somewhere else, or
+        // Only one level of folder nesting is allowed - a folder already nested somewhere else, or
         // one that already has folder children of its own, is excluded here. That also rules out
         // every possible cycle: a cycle needs at least two levels of nesting to close on itself.
         val nestedFolderIds = remember(itemsByFolder) {
@@ -673,7 +673,7 @@ private fun FolderWidgetSizeSheet(
     }
 }
 
-/** Largest an app widget in a folder can be, in rows — the folder scrolls past its own height. */
+/** Largest an app widget in a folder can be, in rows - the folder scrolls past its own height. */
 private const val MAX_FOLDER_APP_WIDGET_SPAN = 6
 
 private fun folderWidgetIcon(item: com.bisc.flauncher.data.model.FolderItem) =

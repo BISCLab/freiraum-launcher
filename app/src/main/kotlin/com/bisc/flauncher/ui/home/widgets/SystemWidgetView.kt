@@ -34,13 +34,13 @@ import com.bisc.flauncher.ui.home.LocalSurfaceIsDarkLoading
 /**
  * Legacy [AbsListView] (ListView/GridView) and [ScrollView] default to nested-scrolling *disabled*
  * for backward compatibility, so they never cooperate with an ancestor Compose scrollable (our page
- * paging, the page-swipe pager) at all — they just sit there inert while the ancestor eats every drag.
+ * paging, the page-swipe pager) at all - they just sit there inert while the ancestor eats every drag.
  * Turning it on lets Android's nested-scroll protocol arbitrate properly, exactly like any other
  * nested scrollable. (Same fix used by Kvaesitso's launcher for this exact problem.)
  *
  * A one-time walk at widget-creation time isn't enough: many widgets re-apply a fresh RemoteViews
  * tree later on (e.g. right after [android.appwidget.AppWidgetHostView.updateAppWidgetSize] or a
- * color-resource change), which swaps in brand new child views that never went through this walk —
+ * color-resource change), which swaps in brand new child views that never went through this walk - 
  * silently undoing the fix. A [ViewGroup.OnHierarchyChangeListener] on every container (except
  * [AbsListView] itself, which recycles row views constantly and doesn't need re-walking for that)
  * re-runs this on whatever gets added, so a later re-apply is caught too.
@@ -84,7 +84,7 @@ fun SystemWidgetView(
     if (info == null || surfaceLoading) {
         WidgetCard(modifier = modifier, appearance = appearance, cornerRadiusPercent = cornerRadiusPercent, horizontalMargin = horizontalMargin) {
             // No provider info means the widget is gone for good (its app was uninstalled, or the id
-            // came from a backup restored on a fresh install) — say so instead of a forever "···".
+            // came from a backup restored on a fresh install) - say so instead of a forever "···".
             Text(
                 if (info == null) stringResource(R.string.widget_system_unavailable) else "···",
                 color = androidx.compose.material3.LocalContentColor.current.copy(alpha = 0.6f),
@@ -110,12 +110,12 @@ fun SystemWidgetView(
         // Still no custom pointer handling here. What was actually missing (per Kvaesitso, which gets
         // this right) is that a widget's internal ListView/GridView/ScrollView defaults to nested
         // scrolling *disabled* for legacy compatibility, so it never even entered Android's nested
-        // scroll protocol our ancestor Compose scrollables (page paging, page-swipe) rely on — it just
+        // scroll protocol our ancestor Compose scrollables (page paging, page-swipe) rely on - it just
         // sat there while the ancestor consumed the whole drag. enableNestedScroll() below turns that
         // on. A hand-rolled interception layer here was tried before and made things worse.
         val density = LocalDensity.current
         // Recreating the host view when dark/light changes (rather than nudging the existing one) is
-        // what actually gets most third-party widgets to repaint in the right theme — see the comment
+        // what actually gets most third-party widgets to repaint in the right theme - see the comment
         // on SystemWidgetHostManager.createHostView. That did bring back an occasional blank/white
         // flash right when it happens (e.g. first swipe onto a widget's page), but a widget stuck in
         // the wrong theme permanently is worse than that.

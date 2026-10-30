@@ -8,7 +8,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
 
-/** The single background shared by every surface — pages, app overview, both search surfaces. */
+/** The single background shared by every surface - pages, app overview, both search surfaces. */
 @Composable
 fun SettingsGlobalBackgroundScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val globalBackground by viewModel.globalBackground.collectAsState()

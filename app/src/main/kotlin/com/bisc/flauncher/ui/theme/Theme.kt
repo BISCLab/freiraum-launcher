@@ -23,7 +23,7 @@ import com.bisc.flauncher.data.model.ElementAppearance
 
 enum class ThemePreference { LIGHT, DARK, SYSTEM }
 
-/** Resolves SYSTEM against the live device setting — the single place this check happens, reused
+/** Resolves SYSTEM against the live device setting - the single place this check happens, reused
  *  by every background/box color resolution so they all agree with each other and with
  *  [FLauncherTheme]'s own [isSystemInDarkTheme] check. */
 fun ThemePreference.isDark(context: Context): Boolean = when (this) {
@@ -32,31 +32,31 @@ fun ThemePreference.isDark(context: Context): Boolean = when (this) {
     ThemePreference.SYSTEM -> (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 }
 
-/** A matte near-black, not pure black — FLauncher's only default background in dark mode. No
+/** A matte near-black, not pure black - FLauncher's only default background in dark mode. No
  *  bundled wallpaper is shipped; this plus plain white in light mode are the only two defaults. */
 const val MATTE_DARK_COLOR = 0xFF121212.toInt()
 
 /** The page background for the given effective mode. */
 fun backgroundColorFor(isDark: Boolean): Int = if (isDark) MATTE_DARK_COLOR else android.graphics.Color.WHITE
 
-/** FLauncher's standard blue — the default accent, and the settings UI's own primary color. */
+/** FLauncher's standard blue - the default accent, and the settings UI's own primary color. */
 const val DEFAULT_ACCENT_COLOR = 0xFF0758F5.toInt()
 
 /** Every element's default corner roundness: fully rounded. */
 const val DEFAULT_CORNER_RADIUS_PERCENT = 100
 
-/** Widgets' own default: only slightly rounded — fully round corners cut into a widget's content. */
+/** Widgets' own default: only slightly rounded - fully round corners cut into a widget's content. */
 const val DEFAULT_WIDGET_CORNER_RADIUS_PERCENT = 10
 
 /** The one transparency every default element fill uses. */
 const val DEFAULT_ELEMENT_OPACITY = 0.8f
 
 /** The fill color every box/card/widget/dock/panel defaults to: black in dark mode, white in light
- *  mode — the same tone as the page, set apart from it by [DEFAULT_ELEMENT_OPACITY] and a border. */
+ *  mode - the same tone as the page, set apart from it by [DEFAULT_ELEMENT_OPACITY] and a border. */
 fun defaultBoxFillColorFor(isDark: Boolean): Int = if (isDark) android.graphics.Color.BLACK else android.graphics.Color.WHITE
 
 /** The shared default look for every box/card/widget/dock/panel when it has no customization of
- *  its own — [defaultBoxFillColorFor] at [DEFAULT_ELEMENT_OPACITY] with a border. The one shared
+ *  its own - [defaultBoxFillColorFor] at [DEFAULT_ELEMENT_OPACITY] with a border. The one shared
  *  default everywhere, for dark and light mode alike. */
 fun defaultBoxAppearanceFor(isDark: Boolean): ElementAppearance = ElementAppearance(
     fill = ColorFill(color = defaultBoxFillColorFor(isDark)),

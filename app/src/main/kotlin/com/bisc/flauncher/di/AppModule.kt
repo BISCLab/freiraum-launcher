@@ -112,7 +112,7 @@ private val MIGRATION_36_37 = object : Migration(36, 37) {
 }
 
 // The old Quick-overview page kind (SIDEBAR) is gone: drop that page and everything pointing at it
-// — its own rows/entries, and page-link entries in docks, element boxes and folders.
+// - its own rows/entries, and page-link entries in docks, element boxes and folders.
 private val MIGRATION_60_61 = object : Migration(60, 61) {
     override fun migrate(db: SupportSQLiteDatabase) {
         val sidebarIds = "SELECT id FROM launcher_pages WHERE kind = 'SIDEBAR'"
@@ -143,7 +143,7 @@ object AppModule {
             )
             // Only a last resort now for jumps with no migration path above (e.g. a much older install
             // skipping several versions at once, or a version older than 27). Every future version bump
-            // needs its own explicit Migration added here — that's what actually keeps people's pages,
+            // needs its own explicit Migration added here - that's what actually keeps people's pages,
             // widgets and settings intact across an update instead of silently wiping them.
             .fallbackToDestructiveMigration(dropAllTables = true)
             .build()

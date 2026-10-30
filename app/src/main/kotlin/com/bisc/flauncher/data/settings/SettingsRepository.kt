@@ -31,11 +31,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-/** Which edge a left/right-dependent layout favors — currently only the app overview's own
+/** Which edge a left/right-dependent layout favors - currently only the app overview's own
  *  alphabet rail and floating search button (see [SettingsRepository.appOverviewHandedness]). */
 enum class Handedness { LEFT, RIGHT }
 
-/** Shape every app icon is masked to — both the dock/search-button containers and the actual
+/** Shape every app icon is masked to - both the dock/search-button containers and the actual
  *  icon bitmaps rendered everywhere else (see [com.bisc.flauncher.util.AppIconLoader]). */
 enum class IconShape { CIRCLE, ROUNDED_SQUARE }
 
@@ -63,20 +63,20 @@ class SettingsRepository @Inject constructor(
             ?: IconShape.ROUNDED_SQUARE
     }
 
-    // 0..200, the icon's actual size as a percent of its normal size — 100 is neutral/default,
+    // 0..200, the icon's actual size as a percent of its normal size - 100 is neutral/default,
     // below shrinks, above grows; each app's own override screen can still adjust its own icon
     // individually on the same scale (see AppOverride.iconSizePercent).
     val iconSizePercent: Flow<Int> = dataStore.data.map { prefs -> prefs[ICON_SIZE_PERCENT_KEY] ?: 100 }
 
     // New elements (rows, folders) are created with this value; changing it also immediately
     // re-stamps every existing row/folder item to match (see PageContentRepository/FolderRepository
-    // .applyCornerRadiusToAll, called from SettingsViewModel.setDefaultCornerRadiusPercent) — each
+    // .applyCornerRadiusToAll, called from SettingsViewModel.setDefaultCornerRadiusPercent) - each
     // element's own Appearance screen can still override it individually afterwards.
     val defaultCornerRadiusPercent: Flow<Int> = dataStore.data.map { prefs -> prefs[DEFAULT_CORNER_RADIUS_PERCENT_KEY] ?: com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT }
 
     val folderCardAppearance: Flow<ElementAppearance> = elementAppearanceFor("folder_card", ElementAppearance(borderEnabled = true))
 
-    /** The text search screen's single, full-bleed appearance — covers both the backdrop and the
+    /** The text search screen's single, full-bleed appearance - covers both the backdrop and the
      *  results, which now float directly on it instead of sitting in a separate card (see the search
      *  redesign: the screen has no more layered boxes, just one themed fill behind everything). */
     val searchAppearance: Flow<ElementAppearance> = elementAppearanceFor("search_appearance", ElementAppearance())
@@ -138,7 +138,7 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[SEARCH_KEYBOARD_AUTO_OPEN_KEY] = enabled }
     }
 
-    /** The search screen's top input bar (field + category row) — its own fill/border, separate
+    /** The search screen's top input bar (field + category row) - its own fill/border, separate
      *  from [searchAppearance]; null until customized, so the bar keeps following the screen's look. */
     val searchBarAppearance: Flow<ElementAppearance?> = customElementAppearanceFor(SEARCH_BAR_PREFIX, ElementAppearance())
 
@@ -153,7 +153,7 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[SEARCH_BAR_CORNER_RADIUS_KEY] = percent }
     }
 
-    /** The search result cards — same split as [searchBarAppearance]: null until customized. */
+    /** The search result cards - same split as [searchBarAppearance]: null until customized. */
     val searchResultsAppearance: Flow<ElementAppearance?> = customElementAppearanceFor(SEARCH_RESULTS_PREFIX, ElementAppearance())
 
     suspend fun setSearchResultsAppearance(appearance: ElementAppearance) = setElementAppearanceFor(SEARCH_RESULTS_PREFIX, appearance)
@@ -251,7 +251,7 @@ class SettingsRepository @Inject constructor(
     }
 
     /** Per-category icon color override, used everywhere a [SearchCategory]'s icon appears (the
-     *  search filter row, each result card's header, the category reorder list in settings) — null
+     *  search filter row, each result card's header, the category reorder list in settings) - null
      *  means "use [com.bisc.flauncher.ui.home.search.defaultColor]". */
     fun categoryColor(category: SearchCategory): Flow<Int?> = dataStore.data.map { it[categoryColorKey(category)] }
 
@@ -279,7 +279,7 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { if (packageName == null) it.remove(SEARCH_MAPS_APP_KEY) else it[SEARCH_MAPS_APP_KEY] = packageName }
     }
 
-    /** Which edge the app-overview's own alphabet rail and floating search button sit on — the
+    /** Which edge the app-overview's own alphabet rail and floating search button sit on - the
      *  App overview page's own setting (see SettingsAppOverviewScreen), not a global one: nothing
      *  else in the launcher has a left/right-dependent layout. */
     val appOverviewHandedness: Flow<Handedness> = dataStore.data.map { prefs ->
@@ -346,7 +346,7 @@ class SettingsRepository @Inject constructor(
         readBackgroundConfig(prefs, key, default)
     }
 
-    // Null exactly when this surface has never been given its own explicit background — the surface
+    // Null exactly when this surface has never been given its own explicit background - the surface
     // then falls back to the single global background instead. Same "null means untouched, fall back to
     // the shared default" shape already used for dockSearchButtonAppearance etc., just applied to layer 1.
     private fun backgroundOverrideFor(key: String): Flow<BackgroundConfig?> = dataStore.data.map { prefs ->
@@ -381,7 +381,7 @@ class SettingsRepository @Inject constructor(
     // ---- Gestures ----
 
     fun gestureAction(gesture: HomeGesture): Flow<GestureAction> = dataStore.data.map { prefs ->
-        // No more hardcoded per-gesture fallback here — this repository has no page-id knowledge,
+        // No more hardcoded per-gesture fallback here - this repository has no page-id knowledge,
         // so the real SWIPE_UP default (pointing at the App overview page) is
         // seeded once, with real ids, by PageContentRepository.ensureSeeded() instead.
         val type = prefs[gestureTypeKey(gesture)]?.let { runCatching { GestureActionType.valueOf(it) }.getOrNull() }
@@ -389,7 +389,7 @@ class SettingsRepository @Inject constructor(
         GestureAction(type, prefs[gesturePayloadKey(gesture)])
     }
 
-    /** One-shot check, not a [Flow] — used only by seeding code to decide whether a default binding
+    /** One-shot check, not a [Flow] - used only by seeding code to decide whether a default binding
      *  would still be safe to write (i.e. the user hasn't touched this gesture yet). */
     suspend fun isGestureConfigured(gesture: HomeGesture): Boolean =
         dataStore.data.first().contains(gestureTypeKey(gesture))
@@ -449,7 +449,7 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[FOLDER_HIDE_DOCK_KEY] = hide }
     }
 
-    /** Default for whether folder items show a text label under their icon — used by any folder
+    /** Default for whether folder items show a text label under their icon - used by any folder
      *  that doesn't set its own [com.bisc.flauncher.data.model.Folder.showLabelsOverrideEnabled]. */
     val folderShowLabels: Flow<Boolean> = dataStore.data.map { it[FOLDER_SHOW_LABELS_KEY] ?: false }
 
@@ -457,7 +457,7 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[FOLDER_SHOW_LABELS_KEY] = show }
     }
 
-    /** One-shot command: hides the status bar on every screen (search, folders, every page — the
+    /** One-shot command: hides the status bar on every screen (search, folders, every page - the
      *  Panel is part of the home page now, so its own pageHideStatusBar entry already covers it). */
     suspend fun setStatusBarHiddenEverywhere(pageIds: List<Long>, hidden: Boolean) {
         dataStore.edit { prefs ->
@@ -649,7 +649,7 @@ class SettingsRepository @Inject constructor(
         private val ICON_SHAPE_KEY = stringPreferencesKey("icon_shape")
         // Renamed from the old "icon_size_percent" key when the scale changed from a -50..50
         // offset to a direct 0..200 percent, so a pre-existing stored offset is never misread as
-        // the new absolute percent — it just reads back as unset (100, the new default) instead.
+        // the new absolute percent - it just reads back as unset (100, the new default) instead.
         private val ICON_SIZE_PERCENT_KEY = intPreferencesKey("icon_size_scale_percent")
         private val DEFAULT_CORNER_RADIUS_PERCENT_KEY = intPreferencesKey("default_corner_radius_percent")
         private val FOLDER_HIDE_STATUS_BAR_KEY = booleanPreferencesKey("folder_hide_status_bar")

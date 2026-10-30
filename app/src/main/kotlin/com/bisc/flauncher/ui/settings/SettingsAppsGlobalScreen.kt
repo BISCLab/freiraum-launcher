@@ -22,7 +22,7 @@ import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.IconPackInfo
 import com.bisc.flauncher.data.settings.IconShape
 
-/** The app-icon presets shared by every app (shape, size, pack) — each one can still be overridden
+/** The app-icon presets shared by every app (shape, size, pack) - each one can still be overridden
  *  individually on a per-app basis in that app's own edit screen (see AppOverrideEditSheetContent). */
 @Composable
 fun SettingsAppsGlobalScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {

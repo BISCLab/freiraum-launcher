@@ -30,7 +30,7 @@ fun BackgroundFill(config: BackgroundConfig, modifier: Modifier = Modifier) {
             }
             BackgroundSource.IMAGE -> {
                 // Opaque even while the image is loading (or if it's missing), so whatever lies
-                // below — the home screen and its Dock under the app list or search — never shows.
+                // below - the home screen and its Dock under the app list or search - never shows.
                 Box(Modifier.matchParentSize().background(config.fill.asBrush()))
                 val bitmap = rememberBackgroundBitmap(config.imagePath)
                 if (bitmap != null) {
@@ -53,7 +53,7 @@ fun BackgroundFill(config: BackgroundConfig, modifier: Modifier = Modifier) {
 }
 
 /** Two neighboring backgrounds blended by [fraction] (0 = [lower] only). When both show the same
- *  image, only their shades differ — the image is drawn once and just the shade is blended, instead
+ *  image, only their shades differ - the image is drawn once and just the shade is blended, instead
  *  of alpha-blending two full-screen photos every frame (expensive, and it flickers). */
 @Composable
 fun BackgroundCrossfade(lower: BackgroundConfig, upper: BackgroundConfig?, fraction: Float, modifier: Modifier = Modifier) {

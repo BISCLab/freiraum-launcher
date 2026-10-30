@@ -6,7 +6,7 @@ data class ContactInfo(
     val displayName: String,
     val photoUri: String? = null,
     val phoneNumbers: List<ContactPhoneNumber> = emptyList(),
-    /** The contact's e-mail address — the one the search matched, if it matched one. */
+    /** The contact's e-mail address - the one the search matched, if it matched one. */
     val email: String? = null,
     /** Whether the search found this contact by [email] (then shown under the name). */
     val matchedByEmail: Boolean = false
