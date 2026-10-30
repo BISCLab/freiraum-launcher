@@ -44,6 +44,10 @@ android {
     }
 
     buildTypes {
+        // Own app id for debug builds, so they install next to the release version.
+        debug {
+            applicationIdSuffix = ".debug"
+        }
         release {
             signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = true

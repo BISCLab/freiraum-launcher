@@ -77,7 +77,7 @@ class BackupManager @Inject constructor(
 
             val info = manifest
             val stagedDb = File(staging, DB_ENTRY)
-            if (info == null || info.optInt("format", -1) != FORMAT || info.optString("app") !in setOf(context.packageName, PREVIOUS_APP_ID) ||
+            if (info == null || info.optInt("format", -1) != FORMAT || !isOwnAppId(info.optString("app")) ||
                 !stagedDb.exists() || !looksLikeSqlite(stagedDb)
             ) {
                 staging.deleteRecursively()
@@ -106,6 +106,12 @@ class BackupManager @Inject constructor(
         private const val FORMAT = 1
         // The app's id before it was renamed to Freiraum Launcher; its backups import unchanged.
         private const val PREVIOUS_APP_ID = "com.bisc.flauncher"
+        private const val APP_ID = "com.bisc.freiraum"
+
+        // Release and debug builds read each other's backups.
+        private fun isOwnAppId(id: String) =
+            id == PREVIOUS_APP_ID || id == APP_ID || id.startsWith("$APP_ID.")
+
         private const val MANIFEST = "manifest.json"
         private const val DB_ENTRY = "flauncher.db"
         private const val SETTINGS_ENTRY = "settings.preferences_pb"
