@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -111,20 +112,22 @@ fun SearchInputBar(
 
     @Composable
     fun Field(modifier: Modifier) {
-        val content = LocalContentColor.current
+        // Same look as the App grid's search field: its automatic box against the bar's own color.
+        val fieldColors = resolveElementColors(automaticRailAppearance(LocalContentColor.current.luminance() > 0.5f))
+        val content = fieldColors.contentColor
         val fieldShape = RoundedCornerShape(FIELD_HEIGHT / 2 * percent)
         Row(
             modifier = modifier
                 .fillMaxWidth()
                 .height(FIELD_HEIGHT)
                 .clip(fieldShape)
-                .background(content.copy(alpha = 0.08f))
-                .border(1.dp, content.copy(alpha = 0.18f), fieldShape)
+                .background(fieldColors.background, alpha = fieldColors.backgroundAlpha)
+                .border(fieldColors.borderWidth, fieldColors.borderColor, fieldShape)
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(Icons.Filled.Search, contentDescription = null)
+            Icon(Icons.Filled.Search, contentDescription = null, tint = content)
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                 if (value.text.isEmpty()) {
                     Text(placeholder, style = MaterialTheme.typography.bodyLarge, color = content.copy(alpha = 0.6f))
@@ -147,6 +150,7 @@ fun SearchInputBar(
                 Icon(
                     Icons.Filled.Close,
                     contentDescription = null,
+                    tint = content,
                     modifier = Modifier.size(20.dp).noRippleClickable { onQueryChange("") }
                 )
             }
