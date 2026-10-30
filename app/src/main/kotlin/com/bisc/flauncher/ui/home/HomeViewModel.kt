@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home
 
+import com.bisc.flauncher.util.matchesAllWordStarts
 import com.bisc.flauncher.util.matchesWordStart
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetManager
@@ -651,7 +652,8 @@ class HomeViewModel @Inject constructor(
         combine(_searchQuery, savedMapTargets, activeSearchCategories) { query, list, active ->
             val include = SearchCategory.PLACES in active
             if (query.isBlank() || !include) emptyList()
-            else list.filter { it.label.contains(query, ignoreCase = true) || it.address.contains(query, ignoreCase = true) }
+            // From the start of each word of the name or address, like every other category.
+            else list.filter { matchesAllWordStarts(it.label + " " + it.address, query) }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val websiteResults: StateFlow<List<PinnedWebsite>> =
