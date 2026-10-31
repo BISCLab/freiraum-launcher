@@ -89,6 +89,12 @@ fun SettingsSearchAppearanceScreen(navController: NavController, onBack: () -> U
             )
             SettingsPreference(
                 icon = null,
+                title = stringResource(R.string.settings_app_grid_search_field),
+                onClick = { onNavigate(SearchElement.FIELD.route) },
+                trailing = null
+            )
+            SettingsPreference(
+                icon = null,
                 title = stringResource(R.string.settings_search_results_label),
                 onClick = { onNavigate(SearchElement.RESULTS.route) },
                 trailing = null
@@ -401,6 +407,7 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
 /** The search screen's own styleable elements, each with the same Background/Border pages. */
 enum class SearchElement(val route: String, val titleRes: Int) {
     BAR("bar", R.string.settings_search_bar_label),
+    FIELD("field", R.string.settings_app_grid_search_field),
     RESULTS("results", R.string.settings_search_results_label)
 }
 
@@ -454,6 +461,19 @@ fun SettingsSearchElementScreen(
                 )
             }
         }
+        if (element == SearchElement.FIELD) {
+            val fieldOwn by viewModel.searchFieldAppearance.collectAsState()
+            if (fieldOwn != null) {
+                SettingsPreferenceGroup {
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(R.string.settings_element_color_reset),
+                        onClick = viewModel::resetSearchFieldAppearance,
+                        trailing = null
+                    )
+                }
+            }
+        }
         // The bar always spans the full width (it's flush with the screen top like the Panel);
         // only the cards have a side margin to switch off.
         if (element == SearchElement.RESULTS) {
@@ -475,14 +495,23 @@ fun SettingsSearchElementScreen(
 private fun effectiveSearchElementAppearance(element: SearchElement, viewModel: SettingsViewModel): com.bisc.flauncher.data.model.ElementAppearance {
     val own by when (element) {
         SearchElement.BAR -> viewModel.searchBarAppearance
+        SearchElement.FIELD -> viewModel.searchFieldAppearance
         SearchElement.RESULTS -> viewModel.searchResultsAppearance
     }.collectAsState()
-    return own ?: com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor(MaterialTheme.colorScheme.background.luminance() < 0.5f)
+    val defaultBox = com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor(MaterialTheme.colorScheme.background.luminance() < 0.5f)
+    if (element == SearchElement.FIELD && own == null) {
+        // The field's automatic look, against the bar's color (as on the search screen).
+        val bar by viewModel.searchBarAppearance.collectAsState()
+        val barContent = com.bisc.flauncher.ui.home.dock.resolveElementColors(bar ?: defaultBox).contentColor
+        return com.bisc.flauncher.ui.home.search.automaticRailAppearance(barContent.luminance() > 0.5f)
+    }
+    return own ?: defaultBox
 }
 
 private fun SettingsViewModel.setSearchElementAppearance(element: SearchElement, appearance: com.bisc.flauncher.data.model.ElementAppearance) =
     when (element) {
         SearchElement.BAR -> setSearchBarAppearance(appearance)
+        SearchElement.FIELD -> setSearchFieldAppearance(appearance)
         SearchElement.RESULTS -> setSearchResultsAppearance(appearance)
     }
 
@@ -502,9 +531,11 @@ fun SettingsSearchElementBorderScreen(element: SearchElement, navController: Nav
     // Unset defaults: the bar follows the global corner roundness, the cards start fully rounded.
     val barCorner by viewModel.searchBarCornerRadiusPercent.collectAsState()
     val resultsCorner by viewModel.searchResultsCornerRadiusPercent.collectAsState()
+    val fieldCorner by viewModel.searchFieldCornerRadiusPercent.collectAsState()
     val defaultCornerPercent by viewModel.defaultCornerRadiusPercent.collectAsState()
     val savedCornerPercent = when (element) {
         SearchElement.BAR -> barCorner ?: defaultCornerPercent
+        SearchElement.FIELD -> fieldCorner ?: barCorner ?: defaultCornerPercent
         SearchElement.RESULTS -> resultsCorner ?: 100
     }
     var cornerPercent by rememberDraft(savedCornerPercent)
@@ -512,6 +543,7 @@ fun SettingsSearchElementBorderScreen(element: SearchElement, navController: Nav
         if (appearance != saved) viewModel.setSearchElementAppearance(element, appearance)
         if (cornerPercent != savedCornerPercent) when (element) {
             SearchElement.BAR -> viewModel.setSearchBarCornerRadiusPercent(cornerPercent)
+            SearchElement.FIELD -> viewModel.setSearchFieldCornerRadiusPercent(cornerPercent)
             SearchElement.RESULTS -> viewModel.setSearchResultsCornerRadiusPercent(cornerPercent)
         }
     }

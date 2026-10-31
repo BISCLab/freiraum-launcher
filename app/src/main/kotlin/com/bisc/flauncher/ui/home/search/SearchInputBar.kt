@@ -88,6 +88,10 @@ fun SearchInputBar(
     showCategories: Boolean = true,
     /** Only the field and categories, without the box around them (like the App grid's field). */
     floating: Boolean = false,
+    /** The input field's own look; null = automatic against the bar's color. */
+    fieldAppearance: ElementAppearance? = null,
+    /** Null = same roundness as the bar. */
+    fieldCornerRadiusPercent: Int? = null,
     /** Inside the bar's background below its content, e.g. the navigation bar when at the bottom. */
     bottomInsets: WindowInsets? = null,
     topDecoration: @Composable () -> Unit = {}
@@ -114,17 +118,20 @@ fun SearchInputBar(
 
     @Composable
     fun Field(modifier: Modifier) {
-        // Same look as the App grid's search field: its automatic box against the bar's own color.
-        val fieldColors = resolveElementColors(automaticRailAppearance(LocalContentColor.current.luminance() > 0.5f))
+        // Until customized, the same look as the App grid's search field: its automatic box
+        // against the bar's own color.
+        val ownAppearance = fieldAppearance ?: automaticRailAppearance(LocalContentColor.current.luminance() > 0.5f)
+        val fieldColors = resolveElementColors(ownAppearance)
         val content = fieldColors.contentColor
-        val fieldShape = RoundedCornerShape(FIELD_HEIGHT / 2 * percent)
+        val fieldPercent = fieldCornerRadiusPercent?.let { it.coerceIn(0, 100) / 100f } ?: percent
+        val fieldShape = RoundedCornerShape(FIELD_HEIGHT / 2 * fieldPercent)
         Row(
             modifier = modifier
                 .fillMaxWidth()
                 .height(FIELD_HEIGHT)
                 .clip(fieldShape)
                 .background(fieldColors.background, alpha = fieldColors.backgroundAlpha)
-                .border(fieldColors.borderWidth, fieldColors.borderColor, fieldShape)
+                .then(if (ownAppearance.borderEnabled) Modifier.border(fieldColors.borderWidth, fieldColors.borderColor, fieldShape) else Modifier)
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)

@@ -184,6 +184,15 @@ class HomeViewModel @Inject constructor(
     val searchBarCornerRadiusPercent: StateFlow<Int?> =
         settingsRepository.searchBarCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
+    val searchFieldAppearance: StateFlow<ElementAppearance?> =
+        settingsRepository.searchFieldAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val searchFieldCornerRadiusPercent: StateFlow<Int?> =
+        settingsRepository.searchFieldCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val appListSearchFieldAppearance: StateFlow<ElementAppearance?> =
+        settingsRepository.appListSearchFieldAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
     val searchResultsAppearance: StateFlow<ElementAppearance?> =
         settingsRepository.searchResultsAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 

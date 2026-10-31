@@ -428,6 +428,9 @@ class MainActivity : ComponentActivity() {
                         composable("settings/app_overview/search_button") {
                             com.bisc.flauncher.ui.settings.SettingsAppOverviewSearchButtonScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
+                        composable("settings/app_overview/search_field") {
+                            com.bisc.flauncher.ui.settings.SettingsAppOverviewSearchFieldScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
                         composable("settings/app_overview/behavior") {
                             com.bisc.flauncher.ui.settings.SettingsAppOverviewBehaviorScreen(navController = navController, onBack = { navController.popBackStack() })
                         }

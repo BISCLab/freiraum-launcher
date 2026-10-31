@@ -52,7 +52,9 @@ fun SettingsAppOverviewScreen(navController: NavController, onBack: () -> Unit, 
 
 /** Appearance hub: the page itself, then each of its elements. Its accents follow the global one. */
 @Composable
-fun SettingsAppOverviewAppearanceHubScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
+fun SettingsAppOverviewAppearanceHubScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+    val showSearchButton by viewModel.appListShowSearchButton.collectAsState()
+    val ownSearch by viewModel.appListOwnSearch.collectAsState()
     SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
             SettingsPreference(
@@ -79,6 +81,14 @@ fun SettingsAppOverviewAppearanceHubScreen(navController: NavController, onBack:
                 onClick = { onNavigate("search_button") },
                 trailing = null
             )
+            if (showSearchButton && ownSearch) {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_app_grid_search_field),
+                    onClick = { onNavigate("search_field") },
+                    trailing = null
+                )
+            }
         }
     }
 }
@@ -223,6 +233,38 @@ fun SettingsAppOverviewAzIndexScreen(
                     icon = null,
                     title = stringResource(R.string.settings_element_color_reset),
                     onClick = viewModel::resetAppListRailAppearance,
+                    trailing = null
+                )
+            }
+        }
+    }
+}
+
+/** The app list's own search field - looks like the search button until customized here. */
+@Composable
+fun SettingsAppOverviewSearchFieldScreen(
+    navController: NavController,
+    onBack: () -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel(),
+    homeViewModel: HomeViewModel = hiltViewModel()
+) {
+    val own by viewModel.appListSearchFieldAppearance.collectAsState()
+    val button by viewModel.appListSearchButtonAppearance.collectAsState()
+    val railAppearance by viewModel.appListRailAppearance.collectAsState()
+    val pageId by homeViewModel.appOverviewPageId.collectAsState()
+    val pageBackground by remember(pageId) { homeViewModel.pageBackgroundConfig(pageId ?: -1L) }.collectAsState(initial = BackgroundConfig())
+    val surfaceIsDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), pageBackground)
+
+    val saved = remember(own, button, railAppearance) { own ?: button ?: railAppearance ?: automaticRailAppearance(surfaceIsDark) }
+    var draft by rememberDraft(saved)
+    SettingsSubScreen(title = stringResource(R.string.settings_app_grid_search_field), navController = navController, onBack = onBack, onSave = { viewModel.setAppListSearchFieldAppearance(draft) }, dirty = draft != saved) {
+        ElementAppearanceSection(appearance = draft, onAppearanceChange = { draft = it }, styleGroupTitle = null)
+        if (own != null) {
+            SettingsPreferenceGroup {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_element_color_reset),
+                    onClick = viewModel::resetAppListSearchFieldAppearance,
                     trailing = null
                 )
             }

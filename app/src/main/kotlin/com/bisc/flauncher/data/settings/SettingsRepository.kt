@@ -154,6 +154,28 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[SEARCH_BAR_CORNER_RADIUS_KEY] = percent }
     }
 
+    /** The input field inside the search bar; null = automatic, against the bar's own color. */
+    val searchFieldAppearance: Flow<ElementAppearance?> = customElementAppearanceFor("search_field", ElementAppearance(borderEnabled = true))
+
+    suspend fun setSearchFieldAppearance(appearance: ElementAppearance) = setElementAppearanceFor("search_field", appearance)
+
+    suspend fun resetSearchFieldAppearance() = resetElementAppearanceFor("search_field")
+
+    /** Null = same roundness as the search bar. */
+    val searchFieldCornerRadiusPercent: Flow<Int?> = dataStore.data.map { it[SEARCH_FIELD_CORNER_RADIUS_KEY] }
+
+    suspend fun setSearchFieldCornerRadiusPercent(percent: Int) {
+        dataStore.edit { it[SEARCH_FIELD_CORNER_RADIUS_KEY] = percent }
+    }
+
+    /** The app list's own search field; null = same look as its search button. */
+    val appListSearchFieldAppearance: Flow<ElementAppearance?> =
+        customElementAppearanceFor("app_list_search_field", ElementAppearance(borderEnabled = true))
+
+    suspend fun setAppListSearchFieldAppearance(appearance: ElementAppearance) = setElementAppearanceFor("app_list_search_field", appearance)
+
+    suspend fun resetAppListSearchFieldAppearance() = resetElementAppearanceFor("app_list_search_field")
+
     /** The search result cards - same split as [searchBarAppearance]: null until customized. */
     val searchResultsAppearance: Flow<ElementAppearance?> = customElementAppearanceFor(SEARCH_RESULTS_PREFIX, ElementAppearance())
 
@@ -776,6 +798,7 @@ class SettingsRepository @Inject constructor(
         private val MUSIC_COVER_ROUNDED_KEY = booleanPreferencesKey("music_cover_rounded")
         private const val SEARCH_BAR_PREFIX = "search_bar"
         private val SEARCH_BAR_CORNER_RADIUS_KEY = intPreferencesKey("search_bar_corner_radius_percent")
+        private val SEARCH_FIELD_CORNER_RADIUS_KEY = intPreferencesKey("search_field_corner_radius_percent")
         private const val SEARCH_RESULTS_PREFIX = "search_results"
         private val SEARCH_RESULTS_CORNER_RADIUS_KEY = intPreferencesKey("search_results_corner_radius_percent")
         private val SEARCH_RESULTS_EDGE_TO_EDGE_KEY = booleanPreferencesKey("search_results_edge_to_edge")

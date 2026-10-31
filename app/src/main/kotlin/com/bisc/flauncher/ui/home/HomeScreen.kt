@@ -181,6 +181,9 @@ fun HomeScreen(
     val searchBarAtBottom by viewModel.searchBarAtBottom.collectAsState()
     val searchBarShowCategories by viewModel.searchBarShowCategories.collectAsState()
     val searchBarFloating by viewModel.searchBarFloating.collectAsState()
+    val searchFieldAppearance by viewModel.searchFieldAppearance.collectAsState()
+    val searchFieldCornerRadiusPercent by viewModel.searchFieldCornerRadiusPercent.collectAsState()
+    val appListSearchFieldAppearance by viewModel.appListSearchFieldAppearance.collectAsState()
     val searchKeyboardCapEnabled by viewModel.searchKeyboardCapEnabled.collectAsState()
     val searchKeyboardCapColor by viewModel.searchKeyboardCapColor.collectAsState()
     val searchKeyboardCapCornerRadiusPercent by viewModel.searchKeyboardCapCornerRadiusPercent.collectAsState()
@@ -998,7 +1001,7 @@ fun HomeScreen(
                                 viewModel.closeAppList()
                             }
                         },
-                        appearance = appListSearchButtonAppearance ?: railAppearance ?: automaticRailAppearance(overviewSurfaceDark),
+                        appearance = appListSearchFieldAppearance ?: appListSearchButtonAppearance ?: railAppearance ?: automaticRailAppearance(overviewSurfaceDark),
                         cornerRadiusPercent = cornerRadiusPercent,
                         autoOpen = true,
                         modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 16.dp)
@@ -1136,6 +1139,8 @@ fun HomeScreen(
             barAtBottom = searchBarAtBottom,
             barShowCategories = searchBarShowCategories,
             barFloating = searchBarFloating,
+            fieldAppearance = searchFieldAppearance,
+            fieldCornerRadiusPercent = searchFieldCornerRadiusPercent,
             keyboardCapColor = if (searchKeyboardCapEnabled) searchKeyboardCapColor else null,
             keyboardCapCornerRadiusPercent = searchKeyboardCapCornerRadiusPercent,
             keyboardCapArrow = searchKeyboardCapArrow,

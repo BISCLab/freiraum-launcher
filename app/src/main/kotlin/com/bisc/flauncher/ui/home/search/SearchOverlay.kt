@@ -108,6 +108,8 @@ fun SearchOverlay(
     barShowCategories: Boolean = true,
     /** Only the field (and categories), without the bar's box, like the App grid's field. */
     barFloating: Boolean = false,
+    fieldAppearance: ElementAppearance? = null,
+    fieldCornerRadiusPercent: Int? = null,
     statusBarHidden: Boolean,
     categoryOrder: List<SearchCategory>,
     activeCategories: Set<SearchCategory>,
@@ -210,6 +212,8 @@ fun SearchOverlay(
                         atBottom = barAtBottom,
                         showCategories = barShowCategories,
                         floating = barFloating,
+                        fieldAppearance = fieldAppearance,
+                        fieldCornerRadiusPercent = fieldCornerRadiusPercent,
                         // At the bottom the bar's own background runs down behind the navigation
                         // bar; with the keyboard open it sits right on the keyboard.
                         bottomInsets = if (barAtBottom) WindowInsets.navigationBars.exclude(WindowInsets.ime) else null,

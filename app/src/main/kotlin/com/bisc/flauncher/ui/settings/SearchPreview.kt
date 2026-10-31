@@ -62,6 +62,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
     val barAtBottom by viewModel.searchBarAtBottom.collectAsState()
     val barShowCategories by viewModel.searchBarShowCategories.collectAsState()
     val barFloating by viewModel.searchBarFloating.collectAsState()
+    val fieldOwn by viewModel.searchFieldAppearance.collectAsState()
 
     // Same resolution rules as the real screen (HomeViewModel.searchBackground, SearchOverlay).
     val background = override ?: globalBackground.copy(shade = globalShade ?: globalBackground.shade)
@@ -90,7 +91,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
 
             Column(modifier = Modifier.fillMaxSize()) {
                 if (!barAtBottom) {
-                    MiniSearchBar(barAppearance, surfaceDark, RoundedCornerShape(bottomStart = barRadius, bottomEnd = barRadius), barShowCategories, atBottom = false, floating = barFloating) {
+                    MiniSearchBar(barAppearance, surfaceDark, RoundedCornerShape(bottomStart = barRadius, bottomEnd = barRadius), barShowCategories, atBottom = false, floating = barFloating, fieldAppearance = fieldOwn) {
                         onNavigate(SearchElement.BAR.route)
                     }
                 }
@@ -107,7 +108,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 if (barAtBottom) {
-                    MiniSearchBar(barAppearance, surfaceDark, RoundedCornerShape(topStart = barRadius, topEnd = barRadius), barShowCategories, atBottom = true, floating = barFloating) {
+                    MiniSearchBar(barAppearance, surfaceDark, RoundedCornerShape(topStart = barRadius, topEnd = barRadius), barShowCategories, atBottom = true, floating = barFloating, fieldAppearance = fieldOwn) {
                         onNavigate(SearchElement.BAR.route)
                     }
                 }
@@ -122,7 +123,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
 }
 
 @Composable
-private fun MiniSearchBar(appearance: ElementAppearance, surfaceDark: Boolean, shape: Shape, showCategories: Boolean, atBottom: Boolean, floating: Boolean, onClick: () -> Unit) {
+private fun MiniSearchBar(appearance: ElementAppearance, surfaceDark: Boolean, shape: Shape, showCategories: Boolean, atBottom: Boolean, floating: Boolean, fieldAppearance: ElementAppearance?, onClick: () -> Unit) {
     // Floating: no box, the field sits on the page itself.
     val colors = resolveElementColors(if (floating) appearance.copy(fillMode = ElementFillMode.NONE) else appearance, surfaceDark)
     Column(
@@ -134,14 +135,17 @@ private fun MiniSearchBar(appearance: ElementAppearance, surfaceDark: Boolean, s
             .padding(start = 8.dp, end = 8.dp, top = if (atBottom) 8.dp else 14.dp, bottom = 8.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
+        val fieldColors = resolveElementColors(
+            fieldAppearance ?: com.bisc.flauncher.ui.home.search.automaticRailAppearance(colors.contentColor.luminance() > 0.5f)
+        )
         val field = @Composable {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(12.dp)
                     .clip(CircleShape)
-                    .background(colors.contentColor.copy(alpha = 0.12f))
-                    .border(0.5.dp, colors.contentColor.copy(alpha = 0.25f), CircleShape)
+                    .background(fieldColors.background, alpha = fieldColors.backgroundAlpha)
+                    .border(0.5.dp, fieldColors.borderColor, CircleShape)
             )
         }
         val categories = @Composable {

@@ -60,12 +60,15 @@ fun SettingsAppGridScreen(navController: NavController, onBack: () -> Unit, onNa
 }
 
 @Composable
-fun SettingsAppGridAppearanceHubScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
+fun SettingsAppGridAppearanceHubScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+    val position by viewModel.appGridBarPosition.collectAsState()
     SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
             SettingsPreference(icon = null, title = stringResource(R.string.settings_search_page_label), onClick = { onNavigate("page") }, trailing = null)
             SettingsPreference(icon = null, title = stringResource(R.string.settings_app_grid_grid_label), onClick = { onNavigate("grid") }, trailing = null)
-            SettingsPreference(icon = null, title = stringResource(R.string.settings_app_grid_search_field), onClick = { onNavigate("search_field") }, trailing = null)
+            if (position != AppGridBarPosition.NONE) {
+                SettingsPreference(icon = null, title = stringResource(R.string.settings_app_grid_search_field), onClick = { onNavigate("search_field") }, trailing = null)
+            }
         }
     }
 }
