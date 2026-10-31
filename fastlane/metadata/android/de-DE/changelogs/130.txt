@@ -1,0 +1,7 @@
+- Neuer Look für das Suchfeld; Home-Button und Linien entfernt
+- Suchleiste oben oder unten auf der Tastatur
+- Kategorie-Symbole ausblendbar
+- Suchfeld frei schwebend ohne Kasten möglich
+- Füllung, Rahmen und Ecken des Suchfelds anpassbar
+- Suchkategorien lassen sich ganz entfernen
+- Kategorie-Symbole passen immer ohne Scrollen

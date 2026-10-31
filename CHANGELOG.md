@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.5.0
+
 - Text search: the search field has the new look of the App grid's field; the Home button and the
   lines in the search bar are gone (back gesture closes the search)
 - Text search: the search bar can sit at the bottom, right on the keyboard, with the categories and

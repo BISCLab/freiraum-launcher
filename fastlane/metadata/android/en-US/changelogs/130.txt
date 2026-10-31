@@ -1,0 +1,7 @@
+- New search field look; Home button and lines removed
+- Search bar at the top or bottom, on the keyboard
+- Category symbols can be hidden
+- Search field can float without a box
+- Search field fill, border and corners customizable
+- Search categories can be removed entirely
+- Category symbols always fit without scrolling
