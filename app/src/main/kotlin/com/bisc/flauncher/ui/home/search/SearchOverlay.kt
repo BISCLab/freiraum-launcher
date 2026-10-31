@@ -106,6 +106,8 @@ fun SearchOverlay(
     barAtBottom: Boolean = false,
     /** The category symbols in the search bar. */
     barShowCategories: Boolean = true,
+    /** Only the field (and categories), without the bar's box, like the App grid's field. */
+    barFloating: Boolean = false,
     statusBarHidden: Boolean,
     categoryOrder: List<SearchCategory>,
     activeCategories: Set<SearchCategory>,
@@ -207,11 +209,12 @@ fun SearchOverlay(
                         topInset = if (barAtBottom) 0.dp else topInset,
                         atBottom = barAtBottom,
                         showCategories = barShowCategories,
+                        floating = barFloating,
                         // At the bottom the bar's own background runs down behind the navigation
                         // bar; with the keyboard open it sits right on the keyboard.
                         bottomInsets = if (barAtBottom) WindowInsets.navigationBars.exclude(WindowInsets.ime) else null,
                         topDecoration = {
-                            if (keyboardCapColor != null) KeyboardCap(keyboardCapColor, keyboardCapCornerRadiusPercent, keyboardCapArrow)
+                            if (keyboardCapColor != null && !barFloating) KeyboardCap(keyboardCapColor, keyboardCapCornerRadiusPercent, keyboardCapArrow)
                         }
                     )
                 }
@@ -265,7 +268,8 @@ fun SearchOverlay(
                     // not the current inset), riding down with it, so both leave in one motion.
                     // With the bar at the bottom it tops the bar instead.
                     if (barAtBottom) Bar()
-                    else if (keyboardCapColor != null) KeyboardCap(keyboardCapColor, keyboardCapCornerRadiusPercent, keyboardCapArrow)
+                    // A floating field has no box to top, so the strip stays on the keyboard.
+                    if (keyboardCapColor != null && (!barAtBottom || barFloating)) KeyboardCap(keyboardCapColor, keyboardCapCornerRadiusPercent, keyboardCapArrow)
                 }
             }
         }

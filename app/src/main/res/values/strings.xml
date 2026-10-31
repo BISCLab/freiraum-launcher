@@ -625,4 +625,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_search_bar_position_label">Position</string>
     <string name="settings_search_bar_show_categories">Category symbols</string>
     <string name="settings_search_bar_show_categories_info">The row of category symbols for narrowing the search to one category.</string>
+    <string name="settings_search_bar_floating">Floating</string>
+    <string name="settings_search_bar_floating_info">Only the search field, without the box around it, like the field on the App grid.</string>
 </resources>

@@ -176,6 +176,13 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[SEARCH_BAR_SHOW_CATEGORIES_KEY] = show }
     }
 
+    /** Only the search field (and categories), floating without the bar's box around them. */
+    val searchBarFloating: Flow<Boolean> = dataStore.data.map { it[SEARCH_BAR_FLOATING_KEY] ?: false }
+
+    suspend fun setSearchBarFloating(floating: Boolean) {
+        dataStore.edit { it[SEARCH_BAR_FLOATING_KEY] = floating }
+    }
+
     val searchResultsEdgeToEdge: Flow<Boolean> = dataStore.data.map { it[SEARCH_RESULTS_EDGE_TO_EDGE_KEY] ?: false }
 
     suspend fun setSearchResultsEdgeToEdge(edgeToEdge: Boolean) {
@@ -774,6 +781,7 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_RESULTS_EDGE_TO_EDGE_KEY = booleanPreferencesKey("search_results_edge_to_edge")
         private val SEARCH_BAR_AT_BOTTOM_KEY = booleanPreferencesKey("search_bar_at_bottom")
         private val SEARCH_BAR_SHOW_CATEGORIES_KEY = booleanPreferencesKey("search_bar_show_categories")
+        private val SEARCH_BAR_FLOATING_KEY = booleanPreferencesKey("search_bar_floating")
         private val SEARCH_KEYBOARD_CAP_ENABLED_KEY = booleanPreferencesKey("search_keyboard_cap_enabled")
         private val SEARCH_KEYBOARD_CAP_COLOR_KEY = intPreferencesKey("search_keyboard_cap_color")
         private val SEARCH_KEYBOARD_CAP_CORNER_RADIUS_KEY = intPreferencesKey("search_keyboard_cap_corner_radius_percent")

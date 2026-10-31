@@ -416,6 +416,7 @@ fun SettingsSearchElementScreen(
     val resultsEdgeToEdge by viewModel.searchResultsEdgeToEdge.collectAsState()
     val barAtBottom by viewModel.searchBarAtBottom.collectAsState()
     val barShowCategories by viewModel.searchBarShowCategories.collectAsState()
+    val barFloating by viewModel.searchBarFloating.collectAsState()
     SettingsSubScreen(title = stringResource(element.titleRes), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
             SettingsPreference(
@@ -443,6 +444,13 @@ fun SettingsSearchElementScreen(
                     info = stringResource(R.string.settings_search_bar_show_categories_info),
                     onClick = { viewModel.setSearchBarShowCategories(!barShowCategories) },
                     trailing = { Switch(checked = barShowCategories, onCheckedChange = viewModel::setSearchBarShowCategories) }
+                )
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_search_bar_floating),
+                    info = stringResource(R.string.settings_search_bar_floating_info),
+                    onClick = { viewModel.setSearchBarFloating(!barFloating) },
+                    trailing = { Switch(checked = barFloating, onCheckedChange = viewModel::setSearchBarFloating) }
                 )
             }
         }

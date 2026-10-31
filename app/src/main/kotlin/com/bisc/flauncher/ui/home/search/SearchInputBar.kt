@@ -86,6 +86,8 @@ fun SearchInputBar(
     topInset: Dp = 0.dp,
     atBottom: Boolean = false,
     showCategories: Boolean = true,
+    /** Only the field and categories, without the box around them (like the App grid's field). */
+    floating: Boolean = false,
     /** Inside the bar's background below its content, e.g. the navigation bar when at the bottom. */
     bottomInsets: WindowInsets? = null,
     topDecoration: @Composable () -> Unit = {}
@@ -172,29 +174,37 @@ fun SearchInputBar(
         }
     }
 
-    CompositionLocalProvider(LocalContentColor provides colors.contentColor) {
+    // Floating, the field sits on the page itself, so it keeps the page's text color.
+    val contentColor = if (floating) LocalContentColor.current else colors.contentColor
+    // Same side margin as the App grid's field when floating.
+    val side = if (floating) 20.dp else 12.dp
+    CompositionLocalProvider(LocalContentColor provides contentColor) {
         Column(
             modifier = modifier
                 .fillMaxWidth()
-                // Flush with the screen's edges, so the border only traces the free edge - drawn
-                // just outside the bar (hence before the clip), so around the rounded corners it
-                // runs on into the screen's side edges instead of ending visibly.
                 .then(
-                    if (appearance.borderEnabled) {
-                        Modifier.freeEdgeBorder(colors.borderWidth, colors.borderColor, radius, if (atBottom) FreeEdge.TOP else FreeEdge.BOTTOM)
-                    } else Modifier
+                    if (floating) Modifier
+                    else Modifier
+                        // Flush with the screen's edges, so the border only traces the free edge - drawn
+                        // just outside the bar (hence before the clip), so around the rounded corners it
+                        // runs on into the screen's side edges instead of ending visibly.
+                        .then(
+                            if (appearance.borderEnabled) {
+                                Modifier.freeEdgeBorder(colors.borderWidth, colors.borderColor, radius, if (atBottom) FreeEdge.TOP else FreeEdge.BOTTOM)
+                            } else Modifier
+                        )
+                        .clip(shape)
+                        .background(colors.background, alpha = colors.backgroundAlpha)
                 )
-                .clip(shape)
-                .background(colors.background, alpha = colors.backgroundAlpha)
                 .padding(top = topInset)
                 .then(if (bottomInsets != null) Modifier.windowInsetsPadding(bottomInsets) else Modifier)
         ) {
             if (atBottom) {
                 topDecoration()
                 if (showCategories) Categories() else Spacer(Modifier.height(12.dp))
-                Field(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp))
+                Field(Modifier.padding(start = side, end = side, bottom = if (floating) 16.dp else 12.dp))
             } else {
-                Field(Modifier.padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = if (showCategories) 0.dp else 12.dp))
+                Field(Modifier.padding(start = side, end = side, top = if (floating) 8.dp else 12.dp, bottom = if (showCategories) 0.dp else 12.dp))
                 if (showCategories) Categories()
             }
         }

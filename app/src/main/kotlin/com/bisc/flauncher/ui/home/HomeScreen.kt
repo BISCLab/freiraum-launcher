@@ -180,6 +180,7 @@ fun HomeScreen(
     val searchResultsEdgeToEdge by viewModel.searchResultsEdgeToEdge.collectAsState()
     val searchBarAtBottom by viewModel.searchBarAtBottom.collectAsState()
     val searchBarShowCategories by viewModel.searchBarShowCategories.collectAsState()
+    val searchBarFloating by viewModel.searchBarFloating.collectAsState()
     val searchKeyboardCapEnabled by viewModel.searchKeyboardCapEnabled.collectAsState()
     val searchKeyboardCapColor by viewModel.searchKeyboardCapColor.collectAsState()
     val searchKeyboardCapCornerRadiusPercent by viewModel.searchKeyboardCapCornerRadiusPercent.collectAsState()
@@ -1134,6 +1135,7 @@ fun HomeScreen(
             resultsEdgeToEdge = searchResultsEdgeToEdge,
             barAtBottom = searchBarAtBottom,
             barShowCategories = searchBarShowCategories,
+            barFloating = searchBarFloating,
             keyboardCapColor = if (searchKeyboardCapEnabled) searchKeyboardCapColor else null,
             keyboardCapCornerRadiusPercent = searchKeyboardCapCornerRadiusPercent,
             keyboardCapArrow = searchKeyboardCapArrow,

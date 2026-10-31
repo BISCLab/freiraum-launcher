@@ -713,6 +713,12 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setSearchBarShowCategories(show) }
     }
 
+    val searchBarFloating: StateFlow<Boolean> = repository.searchBarFloating.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun setSearchBarFloating(floating: Boolean) {
+        viewModelScope.launch { repository.setSearchBarFloating(floating) }
+    }
+
     fun setSearchResultsEdgeToEdge(edgeToEdge: Boolean) {
         viewModelScope.launch { repository.setSearchResultsEdgeToEdge(edgeToEdge) }
     }

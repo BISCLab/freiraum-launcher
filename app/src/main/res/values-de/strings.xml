@@ -625,4 +625,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_bar_position_label">Position</string>
     <string name="settings_search_bar_show_categories">Kategorie-Symbole</string>
     <string name="settings_search_bar_show_categories_info">Die Reihe der Kategorie-Symbole, mit denen sich die Suche auf eine Kategorie eingrenzen lässt.</string>
+    <string name="settings_search_bar_floating">Frei schwebend</string>
+    <string name="settings_search_bar_floating_info">Nur das Suchfeld, ohne den Kasten drumherum, wie beim App-Raster.</string>
 </resources>

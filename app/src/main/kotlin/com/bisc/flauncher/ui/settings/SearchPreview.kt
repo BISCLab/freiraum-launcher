@@ -61,6 +61,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
     val capCorner by viewModel.searchKeyboardCapCornerRadiusPercent.collectAsState()
     val barAtBottom by viewModel.searchBarAtBottom.collectAsState()
     val barShowCategories by viewModel.searchBarShowCategories.collectAsState()
+    val barFloating by viewModel.searchBarFloating.collectAsState()
 
     // Same resolution rules as the real screen (HomeViewModel.searchBackground, SearchOverlay).
     val background = override ?: globalBackground.copy(shade = globalShade ?: globalBackground.shade)
@@ -89,7 +90,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
 
             Column(modifier = Modifier.fillMaxSize()) {
                 if (!barAtBottom) {
-                    MiniSearchBar(barAppearance, surfaceDark, RoundedCornerShape(bottomStart = barRadius, bottomEnd = barRadius), barShowCategories, atBottom = false) {
+                    MiniSearchBar(barAppearance, surfaceDark, RoundedCornerShape(bottomStart = barRadius, bottomEnd = barRadius), barShowCategories, atBottom = false, floating = barFloating) {
                         onNavigate(SearchElement.BAR.route)
                     }
                 }
@@ -106,7 +107,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 if (barAtBottom) {
-                    MiniSearchBar(barAppearance, surfaceDark, RoundedCornerShape(topStart = barRadius, topEnd = barRadius), barShowCategories, atBottom = true) {
+                    MiniSearchBar(barAppearance, surfaceDark, RoundedCornerShape(topStart = barRadius, topEnd = barRadius), barShowCategories, atBottom = true, floating = barFloating) {
                         onNavigate(SearchElement.BAR.route)
                     }
                 }
@@ -121,8 +122,9 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
 }
 
 @Composable
-private fun MiniSearchBar(appearance: ElementAppearance, surfaceDark: Boolean, shape: Shape, showCategories: Boolean, atBottom: Boolean, onClick: () -> Unit) {
-    val colors = resolveElementColors(appearance, surfaceDark)
+private fun MiniSearchBar(appearance: ElementAppearance, surfaceDark: Boolean, shape: Shape, showCategories: Boolean, atBottom: Boolean, floating: Boolean, onClick: () -> Unit) {
+    // Floating: no box, the field sits on the page itself.
+    val colors = resolveElementColors(if (floating) appearance.copy(fillMode = ElementFillMode.NONE) else appearance, surfaceDark)
     Column(
         modifier = Modifier
             .fillMaxWidth()
