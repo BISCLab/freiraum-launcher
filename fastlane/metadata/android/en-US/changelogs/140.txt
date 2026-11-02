@@ -1,0 +1,7 @@
+- New installs start with bundled wallpapers, gestures and a finished design
+- Optional matching lock screen wallpaper on first start
+- Compact language picker
+- Performance hint for the endless carousel
+- Folders grow instead of scrolling; widgets in folders can scroll
+- Folder widgets only get as tall as still fits
+- Save button stays reachable when sizing tall folder widgets

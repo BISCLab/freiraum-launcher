@@ -1,0 +1,7 @@
+- Neuinstallationen starten mit Wallpapern, Gesten und fertigem Design
+- Beim ersten Start optional passender Sperrbildschirm-Hintergrund
+- Kompakte Sprachauswahl
+- Hinweis zur Leistung beim Endlos-Karussell
+- Ordner wachsen statt zu scrollen; Widgets in Ordnern scrollbar
+- Ordner-Widgets nur so hoch, wie noch Platz ist
+- Speichern bei hohen Ordner-Widgets immer erreichbar

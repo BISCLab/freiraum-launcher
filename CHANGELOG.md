@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.6.0
+
 - New installs start with a finished look: bundled wallpapers for Home, app list and Text search,
   light theme, rounded font, swipe up for the app list, double tap for Text search, long press for
   the App grid, and a matching search and app list design
