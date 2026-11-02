@@ -44,6 +44,7 @@
     </queries>
 
     <!-- Contact search and pinned contacts; requested at runtime. -->
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <!-- Expands notifications and quick settings for gesture actions. -->

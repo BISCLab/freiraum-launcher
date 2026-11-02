@@ -628,4 +628,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_bar_floating">Frei schwebend</string>
     <string name="settings_search_bar_floating_info">Nur das Suchfeld, ohne den Kasten drumherum, wie beim App-Raster.</string>
     <string name="settings_pages_carousel_endless_summary">Kann das Wischen zwischen den Seiten weniger flüssig machen</string>
+    <string name="lock_wallpaper_offer_title">Sperrbildschirm</string>
+    <string name="lock_wallpaper_offer_text">Soll der Sperrbildschirm einen passenden Freiraum-Hintergrund bekommen? Das Android-Hintergrundbild hinter dem Startbildschirm bleibt, wie es ist.</string>
+    <string name="lock_wallpaper_offer_yes">Ja, setzen</string>
+    <string name="lock_wallpaper_offer_no">Nein danke</string>
 </resources>

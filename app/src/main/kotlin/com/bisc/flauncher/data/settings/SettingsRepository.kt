@@ -749,6 +749,101 @@ class SettingsRepository @Inject constructor(
     private fun backgroundImagePathKey(key: String) = stringPreferencesKey("bg_${key}_image_path")
     private fun backgroundShadeKey(key: String) = floatPreferencesKey("bg_${key}_shade")
 
+    /** The look a fresh install starts with: light theme, rounded font, and the search, app list
+     *  and folder appearance the launcher was designed with. Only written on first start. */
+    suspend fun applyFreshInstallDefaults() {
+        dataStore.edit {
+            it[booleanPreferencesKey("app_list_own_search")] = false
+            it[booleanPreferencesKey("app_list_search_button_border")] = true
+            it[intPreferencesKey("app_list_search_button_border_color")] = -15901451
+            it[floatPreferencesKey("app_list_search_button_border_width")] = 1.0f
+            it[intPreferencesKey("app_list_search_button_fill_color")] = -986896
+            it[intPreferencesKey("app_list_search_button_fill_color2")] = -16777216
+            it[stringPreferencesKey("app_list_search_button_fill_direction")] = "TOP_TO_BOTTOM"
+            it[stringPreferencesKey("app_list_search_button_fill_mode")] = "SOLID"
+            it[floatPreferencesKey("app_list_search_button_opacity")] = 1.0f
+            it[stringPreferencesKey("app_list_search_button_style")] = "COLOR"
+            it[booleanPreferencesKey("app_list_show_search_button")] = true
+            it[booleanPreferencesKey("carousel_endless")] = false
+            it[booleanPreferencesKey("folder_card_border")] = true
+            it[floatPreferencesKey("folder_card_border_width")] = 1.0f
+            it[intPreferencesKey("folder_card_fill_color")] = -1
+            it[intPreferencesKey("folder_card_fill_color2")] = -16777216
+            it[stringPreferencesKey("folder_card_fill_direction")] = "TOP_TO_BOTTOM"
+            it[stringPreferencesKey("folder_card_fill_mode")] = "SOLID"
+            it[floatPreferencesKey("folder_card_opacity")] = 0.8f
+            it[stringPreferencesKey("folder_card_style")] = "COLOR"
+            it[booleanPreferencesKey("folder_hide_dock")] = true
+            it[booleanPreferencesKey("folder_hide_status_bar")] = true
+            it[booleanPreferencesKey("folder_show_labels")] = false
+            it[stringPreferencesKey("font_preference")] = "ROUNDED"
+            it[booleanPreferencesKey("music_cover_rounded")] = true
+            it[booleanPreferencesKey("search_alphabet_rail_border")] = true
+            it[intPreferencesKey("search_alphabet_rail_border_color")] = -15901451
+            it[floatPreferencesKey("search_alphabet_rail_border_width")] = 1.0f
+            it[intPreferencesKey("search_alphabet_rail_fill_color")] = -986896
+            it[intPreferencesKey("search_alphabet_rail_fill_color2")] = -16777216
+            it[stringPreferencesKey("search_alphabet_rail_fill_direction")] = "TOP_TO_BOTTOM"
+            it[stringPreferencesKey("search_alphabet_rail_fill_mode")] = "SOLID"
+            it[floatPreferencesKey("search_alphabet_rail_opacity")] = 1.0f
+            it[stringPreferencesKey("search_alphabet_rail_style")] = "COLOR"
+            it[booleanPreferencesKey("search_appearance_border")] = true
+            it[floatPreferencesKey("search_appearance_border_width")] = 1.0f
+            it[intPreferencesKey("search_appearance_fill_color")] = -1
+            it[intPreferencesKey("search_appearance_fill_color2")] = -16777216
+            it[stringPreferencesKey("search_appearance_fill_direction")] = "TOP_TO_BOTTOM"
+            it[stringPreferencesKey("search_appearance_fill_mode")] = "SOLID"
+            it[floatPreferencesKey("search_appearance_opacity")] = 1.0f
+            it[stringPreferencesKey("search_appearance_style")] = "COLOR"
+            it[booleanPreferencesKey("search_bar_border")] = false
+            it[intPreferencesKey("search_bar_border_color")] = -15901450
+            it[floatPreferencesKey("search_bar_border_width")] = 1.0f
+            it[intPreferencesKey("search_bar_fill_color")] = -394759
+            it[intPreferencesKey("search_bar_fill_color2")] = -16777216
+            it[stringPreferencesKey("search_bar_fill_direction")] = "TOP_TO_BOTTOM"
+            it[stringPreferencesKey("search_bar_fill_mode")] = "SOLID"
+            it[floatPreferencesKey("search_bar_opacity")] = 1.0f
+            it[stringPreferencesKey("search_bar_style")] = "COLOR"
+            it[stringPreferencesKey("search_category_order")] = "APPS,FOLDERS,CONTACTS,SETTINGS,LAUNCHER_SETTINGS,WEBSITES,PLACES,SHORTCUTS,WEB,AI"
+            it[booleanPreferencesKey("search_header_letter_border")] = true
+            it[intPreferencesKey("search_header_letter_border_color")] = -15901451
+            it[floatPreferencesKey("search_header_letter_border_width")] = 1.0f
+            it[intPreferencesKey("search_header_letter_content_color")] = -15901451
+            it[intPreferencesKey("search_header_letter_fill_color")] = -986896
+            it[intPreferencesKey("search_header_letter_fill_color2")] = -16777216
+            it[stringPreferencesKey("search_header_letter_fill_direction")] = "TOP_TO_BOTTOM"
+            it[stringPreferencesKey("search_header_letter_fill_mode")] = "SOLID"
+            it[floatPreferencesKey("search_header_letter_opacity")] = 1.0f
+            it[stringPreferencesKey("search_header_letter_style")] = "COLOR"
+            it[booleanPreferencesKey("search_hide_status_bar")] = true
+            it[booleanPreferencesKey("search_include_launcher_settings")] = false
+            it[booleanPreferencesKey("search_include_settings")] = false
+            it[booleanPreferencesKey("search_include_shortcuts")] = false
+            it[booleanPreferencesKey("search_keyboard_cap_arrow")] = true
+            it[intPreferencesKey("search_keyboard_cap_color")] = -394759
+            it[booleanPreferencesKey("search_keyboard_cap_enabled")] = true
+            it[booleanPreferencesKey("search_results_border")] = false
+            it[floatPreferencesKey("search_results_border_width")] = 1.0f
+            it[intPreferencesKey("search_results_fill_color")] = -394759
+            it[intPreferencesKey("search_results_fill_color2")] = -16777216
+            it[stringPreferencesKey("search_results_fill_direction")] = "TOP_TO_BOTTOM"
+            it[stringPreferencesKey("search_results_fill_mode")] = "SOLID"
+            it[floatPreferencesKey("search_results_opacity")] = 1.0f
+            it[stringPreferencesKey("search_results_style")] = "COLOR"
+            it[booleanPreferencesKey("search_show_az_index")] = true
+            it[booleanPreferencesKey("show_settings_tips")] = false
+            it[stringPreferencesKey("theme")] = "LIGHT"
+            it[LOCK_WALLPAPER_OFFER_KEY] = true
+        }
+    }
+
+    /** Whether to offer, once, to use the bundled lock screen wallpaper. */
+    val lockWallpaperOffer: Flow<Boolean> = dataStore.data.map { it[LOCK_WALLPAPER_OFFER_KEY] ?: false }
+
+    suspend fun clearLockWallpaperOffer() {
+        dataStore.edit { it[LOCK_WALLPAPER_OFFER_KEY] = false }
+    }
+
     suspend fun setGestureAction(gesture: HomeGesture, action: GestureAction) {
         dataStore.edit { prefs ->
             prefs[gestureTypeKey(gesture)] = action.type.name
@@ -763,6 +858,7 @@ class SettingsRepository @Inject constructor(
     companion object {
         private const val GLOBAL_BACKGROUND_KEY = "global"
         const val SEARCH_BACKGROUND_KEY = "search_page"
+        private val LOCK_WALLPAPER_OFFER_KEY = booleanPreferencesKey("lock_wallpaper_offer")
         private val DEFAULT_ACCENT_COLOR = com.bisc.flauncher.ui.theme.DEFAULT_ACCENT_COLOR
 
         private val THEME_KEY = stringPreferencesKey("theme")

@@ -1,5 +1,8 @@
 ﻿package com.bisc.flauncher.ui.home
 
+import androidx.compose.material3.Text
+import androidx.compose.ui.res.stringResource
+import com.bisc.flauncher.R
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.slideInVertically
@@ -317,6 +320,7 @@ fun HomeScreen(
     var showAddMapTargetDialog by remember { mutableStateOf(false) }
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
     var showFolderCreator by remember { mutableStateOf(false) }
+    val lockWallpaperOffer by viewModel.lockWallpaperOffer.collectAsState()
 
     // See the background-crossfade layer below for why this exists: a stable, append-only cache instead
     // of re-subscribing a Flow every time a page's role (lower/upper) in the crossfade changes.
@@ -1232,6 +1236,24 @@ fun HomeScreen(
             loadPhoto = viewModel::loadContactPhoto,
             onSelected = viewModel::pinContact,
             onDismiss = viewModel::dismissContactPicker
+        )
+    }
+
+    if (lockWallpaperOffer) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { viewModel.answerLockWallpaperOffer(context, false) },
+            title = { Text(stringResource(R.string.lock_wallpaper_offer_title)) },
+            text = { Text(stringResource(R.string.lock_wallpaper_offer_text)) },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = { viewModel.answerLockWallpaperOffer(context, true) }) {
+                    Text(stringResource(R.string.lock_wallpaper_offer_yes))
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { viewModel.answerLockWallpaperOffer(context, false) }) {
+                    Text(stringResource(R.string.lock_wallpaper_offer_no))
+                }
+            }
         )
     }
 

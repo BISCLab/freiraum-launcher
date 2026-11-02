@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -82,9 +83,38 @@ fun SettingsAppearanceScreen(
                 (context as? android.app.Activity)?.let { com.bisc.flauncher.util.AppLanguage.set(it, tag) }
                 Unit
             }
-            RadioPreference(stringResource(R.string.settings_language_system), "", language, pick)
-            RadioPreference("English", "en", language, pick)
-            RadioPreference("Deutsch", "de", language, pick)
+            // Only the chosen language shows; the full list opens on tap, so it stays short as more come.
+            val languages = listOf("" to stringResource(R.string.settings_language_system), "en" to "English", "de" to "Deutsch")
+            var languagePickerOpen by remember { mutableStateOf(false) }
+            SettingsPreference(
+                icon = null,
+                title = languages.firstOrNull { it.first == language }?.second ?: languages.first().second,
+                onClick = { languagePickerOpen = true },
+                trailing = null
+            )
+            if (languagePickerOpen) {
+                androidx.compose.material3.AlertDialog(
+                    onDismissRequest = { languagePickerOpen = false },
+                    title = { Text(stringResource(R.string.settings_language_label)) },
+                    text = {
+                        androidx.compose.foundation.layout.Column {
+                            languages.forEach { (tag, label) ->
+                                androidx.compose.foundation.layout.Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { languagePickerOpen = false; pick(tag) }
+                                        .padding(vertical = 4.dp),
+                                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                                ) {
+                                    androidx.compose.material3.RadioButton(selected = tag == language, onClick = { languagePickerOpen = false; pick(tag) })
+                                    Text(label, modifier = Modifier.padding(start = 8.dp))
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {}
+                )
+            }
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_font_label)) {
             RadioPreference(stringResource(R.string.settings_font_system), FontPreference.SYSTEM, fontPreference, viewModel::setFontPreference, font = FontPreference.SYSTEM.fontFamily)

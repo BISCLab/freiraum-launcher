@@ -32,6 +32,7 @@ import com.bisc.flauncher.data.model.withDockRows
 import com.bisc.flauncher.data.model.withPanelRows
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.settings.SettingsRepository
+import com.bisc.flauncher.util.BackgroundImageStore
 import com.bisc.flauncher.ui.theme.backgroundColorFor
 import com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor
 import com.bisc.flauncher.ui.theme.isDark
@@ -63,6 +64,9 @@ class PageContentRepository @Inject constructor(
     suspend fun ensureSeeded() {
         ensureGlobalBackgroundSeeded()
         val existingHome = pageDao.getHomePage()
+        val freshInstall = existingHome == null
+        // Before anything is drawn from the theme (the Dock's default look below).
+        if (freshInstall) settingsRepository.applyFreshInstallDefaults()
         val homeId = existingHome?.id ?: pageDao.insert(LauncherPage(orderIndex = 0, isHome = true)).also { newHomeId ->
             settingsRepository.setPageHideStatusBar(newHomeId, true)
         }
@@ -115,6 +119,8 @@ class PageContentRepository @Inject constructor(
             )
             settingsRepository.setPageHideStatusBar(gridId, true)
         }
+
+        if (freshInstall) applyFreshInstallPages(homeId)
 
         // Gesture defaults, seeded with real page ids (SettingsRepository knows no page ids).
         // Guarded by "nothing configured yet" so this never clobbers a user's own choice.
@@ -186,6 +192,36 @@ class PageContentRepository @Inject constructor(
         val launcherIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setPackage(targetPackage)
         val launcherActivity = runCatching { packageManager.resolveActivity(launcherIntent, 0)?.activityInfo }.getOrNull() ?: return null
         return ComponentName(launcherActivity.packageName, launcherActivity.name)
+    }
+
+    /** First start: the bundled wallpapers, the gestures to the utility pages, and a Dock and Panel
+     *  without border lines. */
+    private suspend fun applyFreshInstallPages(homeId: Long) {
+        val appList = pageDao.getAppOverviewPage()
+        val search = pageDao.getByKind(LauncherPageKind.SEARCH)
+        val grid = pageDao.getByKind(LauncherPageKind.APP_GRID)
+
+        suspend fun wallpaper(res: Int, key: String): BackgroundConfig? = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            BackgroundImageStore.save(context, Uri.parse("android.resource://${context.packageName}/$res"), key)
+        }?.let { BackgroundConfig(source = BackgroundSource.IMAGE, imagePath = it) }
+
+        wallpaper(R.drawable.wallpaper_4, "global")?.let { settingsRepository.setGlobalBackground(it) }
+        wallpaper(R.drawable.wallpaper_3, "page_$homeId")?.let { settingsRepository.setPageBackgroundConfig(homeId, it) }
+        appList?.let { page -> wallpaper(R.drawable.wallpaper_5, "page_${page.id}")?.let { settingsRepository.setPageBackgroundConfig(page.id, it) } }
+        wallpaper(R.drawable.wallpaper_6, SettingsRepository.SEARCH_BACKGROUND_KEY)?.let { settingsRepository.setSearchBackgroundConfig(it) }
+        grid?.let { settingsRepository.setPageBackgroundConfig(it.id, BackgroundConfig(source = BackgroundSource.COLOR, fill = ColorFill(color = android.graphics.Color.WHITE))) }
+
+        appList?.let { settingsRepository.setGestureAction(HomeGesture.SWIPE_UP, GestureAction(GestureActionType.PAGE, it.id.toString())) }
+        search?.let { settingsRepository.setGestureAction(HomeGesture.DOUBLE_TAP, GestureAction(GestureActionType.PAGE, it.id.toString())) }
+        grid?.let { settingsRepository.setGestureAction(HomeGesture.LONG_PRESS, GestureAction(GestureActionType.PAGE, it.id.toString())) }
+
+        rowDao.getForPage(homeId).forEach { row ->
+            when (row.type) {
+                PageRowType.SEARCH_BAR -> rowDao.update(row.copy(borderEnabled = false))
+                PageRowType.PANEL -> rowDao.update(row.copy(borderEnabled = false, panelRowColumns = "5"))
+                else -> Unit
+            }
+        }
     }
 
     /** Every page/surface falls back to this when it has no color override of its own. */

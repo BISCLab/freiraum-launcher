@@ -353,6 +353,24 @@ class HomeViewModel @Inject constructor(
         _appQuery.value = ""
     }
 
+    // ---- Lock screen wallpaper offer (first start) ----
+
+    val lockWallpaperOffer: StateFlow<Boolean> =
+        settingsRepository.lockWallpaperOffer.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    /** Answers the one-time offer; on yes, the bundled wallpaper goes onto the lock screen only. */
+    fun answerLockWallpaperOffer(context: Context, accept: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.clearLockWallpaperOffer()
+            if (accept) kotlinx.coroutines.withContext(Dispatchers.IO) {
+                runCatching {
+                    val bitmap = android.graphics.BitmapFactory.decodeResource(context.resources, com.bisc.flauncher.R.drawable.wallpaper_2)
+                    android.app.WallpaperManager.getInstance(context).setBitmap(bitmap, null, true, android.app.WallpaperManager.FLAG_LOCK)
+                }
+            }
+        }
+    }
+
     // ---- App grid page ----
 
     private val _appGridOpen = MutableStateFlow(false)

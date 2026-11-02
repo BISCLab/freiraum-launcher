@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- New installs start with a finished look: bundled wallpapers for Home, app list and Text search,
+  light theme, rounded font, swipe up for the app list, double tap for Text search, long press for
+  the App grid, and a matching search and app list design
+- On first start, Freiraum offers to put a matching wallpaper on the lock screen
+- The language setting shows only the chosen language; tap it to pick another
 - The endless carousel setting notes that it can make swiping between pages less smooth
 - Folders no longer scroll or get cut off: they grow up to nearly the whole screen, and widgets
   inside a folder can be scrolled
