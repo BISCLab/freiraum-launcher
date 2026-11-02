@@ -112,6 +112,7 @@ fun SettingsPagesScreen(
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_pages_carousel_endless),
+                summary = stringResource(R.string.settings_pages_carousel_endless_summary),
                 info = stringResource(R.string.settings_pages_carousel_endless_info),
                 onClick = { viewModel.setCarouselEndless(!carouselEndless) },
                 trailing = { Switch(checked = carouselEndless, onCheckedChange = viewModel::setCarouselEndless) }

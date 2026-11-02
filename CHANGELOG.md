@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- The endless carousel setting notes that it can make swiping between pages less smooth
 - Folders no longer scroll or get cut off: they grow up to nearly the whole screen, and widgets
   inside a folder can be scrolled
 - A widget in a folder can only be made as tall as still fits on the screen
