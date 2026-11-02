@@ -36,6 +36,7 @@ Languages: English, German.
 | `READ_CONTACTS` (optional) | Find and pin contacts |
 | Notification access (optional) | Control music playback in the music widget; notification content is not read |
 | `EXPAND_STATUS_BAR` | Gesture that opens the notification shade |
+| `SET_WALLPAPER` | Put a matching wallpaper on the lock screen, only if you agree on first start |
 
 ## Download
 
