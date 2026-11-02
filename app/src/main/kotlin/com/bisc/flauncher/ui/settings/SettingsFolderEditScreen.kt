@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -464,7 +465,10 @@ fun SettingsFolderEditScreen(
             ).withAppearance(item.appearance()),
             spanY = spanY,
             minSpan = if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.minSpan(item.payload) else 1,
-            maxSpan = if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.maxSpan(item.payload) else MAX_FOLDER_APP_WIDGET_SPAN,
+            maxSpan = minOf(
+                if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.maxSpan(item.payload) else MAX_FOLDER_APP_WIDGET_SPAN,
+                folder?.let { com.bisc.flauncher.ui.home.folderWidgetMaxSpan(it, items, item, globalShowLabels) } ?: MAX_FOLDER_APP_WIDGET_SPAN
+            ).coerceAtLeast(if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.minSpan(item.payload) else 1),
             onSpanChange = { spanY = it },
             onSave = {
                 viewModel.setFolderItemSpan(item, spanY)
@@ -483,7 +487,10 @@ fun SettingsFolderEditScreen(
             row = newWidgetPreviewRow(0, kind, sizingWidgetSpanY),
             spanY = sizingWidgetSpanY,
             minSpan = com.bisc.flauncher.data.model.WidgetKind.minSpan(kind),
-            maxSpan = com.bisc.flauncher.data.model.WidgetKind.maxSpan(kind),
+            maxSpan = minOf(
+                com.bisc.flauncher.data.model.WidgetKind.maxSpan(kind),
+                folder?.let { com.bisc.flauncher.ui.home.folderWidgetMaxSpan(it, items, null, globalShowLabels) } ?: MAX_FOLDER_APP_WIDGET_SPAN
+            ).coerceAtLeast(com.bisc.flauncher.data.model.WidgetKind.minSpan(kind)),
             onSpanChange = { sizingWidgetSpanY = it },
             onSave = {
                 viewModel.addWidgetToFolder(folderId, kind, sizingWidgetSpanY)
@@ -655,12 +662,22 @@ private fun FolderWidgetSizeSheet(
     onRemove: (() -> Unit)? = null
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
+        // The preview scrolls when it's taller than the sheet; the buttons below always stay reachable.
         androidx.compose.foundation.layout.Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f, fill = false)
+                .verticalScroll(androidx.compose.foundation.rememberScrollState())
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(stringResource(R.string.settings_rows_size_title), style = MaterialTheme.typography.titleLarge)
             com.bisc.flauncher.ui.home.WidgetSizeEditor(row = row.copy(spanY = spanY), minSpan = minSpan, maxSpan = maxSpan, onSpanChange = onSpanChange)
+        }
+        androidx.compose.foundation.layout.Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             TextButton(onClick = onSave, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.settings_rows_save))
             }
@@ -673,7 +690,7 @@ private fun FolderWidgetSizeSheet(
     }
 }
 
-/** Largest an app widget in a folder can be, in rows - the folder scrolls past its own height. */
+/** Largest an app widget in a folder can be, in rows - less if the folder would no longer fit the screen. */
 private const val MAX_FOLDER_APP_WIDGET_SPAN = 6
 
 private fun folderWidgetIcon(item: com.bisc.flauncher.data.model.FolderItem) =

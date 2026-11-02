@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Folders no longer scroll or get cut off: they grow up to nearly the whole screen, and widgets
+  inside a folder can be scrolled
+- A widget in a folder can only be made as tall as still fits on the screen
+- The widget height sheet in folders keeps its Save button reachable with tall widgets
+
 ## 0.5.0
 
 - Text search: the search field has the new look of the App grid's field; the Home button and the

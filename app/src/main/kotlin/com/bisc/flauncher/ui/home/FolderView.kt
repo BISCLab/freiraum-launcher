@@ -74,6 +74,40 @@ import com.bisc.flauncher.ui.home.widgets.SystemWidgetView
 import com.bisc.flauncher.ui.home.widgets.WeatherWidget
 
 private val FolderCornerRadius = 28.dp
+private val FOLDER_TOP_GAP = 24.dp
+private val FOLDER_CARD_PADDING = 16.dp
+private val FOLDER_WIDGET_GAP = 8.dp
+private val FOLDER_CELL_HEIGHT = 72.dp
+private val FOLDER_CELL_LABEL_HEIGHT = 22.dp
+
+@Composable
+private fun folderDockFootprint(): androidx.compose.ui.unit.Dp {
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    return DockDimens.scaled((screenWidth - DockDimens.horizontalMargin * 2).coerceAtLeast(0.dp))
+        .let { it.barHeight + DockDimens.topMargin + DockDimens.bottomMargin }
+}
+
+/** How many rows a widget in [folder] may take so the folder still fits on the screen, given its
+ *  other widgets and app rows. [editing] is the widget being sized (left out of the others). */
+@Composable
+internal fun folderWidgetMaxSpan(folder: Folder, items: List<FolderItem>, editing: FolderItem?, showLabels: Boolean): Int {
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val screenHeight = with(density) { androidx.compose.ui.platform.LocalView.current.rootView.height.toDp() }
+    val topInset = maxOf(
+        WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
+        WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
+    )
+    val available = screenHeight - topInset - FOLDER_TOP_GAP - folderDockFootprint() - FOLDER_CARD_PADDING * 2
+    val (widgets, grid) = items.filter { it.id != editing?.id }
+        .partition { it.type == GridItemType.WIDGET || it.type == GridItemType.SYSTEM_WIDGET }
+    val othersHeight = widgets.fold(0.dp) { sum, w -> sum + PageRowDimens.spanHeight(PageRowDimens.rowUnitHeight, w.spanY) + FOLDER_WIDGET_GAP }
+    val cell = FOLDER_CELL_HEIGHT + if (showLabels) FOLDER_CELL_LABEL_HEIGHT else 0.dp
+    val gridHeight = cell * gridRowsFor(grid, folder.rows()).size
+    val left = available - othersHeight - gridHeight - FOLDER_WIDGET_GAP
+    var span = 1
+    while (PageRowDimens.spanHeight(PageRowDimens.rowUnitHeight, span + 1) <= left) span++
+    return span
+}
 
 /** One sub-row of the folder's content grid: its configured column [width] (from
  *  [com.bisc.flauncher.data.model.Folder.rows], reserved even if this row isn't fully filled, so
@@ -141,22 +175,18 @@ fun FolderView(
     }
 
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val dockFootprint = DockDimens.scaled((screenWidth - DockDimens.horizontalMargin * 2).coerceAtLeast(0.dp))
-        .let { it.barHeight + DockDimens.topMargin + DockDimens.bottomMargin }
-    val bottomAnchorGap = dockFootprint + PageRowDimens.rowUnitHeight
     val dockPillWidth = DockDimens.scaled((screenWidth - DockDimens.horizontalMargin * 2).coerceAtLeast(0.dp)).pillWidth
 
-    BoxWithConstraints(
-        modifier = modifier.fillMaxSize().padding(top = topInset + 24.dp, bottom = bottomAnchorGap),
-        contentAlignment = Alignment.BottomCenter
-    ) {
+    // The card never scrolls: it grows upward up to just below the status bar. It normally keeps one
+    // row unit of space above the Dock; a tall folder uses that space too before it is full.
+    androidx.compose.ui.layout.Layout(
+        modifier = modifier.fillMaxSize().padding(top = topInset + FOLDER_TOP_GAP, bottom = folderDockFootprint()),
+        content = {
         DockPanelSurface(
             appearance = cardAppearance,
             shape = RoundedCornerShape(FolderCornerRadius),
             modifier = Modifier
                 .width(dockPillWidth)
-                .heightIn(max = maxHeight)
-                .verticalScroll(rememberScrollState())
                 .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {}
         ) {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -221,6 +251,13 @@ fun FolderView(
                     }
                 }
             }
+        }
+        }
+    ) { measurables, constraints ->
+        val card = measurables.first().measure(constraints.copy(minWidth = 0, minHeight = 0))
+        val gap = minOf(PageRowDimens.rowUnitHeight.roundToPx(), (constraints.maxHeight - card.height).coerceAtLeast(0))
+        layout(constraints.maxWidth, constraints.maxHeight) {
+            card.place((constraints.maxWidth - card.width) / 2, constraints.maxHeight - gap - card.height)
         }
     }
 
