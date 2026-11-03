@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- The Home button now also leaves the launcher's own settings and returns to the home screen
 - New setting under System: lock the launcher to portrait so it doesn't turn with the device
 
 ## 0.6.0

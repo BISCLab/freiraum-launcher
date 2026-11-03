@@ -141,6 +141,10 @@ class MainActivity : ComponentActivity() {
                     if (route == null || !route.startsWith("settings")) navController.navigate("settings")
                 }
             }
+            // The Home button leaves the launcher's own settings too, like any other app.
+            androidx.compose.runtime.LaunchedEffect(homeButtonPressCount) {
+                if (homeButtonPressCount > 0) navController.popBackStack("home", inclusive = false)
+            }
 
             val darkTheme = when (theme) {
                 com.bisc.flauncher.ui.theme.ThemePreference.DARK -> true
