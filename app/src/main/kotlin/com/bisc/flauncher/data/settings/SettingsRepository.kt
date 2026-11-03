@@ -110,6 +110,13 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[SHOW_SETTINGS_TIPS_KEY] = show }
     }
 
+    /** Keeps the launcher in portrait instead of turning with the device. */
+    val lockPortrait: Flow<Boolean> = dataStore.data.map { it[LOCK_PORTRAIT_KEY] ?: false }
+
+    suspend fun setLockPortrait(lock: Boolean) {
+        dataStore.edit { it[LOCK_PORTRAIT_KEY] = lock }
+    }
+
     /** Apps whose playback the music widget shows (package names); empty = every app. */
     val musicSources: Flow<Set<String>> = dataStore.data.map { it[MUSIC_SOURCES_KEY] ?: emptySet() }
 
@@ -888,6 +895,7 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_MAPS_APP_KEY = stringPreferencesKey("search_maps_app")
         private fun searchIncludeKey(storageKey: String) = booleanPreferencesKey("search_include_$storageKey")
         private val SEARCH_KEYBOARD_AUTO_OPEN_KEY = booleanPreferencesKey("search_keyboard_auto_open")
+        private val LOCK_PORTRAIT_KEY = booleanPreferencesKey("lock_portrait")
         private val SHOW_SETTINGS_TIPS_KEY = booleanPreferencesKey("show_settings_tips")
         private val CAROUSEL_ENDLESS_KEY = booleanPreferencesKey("carousel_endless")
         private val MUSIC_SOURCES_KEY = stringSetPreferencesKey("music_sources")

@@ -63,6 +63,16 @@ fun SettingsSystemScreen(
                 trailing = null
             )
         }
+        val lockPortrait by viewModel.lockPortrait.collectAsState()
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_rotation_label)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_lock_portrait),
+                summary = stringResource(R.string.settings_lock_portrait_summary),
+                onClick = { viewModel.setLockPortrait(!lockPortrait) },
+                trailing = { Switch(checked = lockPortrait, onCheckedChange = viewModel::setLockPortrait) }
+            )
+        }
         SettingsPreferenceGroup(
             title = stringResource(R.string.settings_standard_apps_label),
             info = stringResource(R.string.settings_search_open_with_info)

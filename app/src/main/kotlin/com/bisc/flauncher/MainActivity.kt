@@ -120,6 +120,11 @@ class MainActivity : ComponentActivity() {
             val globalIconShape by settingsVm.iconShape.collectAsState()
             val appOverridesForIconSize by settingsVm.appOverrides.collectAsState()
             val showSettingsTips by settingsVm.showSettingsTips.collectAsState()
+            val lockPortrait by settingsVm.lockPortrait.collectAsState()
+            androidx.compose.runtime.LaunchedEffect(lockPortrait) {
+                requestedOrientation = if (lockPortrait) android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                    else android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            }
             val accentColor by settingsVm.accentColor.collectAsState()
             // New lambda identity whenever either input changes, so LocalIconSizeResolver consumers
             // (AppIconCell) recompose - a StateFlow's plain .value read wouldn't do that on its own.

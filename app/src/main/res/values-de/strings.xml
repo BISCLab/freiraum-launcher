@@ -632,4 +632,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="lock_wallpaper_offer_text">Soll der Sperrbildschirm einen passenden Freiraum-Hintergrund bekommen? Das Android-Hintergrundbild hinter dem Startbildschirm bleibt, wie es ist.</string>
     <string name="lock_wallpaper_offer_yes">Ja, setzen</string>
     <string name="lock_wallpaper_offer_no">Nein danke</string>
+    <string name="settings_rotation_label">Drehen</string>
+    <string name="settings_lock_portrait">Auf Hochformat sperren</string>
+    <string name="settings_lock_portrait_summary">Der Launcher bleibt aufrecht, wenn das Gerät gedreht wird</string>
 </resources>

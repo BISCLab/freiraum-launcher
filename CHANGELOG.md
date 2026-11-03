@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- New setting under System: lock the launcher to portrait so it doesn't turn with the device
+
 ## 0.6.0
 
 - New installs start with a finished look: bundled wallpapers for Home, app list and Text search,

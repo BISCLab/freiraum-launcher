@@ -357,6 +357,12 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setShowSettingsTips(show) }
     }
 
+    val lockPortrait: StateFlow<Boolean> = repository.lockPortrait.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun setLockPortrait(lock: Boolean) {
+        viewModelScope.launch { repository.setLockPortrait(lock) }
+    }
+
     val searchBarAppearance: StateFlow<ElementAppearance?> =
         repository.searchBarAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
