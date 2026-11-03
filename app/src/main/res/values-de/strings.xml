@@ -635,4 +635,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_rotation_label">Drehen</string>
     <string name="settings_lock_portrait">Auf Hochformat sperren</string>
     <string name="settings_lock_portrait_summary">Der Launcher bleibt aufrecht, wenn das Gerät gedreht wird</string>
+    <string name="settings_tablet_beta_title">Tablet-Ansicht (Beta)</string>
+    <string name="settings_tablet_beta_summary">Freiraum auf Tablets ist noch experimentell: Manche Bildschirme sehen noch nicht ganz richtig aus oder funktionieren nicht wie gewohnt. Rückmeldungen gern auf GitHub.</string>
 </resources>

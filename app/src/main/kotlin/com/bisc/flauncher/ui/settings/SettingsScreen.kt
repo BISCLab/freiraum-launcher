@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,8 +73,20 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
         },
         bottomBar = { SettingsBreadcrumbBar(navController) }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        Column(modifier = Modifier.widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             AboutHeaderCard(onClick = { onNavigate("about") })
+            if (com.bisc.flauncher.ui.isLargeScreen()) {
+                SettingsPreferenceGroup {
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(R.string.settings_tablet_beta_title),
+                        summary = stringResource(R.string.settings_tablet_beta_summary),
+                        onClick = {},
+                        trailing = null
+                    )
+                }
+            }
             // Three levels, global to specific: Design (looks the same everywhere), Pages (each page
             // and utility page, plus gestures), Elements (the library of apps, folders, places,
             // links and action buttons) - then System for everything about fitting into the phone.
@@ -106,6 +120,7 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                     onClick = { onNavigate("system") }
                 )
             }
+        }
         }
     }
 }
@@ -330,15 +345,18 @@ fun SettingsSubScreen(
             }
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .imePadding()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            content = content
-        )
+        Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+            Column(
+                modifier = Modifier
+                    .widthIn(max = com.bisc.flauncher.ui.MaxContentWidth)
+                    .fillMaxWidth()
+                    .imePadding()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+                content = content
+            )
+        }
     }
 
     pendingLeave?.let { leave ->

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.7.0
+
+- Tablets (beta, still experimental): Text search, settings, app list, Dock and Panel stay at a
+  comfortable width in the middle instead of stretching across the screen, and the App grid adds
+  columns on wide screens; the settings show a note that tablet support is in beta
 - The Home button now also leaves the launcher's own settings and returns to the home screen
 - New setting under System: lock the launcher to portrait so it doesn't turn with the device
 

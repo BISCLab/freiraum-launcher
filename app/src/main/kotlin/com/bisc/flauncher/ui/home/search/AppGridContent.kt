@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.search
 
+import androidx.compose.foundation.layout.widthIn
 import android.content.ComponentName
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -129,14 +130,16 @@ fun AppGridContent(
     }
 
     Column(modifier = modifier.fillMaxSize().windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))) {
-        if (barPosition == AppGridBarPosition.TOP) Bar(Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+        if (barPosition == AppGridBarPosition.TOP) Bar(Modifier.align(Alignment.CenterHorizontally).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).padding(horizontal = 20.dp, vertical = 8.dp))
         BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
             val gridState = rememberLazyGridState()
+            // The column setting is meant for a phone; a wider screen gets proportionally more.
+            val effectiveColumns = maxOf(columns, (columns * (maxWidth / com.bisc.flauncher.ui.PhoneReferenceWidth)).toInt())
             val fadeStart = (1f - FADE_TRANSITION_DISTANCE / maxHeight).coerceIn(0f, 1f)
             val canScrollFurther by remember { derivedStateOf { gridState.canScrollForward } }
             val topFadePx = with(LocalDensity.current) { TOP_FADE_HEIGHT.toPx() }
             LazyVerticalGrid(
-                columns = GridCells.Fixed(columns),
+                columns = GridCells.Fixed(effectiveColumns),
                 state = gridState,
                 // Same edge fades as Text search: toward the bottom while there's more to scroll, toward
                 // the top once scrolled away from it - so the side with the search field always fades.
@@ -173,7 +176,7 @@ fun AppGridContent(
                 }
             }
         }
-        if (barPosition == AppGridBarPosition.BOTTOM) Bar(Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 16.dp))
+        if (barPosition == AppGridBarPosition.BOTTOM) Bar(Modifier.align(Alignment.CenterHorizontally).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 16.dp))
         if (keyboardCapColor != null) KeyboardCap(keyboardCapColor, keyboardCapCornerRadiusPercent, keyboardCapArrow)
     }
 }

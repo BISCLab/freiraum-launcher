@@ -1,0 +1,3 @@
+- Tablets (Beta): Inhalte bleiben angenehm breit, mehr Spalten im App-Raster
+- Einstellung zum Sperren auf Hochformat
+- Home-Taste verlässt die Launcher-Einstellungen

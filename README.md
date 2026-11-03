@@ -29,6 +29,8 @@ libraries.
 
 Languages: English, German.
 
+Tablets are supported in beta: it works, but some screens may not look quite right yet.
+
 ## Permissions
 
 | Permission | Why |

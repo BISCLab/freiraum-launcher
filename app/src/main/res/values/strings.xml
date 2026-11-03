@@ -635,4 +635,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_rotation_label">Rotation</string>
     <string name="settings_lock_portrait">Lock to portrait</string>
     <string name="settings_lock_portrait_summary">The launcher stays upright when the device is turned</string>
+    <string name="settings_tablet_beta_title">Tablet view (beta)</string>
+    <string name="settings_tablet_beta_summary">Freiraum on tablets is still experimental: some screens may not look or work quite right yet. Feedback is welcome on GitHub.</string>
 </resources>

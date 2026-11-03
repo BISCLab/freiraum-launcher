@@ -1,5 +1,6 @@
 ﻿package com.bisc.flauncher.ui.home
 
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Text
 import androidx.compose.ui.res.stringResource
 import com.bisc.flauncher.R
@@ -701,7 +702,7 @@ fun HomeScreen(
                 visible = dockExpanded,
                 enter = fadeIn(tween(160)) + androidx.compose.animation.expandVertically(tween(200), expandFrom = Alignment.Bottom),
                 exit = fadeOut(tween(140)) + androidx.compose.animation.shrinkVertically(tween(180), shrinkTowards = Alignment.Bottom),
-                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(dockHeight + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+                modifier = Modifier.align(Alignment.BottomCenter).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().height(dockHeight + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
             ) {
                 DockPanelSurface(
                     appearance = dockAppearance.copy(borderEnabled = false),
@@ -852,7 +853,7 @@ fun HomeScreen(
                 visible = isPanelOpen && !folderOpen && homePanelRow?.enabled != false,
                 enter = expandVertically(animationSpec = tween(160), expandFrom = Alignment.Top) + fadeIn(tween(100)),
                 exit = shrinkVertically(animationSpec = tween(200), shrinkTowards = Alignment.Top) + fadeOut(tween(150)),
-                modifier = Modifier.fillMaxWidth().height(panelHeight)
+                modifier = Modifier.align(Alignment.TopCenter).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().height(panelHeight)
             ) {
                 DockPanelSurface(
                     appearance = panelAppearance.copy(borderEnabled = false),
@@ -967,6 +968,8 @@ fun HomeScreen(
             CompositionLocalProvider(LocalAppIconLoader provides viewModel.iconLoader) {
               Column(
                   modifier = Modifier
+                      .align(Alignment.TopCenter)
+                      .widthIn(max = com.bisc.flauncher.ui.MaxContentWidth)
                       .fillMaxSize()
                       .then(if (appListSearching) Modifier.windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars)) else Modifier)
               ) {
@@ -1015,7 +1018,7 @@ fun HomeScreen(
                     }
                 }
               }
-                if (appListShowSearchButton && !appListSearching) {
+                if (appListShowSearchButton && !appListSearching) Box(modifier = Modifier.align(Alignment.TopCenter).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxSize()) {
                     com.bisc.flauncher.ui.home.search.AppOverviewSearchButton(
                         onClick = { if (appListOwnSearch) appListSearching = true else viewModel.openSearch() },
                         handedness = appOverviewHandedness,

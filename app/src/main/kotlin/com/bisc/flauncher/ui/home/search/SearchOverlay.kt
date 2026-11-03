@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
@@ -224,6 +225,8 @@ fun SearchOverlay(
                 }
                 Column(
                     modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .widthIn(max = com.bisc.flauncher.ui.MaxContentWidth)
                         .fillMaxSize()
                         .windowInsetsPadding(if (barAtBottom) WindowInsets.ime else WindowInsets.ime.union(WindowInsets.navigationBars))
                 ) {

@@ -1,0 +1,3 @@
+- Tablets (beta): content stays at a comfortable width, more App grid columns
+- Setting to lock the launcher to portrait
+- Home button leaves the launcher settings
