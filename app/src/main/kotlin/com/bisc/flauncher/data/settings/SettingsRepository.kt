@@ -110,6 +110,31 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[SHOW_SETTINGS_TIPS_KEY] = show }
     }
 
+    /** How widgets with several pages are paged, and the look of their paging buttons. */
+    val widgetPaging: Flow<com.bisc.flauncher.data.model.WidgetPaging> = dataStore.data.map { prefs ->
+        com.bisc.flauncher.data.model.WidgetPaging(
+            mode = prefs[WIDGET_PAGING_MODE_KEY]?.let { runCatching { com.bisc.flauncher.data.model.WidgetPagingMode.valueOf(it) }.getOrNull() }
+                ?: com.bisc.flauncher.data.model.WidgetPagingMode.GESTURE,
+            arrowStyle = prefs[WIDGET_ARROW_STYLE_KEY]?.let { runCatching { com.bisc.flauncher.data.model.WidgetArrowStyle.valueOf(it) }.getOrNull() }
+                ?: com.bisc.flauncher.data.model.WidgetArrowStyle.CHEVRON,
+            alphaPercent = prefs[WIDGET_ARROW_ALPHA_KEY] ?: 100,
+            appearance = if (prefs[elementFillModeKeyEnum(WIDGET_ARROW_PREFIX)] == null) null
+                else readElementAppearance(prefs, WIDGET_ARROW_PREFIX, ElementAppearance(), null),
+            cornerRadiusPercent = prefs[WIDGET_ARROW_CORNER_KEY] ?: 40
+        )
+    }
+
+    suspend fun setWidgetPaging(paging: com.bisc.flauncher.data.model.WidgetPaging) {
+        dataStore.edit { prefs ->
+            prefs[WIDGET_PAGING_MODE_KEY] = paging.mode.name
+            prefs[WIDGET_ARROW_STYLE_KEY] = paging.arrowStyle.name
+            prefs[WIDGET_ARROW_ALPHA_KEY] = paging.alphaPercent.coerceIn(0, 100)
+            prefs[WIDGET_ARROW_CORNER_KEY] = paging.cornerRadiusPercent.coerceIn(0, 100)
+        }
+        val appearance = paging.appearance
+        if (appearance != null) setElementAppearanceFor(WIDGET_ARROW_PREFIX, appearance) else resetElementAppearanceFor(WIDGET_ARROW_PREFIX)
+    }
+
     /** Keeps the launcher in portrait instead of turning with the device. */
     val lockPortrait: Flow<Boolean> = dataStore.data.map { it[LOCK_PORTRAIT_KEY] ?: false }
 
@@ -896,6 +921,11 @@ class SettingsRepository @Inject constructor(
         private fun searchIncludeKey(storageKey: String) = booleanPreferencesKey("search_include_$storageKey")
         private val SEARCH_KEYBOARD_AUTO_OPEN_KEY = booleanPreferencesKey("search_keyboard_auto_open")
         private val LOCK_PORTRAIT_KEY = booleanPreferencesKey("lock_portrait")
+        private val WIDGET_PAGING_MODE_KEY = stringPreferencesKey("widget_paging_mode")
+        private val WIDGET_ARROW_STYLE_KEY = stringPreferencesKey("widget_arrow_style")
+        private val WIDGET_ARROW_ALPHA_KEY = intPreferencesKey("widget_arrow_alpha")
+        private val WIDGET_ARROW_CORNER_KEY = intPreferencesKey("widget_arrow_corner")
+        private const val WIDGET_ARROW_PREFIX = "widget_arrow"
         private val SHOW_SETTINGS_TIPS_KEY = booleanPreferencesKey("show_settings_tips")
         private val CAROUSEL_ENDLESS_KEY = booleanPreferencesKey("carousel_endless")
         private val MUSIC_SOURCES_KEY = stringSetPreferencesKey("music_sources")

@@ -357,6 +357,13 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setShowSettingsTips(show) }
     }
 
+    val widgetPaging: StateFlow<com.bisc.flauncher.data.model.WidgetPaging> =
+        repository.widgetPaging.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.data.model.WidgetPaging())
+
+    fun setWidgetPaging(paging: com.bisc.flauncher.data.model.WidgetPaging) {
+        viewModelScope.launch { repository.setWidgetPaging(paging) }
+    }
+
     val lockPortrait: StateFlow<Boolean> = repository.lockPortrait.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     fun setLockPortrait(lock: Boolean) {

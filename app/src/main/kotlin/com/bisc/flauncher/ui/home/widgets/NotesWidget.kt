@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.home.widgets
 
+import kotlinx.coroutines.launch
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -68,6 +70,9 @@ fun NotesWidget(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val notes by viewModel.notes.collectAsState()
+    val paging by viewModel.widgetPaging.collectAsState()
+    val buttons = paging.mode == com.bisc.flauncher.data.model.WidgetPagingMode.BUTTONS
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     // Hiding only affects this widget's own grid; the note stays visible everywhere else, so
     // reordering (moveBy below) still operates on the full, unfiltered list.
     val visibleNotes = remember(notes) { notes.filter { !it.hiddenInWidget } }
@@ -145,6 +150,20 @@ fun NotesWidget(
                             }
                         }
                     }
+                    if (buttons && pageCount > 1) {
+                        val slide = androidx.compose.animation.core.tween<Float>(280, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                        PagingButton(
+                            forward = false, width = 28.dp, height = 28.dp, style = paging,
+                            enabled = pagerState.currentPage > 0,
+                            onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1, animationSpec = slide) } }
+                        )
+                        PagingButton(
+                            forward = true, width = 28.dp, height = 28.dp, style = paging,
+                            enabled = pagerState.currentPage < pageCount - 1,
+                            onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1, animationSpec = slide) } },
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+                    }
                     IconButton(onClick = { editingNote = null; showEditor = true }, modifier = Modifier.size(32.dp)) {
                         Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.widget_notes_add), modifier = Modifier.size(18.dp))
                     }
@@ -158,7 +177,7 @@ fun NotesWidget(
                     Text(stringResource(R.string.widget_notes_empty), color = LocalContentColor.current.copy(alpha = 0.7f))
                 }
             } else {
-                HorizontalPager(state = pagerState, modifier = Modifier.weight(1f).fillMaxWidth()) { page ->
+                HorizontalPager(state = pagerState, userScrollEnabled = !buttons, modifier = Modifier.weight(1f).fillMaxWidth()) { page ->
                     val pageNotes = visibleNotes.drop(page * perPage).take(perPage)
                     Column(
                         modifier = Modifier.fillMaxSize().padding(8.dp),

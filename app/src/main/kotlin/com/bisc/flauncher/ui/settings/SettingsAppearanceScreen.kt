@@ -151,6 +151,13 @@ fun SettingsAppearanceScreen(
                 onClick = { onNavigate("appearance/background") },
                 trailing = null
             )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_widget_paging_title),
+                summary = stringResource(R.string.settings_widget_paging_summary),
+                onClick = { onNavigate("appearance/widget_paging") },
+                trailing = null
+            )
         }
         // Home, Pages, App list, Text search and folders each have their own status-bar switch on
         // their own screen. This one is a bulk action over all of them - checked reflects whether

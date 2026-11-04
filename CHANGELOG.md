@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Weather widget: always exactly six whole hours and three whole days side by side, no cut-off tile
+  at the edge, and swiping snaps to whole tiles
+- Widgets with several pages (weather hours and days, notes) can be moved with buttons instead of
+  swiping, which avoids clashes with swiping between pages. The buttons have their own symbol
+  (chevron, triangle, arrow), fill, border, corners and opacity; set it under Design, Paging in widgets
+
 ## 0.7.0
 
 - Tablets (beta, still experimental): Text search, settings, app list, Dock and Panel stay at a

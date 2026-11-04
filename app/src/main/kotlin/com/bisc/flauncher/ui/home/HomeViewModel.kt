@@ -353,6 +353,9 @@ class HomeViewModel @Inject constructor(
         _appQuery.value = ""
     }
 
+    val widgetPaging: StateFlow<com.bisc.flauncher.data.model.WidgetPaging> =
+        settingsRepository.widgetPaging.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.data.model.WidgetPaging())
+
     // ---- Lock screen wallpaper offer (first start) ----
 
     val lockWallpaperOffer: StateFlow<Boolean> =

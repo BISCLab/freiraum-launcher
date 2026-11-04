@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -67,6 +68,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.max
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 private val HOURLY_MIN_HEIGHT = 130.dp
 private val DAILY_MIN_HEIGHT = 172.dp
@@ -78,6 +80,11 @@ private val COMPACT_MAX_HEIGHT = 120.dp
 
 private const val MAX_DAYS = 7
 
+// Always whole tiles side by side: six hours, three days.
+private const val HOURS_PER_PAGE = 6
+private const val DAYS_PER_PAGE = 3
+private val TILE_GAP = 4.dp
+
 /** Current conditions, hourly and daily forecast from the last received weather snapshot. */
 @Composable
 fun WeatherWidget(
@@ -88,6 +95,7 @@ fun WeatherWidget(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val snapshot by viewModel.weather.collectAsState()
+    val paging by viewModel.widgetPaging.collectAsState()
 
     WidgetCard(modifier = modifier, appearance = appearance, cornerRadiusPercent = cornerRadiusPercent, horizontalMargin = horizontalMargin) {
         val weather = snapshot
@@ -101,7 +109,7 @@ fun WeatherWidget(
                 )
             }
         } else {
-            WeatherContent(weather)
+            WeatherContent(weather, paging)
         }
     }
 }
@@ -119,7 +127,7 @@ private data class Shown(
 )
 
 @Composable
-private fun WeatherContent(weather: WeatherSnapshot) {
+private fun WeatherContent(weather: WeatherSnapshot, paging: com.bisc.flauncher.data.model.WidgetPaging) {
     val context = LocalContext.current
     val locale = LocalConfiguration.current.locales.get(0)
     val zone = remember { ZoneId.systemDefault() }
@@ -197,19 +205,45 @@ private fun WeatherContent(weather: WeatherSnapshot) {
 
         val roomy = maxHeight >= ROOMY_MIN_HEIGHT
         val large = maxHeight >= LARGE_MIN_HEIGHT
+        val hourState = rememberLazyListState()
+        val dayState = rememberLazyListState()
+        val buttons = paging.mode == com.bisc.flauncher.data.model.WidgetPagingMode.BUTTONS &&
+            (showHourly && dayHours.size > HOURS_PER_PAGE || showDays && dayCount > DAYS_PER_PAGE)
+        // Upright frames for the hours, wide ones for the days - like the tiles they move.
+        val tallSize = if (roomy) androidx.compose.ui.unit.DpSize(30.dp, 40.dp) else androidx.compose.ui.unit.DpSize(26.dp, 34.dp)
+        val wideSize = if (roomy) androidx.compose.ui.unit.DpSize(44.dp, 26.dp) else androidx.compose.ui.unit.DpSize(38.dp, 22.dp)
+        val clusterWidth = maxOf(tallSize.width * 2, wideSize.width * 2) + 4.dp
+        val fullWidth = maxWidth
         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
-            Header(
-                weather = weather,
-                shown = shown,
-                conditionText = headerCondition,
-                compact = compact,
-                roomy = roomy,
-                feelsLikeC = if (hourSelected == null && day == 0) weather.feelsLikeC else null,
-                showUpdated = roomy || !showHourly,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .then(if (onHeaderClick != null) Modifier.clickable(onClick = onHeaderClick) else Modifier)
-            )
+            androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxWidth()) {
+                Header(
+                    weather = weather,
+                    shown = shown,
+                    conditionText = headerCondition,
+                    compact = compact,
+                    roomy = roomy,
+                    feelsLikeC = if (hourSelected == null && day == 0) weather.feelsLikeC else null,
+                    showUpdated = roomy || !showHourly,
+                    // Keeps the texts clear of the buttons in the middle.
+                    leftMaxWidth = if (buttons) (fullWidth - clusterWidth) / 2 - 6.dp else androidx.compose.ui.unit.Dp.Unspecified,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(if (onHeaderClick != null) Modifier.clickable(onClick = onHeaderClick) else Modifier)
+                )
+                if (buttons) {
+                    // Centered over the gap between the third and fourth hour, level with the temperature.
+                    PagingCluster(
+                        hourState = if (showHourly && dayHours.size > HOURS_PER_PAGE) hourState else null,
+                        hourCount = dayHours.size,
+                        dayState = if (showDays && dayCount > DAYS_PER_PAGE) dayState else null,
+                        dayCount = dayCount,
+                        tallSize = tallSize,
+                        wideSize = wideSize,
+                        style = paging,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
 
             if (showHourly) {
                 HourSelector(
@@ -222,6 +256,8 @@ private fun WeatherContent(weather: WeatherSnapshot) {
                     zone = zone,
                     roomy = roomy,
                     large = large,
+                    listState = hourState,
+                    swipe = !buttons,
                     modifier = if (large) Modifier.weight(1f).padding(vertical = 8.dp) else Modifier
                 )
             }
@@ -234,6 +270,8 @@ private fun WeatherContent(weather: WeatherSnapshot) {
                     locale = locale,
                     roomy = roomy,
                     large = large,
+                    listState = dayState,
+                    swipe = !buttons,
                     onSelect = { selectedDay = it; selectedHour = null }
                 )
             }
@@ -250,12 +288,14 @@ private fun Header(
     roomy: Boolean,
     feelsLikeC: Double?,
     showUpdated: Boolean,
+    leftMaxWidth: Dp,
     modifier: Modifier
 ) {
     val content = LocalContentColor.current
     val condition = WeatherCondition.fromCode(shown.conditionCode)
     Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Column(modifier = Modifier.weight(1f)) {
+          Column(modifier = if (leftMaxWidth != Dp.Unspecified) Modifier.widthIn(max = leftMaxWidth) else Modifier) {
             Text(weather.location, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(
                 stringResource(R.string.widget_weather_temp, shown.tempC.roundToInt()),
@@ -295,6 +335,7 @@ private fun Header(
                     modifier = Modifier.padding(top = 2.dp)
                 )
             }
+          }
         }
         Column(horizontalAlignment = Alignment.End) {
             WeatherGlyph(condition = condition, night = shown.night, size = if (compact) 32.dp else if (roomy) 44.dp else 34.dp, tint = content)
@@ -363,26 +404,31 @@ private fun HourSelector(
     zone: ZoneId,
     roomy: Boolean,
     large: Boolean,
+    listState: LazyListState,
+    swipe: Boolean,
     modifier: Modifier = Modifier
 ) {
     val labelStyle = if (large) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelSmall
-    val listState: LazyListState = rememberLazyListState()
     LaunchedEffect(hours.firstOrNull()?.timestampMillis) { listState.scrollToItem(0) }
     val formatter = remember(timeFormat24, locale) { DateTimeFormatter.ofPattern(if (timeFormat24) "HH:mm" else "h a", locale) }
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+    val tileWidth = (maxWidth - TILE_GAP * (HOURS_PER_PAGE - 1)) / HOURS_PER_PAGE
     LazyRow(
         state = listState,
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        contentPadding = PaddingValues(0.dp)
+        modifier = Modifier.fillMaxWidth().then(if (large) Modifier.fillMaxSize() else Modifier),
+        horizontalArrangement = Arrangement.spacedBy(TILE_GAP),
+        contentPadding = PaddingValues(0.dp),
+        userScrollEnabled = swipe,
+        flingBehavior = androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior(listState)
     ) {
         itemsIndexed(hours, key = { _, h -> h.timestampMillis }) { _, hour ->
             val isSelected = hour.timestampMillis == selected
             SelectorTile(
                 selected = isSelected,
                 onClick = { onSelect(hour.timestampMillis) },
-                modifier = if (large) Modifier.fillParentMaxHeight() else Modifier
+                modifier = Modifier.width(tileWidth).then(if (large) Modifier.fillParentMaxHeight() else Modifier)
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.widthIn(min = if (large) 56.dp else 44.dp).padding(vertical = if (roomy) 11.dp else 6.dp, horizontal = if (large) 6.dp else 4.dp)) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(vertical = if (roomy) 11.dp else 6.dp, horizontal = 2.dp)) {
                     WeatherGlyph(
                         condition = WeatherCondition.fromCode(hour.conditionCode),
                         night = isNight(hour.timestampMillis),
@@ -413,6 +459,7 @@ private fun HourSelector(
             }
         }
     }
+    }
 }
 
 @Composable
@@ -424,16 +471,27 @@ private fun DaySelector(
     locale: Locale,
     roomy: Boolean,
     large: Boolean,
+    listState: LazyListState,
+    swipe: Boolean,
     onSelect: (Int) -> Unit
 ) {
     val formatter = remember(locale) { DateTimeFormatter.ofPattern("EEE", locale) }
-    LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+    val tileWidth = (maxWidth - TILE_GAP * (DAYS_PER_PAGE - 1)) / DAYS_PER_PAGE
+    LazyRow(
+        state = listState,
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(TILE_GAP),
+        userScrollEnabled = swipe,
+        flingBehavior = androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior(listState)
+    ) {
         itemsIndexed((0 until dayCount).toList()) { _, index ->
             val forecast = daily.getOrNull(index)
-            SelectorTile(selected = index == selectedDay, onClick = { onSelect(index) }) {
+            SelectorTile(selected = index == selectedDay, onClick = { onSelect(index) }, modifier = Modifier.width(tileWidth)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(horizontal = if (large) 10.dp else 8.dp, vertical = if (roomy || large) 10.dp else 6.dp)
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = if (roomy || large) 10.dp else 6.dp)
                 ) {
                     if (forecast != null) {
                         WeatherGlyph(WeatherCondition.fromCode(forecast.conditionCode), night = false, size = if (roomy || large) 24.dp else 18.dp, tint = LocalContentColor.current)
@@ -444,10 +502,47 @@ private fun DaySelector(
                             if (forecast != null) append(" ${forecast.minC.roundToInt()}° / ${forecast.maxC.roundToInt()}°")
                         },
                         style = if (large) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelSmall,
-                        softWrap = false,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(start = if (forecast != null) 6.dp else 0.dp)
                     )
                 }
+            }
+        }
+    }
+    }
+}
+
+/** The paging buttons: the hour pair (upright) above the day pair (wide). Each press moves one
+ *  whole page, quick and smooth. */
+@Composable
+private fun PagingCluster(
+    hourState: LazyListState?,
+    hourCount: Int,
+    dayState: LazyListState?,
+    dayCount: Int,
+    tallSize: androidx.compose.ui.unit.DpSize,
+    wideSize: androidx.compose.ui.unit.DpSize,
+    style: com.bisc.flauncher.data.model.WidgetPaging,
+    modifier: Modifier = Modifier
+) {
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    fun page(state: LazyListState, count: Int, perPage: Int, forward: Boolean) {
+        val lastStart = (count - perPage).coerceAtLeast(0)
+        val target = (state.firstVisibleItemIndex + if (forward) perPage else -perPage).coerceIn(0, lastStart)
+        scope.launch { state.animateScrollToItem(target) }
+    }
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        if (hourState != null) {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                PagingButton(false, tallSize.width, tallSize.height, style, hourState.canScrollBackward, { page(hourState, hourCount, HOURS_PER_PAGE, false) })
+                PagingButton(true, tallSize.width, tallSize.height, style, hourState.canScrollForward, { page(hourState, hourCount, HOURS_PER_PAGE, true) })
+            }
+        }
+        if (dayState != null) {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                PagingButton(false, wideSize.width, wideSize.height, style, dayState.canScrollBackward, { page(dayState, dayCount, DAYS_PER_PAGE, false) })
+                PagingButton(true, wideSize.width, wideSize.height, style, dayState.canScrollForward, { page(dayState, dayCount, DAYS_PER_PAGE, true) })
             }
         }
     }

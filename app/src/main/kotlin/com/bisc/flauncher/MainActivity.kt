@@ -449,6 +449,9 @@ class MainActivity : ComponentActivity() {
                         composable("settings/app_overview/az_index") {
                             com.bisc.flauncher.ui.settings.SettingsAppOverviewAzIndexScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
+                        composable("settings/appearance/widget_paging") {
+                            com.bisc.flauncher.ui.settings.SettingsWidgetPagingScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
                         composable("settings/app_grid") {
                             com.bisc.flauncher.ui.settings.SettingsAppGridScreen(
                                 navController = navController,

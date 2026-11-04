@@ -637,4 +637,19 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_lock_portrait_summary">The launcher stays upright when the device is turned</string>
     <string name="settings_tablet_beta_title">Tablet view (beta)</string>
     <string name="settings_tablet_beta_summary">Freiraum on tablets is still experimental: some screens may not look or work quite right yet. Feedback is welcome on GitHub.</string>
+    <string name="widget_page_next">Next</string>
+    <string name="widget_page_previous">Previous</string>
+    <string name="settings_widget_paging_title">Paging in widgets</string>
+    <string name="settings_widget_paging_summary">Swipe or buttons for weather hours and days and for notes</string>
+    <string name="settings_widget_paging_mode">Move by</string>
+    <string name="settings_widget_paging_mode_info">Swiping inside a widget near your thumb can collide with swiping between pages. With buttons, widgets no longer react to swiping.</string>
+    <string name="settings_widget_paging_gesture">Swiping</string>
+    <string name="settings_widget_paging_buttons">Buttons</string>
+    <string name="settings_widget_paging_symbol">Symbol</string>
+    <string name="settings_widget_arrow_chevron">Chevron</string>
+    <string name="settings_widget_arrow_triangle">Triangle</string>
+    <string name="settings_widget_arrow_arrow">Arrow</string>
+    <string name="settings_widget_paging_opacity">Opacity</string>
+    <string name="settings_widget_paging_opacity_info">Even at 0 the buttons can still be tapped, they are just invisible.</string>
+    <string name="settings_widget_paging_hint">Weather: the upright buttons move the hours, the wide ones the days. Notes: the buttons sit left of the plus.</string>
 </resources>
