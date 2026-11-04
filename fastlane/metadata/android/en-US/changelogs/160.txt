@@ -1,0 +1,4 @@
+- Short welcome walkthrough on first start, skippable
+- Weather: always six whole hours and three whole days
+- Optional buttons to page weather and notes widgets
+- Buttons with own symbol, fill, border, corners, opacity

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.8.0
+
 - New short welcome walkthrough on first start: what Freiraum is, its gestures, where the settings
   are, the permissions and the lock screen wallpaper; skippable at any point
 - Weather widget: always exactly six whole hours and three whole days side by side, no cut-off tile

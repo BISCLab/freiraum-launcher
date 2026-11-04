@@ -1,0 +1,4 @@
+- Kurze Einführung beim ersten Start, überspringbar
+- Wetter: immer sechs ganze Stunden und drei ganze Tage
+- Optionale Pfeiltasten für Wetter- und Notiz-Widget
+- Tasten mit eigenem Symbol, Füllung, Rahmen, Ecken, Deckkraft
