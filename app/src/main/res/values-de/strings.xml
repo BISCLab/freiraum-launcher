@@ -665,4 +665,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_permissions_text">Alles hier ist freiwillig, und Freiraum hat keinen Internetzugriff. Tippe auf eine Zeile, um es jetzt zu erlauben, oder später in den Einstellungen.</string>
     <string name="welcome_lock_title">Sperrbildschirm</string>
     <string name="welcome_lock_text">Passend zum Startbildschirm: Soll dieses Bild auf den Sperrbildschirm? Das Android-Hintergrundbild hinter dem Startbildschirm bleibt, wie es ist.</string>
+    <string name="welcome_gesture_panel">Panel</string>
 </resources>

@@ -254,8 +254,13 @@ private fun GesturesPreview(viewModel: SettingsViewModel) {
     val gestureActions by viewModel.gestureActions.collectAsState()
     val allPages by viewModel.allPages.collectAsState()
     val labeledApps by viewModel.labeledApps.collectAsState()
+    val homePanelRow by viewModel.homePanelRow.collectAsState()
+    val panelLabel = stringResource(R.string.welcome_gesture_panel)
     val markers = HomeGesture.entries.associateWith { gesture ->
-        GestureMarker(summary = gestureActionSummary(gestureActions[gesture] ?: GestureAction.NONE, allPages, labeledApps), enabled = true)
+        // Swiping down belongs to the Panel while it's on, like on the gestures screen.
+        val summary = if (gesture == HomeGesture.SWIPE_DOWN && homePanelRow?.enabled == true) panelLabel
+            else gestureActionSummary(gestureActions[gesture] ?: GestureAction.NONE, allPages, labeledApps)
+        GestureMarker(summary = summary, enabled = true)
     }
     Box(modifier = Modifier.fillMaxHeight().aspectRatio(0.52f, matchHeightConstraintsFirst = true), contentAlignment = Alignment.Center) {
         GesturePhone(markers = markers, onEdit = {}, widthFraction = 1f)

@@ -665,4 +665,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_permissions_text">Everything here is optional, and Freiraum has no internet access. Tap a row to allow it now, or later in the settings.</string>
     <string name="welcome_lock_title">Lock screen</string>
     <string name="welcome_lock_text">To match your home screen: use this wallpaper on the lock screen? Android\'s wallpaper behind your home screen stays as it is.</string>
+    <string name="welcome_gesture_panel">Panel</string>
 </resources>
