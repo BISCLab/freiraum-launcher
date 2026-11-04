@@ -322,6 +322,7 @@ fun HomeScreen(
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
     var showFolderCreator by remember { mutableStateOf(false) }
     val lockWallpaperOffer by viewModel.lockWallpaperOffer.collectAsState()
+    val welcomePending by viewModel.welcomePending.collectAsState()
 
     // See the background-crossfade layer below for why this exists: a stable, append-only cache instead
     // of re-subscribing a Flow every time a page's role (lower/upper) in the crossfade changes.
@@ -1242,7 +1243,13 @@ fun HomeScreen(
         )
     }
 
-    if (lockWallpaperOffer) {
+    // The walkthrough asks about the lock screen itself; the plain dialog is only the fallback.
+    if (welcomePending) {
+        WelcomeWalkthrough(
+            onLockScreenAnswer = { accept -> if (lockWallpaperOffer) viewModel.answerLockWallpaperOffer(context, accept) },
+            onDone = viewModel::finishWelcome
+        )
+    } else if (lockWallpaperOffer) {
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { viewModel.answerLockWallpaperOffer(context, false) },
             title = { Text(stringResource(R.string.lock_wallpaper_offer_title)) },

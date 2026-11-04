@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- New short welcome walkthrough on first start: what Freiraum is, its gestures, where the settings
+  are, the permissions and the lock screen wallpaper; skippable at any point
 - Weather widget: always exactly six whole hours and three whole days side by side, no cut-off tile
   at the edge, and swiping snaps to whole tiles
 - Widgets with several pages (weather hours and days, notes) can be moved with buttons instead of

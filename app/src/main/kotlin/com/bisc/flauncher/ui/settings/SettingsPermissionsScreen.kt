@@ -36,6 +36,15 @@ import com.bisc.flauncher.util.DefaultLauncherUtil
 /** Status and grant actions for all permissions and system settings the launcher uses. */
 @Composable
 fun SettingsPermissionsScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+    SettingsSubScreen(title = stringResource(R.string.settings_section_permissions), navController = navController, onBack = onBack) {
+        PermissionGroups(viewModel = viewModel)
+    }
+}
+
+/** The permission rows with their live status, shared by the settings and the welcome walkthrough
+ *  ([purposeVisible] shows what each is for right away instead of behind the tips button). */
+@Composable
+internal fun PermissionGroups(viewModel: SettingsViewModel, purposeVisible: Boolean = false) {
     val context = LocalContext.current
     var refreshTick by remember { mutableIntStateOf(0) }
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -73,15 +82,17 @@ fun SettingsPermissionsScreen(navController: NavController, onBack: () -> Unit, 
         permissionLauncher.launch(permission)
     }
 
-    SettingsSubScreen(title = stringResource(R.string.settings_section_permissions), navController = navController, onBack = onBack) {
+    run {
         SettingsPreferenceGroup(title = stringResource(R.string.settings_permissions_launcher_group)) {
             PermissionRow(
+                purposeVisible = purposeVisible,
                 title = stringResource(R.string.settings_section_default_launcher),
                 purpose = stringResource(R.string.settings_default_launcher_description),
                 granted = isDefault,
                 onClick = { if (!isDefault) requestDefault() }
             )
             PermissionRow(
+                purposeVisible = purposeVisible,
                 title = stringResource(R.string.settings_permissions_shortcuts),
                 purpose = stringResource(R.string.settings_permissions_shortcuts_purpose),
                 granted = shortcuts,
@@ -90,12 +101,14 @@ fun SettingsPermissionsScreen(navController: NavController, onBack: () -> Unit, 
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_permissions_access_group)) {
             PermissionRow(
+                purposeVisible = purposeVisible,
                 title = stringResource(R.string.settings_permissions_contacts),
                 purpose = stringResource(R.string.settings_permissions_contacts_purpose),
                 granted = contacts,
                 onClick = { if (contacts) openAppDetails() else requestPermission(Manifest.permission.READ_CONTACTS) }
             )
             PermissionRow(
+                purposeVisible = purposeVisible,
                 title = stringResource(R.string.settings_permissions_notifications),
                 purpose = stringResource(R.string.settings_permissions_notifications_purpose),
                 granted = notifications,
@@ -106,13 +119,13 @@ fun SettingsPermissionsScreen(navController: NavController, onBack: () -> Unit, 
 }
 
 @Composable
-private fun PermissionRow(title: String, purpose: String, granted: Boolean, onClick: () -> Unit) {
+private fun PermissionRow(title: String, purpose: String, granted: Boolean, onClick: () -> Unit, purposeVisible: Boolean = false) {
     val status = stringResource(if (granted) R.string.settings_permissions_granted else R.string.settings_permissions_not_granted)
     SettingsPreference(
         icon = null,
         title = title,
-        summary = status,
-        info = purpose,
+        summary = if (purposeVisible) "$status · $purpose" else status,
+        info = if (purposeVisible) null else purpose,
         onClick = onClick,
         leading = {
             Icon(

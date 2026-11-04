@@ -226,11 +226,11 @@ internal data class GestureMarker(val summary: String, val enabled: Boolean)
 /** A phone outline with the four home gestures marked where they happen: swipe down at the top,
  *  double tap and long press in the middle, swipe up at the bottom. */
 @Composable
-private fun GesturePhone(markers: Map<HomeGesture, GestureMarker>, onEdit: (HomeGesture) -> Unit) {
+internal fun GesturePhone(markers: Map<HomeGesture, GestureMarker>, onEdit: (HomeGesture) -> Unit, widthFraction: Float = 0.82f) {
     Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
         Column(
             modifier = Modifier
-                .fillMaxWidth(0.82f)
+                .fillMaxWidth(widthFraction)
                 .aspectRatio(0.52f)
                 .clip(RoundedCornerShape(40.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainer)

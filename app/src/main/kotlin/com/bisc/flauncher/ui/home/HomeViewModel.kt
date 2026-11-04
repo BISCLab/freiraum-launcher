@@ -356,6 +356,15 @@ class HomeViewModel @Inject constructor(
     val widgetPaging: StateFlow<com.bisc.flauncher.data.model.WidgetPaging> =
         settingsRepository.widgetPaging.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.data.model.WidgetPaging())
 
+    // ---- Welcome walkthrough (first start) ----
+
+    val welcomePending: StateFlow<Boolean> =
+        settingsRepository.welcomePending.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun finishWelcome() {
+        viewModelScope.launch { settingsRepository.clearWelcomePending() }
+    }
+
     // ---- Lock screen wallpaper offer (first start) ----
 
     val lockWallpaperOffer: StateFlow<Boolean> =

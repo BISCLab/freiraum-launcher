@@ -866,7 +866,15 @@ class SettingsRepository @Inject constructor(
             it[booleanPreferencesKey("show_settings_tips")] = false
             it[stringPreferencesKey("theme")] = "LIGHT"
             it[LOCK_WALLPAPER_OFFER_KEY] = true
+            it[WELCOME_PENDING_KEY] = true
         }
+    }
+
+    /** Whether the welcome walkthrough is still to be shown (fresh installs only). */
+    val welcomePending: Flow<Boolean> = dataStore.data.map { it[WELCOME_PENDING_KEY] ?: false }
+
+    suspend fun clearWelcomePending() {
+        dataStore.edit { it[WELCOME_PENDING_KEY] = false }
     }
 
     /** Whether to offer, once, to use the bundled lock screen wallpaper. */
@@ -891,6 +899,7 @@ class SettingsRepository @Inject constructor(
         private const val GLOBAL_BACKGROUND_KEY = "global"
         const val SEARCH_BACKGROUND_KEY = "search_page"
         private val LOCK_WALLPAPER_OFFER_KEY = booleanPreferencesKey("lock_wallpaper_offer")
+        private val WELCOME_PENDING_KEY = booleanPreferencesKey("welcome_pending")
         private val DEFAULT_ACCENT_COLOR = com.bisc.flauncher.ui.theme.DEFAULT_ACCENT_COLOR
 
         private val THEME_KEY = stringPreferencesKey("theme")
