@@ -14,9 +14,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.graphics.TransformOrigin
 
-/** How much the launcher animates: zoom and depth everywhere, a lighter version, or nothing.
- *  Android's own "Remove animations" switch always means [OFF]. */
-enum class MotionLevel { FULL, SUBTLE, OFF }
+/** Whether the launcher animates at all. Android's own "Remove animations" switch always means [OFF]. */
+enum class MotionLevel { FULL, OFF }
 
 val LocalMotion = staticCompositionLocalOf { MotionLevel.FULL }
 
@@ -61,21 +60,18 @@ object TouchOrigin {
 /** A page or overlay growing out of [origin]. */
 fun zoomIn(level: MotionLevel, origin: TransformOrigin): EnterTransition = when (level) {
     MotionLevel.FULL -> scaleIn(tween(320, easing = EmphasizedEasing), initialScale = 0.82f, transformOrigin = origin) + fadeIn(tween(200))
-    MotionLevel.SUBTLE -> scaleIn(tween(240, easing = EmphasizedEasing), initialScale = 0.95f, transformOrigin = origin) + fadeIn(tween(160))
     MotionLevel.OFF -> EnterTransition.None
 }
 
 /** The reverse of [zoomIn]: shrinking back towards [origin]. */
 fun zoomOut(level: MotionLevel, origin: TransformOrigin): ExitTransition = when (level) {
     MotionLevel.FULL -> scaleOut(tween(240, easing = EmphasizedEasing), targetScale = 0.86f, transformOrigin = origin) + fadeOut(tween(180))
-    MotionLevel.SUBTLE -> scaleOut(tween(180, easing = EmphasizedEasing), targetScale = 0.96f, transformOrigin = origin) + fadeOut(tween(140))
     MotionLevel.OFF -> ExitTransition.None
 }
 
 /** How far a page shrinks while it's swiped away, at most. */
 fun pageDepth(level: MotionLevel): Float = when (level) {
     MotionLevel.FULL -> 0.08f
-    MotionLevel.SUBTLE -> 0.03f
     MotionLevel.OFF -> 0f
 }
 

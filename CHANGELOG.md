@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Animations setting built like the status bar one: one switch for all animations, below it each
+  animation on its own; the in-between level Subtle is gone
+
 ## 0.9.1
 
 - App list: the letter bubble of the A-Z index can be pulled into the list like a spring - the

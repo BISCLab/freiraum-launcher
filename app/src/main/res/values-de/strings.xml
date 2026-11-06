@@ -668,12 +668,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_gesture_panel">Panel</string>
     <string name="settings_motion_label">Animationen</string>
     <string name="settings_motion_info">Apps, Ordner und Seiten zoomen aus dem Angetippten heraus, Seiten treten beim Wischen leicht zurück, und die Zurück-Geste lässt den Bildschirm mit dem Finger schrumpfen. Ist in Android „Animationen entfernen“ an, gibt es keine.</string>
-    <string name="settings_motion_full">Voll</string>
-    <string name="settings_motion_subtle">Dezent</string>
-    <string name="settings_motion_off">Aus</string>
     <string name="settings_motion_system_off">In Android ist „Animationen entfernen“ an</string>
     <string name="settings_motion_system_off_summary">Deshalb zeigt Freiraum keine Animationen. Tippe, um die Bedienungshilfen von Android zu öffnen (Farbe und Bewegung).</string>
-    <string name="settings_motion_each_label">Einzelne Animationen</string>
     <string name="settings_motion_app_zoom">Apps öffnen aus ihrem Icon</string>
     <string name="settings_motion_overlay_zoom">App-Liste, App-Raster und Suche zoomen auf</string>
     <string name="settings_motion_folder_zoom">Ordner zoomen auf</string>
@@ -706,4 +702,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="designs_effect_once">Einmal beim Erscheinen</string>
     <string name="designs_effect_slow">Langsam umlaufend</string>
     <string name="designs_effect_slow_summary">Sieht toll aus, braucht aber etwas mehr Akku</string>
+    <string name="settings_motion_all">Animationen</string>
 </resources>

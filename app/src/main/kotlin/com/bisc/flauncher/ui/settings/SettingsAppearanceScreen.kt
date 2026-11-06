@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
@@ -85,11 +86,13 @@ fun SettingsAppearanceScreen(
             // as its own primary color) - that's the preview.
             AccentPalette(selected = accentColor, onSelect = viewModel::setAccentColor, onCustom = { accentPickerOpen = true })
         }
+        // Same build as the status bar setting: one switch for everything, then each animation.
         SettingsPreferenceGroup(
             title = stringResource(R.string.settings_motion_label),
             info = stringResource(R.string.settings_motion_info)
         ) {
             val motionLevel by viewModel.motionLevel.collectAsState()
+            val motionPrefs by viewModel.motionPrefs.collectAsState()
             // Android's own switch overrides everything here - say so, with a way there.
             var systemOff by remember { mutableStateOf(com.bisc.flauncher.ui.systemAnimationsOff(context)) }
             androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
@@ -107,31 +110,25 @@ fun SettingsAppearanceScreen(
                     trailing = null
                 )
             }
-            RadioPreference(stringResource(R.string.settings_motion_full), com.bisc.flauncher.ui.MotionLevel.FULL, motionLevel, viewModel::setMotionLevel, enabled = !systemOff)
-            RadioPreference(stringResource(R.string.settings_motion_subtle), com.bisc.flauncher.ui.MotionLevel.SUBTLE, motionLevel, viewModel::setMotionLevel, enabled = !systemOff)
-            RadioPreference(stringResource(R.string.settings_motion_off), com.bisc.flauncher.ui.MotionLevel.OFF, motionLevel, viewModel::setMotionLevel, enabled = !systemOff)
-        }
-        val motionLevelNow by viewModel.motionLevel.collectAsState()
-        val motionPrefs by viewModel.motionPrefs.collectAsState()
-        if (motionLevelNow != com.bisc.flauncher.ui.MotionLevel.OFF) {
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_motion_each_label)) {
-                @Composable
-                fun MotionSwitch(titleRes: Int, checked: Boolean, set: (Boolean) -> com.bisc.flauncher.ui.MotionPrefs) {
-                    SettingsPreference(
-                        icon = null,
-                        title = stringResource(titleRes),
-                        onClick = { viewModel.setMotionPrefs(set(!checked)) },
-                        trailing = { Switch(checked = checked, onCheckedChange = { viewModel.setMotionPrefs(set(it)) }) }
-                    )
-                }
-                MotionSwitch(R.string.settings_motion_app_zoom, motionPrefs.appZoom) { motionPrefs.copy(appZoom = it) }
-                MotionSwitch(R.string.settings_motion_overlay_zoom, motionPrefs.overlayZoom) { motionPrefs.copy(overlayZoom = it) }
-                MotionSwitch(R.string.settings_motion_folder_zoom, motionPrefs.folderZoom) { motionPrefs.copy(folderZoom = it) }
-                MotionSwitch(R.string.settings_motion_page_depth, motionPrefs.pageDepth) { motionPrefs.copy(pageDepth = it) }
-                MotionSwitch(R.string.settings_motion_back_gesture, motionPrefs.backGesture) { motionPrefs.copy(backGesture = it) }
-                MotionSwitch(R.string.settings_motion_settings_slide, motionPrefs.settingsSlide) { motionPrefs.copy(settingsSlide = it) }
-                MotionSwitch(R.string.settings_motion_ripples, motionPrefs.gestureRipples) { motionPrefs.copy(gestureRipples = it) }
+            val on = motionLevel == com.bisc.flauncher.ui.MotionLevel.FULL && !systemOff
+            val setOn = { enabled: Boolean ->
+                viewModel.setMotionLevel(if (enabled) com.bisc.flauncher.ui.MotionLevel.FULL else com.bisc.flauncher.ui.MotionLevel.OFF)
             }
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_motion_all),
+                enabled = !systemOff,
+                onClick = { setOn(!on) },
+                trailing = { Switch(checked = on, enabled = !systemOff, onCheckedChange = setOn) }
+            )
+            val rowsEnabled = on
+            MotionRow(stringResource(R.string.settings_motion_app_zoom), motionPrefs.appZoom, rowsEnabled) { viewModel.setMotionPrefs(motionPrefs.copy(appZoom = it)) }
+            MotionRow(stringResource(R.string.settings_motion_overlay_zoom), motionPrefs.overlayZoom, rowsEnabled) { viewModel.setMotionPrefs(motionPrefs.copy(overlayZoom = it)) }
+            MotionRow(stringResource(R.string.settings_motion_folder_zoom), motionPrefs.folderZoom, rowsEnabled) { viewModel.setMotionPrefs(motionPrefs.copy(folderZoom = it)) }
+            MotionRow(stringResource(R.string.settings_motion_page_depth), motionPrefs.pageDepth, rowsEnabled) { viewModel.setMotionPrefs(motionPrefs.copy(pageDepth = it)) }
+            MotionRow(stringResource(R.string.settings_motion_back_gesture), motionPrefs.backGesture, rowsEnabled) { viewModel.setMotionPrefs(motionPrefs.copy(backGesture = it)) }
+            MotionRow(stringResource(R.string.settings_motion_settings_slide), motionPrefs.settingsSlide, rowsEnabled) { viewModel.setMotionPrefs(motionPrefs.copy(settingsSlide = it)) }
+            MotionRow(stringResource(R.string.settings_motion_ripples), motionPrefs.gestureRipples, rowsEnabled) { viewModel.setMotionPrefs(motionPrefs.copy(gestureRipples = it)) }
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_language_label)) {
             var language by remember { mutableStateOf(com.bisc.flauncher.util.AppLanguage.current(context)) }
@@ -305,6 +302,25 @@ fun SettingsAppearanceScreen(
                 TextButton(onClick = { confirmingTheme = null }) { Text(stringResource(R.string.widget_notes_cancel)) }
             }
         )
+    }
+}
+
+/** One animation's switch under the main one, slim like the status bar's per-page rows; greyed out
+ *  while animations are off as a whole. */
+@Composable
+private fun MotionRow(label: String, checked: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .noRippleClickable(enabled = enabled) { onChange(!checked) }
+            .padding(start = 16.dp, end = 8.dp)
+            .alpha(if (enabled) 1f else 0.45f),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+        Switch(checked = checked, enabled = enabled, onCheckedChange = onChange, modifier = Modifier.scale(0.75f))
     }
 }
 
