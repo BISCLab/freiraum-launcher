@@ -27,6 +27,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.ViewCarousel
@@ -90,7 +92,7 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
             // Three levels, global to specific: Design (looks the same everywhere), Pages (each page
             // and utility page, plus gestures), Elements (the library of apps, folders, places,
             // links and action buttons) - then System for everything about fitting into the phone.
-            SettingsPreferenceGroup {
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_group_basics)) {
                 SettingsPreference(
                     icon = Icons.Filled.Palette,
                     title = stringResource(R.string.settings_design_title),
@@ -118,6 +120,22 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                         stringResource(R.string.settings_default_launcher_description)
                     },
                     onClick = { onNavigate("system") }
+                )
+            }
+            // What goes beyond the launcher itself: designs to add now, plugins to come.
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_group_extensions)) {
+                SettingsPreference(
+                    icon = Icons.Filled.AutoAwesome,
+                    title = stringResource(R.string.designs_title),
+                    summary = stringResource(R.string.designs_entry_summary),
+                    onClick = { onNavigate("appearance/designs") }
+                )
+                SettingsPreference(
+                    icon = Icons.Filled.Extension,
+                    title = stringResource(R.string.settings_plugins_title),
+                    summary = stringResource(R.string.settings_plugins_soon),
+                    onClick = {},
+                    enabled = false
                 )
             }
         }

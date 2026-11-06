@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Settings are grouped into Basics (Design, Pages, Elements, System) and Extensions (Designs, and
+  Plugins as a preview of what's coming); Designs also turn up in the settings search
+
 - Widgets in folders can be set up as fully as widgets on pages: size, fill, border, text color,
   corners, music sources and all clock options including its tap actions
 - Applying a design no longer makes widgets fully round; going back to your own look restores each
