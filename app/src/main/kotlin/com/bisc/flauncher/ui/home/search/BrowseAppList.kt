@@ -360,21 +360,6 @@ private fun ScrubMagnifier(label: String, verticalFraction: Float, pull: Float, 
         val restOffsetPx = with(density) { (railBarDistance + MAGNIFIER_GAP).toPx() }
         val bubbleColor = Color(accentColor)
 
-        // The band between rail and bubble: thick when slack, thin and taut when pulled far.
-        if (stretch > 1f) {
-            androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
-                val cy = yPx + bubbleSizePx / 2f
-                val railX = if (isLeft) restOffsetPx - with(density) { MAGNIFIER_GAP.toPx() } else size.width - restOffsetPx + with(density) { MAGNIFIER_GAP.toPx() }
-                val bubbleX = if (isLeft) restOffsetPx + stretch + bubbleSizePx / 2f else size.width - restOffsetPx - stretch - bubbleSizePx / 2f
-                drawLine(
-                    color = bubbleColor.copy(alpha = 0.35f + 0.25f * tension),
-                    start = androidx.compose.ui.geometry.Offset(railX, cy),
-                    end = androidx.compose.ui.geometry.Offset(bubbleX, cy),
-                    strokeWidth = with(density) { (10.dp * (1f - 0.75f * tension)).toPx() },
-                    cap = androidx.compose.ui.graphics.StrokeCap.Round
-                )
-            }
-        }
         Box(
             modifier = Modifier
                 .align(if (isLeft) Alignment.TopStart else Alignment.TopEnd)
