@@ -1,0 +1,6 @@
+- Designs: ready-made looks with wallpapers and effects
+- First design: Neon with glowing borders
+- Apps, lists, search and folders zoom open
+- Pages sink back while swiping; back swipe follows finger
+- Ripples for taps and gestures
+- Every animation switchable on its own

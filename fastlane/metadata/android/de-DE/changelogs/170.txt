@@ -1,0 +1,6 @@
+- Designs: fertige Looks mit Wallpapern und Effekten
+- Erstes Design: Neon mit leuchtenden Rahmen
+- Apps, Listen, Suche und Ordner zoomen auf
+- Seiten treten beim Wischen zurück; Zurück-Geste folgt dem Finger
+- Wellen bei Tippen und Gesten
+- Jede Animation einzeln schaltbar
