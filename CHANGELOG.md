@@ -20,6 +20,12 @@
 - No more wallpapers inside the app (it got about 650 KB smaller); a fresh install starts plain
 - Plain light background is now chalk white instead of pure white
 - Switching light/dark keeps your pictures and recolors only plain backgrounds
+- New welcome tour: logo, language behind a flag, a light/dark switch for the tour and settings,
+  and Quick setup (everything recommended at once) or Set up myself
+- Set up myself goes through gestures and settings, then lets you choose a design, a wallpaper pack
+  (or none) and a shape: like the design, Round, Soft or Square, optionally part by part (Dock,
+  widgets, search button, Text search, folders); widgets always stay a little less round
+- The lock screen step only shows when the chosen wallpaper pack has a picture for it
 
 ## 0.9.2
 

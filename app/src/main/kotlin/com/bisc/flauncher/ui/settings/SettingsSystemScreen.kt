@@ -292,7 +292,7 @@ private fun settingsThemeLabel(mode: com.bisc.flauncher.ui.theme.SettingsThemeMo
 
 /** A short list of radio choices that closes on pick. */
 @Composable
-private fun <T> ChoiceDialog(title: String, options: List<Pair<T, String>>, selected: T, onPick: (T) -> Unit, onDismiss: () -> Unit) {
+internal fun <T> ChoiceDialog(title: String, options: List<Pair<T, String>>, selected: T, onPick: (T) -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },

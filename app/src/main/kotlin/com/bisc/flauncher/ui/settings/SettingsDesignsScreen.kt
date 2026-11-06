@@ -272,7 +272,7 @@ private fun DesignSwatch(design: Design) {
 /** The home screen in small on the plain background of the design's mode, with its effects, a
  *  search field, a widget card and the Dock - drawn with the same code as the real ones. */
 @Composable
-private fun DesignPreview(design: Design, modifier: Modifier = Modifier) {
+internal fun DesignPreview(design: Design, modifier: Modifier = Modifier) {
     val shape = RoundedCornerShape(20.dp)
     val dark = design.theme == com.bisc.flauncher.ui.theme.ThemePreference.DARK
     CompositionLocalProvider(LocalDesignEffects provides design.effects) {
