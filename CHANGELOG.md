@@ -2,17 +2,16 @@
 
 ## Unreleased
 
+## 0.9.2
+
 - Settings are grouped into Basics (Design, Pages, Elements, System) and Extensions (Designs, and
   Plugins as a preview of what's coming); Designs also turn up in the settings search
-
 - Widgets in folders can be set up as fully as widgets on pages: size, fill, border, text color,
   corners, music sources and all clock options including its tap actions
 - Applying a design no longer makes widgets fully round; going back to your own look restores each
   widget's corners (or Freiraum's widget default for older saved looks)
 - Neon Light: a border line under the Text search bar, and no more checkered grid over the wallpapers
-
 - Designs: every installed design has its own remove button, with a confirmation
-
 - Animations setting built like the status bar one: one switch for all animations, below it each
   animation on its own; the in-between level Subtle is gone
 

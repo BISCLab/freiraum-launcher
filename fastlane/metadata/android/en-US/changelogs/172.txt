@@ -1,0 +1,6 @@
+- Settings: Basics and Extensions, Designs in the main menu
+- Widgets in folders fully adjustable, clock included
+- Designs keep widget corners; own look restores them
+- Animations: one switch plus each animation
+- Remove button per design
+- Neon Light: search bar line, no grid

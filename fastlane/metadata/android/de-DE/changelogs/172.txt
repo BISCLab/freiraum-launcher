@@ -1,0 +1,6 @@
+- Einstellungen: Grundeinstellungen und Erweiterungen, Designs im Hauptmenü
+- Widgets in Ordnern voll anpassbar, auch die Uhr
+- Designs behalten Widget-Ecken; eigener Look stellt sie wieder her
+- Animationen: ein Schalter plus jede einzeln
+- Entfernen-Knopf je Design
+- Neon Light: Linie an der Suchleiste, kein Raster
