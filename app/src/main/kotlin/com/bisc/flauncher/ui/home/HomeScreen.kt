@@ -481,6 +481,7 @@ fun HomeScreen(
                     .fillMaxSize()
                     .onSizeChanged { pagerHeightPx = it.height }
                     .then(if (blurRadius > 0.dp) Modifier.blur(blurRadius) else Modifier)
+                    .waterRipples(ripples)
             ) {
                 // Layer 1 (the background) is one shared layer behind the pager rather than part of
                 // each page, so pages with different images/colors blend instead of showing a seam.

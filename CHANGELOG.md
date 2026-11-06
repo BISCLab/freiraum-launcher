@@ -29,6 +29,9 @@
 - Swipe or paging buttons is now chosen per widget (weather, notes) in the widget's own settings, on
   pages and in folders; Appearance keeps only the look of the buttons. If you had buttons switched
   on, every widget keeps them
+- Gesture ripples are now a drop on water: from Android 13 the page underneath bends in two or three
+  spreading crests that fade out (two drops for a double tap, a wide slow one for a long press);
+  older phones get soft double rings that thin out as they spread
 
 ## 0.9.2
 
