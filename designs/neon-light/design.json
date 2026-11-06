@@ -1,120 +1,121 @@
 {
   "format": 1,
-  "id": "neon",
-  "name": "Neon",
-  "name_de": "Neon",
+  "id": "neon-light",
+  "name": "Neon Light",
+  "name_de": "Neon Light",
   "author": "BISC Lab",
   "version": "1.0",
-  "theme": "DARK",
-  "accent": "#FF4DB8FF",
+  "theme": "LIGHT",
+  "accent": "#FF1E8FFF",
   "font": "SYSTEM",
-  "cornerRadiusPercent": 40,
+  "cornerRadiusPercent": 100,
+  "widgetCornerRadiusPercent": 10,
   "box": {
     "style": "COLOR",
-    "fill": "#FF14161B",
+    "fill": "#FFFFFFFF",
     "fillMode": "SOLID",
-    "opacity": 0.88,
+    "opacity": 0.85,
     "border": true,
     "borderWidth": 1.0,
-    "borderColor": "#24FFFFFF",
-    "contentColor": "#FFF2F3F5"
+    "borderColor": "#1A000000",
+    "contentColor": "#FF14161B"
   },
   "dock": {
     "style": "COLOR",
-    "fill": "#FF14161B",
+    "fill": "#FFFFFFFF",
+    "fillMode": "SOLID",
+    "opacity": 0.88,
+    "border": false,
+    "borderWidth": 1.0,
+    "contentColor": "#FF14161B"
+  },
+  "panel": {
+    "style": "COLOR",
+    "fill": "#FFFFFFFF",
     "fillMode": "SOLID",
     "opacity": 0.9,
     "border": false,
     "borderWidth": 1.0,
-    "contentColor": "#FFF2F3F5"
-  },
-  "panel": {
-    "style": "COLOR",
-    "fill": "#FF14161B",
-    "fillMode": "SOLID",
-    "opacity": 0.92,
-    "border": false,
-    "borderWidth": 1.0,
-    "contentColor": "#FFF2F3F5"
+    "contentColor": "#FF14161B"
   },
   "elements": {
     "search_appearance": {
       "style": "NONE",
-      "fill": "#FF0C0D10",
+      "fill": "#FFFFFFFF",
       "fillMode": "SOLID",
       "opacity": 1.0,
       "border": false,
       "borderWidth": 1.0,
-      "contentColor": "#FFF2F3F5"
+      "contentColor": "#FF14161B"
     },
     "search_bar": {
       "style": "COLOR",
-      "fill": "#FF14161B",
+      "fill": "#FFFFFFFF",
       "fillMode": "SOLID",
       "opacity": 0.92,
       "border": false,
       "borderWidth": 1.0,
-      "contentColor": "#FFF2F3F5"
+      "contentColor": "#FF14161B"
     },
     "search_field": {
       "style": "COLOR",
-      "fill": "#08FFFFFF",
+      "fill": "#CCFFFFFF",
       "fillMode": "SOLID",
       "opacity": 1.0,
       "border": true,
       "borderWidth": 1.0,
-      "borderColor": "#24FFFFFF",
-      "contentColor": "#FFF2F3F5"
+      "borderColor": "#1A000000",
+      "contentColor": "#FF14161B"
     },
     "search_results": {
       "style": "COLOR",
-      "fill": "#FF1A1D23",
-      "fillMode": "SOLID",
-      "opacity": 0.9,
-      "border": true,
-      "borderWidth": 1.0,
-      "borderColor": "#14FFFFFF",
-      "contentColor": "#FFF2F3F5"
-    },
-    "folder_card": {
-      "style": "COLOR",
-      "fill": "#FF14161B",
+      "fill": "#FFFFFFFF",
       "fillMode": "SOLID",
       "opacity": 0.92,
       "border": true,
       "borderWidth": 1.0,
-      "borderColor": "#24FFFFFF",
-      "contentColor": "#FFF2F3F5"
+      "borderColor": "#0F000000",
+      "contentColor": "#FF14161B"
+    },
+    "folder_card": {
+      "style": "COLOR",
+      "fill": "#FFFFFFFF",
+      "fillMode": "SOLID",
+      "opacity": 0.92,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#1A000000",
+      "contentColor": "#FF14161B"
     },
     "app_list_search_button": {
       "style": "COLOR",
-      "fill": "#FF14161B",
+      "fill": "#FFFFFFFF",
       "fillMode": "SOLID",
       "opacity": 1.0,
       "border": true,
       "borderWidth": 1.0,
-      "borderColor": "#FF4DB8FF",
-      "contentColor": "#FF4DB8FF"
+      "borderColor": "#FF1E8FFF",
+      "contentColor": "#FF1E8FFF"
     },
     "app_list_search_field": {
       "style": "COLOR",
-      "fill": "#08FFFFFF",
+      "fill": "#CCFFFFFF",
       "fillMode": "SOLID",
       "opacity": 1.0,
       "border": true,
       "borderWidth": 1.0,
-      "borderColor": "#24FFFFFF",
-      "contentColor": "#FFF2F3F5"
+      "borderColor": "#1A000000",
+      "contentColor": "#FF14161B"
     },
     "search_alphabet_rail": {
       "style": "COLOR",
-      "fill": "#FF14161B",
+      "fill": "#FFFFFFFF",
       "fillMode": "SOLID",
       "opacity": 1.0,
       "border": true,
       "borderWidth": 1.0,
-      "borderColor": "#FF4DB8FF",
-      "contentColor": "#FFD3D7DE"
+      "borderColor": "#FF1E8FFF",
+      "contentColor": "#FF3A3F48"
     },
     "search_header_letter": {
       "style": "NONE",
@@ -123,53 +124,66 @@
       "opacity": 1.0,
       "border": true,
       "borderWidth": 1.0,
-      "borderColor": "#FF4DFFB0",
-      "contentColor": "#FF4DFFB0"
+      "borderColor": "#FF00C27A",
+      "contentColor": "#FF00A86B"
     },
     "app_grid_search_bar": {
       "style": "COLOR",
-      "fill": "#08FFFFFF",
+      "fill": "#CCFFFFFF",
       "fillMode": "SOLID",
       "opacity": 1.0,
       "border": true,
       "borderWidth": 1.0,
-      "borderColor": "#24FFFFFF",
-      "contentColor": "#FFF2F3F5"
+      "borderColor": "#1A000000",
+      "contentColor": "#FF14161B"
     },
     "widget_arrow": {
       "style": "COLOR",
-      "fill": "#14FFFFFF",
+      "fill": "#10000000",
       "fillMode": "SOLID",
       "opacity": 1.0,
       "border": true,
       "borderWidth": 1.0,
-      "borderColor": "#24FFFFFF",
-      "contentColor": "#FFF2F3F5"
+      "borderColor": "#1A000000",
+      "contentColor": "#FF14161B"
     }
   },
-  "keyboardCapColor": "#FF14161B",
+  "keyboardCapColor": "#FFFFFFFF",
   "backgrounds": {
     "global": {
-      "color": "#FF0C0D10",
+      "color": "#FFFFFFFF",
+      "shade": 0
+    },
+    "home": {
+      "image": "wallpapers/home.webp",
+      "shade": 0
+    },
+    "appList": {
+      "image": "wallpapers/applist.webp",
       "shade": 0
     },
     "search": {
-      "color": "#FF0C0D10",
+      "image": "wallpapers/search.webp",
+      "shade": 0
+    },
+    "appGrid": {
+      "image": "wallpapers/appgrid.webp",
       "shade": 0
     }
   },
+  "lockWallpaper": "wallpapers/lockscreen.webp",
   "effects": {
     "glowBorder": true,
     "glowColors": [
-      "#FF4DFFB0",
-      "#FF4DB8FF",
-      "#FFB47BFF",
-      "#FFFF6AD5"
+      "#FF00C27A",
+      "#FF1E8FFF",
+      "#FF8B5CF6",
+      "#FFEC4899"
     ],
-    "baseColor": "#12FFFFFF",
+    "baseColor": "#10000000",
     "speedSeconds": 4.5,
     "motion": "ONCE",
-    "glowStrength": 0.55,
+    "glowStrength": 0.4,
     "targets": [
       "dock",
       "panel",
@@ -180,14 +194,14 @@
       "buttons"
     ],
     "grid": true,
-    "gridColor": "#06FFFFFF",
+    "gridColor": "#0A000000",
     "gridSpacing": 44,
     "blobs": true,
     "blobColors": [
-      "#FF4DFFB0",
-      "#FFB47BFF",
-      "#FF4DB8FF"
+      "#FF00C27A",
+      "#FF8B5CF6",
+      "#FF1E8FFF"
     ],
-    "blobStrength": 1.0
+    "blobStrength": 0.8
   }
 }

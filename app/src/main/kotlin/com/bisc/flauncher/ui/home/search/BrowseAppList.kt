@@ -223,8 +223,8 @@ fun BrowseAppList(
                         }
                     }
                 },
-                onScrub = { active, label, fraction ->
-                    scrub.update(active, label, fraction)
+                onScrub = { active, label, fraction, pull ->
+                    scrub.update(active, label, fraction, pull)
                     if (!active) lastTarget[0] = -1
                 }
             )
@@ -244,11 +244,15 @@ class BrowseScrubState {
         private set
     var fraction by mutableFloatStateOf(0f)
         private set
+    /** How far the finger has pulled off the rail into the list, in px. */
+    var pull by mutableFloatStateOf(0f)
+        private set
 
-    fun update(active: Boolean, label: String, fraction: Float) {
+    fun update(active: Boolean, label: String, fraction: Float, pull: Float = 0f) {
         if (this.active != active) this.active = active
         if (this.label != label) this.label = label
         if (this.fraction != fraction) this.fraction = fraction
+        if (this.pull != pull) this.pull = pull
     }
 }
 
@@ -260,7 +264,7 @@ private fun ScrubOverlay(scrub: BrowseScrubState, listHeight: Dp, handedness: Ha
         exit = fadeOut(),
         modifier = Modifier.fillMaxWidth().height(listHeight)
     ) {
-        ScrubMagnifier(label = scrub.label, verticalFraction = scrub.fraction, handedness = handedness, accentColor = accentColor, edgeInset = edgeInset)
+        ScrubMagnifier(label = scrub.label, verticalFraction = scrub.fraction, pull = scrub.pull, handedness = handedness, accentColor = accentColor, edgeInset = edgeInset)
     }
 }
 
@@ -325,27 +329,68 @@ private val MAGNIFIER_GAP = 6.dp
 private fun contentColorFor(color: Color): Color = if (color.luminance() > 0.5f) Color.Black else Color.White
 
 @Composable
-private fun ScrubMagnifier(label: String, verticalFraction: Float, handedness: Handedness, accentColor: Int, edgeInset: Dp) {
+private fun ScrubMagnifier(label: String, verticalFraction: Float, pull: Float, handedness: Handedness, accentColor: Int, edgeInset: Dp) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val density = LocalDensity.current
+        val motion = com.bisc.flauncher.ui.LocalMotion.current
         val bubbleSize = 76.dp
         val bubbleSizePx = with(density) { bubbleSize.toPx() }
         val maxHeightPx = with(density) { maxHeight.toPx() }
-        val yPx = (verticalFraction * maxHeightPx - bubbleSizePx / 2f)
+        val targetY = (verticalFraction * maxHeightPx - bubbleSizePx / 2f)
             .coerceIn(0f, (maxHeightPx - bubbleSizePx).coerceAtLeast(0f))
-        val y = with(density) { yPx.toDp() }
         val isLeft = handedness == Handedness.LEFT
 
+        // Like a spring: pulled into the list it follows the finger, but every further bit takes more
+        // effort (it approaches a limit and never reaches it). Let go, it snaps back with a little bounce.
+        val maxStretchPx = with(density) { MAGNIFIER_MAX_STRETCH.toPx() }
+        val stretchTarget = if (motion == com.bisc.flauncher.ui.MotionLevel.OFF) 0f
+            else maxStretchPx * (1f - kotlin.math.exp(-pull / maxStretchPx))
+        val springy = androidx.compose.animation.core.spring<Float>(dampingRatio = 0.5f, stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow)
+        val stretch by androidx.compose.animation.core.animateFloatAsState(stretchTarget, springy, label = "magnifierStretch")
+        // The letter glides after the finger instead of jumping row by row.
+        val yPx by androidx.compose.animation.core.animateFloatAsState(
+            targetY,
+            if (motion == com.bisc.flauncher.ui.MotionLevel.OFF) androidx.compose.animation.core.snap()
+            else androidx.compose.animation.core.spring(dampingRatio = 0.8f, stiffness = androidx.compose.animation.core.Spring.StiffnessHigh),
+            label = "magnifierY"
+        )
+        val tension = (stretch / maxStretchPx).coerceIn(0f, 1f)
+
         val railBarDistance = edgeInset + RAIL_BAR_WIDTH
+        val restOffsetPx = with(density) { (railBarDistance + MAGNIFIER_GAP).toPx() }
         val bubbleColor = Color(accentColor)
+
+        // The band between rail and bubble: thick when slack, thin and taut when pulled far.
+        if (stretch > 1f) {
+            androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
+                val cy = yPx + bubbleSizePx / 2f
+                val railX = if (isLeft) restOffsetPx - with(density) { MAGNIFIER_GAP.toPx() } else size.width - restOffsetPx + with(density) { MAGNIFIER_GAP.toPx() }
+                val bubbleX = if (isLeft) restOffsetPx + stretch + bubbleSizePx / 2f else size.width - restOffsetPx - stretch - bubbleSizePx / 2f
+                drawLine(
+                    color = bubbleColor.copy(alpha = 0.35f + 0.25f * tension),
+                    start = androidx.compose.ui.geometry.Offset(railX, cy),
+                    end = androidx.compose.ui.geometry.Offset(bubbleX, cy),
+                    strokeWidth = with(density) { (10.dp * (1f - 0.75f * tension)).toPx() },
+                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                )
+            }
+        }
         Box(
             modifier = Modifier
                 .align(if (isLeft) Alignment.TopStart else Alignment.TopEnd)
-                .offset(
-                    x = if (isLeft) (railBarDistance + MAGNIFIER_GAP) else -(railBarDistance + MAGNIFIER_GAP),
-                    y = y
-                )
+                .offset {
+                    androidx.compose.ui.unit.IntOffset(
+                        x = (if (isLeft) restOffsetPx + stretch else -(restOffsetPx + stretch)).toInt(),
+                        y = yPx.toInt()
+                    )
+                }
                 .size(bubbleSize)
+                .graphicsLayer {
+                    // A little bigger and squeezed along the pull, like something elastic under tension.
+                    val grow = 1f + 0.12f * tension
+                    scaleX = grow * (1f + 0.08f * tension)
+                    scaleY = grow * (1f - 0.06f * tension)
+                }
                 .clip(CircleShape)
                 .background(bubbleColor.copy(alpha = 0.92f)),
             contentAlignment = Alignment.Center
@@ -354,6 +399,9 @@ private fun ScrubMagnifier(label: String, verticalFraction: Float, handedness: H
         }
     }
 }
+
+/** How far the letter bubble can be pulled into the list at most (it only ever approaches this). */
+private val MAGNIFIER_MAX_STRETCH = 120.dp
 
 @Composable
 private fun AppBrowseRow(app: AppInfo, loadIcon: (ComponentName) -> ImageBitmap?, handedness: Handedness, edgeInset: Dp, iconSize: Dp, onClick: () -> Unit) {

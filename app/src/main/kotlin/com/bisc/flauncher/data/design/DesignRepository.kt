@@ -196,11 +196,7 @@ class DesignRepository @Inject constructor(
         design.theme?.let { settingsRepository.setTheme(it) }
         design.accent?.let { settingsRepository.setAccentColor(it) }
         design.font?.let { settingsRepository.setFontPreference(it) }
-        design.cornerRadiusPercent?.let {
-            settingsRepository.setDefaultCornerRadiusPercent(it)
-            pageContentRepository.applyCornerRadiusToAllRows(it)
-            folderRepository.applyCornerRadiusToAllItems(it)
-        }
+        design.cornerRadiusPercent?.let { settingsRepository.setDefaultCornerRadiusPercent(it) }
         DESIGN_ELEMENTS.forEach { settingsRepository.setElementAppearanceByName(it, design.elements[it]) }
         design.keyboardCapColor?.let { settingsRepository.setSearchKeyboardCapColor(it) }
 
@@ -208,6 +204,9 @@ class DesignRepository @Inject constructor(
         val items = folderItemDao.observeAll().first()
         val ownRows = design.rowAppearances
         val ownItems = design.folderItemAppearances
+        // Corners follow Freiraum's own rule: widgets only slightly rounded, everything else by the
+        // general roundness - never one value for both.
+        fun cornerFor(isWidget: Boolean): Int? = if (isWidget) design.widgetCornerRadiusPercent else design.cornerRadiusPercent
         pageRowDao.updateAll(rows.map { row ->
             val look = when {
                 ownRows != null -> ownRows[row.id]
@@ -215,11 +214,15 @@ class DesignRepository @Inject constructor(
                 row.type == PageRowType.PANEL -> design.panel ?: design.box
                 else -> design.box
             }
-            if (look != null) row.withAppearance(look) else row
+            val isWidget = row.type == PageRowType.WIDGET || row.type == PageRowType.SYSTEM_WIDGET
+            val corner = design.rowCorners?.get(row.id) ?: cornerFor(isWidget)
+            (if (look != null) row.withAppearance(look) else row).let { if (corner != null) it.copy(cornerRadiusPercent = corner) else it }
         })
         folderItemDao.updateAll(items.map { item ->
             val look = if (ownItems != null) ownItems[item.id] else design.box
-            if (look != null) item.withAppearance(look) else item
+            val isWidget = item.type == com.bisc.flauncher.data.model.GridItemType.WIDGET || item.type == com.bisc.flauncher.data.model.GridItemType.SYSTEM_WIDGET
+            val corner = design.folderItemCorners?.get(item.id) ?: cornerFor(isWidget)
+            (if (look != null) item.withAppearance(look) else item).let { if (corner != null) it.copy(cornerRadiusPercent = corner) else it }
         })
 
         BACKGROUND_ROLES.forEach { role ->
@@ -258,8 +261,11 @@ class DesignRepository @Inject constructor(
             keyboardCapColor = settingsRepository.searchKeyboardCapColor.first(),
             backgrounds = backgrounds,
             effects = settingsRepository.designEffects.first(),
+            widgetCornerRadiusPercent = rows.firstOrNull { it.type == PageRowType.WIDGET || it.type == PageRowType.SYSTEM_WIDGET }?.cornerRadiusPercent,
             rowAppearances = if (withRows) rows.associate { it.id to it.appearance() } else null,
-            folderItemAppearances = if (withRows) folderItemDao.observeAll().first().associate { it.id to it.appearance() } else null
+            folderItemAppearances = if (withRows) folderItemDao.observeAll().first().associate { it.id to it.appearance() } else null,
+            rowCorners = if (withRows) rows.associate { it.id to it.cornerRadiusPercent } else null,
+            folderItemCorners = if (withRows) folderItemDao.observeAll().first().associate { it.id to it.cornerRadiusPercent } else null
         )
     }
 

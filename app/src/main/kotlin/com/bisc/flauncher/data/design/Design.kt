@@ -47,6 +47,8 @@ data class Design(
     val accent: Int? = null,
     val font: FontPreference? = null,
     val cornerRadiusPercent: Int? = null,
+    /** Widgets' own roundness (they're only slightly rounded by default, see DEFAULT_WIDGET_CORNER_RADIUS_PERCENT). */
+    val widgetCornerRadiusPercent: Int? = null,
     /** Widgets, element boxes and folder items. */
     val box: ElementAppearance? = null,
     val dock: ElementAppearance? = null,
@@ -60,7 +62,9 @@ data class Design(
     val effects: DesignEffects? = null,
     /** Only in the snapshot of the user's own look: every row's and folder item's exact look. */
     val rowAppearances: Map<Long, ElementAppearance>? = null,
-    val folderItemAppearances: Map<Long, ElementAppearance>? = null
+    val folderItemAppearances: Map<Long, ElementAppearance>? = null,
+    val rowCorners: Map<Long, Int>? = null,
+    val folderItemCorners: Map<Long, Int>? = null
 ) {
     fun displayName(german: Boolean): String = if (german && !nameDe.isNullOrBlank()) nameDe else name
 }
@@ -91,6 +95,7 @@ object DesignJson {
             accent = color(json.optString("accent")),
             font = json.optString("font").let { v -> FontPreference.entries.firstOrNull { it.name == v } },
             cornerRadiusPercent = if (json.has("cornerRadiusPercent")) json.getInt("cornerRadiusPercent").coerceIn(0, 100) else null,
+            widgetCornerRadiusPercent = if (json.has("widgetCornerRadiusPercent")) json.getInt("widgetCornerRadiusPercent").coerceIn(0, 100) else null,
             box = json.optJSONObject("box")?.let(::appearance),
             dock = json.optJSONObject("dock")?.let(::appearance),
             panel = json.optJSONObject("panel")?.let(::appearance),
@@ -107,7 +112,9 @@ object DesignJson {
             lockWallpaper = file(json.optString("lockWallpaper")),
             effects = json.optJSONObject("effects")?.let(::effects),
             rowAppearances = json.optJSONObject("rows")?.let { obj -> obj.keys().asSequence().associate { it.toLong() to appearance(obj.getJSONObject(it)) } },
-            folderItemAppearances = json.optJSONObject("folderItems")?.let { obj -> obj.keys().asSequence().associate { it.toLong() to appearance(obj.getJSONObject(it)) } }
+            folderItemAppearances = json.optJSONObject("folderItems")?.let { obj -> obj.keys().asSequence().associate { it.toLong() to appearance(obj.getJSONObject(it)) } },
+            rowCorners = json.optJSONObject("rowCorners")?.let { obj -> obj.keys().asSequence().associate { it.toLong() to obj.getInt(it) } },
+            folderItemCorners = json.optJSONObject("folderItemCorners")?.let { obj -> obj.keys().asSequence().associate { it.toLong() to obj.getInt(it) } }
         )
     }
 
@@ -123,6 +130,7 @@ object DesignJson {
         design.accent?.let { put("accent", hex(it)) }
         design.font?.let { put("font", it.name) }
         design.cornerRadiusPercent?.let { put("cornerRadiusPercent", it) }
+        design.widgetCornerRadiusPercent?.let { put("widgetCornerRadiusPercent", it) }
         design.box?.let { put("box", appearanceJson(it)) }
         design.dock?.let { put("dock", appearanceJson(it)) }
         design.panel?.let { put("panel", appearanceJson(it)) }
@@ -141,6 +149,8 @@ object DesignJson {
         design.effects?.let { put("effects", effectsJson(it)) }
         design.rowAppearances?.let { rows -> put("rows", JSONObject().apply { rows.forEach { (k, v) -> put(k.toString(), appearanceJson(v)) } }) }
         design.folderItemAppearances?.let { items -> put("folderItems", JSONObject().apply { items.forEach { (k, v) -> put(k.toString(), appearanceJson(v)) } }) }
+        design.rowCorners?.let { rows -> put("rowCorners", JSONObject().apply { rows.forEach { (k, v) -> put(k.toString(), v) } }) }
+        design.folderItemCorners?.let { items -> put("folderItemCorners", JSONObject().apply { items.forEach { (k, v) -> put(k.toString(), v) } }) }
     }
 
     fun effects(json: JSONObject) = DesignEffects(

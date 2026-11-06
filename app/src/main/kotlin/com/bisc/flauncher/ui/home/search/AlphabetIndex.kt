@@ -54,7 +54,8 @@ fun AlphabetIndex(
     handedness: Handedness,
     cornerRadiusPercent: Int,
     onSelect: (IndexEntry) -> Unit,
-    onScrub: (active: Boolean, label: String, verticalFraction: Float) -> Unit,
+    /** [pull] is how far (px) the finger has moved off the rail into the list. */
+    onScrub: (active: Boolean, label: String, verticalFraction: Float, pull: Float) -> Unit,
     modifier: Modifier = Modifier,
     edgeInset: Dp = FLUSH_INSET
 ) {
@@ -71,12 +72,14 @@ fun AlphabetIndex(
         val density = LocalDensity.current
         val heightPx = with(density) { maxHeight.toPx() }
 
-        fun selectFromY(y: Float) {
+        var startX = 0f
+        fun selectFromY(y: Float, x: Float = startX) {
             if (entries.isEmpty()) return
             val fraction = (y / heightPx).coerceIn(0f, 1f)
             val entry = entries[(fraction * entries.size).toInt().coerceIn(0, entries.size - 1)]
             onSelect(entry)
-            onScrub(true, entry.label(), fraction)
+            val pull = (if (handedness == Handedness.LEFT) x - startX else startX - x).coerceAtLeast(0f)
+            onScrub(true, entry.label(), fraction, pull)
         }
 
         Box(
@@ -84,10 +87,10 @@ fun AlphabetIndex(
                 .fillMaxSize()
                 .pointerInput(entries) {
                     detectDragGestures(
-                        onDragStart = { offset -> selectFromY(offset.y) },
-                        onDragEnd = { onScrub(false, "", 0f) },
-                        onDragCancel = { onScrub(false, "", 0f) },
-                        onDrag = { change, _ -> selectFromY(change.position.y) }
+                        onDragStart = { offset -> startX = offset.x; selectFromY(offset.y, offset.x) },
+                        onDragEnd = { onScrub(false, "", 0f, 0f) },
+                        onDragCancel = { onScrub(false, "", 0f, 0f) },
+                        onDrag = { change, _ -> selectFromY(change.position.y, change.position.x) }
                     )
                 },
             contentAlignment = if (handedness == Handedness.LEFT) Alignment.CenterStart else Alignment.CenterEnd

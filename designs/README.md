@@ -16,7 +16,7 @@ Freiraum has no internet access, so designs are always downloaded in the browser
 
 | Design | Look |
 |---|---|
-| [Neon](neon/design.json) | Dark, glowing borders in green, blue, violet and pink, a fine grid and soft light spots |
+| [Neon Light](neon-light/design.json) | Light, with its own blue wallpapers, glowing borders in green, blue, violet and pink, a fine grid and soft light spots |
 
 ## Make your own
 
@@ -39,7 +39,8 @@ preview.webp              (optional)
 | `theme` | `LIGHT` or `DARK` |
 | `accent` | Accent color, `#AARRGGBB` |
 | `font` | `SYSTEM`, `SERIF`, `MONOSPACE` or `ROUNDED` |
-| `cornerRadiusPercent` | 0 (square) to 100 (fully round) |
+| `cornerRadiusPercent` | Roundness of everything except widgets, 0 (square) to 100 (fully round) |
+| `widgetCornerRadiusPercent` | Roundness of widgets (Freiraum's default is 10) |
 | `box`, `dock`, `panel` | Look of widgets and element boxes, the Dock, the Panel |
 | `elements` | Look of single parts: `search_bar`, `search_field`, `search_results`, `search_appearance`, `folder_card`, `app_list_search_button`, `app_list_search_field`, `search_alphabet_rail`, `search_header_letter`, `app_grid_search_bar`, `widget_arrow` |
 | `keyboardCapColor` | The strip above the keyboard |

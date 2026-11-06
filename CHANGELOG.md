@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- App list: the letter bubble of the A-Z index can be pulled into the list like a spring - the
+  further, the harder - glides after the finger and bounces back when let go
+- Designs keep Freiraum's corner rule (widgets only slightly rounded, everything else by the general
+  roundness) instead of one value for all
+- The Neon design is now Neon Light: light, with its own wallpapers and dark text and icons
+
 ## 0.9.0
 
 - Designs: ready-made looks with colors, borders, wallpapers and effects, under Design, Designs.
