@@ -81,9 +81,48 @@ fun SettingsAppearanceScreen(
             info = stringResource(R.string.settings_motion_info)
         ) {
             val motionLevel by viewModel.motionLevel.collectAsState()
-            RadioPreference(stringResource(R.string.settings_motion_full), com.bisc.flauncher.ui.MotionLevel.FULL, motionLevel, viewModel::setMotionLevel)
-            RadioPreference(stringResource(R.string.settings_motion_subtle), com.bisc.flauncher.ui.MotionLevel.SUBTLE, motionLevel, viewModel::setMotionLevel)
-            RadioPreference(stringResource(R.string.settings_motion_off), com.bisc.flauncher.ui.MotionLevel.OFF, motionLevel, viewModel::setMotionLevel)
+            // Android's own switch overrides everything here - say so, with a way there.
+            var systemOff by remember { mutableStateOf(com.bisc.flauncher.ui.systemAnimationsOff(context)) }
+            androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
+                systemOff = com.bisc.flauncher.ui.systemAnimationsOff(context)
+                onPauseOrDispose { }
+            }
+            if (systemOff) {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_motion_system_off),
+                    summary = stringResource(R.string.settings_motion_system_off_summary),
+                    onClick = {
+                        runCatching { context.startActivity(android.content.Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
+                    },
+                    trailing = null
+                )
+            }
+            RadioPreference(stringResource(R.string.settings_motion_full), com.bisc.flauncher.ui.MotionLevel.FULL, motionLevel, viewModel::setMotionLevel, enabled = !systemOff)
+            RadioPreference(stringResource(R.string.settings_motion_subtle), com.bisc.flauncher.ui.MotionLevel.SUBTLE, motionLevel, viewModel::setMotionLevel, enabled = !systemOff)
+            RadioPreference(stringResource(R.string.settings_motion_off), com.bisc.flauncher.ui.MotionLevel.OFF, motionLevel, viewModel::setMotionLevel, enabled = !systemOff)
+        }
+        val motionLevelNow by viewModel.motionLevel.collectAsState()
+        val motionPrefs by viewModel.motionPrefs.collectAsState()
+        if (motionLevelNow != com.bisc.flauncher.ui.MotionLevel.OFF) {
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_motion_each_label)) {
+                @Composable
+                fun MotionSwitch(titleRes: Int, checked: Boolean, set: (Boolean) -> com.bisc.flauncher.ui.MotionPrefs) {
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(titleRes),
+                        onClick = { viewModel.setMotionPrefs(set(!checked)) },
+                        trailing = { Switch(checked = checked, onCheckedChange = { viewModel.setMotionPrefs(set(it)) }) }
+                    )
+                }
+                MotionSwitch(R.string.settings_motion_app_zoom, motionPrefs.appZoom) { motionPrefs.copy(appZoom = it) }
+                MotionSwitch(R.string.settings_motion_overlay_zoom, motionPrefs.overlayZoom) { motionPrefs.copy(overlayZoom = it) }
+                MotionSwitch(R.string.settings_motion_folder_zoom, motionPrefs.folderZoom) { motionPrefs.copy(folderZoom = it) }
+                MotionSwitch(R.string.settings_motion_page_depth, motionPrefs.pageDepth) { motionPrefs.copy(pageDepth = it) }
+                MotionSwitch(R.string.settings_motion_back_gesture, motionPrefs.backGesture) { motionPrefs.copy(backGesture = it) }
+                MotionSwitch(R.string.settings_motion_settings_slide, motionPrefs.settingsSlide) { motionPrefs.copy(settingsSlide = it) }
+                MotionSwitch(R.string.settings_motion_ripples, motionPrefs.gestureRipples) { motionPrefs.copy(gestureRipples = it) }
+            }
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_language_label)) {
             var language by remember { mutableStateOf(com.bisc.flauncher.util.AppLanguage.current(context)) }

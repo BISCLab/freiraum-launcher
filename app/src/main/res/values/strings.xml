@@ -671,4 +671,14 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_motion_full">Full</string>
     <string name="settings_motion_subtle">Subtle</string>
     <string name="settings_motion_off">Off</string>
+    <string name="settings_motion_system_off">Android\'s Remove animations is on</string>
+    <string name="settings_motion_system_off_summary">That\'s why Freiraum shows no animations. Tap to open Android\'s accessibility settings (Color and motion).</string>
+    <string name="settings_motion_each_label">Each animation</string>
+    <string name="settings_motion_app_zoom">Apps open out of their icon</string>
+    <string name="settings_motion_overlay_zoom">App list, App grid and search zoom in</string>
+    <string name="settings_motion_folder_zoom">Folders zoom in</string>
+    <string name="settings_motion_page_depth">Pages sink back while swiping</string>
+    <string name="settings_motion_back_gesture">Screen follows the back swipe</string>
+    <string name="settings_motion_settings_slide">Settings pages glide</string>
+    <string name="settings_motion_ripples">Ripples for taps and gestures</string>
 </resources>

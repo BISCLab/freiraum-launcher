@@ -671,4 +671,14 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_motion_full">Voll</string>
     <string name="settings_motion_subtle">Dezent</string>
     <string name="settings_motion_off">Aus</string>
+    <string name="settings_motion_system_off">In Android ist „Animationen entfernen“ an</string>
+    <string name="settings_motion_system_off_summary">Deshalb zeigt Freiraum keine Animationen. Tippe, um die Bedienungshilfen von Android zu öffnen (Farbe und Bewegung).</string>
+    <string name="settings_motion_each_label">Einzelne Animationen</string>
+    <string name="settings_motion_app_zoom">Apps öffnen aus ihrem Icon</string>
+    <string name="settings_motion_overlay_zoom">App-Liste, App-Raster und Suche zoomen auf</string>
+    <string name="settings_motion_folder_zoom">Ordner zoomen auf</string>
+    <string name="settings_motion_page_depth">Seiten treten beim Wischen zurück</string>
+    <string name="settings_motion_back_gesture">Bildschirm folgt der Zurück-Geste</string>
+    <string name="settings_motion_settings_slide">Einstellungsseiten gleiten</string>
+    <string name="settings_motion_ripples">Wellen bei Tippen und Gesten</string>
 </resources>

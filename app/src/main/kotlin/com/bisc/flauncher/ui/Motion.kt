@@ -20,6 +20,26 @@ enum class MotionLevel { FULL, SUBTLE, OFF }
 
 val LocalMotion = staticCompositionLocalOf { MotionLevel.FULL }
 
+/** Each animation on its own, on top of [MotionLevel]. */
+data class MotionPrefs(
+    val appZoom: Boolean = true,
+    val overlayZoom: Boolean = true,
+    val folderZoom: Boolean = true,
+    val pageDepth: Boolean = true,
+    val backGesture: Boolean = true,
+    val settingsSlide: Boolean = true,
+    val gestureRipples: Boolean = true
+)
+
+val LocalMotionPrefs = staticCompositionLocalOf { MotionPrefs() }
+
+/** This level for an animation that's switched on, none for one that's off. */
+fun MotionLevel.unless(enabled: Boolean): MotionLevel = if (enabled) this else MotionLevel.OFF
+
+/** Android's own "Remove animations" (Accessibility) is on. */
+fun systemAnimationsOff(context: android.content.Context): Boolean =
+    android.provider.Settings.Global.getFloat(context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
+
 /** Smooth start, soft landing - the curve all zoom transitions share. */
 val EmphasizedEasing = CubicBezierEasing(0.2f, 0f, 0f, 1f)
 

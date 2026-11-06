@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Ripples on the home screen: a ring for a tap, two for a double tap, a soft wave for a long press
+- Every animation can be switched on or off on its own under Design, Animations
+- If Android's Remove animations is on, the Animations setting says so and links to it
+
 - New animations: apps open by zooming out of the tapped icon; app list, App grid, Text search and
   folders grow out of where you tapped and shrink back; pages sink back a little while swiping;
   settings pages glide in and out; on Android 14+ the back swipe shrinks the screen with your finger.

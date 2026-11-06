@@ -145,6 +145,30 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[MOTION_LEVEL_KEY] = level.name }
     }
 
+    val motionPrefs: Flow<com.bisc.flauncher.ui.MotionPrefs> = dataStore.data.map { prefs ->
+        com.bisc.flauncher.ui.MotionPrefs(
+            appZoom = prefs[booleanPreferencesKey("motion_app_zoom")] ?: true,
+            overlayZoom = prefs[booleanPreferencesKey("motion_overlay_zoom")] ?: true,
+            folderZoom = prefs[booleanPreferencesKey("motion_folder_zoom")] ?: true,
+            pageDepth = prefs[booleanPreferencesKey("motion_page_depth")] ?: true,
+            backGesture = prefs[booleanPreferencesKey("motion_back_gesture")] ?: true,
+            settingsSlide = prefs[booleanPreferencesKey("motion_settings_slide")] ?: true,
+            gestureRipples = prefs[booleanPreferencesKey("motion_gesture_ripples")] ?: true
+        )
+    }
+
+    suspend fun setMotionPrefs(p: com.bisc.flauncher.ui.MotionPrefs) {
+        dataStore.edit {
+            it[booleanPreferencesKey("motion_app_zoom")] = p.appZoom
+            it[booleanPreferencesKey("motion_overlay_zoom")] = p.overlayZoom
+            it[booleanPreferencesKey("motion_folder_zoom")] = p.folderZoom
+            it[booleanPreferencesKey("motion_page_depth")] = p.pageDepth
+            it[booleanPreferencesKey("motion_back_gesture")] = p.backGesture
+            it[booleanPreferencesKey("motion_settings_slide")] = p.settingsSlide
+            it[booleanPreferencesKey("motion_gesture_ripples")] = p.gestureRipples
+        }
+    }
+
     /** Keeps the launcher in portrait instead of turning with the device. */
     val lockPortrait: Flow<Boolean> = dataStore.data.map { it[LOCK_PORTRAIT_KEY] ?: false }
 

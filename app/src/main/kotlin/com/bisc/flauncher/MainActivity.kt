@@ -131,12 +131,15 @@ class MainActivity : ComponentActivity() {
             val showSettingsTips by settingsVm.showSettingsTips.collectAsState()
             val lockPortrait by settingsVm.lockPortrait.collectAsState()
             val chosenMotion by settingsVm.motionLevel.collectAsState()
-            // Android's "Remove animations" wins over the launcher's own choice.
-            val systemAnimationsOff = androidx.compose.runtime.remember {
-                android.provider.Settings.Global.getFloat(contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
+            val motionPrefs by settingsVm.motionPrefs.collectAsState()
+            // Android's "Remove animations" wins over the launcher's own choice; re-read on every return.
+            var systemAnimationsOff by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(com.bisc.flauncher.ui.systemAnimationsOff(this)) }
+            androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
+                systemAnimationsOff = com.bisc.flauncher.ui.systemAnimationsOff(this@MainActivity)
+                onPauseOrDispose { }
             }
             val motion = if (systemAnimationsOff) com.bisc.flauncher.ui.MotionLevel.OFF else chosenMotion
-            com.bisc.flauncher.ui.TouchOrigin.launchZoom = motion != com.bisc.flauncher.ui.MotionLevel.OFF
+            com.bisc.flauncher.ui.TouchOrigin.launchZoom = motion != com.bisc.flauncher.ui.MotionLevel.OFF && motionPrefs.appZoom
             androidx.compose.runtime.LaunchedEffect(lockPortrait) {
                 requestedOrientation = if (lockPortrait) android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                     else android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
@@ -179,11 +182,12 @@ class MainActivity : ComponentActivity() {
                 com.bisc.flauncher.ui.home.LocalIconSizeResolver provides iconSizeResolver,
                 com.bisc.flauncher.ui.home.LocalIconShape provides globalIconShape,
                 com.bisc.flauncher.ui.settings.LocalShowSettingsTips provides showSettingsTips,
-                com.bisc.flauncher.ui.LocalMotion provides motion
+                com.bisc.flauncher.ui.LocalMotion provides motion,
+                com.bisc.flauncher.ui.LocalMotionPrefs provides motionPrefs
             ) {
             FLauncherTheme(themePreference = theme, fontPreference = font, accentColor = accentColor) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    val navMotion = motion
+                    val navMotion = if (motionPrefs.settingsSlide) motion else com.bisc.flauncher.ui.MotionLevel.OFF
                     NavHost(
                         navController = navController,
                         startDestination = "home",

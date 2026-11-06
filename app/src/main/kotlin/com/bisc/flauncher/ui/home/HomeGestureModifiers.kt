@@ -39,6 +39,8 @@ import kotlin.math.abs
 fun Modifier.detectHomeGestures(
     onLongPress: () -> Unit,
     onDoubleTap: () -> Unit,
+    /** A plain tap on the empty background (only for feedback, it triggers nothing). */
+    onTap: (() -> Unit)? = null,
     onSwipeUp: () -> Unit,
     onSwipeDown: () -> Unit,
     // Excludes a strip at the top/bottom edge from triggering onSwipeDown/onSwipeUp when the drag
@@ -61,6 +63,7 @@ fun Modifier.detectHomeGestures(
     val currentOnSwipeDown = rememberUpdatedState(onSwipeDown)
     val currentOnLongPress = rememberUpdatedState(onLongPress)
     val currentOnDoubleTap = rememberUpdatedState(onDoubleTap)
+    val currentOnTap = rememberUpdatedState(onTap)
     return this
         .pointerInput(thresholdPx, topSafeZonePx, bottomSafeZonePx, exclusion) {
             awaitEachGesture {
@@ -105,7 +108,11 @@ fun Modifier.detectHomeGestures(
             }
         }
         .pointerInput(Unit) {
-            detectTapGestures(onLongPress = { currentOnLongPress.value() }, onDoubleTap = { currentOnDoubleTap.value() })
+            detectTapGestures(
+                onLongPress = { currentOnLongPress.value() },
+                onDoubleTap = { currentOnDoubleTap.value() },
+                onTap = { currentOnTap.value?.invoke() }
+            )
         }
 }
 
