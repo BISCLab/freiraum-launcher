@@ -194,22 +194,14 @@ class PageContentRepository @Inject constructor(
         return ComponentName(launcherActivity.packageName, launcherActivity.name)
     }
 
-    /** First start: the bundled wallpapers, the gestures to the utility pages, and a Dock and Panel
-     *  without border lines. */
+    /** First start: plain backgrounds (pictures come with wallpaper packs), the gestures to the
+     *  utility pages, and a Dock and Panel without border lines. */
     private suspend fun applyFreshInstallPages(homeId: Long) {
         val appList = pageDao.getAppOverviewPage()
         val search = pageDao.getByKind(LauncherPageKind.SEARCH)
         val grid = pageDao.getByKind(LauncherPageKind.APP_GRID)
 
-        suspend fun wallpaper(res: Int, key: String): BackgroundConfig? = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-            BackgroundImageStore.save(context, Uri.parse("android.resource://${context.packageName}/$res"), key)
-        }?.let { BackgroundConfig(source = BackgroundSource.IMAGE, imagePath = it) }
-
-        wallpaper(R.drawable.wallpaper_4, "global")?.let { settingsRepository.setGlobalBackground(it) }
-        wallpaper(R.drawable.wallpaper_3, "page_$homeId")?.let { settingsRepository.setPageBackgroundConfig(homeId, it) }
-        appList?.let { page -> wallpaper(R.drawable.wallpaper_5, "page_${page.id}")?.let { settingsRepository.setPageBackgroundConfig(page.id, it) } }
-        wallpaper(R.drawable.wallpaper_6, SettingsRepository.SEARCH_BACKGROUND_KEY)?.let { settingsRepository.setSearchBackgroundConfig(it) }
-        grid?.let { settingsRepository.setPageBackgroundConfig(it.id, BackgroundConfig(source = BackgroundSource.COLOR, fill = ColorFill(color = android.graphics.Color.WHITE))) }
+        settingsRepository.setGlobalBackground(BackgroundConfig(source = BackgroundSource.COLOR, fill = ColorFill(color = backgroundColorFor(isDark()))))
 
         appList?.let { settingsRepository.setGestureAction(HomeGesture.SWIPE_UP, GestureAction(GestureActionType.PAGE, it.id.toString())) }
         search?.let { settingsRepository.setGestureAction(HomeGesture.DOUBLE_TAP, GestureAction(GestureActionType.PAGE, it.id.toString())) }

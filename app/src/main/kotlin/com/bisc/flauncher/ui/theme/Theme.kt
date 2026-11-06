@@ -36,12 +36,14 @@ fun ThemePreference.isDark(context: Context): Boolean = when (this) {
     ThemePreference.SYSTEM -> (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 }
 
-/** A matte near-black, not pure black - FLauncher's only default background in dark mode. No
- *  bundled wallpaper is shipped; this plus plain white in light mode are the only two defaults. */
+/** Matte near-black: the background in dark mode without a wallpaper pack. */
 const val MATTE_DARK_COLOR = 0xFF121212.toInt()
 
+/** Chalk white: the background in light mode without a wallpaper pack. */
+const val MATTE_LIGHT_COLOR = 0xFFF4F3EF.toInt()
+
 /** The page background for the given effective mode. */
-fun backgroundColorFor(isDark: Boolean): Int = if (isDark) MATTE_DARK_COLOR else android.graphics.Color.WHITE
+fun backgroundColorFor(isDark: Boolean): Int = if (isDark) MATTE_DARK_COLOR else MATTE_LIGHT_COLOR
 
 /** FLauncher's standard blue - the default accent, and the settings UI's own primary color. */
 const val DEFAULT_ACCENT_COLOR = 0xFF0758F5.toInt()

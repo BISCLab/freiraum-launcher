@@ -1,13 +1,15 @@
 # Freiraum designs
 
-A design changes only the look of Freiraum Launcher: colors, borders, wallpapers and effects. Pages,
-apps, folders and notes stay as they are.
+A design changes only the look of Freiraum Launcher: colors, borders, corners and effects. Pages,
+apps, folders, notes and backgrounds stay as they are. Backgrounds come with
+[wallpaper packs](../wallpaper-packs/README.md), so any design goes with any pack. A design holds
+no personal data and no pictures, so it is safe to share.
 
 ## Install a design
 
 1. Download a `.freiraum-design` file from the
    [releases page](https://github.com/BISCLab/freiraum-launcher/releases).
-2. In Freiraum: Settings → Design → Designs → Add design, and pick the file.
+2. In Freiraum: Settings → Designs → Add design, and pick the file.
 3. Tap the design to preview it, then Apply. "Back to my own look" returns to how it was before.
 
 Freiraum has no internet access, so designs are always downloaded in the browser.
@@ -16,20 +18,17 @@ Freiraum has no internet access, so designs are always downloaded in the browser
 
 | Design | Look |
 |---|---|
-| [Neon Light](neon-light/design.json) | Light, with its own blue wallpapers, glowing borders in green, blue, violet and pink, a fine grid and soft light spots |
+| Modern Light, Modern Dark | Included in the app: Freiraum's own look, light or dark |
+| [Neon Light](neon-light/design.json) | Light, with glowing borders in green, blue, violet and pink and soft light spots |
+| [Neon Dark](neon-dark/design.json) | The same glow on matte black |
 
 ## Make your own
 
-The easiest start: Settings → Design → Designs → Save current look as design. That writes a
-`.freiraum-design` file with your current colors, borders and wallpapers.
+The easiest start: Settings → Designs → Save current look as design. That writes a
+`.freiraum-design` file with your current colors, borders and corners.
 
-A design file is a ZIP with:
-
-```
-design.json
-wallpapers/home.webp      (optional, any name, png/jpg/webp)
-preview.webp              (optional)
-```
+A design file is a ZIP with `design.json` at the top level. `python tools/build_extensions.py`
+packs every folder here into `release/<id>.freiraum-design`.
 
 `design.json` (format 1), all fields optional except `format` and `id`:
 
@@ -44,8 +43,6 @@ preview.webp              (optional)
 | `box`, `dock`, `panel` | Look of widgets and element boxes, the Dock, the Panel |
 | `elements` | Look of single parts: `search_bar`, `search_field`, `search_results`, `search_appearance`, `folder_card`, `app_list_search_button`, `app_list_search_field`, `search_alphabet_rail`, `search_header_letter`, `app_grid_search_bar`, `widget_arrow` |
 | `keyboardCapColor` | The strip above the keyboard |
-| `backgrounds` | Per page: `global`, `home`, `appList`, `search`, `appGrid`, each `{"image": "wallpapers/…"}` or `{"color": "#…"}`, plus `shade` (-1 to 1) |
-| `lockWallpaper` | Image offered for the lock screen when applying |
 | `effects` | See below |
 
 A look (`box`, `dock`, … ) is `{"style": "COLOR" or "NONE", "fill": "#…", "fill2": "#…", "fillMode": "SOLID" or "GRADIENT", "opacity": 0–1, "border": true/false, "borderColor": "#…", "borderWidth": 0.5–6, "contentColor": "#…"}`.
@@ -62,5 +59,4 @@ A look (`box`, `dock`, … ) is `{"style": "COLOR" or "NONE", "fill": "#…", "f
 | `grid`, `gridColor`, `gridSpacing` | Fine grid over the backgrounds |
 | `blobs`, `blobColors`, `blobStrength` | Soft colored light spots over the backgrounds |
 
-Build the file with any ZIP tool so that `design.json` sits at the top level, then rename the
-`.zip` to `.freiraum-design`.
+Older design files may still name `backgrounds` and pictures; Freiraum ignores them.

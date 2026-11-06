@@ -1,0 +1,185 @@
+{
+  "format": 1,
+  "id": "neon-dark",
+  "name": "Neon Dark",
+  "name_de": "Neon Dunkel",
+  "author": "BISC Lab",
+  "version": "1.0",
+  "theme": "DARK",
+  "accent": "#FF3DA5FF",
+  "font": "SYSTEM",
+  "cornerRadiusPercent": 100,
+  "widgetCornerRadiusPercent": 10,
+  "box": {
+    "style": "COLOR",
+    "fill": "#FF0B0D12",
+    "fillMode": "SOLID",
+    "opacity": 0.82,
+    "border": true,
+    "borderWidth": 1.0,
+    "borderColor": "#1FFFFFFF",
+    "contentColor": "#FFE8EAF0"
+  },
+  "dock": {
+    "style": "COLOR",
+    "fill": "#FF0B0D12",
+    "fillMode": "SOLID",
+    "opacity": 0.86,
+    "border": false,
+    "borderWidth": 1.0,
+    "contentColor": "#FFE8EAF0"
+  },
+  "panel": {
+    "style": "COLOR",
+    "fill": "#FF0B0D12",
+    "fillMode": "SOLID",
+    "opacity": 0.9,
+    "border": false,
+    "borderWidth": 1.0,
+    "contentColor": "#FFE8EAF0"
+  },
+  "elements": {
+    "search_appearance": {
+      "style": "NONE",
+      "fill": "#FF000000",
+      "fillMode": "SOLID",
+      "opacity": 1.0,
+      "border": false,
+      "borderWidth": 1.0,
+      "contentColor": "#FFE8EAF0"
+    },
+    "search_bar": {
+      "style": "COLOR",
+      "fill": "#FF0B0D12",
+      "fillMode": "SOLID",
+      "opacity": 0.92,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#1FFFFFFF",
+      "contentColor": "#FFE8EAF0"
+    },
+    "search_field": {
+      "style": "COLOR",
+      "fill": "#CC14171E",
+      "fillMode": "SOLID",
+      "opacity": 1.0,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#1FFFFFFF",
+      "contentColor": "#FFE8EAF0"
+    },
+    "search_results": {
+      "style": "COLOR",
+      "fill": "#FF0B0D12",
+      "fillMode": "SOLID",
+      "opacity": 0.92,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#14FFFFFF",
+      "contentColor": "#FFE8EAF0"
+    },
+    "folder_card": {
+      "style": "COLOR",
+      "fill": "#FF0B0D12",
+      "fillMode": "SOLID",
+      "opacity": 0.92,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#1FFFFFFF",
+      "contentColor": "#FFE8EAF0"
+    },
+    "app_list_search_button": {
+      "style": "COLOR",
+      "fill": "#FF0B0D12",
+      "fillMode": "SOLID",
+      "opacity": 1.0,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#FF3DA5FF",
+      "contentColor": "#FF3DA5FF"
+    },
+    "app_list_search_field": {
+      "style": "COLOR",
+      "fill": "#CC14171E",
+      "fillMode": "SOLID",
+      "opacity": 1.0,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#1FFFFFFF",
+      "contentColor": "#FFE8EAF0"
+    },
+    "search_alphabet_rail": {
+      "style": "COLOR",
+      "fill": "#FF0B0D12",
+      "fillMode": "SOLID",
+      "opacity": 1.0,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#FF3DA5FF",
+      "contentColor": "#FFB8BECB"
+    },
+    "search_header_letter": {
+      "style": "NONE",
+      "fill": "#00000000",
+      "fillMode": "SOLID",
+      "opacity": 1.0,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#FF19E39A",
+      "contentColor": "#FF19E39A"
+    },
+    "app_grid_search_bar": {
+      "style": "COLOR",
+      "fill": "#CC14171E",
+      "fillMode": "SOLID",
+      "opacity": 1.0,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#1FFFFFFF",
+      "contentColor": "#FFE8EAF0"
+    },
+    "widget_arrow": {
+      "style": "COLOR",
+      "fill": "#14FFFFFF",
+      "fillMode": "SOLID",
+      "opacity": 1.0,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#1FFFFFFF",
+      "contentColor": "#FFE8EAF0"
+    }
+  },
+  "keyboardCapColor": "#FF14171E",
+  "effects": {
+    "glowBorder": true,
+    "glowColors": [
+      "#FF19E39A",
+      "#FF3DA5FF",
+      "#FFA78BFA",
+      "#FFF472B6"
+    ],
+    "baseColor": "#14FFFFFF",
+    "speedSeconds": 4.5,
+    "motion": "ONCE",
+    "glowStrength": 0.55,
+    "targets": [
+      "dock",
+      "panel",
+      "search",
+      "folders",
+      "cards",
+      "widgets",
+      "buttons"
+    ],
+    "grid": false,
+    "gridColor": "#06FFFFFF",
+    "gridSpacing": 44,
+    "blobs": true,
+    "blobColors": [
+      "#FF19E39A",
+      "#FFA78BFA",
+      "#FF3DA5FF"
+    ],
+    "blobStrength": 0.6
+  }
+}

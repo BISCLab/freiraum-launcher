@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.ViewCarousel
+import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -122,13 +123,19 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                     onClick = { onNavigate("system") }
                 )
             }
-            // What goes beyond the launcher itself: designs to add now, plugins to come.
+            // What goes beyond the launcher itself: designs and wallpaper packs to add now, plugins to come.
             SettingsPreferenceGroup(title = stringResource(R.string.settings_group_extensions)) {
                 SettingsPreference(
                     icon = Icons.Filled.AutoAwesome,
                     title = stringResource(R.string.designs_title),
                     summary = stringResource(R.string.designs_entry_summary),
                     onClick = { onNavigate("appearance/designs") }
+                )
+                SettingsPreference(
+                    icon = Icons.Filled.Wallpaper,
+                    title = stringResource(R.string.packs_title),
+                    summary = stringResource(R.string.packs_entry_summary),
+                    onClick = { onNavigate("wallpaper_packs") }
                 )
                 SettingsPreference(
                     icon = Icons.Filled.Extension,

@@ -1,0 +1,23 @@
+{
+  "format": 1,
+  "id": "modern-dark",
+  "name": "Modern Dark",
+  "name_de": "Modern Dunkel",
+  "author": "BISC Lab",
+  "version": "1.0",
+  "dark": true,
+  "wallpapers": {
+    "home": "home.webp",
+    "appList": "applist.webp",
+    "search": "search.webp",
+    "appGrid": "appgrid.webp",
+    "lock": "lock.webp"
+  },
+  "extras": [
+    "extra_1.webp",
+    "extra_2.webp",
+    "extra_3.webp",
+    "extra_4.webp",
+    "extra_5.webp"
+  ]
+}

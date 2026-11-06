@@ -678,8 +678,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_motion_settings_slide">Settings pages glide</string>
     <string name="settings_motion_ripples">Ripples for taps and gestures</string>
     <string name="designs_title">Designs</string>
-    <string name="designs_entry_summary">Ready-made looks with colors, wallpapers and effects</string>
-    <string name="designs_intro">A design only changes the look: colors, borders, wallpapers and effects. Your pages, apps, folders and notes stay as they are. Freiraum has no internet access, so designs are downloaded in the browser and then added here.</string>
+    <string name="designs_entry_summary">Ready-made looks with colors, borders, corners and effects</string>
+    <string name="designs_intro">A design only changes the look: colors, borders, corners and effects. Your pages, apps, folders and notes stay as they are, and so do your backgrounds, which come with wallpaper packs. Freiraum has no internet access, so designs are downloaded in the browser and then added here.</string>
     <string name="designs_find">Find designs</string>
     <string name="designs_find_summary">Opens the designs on GitHub in your browser</string>
     <string name="designs_add">Add design</string>
@@ -724,4 +724,22 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_backup_export_confirm">Export</string>
     <string name="settings_widgets_corner_hint">Up to 50%. Above about 25%, the corners start cutting into the widget content.</string>
     <string name="designs_export_info">A design holds only the look: colors, borders, corners and effects. No personal data and no pictures, so you can share it safely.</string>
+    <string name="packs_title">Wallpaper packs</string>
+    <string name="packs_entry_summary">Backgrounds for every page</string>
+    <string name="packs_intro">A wallpaper pack brings a picture for each page: Home, App list, Text search, App grid, more for further pages, and one for the lock screen. Packs go with every design.</string>
+    <string name="packs_find">Find wallpaper packs</string>
+    <string name="packs_find_summary">Opens the collection on GitHub in your browser</string>
+    <string name="packs_add">Add wallpaper pack</string>
+    <string name="packs_add_summary">Pick a downloaded .freiraum-wallpapers file</string>
+    <string name="packs_installed">Choose</string>
+    <string name="packs_plain">Without pictures</string>
+    <string name="packs_plain_summary">Matte black or chalk white</string>
+    <string name="packs_plain_text">Every page gets the plain background of the color mode: matte black in dark mode, chalk white in light mode. Your own pictures on the pages are replaced.</string>
+    <string name="packs_picture_count">%1$d pictures</string>
+    <string name="packs_apply_text">The pictures go onto Home, App list, Text search and App grid, the rest onto your further pages in their order. Pictures you set yourself are replaced.</string>
+    <string name="packs_applied">Wallpaper pack applied</string>
+    <string name="packs_import_done">%1$s added</string>
+    <string name="packs_import_failed">This is not a wallpaper pack</string>
+    <string name="packs_remove_text">The pack is removed from Freiraum. The pictures stay on your pages until you choose others.</string>
+    <string name="designs_bundled">Included</string>
 </resources>

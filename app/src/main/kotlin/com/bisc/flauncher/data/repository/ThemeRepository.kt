@@ -11,7 +11,6 @@ import com.bisc.flauncher.data.settings.SettingsRepository
 import com.bisc.flauncher.ui.theme.backgroundColorFor
 import com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor
 import com.bisc.flauncher.ui.theme.isDark
-import com.bisc.flauncher.util.BackgroundImageStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
@@ -33,13 +32,14 @@ class ThemeRepository @Inject constructor(
         val isDark = settingsRepository.theme.first().isDark(context)
         val boxAppearance = defaultBoxAppearanceFor(isDark)
 
-        // One shared global background, not a same-color override stamped onto every page - 
-        // clearing every per-page override here means they actually go back to tracking the
-        // global background going forward, instead of each carrying its own now-redundant copy.
-        settingsRepository.setGlobalBackground(BackgroundConfig(source = BackgroundSource.COLOR, fill = ColorFill(color = backgroundColorFor(isDark))))
+        // Plain backgrounds follow the mode; pictures (from a wallpaper pack or your own) stay.
+        // A page with a plain color of its own goes back to the shared global background.
+        if (settingsRepository.globalBackground.first().source != BackgroundSource.IMAGE) {
+            settingsRepository.setGlobalBackground(BackgroundConfig(source = BackgroundSource.COLOR, fill = ColorFill(color = backgroundColorFor(isDark))))
+        }
         pageContentRepository.allPages.first().forEach { page ->
-            BackgroundImageStore.delete(context, "page_${page.id}")
-            settingsRepository.clearPageBackgroundConfig(page.id)
+            val own = settingsRepository.pageBackgroundOverride(page.id).first()
+            if (own != null && own.source != BackgroundSource.IMAGE) settingsRepository.clearPageBackgroundConfig(page.id)
         }
 
         // "Layer 3, null means auto light/dark" overrides - a customization made under the old

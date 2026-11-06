@@ -561,6 +561,9 @@ class MainActivity : ComponentActivity() {
                                 onNavigate = { route -> navController.navigate("settings/$route") }
                             )
                         }
+                        settingsComposable("settings/wallpaper_packs") {
+                            com.bisc.flauncher.ui.settings.SettingsWallpaperPacksScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
                         settingsComposable("settings/system/statusbar") {
                             com.bisc.flauncher.ui.settings.SettingsStatusBarScreen(navController = navController, onBack = { navController.popBackStack() })
                         }

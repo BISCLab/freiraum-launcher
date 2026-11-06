@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "id": "modern-light",
+  "name": "Modern Light",
+  "name_de": "Modern Hell",
+  "author": "BISC Lab",
+  "version": "1.0",
+  "theme": "LIGHT",
+  "accent": "#FF0758F5",
+  "font": "ROUNDED",
+  "cornerRadiusPercent": 100,
+  "widgetCornerRadiusPercent": 10,
+  "box": {
+    "style": "COLOR",
+    "fill": "#FFFFFFFF",
+    "fillMode": "SOLID",
+    "opacity": 0.8,
+    "border": true,
+    "borderWidth": 1.0
+  },
+  "dock": {
+    "style": "COLOR",
+    "fill": "#FFFFFFFF",
+    "fillMode": "SOLID",
+    "opacity": 0.8,
+    "border": false,
+    "borderWidth": 1.0
+  },
+  "panel": {
+    "style": "COLOR",
+    "fill": "#FFFFFFFF",
+    "fillMode": "SOLID",
+    "opacity": 0.8,
+    "border": false,
+    "borderWidth": 1.0
+  },
+  "elements": {
+    "search_appearance": {
+      "style": "COLOR",
+      "fill": "#FFFFFFFF",
+      "fillMode": "SOLID",
+      "opacity": 1.0,
+      "border": true,
+      "borderWidth": 1.0
+    },
+    "search_bar": {
+      "style": "COLOR",
+      "fill": "#FFF9F9F9",
+      "fillMode": "SOLID",
+      "opacity": 1.0,
+      "border": false,
+      "borderWidth": 1.0
+    },
+    "search_results": {
+      "style": "COLOR",
+      "fill": "#FFF9F9F9",
+      "fillMode": "SOLID",
+      "opacity": 1.0,
+      "border": false,
+      "borderWidth": 1.0
+    },
+    "folder_card": {
+      "style": "COLOR",
+      "fill": "#FFFFFFFF",
+      "fillMode": "SOLID",
+      "opacity": 0.8,
+      "border": true,
+      "borderWidth": 1.0
+    },
+    "app_list_search_button": {
+      "style": "COLOR",
+      "fill": "#FFF0F0F0",
+      "fillMode": "SOLID",
+      "opacity": 1.0,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#FF0D5CF5"
+    },
+    "search_alphabet_rail": {
+      "style": "COLOR",
+      "fill": "#FFF0F0F0",
+      "fillMode": "SOLID",
+      "opacity": 1.0,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#FF0D5CF5"
+    },
+    "search_header_letter": {
+      "style": "COLOR",
+      "fill": "#FFF0F0F0",
+      "fillMode": "SOLID",
+      "opacity": 1.0,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#FF0D5CF5",
+      "contentColor": "#FF0D5CF5"
+    }
+  },
+  "keyboardCapColor": "#FFF9F9F9"
+}

@@ -12,6 +12,14 @@
 - Exporting a backup asks you to confirm it holds personal data; exporting a design explains it
   holds only the look and leaves out all pictures
 - App list: the A-Z bubble no longer draws a line to the letter rail
+- New: Wallpaper packs under Extensions. A pack brings a picture for Home, App list, Text search,
+  App grid, further pages and the lock screen; "Without pictures" gives matte black or chalk white.
+  Modern Light and Modern Dark are the first packs
+- Designs no longer carry pictures, so any design goes with any wallpaper pack; Modern Light and
+  Modern Dark come with the app, Neon Light and the new Neon Dark are downloads
+- No more wallpapers inside the app (it got about 650 KB smaller); a fresh install starts plain
+- Plain light background is now chalk white instead of pure white
+- Switching light/dark keeps your pictures and recolors only plain backgrounds
 
 ## 0.9.2
 

@@ -144,6 +144,7 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
         "settings/appearance/icons" -> stringResource(R.string.settings_icons_label)
         "settings/system" -> stringResource(R.string.settings_system_title)
         "settings/system/statusbar" -> stringResource(R.string.settings_statusbar_label)
+        "settings/wallpaper_packs" -> stringResource(R.string.packs_title)
         "settings/system/animations" -> stringResource(R.string.settings_motion_label)
         "settings/folder" -> stringResource(R.string.settings_section_folder)
         "settings/folder/global" -> stringResource(R.string.settings_folder_global_label)

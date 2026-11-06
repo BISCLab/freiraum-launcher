@@ -9,7 +9,6 @@ import com.bisc.flauncher.ui.theme.FontPreference
 import com.bisc.flauncher.ui.theme.ThemePreference
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.File
 
 /** How the glowing border of a design moves: not at all, one turn when it appears, or slowly round. */
 enum class EffectMotion { STILL, ONCE, SLOW }
@@ -33,10 +32,8 @@ data class DesignEffects(
     val blobStrength: Float = 1f
 )
 
-/** One page's background in a design: an image (file inside the design) or a plain color. */
-data class DesignBackground(val image: File? = null, val color: Int? = null, val shade: Float = 0f)
-
-/** A design: only looks, never content. Applied on top of the user's pages, apps and folders. */
+/** A design: only looks, never content and never pictures (those come with wallpaper packs).
+ *  Applied on top of the user's pages, apps and folders. */
 data class Design(
     val id: String,
     val name: String,
@@ -56,15 +53,14 @@ data class Design(
     /** Search bar, field, results, app list parts, … by their settings name, see [DESIGN_ELEMENTS]. */
     val elements: Map<String, ElementAppearance> = emptyMap(),
     val keyboardCapColor: Int? = null,
-    /** By role: global, home, appList, search, appGrid. */
-    val backgrounds: Map<String, DesignBackground> = emptyMap(),
-    val lockWallpaper: File? = null,
     val effects: DesignEffects? = null,
     /** Only in the snapshot of the user's own look: every row's and folder item's exact look. */
     val rowAppearances: Map<Long, ElementAppearance>? = null,
     val folderItemAppearances: Map<Long, ElementAppearance>? = null,
     val rowCorners: Map<Long, Int>? = null,
-    val folderItemCorners: Map<Long, Int>? = null
+    val folderItemCorners: Map<Long, Int>? = null,
+    /** Comes with the app; can't be removed. */
+    val bundled: Boolean = false
 ) {
     fun displayName(german: Boolean): String = if (german && !nameDe.isNullOrBlank()) nameDe else name
 }
@@ -76,15 +72,13 @@ val DESIGN_ELEMENTS = listOf(
     "app_grid_search_bar", "widget_arrow"
 )
 
-val BACKGROUND_ROLES = listOf("global", "home", "appList", "search", "appGrid")
-
-/** Reads and writes `design.json`. Image paths in the file are relative to the design's folder. */
+/** Reads and writes `design.json`. Older files may still name backgrounds and pictures; those are
+ *  ignored. */
 object DesignJson {
     const val FORMAT = 1
 
-    fun parse(json: JSONObject, baseDir: File): Design {
+    fun parse(json: JSONObject, bundled: Boolean = false): Design {
         require(json.optInt("format", -1) == FORMAT) { "Unsupported design format" }
-        fun file(path: String?): File? = path?.takeIf { it.isNotBlank() }?.let { File(baseDir, it) }
         return Design(
             id = json.getString("id"),
             name = json.optString("name", json.getString("id")),
@@ -103,23 +97,16 @@ object DesignJson {
                 obj.keys().asSequence().filter { it in DESIGN_ELEMENTS }.associateWith { appearance(obj.getJSONObject(it)) }
             }.orEmpty(),
             keyboardCapColor = color(json.optString("keyboardCapColor")),
-            backgrounds = json.optJSONObject("backgrounds")?.let { obj ->
-                obj.keys().asSequence().filter { it in BACKGROUND_ROLES }.associateWith { role ->
-                    val b = obj.getJSONObject(role)
-                    DesignBackground(file(b.optString("image")), color(b.optString("color")), b.optDouble("shade", 0.0).toFloat())
-                }
-            }.orEmpty(),
-            lockWallpaper = file(json.optString("lockWallpaper")),
             effects = json.optJSONObject("effects")?.let(::effects),
             rowAppearances = json.optJSONObject("rows")?.let { obj -> obj.keys().asSequence().associate { it.toLong() to appearance(obj.getJSONObject(it)) } },
             folderItemAppearances = json.optJSONObject("folderItems")?.let { obj -> obj.keys().asSequence().associate { it.toLong() to appearance(obj.getJSONObject(it)) } },
             rowCorners = json.optJSONObject("rowCorners")?.let { obj -> obj.keys().asSequence().associate { it.toLong() to obj.getInt(it) } },
-            folderItemCorners = json.optJSONObject("folderItemCorners")?.let { obj -> obj.keys().asSequence().associate { it.toLong() to obj.getInt(it) } }
+            folderItemCorners = json.optJSONObject("folderItemCorners")?.let { obj -> obj.keys().asSequence().associate { it.toLong() to obj.getInt(it) } },
+            bundled = bundled
         )
     }
 
-    /** [imageName] maps a background/lock image to the path it gets inside the design. */
-    fun write(design: Design, imageName: (File) -> String): JSONObject = JSONObject().apply {
+    fun write(design: Design): JSONObject = JSONObject().apply {
         put("format", FORMAT)
         put("id", design.id)
         put("name", design.name)
@@ -136,16 +123,6 @@ object DesignJson {
         design.panel?.let { put("panel", appearanceJson(it)) }
         put("elements", JSONObject().apply { design.elements.forEach { (k, v) -> put(k, appearanceJson(v)) } })
         design.keyboardCapColor?.let { put("keyboardCapColor", hex(it)) }
-        put("backgrounds", JSONObject().apply {
-            design.backgrounds.forEach { (role, b) ->
-                put(role, JSONObject().apply {
-                    b.image?.let { put("image", imageName(it)) }
-                    b.color?.let { put("color", hex(it)) }
-                    put("shade", b.shade.toDouble())
-                })
-            }
-        })
-        design.lockWallpaper?.let { put("lockWallpaper", imageName(it)) }
         design.effects?.let { put("effects", effectsJson(it)) }
         design.rowAppearances?.let { rows -> put("rows", JSONObject().apply { rows.forEach { (k, v) -> put(k.toString(), appearanceJson(v)) } }) }
         design.folderItemAppearances?.let { items -> put("folderItems", JSONObject().apply { items.forEach { (k, v) -> put(k.toString(), appearanceJson(v)) } }) }

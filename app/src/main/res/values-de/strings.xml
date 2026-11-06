@@ -678,8 +678,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_motion_settings_slide">Einstellungsseiten gleiten</string>
     <string name="settings_motion_ripples">Wellen bei Tippen und Gesten</string>
     <string name="designs_title">Designs</string>
-    <string name="designs_entry_summary">Fertige Looks mit Farben, Wallpapern und Effekten</string>
-    <string name="designs_intro">Ein Design ändert nur das Aussehen: Farben, Rahmen, Wallpaper und Effekte. Deine Seiten, Apps, Ordner und Notizen bleiben, wie sie sind. Freiraum hat keinen Internetzugriff, deshalb lädst du Designs im Browser herunter und fügst sie hier hinzu.</string>
+    <string name="designs_entry_summary">Fertige Looks mit Farben, Rahmen, Ecken und Effekten</string>
+    <string name="designs_intro">Ein Design ändert nur das Aussehen: Farben, Rahmen, Ecken und Effekte. Deine Seiten, Apps, Ordner und Notizen bleiben, wie sie sind, ebenso deine Hintergründe, die mit Wallpaper-Packs kommen. Freiraum hat keinen Internetzugriff, deshalb lädst du Designs im Browser herunter und fügst sie hier hinzu.</string>
     <string name="designs_find">Designs finden</string>
     <string name="designs_find_summary">Öffnet die Designs auf GitHub im Browser</string>
     <string name="designs_add">Design hinzufügen</string>
@@ -724,4 +724,22 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_backup_export_confirm">Exportieren</string>
     <string name="settings_widgets_corner_hint">Bis 50 %. Ab etwa 25 % schneiden die Ecken in den Inhalt des Widgets.</string>
     <string name="designs_export_info">Ein Design enthält nur das Aussehen: Farben, Rahmen, Ecken und Effekte. Keine persönlichen Daten und keine Bilder, du kannst es also gefahrlos teilen.</string>
+    <string name="packs_title">Wallpaper-Packs</string>
+    <string name="packs_entry_summary">Hintergrundbilder für alle Seiten</string>
+    <string name="packs_intro">Ein Wallpaper-Pack bringt für jede Seite ein Bild mit: Startseite, App-Liste, Textsuche, App-Raster, weitere für zusätzliche Seiten und eines für den Sperrbildschirm. Packs passen zu jedem Design.</string>
+    <string name="packs_find">Wallpaper-Packs finden</string>
+    <string name="packs_find_summary">Öffnet die Sammlung auf GitHub im Browser</string>
+    <string name="packs_add">Wallpaper-Pack hinzufügen</string>
+    <string name="packs_add_summary">Eine heruntergeladene .freiraum-wallpapers-Datei wählen</string>
+    <string name="packs_installed">Auswählen</string>
+    <string name="packs_plain">Ohne Bilder</string>
+    <string name="packs_plain_summary">Mattes Schwarz oder Kreideweiß</string>
+    <string name="packs_plain_text">Alle Seiten bekommen den schlichten Hintergrund des Farbmodus: mattes Schwarz im dunklen, Kreideweiß im hellen Modus. Eigene Bilder auf den Seiten werden ersetzt.</string>
+    <string name="packs_picture_count">%1$d Bilder</string>
+    <string name="packs_apply_text">Die Bilder kommen auf Startseite, App-Liste, Textsuche und App-Raster, die übrigen der Reihe nach auf deine weiteren Seiten. Selbst gesetzte Bilder werden ersetzt.</string>
+    <string name="packs_applied">Wallpaper-Pack angewendet</string>
+    <string name="packs_import_done">%1$s hinzugefügt</string>
+    <string name="packs_import_failed">Das ist kein Wallpaper-Pack</string>
+    <string name="packs_remove_text">Das Pack wird aus Freiraum entfernt. Die Bilder bleiben auf deinen Seiten, bis du andere wählst.</string>
+    <string name="designs_bundled">Mitgeliefert</string>
 </resources>

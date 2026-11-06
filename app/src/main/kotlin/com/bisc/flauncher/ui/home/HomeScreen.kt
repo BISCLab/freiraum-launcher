@@ -347,7 +347,6 @@ fun HomeScreen(
     var showAddMapTargetDialog by remember { mutableStateOf(false) }
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
     var showFolderCreator by remember { mutableStateOf(false) }
-    val lockWallpaperOffer by viewModel.lockWallpaperOffer.collectAsState()
     val welcomePending by viewModel.welcomePending.collectAsState()
 
     // See the background-crossfade layer below for why this exists: a stable, append-only cache instead
@@ -1271,30 +1270,10 @@ fun HomeScreen(
         )
     }
 
-    // The walkthrough asks about the lock screen itself; the plain dialog is only the fallback.
     if (welcomePending) {
         com.bisc.flauncher.ui.theme.SettingsThemed {
-            WelcomeWalkthrough(
-                onLockScreenAnswer = { accept -> if (lockWallpaperOffer) viewModel.answerLockWallpaperOffer(context, accept) },
-                onDone = viewModel::finishWelcome
-            )
+            WelcomeWalkthrough(onDone = viewModel::finishWelcome)
         }
-    } else if (lockWallpaperOffer) {
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { viewModel.answerLockWallpaperOffer(context, false) },
-            title = { Text(stringResource(R.string.lock_wallpaper_offer_title)) },
-            text = { Text(stringResource(R.string.lock_wallpaper_offer_text)) },
-            confirmButton = {
-                androidx.compose.material3.TextButton(onClick = { viewModel.answerLockWallpaperOffer(context, true) }) {
-                    Text(stringResource(R.string.lock_wallpaper_offer_yes))
-                }
-            },
-            dismissButton = {
-                androidx.compose.material3.TextButton(onClick = { viewModel.answerLockWallpaperOffer(context, false) }) {
-                    Text(stringResource(R.string.lock_wallpaper_offer_no))
-                }
-            }
-        )
     }
 
     if (showFolderCreator) {

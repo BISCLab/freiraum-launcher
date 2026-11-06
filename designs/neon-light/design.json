@@ -2,9 +2,9 @@
   "format": 1,
   "id": "neon-light",
   "name": "Neon Light",
-  "name_de": "Neon Light",
+  "name_de": "Neon Hell",
   "author": "BISC Lab",
-  "version": "1.1",
+  "version": "1.2",
   "theme": "LIGHT",
   "accent": "#FF1E8FFF",
   "font": "SYSTEM",
@@ -150,29 +150,6 @@
     }
   },
   "keyboardCapColor": "#FFFFFFFF",
-  "backgrounds": {
-    "global": {
-      "color": "#FFFFFFFF",
-      "shade": 0
-    },
-    "home": {
-      "image": "wallpapers/home.webp",
-      "shade": 0
-    },
-    "appList": {
-      "image": "wallpapers/applist.webp",
-      "shade": 0
-    },
-    "search": {
-      "image": "wallpapers/search.webp",
-      "shade": 0
-    },
-    "appGrid": {
-      "image": "wallpapers/appgrid.webp",
-      "shade": 0
-    }
-  },
-  "lockWallpaper": "wallpapers/lockscreen.webp",
   "effects": {
     "glowBorder": true,
     "glowColors": [

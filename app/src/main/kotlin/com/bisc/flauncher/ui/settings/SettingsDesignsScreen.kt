@@ -89,24 +89,15 @@ class DesignsViewModel @Inject constructor(
     init { viewModelScope.launch { repository.refresh() } }
 
     fun import(uri: Uri, onDone: (String?) -> Unit) = viewModelScope.launch { onDone(repository.import(uri)) }
-    fun apply(design: Design, lockScreen: Boolean, context: android.content.Context) = viewModelScope.launch {
-        repository.apply(design)
-        if (lockScreen) repository.lockWallpaperOf(design)?.let { file ->
-            withContext(Dispatchers.IO) {
-                runCatching {
-                    val bitmap = android.graphics.BitmapFactory.decodeFile(file.absolutePath)
-                    android.app.WallpaperManager.getInstance(context).setBitmap(bitmap, null, true, android.app.WallpaperManager.FLAG_LOCK)
-                }
-            }
-        }
-    }
+    fun apply(design: Design) = viewModelScope.launch { repository.apply(design) }
     fun restoreMine() = viewModelScope.launch { repository.restoreMine() }
     fun delete(design: Design) = viewModelScope.launch { repository.delete(design) }
     fun export(uri: Uri, name: String, onDone: () -> Unit) = viewModelScope.launch { repository.exportCurrent(uri, name); onDone() }
 }
 
-/** Designs: install them from a file, preview, apply, go back to your own look, or save your look
- *  as a design. Freiraum has no internet access; designs are downloaded in the browser. */
+/** Designs: the bundled ones plus any installed from a file - preview, apply, go back to your own
+ *  look, or save your look as a design. Freiraum has no internet access; designs are downloaded in
+ *  the browser. Backgrounds come from wallpaper packs, not from designs. */
 @Composable
 fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, viewModel: DesignsViewModel = hiltViewModel()) {
     val context = LocalContext.current
@@ -164,7 +155,7 @@ fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, view
                         icon = null,
                         title = design.displayName(german),
                         summary = listOfNotNull(
-                            design.author.takeIf { it.isNotBlank() },
+                            if (design.bundled) stringResource(R.string.designs_bundled) else design.author.takeIf { it.isNotBlank() },
                             design.version.takeIf { it.isNotBlank() }?.let { "v$it" },
                             if (design.id == activeId) stringResource(R.string.designs_active) else null
                         ).joinToString(" · "),
@@ -172,7 +163,7 @@ fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, view
                         trailing = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 DesignSwatch(design)
-                                androidx.compose.material3.IconButton(onClick = { removing = design }) {
+                                if (design.bundled) Box(Modifier.size(48.dp)) else androidx.compose.material3.IconButton(onClick = { removing = design }) {
                                     androidx.compose.material3.Icon(
                                         androidx.compose.material.icons.Icons.Filled.Delete,
                                         contentDescription = stringResource(R.string.designs_remove),
@@ -248,31 +239,20 @@ fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, view
     }
 
     previewing?.let { design ->
-        var lockScreen by remember(design.id) { mutableStateOf(false) }
         AlertDialog(
             onDismissRequest = { previewing = null },
             title = { Text(design.displayName(german)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     DesignPreview(design, Modifier.fillMaxWidth(0.6f))
-                    if (design.lockWallpaper != null) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(checked = lockScreen, onCheckedChange = { lockScreen = it })
-                            Text(stringResource(R.string.designs_lock_screen_too), style = MaterialTheme.typography.bodyMedium)
-                        }
-                    }
                 }
             },
             confirmButton = {
-                TextButton(onClick = { viewModel.apply(design, lockScreen, context); previewing = null }) {
+                TextButton(onClick = { viewModel.apply(design); previewing = null }) {
                     Text(stringResource(R.string.designs_apply))
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { viewModel.delete(design); previewing = null }) {
-                    Text(stringResource(R.string.designs_remove), color = MaterialTheme.colorScheme.error)
-                }
-            }
+            dismissButton = { TextButton(onClick = { previewing = null }) { Text(stringResource(android.R.string.cancel)) } }
         )
     }
 }
@@ -283,37 +263,26 @@ private const val DESIGNS_URL = "https://github.com/BISCLab/freiraum-launcher/tr
 @Composable
 private fun DesignSwatch(design: Design) {
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        listOfNotNull(design.accent, design.dock?.fill?.color, design.backgrounds["global"]?.color).take(3).forEach {
+        listOfNotNull(design.accent, design.dock?.fill?.color, design.box?.fill?.color).take(3).forEach {
             Box(modifier = Modifier.size(16.dp).clip(CircleShape).background(Color(it)).border(1.dp, MaterialTheme.colorScheme.outline, CircleShape))
         }
     }
 }
 
-/** The home screen in small with the design's background, effects, a search field, a widget card
- *  and the Dock - drawn with the same code as the real ones. */
+/** The home screen in small on the plain background of the design's mode, with its effects, a
+ *  search field, a widget card and the Dock - drawn with the same code as the real ones. */
 @Composable
 private fun DesignPreview(design: Design, modifier: Modifier = Modifier) {
     val shape = RoundedCornerShape(20.dp)
-    val home = design.backgrounds["home"] ?: design.backgrounds["global"]
-    val bitmap by produceState<ImageBitmap?>(null, home?.image) {
-        value = withContext(Dispatchers.IO) {
-            home?.image?.takeIf(File::isFile)?.let { file ->
-                runCatching {
-                    val opts = android.graphics.BitmapFactory.Options().apply { inSampleSize = 4 }
-                    android.graphics.BitmapFactory.decodeFile(file.absolutePath, opts)?.asImageBitmap()
-                }.getOrNull()
-            }
-        }
-    }
+    val dark = design.theme == com.bisc.flauncher.ui.theme.ThemePreference.DARK
     CompositionLocalProvider(LocalDesignEffects provides design.effects) {
         Box(
             modifier = modifier
                 .aspectRatio(0.5f)
                 .clip(shape)
-                .background(home?.color?.let { Color(it) } ?: MaterialTheme.colorScheme.surfaceContainer)
+                .background(Color(com.bisc.flauncher.ui.theme.backgroundColorFor(dark)))
                 .border(2.dp, MaterialTheme.colorScheme.outline, shape)
         ) {
-            bitmap?.let { Image(it, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize()) }
             DesignBackgroundEffects(Modifier.fillMaxSize())
             Column(modifier = Modifier.fillMaxSize().padding(10.dp), verticalArrangement = Arrangement.SpaceBetween) {
                 MiniSurface(design.elements["search_field"] ?: design.box, RoundedCornerShape(50), "search", Modifier.fillMaxWidth().height(18.dp))

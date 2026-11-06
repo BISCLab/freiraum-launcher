@@ -44,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -62,24 +63,19 @@ import com.bisc.flauncher.ui.settings.SettingsViewModel
 import com.bisc.flauncher.ui.settings.gestureActionSummary
 import kotlinx.coroutines.launch
 
-private enum class WelcomeStep { HELLO, GESTURES, SETTINGS, PERMISSIONS, LOCK_SCREEN }
+private enum class WelcomeStep { HELLO, GESTURES, SETTINGS, PERMISSIONS }
 
-/** The first-start walkthrough: what Freiraum is, its gestures, where the settings are, the
- *  permissions and the lock screen offer. Skippable at any point; shown once. */
+/** The first-start walkthrough: what Freiraum is, its gestures, where the settings are and the
+ *  permissions. Skippable at any point; shown once. */
 @Composable
 fun WelcomeWalkthrough(
-    onLockScreenAnswer: (Boolean) -> Unit,
     onDone: () -> Unit,
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     val steps = WelcomeStep.entries
     val pagerState = rememberPagerState(pageCount = { steps.size })
     val scope = rememberCoroutineScope()
-    var lockAnswered by remember { mutableStateOf<Boolean?>(null) }
-    val finish = {
-        if (lockAnswered == null) onLockScreenAnswer(false)
-        onDone()
-    }
+    val finish = onDone
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Box(modifier = Modifier.fillMaxSize().safeDrawingPadding(), contentAlignment = Alignment.TopCenter) {
@@ -103,38 +99,9 @@ fun WelcomeWalkthrough(
                                 PermissionGroups(viewModel = settingsViewModel, purposeVisible = true)
                             }
                         }
-                        WelcomeStep.LOCK_SCREEN -> WelcomePage(R.string.welcome_lock_title, R.string.welcome_lock_text) {
-                            PhoneFrame {
-                                Image(
-                                    painter = painterResource(R.drawable.wallpaper_2),
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                                Text(
-                                    "12:30",
-                                    style = MaterialTheme.typography.displaySmall,
-                                    color = Color.White,
-                                    modifier = Modifier.align(Alignment.TopCenter).padding(top = 40.dp)
-                                )
-                            }
-                        }
                     }
                 }
                 val step = steps[pagerState.currentPage]
-                if (step == WelcomeStep.LOCK_SCREEN && lockAnswered == null) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        OutlinedButton(onClick = { lockAnswered = false; onLockScreenAnswer(false); onDone() }, modifier = Modifier.weight(1f)) {
-                            Text(stringResource(R.string.lock_wallpaper_offer_no))
-                        }
-                        Button(onClick = { lockAnswered = true; onLockScreenAnswer(true); onDone() }, modifier = Modifier.weight(1f)) {
-                            Text(stringResource(R.string.lock_wallpaper_offer_yes))
-                        }
-                    }
-                }
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -150,11 +117,11 @@ fun WelcomeWalkthrough(
                             )
                         }
                     }
-                    if (step != WelcomeStep.LOCK_SCREEN) {
+                    if (pagerState.currentPage < steps.lastIndex) {
                         Button(onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) } }) {
                             Text(stringResource(R.string.welcome_next))
                         }
-                    } else if (lockAnswered != null) {
+                    } else {
                         Button(onClick = onDone) { Text(stringResource(R.string.welcome_done)) }
                     }
                 }
@@ -212,15 +179,14 @@ private fun PhoneFrame(content: @Composable BoxScope.() -> Unit) {
     )
 }
 
-/** The home screen in small: the bundled wallpaper and a Dock, optionally with the settings button
+/** The home screen in small: a soft backdrop and a Dock, optionally with the settings button
  *  picked out. */
 @Composable
 private fun BoxScope.HomePreview(highlightSettings: Boolean) {
-    Image(
-        painter = painterResource(R.drawable.wallpaper_3),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier.fillMaxSize()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Brush.verticalGradient(listOf(Color(0xFFDCE6F5), Color(0xFFF4F3EF))))
     )
     Row(
         modifier = Modifier

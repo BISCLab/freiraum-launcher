@@ -1,0 +1,23 @@
+{
+  "format": 1,
+  "id": "modern-light",
+  "name": "Modern Light",
+  "name_de": "Modern Hell",
+  "author": "BISC Lab",
+  "version": "1.0",
+  "dark": false,
+  "wallpapers": {
+    "home": "home.webp",
+    "appList": "applist.webp",
+    "search": "search.webp",
+    "appGrid": "appgrid.webp",
+    "lock": "lock.webp"
+  },
+  "extras": [
+    "extra_1.webp",
+    "extra_2.webp",
+    "extra_3.webp",
+    "extra_4.webp",
+    "extra_5.webp"
+  ]
+}

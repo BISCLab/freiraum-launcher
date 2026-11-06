@@ -4,9 +4,6 @@ import android.content.Context
 import android.net.Uri
 import com.bisc.flauncher.data.db.FolderItemDao
 import com.bisc.flauncher.data.db.PageRowDao
-import com.bisc.flauncher.data.model.BackgroundConfig
-import com.bisc.flauncher.data.model.BackgroundSource
-import com.bisc.flauncher.data.model.ColorFill
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.LauncherPageKind
 import com.bisc.flauncher.data.model.PageRowType
@@ -15,7 +12,6 @@ import com.bisc.flauncher.data.model.withAppearance
 import com.bisc.flauncher.data.repository.FolderRepository
 import com.bisc.flauncher.data.repository.PageContentRepository
 import com.bisc.flauncher.data.settings.SettingsRepository
-import com.bisc.flauncher.util.BackgroundImageStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,9 +28,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Installed designs (`files/designs/<id>/design.json` plus its images), applying them, and going
- * back to the user's own look. Designs are plain data files (`.freiraum-design`, a ZIP); the app
- * never downloads them itself - it has no internet access.
+ * Designs (bundled ones from the app's assets, installed ones in `files/designs/<id>/design.json`),
+ * applying them, and going back to the user's own look. Designs are plain data files
+ * (`.freiraum-design`, a ZIP); the app never downloads them itself - it has no internet access.
+ * Backgrounds are not part of a design; they come from wallpaper packs.
  */
 @Singleton
 class DesignRepository @Inject constructor(
@@ -52,13 +49,19 @@ class DesignRepository @Inject constructor(
     private val mineDir get() = File(root, MINE)
 
     suspend fun refresh() = withContext(Dispatchers.IO) {
-        _designs.value = root.listFiles().orEmpty()
-            .filter { it.isDirectory && it.name != MINE }
+        val bundled = context.assets.list(BUNDLED_DIR).orEmpty().sorted().mapNotNull { file ->
+            runCatching {
+                DesignJson.parse(JSONObject(context.assets.open("$BUNDLED_DIR/$file").bufferedReader().use { it.readText() }), bundled = true)
+            }.getOrNull()
+        }
+        val installed = root.listFiles().orEmpty()
+            .filter { it.isDirectory && it.name != MINE && bundled.none { b -> b.id == it.name } }
             .mapNotNull { dir -> runCatching { load(dir) }.getOrNull() }
             .sortedBy { it.name.lowercase() }
+        _designs.value = bundled + installed
     }
 
-    private fun load(dir: File): Design = DesignJson.parse(JSONObject(File(dir, DESIGN_JSON).readText()), dir)
+    private fun load(dir: File): Design = DesignJson.parse(JSONObject(File(dir, DESIGN_JSON).readText()))
 
     /** Installs a design file. Returns its name, or null if it isn't a valid design. */
     suspend fun import(uri: Uri): String? = withContext(Dispatchers.IO) {
@@ -72,8 +75,10 @@ class DesignRepository @Inject constructor(
                         val entry = zip.nextEntry ?: break
                         if (entry.isDirectory) continue
                         val name = entry.name
-                        // Only the description and images, never paths leaving the design's folder.
-                        if (!SAFE_NAME.matches(name) || name.contains("..")) return@withContext null
+                        // Only the description, never paths leaving the design's folder. Pictures
+                        // in older files are skipped.
+                        if (name.contains("..")) return@withContext null
+                        if (name != DESIGN_JSON) continue
                         if (++count > MAX_ENTRIES) return@withContext null
                         val out = File(staging, name).apply { parentFile?.mkdirs() }
                         out.outputStream().use { os ->
@@ -91,7 +96,7 @@ class DesignRepository @Inject constructor(
             } ?: return@withContext null
             val design = runCatching { load(staging) }.getOrNull() ?: return@withContext null
             val id = design.id.lowercase().replace(Regex("[^a-z0-9-]"), "-").take(40).ifBlank { return@withContext null }
-            if (id == MINE) return@withContext null
+            if (id == MINE || _designs.value.any { it.bundled && it.id == id }) return@withContext null
             val target = File(root, id)
             target.deleteRecursively()
             root.mkdirs()
@@ -104,6 +109,7 @@ class DesignRepository @Inject constructor(
     }
 
     suspend fun delete(design: Design) = withContext(Dispatchers.IO) {
+        if (design.bundled) return@withContext
         if (settingsRepository.activeDesignId.first() == design.id) restoreMine()
         File(root, design.id).deleteRecursively()
         refresh()
@@ -129,30 +135,16 @@ class DesignRepository @Inject constructor(
     /** Saves the current look as a design file, e.g. to share it or as the start of a new design. */
     suspend fun exportCurrent(target: Uri, name: String) = withContext(Dispatchers.IO) {
         val id = name.lowercase().replace(Regex("[^a-z0-9-]"), "-").trim('-').ifBlank { "design" }
-        // Only the look travels: no pictures, so no private photos end up in a shared file.
-        val design = captureCurrent(id = id, name = name, withRows = false).let { d ->
-            d.copy(backgrounds = d.backgrounds.mapValues { it.value.copy(image = null) }, lockWallpaper = null)
-        }
-        val images = mutableMapOf<File, String>()
-        fun imageName(file: File) = images.getOrPut(file) { "wallpapers/${images.size + 1}.${file.extension.ifBlank { "jpg" }}" }
-        val json = DesignJson.write(design, ::imageName).toString(2)
+        val design = captureCurrent(id = id, name = name, withRows = false)
+        val json = DesignJson.write(design).toString(2)
         context.contentResolver.openOutputStream(target)?.use { out ->
             ZipOutputStream(out).use { zip ->
                 zip.putNextEntry(ZipEntry(DESIGN_JSON))
                 zip.write(json.toByteArray())
                 zip.closeEntry()
-                images.forEach { (file, entry) ->
-                    if (file.isFile) {
-                        zip.putNextEntry(ZipEntry(entry))
-                        file.inputStream().use { it.copyTo(zip) }
-                        zip.closeEntry()
-                    }
-                }
             }
         }
     }
-
-    suspend fun lockWallpaperOf(design: Design): File? = design.lockWallpaper?.takeIf { it.isFile }
 
     // ---- inside ----
 
@@ -163,35 +155,6 @@ class DesignRepository @Inject constructor(
             "appList" -> pages.firstOrNull { it.kind == LauncherPageKind.APP_LIST }?.id
             "appGrid" -> pages.firstOrNull { it.kind == LauncherPageKind.APP_GRID }?.id
             else -> null
-        }
-    }
-
-    private suspend fun currentBackground(role: String): BackgroundConfig? = when (role) {
-        "global" -> settingsRepository.globalBackground.first()
-        "search" -> settingsRepository.searchBackgroundOverride.first()
-        else -> pageIdFor(role)?.let { settingsRepository.pageBackgroundOverride(it).first() }
-    }
-
-    private suspend fun setBackground(role: String, background: DesignBackground?) {
-        val key = when (role) {
-            "global" -> "global"
-            "search" -> SettingsRepository.SEARCH_BACKGROUND_KEY
-            else -> pageIdFor(role)?.let { "page_$it" } ?: return
-        }
-        val config = background?.let { b ->
-            val image = b.image?.takeIf { it.isFile }?.let { BackgroundImageStore.save(context, Uri.fromFile(it), key) }
-            when {
-                image != null -> BackgroundConfig(source = BackgroundSource.IMAGE, imagePath = image, shade = b.shade)
-                b.color != null -> BackgroundConfig(source = BackgroundSource.COLOR, fill = ColorFill(color = b.color), shade = b.shade)
-                else -> null
-            }
-        }
-        when (role) {
-            "global" -> if (config != null) settingsRepository.setGlobalBackground(config)
-            "search" -> if (config != null) settingsRepository.setSearchBackgroundConfig(config) else settingsRepository.clearSearchBackgroundConfig()
-            else -> pageIdFor(role)?.let { id ->
-                if (config != null) settingsRepository.setPageBackgroundConfig(id, config) else settingsRepository.clearPageBackgroundConfig(id)
-            }
         }
     }
 
@@ -231,12 +194,6 @@ class DesignRepository @Inject constructor(
             (if (look != null) item.withAppearance(look) else item).let { if (corner != null) it.copy(cornerRadiusPercent = corner) else it }
         })
 
-        BACKGROUND_ROLES.forEach { role ->
-            val background = design.backgrounds[role]
-            // A design without a global background keeps the current one; every other page then
-            // simply follows it.
-            if (role != "global" || background != null) setBackground(role, background)
-        }
         settingsRepository.setDesignEffects(design.effects)
     }
 
@@ -245,14 +202,6 @@ class DesignRepository @Inject constructor(
         val homeId = pageIdFor("home")
         val homeRows = rows.filter { it.pageId == homeId }
         val firstBox = rows.firstOrNull { it.type == PageRowType.WIDGET || it.type == PageRowType.SYSTEM_WIDGET || it.type == PageRowType.ELEMENT_BOX }
-        val backgrounds = BACKGROUND_ROLES.mapNotNull { role ->
-            currentBackground(role)?.let { config ->
-                role to when (config.source) {
-                    BackgroundSource.IMAGE -> DesignBackground(image = config.imagePath?.let(::File), shade = config.shade)
-                    BackgroundSource.COLOR -> DesignBackground(color = config.fill.color, shade = config.shade)
-                }
-            }
-        }.toMap()
         return Design(
             id = id,
             name = name,
@@ -265,7 +214,6 @@ class DesignRepository @Inject constructor(
             panel = homeRows.firstOrNull { it.type == PageRowType.PANEL }?.appearance(),
             elements = DESIGN_ELEMENTS.mapNotNull { key -> settingsRepository.elementAppearanceOrNull(key)?.let { key to it } }.toMap(),
             keyboardCapColor = settingsRepository.searchKeyboardCapColor.first(),
-            backgrounds = backgrounds,
             effects = settingsRepository.designEffects.first(),
             widgetCornerRadiusPercent = rows.firstOrNull { it.type == PageRowType.WIDGET || it.type == PageRowType.SYSTEM_WIDGET }?.cornerRadiusPercent,
             rowAppearances = if (withRows) rows.associate { it.id to it.appearance() } else null,
@@ -275,19 +223,9 @@ class DesignRepository @Inject constructor(
         )
     }
 
-    /** Writes [design] with copies of its images into [dir] (images move into the folder, since the
-     *  live background files get replaced as soon as another design is applied). */
     private fun writeDesign(design: Design, dir: File) {
-        val images = File(dir, "wallpapers").apply { mkdirs() }
-        var n = 0
-        fun copyImage(file: File): String {
-            val name = "wallpapers/${++n}.${file.extension.ifBlank { "jpg" }}"
-            if (file.isFile) file.copyTo(File(dir, name), overwrite = true)
-            return name
-        }
-        val json = DesignJson.write(design, ::copyImage)
-        File(dir, DESIGN_JSON).writeText(json.toString())
-        if (images.listFiles().isNullOrEmpty()) images.delete()
+        dir.mkdirs()
+        File(dir, DESIGN_JSON).writeText(DesignJson.write(design).toString())
     }
 
     companion object {
@@ -296,6 +234,6 @@ class DesignRepository @Inject constructor(
         private const val MINE = "_mine"
         private const val MAX_ENTRIES = 64
         private const val MAX_TOTAL_BYTES = 60L * 1024 * 1024
-        private val SAFE_NAME = Regex("^(design\\.json|preview\\.(png|jpg|jpeg|webp)|wallpapers/[A-Za-z0-9._-]+\\.(png|jpg|jpeg|webp))$")
+        private const val BUNDLED_DIR = "designs"
     }
 }

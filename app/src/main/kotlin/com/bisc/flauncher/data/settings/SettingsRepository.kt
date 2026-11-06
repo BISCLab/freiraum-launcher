@@ -201,6 +201,13 @@ class SettingsRepository @Inject constructor(
         if (appearance == null) resetElementAppearanceFor(prefix) else setElementAppearanceFor(prefix, appearance)
     }
 
+    /** The wallpaper pack last applied; "" for plain backgrounds, null for none. */
+    val activeWallpaperPackId: Flow<String?> = dataStore.data.map { it[ACTIVE_WALLPAPER_PACK_KEY] }
+
+    suspend fun setActiveWallpaperPackId(id: String?) {
+        dataStore.edit { if (id == null) it.remove(ACTIVE_WALLPAPER_PACK_KEY) else it[ACTIVE_WALLPAPER_PACK_KEY] = id }
+    }
+
     /** Color mode of the settings and the welcome tour only. */
     val settingsThemeMode: Flow<com.bisc.flauncher.ui.theme.SettingsThemeMode> = dataStore.data.map { prefs ->
         prefs[SETTINGS_THEME_KEY]?.let { v -> com.bisc.flauncher.ui.theme.SettingsThemeMode.entries.firstOrNull { it.name == v } }
@@ -941,7 +948,6 @@ class SettingsRepository @Inject constructor(
             it[booleanPreferencesKey("search_show_az_index")] = true
             it[booleanPreferencesKey("show_settings_tips")] = false
             it[stringPreferencesKey("theme")] = "LIGHT"
-            it[LOCK_WALLPAPER_OFFER_KEY] = true
             it[WELCOME_PENDING_KEY] = true
         }
     }
@@ -953,12 +959,6 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[WELCOME_PENDING_KEY] = false }
     }
 
-    /** Whether to offer, once, to use the bundled lock screen wallpaper. */
-    val lockWallpaperOffer: Flow<Boolean> = dataStore.data.map { it[LOCK_WALLPAPER_OFFER_KEY] ?: false }
-
-    suspend fun clearLockWallpaperOffer() {
-        dataStore.edit { it[LOCK_WALLPAPER_OFFER_KEY] = false }
-    }
 
     suspend fun setGestureAction(gesture: HomeGesture, action: GestureAction) {
         dataStore.edit { prefs ->
@@ -974,7 +974,6 @@ class SettingsRepository @Inject constructor(
     companion object {
         private const val GLOBAL_BACKGROUND_KEY = "global"
         const val SEARCH_BACKGROUND_KEY = "search_page"
-        private val LOCK_WALLPAPER_OFFER_KEY = booleanPreferencesKey("lock_wallpaper_offer")
         private val WELCOME_PENDING_KEY = booleanPreferencesKey("welcome_pending")
         private val DEFAULT_ACCENT_COLOR = com.bisc.flauncher.ui.theme.DEFAULT_ACCENT_COLOR
 
@@ -1007,6 +1006,7 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_KEYBOARD_AUTO_OPEN_KEY = booleanPreferencesKey("search_keyboard_auto_open")
         private val LOCK_PORTRAIT_KEY = booleanPreferencesKey("lock_portrait")
         private val SETTINGS_THEME_KEY = stringPreferencesKey("settings_theme")
+        private val ACTIVE_WALLPAPER_PACK_KEY = stringPreferencesKey("active_wallpaper_pack")
         private val DESIGN_EFFECTS_KEY = stringPreferencesKey("design_effects")
         private val ACTIVE_DESIGN_KEY = stringPreferencesKey("active_design")
         private val MOTION_LEVEL_KEY = stringPreferencesKey("motion_level")
