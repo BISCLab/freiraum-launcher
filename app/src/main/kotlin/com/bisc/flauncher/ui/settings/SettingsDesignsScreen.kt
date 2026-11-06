@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
@@ -113,6 +114,7 @@ fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, view
     val activeId by viewModel.activeId.collectAsState()
     val effects by viewModel.effects.collectAsState()
     var previewing by remember { mutableStateOf<Design?>(null) }
+    var removing by remember { mutableStateOf<Design?>(null) }
     val german = LocalConfiguration.current.locales.get(0).language == "de"
 
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -166,7 +168,18 @@ fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, view
                             if (design.id == activeId) stringResource(R.string.designs_active) else null
                         ).joinToString(" · "),
                         onClick = { previewing = design },
-                        trailing = { DesignSwatch(design) }
+                        trailing = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                DesignSwatch(design)
+                                androidx.compose.material3.IconButton(onClick = { removing = design }) {
+                                    androidx.compose.material3.Icon(
+                                        androidx.compose.material.icons.Icons.Filled.Delete,
+                                        contentDescription = stringResource(R.string.designs_remove),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
                     )
                 }
             }
@@ -200,6 +213,22 @@ fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, view
                 trailing = null
             )
         }
+    }
+
+    removing?.let { design ->
+        AlertDialog(
+            onDismissRequest = { removing = null },
+            title = { Text(stringResource(R.string.designs_remove_title, design.displayName(german))) },
+            text = {
+                Text(stringResource(if (design.id == activeId) R.string.designs_remove_active_text else R.string.designs_remove_text))
+            },
+            confirmButton = {
+                TextButton(onClick = { viewModel.delete(design); removing = null }) {
+                    Text(stringResource(R.string.designs_remove), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = { TextButton(onClick = { removing = null }) { Text(stringResource(android.R.string.cancel)) } }
+        )
     }
 
     previewing?.let { design ->

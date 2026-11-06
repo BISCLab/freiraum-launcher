@@ -703,4 +703,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="designs_effect_slow">Langsam umlaufend</string>
     <string name="designs_effect_slow_summary">Sieht toll aus, braucht aber etwas mehr Akku</string>
     <string name="settings_motion_all">Animationen</string>
+    <string name="designs_remove_title">%1$s entfernen?</string>
+    <string name="designs_remove_text">Das Design wird aus Freiraum gelöscht. Du kannst es jederzeit wieder hinzufügen.</string>
+    <string name="designs_remove_active_text">Dieses Design ist gerade aktiv. Freiraum kehrt zuerst zu deinem eigenen Look zurück und löscht dann das Design.</string>
 </resources>

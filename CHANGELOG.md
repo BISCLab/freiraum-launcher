@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Designs: every installed design has its own remove button, with a confirmation
+
 - Animations setting built like the status bar one: one switch for all animations, below it each
   animation on its own; the in-between level Subtle is gone
 
