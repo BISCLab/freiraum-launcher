@@ -1,0 +1,3 @@
+- A-Z letter bubble pulls like a spring and bounces back
+- Designs keep Freiraum's corner rule for widgets
+- Neon is now Neon Light with its own wallpapers

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.9.1
+
 - App list: the letter bubble of the A-Z index can be pulled into the list like a spring - the
   further, the harder - glides after the finger and bounces back when let go
 - Designs keep Freiraum's corner rule (widgets only slightly rounded, everything else by the general
