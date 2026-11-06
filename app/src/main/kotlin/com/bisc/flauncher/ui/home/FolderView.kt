@@ -65,6 +65,9 @@ import com.bisc.flauncher.data.model.SavedMapTarget
 import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.data.model.WidgetKind
 import com.bisc.flauncher.data.model.rows
+import com.bisc.flauncher.data.model.clockTimeAction
+import com.bisc.flauncher.data.model.clockDateAction
+import com.bisc.flauncher.data.model.asWidgetRow
 import com.bisc.flauncher.ui.home.dock.DockDimens
 import com.bisc.flauncher.ui.home.dock.DockPanelSurface
 import com.bisc.flauncher.ui.home.widgets.ClockWidget
@@ -150,6 +153,8 @@ fun FolderView(
     onReorderItems: (List<FolderItem>) -> Unit = {},
     onBack: () -> Unit,
     cardAppearance: ElementAppearance,
+    /** Runs a clock widget's tap action. */
+    onExecuteAction: (com.bisc.flauncher.data.model.GestureAction) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     // A pending removal asks first; picking "move" instead switches into reorder mode below.
@@ -192,7 +197,7 @@ fun FolderView(
         ) {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 for (widgetItem in widgetItems) {
-                    key("widget_${widgetItem.id}") { FolderWidgetRow(item = widgetItem) }
+                    key("widget_${widgetItem.id}") { FolderWidgetRow(item = widgetItem, onExecuteAction = onExecuteAction) }
                 }
                 for (row in gridRows) {
                     key("grid_${row.items.first().id}") {
@@ -288,11 +293,23 @@ private fun folderItemLabel(
 }
 
 @Composable
-private fun FolderWidgetRow(item: FolderItem) {
+private fun FolderWidgetRow(item: FolderItem, onExecuteAction: (com.bisc.flauncher.data.model.GestureAction) -> Unit) {
     Box(modifier = Modifier.fillMaxWidth().height(PageRowDimens.spanHeight(PageRowDimens.rowUnitHeight, item.spanY)).padding(bottom = 8.dp)) {
         when (item.type) {
             GridItemType.WIDGET -> when (item.payload) {
-                WidgetKind.CLOCK -> ClockWidget()
+                WidgetKind.CLOCK -> {
+                    val row = item.asWidgetRow()
+                    ClockWidget(
+                        style = row.clockStyle,
+                        timeFormat = row.clockTimeFormat,
+                        dateFormat = row.clockDateFormat,
+                        showNextAlarm = row.clockShowNextAlarm,
+                        alignment = row.clockAlignment,
+                        customInk = row.appearance().contentColor?.let { androidx.compose.ui.graphics.Color(it) },
+                        onDateClick = row.clockDateAction().takeIf { it.type != com.bisc.flauncher.data.model.GestureActionType.NONE }?.let { action -> { onExecuteAction(action) } },
+                        onTimeClick = row.clockTimeAction().takeIf { it.type != com.bisc.flauncher.data.model.GestureActionType.NONE }?.let { action -> { onExecuteAction(action) } }
+                    )
+                }
                 WidgetKind.MUSIC -> MusicWidget(appearance = item.appearance(), cornerRadiusPercent = item.cornerRadiusPercent)
                 WidgetKind.WEATHER -> WeatherWidget(appearance = item.appearance(), cornerRadiusPercent = item.cornerRadiusPercent)
                 WidgetKind.NOTES -> NotesWidget(appearance = item.appearance(), cornerRadiusPercent = item.cornerRadiusPercent, spanY = item.spanY)

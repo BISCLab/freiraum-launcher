@@ -37,8 +37,53 @@ data class FolderItem(
     val cornerRadiusPercent: Int = com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT,
     val elementBorderColor: Int? = null,
     val elementBorderWidth: Float = 1f,
-    val elementContentColor: Int? = null
+    val elementContentColor: Int? = null,
+    // The clock widget's own settings, the same as PageRow's.
+    val clockStyle: String = ClockStyle.DIGITAL,
+    val clockDateActionType: String = GestureActionType.NONE.name,
+    val clockDateActionPayload: String? = null,
+    val clockTimeActionType: String = GestureActionType.NONE.name,
+    val clockTimeActionPayload: String? = null,
+    val clockTimeFormat: String = ClockTimeFormat.SYSTEM,
+    val clockDateFormat: String = "",
+    val clockShowNextAlarm: Boolean = false,
+    val clockAlignment: String = ClockAlignment.CENTER
 )
+
+/** A folder widget as a page row, so the one widget editor and widget renderer serve both. */
+fun FolderItem.asWidgetRow(): PageRow = PageRow(
+    id = id,
+    pageId = -1L,
+    orderIndex = 0,
+    type = if (type == GridItemType.SYSTEM_WIDGET) PageRowType.SYSTEM_WIDGET else PageRowType.WIDGET,
+    payload = payload,
+    spanY = spanY,
+    cornerRadiusPercent = cornerRadiusPercent,
+    clockStyle = clockStyle,
+    clockDateActionType = clockDateActionType,
+    clockDateActionPayload = clockDateActionPayload,
+    clockTimeActionType = clockTimeActionType,
+    clockTimeActionPayload = clockTimeActionPayload,
+    clockTimeFormat = clockTimeFormat,
+    clockDateFormat = clockDateFormat,
+    clockShowNextAlarm = clockShowNextAlarm,
+    clockAlignment = clockAlignment
+).withAppearance(appearance())
+
+/** Takes back what was edited on [row] (see [asWidgetRow]). */
+fun FolderItem.withWidgetRow(row: PageRow): FolderItem = copy(
+    spanY = row.spanY,
+    cornerRadiusPercent = row.cornerRadiusPercent,
+    clockStyle = row.clockStyle,
+    clockDateActionType = row.clockDateActionType,
+    clockDateActionPayload = row.clockDateActionPayload,
+    clockTimeActionType = row.clockTimeActionType,
+    clockTimeActionPayload = row.clockTimeActionPayload,
+    clockTimeFormat = row.clockTimeFormat,
+    clockDateFormat = row.clockDateFormat,
+    clockShowNextAlarm = row.clockShowNextAlarm,
+    clockAlignment = row.clockAlignment
+).withAppearance(row.appearance())
 
 /** Assembles the flattened style columns into an [ElementAppearance]. */
 fun FolderItem.appearance(): ElementAppearance = ElementAppearance(

@@ -1370,6 +1370,7 @@ fun HomeScreen(
                 onReorderItems = viewModel::reorderFolderItems,
                 onBack = viewModel::closeFolder,
                 cardAppearance = folder.effectiveAppearance(folderCardAppearance),
+                onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) },
                 showLabels = if (folder.showLabelsOverrideEnabled) folder.showLabels else folderShowLabels
             )
             }

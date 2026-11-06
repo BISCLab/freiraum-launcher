@@ -4,7 +4,7 @@
   "name": "Neon Light",
   "name_de": "Neon Light",
   "author": "BISC Lab",
-  "version": "1.0",
+  "version": "1.1",
   "theme": "LIGHT",
   "accent": "#FF1E8FFF",
   "font": "SYSTEM",
@@ -53,9 +53,10 @@
       "fill": "#FFFFFFFF",
       "fillMode": "SOLID",
       "opacity": 0.92,
-      "border": false,
+      "border": true,
       "borderWidth": 1.0,
-      "contentColor": "#FF14161B"
+      "contentColor": "#FF14161B",
+      "borderColor": "#1A000000"
     },
     "search_field": {
       "style": "COLOR",
@@ -193,7 +194,7 @@
       "widgets",
       "buttons"
     ],
-    "grid": true,
+    "grid": false,
     "gridColor": "#0A000000",
     "gridSpacing": 44,
     "blobs": true,

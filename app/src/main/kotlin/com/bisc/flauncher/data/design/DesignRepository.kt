@@ -206,7 +206,10 @@ class DesignRepository @Inject constructor(
         val ownItems = design.folderItemAppearances
         // Corners follow Freiraum's own rule: widgets only slightly rounded, everything else by the
         // general roundness - never one value for both.
-        fun cornerFor(isWidget: Boolean): Int? = if (isWidget) design.widgetCornerRadiusPercent else design.cornerRadiusPercent
+        // Snapshots from before corners were saved per widget fall back to Freiraum's widget default.
+        fun cornerFor(isWidget: Boolean): Int? = if (isWidget) {
+            design.widgetCornerRadiusPercent ?: if (design.rowAppearances != null) com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT else null
+        } else design.cornerRadiusPercent
         pageRowDao.updateAll(rows.map { row ->
             val look = when {
                 ownRows != null -> ownRows[row.id]

@@ -124,6 +124,21 @@ private val MIGRATION_60_61 = object : Migration(60, 61) {
     }
 }
 
+// Folder widgets get the clock's settings, like widgets on pages.
+private val MIGRATION_61_62 = object : Migration(61, 62) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE folder_items ADD COLUMN clockStyle TEXT NOT NULL DEFAULT 'digital'")
+        db.execSQL("ALTER TABLE folder_items ADD COLUMN clockDateActionType TEXT NOT NULL DEFAULT 'NONE'")
+        db.execSQL("ALTER TABLE folder_items ADD COLUMN clockDateActionPayload TEXT")
+        db.execSQL("ALTER TABLE folder_items ADD COLUMN clockTimeActionType TEXT NOT NULL DEFAULT 'NONE'")
+        db.execSQL("ALTER TABLE folder_items ADD COLUMN clockTimeActionPayload TEXT")
+        db.execSQL("ALTER TABLE folder_items ADD COLUMN clockTimeFormat TEXT NOT NULL DEFAULT 'system'")
+        db.execSQL("ALTER TABLE folder_items ADD COLUMN clockDateFormat TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE folder_items ADD COLUMN clockShowNextAlarm INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE folder_items ADD COLUMN clockAlignment TEXT NOT NULL DEFAULT 'center'")
+    }
+}
+
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "flauncher_settings")
 
 @Module
@@ -139,7 +154,7 @@ object AppModule {
         Room.databaseBuilder(ctx, FLauncherDatabase::class.java, "flauncher.db")
             .addMigrations(
                 MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33,
-                MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36, MIGRATION_36_37, MIGRATION_60_61
+                MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36, MIGRATION_36_37, MIGRATION_60_61, MIGRATION_61_62
             )
             // Only a last resort now for jumps with no migration path above (e.g. a much older install
             // skipping several versions at once, or a version older than 27). Every future version bump

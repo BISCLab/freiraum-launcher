@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.ClockAlignment
 import com.bisc.flauncher.data.model.ClockStyle
@@ -59,27 +60,12 @@ fun SettingsWidgetRowEditScreen(
 ) {
     val rowsByPage by viewModel.rowsByPage.collectAsState()
     val allPages by viewModel.allPages.collectAsState()
-    val browsableApps by viewModel.browsableApps.collectAsState()
     val savedRow = rowsByPage[pageId]?.find { it.id == rowId }
 
     LaunchedEffect(savedRow) { if (savedRow == null) onBack() }
     if (savedRow == null) return
-    var row by rememberDraft(savedRow)
-
-    var hostedWidgetView by remember { mutableStateOf<android.view.View?>(null) }
-    var confirmingRemove by remember { mutableStateOf(false) }
-    var pickingActionTypeFor by remember { mutableStateOf<ClockActionSlot?>(null) }
-    var pickingAppFor by remember { mutableStateOf<ClockActionSlot?>(null) }
-    var pickingPageFor by remember { mutableStateOf<ClockActionSlot?>(null) }
-    fun applyClockAction(slot: ClockActionSlot, action: GestureAction) {
-        when (slot) {
-            ClockActionSlot.DATE -> row = row.copy(clockDateActionType = action.type.name, clockDateActionPayload = action.payload)
-            ClockActionSlot.TIME -> row = row.copy(clockTimeActionType = action.type.name, clockTimeActionPayload = action.payload)
-        }
-    }
-
-    val isBuiltIn = row.type == PageRowType.WIDGET
-    val minSpan = if (isBuiltIn) WidgetKind.minSpan(row.payload) else 1
+    val isBuiltIn = savedRow.type == PageRowType.WIDGET
+    val minSpan = if (isBuiltIn) WidgetKind.minSpan(savedRow.payload) else 1
     // The page's row grid, computed exactly as HomeScreen lays the page out (see PageGrid): how many
     // row units fit - fewer with Home's Dock, which shows on every page - and how tall one is drawn.
     val homePageId = allPages.find { it.isHome }?.id
@@ -102,10 +88,7 @@ fun SettingsWidgetRowEditScreen(
         ),
         unitCount
     )
-    val maxSpan = if (isBuiltIn) WidgetKind.maxSpan(row.payload) else unitCount.takeIf { it > 0 } ?: 6
-
-    val showsStyleControls = row.type == PageRowType.SYSTEM_WIDGET ||
-        (isBuiltIn && row.payload != WidgetKind.CLOCK && row.payload != WidgetKind.SPACER)
+    val maxSpan = if (isBuiltIn) WidgetKind.maxSpan(savedRow.payload) else unitCount.takeIf { it > 0 } ?: 6
 
     // A free-height widget can be anything from one plain row up to the whole page; taller can't fit,
     // since a page doesn't scroll.
@@ -113,8 +96,59 @@ fun SettingsWidgetRowEditScreen(
         val minPx = PageRowDimens.rowUnitHeight.roundToPx()
         minPx..maxOf(PageRowDimens.spanHeight(gridUnit, maxSpan).roundToPx(), minPx)
     }
+    WidgetEditor(
+        savedRow = savedRow,
+        navController = navController,
+        onBack = onBack,
+        onSave = viewModel::saveRow,
+        onRemove = viewModel::removeRow,
+        minSpan = minSpan,
+        maxSpan = maxSpan,
+        heightPxRange = heightPxRange,
+        gridUnit = gridUnit,
+        showEdgeToEdge = true,
+        viewModel = viewModel
+    )
+}
 
-    SettingsSubScreen(title = rowLabel(row), navController = navController, onBack = onBack, onSave = { viewModel.saveRow(row) }, dirty = row != savedRow) {
+/**
+ * Everything about one widget - size, fill, border, corners and the widget's own options (music
+ * sources, clock style and taps) - shared by widgets on pages and in folders. [heightPxRange] null
+ * means rows only (no free pixel height); folders also have no edge-to-edge.
+ */
+@Composable
+internal fun WidgetEditor(
+    savedRow: PageRow,
+    navController: NavController,
+    onBack: () -> Unit,
+    onSave: (PageRow) -> Unit,
+    onRemove: (PageRow) -> Unit,
+    minSpan: Int,
+    maxSpan: Int,
+    heightPxRange: IntRange?,
+    gridUnit: androidx.compose.ui.unit.Dp,
+    showEdgeToEdge: Boolean,
+    viewModel: HomeViewModel
+) {
+    val allPages by viewModel.allPages.collectAsState()
+    val browsableApps by viewModel.browsableApps.collectAsState()
+    var row by rememberDraft(savedRow)
+    var hostedWidgetView by remember { mutableStateOf<android.view.View?>(null) }
+    var confirmingRemove by remember { mutableStateOf(false) }
+    var pickingActionTypeFor by remember { mutableStateOf<ClockActionSlot?>(null) }
+    var pickingAppFor by remember { mutableStateOf<ClockActionSlot?>(null) }
+    var pickingPageFor by remember { mutableStateOf<ClockActionSlot?>(null) }
+    fun applyClockAction(slot: ClockActionSlot, action: GestureAction) {
+        when (slot) {
+            ClockActionSlot.DATE -> row = row.copy(clockDateActionType = action.type.name, clockDateActionPayload = action.payload)
+            ClockActionSlot.TIME -> row = row.copy(clockTimeActionType = action.type.name, clockTimeActionPayload = action.payload)
+        }
+    }
+    val isBuiltIn = row.type == PageRowType.WIDGET
+    val showsStyleControls = row.type == PageRowType.SYSTEM_WIDGET ||
+        (isBuiltIn && row.payload != WidgetKind.CLOCK && row.payload != WidgetKind.SPACER)
+
+    SettingsSubScreen(title = rowLabel(row), navController = navController, onBack = onBack, onSave = { onSave(row) }, dirty = row != savedRow) {
         WidgetSizeEditor(
             row = row,
             minSpan = minSpan,
@@ -141,7 +175,7 @@ fun SettingsWidgetRowEditScreen(
                     onSettled = { row = row.copy(cornerRadiusPercent = it) }
                 )
             }
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_edge_label)) {
+            if (showEdgeToEdge) SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_edge_label)) {
                 SettingsPreference(
                     icon = null,
                     title = stringResource(R.string.settings_widgets_edge_to_edge_label),
@@ -242,7 +276,7 @@ fun SettingsWidgetRowEditScreen(
             onDismissRequest = { confirmingRemove = false },
             title = { Text(stringResource(R.string.settings_rows_remove)) },
             confirmButton = {
-                TextButton(onClick = { confirmingRemove = false; viewModel.removeRow(row); onBack() }) { Text(stringResource(R.string.settings_rows_remove)) }
+                TextButton(onClick = { confirmingRemove = false; onRemove(row); onBack() }) { Text(stringResource(R.string.settings_rows_remove)) }
             },
             dismissButton = {
                 TextButton(onClick = { confirmingRemove = false }) { Text(stringResource(R.string.widget_notes_cancel)) }

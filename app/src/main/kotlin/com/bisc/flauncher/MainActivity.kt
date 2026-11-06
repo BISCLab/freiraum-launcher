@@ -581,6 +581,14 @@ class MainActivity : ComponentActivity() {
                             SettingsFolderEditScreen(folderId = folderId, navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable(
+                            "settings/folder/{folderId}/widget/{itemId}",
+                            arguments = listOf(navArgument("folderId") { type = NavType.LongType }, navArgument("itemId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val folderId = backStackEntry.arguments?.getLong("folderId") ?: return@composable
+                            val itemId = backStackEntry.arguments?.getLong("itemId") ?: return@composable
+                            com.bisc.flauncher.ui.settings.SettingsFolderWidgetEditScreen(folderId = folderId, itemId = itemId, navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable(
                             "settings/folder/{folderId}/icon",
                             arguments = listOf(navArgument("folderId") { type = NavType.LongType })
                         ) { backStackEntry ->

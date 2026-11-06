@@ -45,6 +45,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.bisc.flauncher.data.model.PageRow
+import com.bisc.flauncher.data.model.asWidgetRow
+import com.bisc.flauncher.data.model.withWidgetRow
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -218,7 +221,7 @@ fun SettingsFolderEditScreen(
                     icon = folderWidgetIcon(item),
                     title = folderWidgetLabel(item, homeViewModel),
                     summary = androidx.compose.ui.res.pluralStringResource(R.plurals.settings_widget_size_rows, item.spanY, item.spanY),
-                    onClick = { editingWidget = item },
+                    onClick = { navController.navigate("settings/folder/$folderId/widget/${item.id}") },
                     trailing = {
                         Row {
                             IconButton(onClick = { move(-1) }, enabled = index > 0) {
@@ -838,3 +841,43 @@ fun ColumnScope.IconPackPickerContent(
     }
 }
 
+
+/** One widget in a folder, with the same editor as widgets on pages (minus what only pages have:
+ *  free pixel height and edge to edge). Its height is limited so the folder still fits. */
+@Composable
+fun SettingsFolderWidgetEditScreen(
+    folderId: Long,
+    itemId: Long,
+    navController: NavController,
+    onBack: () -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel(),
+    homeViewModel: com.bisc.flauncher.ui.home.HomeViewModel = hiltViewModel()
+) {
+    val folders by viewModel.folders.collectAsState()
+    val folderItems by viewModel.folderItems.collectAsState()
+    val showLabels by viewModel.folderShowLabels.collectAsState()
+    val folder = folders.find { it.id == folderId }
+    val items = folderItems.filter { it.folderId == folderId }
+    val item = items.find { it.id == itemId }
+    LaunchedEffect(item == null) { if (item == null) onBack() }
+    if (item == null || folder == null) return
+    val isBuiltIn = item.type == GridItemType.WIDGET
+    val minSpan = if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.minSpan(item.payload) else 1
+    val maxSpan = minOf(
+        if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.maxSpan(item.payload) else MAX_FOLDER_APP_WIDGET_SPAN,
+        com.bisc.flauncher.ui.home.folderWidgetMaxSpan(folder, items, item, showLabels)
+    ).coerceAtLeast(minSpan)
+    WidgetEditor(
+        savedRow = remember(item) { item.asWidgetRow() },
+        navController = navController,
+        onBack = onBack,
+        onSave = { row -> viewModel.updateFolderItem(item.withWidgetRow(row)) },
+        onRemove = { viewModel.removeFolderItem(item) },
+        minSpan = minSpan,
+        maxSpan = maxSpan,
+        heightPxRange = null,
+        gridUnit = com.bisc.flauncher.ui.home.PageRowDimens.rowUnitHeight,
+        showEdgeToEdge = false,
+        viewModel = homeViewModel
+    )
+}

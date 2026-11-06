@@ -288,6 +288,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { folderRepository.setFolderItemSpan(item, spanY) }
     }
 
+    fun updateFolderItem(item: com.bisc.flauncher.data.model.FolderItem) {
+        viewModelScope.launch { folderRepository.updateFolderItem(item) }
+    }
+
     fun removeFolderItem(item: com.bisc.flauncher.data.model.FolderItem) {
         viewModelScope.launch { folderRepository.removeFolderItem(item) }
     }

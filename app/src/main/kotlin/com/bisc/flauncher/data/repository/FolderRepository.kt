@@ -126,6 +126,10 @@ class FolderRepository @Inject constructor(
         return folderItemDao.insert(item)
     }
 
+    suspend fun updateFolderItem(item: FolderItem) {
+        folderItemDao.update(item)
+    }
+
     suspend fun setFolderItemSpan(item: FolderItem, spanY: Int) {
         folderItemDao.update(item.copy(spanY = spanY))
     }
