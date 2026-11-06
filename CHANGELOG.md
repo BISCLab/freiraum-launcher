@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.10.0
+
 - Settings rebuilt: "Design" is now "Appearance" (launcher color mode, accent, font, background,
   paging buttons in widgets); "Elements" is now "Apps & elements" and holds the icons too
 - System has a new Display group: status bar and animations each open their own page with a short
@@ -17,7 +19,7 @@
   Modern Light and Modern Dark are the first packs
 - Designs no longer carry pictures, so any design goes with any wallpaper pack; Modern Light and
   Modern Dark come with the app, Neon Light and the new Neon Dark are downloads
-- No more wallpapers inside the app (it got about 650 KB smaller); a fresh install starts plain
+- No more wallpapers inside the app (it got about 600 KB smaller); a fresh install starts plain
 - Plain light background is now chalk white instead of pure white
 - Switching light/dark keeps your pictures and recolors only plain backgrounds
 - New welcome tour: logo, language behind a flag, a light/dark switch for the tour and settings,

@@ -1,0 +1,8 @@
+- Settings rebuilt: Appearance, Apps & elements, System with Display
+- Own color mode for the settings
+- New: wallpaper packs; designs without pictures, Modern Light/Dark built in
+- New welcome tour with quick setup, design, pack and shape
+- Swipe or paging buttons per widget
+- Water drop instead of rings for gestures
+- Light/dark switch keeps your pictures
+- Notes when exporting a backup or design

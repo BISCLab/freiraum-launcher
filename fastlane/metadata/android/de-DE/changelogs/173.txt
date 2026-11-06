@@ -1,0 +1,8 @@
+- Einstellungen neu: Aussehen, Apps & Elemente, System mit Anzeige
+- Eigener Farbmodus für die Einstellungen
+- Neu: Wallpaper-Packs; Designs ohne Bilder, Modern Hell/Dunkel eingebaut
+- Neue Einführung mit Schnelleinrichtung, Design, Pack und Form
+- Wischen oder Pfeiltasten pro Widget
+- Wassertropfen statt Ringe bei Gesten
+- Hell/Dunkel-Wechsel behält Bilder
+- Hinweise beim Export von Sicherung und Design
