@@ -639,8 +639,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_tablet_beta_summary">Freiraum auf Tablets ist noch experimentell: Manche Bildschirme sehen noch nicht ganz richtig aus oder funktionieren nicht wie gewohnt. Rückmeldungen gern auf GitHub.</string>
     <string name="widget_page_next">Weiter</string>
     <string name="widget_page_previous">Zurück</string>
-    <string name="settings_widget_paging_title">Blättern in Widgets</string>
-    <string name="settings_widget_paging_summary">Wischen oder Pfeiltasten für Stunden und Tage im Wetter und für Notizen</string>
+    <string name="settings_widget_paging_title">Pfeiltasten in Widgets</string>
+    <string name="settings_widget_paging_summary">Symbol, Deckkraft, Füllung, Rahmen und Ecken</string>
     <string name="settings_widget_paging_mode">Blättern per</string>
     <string name="settings_widget_paging_mode_info">Wischen in einem Widget auf Daumenhöhe kann mit dem Wischen zwischen den Seiten kollidieren. Mit Pfeiltasten reagieren Widgets nicht mehr auf Wischen.</string>
     <string name="settings_widget_paging_gesture">Wischen</string>
@@ -769,4 +769,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_shape_part_search_button">Suchbutton und A–Z-Leiste</string>
     <string name="welcome_shape_part_text_search">Textsuche</string>
     <string name="welcome_shape_part_folders">Ordner und Element-Boxen</string>
+    <string name="settings_widget_paging_mode_row_info">Wie dieses Widget blättert (Stunden und Tage, Notizen). Das Aussehen der Pfeiltasten stellst du einmal für alle Widgets unter Aussehen ein.</string>
 </resources>

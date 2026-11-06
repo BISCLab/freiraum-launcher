@@ -189,6 +189,15 @@ internal fun WidgetEditor(
                 )
             }
         }
+        if (isBuiltIn && (row.payload == WidgetKind.WEATHER || row.payload == WidgetKind.NOTES)) {
+            SettingsPreferenceGroup(
+                title = stringResource(R.string.settings_widget_paging_mode),
+                info = stringResource(R.string.settings_widget_paging_mode_row_info)
+            ) {
+                RadioPreference(stringResource(R.string.settings_widget_paging_gesture), false, row.pagingButtons, { row = row.copy(pagingButtons = it) })
+                RadioPreference(stringResource(R.string.settings_widget_paging_buttons), true, row.pagingButtons, { row = row.copy(pagingButtons = it) })
+            }
+        }
         if (isBuiltIn && row.payload == WidgetKind.MUSIC) {
             val musicSources by viewModel.musicSources.collectAsState()
             val coverRounded by viewModel.musicCoverRounded.collectAsState()

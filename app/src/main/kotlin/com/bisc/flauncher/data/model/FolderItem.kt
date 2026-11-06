@@ -35,6 +35,8 @@ data class FolderItem(
     val borderEnabled: Boolean = false,
     // 0 = sharp 90° corners, 100 = fully rounded - see PageRow.cornerRadiusPercent.
     val cornerRadiusPercent: Int = com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT,
+    /** See PageRow.pagingButtons. */
+    val pagingButtons: Boolean = false,
     val elementBorderColor: Int? = null,
     val elementBorderWidth: Float = 1f,
     val elementContentColor: Int? = null,
@@ -59,6 +61,7 @@ fun FolderItem.asWidgetRow(): PageRow = PageRow(
     payload = payload,
     spanY = spanY,
     cornerRadiusPercent = cornerRadiusPercent,
+    pagingButtons = pagingButtons,
     clockStyle = clockStyle,
     clockDateActionType = clockDateActionType,
     clockDateActionPayload = clockDateActionPayload,
@@ -74,6 +77,7 @@ fun FolderItem.asWidgetRow(): PageRow = PageRow(
 fun FolderItem.withWidgetRow(row: PageRow): FolderItem = copy(
     spanY = row.spanY,
     cornerRadiusPercent = row.cornerRadiusPercent,
+    pagingButtons = row.pagingButtons,
     clockStyle = row.clockStyle,
     clockDateActionType = row.clockDateActionType,
     clockDateActionPayload = row.clockDateActionPayload,

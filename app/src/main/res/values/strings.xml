@@ -639,8 +639,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_tablet_beta_summary">Freiraum on tablets is still experimental: some screens may not look or work quite right yet. Feedback is welcome on GitHub.</string>
     <string name="widget_page_next">Next</string>
     <string name="widget_page_previous">Previous</string>
-    <string name="settings_widget_paging_title">Paging in widgets</string>
-    <string name="settings_widget_paging_summary">Swipe or buttons for weather hours and days and for notes</string>
+    <string name="settings_widget_paging_title">Paging buttons in widgets</string>
+    <string name="settings_widget_paging_summary">Symbol, opacity, fill, border and corners</string>
     <string name="settings_widget_paging_mode">Move by</string>
     <string name="settings_widget_paging_mode_info">Swiping inside a widget near your thumb can collide with swiping between pages. With buttons, widgets no longer react to swiping.</string>
     <string name="settings_widget_paging_gesture">Swiping</string>
@@ -769,4 +769,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_shape_part_search_button">Search button and A-Z rail</string>
     <string name="welcome_shape_part_text_search">Text search</string>
     <string name="welcome_shape_part_folders">Folders and element boxes</string>
+    <string name="settings_widget_paging_mode_row_info">How this widget turns its pages (hours and days, notes). The look of the buttons is set once for all widgets under Appearance.</string>
 </resources>

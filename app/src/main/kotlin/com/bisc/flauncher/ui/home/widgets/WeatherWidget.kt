@@ -92,6 +92,7 @@ fun WeatherWidget(
     appearance: ElementAppearance = ElementAppearance(),
     cornerRadiusPercent: Int = com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT,
     horizontalMargin: Dp = 0.dp,
+    pagingButtons: Boolean = false,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val snapshot by viewModel.weather.collectAsState()
@@ -109,7 +110,7 @@ fun WeatherWidget(
                 )
             }
         } else {
-            WeatherContent(weather, paging)
+            WeatherContent(weather, paging, pagingButtons)
         }
     }
 }
@@ -127,7 +128,7 @@ private data class Shown(
 )
 
 @Composable
-private fun WeatherContent(weather: WeatherSnapshot, paging: com.bisc.flauncher.data.model.WidgetPaging) {
+private fun WeatherContent(weather: WeatherSnapshot, paging: com.bisc.flauncher.data.model.WidgetPaging, pagingButtons: Boolean) {
     val context = LocalContext.current
     val locale = LocalConfiguration.current.locales.get(0)
     val zone = remember { ZoneId.systemDefault() }
@@ -207,7 +208,7 @@ private fun WeatherContent(weather: WeatherSnapshot, paging: com.bisc.flauncher.
         val large = maxHeight >= LARGE_MIN_HEIGHT
         val hourState = rememberLazyListState()
         val dayState = rememberLazyListState()
-        val buttons = paging.mode == com.bisc.flauncher.data.model.WidgetPagingMode.BUTTONS &&
+        val buttons = pagingButtons &&
             (showHourly && dayHours.size > HOURS_PER_PAGE || showDays && dayCount > DAYS_PER_PAGE)
         // Upright frames for the hours, wide ones for the days - like the tiles they move.
         val tallSize = if (roomy) androidx.compose.ui.unit.DpSize(30.dp, 40.dp) else androidx.compose.ui.unit.DpSize(26.dp, 34.dp)

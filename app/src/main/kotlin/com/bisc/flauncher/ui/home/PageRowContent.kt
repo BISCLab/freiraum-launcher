@@ -122,8 +122,8 @@ fun PageRowContent(
                         onTimeClick = row.clockTimeAction().takeIf { it.type != GestureActionType.NONE }?.let { action -> { onExecuteAction(action) } }
                     )
                     WidgetKind.MUSIC -> MusicWidget(appearance = row.appearance(), cornerRadiusPercent = row.cornerRadiusPercent, horizontalMargin = horizontalMargin)
-                    WidgetKind.WEATHER -> WeatherWidget(appearance = row.appearance(), cornerRadiusPercent = row.cornerRadiusPercent, horizontalMargin = horizontalMargin)
-                    WidgetKind.NOTES -> NotesWidget(appearance = row.appearance(), cornerRadiusPercent = row.cornerRadiusPercent, horizontalMargin = horizontalMargin, spanY = row.spanY)
+                    WidgetKind.WEATHER -> WeatherWidget(appearance = row.appearance(), cornerRadiusPercent = row.cornerRadiusPercent, horizontalMargin = horizontalMargin, pagingButtons = row.pagingButtons)
+                    WidgetKind.NOTES -> NotesWidget(appearance = row.appearance(), cornerRadiusPercent = row.cornerRadiusPercent, horizontalMargin = horizontalMargin, spanY = row.spanY, pagingButtons = row.pagingButtons)
                     WidgetKind.SPACER -> Unit
                 }
             }

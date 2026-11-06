@@ -26,6 +26,9 @@
   (or none) and a shape: like the design, Round, Soft or Square, optionally part by part (Dock,
   widgets, search button, Text search, folders); widgets always stay a little less round
 - The lock screen step only shows when the chosen wallpaper pack has a picture for it
+- Swipe or paging buttons is now chosen per widget (weather, notes) in the widget's own settings, on
+  pages and in folders; Appearance keeps only the look of the buttons. If you had buttons switched
+  on, every widget keeps them
 
 ## 0.9.2
 

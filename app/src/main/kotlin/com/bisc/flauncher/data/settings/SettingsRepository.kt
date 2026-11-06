@@ -113,8 +113,6 @@ class SettingsRepository @Inject constructor(
     /** How widgets with several pages are paged, and the look of their paging buttons. */
     val widgetPaging: Flow<com.bisc.flauncher.data.model.WidgetPaging> = dataStore.data.map { prefs ->
         com.bisc.flauncher.data.model.WidgetPaging(
-            mode = prefs[WIDGET_PAGING_MODE_KEY]?.let { runCatching { com.bisc.flauncher.data.model.WidgetPagingMode.valueOf(it) }.getOrNull() }
-                ?: com.bisc.flauncher.data.model.WidgetPagingMode.GESTURE,
             arrowStyle = prefs[WIDGET_ARROW_STYLE_KEY]?.let { runCatching { com.bisc.flauncher.data.model.WidgetArrowStyle.valueOf(it) }.getOrNull() }
                 ?: com.bisc.flauncher.data.model.WidgetArrowStyle.CHEVRON,
             alphaPercent = prefs[WIDGET_ARROW_ALPHA_KEY] ?: 100,
@@ -124,9 +122,18 @@ class SettingsRepository @Inject constructor(
         )
     }
 
+    /** True once if paging buttons were switched on for all widgets before it became per widget. */
+    suspend fun consumeLegacyPagingButtons(): Boolean {
+        var buttons = false
+        dataStore.edit { prefs ->
+            buttons = prefs[WIDGET_PAGING_MODE_KEY] == "BUTTONS"
+            prefs.remove(WIDGET_PAGING_MODE_KEY)
+        }
+        return buttons
+    }
+
     suspend fun setWidgetPaging(paging: com.bisc.flauncher.data.model.WidgetPaging) {
         dataStore.edit { prefs ->
-            prefs[WIDGET_PAGING_MODE_KEY] = paging.mode.name
             prefs[WIDGET_ARROW_STYLE_KEY] = paging.arrowStyle.name
             prefs[WIDGET_ARROW_ALPHA_KEY] = paging.alphaPercent.coerceIn(0, 100)
             prefs[WIDGET_ARROW_CORNER_KEY] = paging.cornerRadiusPercent.coerceIn(0, 100)

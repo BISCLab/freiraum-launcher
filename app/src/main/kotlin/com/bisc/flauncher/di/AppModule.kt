@@ -139,6 +139,14 @@ private val MIGRATION_61_62 = object : Migration(61, 62) {
     }
 }
 
+// Swipe or paging buttons is chosen per widget now.
+private val MIGRATION_62_63 = object : Migration(62, 63) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE page_rows ADD COLUMN pagingButtons INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE folder_items ADD COLUMN pagingButtons INTEGER NOT NULL DEFAULT 0")
+    }
+}
+
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "flauncher_settings")
 
 @Module
@@ -154,7 +162,8 @@ object AppModule {
         Room.databaseBuilder(ctx, FLauncherDatabase::class.java, "flauncher.db")
             .addMigrations(
                 MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33,
-                MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36, MIGRATION_36_37, MIGRATION_60_61, MIGRATION_61_62
+                MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36, MIGRATION_36_37, MIGRATION_60_61, MIGRATION_61_62,
+                MIGRATION_62_63
             )
             // Only a last resort now for jumps with no migration path above (e.g. a much older install
             // skipping several versions at once, or a version older than 27). Every future version bump

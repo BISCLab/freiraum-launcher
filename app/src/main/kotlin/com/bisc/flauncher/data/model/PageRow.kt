@@ -39,6 +39,8 @@ data class PageRow(
     // RoundedCornerShape(percent = ...), used directly everywhere this is rendered.
     val cornerRadiusPercent: Int = com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT,
     val edgeToEdge: Boolean = false,
+    /** Paging buttons instead of swiping, for widgets with several pages (weather, notes). */
+    val pagingButtons: Boolean = false,
     val columns: Int = 5,
     val clockStyle: String = ClockStyle.DIGITAL,
     val clockDateActionType: String = GestureActionType.NONE.name,

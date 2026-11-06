@@ -311,8 +311,8 @@ private fun FolderWidgetRow(item: FolderItem, onExecuteAction: (com.bisc.flaunch
                     )
                 }
                 WidgetKind.MUSIC -> MusicWidget(appearance = item.appearance(), cornerRadiusPercent = item.cornerRadiusPercent)
-                WidgetKind.WEATHER -> WeatherWidget(appearance = item.appearance(), cornerRadiusPercent = item.cornerRadiusPercent)
-                WidgetKind.NOTES -> NotesWidget(appearance = item.appearance(), cornerRadiusPercent = item.cornerRadiusPercent, spanY = item.spanY)
+                WidgetKind.WEATHER -> WeatherWidget(appearance = item.appearance(), cornerRadiusPercent = item.cornerRadiusPercent, pagingButtons = item.pagingButtons)
+                WidgetKind.NOTES -> NotesWidget(appearance = item.appearance(), cornerRadiusPercent = item.cornerRadiusPercent, spanY = item.spanY, pagingButtons = item.pagingButtons)
             }
             GridItemType.SYSTEM_WIDGET -> item.payload.toIntOrNull()?.let { appWidgetId ->
                 SystemWidgetView(

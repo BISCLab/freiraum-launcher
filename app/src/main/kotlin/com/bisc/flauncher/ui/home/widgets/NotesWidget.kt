@@ -67,11 +67,12 @@ fun NotesWidget(
     cornerRadiusPercent: Int = com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT,
     horizontalMargin: Dp = 0.dp,
     spanY: Int = 1,
+    pagingButtons: Boolean = false,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val notes by viewModel.notes.collectAsState()
     val paging by viewModel.widgetPaging.collectAsState()
-    val buttons = paging.mode == com.bisc.flauncher.data.model.WidgetPagingMode.BUTTONS
+    val buttons = pagingButtons
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     // Hiding only affects this widget's own grid; the note stays visible everywhere else, so
     // reordering (moveBy below) still operates on the full, unfiltered list.

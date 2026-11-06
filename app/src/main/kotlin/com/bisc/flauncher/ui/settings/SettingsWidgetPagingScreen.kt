@@ -23,12 +23,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.WidgetArrowStyle
-import com.bisc.flauncher.data.model.WidgetPagingMode
 import com.bisc.flauncher.ui.home.widgets.PagingButton
 import com.bisc.flauncher.ui.home.widgets.arrowIcon
 import kotlin.math.roundToInt
 
-/** Swipe or buttons for widgets with several pages (weather, notes), and the buttons' look. */
+/** The look of the paging buttons; whether a widget uses them is chosen in its own settings. */
 @Composable
 fun SettingsWidgetPagingScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val saved by viewModel.widgetPaging.collectAsState()
@@ -40,14 +39,7 @@ fun SettingsWidgetPagingScreen(navController: NavController, onBack: () -> Unit,
         onSave = { viewModel.setWidgetPaging(draft) },
         dirty = draft != saved
     ) {
-        SettingsPreferenceGroup(
-            title = stringResource(R.string.settings_widget_paging_mode),
-            info = stringResource(R.string.settings_widget_paging_mode_info)
-        ) {
-            RadioPreference(stringResource(R.string.settings_widget_paging_gesture), WidgetPagingMode.GESTURE, draft.mode, { draft = draft.copy(mode = it) })
-            RadioPreference(stringResource(R.string.settings_widget_paging_buttons), WidgetPagingMode.BUTTONS, draft.mode, { draft = draft.copy(mode = it) })
-        }
-        if (draft.mode == WidgetPagingMode.BUTTONS) {
+        run {
             // The weather widget's own arrangement: upright pair for the hours, wide pair for the days.
             Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {

@@ -50,7 +50,8 @@ class PageContentRepository @Inject constructor(
     private val rowDao: PageRowDao,
     private val entryDao: RowEntryDao,
     private val settingsRepository: SettingsRepository,
-    private val actionButtonRepository: ActionButtonRepository
+    private val actionButtonRepository: ActionButtonRepository,
+    private val folderItemDao: com.bisc.flauncher.data.db.FolderItemDao
 ) {
     val allPages: Flow<List<LauncherPage>> = pageDao.observeAll()
 
@@ -63,6 +64,10 @@ class PageContentRepository @Inject constructor(
 
     suspend fun ensureSeeded() {
         ensureGlobalBackgroundSeeded()
+        if (settingsRepository.consumeLegacyPagingButtons()) {
+            rowDao.updateAll(rowDao.observeAll().first().map { it.copy(pagingButtons = true) })
+            folderItemDao.updateAll(folderItemDao.observeAll().first().map { it.copy(pagingButtons = true) })
+        }
         val existingHome = pageDao.getHomePage()
         val freshInstall = existingHome == null
         // Before anything is drawn from the theme (the Dock's default look below).
