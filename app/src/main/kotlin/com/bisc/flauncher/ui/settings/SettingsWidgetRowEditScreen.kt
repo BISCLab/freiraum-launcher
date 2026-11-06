@@ -169,10 +169,14 @@ internal fun WidgetEditor(
                     { hostedWidgetView?.let(::captureViewBitmap) }
                 } else null
             )
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
+            SettingsPreferenceGroup(
+                title = stringResource(R.string.settings_widgets_corner_shape_label),
+                info = stringResource(R.string.settings_widgets_corner_hint)
+            ) {
                 ExpandablePercentSlider(
                     percent = row.cornerRadiusPercent,
-                    onSettled = { row = row.copy(cornerRadiusPercent = it) }
+                    onSettled = { row = row.copy(cornerRadiusPercent = it) },
+                    max = 50
                 )
             }
             if (showEdgeToEdge) SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_edge_label)) {

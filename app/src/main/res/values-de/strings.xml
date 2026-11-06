@@ -104,12 +104,12 @@
     <string name="settings_accent_follows_global">Folgt der globalen Akzentfarbe</string>
     <string name="settings_accent_use_global">Globale Akzentfarbe verwenden</string>
     <string name="settings_accent_custom">Eigene Farbe</string>
-    <string name="settings_design_title">Design</string>
-    <string name="settings_card_design_subtitle">Farben, Sprache, Schrift, Formen, Icons, Hintergrund</string>
+    <string name="settings_design_title">Aussehen</string>
+    <string name="settings_card_design_subtitle">Farbmodus, Akzentfarbe, Schrift, Hintergrund</string>
     <string name="settings_icons_label">Icons</string>
     <string name="settings_icons_summary">Form, Größe und Icon-Pack für alle Apps</string>
     <string name="settings_system_title">System</string>
-    <string name="settings_card_system_subtitle">Berechtigungen, Standard-Apps, Laden, Backup</string>
+    <string name="settings_card_system_subtitle">Berechtigungen, Sprache, Anzeige, Standard-Apps, Sicherung</string>
     <string name="settings_element_fill_label">Fläche</string>
     <string name="settings_font_label">Schriftart</string>
     <string name="settings_font_system">Systemstandard</string>
@@ -152,8 +152,8 @@
     <string name="settings_element_show_labels_label">Beschriftung anzeigen</string>
     <string name="settings_captions_label">Beschriftung</string>
 
-    <string name="settings_section_elements">Elemente</string>
-    <string name="settings_card_elements_subtitle">Apps, Ordner, Adressen, Links, Aktionsbuttons</string>
+    <string name="settings_section_elements">Apps &amp; Elemente</string>
+    <string name="settings_card_elements_subtitle">Apps, Icons, Ordner, Adressen, Links, Aktionsbuttons</string>
     <string name="settings_elements_addresses_title">Adressen</string>
     <string name="settings_elements_addresses_empty">Noch keine Adressen.</string>
     <string name="settings_elements_add_address">Adresse hinzufügen</string>
@@ -710,4 +710,18 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_group_extensions">Erweiterungen</string>
     <string name="settings_plugins_title">Plugins</string>
     <string name="settings_plugins_soon">Bald: weitere Widgets als Erweiterung</string>
+    <string name="settings_launcher_theme_label">Launcher-Farbmodus</string>
+    <string name="settings_display_label">Anzeige</string>
+    <string name="settings_settings_theme_label">Farbmodus der Einstellungen</string>
+    <string name="settings_settings_theme_launcher">Wie der Launcher</string>
+    <string name="settings_settings_theme_info">Gilt nur für die Einstellungen und die Einführung. Der Launcher selbst behält seinen Farbmodus aus „Aussehen“.</string>
+    <string name="settings_statusbar_summary">Ausgeblendet auf %1$d von %2$d</string>
+    <string name="settings_motion_summary_on">An, %1$d von %2$d</string>
+    <string name="settings_motion_summary_off">Aus</string>
+    <string name="settings_motion_summary_system_off">In den Android-Einstellungen aus</string>
+    <string name="settings_backup_export_warning">Die Sicherung enthält persönliche Daten: Notizen, Adressen, Kontakte, Links und deine Apps. Bewahre sie nur für dich auf und teile sie nicht.</string>
+    <string name="settings_backup_export_understood">Verstanden</string>
+    <string name="settings_backup_export_confirm">Exportieren</string>
+    <string name="settings_widgets_corner_hint">Bis 50 %. Ab etwa 25 % schneiden die Ecken in den Inhalt des Widgets.</string>
+    <string name="designs_export_info">Ein Design enthält nur das Aussehen: Farben, Rahmen, Ecken und Effekte. Keine persönlichen Daten und keine Bilder, du kannst es also gefahrlos teilen.</string>
 </resources>

@@ -127,6 +127,7 @@ fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, view
         }
     }
     val exportName = stringResource(R.string.designs_export_default_name)
+    var confirmingDesignExport by remember { mutableStateOf(false) }
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
         if (uri != null) viewModel.export(uri, exportName) {
             Toast.makeText(context, R.string.designs_export_done, Toast.LENGTH_LONG).show()
@@ -209,10 +210,25 @@ fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, view
                 icon = null,
                 title = stringResource(R.string.designs_export),
                 summary = stringResource(R.string.designs_export_summary),
-                onClick = { exportLauncher.launch("freiraum-design.freiraum-design") },
+                onClick = { confirmingDesignExport = true },
                 trailing = null
             )
         }
+    }
+
+    if (confirmingDesignExport) {
+        AlertDialog(
+            onDismissRequest = { confirmingDesignExport = false },
+            title = { Text(stringResource(R.string.designs_export)) },
+            text = { Text(stringResource(R.string.designs_export_info)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmingDesignExport = false
+                    exportLauncher.launch("freiraum-design.freiraum-design")
+                }) { Text(stringResource(R.string.settings_backup_export_confirm)) }
+            },
+            dismissButton = { TextButton(onClick = { confirmingDesignExport = false }) { Text(stringResource(android.R.string.cancel)) } }
+        )
     }
 
     removing?.let { design ->

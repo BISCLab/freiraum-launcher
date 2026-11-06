@@ -1273,10 +1273,12 @@ fun HomeScreen(
 
     // The walkthrough asks about the lock screen itself; the plain dialog is only the fallback.
     if (welcomePending) {
-        WelcomeWalkthrough(
-            onLockScreenAnswer = { accept -> if (lockWallpaperOffer) viewModel.answerLockWallpaperOffer(context, accept) },
-            onDone = viewModel::finishWelcome
-        )
+        com.bisc.flauncher.ui.theme.SettingsThemed {
+            WelcomeWalkthrough(
+                onLockScreenAnswer = { accept -> if (lockWallpaperOffer) viewModel.answerLockWallpaperOffer(context, accept) },
+                onDone = viewModel::finishWelcome
+            )
+        }
     } else if (lockWallpaperOffer) {
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { viewModel.answerLockWallpaperOffer(context, false) },

@@ -89,9 +89,9 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                     )
                 }
             }
-            // Three levels, global to specific: Design (looks the same everywhere), Pages (each page
-            // and utility page, plus gestures), Elements (the library of apps, folders, places,
-            // links and action buttons) - then System for everything about fitting into the phone.
+            // Three levels, global to specific: Appearance (looks the same everywhere), Pages (each
+            // page and utility page, plus gestures), Apps & elements (the library of apps, folders,
+            // places, links and action buttons) - then System for everything about fitting into the phone.
             SettingsPreferenceGroup(title = stringResource(R.string.settings_group_basics)) {
                 SettingsPreference(
                     icon = Icons.Filled.Palette,

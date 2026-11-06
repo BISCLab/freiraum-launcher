@@ -33,9 +33,8 @@ import com.bisc.flauncher.ui.pageLabel
 import com.bisc.flauncher.ui.theme.FontPreference
 import com.bisc.flauncher.ui.theme.ThemePreference
 
-/** Design: everything that looks the same across the whole launcher - colors, language and font,
- *  corner shape, icons, background and status bar. Pages and elements can override parts of it on
- *  their own screens (a page's own background, the app list's own accent, ...). */
+/** Appearance: what looks the same across the whole launcher - color mode, accent, font, background
+ *  and the widget paging buttons. Pages and elements can override parts of it on their own screens. */
 @Composable
 fun SettingsAppearanceScreen(
     navController: NavController,
@@ -46,25 +45,11 @@ fun SettingsAppearanceScreen(
     val theme by viewModel.theme.collectAsState()
     val fontPreference by viewModel.fontPreference.collectAsState()
     val accentColor by viewModel.accentColor.collectAsState()
-    val statusBarHiddenEverywhere by viewModel.statusBarHiddenEverywhere.collectAsState()
-    val defaultCornerRadiusPercent by viewModel.defaultCornerRadiusPercent.collectAsState()
-    val allPages by viewModel.allPages.collectAsState()
-    val searchHideStatusBar by viewModel.searchHideStatusBar.collectAsState()
-    val folderHideStatusBar by viewModel.folderHideStatusBar.collectAsState()
-    // Carousel pages in their order (Home among them), then App list and Text search.
-    val orderedPages = remember(allPages) {
-        allPages.filter { it.kind == LauncherPageKind.ROWS }.sortedBy { it.orderIndex } +
-            allPages.filter { it.kind == LauncherPageKind.APP_LIST } +
-            allPages.filter { it.kind == LauncherPageKind.SEARCH } +
-            allPages.filter { it.kind == LauncherPageKind.APP_GRID }
-    }
     var confirmingTheme by remember { mutableStateOf<ThemePreference?>(null) }
     var accentPickerOpen by remember { mutableStateOf(false) }
-    var confirmingHideStatusBarEverywhere by remember { mutableStateOf<Boolean?>(null) }
-    val context = androidx.compose.ui.platform.LocalContext.current
 
     SettingsSubScreen(title = stringResource(R.string.settings_design_title), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_theme_label)) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_launcher_theme_label)) {
             RadioPreference(stringResource(R.string.settings_theme_light), ThemePreference.LIGHT, theme, onSelect = { confirmingTheme = it })
             RadioPreference(stringResource(R.string.settings_theme_dark), ThemePreference.DARK, theme, onSelect = { confirmingTheme = it })
             RadioPreference(stringResource(R.string.settings_theme_system), ThemePreference.SYSTEM, theme, onSelect = { confirmingTheme = it })
@@ -77,118 +62,13 @@ fun SettingsAppearanceScreen(
             // as its own primary color) - that's the preview.
             AccentPalette(selected = accentColor, onSelect = viewModel::setAccentColor, onCustom = { accentPickerOpen = true })
         }
-        // Same build as the status bar setting: one switch for everything, then each animation.
-        SettingsPreferenceGroup(
-            title = stringResource(R.string.settings_motion_label),
-            info = stringResource(R.string.settings_motion_info)
-        ) {
-            val motionLevel by viewModel.motionLevel.collectAsState()
-            val motionPrefs by viewModel.motionPrefs.collectAsState()
-            // Android's own switch overrides everything here - say so, with a way there.
-            var systemOff by remember { mutableStateOf(com.bisc.flauncher.ui.systemAnimationsOff(context)) }
-            androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
-                systemOff = com.bisc.flauncher.ui.systemAnimationsOff(context)
-                onPauseOrDispose { }
-            }
-            if (systemOff) {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_motion_system_off),
-                    summary = stringResource(R.string.settings_motion_system_off_summary),
-                    onClick = {
-                        runCatching { context.startActivity(android.content.Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
-                    },
-                    trailing = null
-                )
-            }
-            val on = motionLevel == com.bisc.flauncher.ui.MotionLevel.FULL && !systemOff
-            val setOn = { enabled: Boolean ->
-                viewModel.setMotionLevel(if (enabled) com.bisc.flauncher.ui.MotionLevel.FULL else com.bisc.flauncher.ui.MotionLevel.OFF)
-            }
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_motion_all),
-                enabled = !systemOff,
-                onClick = { setOn(!on) },
-                trailing = { Switch(checked = on, enabled = !systemOff, onCheckedChange = setOn) }
-            )
-            val rowsEnabled = on
-            MotionRow(stringResource(R.string.settings_motion_app_zoom), motionPrefs.appZoom, rowsEnabled) { viewModel.setMotionPrefs(motionPrefs.copy(appZoom = it)) }
-            MotionRow(stringResource(R.string.settings_motion_overlay_zoom), motionPrefs.overlayZoom, rowsEnabled) { viewModel.setMotionPrefs(motionPrefs.copy(overlayZoom = it)) }
-            MotionRow(stringResource(R.string.settings_motion_folder_zoom), motionPrefs.folderZoom, rowsEnabled) { viewModel.setMotionPrefs(motionPrefs.copy(folderZoom = it)) }
-            MotionRow(stringResource(R.string.settings_motion_page_depth), motionPrefs.pageDepth, rowsEnabled) { viewModel.setMotionPrefs(motionPrefs.copy(pageDepth = it)) }
-            MotionRow(stringResource(R.string.settings_motion_back_gesture), motionPrefs.backGesture, rowsEnabled) { viewModel.setMotionPrefs(motionPrefs.copy(backGesture = it)) }
-            MotionRow(stringResource(R.string.settings_motion_settings_slide), motionPrefs.settingsSlide, rowsEnabled) { viewModel.setMotionPrefs(motionPrefs.copy(settingsSlide = it)) }
-            MotionRow(stringResource(R.string.settings_motion_ripples), motionPrefs.gestureRipples, rowsEnabled) { viewModel.setMotionPrefs(motionPrefs.copy(gestureRipples = it)) }
-        }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_language_label)) {
-            var language by remember { mutableStateOf(com.bisc.flauncher.util.AppLanguage.current(context)) }
-            val pick = { tag: String ->
-                language = tag
-                (context as? android.app.Activity)?.let { com.bisc.flauncher.util.AppLanguage.set(it, tag) }
-                Unit
-            }
-            // Only the chosen language shows; the full list opens on tap, so it stays short as more come.
-            val languages = listOf("" to stringResource(R.string.settings_language_system), "en" to "English", "de" to "Deutsch")
-            var languagePickerOpen by remember { mutableStateOf(false) }
-            SettingsPreference(
-                icon = null,
-                title = languages.firstOrNull { it.first == language }?.second ?: languages.first().second,
-                onClick = { languagePickerOpen = true },
-                trailing = null
-            )
-            if (languagePickerOpen) {
-                androidx.compose.material3.AlertDialog(
-                    onDismissRequest = { languagePickerOpen = false },
-                    title = { Text(stringResource(R.string.settings_language_label)) },
-                    text = {
-                        androidx.compose.foundation.layout.Column {
-                            languages.forEach { (tag, label) ->
-                                androidx.compose.foundation.layout.Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable { languagePickerOpen = false; pick(tag) }
-                                        .padding(vertical = 4.dp),
-                                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                                ) {
-                                    androidx.compose.material3.RadioButton(selected = tag == language, onClick = { languagePickerOpen = false; pick(tag) })
-                                    Text(label, modifier = Modifier.padding(start = 8.dp))
-                                }
-                            }
-                        }
-                    },
-                    confirmButton = {}
-                )
-            }
-        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_font_label)) {
             RadioPreference(stringResource(R.string.settings_font_system), FontPreference.SYSTEM, fontPreference, viewModel::setFontPreference, font = FontPreference.SYSTEM.fontFamily)
             RadioPreference(stringResource(R.string.settings_font_serif), FontPreference.SERIF, fontPreference, viewModel::setFontPreference, font = FontPreference.SERIF.fontFamily)
             RadioPreference(stringResource(R.string.settings_font_monospace), FontPreference.MONOSPACE, fontPreference, viewModel::setFontPreference, font = FontPreference.MONOSPACE.fontFamily)
             RadioPreference(stringResource(R.string.settings_font_rounded), FontPreference.ROUNDED, fontPreference, viewModel::setFontPreference, font = FontPreference.ROUNDED.fontFamily)
         }
-        // Changing this immediately re-stamps every existing row/folder item to match (see
-        // SettingsViewModel.setDefaultCornerRadiusPercent) - each element's own Appearance screen
-        // can still override it individually afterwards.
-        SettingsPreferenceGroup(
-            title = stringResource(R.string.settings_corner_style_label),
-            info = stringResource(R.string.settings_corner_style_info)
-        ) {
-            CornerShapeTiles(percent = defaultCornerRadiusPercent, onSelect = viewModel::setDefaultCornerRadiusPercent)
-            // Fine-tuning between the presets.
-            ExpandablePercentSlider(
-                percent = defaultCornerRadiusPercent,
-                onSettled = viewModel::setDefaultCornerRadiusPercent
-            )
-        }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_home_appearance_title)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_icons_label),
-                summary = stringResource(R.string.settings_icons_summary),
-                onClick = { onNavigate("appearance/icons") },
-                trailing = null
-            )
+        SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_section_global_background),
@@ -204,34 +84,6 @@ fun SettingsAppearanceScreen(
                 trailing = null
             )
         }
-        // Home, Pages, App list, Text search and folders each have their own status-bar switch on
-        // their own screen. This one is a bulk action over all of them - checked reflects whether
-        // every one of them is currently hidden, and toggling it off sets every one back to shown.
-        SettingsPreferenceGroup(
-            title = stringResource(R.string.settings_statusbar_label),
-            info = stringResource(R.string.settings_statusbar_hide_all_summary)
-        ) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_statusbar_hide_all),
-                onClick = { confirmingHideStatusBarEverywhere = !statusBarHiddenEverywhere },
-                trailing = {
-                    Switch(checked = statusBarHiddenEverywhere, onCheckedChange = { confirmingHideStatusBarEverywhere = it })
-                }
-            )
-            // Right under it, in the same card: every place with its own status-bar switch (the
-            // same switches as on each page's own screen), as slimmer rows so they read as the
-            // detail of the switch above.
-            orderedPages.forEach { page ->
-                if (page.kind == LauncherPageKind.SEARCH) {
-                    StatusBarRow(pageLabel(page, allPages), searchHideStatusBar, viewModel::setSearchHideStatusBar)
-                } else {
-                    val hidden by remember(page.id) { viewModel.pageHideStatusBar(page.id) }.collectAsState(initial = false)
-                    StatusBarRow(pageLabel(page, allPages), hidden) { viewModel.setPageHideStatusBar(page.id, it) }
-                }
-            }
-            StatusBarRow(stringResource(R.string.settings_section_folder), folderHideStatusBar, viewModel::setFolderHideStatusBar)
-        }
     }
 
     if (accentPickerOpen) {
@@ -243,30 +95,6 @@ fun SettingsAppearanceScreen(
                 modifier = androidx.compose.ui.Modifier.fillMaxWidth()
             )
         }
-    }
-
-    confirmingHideStatusBarEverywhere?.let { targetHidden ->
-        AlertDialog(
-            onDismissRequest = { confirmingHideStatusBarEverywhere = null },
-            title = { Text(stringResource(R.string.settings_statusbar_hide_all)) },
-            text = {
-                Text(
-                    stringResource(
-                        if (targetHidden) R.string.settings_statusbar_confirm_hide_message
-                        else R.string.settings_statusbar_confirm_show_message
-                    )
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.setStatusBarHiddenEverywhere(targetHidden)
-                    confirmingHideStatusBarEverywhere = null
-                }) { Text(stringResource(R.string.widget_notes_save)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { confirmingHideStatusBarEverywhere = null }) { Text(stringResource(R.string.widget_notes_cancel)) }
-            }
-        )
     }
 
     confirmingTheme?.let { pref ->
@@ -293,40 +121,5 @@ fun SettingsAppearanceScreen(
                 TextButton(onClick = { confirmingTheme = null }) { Text(stringResource(R.string.widget_notes_cancel)) }
             }
         )
-    }
-}
-
-/** One animation's switch under the main one, slim like the status bar's per-page rows; greyed out
- *  while animations are off as a whole. */
-@Composable
-private fun MotionRow(label: String, checked: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(52.dp)
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .noRippleClickable(enabled = enabled) { onChange(!checked) }
-            .padding(start = 16.dp, end = 8.dp)
-            .alpha(if (enabled) 1f else 0.45f),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-        Switch(checked = checked, enabled = enabled, onCheckedChange = onChange, modifier = Modifier.scale(0.75f))
-    }
-}
-
-@Composable
-private fun StatusBarRow(label: String, hidden: Boolean, onChange: (Boolean) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(52.dp)
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .noRippleClickable { onChange(!hidden) }
-            .padding(start = 16.dp, end = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-        Switch(checked = hidden, onCheckedChange = onChange, modifier = Modifier.scale(0.75f))
     }
 }

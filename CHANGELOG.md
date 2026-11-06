@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Settings rebuilt: "Design" is now "Appearance" (launcher color mode, accent, font, background,
+  paging buttons in widgets); "Elements" is now "Apps & elements" and holds the icons too
+- System has a new Display group: status bar and animations each open their own page with a short
+  summary in the list, portrait lock, and a color mode just for the settings and the welcome tour
+- Language moved to System
+- Hiding the status bar everywhere still asks first, showing it again no longer does
+- No more general corner setting; widget corners go up to 50% with a hint about the content
+- Exporting a backup asks you to confirm it holds personal data; exporting a design explains it
+  holds only the look and leaves out all pictures
+- App list: the A-Z bubble no longer draws a line to the letter rail
+
 ## 0.9.2
 
 - Settings are grouped into Basics (Design, Pages, Elements, System) and Extensions (Designs, and

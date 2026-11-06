@@ -387,6 +387,13 @@ class SettingsViewModel @Inject constructor(
 
     val lockPortrait: StateFlow<Boolean> = repository.lockPortrait.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    val settingsThemeMode: StateFlow<com.bisc.flauncher.ui.theme.SettingsThemeMode> =
+        repository.settingsThemeMode.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.theme.SettingsThemeMode.LAUNCHER)
+
+    fun setSettingsThemeMode(mode: com.bisc.flauncher.ui.theme.SettingsThemeMode) {
+        viewModelScope.launch { repository.setSettingsThemeMode(mode) }
+    }
+
     fun setLockPortrait(lock: Boolean) {
         viewModelScope.launch { repository.setLockPortrait(lock) }
     }

@@ -15,9 +15,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
 import com.bisc.flauncher.util.DefaultLauncherUtil
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
-/** System: how the launcher fits into the phone - permissions and default launcher, which apps
- *  links and places open in, the charging animation, settings tips and backups. */
+/** System: how the launcher fits into the phone - permissions, language, display, which apps links
+ *  and places open in, the charging animation, settings tips and backups. */
 @Composable
 fun SettingsSystemScreen(
     navController: NavController,
@@ -39,6 +44,13 @@ fun SettingsSystemScreen(
         runCatching { context.packageManager.getApplicationLabel(context.packageManager.getApplicationInfo(it, 0)).toString() }.getOrNull()
     } ?: defaultAppLabel
     var pendingImport by remember { mutableStateOf<android.net.Uri?>(null) }
+    var confirmingExport by remember { mutableStateOf(false) }
+    val settingsThemeMode by viewModel.settingsThemeMode.collectAsState()
+    var settingsThemePickerOpen by remember { mutableStateOf(false) }
+    var language by remember { mutableStateOf(com.bisc.flauncher.util.AppLanguage.current(context)) }
+    // Only the chosen language shows; the full list opens on tap, so it stays short as more come.
+    val languages = listOf("" to stringResource(R.string.settings_language_system), "en" to "English", "de" to "Deutsch")
+    var languagePickerOpen by remember { mutableStateOf(false) }
     val exportLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/zip")
     ) { uri ->
@@ -63,14 +75,44 @@ fun SettingsSystemScreen(
                 trailing = null
             )
         }
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_language_label)) {
+            SettingsPreference(
+                icon = null,
+                title = languages.firstOrNull { it.first == language }?.second ?: languages.first().second,
+                onClick = { languagePickerOpen = true },
+                trailing = null
+            )
+        }
         val lockPortrait by viewModel.lockPortrait.collectAsState()
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_rotation_label)) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_display_label)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_statusbar_label),
+                summary = statusBarSummary(viewModel),
+                onClick = { onNavigate("system/statusbar") },
+                trailing = null
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_motion_label),
+                summary = motionSummary(viewModel),
+                onClick = { onNavigate("system/animations") },
+                trailing = null
+            )
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_lock_portrait),
                 summary = stringResource(R.string.settings_lock_portrait_summary),
                 onClick = { viewModel.setLockPortrait(!lockPortrait) },
                 trailing = { Switch(checked = lockPortrait, onCheckedChange = viewModel::setLockPortrait) }
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_settings_theme_label),
+                summary = settingsThemeLabel(settingsThemeMode),
+                info = stringResource(R.string.settings_settings_theme_info),
+                onClick = { settingsThemePickerOpen = true },
+                trailing = null
             )
         }
         SettingsPreferenceGroup(
@@ -127,10 +169,7 @@ fun SettingsSystemScreen(
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_backup_export),
-                onClick = {
-                    val stamp = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
-                    exportLauncher.launch("freiraum-backup-$stamp.zip")
-                },
+                onClick = { confirmingExport = true },
                 trailing = null
             )
             SettingsPreference(
@@ -165,6 +204,58 @@ fun SettingsSystemScreen(
         )
     }
 
+    if (languagePickerOpen) {
+        ChoiceDialog(
+            title = stringResource(R.string.settings_language_label),
+            options = languages,
+            selected = language,
+            onPick = { tag ->
+                languagePickerOpen = false
+                language = tag
+                (context as? android.app.Activity)?.let { com.bisc.flauncher.util.AppLanguage.set(it, tag) }
+            },
+            onDismiss = { languagePickerOpen = false }
+        )
+    }
+    if (settingsThemePickerOpen) {
+        ChoiceDialog(
+            title = stringResource(R.string.settings_settings_theme_label),
+            options = com.bisc.flauncher.ui.theme.SettingsThemeMode.entries.map { it to settingsThemeLabel(it) },
+            selected = settingsThemeMode,
+            onPick = { settingsThemePickerOpen = false; viewModel.setSettingsThemeMode(it) },
+            onDismiss = { settingsThemePickerOpen = false }
+        )
+    }
+    if (confirmingExport) {
+        var understood by remember { mutableStateOf(false) }
+        AlertDialog(
+            onDismissRequest = { confirmingExport = false },
+            title = { Text(stringResource(R.string.settings_backup_export)) },
+            text = {
+                androidx.compose.foundation.layout.Column {
+                    Text(stringResource(R.string.settings_backup_export_warning))
+                    androidx.compose.foundation.layout.Row(
+                        modifier = Modifier
+                            .padding(top = 12.dp)
+                            .clickable { understood = !understood },
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                    ) {
+                        androidx.compose.material3.Checkbox(checked = understood, onCheckedChange = { understood = it })
+                        Text(stringResource(R.string.settings_backup_export_understood))
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(enabled = understood, onClick = {
+                    confirmingExport = false
+                    val stamp = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
+                    exportLauncher.launch("freiraum-backup-$stamp.zip")
+                }) { Text(stringResource(R.string.settings_backup_export_confirm)) }
+            },
+            dismissButton = { TextButton(onClick = { confirmingExport = false }) { Text(stringResource(R.string.widget_notes_cancel)) } }
+        )
+    }
+
     pendingImport?.let { uri ->
         AlertDialog(
             onDismissRequest = { pendingImport = null },
@@ -187,4 +278,40 @@ fun SettingsSystemScreen(
             dismissButton = { TextButton(onClick = { pendingImport = null }) { Text(stringResource(R.string.widget_notes_cancel)) } }
         )
     }
+}
+
+@Composable
+private fun settingsThemeLabel(mode: com.bisc.flauncher.ui.theme.SettingsThemeMode): String = stringResource(
+    when (mode) {
+        com.bisc.flauncher.ui.theme.SettingsThemeMode.LAUNCHER -> R.string.settings_settings_theme_launcher
+        com.bisc.flauncher.ui.theme.SettingsThemeMode.LIGHT -> R.string.settings_theme_light
+        com.bisc.flauncher.ui.theme.SettingsThemeMode.DARK -> R.string.settings_theme_dark
+        com.bisc.flauncher.ui.theme.SettingsThemeMode.SYSTEM -> R.string.settings_theme_system
+    }
+)
+
+/** A short list of radio choices that closes on pick. */
+@Composable
+private fun <T> ChoiceDialog(title: String, options: List<Pair<T, String>>, selected: T, onPick: (T) -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            androidx.compose.foundation.layout.Column {
+                options.forEach { (value, label) ->
+                    androidx.compose.foundation.layout.Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onPick(value) }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                    ) {
+                        androidx.compose.material3.RadioButton(selected = value == selected, onClick = { onPick(value) })
+                        Text(label, modifier = Modifier.padding(start = 8.dp))
+                    }
+                }
+            }
+        },
+        confirmButton = {}
+    )
 }

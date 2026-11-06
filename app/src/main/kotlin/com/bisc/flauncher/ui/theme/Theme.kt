@@ -6,7 +6,11 @@ import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -79,16 +83,22 @@ fun FLauncherTheme(
         ThemePreference.SYSTEM -> systemDark
     }
 
+    MaterialTheme(
+        colorScheme = freiraumColorScheme(context, isDark, accentColor),
+        typography = themedTypography(fontPreference.fontFamily),
+        content = content
+    )
+}
+
+/** Neutral surfaces from the system (dynamic on Android 12+), every accent the launcher's own. */
+fun freiraumColorScheme(context: Context, isDark: Boolean, accentColor: Int): ColorScheme {
     val baseScheme = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
     } else {
-        // Dynamic color requires Android 12; older versions use the static scheme.
         if (isDark) darkColorScheme() else lightColorScheme()
     }
-    // Neutral surfaces stay from the base scheme; every accent (switches, radio buttons, sliders,
-    // group titles) is the launcher's own accent color instead of a wallpaper-derived one.
     val accent = Color(accentColor)
-    val colorScheme = baseScheme.copy(
+    return baseScheme.copy(
         primary = accent,
         onPrimary = Color.White,
         secondary = accent,
@@ -96,12 +106,36 @@ fun FLauncherTheme(
         tertiary = accent,
         surfaceTint = accent
     )
+}
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = themedTypography(fontPreference.fontFamily),
-        content = content
-    )
+/** Color mode of the settings and the welcome tour only; LAUNCHER follows the launcher's own. */
+enum class SettingsThemeMode { LAUNCHER, LIGHT, DARK, SYSTEM }
+
+val LocalSettingsThemeMode = staticCompositionLocalOf { SettingsThemeMode.LAUNCHER }
+
+/** Whether settings show dark, given the launcher's own [launcherDark]. */
+@Composable
+fun settingsDark(mode: SettingsThemeMode, launcherDark: Boolean): Boolean = when (mode) {
+    SettingsThemeMode.LAUNCHER -> launcherDark
+    SettingsThemeMode.LIGHT -> false
+    SettingsThemeMode.DARK -> true
+    SettingsThemeMode.SYSTEM -> isSystemInDarkTheme()
+}
+
+/** Re-themes [content] in the settings color mode, keeping the launcher's accent and font. */
+@Composable
+fun SettingsThemed(content: @Composable () -> Unit) {
+    val mode = LocalSettingsThemeMode.current
+    if (mode == SettingsThemeMode.LAUNCHER) {
+        content()
+        return
+    }
+    val context = LocalContext.current
+    val isDark = settingsDark(mode, launcherDark = false)
+    val accent = MaterialTheme.colorScheme.primary.toArgb()
+    MaterialTheme(colorScheme = freiraumColorScheme(context, isDark, accent), typography = MaterialTheme.typography) {
+        Surface(color = MaterialTheme.colorScheme.background, content = content)
+    }
 }
 
 /** A plain tap target with no press indication. */

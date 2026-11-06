@@ -129,11 +129,11 @@ internal fun ExpandableSlider(
 
 /** 0-100 percent case, e.g. corner roundness. */
 @Composable
-fun ExpandablePercentSlider(percent: Int, onSettled: (Int) -> Unit) {
+fun ExpandablePercentSlider(percent: Int, onSettled: (Int) -> Unit, max: Int = 100) {
     ExpandableSlider(
-        value = percent.toFloat(),
+        value = percent.coerceAtMost(max).toFloat(),
         onSettled = { onSettled(it.roundToInt()) },
-        valueRange = 0f..100f,
+        valueRange = 0f..max.toFloat(),
         valueLabel = { stringResource(R.string.settings_corner_radius_value, it.roundToInt()) }
     )
 }

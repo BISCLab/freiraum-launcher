@@ -129,7 +129,10 @@ class DesignRepository @Inject constructor(
     /** Saves the current look as a design file, e.g. to share it or as the start of a new design. */
     suspend fun exportCurrent(target: Uri, name: String) = withContext(Dispatchers.IO) {
         val id = name.lowercase().replace(Regex("[^a-z0-9-]"), "-").trim('-').ifBlank { "design" }
-        val design = captureCurrent(id = id, name = name, withRows = false)
+        // Only the look travels: no pictures, so no private photos end up in a shared file.
+        val design = captureCurrent(id = id, name = name, withRows = false).let { d ->
+            d.copy(backgrounds = d.backgrounds.mapValues { it.value.copy(image = null) }, lockWallpaper = null)
+        }
         val images = mutableMapOf<File, String>()
         fun imageName(file: File) = images.getOrPut(file) { "wallpapers/${images.size + 1}.${file.extension.ifBlank { "jpg" }}" }
         val json = DesignJson.write(design, ::imageName).toString(2)

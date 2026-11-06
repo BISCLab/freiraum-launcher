@@ -201,6 +201,16 @@ class SettingsRepository @Inject constructor(
         if (appearance == null) resetElementAppearanceFor(prefix) else setElementAppearanceFor(prefix, appearance)
     }
 
+    /** Color mode of the settings and the welcome tour only. */
+    val settingsThemeMode: Flow<com.bisc.flauncher.ui.theme.SettingsThemeMode> = dataStore.data.map { prefs ->
+        prefs[SETTINGS_THEME_KEY]?.let { v -> com.bisc.flauncher.ui.theme.SettingsThemeMode.entries.firstOrNull { it.name == v } }
+            ?: com.bisc.flauncher.ui.theme.SettingsThemeMode.LAUNCHER
+    }
+
+    suspend fun setSettingsThemeMode(mode: com.bisc.flauncher.ui.theme.SettingsThemeMode) {
+        dataStore.edit { it[SETTINGS_THEME_KEY] = mode.name }
+    }
+
     /** Keeps the launcher in portrait instead of turning with the device. */
     val lockPortrait: Flow<Boolean> = dataStore.data.map { it[LOCK_PORTRAIT_KEY] ?: false }
 
@@ -996,6 +1006,7 @@ class SettingsRepository @Inject constructor(
         private fun searchIncludeKey(storageKey: String) = booleanPreferencesKey("search_include_$storageKey")
         private val SEARCH_KEYBOARD_AUTO_OPEN_KEY = booleanPreferencesKey("search_keyboard_auto_open")
         private val LOCK_PORTRAIT_KEY = booleanPreferencesKey("lock_portrait")
+        private val SETTINGS_THEME_KEY = stringPreferencesKey("settings_theme")
         private val DESIGN_EFFECTS_KEY = stringPreferencesKey("design_effects")
         private val ACTIVE_DESIGN_KEY = stringPreferencesKey("active_design")
         private val MOTION_LEVEL_KEY = stringPreferencesKey("motion_level")
