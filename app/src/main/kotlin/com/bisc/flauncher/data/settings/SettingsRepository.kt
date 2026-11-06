@@ -135,6 +135,16 @@ class SettingsRepository @Inject constructor(
         if (appearance != null) setElementAppearanceFor(WIDGET_ARROW_PREFIX, appearance) else resetElementAppearanceFor(WIDGET_ARROW_PREFIX)
     }
 
+    /** How much the launcher animates (zoom, page depth, back gesture). */
+    val motionLevel: Flow<com.bisc.flauncher.ui.MotionLevel> = dataStore.data.map { prefs ->
+        prefs[MOTION_LEVEL_KEY]?.let { runCatching { com.bisc.flauncher.ui.MotionLevel.valueOf(it) }.getOrNull() }
+            ?: com.bisc.flauncher.ui.MotionLevel.FULL
+    }
+
+    suspend fun setMotionLevel(level: com.bisc.flauncher.ui.MotionLevel) {
+        dataStore.edit { it[MOTION_LEVEL_KEY] = level.name }
+    }
+
     /** Keeps the launcher in portrait instead of turning with the device. */
     val lockPortrait: Flow<Boolean> = dataStore.data.map { it[LOCK_PORTRAIT_KEY] ?: false }
 
@@ -930,6 +940,7 @@ class SettingsRepository @Inject constructor(
         private fun searchIncludeKey(storageKey: String) = booleanPreferencesKey("search_include_$storageKey")
         private val SEARCH_KEYBOARD_AUTO_OPEN_KEY = booleanPreferencesKey("search_keyboard_auto_open")
         private val LOCK_PORTRAIT_KEY = booleanPreferencesKey("lock_portrait")
+        private val MOTION_LEVEL_KEY = stringPreferencesKey("motion_level")
         private val WIDGET_PAGING_MODE_KEY = stringPreferencesKey("widget_paging_mode")
         private val WIDGET_ARROW_STYLE_KEY = stringPreferencesKey("widget_arrow_style")
         private val WIDGET_ARROW_ALPHA_KEY = intPreferencesKey("widget_arrow_alpha")

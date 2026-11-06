@@ -666,4 +666,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_lock_title">Sperrbildschirm</string>
     <string name="welcome_lock_text">Passend zum Startbildschirm: Soll dieses Bild auf den Sperrbildschirm? Das Android-Hintergrundbild hinter dem Startbildschirm bleibt, wie es ist.</string>
     <string name="welcome_gesture_panel">Panel</string>
+    <string name="settings_motion_label">Animationen</string>
+    <string name="settings_motion_info">Apps, Ordner und Seiten zoomen aus dem Angetippten heraus, Seiten treten beim Wischen leicht zurück, und die Zurück-Geste lässt den Bildschirm mit dem Finger schrumpfen. Ist in Android „Animationen entfernen“ an, gibt es keine.</string>
+    <string name="settings_motion_full">Voll</string>
+    <string name="settings_motion_subtle">Dezent</string>
+    <string name="settings_motion_off">Aus</string>
 </resources>

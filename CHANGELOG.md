@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- New animations: apps open by zooming out of the tapped icon; app list, App grid, Text search and
+  folders grow out of where you tapped and shrink back; pages sink back a little while swiping;
+  settings pages glide in and out; on Android 14+ the back swipe shrinks the screen with your finger.
+  Choose Full, Subtle or Off under Design, Animations; Android's Remove animations turns them off
+
 ## 0.8.0
 
 - New short welcome walkthrough on first start: what Freiraum is, its gestures, where the settings

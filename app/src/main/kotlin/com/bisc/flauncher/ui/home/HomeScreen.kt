@@ -286,6 +286,22 @@ fun HomeScreen(
     val targetTopInset = if (immersiveSearch) cachedCutoutInset else maxOf(cachedStatusBarInset, cachedCutoutInset)
     val animatedTopInset by animateDpAsState(targetTopInset, animationSpec = tween(200), label = "topInset")
     val view = LocalView.current
+    val motion = com.bisc.flauncher.ui.LocalMotion.current
+    val appListOrigin = com.bisc.flauncher.ui.rememberOpenOrigin(appListOpen)
+    val appGridOrigin = com.bisc.flauncher.ui.rememberOpenOrigin(appGridOpen)
+    val searchOrigin = com.bisc.flauncher.ui.rememberOpenOrigin(searchOpen)
+    // How far a back swipe has gone (Android 14+): the open overlay shrinks with the finger.
+    var backProgress by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
+    val backGestureModifier = if (motion == com.bisc.flauncher.ui.MotionLevel.OFF) Modifier else Modifier.graphicsLayer {
+        val p = backProgress
+        if (p > 0f) {
+            val s = 1f - (if (motion == com.bisc.flauncher.ui.MotionLevel.FULL) 0.1f else 0.04f) * p
+            scaleX = s
+            scaleY = s
+            shape = RoundedCornerShape((32 * p).dp)
+            clip = true
+        }
+    }
     DisposableEffect(hideStatusBar) {
         val window = (view.context as? Activity)?.window
         window?.setStatusBarHidden(view, hideStatusBar)
@@ -551,6 +567,13 @@ fun HomeScreen(
                         // instead of letting it be rebound. A top/bottom safe zone keeps Android's own
                         // edge gestures (hidden status bar reveal; gesture-nav task switcher) reachable.
                         modifier = Modifier.fillMaxSize().then(
+                            if (com.bisc.flauncher.ui.pageDepth(motion) > 0f) Modifier.graphicsLayer {
+                                val offset = kotlin.math.abs((pagerState.currentPage - pageIndex) + pagerState.currentPageOffsetFraction).coerceAtMost(1f)
+                                val s = 1f - com.bisc.flauncher.ui.pageDepth(motion) * offset
+                                scaleX = s
+                                scaleY = s
+                            } else Modifier
+                        ).then(
                             if (page != null) {
                                 Modifier.detectHomeGestures(
                                     onLongPress = { viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.LONG_PRESS, context, openPageById, openSettingsFromGesture) },
@@ -926,8 +949,14 @@ fun HomeScreen(
     // screen" contract: from either search surface, from plain app overview, and from any other page
     // with nothing open on top - not just closing whatever overlay happens to be up while leaving the
     // pager wherever it already was.
-    BackHandler(enabled = (appListOpen || appGridOpen) && !searchOpen) { returnHome() }
-    BackHandler(enabled = searchOpen) { returnHome() }
+    androidx.activity.compose.PredictiveBackHandler(enabled = appListOpen || appGridOpen || searchOpen) { progress ->
+        try {
+            progress.collect { backProgress = it.progress }
+            returnHome()
+        } finally {
+            backProgress = 0f
+        }
+    }
     BackHandler(enabled = !appListOpen && !appGridOpen && !searchOpen && !folderOpen && realIndex(pagerState.currentPage) != homeIndex) { returnHome() }
     // Back first leaves the app list's own search, then the list.
     BackHandler(enabled = appListOpen && appListSearching && !searchOpen && !folderOpen) {
@@ -939,9 +968,9 @@ fun HomeScreen(
     LaunchedEffect(homeButtonPressCount) { if (homeButtonPressCount > 0) returnHome() }
     AnimatedVisibility(
         visible = appListOpen,
-        modifier = Modifier.fillMaxSize(),
-        enter = fadeIn(tween(110)) + slideInVertically(animationSpec = tween(130)) { it / 8 },
-        exit = fadeOut(tween(110)) + slideOutVertically(animationSpec = tween(130)) { it / 8 }
+        modifier = Modifier.fillMaxSize().then(backGestureModifier),
+        enter = com.bisc.flauncher.ui.zoomIn(motion, appListOrigin),
+        exit = com.bisc.flauncher.ui.zoomOut(motion, appListOrigin)
     ) {
         // Pulling out of the app overview goes through returnHome(), so it always lands on home.
         // rememberUpdatedState (not a plain closure over returnHome) because this connection object is
@@ -1033,9 +1062,9 @@ fun HomeScreen(
 
     AnimatedVisibility(
         visible = appGridOpen,
-        modifier = Modifier.fillMaxSize(),
-        enter = fadeIn(tween(110)) + slideInVertically(animationSpec = tween(130)) { it / 8 },
-        exit = fadeOut(tween(110)) + slideOutVertically(animationSpec = tween(130)) { it / 8 }
+        modifier = Modifier.fillMaxSize().then(backGestureModifier),
+        enter = com.bisc.flauncher.ui.zoomIn(motion, appGridOrigin),
+        exit = com.bisc.flauncher.ui.zoomOut(motion, appGridOrigin)
     ) {
         val gridSurfaceDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), appGridBackground)
         val gridFolders = remember(folders, appGridFolderIds) { appGridFolderIds.mapNotNull { id -> folders.find { it.id == id } } }
@@ -1096,26 +1125,11 @@ fun HomeScreen(
         }
     }
 
-    val searchPivotX = if (appOverviewHandedness == Handedness.LEFT) 0.12f else 0.88f
     AnimatedVisibility(
         visible = searchOpen,
-        modifier = Modifier.fillMaxSize(),
-        enter = expandVertically(
-            animationSpec = tween(120),
-            expandFrom = Alignment.Bottom
-        ) + scaleIn(
-            animationSpec = tween(120),
-            initialScale = 0.94f,
-            transformOrigin = TransformOrigin(searchPivotX, 1f)
-        ) + fadeIn(tween(90)),
-        exit = shrinkVertically(
-            animationSpec = tween(220),
-            shrinkTowards = Alignment.Bottom
-        ) + scaleOut(
-            animationSpec = tween(220),
-            targetScale = 0.94f,
-            transformOrigin = TransformOrigin(searchPivotX, 1f)
-        ) + fadeOut(tween(160))
+        modifier = Modifier.fillMaxSize().then(backGestureModifier),
+        enter = com.bisc.flauncher.ui.zoomIn(motion, searchOrigin),
+        exit = com.bisc.flauncher.ui.zoomOut(motion, searchOrigin)
     ) {
         SearchOverlay(
             query = searchQuery,
@@ -1300,7 +1314,18 @@ fun HomeScreen(
 
     openFolderPath.lastOrNull()?.let { folderId ->
         val folder = folders.find { it.id == folderId }
-        if (folder != null) {
+        if (folder != null) androidx.compose.runtime.key(folderId) {
+            val folderOrigin = remember { com.bisc.flauncher.ui.TouchOrigin.transformOrigin(view.width, view.height) }
+            val appear = remember { androidx.compose.animation.core.Animatable(if (motion == com.bisc.flauncher.ui.MotionLevel.OFF) 1f else 0f) }
+            LaunchedEffect(Unit) { appear.animateTo(1f, tween(300, easing = com.bisc.flauncher.ui.EmphasizedEasing)) }
+            val startScale = if (motion == com.bisc.flauncher.ui.MotionLevel.FULL) 0.8f else 0.94f
+            Box(modifier = Modifier.fillMaxSize().graphicsLayer {
+                val s = startScale + (1f - startScale) * appear.value
+                scaleX = s
+                scaleY = s
+                alpha = appear.value
+                transformOrigin = folderOrigin
+            }) {
             FolderView(
                 folder = folder,
                 items = folderItemsByFolder[folderId].orEmpty(),
@@ -1333,6 +1358,7 @@ fun HomeScreen(
                 cardAppearance = folder.effectiveAppearance(folderCardAppearance),
                 showLabels = if (folder.showLabelsOverrideEnabled) folder.showLabels else folderShowLabels
             )
+            }
         }
     }
 

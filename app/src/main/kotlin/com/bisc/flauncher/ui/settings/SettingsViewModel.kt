@@ -364,6 +364,13 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setWidgetPaging(paging) }
     }
 
+    val motionLevel: StateFlow<com.bisc.flauncher.ui.MotionLevel> =
+        repository.motionLevel.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.MotionLevel.FULL)
+
+    fun setMotionLevel(level: com.bisc.flauncher.ui.MotionLevel) {
+        viewModelScope.launch { repository.setMotionLevel(level) }
+    }
+
     val lockPortrait: StateFlow<Boolean> = repository.lockPortrait.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     fun setLockPortrait(lock: Boolean) {

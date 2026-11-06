@@ -76,6 +76,15 @@ fun SettingsAppearanceScreen(
             // as its own primary color) - that's the preview.
             AccentPalette(selected = accentColor, onSelect = viewModel::setAccentColor, onCustom = { accentPickerOpen = true })
         }
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_motion_label),
+            info = stringResource(R.string.settings_motion_info)
+        ) {
+            val motionLevel by viewModel.motionLevel.collectAsState()
+            RadioPreference(stringResource(R.string.settings_motion_full), com.bisc.flauncher.ui.MotionLevel.FULL, motionLevel, viewModel::setMotionLevel)
+            RadioPreference(stringResource(R.string.settings_motion_subtle), com.bisc.flauncher.ui.MotionLevel.SUBTLE, motionLevel, viewModel::setMotionLevel)
+            RadioPreference(stringResource(R.string.settings_motion_off), com.bisc.flauncher.ui.MotionLevel.OFF, motionLevel, viewModel::setMotionLevel)
+        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_language_label)) {
             var language by remember { mutableStateOf(com.bisc.flauncher.util.AppLanguage.current(context)) }
             val pick = { tag: String ->

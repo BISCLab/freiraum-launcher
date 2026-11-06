@@ -75,6 +75,15 @@ class MainActivity : ComponentActivity() {
     }
 
     // Applies the in-app language choice on Android 12 and older.
+    // Remembers where each touch starts, so apps and overlays can zoom out of that spot.
+    override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
+        if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN) {
+            com.bisc.flauncher.ui.TouchOrigin.x = ev.rawX
+            com.bisc.flauncher.ui.TouchOrigin.y = ev.rawY
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
     override fun attachBaseContext(newBase: android.content.Context) {
         super.attachBaseContext(com.bisc.flauncher.util.AppLanguage.wrap(newBase))
     }
@@ -121,6 +130,13 @@ class MainActivity : ComponentActivity() {
             val appOverridesForIconSize by settingsVm.appOverrides.collectAsState()
             val showSettingsTips by settingsVm.showSettingsTips.collectAsState()
             val lockPortrait by settingsVm.lockPortrait.collectAsState()
+            val chosenMotion by settingsVm.motionLevel.collectAsState()
+            // Android's "Remove animations" wins over the launcher's own choice.
+            val systemAnimationsOff = androidx.compose.runtime.remember {
+                android.provider.Settings.Global.getFloat(contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
+            }
+            val motion = if (systemAnimationsOff) com.bisc.flauncher.ui.MotionLevel.OFF else chosenMotion
+            com.bisc.flauncher.ui.TouchOrigin.launchZoom = motion != com.bisc.flauncher.ui.MotionLevel.OFF
             androidx.compose.runtime.LaunchedEffect(lockPortrait) {
                 requestedOrientation = if (lockPortrait) android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                     else android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
@@ -162,11 +178,36 @@ class MainActivity : ComponentActivity() {
                 com.bisc.flauncher.ui.home.LocalAppIconLoader provides appIconLoader,
                 com.bisc.flauncher.ui.home.LocalIconSizeResolver provides iconSizeResolver,
                 com.bisc.flauncher.ui.home.LocalIconShape provides globalIconShape,
-                com.bisc.flauncher.ui.settings.LocalShowSettingsTips provides showSettingsTips
+                com.bisc.flauncher.ui.settings.LocalShowSettingsTips provides showSettingsTips,
+                com.bisc.flauncher.ui.LocalMotion provides motion
             ) {
             FLauncherTheme(themePreference = theme, fontPreference = font, accentColor = accentColor) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    NavHost(navController = navController, startDestination = "home") {
+                    val navMotion = motion
+                    NavHost(
+                        navController = navController,
+                        startDestination = "home",
+                        enterTransition = {
+                            if (navMotion == com.bisc.flauncher.ui.MotionLevel.OFF) androidx.compose.animation.EnterTransition.None
+                            else androidx.compose.animation.slideInHorizontally(androidx.compose.animation.core.tween(320, easing = com.bisc.flauncher.ui.EmphasizedEasing)) { it / 5 } +
+                                androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(220))
+                        },
+                        exitTransition = {
+                            if (navMotion == com.bisc.flauncher.ui.MotionLevel.OFF) androidx.compose.animation.ExitTransition.None
+                            else androidx.compose.animation.scaleOut(androidx.compose.animation.core.tween(320, easing = com.bisc.flauncher.ui.EmphasizedEasing), targetScale = 0.96f) +
+                                androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(220))
+                        },
+                        popEnterTransition = {
+                            if (navMotion == com.bisc.flauncher.ui.MotionLevel.OFF) androidx.compose.animation.EnterTransition.None
+                            else androidx.compose.animation.scaleIn(androidx.compose.animation.core.tween(320, easing = com.bisc.flauncher.ui.EmphasizedEasing), initialScale = 0.96f) +
+                                androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(220))
+                        },
+                        popExitTransition = {
+                            if (navMotion == com.bisc.flauncher.ui.MotionLevel.OFF) androidx.compose.animation.ExitTransition.None
+                            else androidx.compose.animation.slideOutHorizontally(androidx.compose.animation.core.tween(280, easing = com.bisc.flauncher.ui.EmphasizedEasing)) { it / 5 } +
+                                androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(200))
+                        }
+                    ) {
                         composable("home") {
                             HomeScreen(
                                 onNavigateToSettings = { route ->

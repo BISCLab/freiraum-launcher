@@ -666,4 +666,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_lock_title">Lock screen</string>
     <string name="welcome_lock_text">To match your home screen: use this wallpaper on the lock screen? Android\'s wallpaper behind your home screen stays as it is.</string>
     <string name="welcome_gesture_panel">Panel</string>
+    <string name="settings_motion_label">Animations</string>
+    <string name="settings_motion_info">Apps, folders and pages zoom out of what you tapped, pages sink back a little while swiping, and the back swipe shrinks the screen with your finger. If Android\'s Remove animations is on, there are none.</string>
+    <string name="settings_motion_full">Full</string>
+    <string name="settings_motion_subtle">Subtle</string>
+    <string name="settings_motion_off">Off</string>
 </resources>
