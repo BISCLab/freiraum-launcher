@@ -742,6 +742,7 @@ fun HomeScreen(
                 DockPanelSurface(
                     appearance = dockAppearance.copy(borderEnabled = false),
                     shape = dockShape,
+                    effectTarget = "dock",
                     modifier = Modifier
                         .fillMaxSize()
                         .then(
@@ -893,6 +894,7 @@ fun HomeScreen(
                 DockPanelSurface(
                     appearance = panelAppearance.copy(borderEnabled = false),
                     shape = panelShape,
+                    effectTarget = "panel",
                     modifier = Modifier
                         .fillMaxSize()
                         .then(

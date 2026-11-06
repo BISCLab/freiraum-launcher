@@ -16,6 +16,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.bisc.flauncher.ui.theme.designGlow
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
@@ -50,6 +51,7 @@ fun PagingButton(
         modifier = modifier
             .size(width, height)
             .alpha(style.alphaPercent.coerceIn(0, 100) / 100f * if (enabled) 1f else 0.35f)
+            .then(Modifier.designGlow(shape, "buttons"))
             .clip(shape)
             .then(
                 if (colors != null) Modifier.background(colors.background, alpha = colors.backgroundAlpha)

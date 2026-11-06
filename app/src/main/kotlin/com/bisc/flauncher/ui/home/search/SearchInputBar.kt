@@ -35,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.bisc.flauncher.ui.theme.designGlow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -129,6 +130,7 @@ fun SearchInputBar(
             modifier = modifier
                 .fillMaxWidth()
                 .height(FIELD_HEIGHT)
+                .then(Modifier.designGlow(fieldShape, "search"))
                 .clip(fieldShape)
                 .background(fieldColors.background, alpha = fieldColors.backgroundAlpha)
                 .then(if (ownAppearance.borderEnabled) Modifier.border(fieldColors.borderWidth, fieldColors.borderColor, fieldShape) else Modifier)

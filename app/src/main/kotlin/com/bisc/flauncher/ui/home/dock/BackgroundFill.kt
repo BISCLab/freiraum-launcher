@@ -49,6 +49,7 @@ fun BackgroundFill(config: BackgroundConfig, modifier: Modifier = Modifier) {
         } else if (shade > 0f) {
             Box(Modifier.matchParentSize().background(Color.White.copy(alpha = shade)))
         }
+        com.bisc.flauncher.ui.theme.DesignBackgroundEffects(Modifier.matchParentSize())
     }
 }
 

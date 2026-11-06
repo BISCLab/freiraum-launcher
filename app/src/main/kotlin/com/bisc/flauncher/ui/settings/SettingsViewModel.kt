@@ -378,6 +378,9 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setMotionPrefs(prefs) }
     }
 
+    val designEffects: StateFlow<com.bisc.flauncher.data.design.DesignEffects?> =
+        repository.designEffects.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
     val lockPortrait: StateFlow<Boolean> = repository.lockPortrait.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     fun setLockPortrait(lock: Boolean) {

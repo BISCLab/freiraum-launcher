@@ -185,6 +185,7 @@ fun FolderView(
         DockPanelSurface(
             appearance = cardAppearance,
             shape = RoundedCornerShape(FolderCornerRadius),
+            effectTarget = "folders",
             modifier = Modifier
                 .width(dockPillWidth)
                 .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {}

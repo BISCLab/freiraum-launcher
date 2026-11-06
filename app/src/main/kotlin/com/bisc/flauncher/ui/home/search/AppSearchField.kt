@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.bisc.flauncher.ui.theme.designGlow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -65,6 +66,7 @@ fun AppSearchField(
         modifier = modifier
             .fillMaxWidth()
             .height(FIELD_HEIGHT)
+            .then(Modifier.designGlow(shape, "search"))
             .clip(shape)
             .background(colors.background, alpha = colors.backgroundAlpha)
             .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)

@@ -294,6 +294,7 @@ private fun ResultCard(appearance: ElementAppearance, content: @Composable () ->
     DockPanelSurface(
         appearance = appearance,
         shape = LocalResultCardShape.current,
+        effectTarget = "cards",
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) { content() }

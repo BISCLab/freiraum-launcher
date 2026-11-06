@@ -169,6 +169,38 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    // ---- Designs ----
+
+    /** The effects of the applied design; null = none. */
+    val designEffects: Flow<com.bisc.flauncher.data.design.DesignEffects?> = dataStore.data.map { prefs ->
+        prefs[DESIGN_EFFECTS_KEY]?.let { runCatching { com.bisc.flauncher.data.design.DesignJson.effects(org.json.JSONObject(it)) }.getOrNull() }
+    }
+
+    suspend fun setDesignEffects(effects: com.bisc.flauncher.data.design.DesignEffects?) {
+        dataStore.edit { prefs ->
+            if (effects == null) prefs.remove(DESIGN_EFFECTS_KEY)
+            else prefs[DESIGN_EFFECTS_KEY] = com.bisc.flauncher.data.design.DesignJson.effectsJson(effects).toString()
+        }
+    }
+
+    /** The applied design's id; null = the user's own look. */
+    val activeDesignId: Flow<String?> = dataStore.data.map { it[ACTIVE_DESIGN_KEY] }
+
+    suspend fun setActiveDesignId(id: String?) {
+        dataStore.edit { prefs -> if (id == null) prefs.remove(ACTIVE_DESIGN_KEY) else prefs[ACTIVE_DESIGN_KEY] = id }
+    }
+
+    /** An element's own look by its stored name, or null while it's automatic. */
+    suspend fun elementAppearanceOrNull(prefix: String): ElementAppearance? {
+        val prefs = dataStore.data.first()
+        return if (prefs[elementFillModeKeyEnum(prefix)] == null) null else readElementAppearance(prefs, prefix, ElementAppearance(), null)
+    }
+
+    /** Sets an element's look by its stored name; null makes it automatic again. */
+    suspend fun setElementAppearanceByName(prefix: String, appearance: ElementAppearance?) {
+        if (appearance == null) resetElementAppearanceFor(prefix) else setElementAppearanceFor(prefix, appearance)
+    }
+
     /** Keeps the launcher in portrait instead of turning with the device. */
     val lockPortrait: Flow<Boolean> = dataStore.data.map { it[LOCK_PORTRAIT_KEY] ?: false }
 
@@ -964,6 +996,8 @@ class SettingsRepository @Inject constructor(
         private fun searchIncludeKey(storageKey: String) = booleanPreferencesKey("search_include_$storageKey")
         private val SEARCH_KEYBOARD_AUTO_OPEN_KEY = booleanPreferencesKey("search_keyboard_auto_open")
         private val LOCK_PORTRAIT_KEY = booleanPreferencesKey("lock_portrait")
+        private val DESIGN_EFFECTS_KEY = stringPreferencesKey("design_effects")
+        private val ACTIVE_DESIGN_KEY = stringPreferencesKey("active_design")
         private val MOTION_LEVEL_KEY = stringPreferencesKey("motion_level")
         private val WIDGET_PAGING_MODE_KEY = stringPreferencesKey("widget_paging_mode")
         private val WIDGET_ARROW_STYLE_KEY = stringPreferencesKey("widget_arrow_style")

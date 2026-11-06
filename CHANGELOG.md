@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Designs: ready-made looks with colors, borders, wallpapers and effects, under Design, Designs.
+  Download a .freiraum-design file in the browser and add it; preview, apply, remove, go back to
+  your own look, or save your current look as a design. Pages, apps and folders stay untouched
+- First design: Neon, dark with glowing borders, a fine grid and soft light spots; the glow can be
+  still, run once when shown, or keep running round
+
 - Ripples on the home screen: a ring for a tap, two for a double tap, a soft wave for a long press
 - Every animation can be switched on or off on its own under Design, Animations
 - If Android's Remove animations is on, the Animations setting says so and links to it

@@ -63,6 +63,15 @@ fun SettingsAppearanceScreen(
     val context = androidx.compose.ui.platform.LocalContext.current
 
     SettingsSubScreen(title = stringResource(R.string.settings_design_title), navController = navController, onBack = onBack) {
+        SettingsPreferenceGroup {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.designs_title),
+                summary = stringResource(R.string.designs_entry_summary),
+                onClick = { onNavigate("appearance/designs") },
+                trailing = null
+            )
+        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_theme_label)) {
             RadioPreference(stringResource(R.string.settings_theme_light), ThemePreference.LIGHT, theme, onSelect = { confirmingTheme = it })
             RadioPreference(stringResource(R.string.settings_theme_dark), ThemePreference.DARK, theme, onSelect = { confirmingTheme = it })

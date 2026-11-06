@@ -132,6 +132,7 @@ class MainActivity : ComponentActivity() {
             val lockPortrait by settingsVm.lockPortrait.collectAsState()
             val chosenMotion by settingsVm.motionLevel.collectAsState()
             val motionPrefs by settingsVm.motionPrefs.collectAsState()
+            val designEffects by settingsVm.designEffects.collectAsState()
             // Android's "Remove animations" wins over the launcher's own choice; re-read on every return.
             var systemAnimationsOff by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(com.bisc.flauncher.ui.systemAnimationsOff(this)) }
             androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
@@ -183,7 +184,8 @@ class MainActivity : ComponentActivity() {
                 com.bisc.flauncher.ui.home.LocalIconShape provides globalIconShape,
                 com.bisc.flauncher.ui.settings.LocalShowSettingsTips provides showSettingsTips,
                 com.bisc.flauncher.ui.LocalMotion provides motion,
-                com.bisc.flauncher.ui.LocalMotionPrefs provides motionPrefs
+                com.bisc.flauncher.ui.LocalMotionPrefs provides motionPrefs,
+                com.bisc.flauncher.ui.theme.LocalDesignEffects provides designEffects
             ) {
             FLauncherTheme(themePreference = theme, fontPreference = font, accentColor = accentColor) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -493,6 +495,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("settings/app_overview/az_index") {
                             com.bisc.flauncher.ui.settings.SettingsAppOverviewAzIndexScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        composable("settings/appearance/designs") {
+                            com.bisc.flauncher.ui.settings.SettingsDesignsScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         composable("settings/appearance/widget_paging") {
                             com.bisc.flauncher.ui.settings.SettingsWidgetPagingScreen(navController = navController, onBack = { navController.popBackStack() })

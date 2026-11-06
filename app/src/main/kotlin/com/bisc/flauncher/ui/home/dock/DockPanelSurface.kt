@@ -8,6 +8,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import com.bisc.flauncher.ui.theme.designGlow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import com.bisc.flauncher.data.model.ElementAppearance
@@ -18,12 +19,15 @@ fun DockPanelSurface(
     appearance: ElementAppearance,
     shape: Shape,
     modifier: Modifier = Modifier,
+    /** Which kind of surface this is for a design's glowing border (dock, panel, folders, cards). */
+    effectTarget: String? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
     val colors = resolveElementColors(appearance)
     CompositionLocalProvider(LocalContentColor provides colors.contentColor) {
         Box(
             modifier = modifier
+                .then(if (effectTarget != null) Modifier.designGlow(shape, effectTarget) else Modifier)
                 .clip(shape)
                 .background(colors.background, alpha = colors.backgroundAlpha)
                 .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)

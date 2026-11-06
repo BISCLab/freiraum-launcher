@@ -24,6 +24,7 @@ libraries.
   places, with web, maps and calculator commands
 - **Appearance** – light/dark mode, accent color, corner shapes, icon packs, and fill, border and
   text color for every element
+- **Designs** – ready-made looks with wallpapers and effects, see [designs](designs/README.md)
 - **Gestures** – swipe up/down, double tap and long press, each assignable
 - **Backup** – export and import everything as one file
 
