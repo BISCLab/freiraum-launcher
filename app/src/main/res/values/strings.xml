@@ -124,7 +124,7 @@
     <string name="settings_pictogram_picker_title">Choose an icon</string>
     <string name="settings_element_icon_label">Icon</string>
 
-    <string name="settings_app_overview_alignment_label">Alignment</string>
+    <string name="settings_app_overview_alignment_label">Edge</string>
     <string name="settings_app_overview_align_left">Left</string>
     <string name="settings_app_overview_align_right">Right</string>
 
@@ -450,7 +450,7 @@
     <string name="settings_section_search_full">Text search</string>
     <string name="settings_app_list_search_button">Search button</string>
     <string name="settings_app_list_search_button_summary">Floating search button in the app list, positioned like the dock button.</string>
-    <string name="settings_app_overview_az_index_label">A–Z index</string>
+    <string name="settings_app_overview_az_index_label">A–Z rail</string>
     <string name="settings_app_icon_label">Icon</string>
     <string name="settings_app_icon_default">Default</string>
     <string name="settings_app_icon_reset">Use default icon</string>

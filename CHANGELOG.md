@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Settings use the same words everywhere: Appearance (no more Erscheinungsbild in German), element
+  box, icon pack, A-Z rail, and Edge for the left or right side of rails and buttons
+
 - Text search: the category rail has a look of its own (fill, border, corners) on its own page
   Category rail, which also holds showing it and which edge it sits on; until changed it looks like
   the search field. It is a part of its own in Corners of all parts and in designs

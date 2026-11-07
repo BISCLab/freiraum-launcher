@@ -124,10 +124,10 @@
     <string name="settings_pictogram_picker_title">Symbol wählen</string>
     <string name="settings_element_icon_label">Symbol</string>
 
-    <string name="settings_app_overview_alignment_label">Ausrichtung</string>
+    <string name="settings_app_overview_alignment_label">Rand</string>
     <string name="settings_app_overview_align_left">Links</string>
     <string name="settings_app_overview_align_right">Rechts</string>
-    <string name="settings_app_overview_az_index_label">A–Z-Index</string>
+    <string name="settings_app_overview_az_index_label">A–Z-Leiste</string>
 
     <string name="settings_color_eyedropper">Aus Widget übernehmen</string>
     <string name="settings_color_eyedropper_hint">Tippe auf eine Stelle im Widget, um genau diese Farbe zu übernehmen.</string>
@@ -192,7 +192,7 @@
     <string name="settings_layer_surface_widget">Widget</string>
     <string name="settings_layer_surface_section_letter">Abschnittsbuchstabe</string>
 
-    <string name="settings_section_icon_pack">Symbolpaket</string>
+    <string name="settings_section_icon_pack">Icon-Pack</string>
     <string name="settings_icon_pack_default">Standard</string>
 
     <string name="settings_section_default_launcher">Standard-Launcher</string>
@@ -215,7 +215,7 @@
     <string name="settings_default_launcher_already_set">Freiraum ist der Standard-Launcher.</string>
 
     <string name="settings_section_manage_apps">Apps</string>
-    <string name="settings_card_manage_apps_subtitle">Apps ausblenden und umbenennen, Symbole, Symbolpaket</string>
+    <string name="settings_card_manage_apps_subtitle">Apps ausblenden und umbenennen, Icons, Icon-Pack</string>
     <string name="settings_manage_apps_search_hint">Apps durchsuchen…</string>
     <string name="settings_manage_apps_hidden_summary">Ausgeblendet</string>
     <string name="settings_manage_apps_hidden_from_list_summary">In App-Liste ausgeblendet</string>
@@ -256,9 +256,9 @@
     <string name="settings_folder_widgets_label">Widgets</string>
     <string name="settings_folder_widget_add">Widget hinzufügen</string>
     <string name="settings_folder_widget_app_widget">App-Widget</string>
-    <string name="settings_folder_icon_pack_label">Symbolpaket</string>
+    <string name="settings_folder_icon_pack_label">Icon-Pack</string>
     <string name="settings_folder_icon_pack_choose_icon">Symbol auswählen</string>
-    <string name="settings_folder_icon_pack_none_installed">Keine Symbolpakete installiert</string>
+    <string name="settings_folder_icon_pack_none_installed">Keine Icon-Packs installiert</string>
     <string name="settings_folder_icon_pack_loading">Lädt…</string>
     <string name="settings_folder_icon_pack_search">Symbole suchen</string>
     <string name="settings_folder_icon_pack_no_results">Keine passenden Symbole</string>
@@ -293,9 +293,9 @@
 
     <string name="settings_section_pages">Seiten</string>
     <string name="settings_section_app_overview">App-Übersicht</string>
-    <string name="settings_card_pages_subtitle">Widgets, Elementenboxen, Hintergründe</string>
+    <string name="settings_card_pages_subtitle">Widgets, Element-Boxen, Hintergründe</string>
     <string name="settings_pages_home">Startbildschirm</string>
-    <string name="settings_home_appearance_title">Erscheinungsbild</string>
+    <string name="settings_home_appearance_title">Aussehen</string>
     <string name="settings_home_appearance_subtitle">Hintergrund, Statusleiste</string>
     <string name="settings_home_layout_title">Aufbau</string>
     <string name="settings_home_layout_subtitle">Panel, Widgets, Dock</string>
@@ -336,7 +336,7 @@
     <string name="settings_page_icon_glyph_widget_page">Widget-Seite</string>
 
     <string name="settings_rows_title">Zeilen</string>
-    <string name="settings_rows_empty">Keine Zeilen auf dieser Seite. Über „Zeile hinzufügen“ ein Widget oder eine Elementenbox ergänzen.</string>
+    <string name="settings_rows_empty">Keine Zeilen auf dieser Seite. Über „Zeile hinzufügen“ ein Widget oder eine Element-Box ergänzen.</string>
     <string name="settings_page_app_overview_description">Vollbildliste aller Apps. Wird per Geste geöffnet (Standard: Nach oben wischen, siehe Gesten).</string>
     <plurals name="settings_widget_size_rows">
         <item quantity="one">%1$d Zeile</item>
@@ -346,7 +346,7 @@
     <string name="settings_widget_size_increase">Um %1$d erhöhen</string>
     <string name="settings_widget_size_decrease">Um %1$d verringern</string>
     <string name="settings_rows_add">Zeile hinzufügen</string>
-    <string name="settings_rows_add_element_box">Elementenbox</string>
+    <string name="settings_rows_add_element_box">Element-Box</string>
     <string name="settings_rows_add_search_bar">Dock</string>
     <string name="settings_rows_size_title">Widget-Höhe</string>
     <string name="settings_rows_save">Speichern</string>
@@ -385,7 +385,7 @@
     <string name="settings_clock_show_next_alarm">Nächsten Alarm anzeigen</string>
     <string name="settings_clock_show_next_alarm_summary">Zeigt den nächsten Alarm unter dem Datum. Keine zusätzliche Berechtigung erforderlich.</string>
 
-    <string name="settings_element_box_edit_title">Elementenbox bearbeiten</string>
+    <string name="settings_element_box_edit_title">Element-Box bearbeiten</string>
     <string name="settings_element_box_columns_label">Spalten</string>
     <string name="settings_panel_rows_label">Zeilen</string>
     <string name="settings_panel_row_number">Zeile %1$d</string>
