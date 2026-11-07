@@ -475,7 +475,7 @@ enum class SearchElement(val route: String, val titleRes: Int) {
     RESULTS("results", R.string.settings_search_results_label)
 }
 
-/** Background/Border hub for one [SearchElement], same split as the Panel's own. */
+/** One search part: its look with a live preview, its corners, and what else belongs to it. */
 @Composable
 fun SettingsSearchElementScreen(
     element: SearchElement,
@@ -486,83 +486,95 @@ fun SettingsSearchElementScreen(
 ) {
     val resultsEdgeToEdge by viewModel.searchResultsEdgeToEdge.collectAsState()
     val barAtBottom by viewModel.searchBarAtBottom.collectAsState()
-    SettingsSubScreen(title = stringResource(element.titleRes), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_element_fill_label),
-                onClick = { onNavigate("background") },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_element_border_label),
-                onClick = { onNavigate("border") },
-                trailing = null
-            )
-        }
-        if (element == SearchElement.FIELD) {
-            SettingsPreferenceGroup(
-                title = stringResource(R.string.settings_search_bar_position_label),
-                info = stringResource(R.string.settings_search_field_position_info)
-            ) {
-                RadioPreference(stringResource(R.string.settings_app_grid_bar_top), false, barAtBottom, viewModel::setSearchBarAtBottom)
-                RadioPreference(stringResource(R.string.settings_app_grid_bar_bottom), true, barAtBottom, viewModel::setSearchBarAtBottom)
-            }
-            val fieldOwn by viewModel.searchFieldAppearance.collectAsState()
-            if (fieldOwn != null) {
-                SettingsPreferenceGroup {
-                    SettingsPreference(
-                        icon = null,
-                        title = stringResource(R.string.settings_element_color_reset),
-                        onClick = viewModel::resetSearchFieldAppearance,
-                        trailing = null
-                    )
-                }
-            }
-        }
-        if (element == SearchElement.RAIL) {
-            val railShown by viewModel.searchBarShowCategories.collectAsState()
-            val railLeft by viewModel.searchCategoryRailLeft.collectAsState()
-            val railOwn by viewModel.searchRailAppearance.collectAsState()
-            SettingsPreferenceGroup(info = stringResource(R.string.settings_search_rail_info)) {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_search_rail_show),
-                    onClick = { viewModel.setSearchBarShowCategories(!railShown) },
-                    trailing = { Switch(checked = railShown, onCheckedChange = viewModel::setSearchBarShowCategories) }
-                )
-            }
-            if (railShown) {
-                SettingsPreferenceGroup(title = stringResource(R.string.settings_search_rail_side_label)) {
-                    RadioPreference(stringResource(R.string.settings_search_rail_left), true, railLeft, viewModel::setSearchCategoryRailLeft)
-                    RadioPreference(stringResource(R.string.settings_search_rail_right), false, railLeft, viewModel::setSearchCategoryRailLeft)
-                }
-            }
-            if (railOwn != null) {
-                SettingsPreferenceGroup {
-                    SettingsPreference(
-                        icon = null,
-                        title = stringResource(R.string.settings_search_rail_like_field),
-                        onClick = viewModel::resetSearchRailAppearance,
-                        trailing = null
-                    )
-                }
-            }
-        }
-        // Only the cards have a side margin to switch off.
-        if (element == SearchElement.RESULTS) {
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_edge_label)) {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_widgets_edge_to_edge_label),
-                    info = stringResource(R.string.settings_edge_to_edge_summary),
-                    onClick = { viewModel.setSearchResultsEdgeToEdge(!resultsEdgeToEdge) },
-                    trailing = { Switch(checked = resultsEdgeToEdge, onCheckedChange = viewModel::setSearchResultsEdgeToEdge) }
-                )
-            }
-        }
+    val saved = effectiveSearchElementAppearance(element, viewModel)
+    // Unset defaults: the field follows the general roundness, the rail the field, the cards start fully rounded.
+    val barCorner by viewModel.searchBarCornerRadiusPercent.collectAsState()
+    val resultsCorner by viewModel.searchResultsCornerRadiusPercent.collectAsState()
+    val fieldCorner by viewModel.searchFieldCornerRadiusPercent.collectAsState()
+    val railCorner by viewModel.searchRailCornerRadiusPercent.collectAsState()
+    val defaultCornerPercent by viewModel.defaultCornerRadiusPercent.collectAsState()
+    val savedCorner = when (element) {
+        SearchElement.FIELD -> fieldCorner ?: barCorner ?: defaultCornerPercent
+        SearchElement.RAIL -> railCorner ?: fieldCorner ?: barCorner ?: defaultCornerPercent
+        SearchElement.RESULTS -> resultsCorner ?: 100
     }
+    ElementLookScreen(
+        title = stringResource(element.titleRes),
+        navController = navController,
+        onBack = onBack,
+        saved = saved,
+        savedCorner = savedCorner,
+        onSave = { look, corner ->
+            if (look != saved) viewModel.setSearchElementAppearance(element, look)
+            if (corner != null && corner != savedCorner) when (element) {
+                SearchElement.FIELD -> viewModel.setSearchFieldCornerRadiusPercent(corner)
+                SearchElement.RAIL -> viewModel.setSearchRailCornerRadiusPercent(corner)
+                SearchElement.RESULTS -> viewModel.setSearchResultsCornerRadiusPercent(corner)
+            }
+        },
+        kind = when (element) {
+            SearchElement.FIELD -> LookSampleKind.FIELD
+            SearchElement.RAIL -> LookSampleKind.RAIL
+            SearchElement.RESULTS -> LookSampleKind.CARDS
+        },
+        links = {
+            if (element == SearchElement.FIELD) {
+                SettingsPreferenceGroup(
+                    title = stringResource(R.string.settings_search_bar_position_label),
+                    info = stringResource(R.string.settings_search_field_position_info)
+                ) {
+                    RadioPreference(stringResource(R.string.settings_app_grid_bar_top), false, barAtBottom, viewModel::setSearchBarAtBottom)
+                    RadioPreference(stringResource(R.string.settings_app_grid_bar_bottom), true, barAtBottom, viewModel::setSearchBarAtBottom)
+                }
+            }
+            if (element == SearchElement.RAIL) {
+                val railShown by viewModel.searchBarShowCategories.collectAsState()
+                val railLeft by viewModel.searchCategoryRailLeft.collectAsState()
+                SettingsPreferenceGroup(info = stringResource(R.string.settings_search_rail_info)) {
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(R.string.settings_search_rail_show),
+                        onClick = { viewModel.setSearchBarShowCategories(!railShown) },
+                        trailing = { Switch(checked = railShown, onCheckedChange = viewModel::setSearchBarShowCategories) }
+                    )
+                    if (railShown) {
+                        RadioPreference(stringResource(R.string.settings_search_rail_left), true, railLeft, viewModel::setSearchCategoryRailLeft)
+                        RadioPreference(stringResource(R.string.settings_search_rail_right), false, railLeft, viewModel::setSearchCategoryRailLeft)
+                    }
+                }
+            }
+            if (element == SearchElement.RESULTS) {
+                SettingsPreferenceGroup {
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(R.string.settings_widgets_edge_to_edge_label),
+                        info = stringResource(R.string.settings_edge_to_edge_summary),
+                        onClick = { viewModel.setSearchResultsEdgeToEdge(!resultsEdgeToEdge) },
+                        trailing = { Switch(checked = resultsEdgeToEdge, onCheckedChange = viewModel::setSearchResultsEdgeToEdge) }
+                    )
+                }
+            }
+        },
+        extras = {
+            val fieldOwn by viewModel.searchFieldAppearance.collectAsState()
+            val railOwn by viewModel.searchRailAppearance.collectAsState()
+            val reset: (() -> Unit)? = when {
+                element == SearchElement.FIELD && fieldOwn != null -> viewModel::resetSearchFieldAppearance
+                element == SearchElement.RAIL && railOwn != null -> viewModel::resetSearchRailAppearance
+                else -> null
+            }
+            if (reset != null) {
+                SettingsPreferenceGroup {
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(if (element == SearchElement.RAIL) R.string.settings_search_rail_like_field else R.string.settings_element_color_reset),
+                        onClick = reset,
+                        trailing = null
+                    )
+                }
+            }
+        }
+    )
 }
 
 /** Until customized here, an element looks like every other element: the theme's default box. */
@@ -597,50 +609,6 @@ private fun SettingsViewModel.setSearchElementAppearance(element: SearchElement,
         SearchElement.RAIL -> setSearchRailAppearance(appearance)
         SearchElement.RESULTS -> setSearchResultsAppearance(appearance)
     }
-
-@Composable
-fun SettingsSearchElementBackgroundScreen(element: SearchElement, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val saved = effectiveSearchElementAppearance(element, viewModel)
-    var appearance by rememberDraft(saved)
-    SettingsSubScreen(title = stringResource(R.string.settings_element_fill_label), navController = navController, onBack = onBack, onSave = { viewModel.setSearchElementAppearance(element, appearance) }, dirty = appearance != saved) {
-        ElementBackgroundSection(appearance = appearance, onAppearanceChange = { appearance = it })
-    }
-}
-
-@Composable
-fun SettingsSearchElementBorderScreen(element: SearchElement, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val saved = effectiveSearchElementAppearance(element, viewModel)
-    var appearance by rememberDraft(saved)
-    // Unset defaults: the field follows the general roundness, the cards start fully rounded.
-    val barCorner by viewModel.searchBarCornerRadiusPercent.collectAsState()
-    val resultsCorner by viewModel.searchResultsCornerRadiusPercent.collectAsState()
-    val fieldCorner by viewModel.searchFieldCornerRadiusPercent.collectAsState()
-    val railCorner by viewModel.searchRailCornerRadiusPercent.collectAsState()
-    val defaultCornerPercent by viewModel.defaultCornerRadiusPercent.collectAsState()
-    val savedCornerPercent = when (element) {
-        SearchElement.FIELD -> fieldCorner ?: barCorner ?: defaultCornerPercent
-        SearchElement.RAIL -> railCorner ?: fieldCorner ?: barCorner ?: defaultCornerPercent
-        SearchElement.RESULTS -> resultsCorner ?: 100
-    }
-    var cornerPercent by rememberDraft(savedCornerPercent)
-    val save = {
-        if (appearance != saved) viewModel.setSearchElementAppearance(element, appearance)
-        if (cornerPercent != savedCornerPercent) when (element) {
-            SearchElement.FIELD -> viewModel.setSearchFieldCornerRadiusPercent(cornerPercent)
-            SearchElement.RAIL -> viewModel.setSearchRailCornerRadiusPercent(cornerPercent)
-            SearchElement.RESULTS -> viewModel.setSearchResultsCornerRadiusPercent(cornerPercent)
-        }
-    }
-    SettingsSubScreen(title = stringResource(R.string.settings_element_border_label), navController = navController, onBack = onBack, onSave = save, dirty = appearance != saved || cornerPercent != savedCornerPercent) {
-        ElementBorderSection(appearance = appearance, onAppearanceChange = { appearance = it })
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
-            ExpandablePercentSlider(
-                percent = cornerPercent,
-                onSettled = { cornerPercent = it }
-            )
-        }
-    }
-}
 
 @Composable
 private fun searchEngineLabel(engine: SearchEngine): String = when (engine) {

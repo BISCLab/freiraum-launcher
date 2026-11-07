@@ -37,12 +37,8 @@ import com.bisc.flauncher.ui.settings.SettingsHomeScreenHub
 import com.bisc.flauncher.ui.settings.SettingsPageAppearanceScreen
 import com.bisc.flauncher.ui.settings.SettingsHomeLayoutScreen
 import com.bisc.flauncher.ui.settings.SettingsHomePanelScreen
-import com.bisc.flauncher.ui.settings.SettingsPanelBackgroundScreen
-import com.bisc.flauncher.ui.settings.SettingsPanelBorderScreen
 import com.bisc.flauncher.ui.settings.SettingsDockScreen
 import com.bisc.flauncher.ui.settings.SettingsDockVisibilityScreen
-import com.bisc.flauncher.ui.settings.SettingsDockBackgroundScreen
-import com.bisc.flauncher.ui.settings.SettingsDockBorderScreen
 import com.bisc.flauncher.ui.settings.SettingsDockElementsScreen
 import com.bisc.flauncher.ui.settings.SettingsPanelElementsScreen
 import com.bisc.flauncher.ui.settings.SettingsSearchFullScreen
@@ -265,12 +261,6 @@ class MainActivity : ComponentActivity() {
                                     onNavigate = { sub -> navController.navigate("settings/search/${element.route}/$sub") }
                                 )
                             }
-                            settingsComposable("settings/search/${element.route}/background") {
-                                com.bisc.flauncher.ui.settings.SettingsSearchElementBackgroundScreen(element = element, navController = navController, onBack = { navController.popBackStack() })
-                            }
-                            settingsComposable("settings/search/${element.route}/border") {
-                                com.bisc.flauncher.ui.settings.SettingsSearchElementBorderScreen(element = element, navController = navController, onBack = { navController.popBackStack() })
-                            }
                         }
                         settingsComposable("settings/search/appearance") {
                             com.bisc.flauncher.ui.settings.SettingsSearchAppearanceScreen(
@@ -366,24 +356,11 @@ class MainActivity : ComponentActivity() {
                         ) { backStackEntry ->
                             val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@settingsComposable
                             SettingsHomePanelScreen(
+                                pageId = pageId,
                                 navController = navController,
                                 onBack = { navController.popBackStack() },
                                 onNavigate = { sub -> navController.navigate("settings/pages/$pageId/home/panel/$sub") }
                             )
-                        }
-                        settingsComposable(
-                            "settings/pages/{pageId}/home/panel/background",
-                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
-                        ) { backStackEntry ->
-                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@settingsComposable
-                            SettingsPanelBackgroundScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
-                        }
-                        settingsComposable(
-                            "settings/pages/{pageId}/home/panel/border",
-                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
-                        ) { backStackEntry ->
-                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@settingsComposable
-                            SettingsPanelBorderScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
                         }
                         settingsComposable(
                             "settings/pages/{pageId}/home/panel/elements",
@@ -410,20 +387,6 @@ class MainActivity : ComponentActivity() {
                         ) { backStackEntry ->
                             val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@settingsComposable
                             SettingsDockVisibilityScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
-                        }
-                        settingsComposable(
-                            "settings/pages/{pageId}/home/layout/dock/background",
-                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
-                        ) { backStackEntry ->
-                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@settingsComposable
-                            SettingsDockBackgroundScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
-                        }
-                        settingsComposable(
-                            "settings/pages/{pageId}/home/layout/dock/border",
-                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
-                        ) { backStackEntry ->
-                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@settingsComposable
-                            SettingsDockBorderScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
                         }
                         settingsComposable(
                             "settings/pages/{pageId}/home/layout/dock/elements",
@@ -582,12 +545,6 @@ class MainActivity : ComponentActivity() {
                                 onBack = { navController.popBackStack() },
                                 onNavigate = { sub -> navController.navigate("settings/folder/global/$sub") }
                             )
-                        }
-                        settingsComposable("settings/folder/global/appearance") {
-                            com.bisc.flauncher.ui.settings.SettingsFolderGlobalAppearanceScreen(navController = navController, onBack = { navController.popBackStack() })
-                        }
-                        settingsComposable("settings/folder/global/border") {
-                            com.bisc.flauncher.ui.settings.SettingsFolderGlobalBorderScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         settingsComposable("settings/folder/global/visibility") {
                             com.bisc.flauncher.ui.settings.SettingsFolderGlobalVisibilityScreen(navController = navController, onBack = { navController.popBackStack() })

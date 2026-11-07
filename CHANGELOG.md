@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Dock, Panel, folders, search field, category rail and search results each have one page for their
+  look instead of separate Fill and Border pages: a live preview on top, then fill, text color,
+  opacity, border and corners, saved together. Elements, visibility and the other options of the
+  part sit right under the preview
+
 - Settings use the same words everywhere: Appearance (no more Erscheinungsbild in German), element
   box, icon pack, A-Z rail, and Edge for the left or right side of rails and buttons
 

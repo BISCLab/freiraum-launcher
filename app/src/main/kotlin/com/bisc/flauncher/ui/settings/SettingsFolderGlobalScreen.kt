@@ -19,47 +19,27 @@ import com.bisc.flauncher.R
  *  long flat screen. An individual folder can still override Appearance and Border independently
  *  for itself (see SettingsFolderEditScreen). */
 @Composable
-fun SettingsFolderGlobalScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
-    SettingsSubScreen(title = stringResource(R.string.settings_folder_global_label), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = Icons.Filled.Palette,
-                title = stringResource(R.string.settings_element_fill_label),
-                onClick = { onNavigate("appearance") },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = Icons.Filled.BorderAll,
-                title = stringResource(R.string.settings_element_border_label),
-                onClick = { onNavigate("border") },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = Icons.Filled.Visibility,
-                title = stringResource(R.string.settings_folder_visibility_label),
-                onClick = { onNavigate("visibility") },
-                trailing = null
-            )
+fun SettingsFolderGlobalScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+    val saved by viewModel.folderCardAppearance.collectAsState()
+    ElementLookScreen(
+        title = stringResource(R.string.settings_folder_global_label),
+        navController = navController,
+        onBack = onBack,
+        saved = saved,
+        savedCorner = null,
+        onSave = { look, _ -> viewModel.setFolderCardAppearance(look) },
+        kind = LookSampleKind.FOLDER,
+        links = {
+            SettingsPreferenceGroup {
+                SettingsPreference(
+                    icon = Icons.Filled.Visibility,
+                    title = stringResource(R.string.settings_folder_visibility_label),
+                    onClick = { onNavigate("visibility") },
+                    trailing = null
+                )
+            }
         }
-    }
-}
-
-@Composable
-fun SettingsFolderGlobalAppearanceScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val saved by viewModel.folderCardAppearance.collectAsState()
-    var cardAppearance by rememberDraft(saved)
-    SettingsSubScreen(title = stringResource(R.string.settings_element_fill_label), navController = navController, onBack = onBack, onSave = { viewModel.setFolderCardAppearance(cardAppearance) }, dirty = cardAppearance != saved) {
-        ElementBackgroundSection(appearance = cardAppearance, onAppearanceChange = { cardAppearance = it })
-    }
-}
-
-@Composable
-fun SettingsFolderGlobalBorderScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val saved by viewModel.folderCardAppearance.collectAsState()
-    var cardAppearance by rememberDraft(saved)
-    SettingsSubScreen(title = stringResource(R.string.settings_element_border_label), navController = navController, onBack = onBack, onSave = { viewModel.setFolderCardAppearance(cardAppearance) }, dirty = cardAppearance != saved) {
-        ElementBorderSection(appearance = cardAppearance, onAppearanceChange = { cardAppearance = it })
-    }
+    )
 }
 
 @Composable

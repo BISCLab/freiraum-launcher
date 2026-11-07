@@ -292,29 +292,27 @@ fun SettingsHomeLayoutScreen(
  *  own hub; the enable switch itself lives inline in [SettingsHomeLayoutScreen]'s list, not here,
  *  matching the Dock bookend's own split. */
 @Composable
-fun SettingsHomePanelScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
-    SettingsSubScreen(title = stringResource(R.string.settings_home_panel_label), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = Icons.Filled.Palette,
-                title = stringResource(R.string.settings_element_fill_label),
-                onClick = { onNavigate("background") },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = Icons.Filled.BorderAll,
-                title = stringResource(R.string.settings_element_border_label),
-                onClick = { onNavigate("border") },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = Icons.Filled.GridView,
-                title = stringResource(R.string.settings_dock_elements_title),
-                onClick = { onNavigate("elements") },
-                trailing = null
-            )
+fun SettingsHomePanelScreen(pageId: Long, navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+    val saved = rememberPanelRow(pageId, viewModel) ?: return
+    ElementLookScreen(
+        title = stringResource(R.string.settings_home_panel_label),
+        navController = navController,
+        onBack = onBack,
+        saved = saved.appearance(),
+        savedCorner = saved.cornerRadiusPercent,
+        onSave = { look, corner -> viewModel.saveRow(saved.withAppearance(look).copy(cornerRadiusPercent = corner ?: saved.cornerRadiusPercent)) },
+        kind = LookSampleKind.PANEL,
+        links = {
+            SettingsPreferenceGroup {
+                SettingsPreference(
+                    icon = Icons.Filled.GridView,
+                    title = stringResource(R.string.settings_dock_elements_title),
+                    onClick = { onNavigate("elements") },
+                    trailing = null
+                )
+            }
         }
-    }
+    )
 }
 
 /** Finds the Home page's own pinned Panel row - mirrors [SettingsDockScreen.kt]'s rememberDockRow,
@@ -325,29 +323,6 @@ private fun rememberPanelRow(pageId: Long, viewModel: HomeViewModel): PageRow? {
     return rowsByPage[pageId]?.find { it.type == PageRowType.PANEL }
 }
 
-@Composable
-fun SettingsPanelBackgroundScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val saved = rememberPanelRow(pageId, viewModel) ?: return
-    var row by rememberDraft(saved)
-    SettingsSubScreen(title = stringResource(R.string.settings_element_fill_label), navController = navController, onBack = onBack, onSave = { viewModel.saveRow(row) }, dirty = row != saved) {
-        ElementBackgroundSection(appearance = row.appearance(), onAppearanceChange = { row = row.withAppearance(it) })
-    }
-}
-
-@Composable
-fun SettingsPanelBorderScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val saved = rememberPanelRow(pageId, viewModel) ?: return
-    var row by rememberDraft(saved)
-    SettingsSubScreen(title = stringResource(R.string.settings_element_border_label), navController = navController, onBack = onBack, onSave = { viewModel.saveRow(row) }, dirty = row != saved) {
-        ElementBorderSection(appearance = row.appearance(), onAppearanceChange = { row = row.withAppearance(it) })
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
-            ExpandablePercentSlider(
-                percent = row.cornerRadiusPercent,
-                onSettled = { row = row.copy(cornerRadiusPercent = it) }
-            )
-        }
-    }
-}
 
 /** The Panel's own grid editor - same "+" preview/chooser idea as [SettingsDockElementsScreen], but
  *  shaped row by row (each sub-row picks its own column count, 1-6) instead of one shared column

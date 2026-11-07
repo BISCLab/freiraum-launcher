@@ -51,37 +51,36 @@ import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
-/** The Dock's own settings - a hub, mirroring the Home page's own Appearance/Layout split. */
+/** The Dock: how it looks, with a live preview, and the way to its visibility and elements. */
 @Composable
-fun SettingsDockScreen(pageId: Long, navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
-    SettingsSubScreen(title = stringResource(R.string.settings_home_dock_label), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = Icons.Filled.Visibility,
-                title = stringResource(R.string.settings_dock_visibility_label),
-                onClick = { onNavigate("visibility") },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = Icons.Filled.Palette,
-                title = stringResource(R.string.settings_element_fill_label),
-                onClick = { onNavigate("background") },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = Icons.Filled.BorderAll,
-                title = stringResource(R.string.settings_element_border_label),
-                onClick = { onNavigate("border") },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = Icons.Filled.GridView,
-                title = stringResource(R.string.settings_dock_elements_title),
-                onClick = { onNavigate("elements") },
-                trailing = null
-            )
+fun SettingsDockScreen(pageId: Long, navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+    val saved = rememberDockRow(pageId, viewModel) ?: return
+    ElementLookScreen(
+        title = stringResource(R.string.settings_home_dock_label),
+        navController = navController,
+        onBack = onBack,
+        saved = saved.appearance(),
+        savedCorner = saved.cornerRadiusPercent,
+        onSave = { look, corner -> viewModel.saveRow(saved.withAppearance(look).copy(cornerRadiusPercent = corner ?: saved.cornerRadiusPercent)) },
+        kind = LookSampleKind.DOCK,
+        links = {
+            SettingsPreferenceGroup {
+                SettingsPreference(
+                    icon = Icons.Filled.GridView,
+                    title = stringResource(R.string.settings_dock_elements_title),
+                    onClick = { onNavigate("elements") },
+                    trailing = null
+                )
+                SettingsPreference(
+                    icon = Icons.Filled.Visibility,
+                    title = stringResource(R.string.settings_dock_visibility_label),
+                    summary = dockVisibilityModeLabel(saved.dockVisibilityMode),
+                    onClick = { onNavigate("visibility") },
+                    trailing = null
+                )
+            }
         }
-    }
+    )
 }
 
 /** Finds the Home page's own pinned dock row, wherever it's needed across the 4 Dock sub-screens - 
@@ -101,30 +100,6 @@ fun SettingsDockVisibilityScreen(pageId: Long, navController: NavController, onB
             DockVisibilityMode.entries.forEach { mode ->
                 RadioPreference(dockVisibilityModeLabel(mode), mode, row.dockVisibilityMode, { viewModel.setRowDockVisibilityMode(row, it) })
             }
-        }
-    }
-}
-
-@Composable
-fun SettingsDockBackgroundScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val saved = rememberDockRow(pageId, viewModel) ?: return
-    var row by rememberDraft(saved)
-    SettingsSubScreen(title = stringResource(R.string.settings_element_fill_label), navController = navController, onBack = onBack, onSave = { viewModel.saveRow(row) }, dirty = row != saved) {
-        ElementBackgroundSection(appearance = row.appearance(), onAppearanceChange = { row = row.withAppearance(it) })
-    }
-}
-
-@Composable
-fun SettingsDockBorderScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val saved = rememberDockRow(pageId, viewModel) ?: return
-    var row by rememberDraft(saved)
-    SettingsSubScreen(title = stringResource(R.string.settings_element_border_label), navController = navController, onBack = onBack, onSave = { viewModel.saveRow(row) }, dirty = row != saved) {
-        ElementBorderSection(appearance = row.appearance(), onAppearanceChange = { row = row.withAppearance(it) })
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
-            ExpandablePercentSlider(
-                percent = row.cornerRadiusPercent,
-                onSettled = { row = row.copy(cornerRadiusPercent = it) }
-            )
         }
     }
 }
