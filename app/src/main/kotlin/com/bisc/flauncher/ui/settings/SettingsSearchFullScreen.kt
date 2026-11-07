@@ -91,6 +91,13 @@ fun SettingsSearchAppearanceScreen(navController: NavController, onBack: () -> U
             )
             SettingsPreference(
                 icon = null,
+                title = stringResource(R.string.settings_search_rail_label),
+                summary = stringResource(if (railShown) (if (railLeft) R.string.settings_search_rail_left else R.string.settings_search_rail_right) else R.string.settings_search_rail_hidden),
+                onClick = { onNavigate(SearchElement.RAIL.route) },
+                trailing = null
+            )
+            SettingsPreference(
+                icon = null,
                 title = stringResource(R.string.settings_search_results_label),
                 onClick = { onNavigate(SearchElement.RESULTS.route) },
                 trailing = null
@@ -101,21 +108,6 @@ fun SettingsSearchAppearanceScreen(navController: NavController, onBack: () -> U
                 onClick = { onNavigate("keyboard") },
                 trailing = null
             )
-        }
-        SettingsPreferenceGroup(
-            title = stringResource(R.string.settings_search_rail_label),
-            info = stringResource(R.string.settings_search_rail_info)
-        ) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_rail_show),
-                onClick = { viewModel.setSearchBarShowCategories(!railShown) },
-                trailing = { Switch(checked = railShown, onCheckedChange = viewModel::setSearchBarShowCategories) }
-            )
-            if (railShown) {
-                RadioPreference(stringResource(R.string.settings_search_rail_left), true, railLeft, viewModel::setSearchCategoryRailLeft)
-                RadioPreference(stringResource(R.string.settings_search_rail_right), false, railLeft, viewModel::setSearchCategoryRailLeft)
-            }
         }
     }
 }
@@ -479,6 +471,7 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
 /** The search screen's own styleable elements, each with the same Background/Border pages. */
 enum class SearchElement(val route: String, val titleRes: Int) {
     FIELD("field", R.string.settings_app_grid_search_field),
+    RAIL("rail", R.string.settings_search_rail_label),
     RESULTS("results", R.string.settings_search_results_label)
 }
 
@@ -528,6 +521,35 @@ fun SettingsSearchElementScreen(
                 }
             }
         }
+        if (element == SearchElement.RAIL) {
+            val railShown by viewModel.searchBarShowCategories.collectAsState()
+            val railLeft by viewModel.searchCategoryRailLeft.collectAsState()
+            val railOwn by viewModel.searchRailAppearance.collectAsState()
+            SettingsPreferenceGroup(info = stringResource(R.string.settings_search_rail_info)) {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_search_rail_show),
+                    onClick = { viewModel.setSearchBarShowCategories(!railShown) },
+                    trailing = { Switch(checked = railShown, onCheckedChange = viewModel::setSearchBarShowCategories) }
+                )
+            }
+            if (railShown) {
+                SettingsPreferenceGroup(title = stringResource(R.string.settings_search_rail_side_label)) {
+                    RadioPreference(stringResource(R.string.settings_search_rail_left), true, railLeft, viewModel::setSearchCategoryRailLeft)
+                    RadioPreference(stringResource(R.string.settings_search_rail_right), false, railLeft, viewModel::setSearchCategoryRailLeft)
+                }
+            }
+            if (railOwn != null) {
+                SettingsPreferenceGroup {
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(R.string.settings_search_rail_like_field),
+                        onClick = viewModel::resetSearchRailAppearance,
+                        trailing = null
+                    )
+                }
+            }
+        }
         // Only the cards have a side margin to switch off.
         if (element == SearchElement.RESULTS) {
             SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_edge_label)) {
@@ -546,8 +568,12 @@ fun SettingsSearchElementScreen(
 /** Until customized here, an element looks like every other element: the theme's default box. */
 @Composable
 private fun effectiveSearchElementAppearance(element: SearchElement, viewModel: SettingsViewModel): com.bisc.flauncher.data.model.ElementAppearance {
+    if (element == SearchElement.RAIL) {
+        val railOwn by viewModel.searchRailAppearance.collectAsState()
+        return railOwn ?: effectiveSearchElementAppearance(SearchElement.FIELD, viewModel)
+    }
     val own by when (element) {
-        SearchElement.FIELD -> viewModel.searchFieldAppearance
+        SearchElement.RAIL, SearchElement.FIELD -> viewModel.searchFieldAppearance
         SearchElement.RESULTS -> viewModel.searchResultsAppearance
     }.collectAsState()
     val defaultBox = com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor(MaterialTheme.colorScheme.background.luminance() < 0.5f)
@@ -568,6 +594,7 @@ private fun effectiveSearchElementAppearance(element: SearchElement, viewModel: 
 private fun SettingsViewModel.setSearchElementAppearance(element: SearchElement, appearance: com.bisc.flauncher.data.model.ElementAppearance) =
     when (element) {
         SearchElement.FIELD -> setSearchFieldAppearance(appearance)
+        SearchElement.RAIL -> setSearchRailAppearance(appearance)
         SearchElement.RESULTS -> setSearchResultsAppearance(appearance)
     }
 
@@ -588,9 +615,11 @@ fun SettingsSearchElementBorderScreen(element: SearchElement, navController: Nav
     val barCorner by viewModel.searchBarCornerRadiusPercent.collectAsState()
     val resultsCorner by viewModel.searchResultsCornerRadiusPercent.collectAsState()
     val fieldCorner by viewModel.searchFieldCornerRadiusPercent.collectAsState()
+    val railCorner by viewModel.searchRailCornerRadiusPercent.collectAsState()
     val defaultCornerPercent by viewModel.defaultCornerRadiusPercent.collectAsState()
     val savedCornerPercent = when (element) {
         SearchElement.FIELD -> fieldCorner ?: barCorner ?: defaultCornerPercent
+        SearchElement.RAIL -> railCorner ?: fieldCorner ?: barCorner ?: defaultCornerPercent
         SearchElement.RESULTS -> resultsCorner ?: 100
     }
     var cornerPercent by rememberDraft(savedCornerPercent)
@@ -598,6 +627,7 @@ fun SettingsSearchElementBorderScreen(element: SearchElement, navController: Nav
         if (appearance != saved) viewModel.setSearchElementAppearance(element, appearance)
         if (cornerPercent != savedCornerPercent) when (element) {
             SearchElement.FIELD -> viewModel.setSearchFieldCornerRadiusPercent(cornerPercent)
+            SearchElement.RAIL -> viewModel.setSearchRailCornerRadiusPercent(cornerPercent)
             SearchElement.RESULTS -> viewModel.setSearchResultsCornerRadiusPercent(cornerPercent)
         }
     }

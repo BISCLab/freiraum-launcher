@@ -185,6 +185,8 @@ fun HomeScreen(
     val searchBarShowCategories by viewModel.searchBarShowCategories.collectAsState()
     val searchFieldAppearance by viewModel.searchFieldAppearance.collectAsState()
     val searchFieldCornerRadiusPercent by viewModel.searchFieldCornerRadiusPercent.collectAsState()
+    val searchRailAppearance by viewModel.searchRailAppearance.collectAsState()
+    val searchRailCornerRadiusPercent by viewModel.searchRailCornerRadiusPercent.collectAsState()
     val appListSearchFieldAppearance by viewModel.appListSearchFieldAppearance.collectAsState()
     val searchKeyboardCapEnabled by viewModel.searchKeyboardCapEnabled.collectAsState()
     val searchKeyboardCapColor by viewModel.searchKeyboardCapColor.collectAsState()
@@ -1187,6 +1189,8 @@ fun HomeScreen(
             showCategoryRail = searchBarShowCategories,
             fieldAppearance = searchFieldAppearance,
             fieldCornerRadiusPercent = searchFieldCornerRadiusPercent,
+            railAppearance = searchRailAppearance,
+            railCornerRadiusPercent = searchRailCornerRadiusPercent,
             keyboardCapColor = if (searchKeyboardCapEnabled) searchKeyboardCapColor else null,
             keyboardCapCornerRadiusPercent = searchKeyboardCapCornerRadiusPercent,
             keyboardCapArrow = searchKeyboardCapArrow,

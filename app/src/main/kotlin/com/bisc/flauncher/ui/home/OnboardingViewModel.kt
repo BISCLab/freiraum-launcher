@@ -28,7 +28,7 @@ enum class ShapePreset(val elements: Int, val widgets: Int) {
 
 /** Every part the welcome tour can shape on its own. */
 enum class ShapePart(val isWidget: Boolean = false) {
-    DOCK, PANEL, WIDGETS(isWidget = true), ELEMENT_BOXES, FOLDERS, SEARCH_BUTTON, ALPHABET_RAIL, SEARCH_BAR, SEARCH_RESULTS;
+    DOCK, PANEL, WIDGETS(isWidget = true), ELEMENT_BOXES, FOLDERS, SEARCH_BUTTON, ALPHABET_RAIL, SEARCH_BAR, SEARCH_RESULTS, CATEGORY_RAIL;
 
     fun percentOf(preset: ShapePreset) = if (isWidget) preset.widgets else preset.elements
 
@@ -83,7 +83,9 @@ class OnboardingViewModel @Inject constructor(
             ShapePart.SEARCH_BUTTON to (settingsRepository.appListSearchButtonCornerPercent.first() ?: general),
             ShapePart.ALPHABET_RAIL to (settingsRepository.alphabetRailCornerPercent.first() ?: general),
             ShapePart.SEARCH_BAR to (settingsRepository.searchBarCornerRadiusPercent.first() ?: general),
-            ShapePart.SEARCH_RESULTS to (settingsRepository.searchResultsCornerRadiusPercent.first() ?: general)
+            ShapePart.SEARCH_RESULTS to (settingsRepository.searchResultsCornerRadiusPercent.first() ?: general),
+            ShapePart.CATEGORY_RAIL to (settingsRepository.searchRailCornerRadiusPercent.first()
+                ?: settingsRepository.searchFieldCornerRadiusPercent.first() ?: settingsRepository.searchBarCornerRadiusPercent.first() ?: general)
         )
     }
 
@@ -107,6 +109,7 @@ class OnboardingViewModel @Inject constructor(
                 settingsRepository.setSearchFieldCornerRadiusPercent(it)
             }
             shape[ShapePart.SEARCH_RESULTS]?.let { settingsRepository.setSearchResultsCornerRadiusPercent(it) }
+            shape[ShapePart.CATEGORY_RAIL]?.let { settingsRepository.setSearchRailCornerRadiusPercent(it) }
             pageRowDao.updateAll(pageRowDao.observeAll().first().map { row ->
                 val corner = when (row.type) {
                     PageRowType.SEARCH_BAR -> shape[ShapePart.DOCK]

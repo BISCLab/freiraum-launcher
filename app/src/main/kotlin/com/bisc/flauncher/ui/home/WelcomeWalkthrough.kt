@@ -520,6 +520,7 @@ private fun ShapePart.label() = when (this) {
     ShapePart.ALPHABET_RAIL -> R.string.welcome_shape_part_alphabet_rail
     ShapePart.SEARCH_BAR -> R.string.welcome_shape_part_search_bar
     ShapePart.SEARCH_RESULTS -> R.string.welcome_shape_part_search_results
+    ShapePart.CATEGORY_RAIL -> R.string.settings_search_rail_label
 }
 
 /** One screen in small with its parts drawn at their corners; the part picked in the table glows
@@ -593,12 +594,19 @@ private fun MockScreen(screen: ShapeScreen, corners: Map<ShapePart, Int>, focus:
             }
             ShapeScreen.SEARCH -> Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Spacer(Modifier.height(10.dp))
-                Part(ShapePart.SEARCH_RESULTS, Modifier.fillMaxWidth().height(110.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Part(ShapePart.SEARCH_RESULTS, Modifier.weight(1f).height(110.dp)) {
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(stringResource(R.string.welcome_shape_part_search_results), fontSize = 8.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f))
-                        Dots(4)
-                        Dots(4)
+                        Text(stringResource(R.string.welcome_shape_part_search_results), fontSize = 8.sp, maxLines = 1, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f))
+                        Dots(3)
+                        Dots(3)
                     }
+                }
+                Part(ShapePart.CATEGORY_RAIL, Modifier.width(12.dp).height(110.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                        repeat(4) { Box(Modifier.size(5.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))) }
+                    }
+                }
                 }
                 Spacer(Modifier.weight(1f))
                 Part(ShapePart.SEARCH_BAR, Modifier.fillMaxWidth().height(26.dp), stringResource(R.string.welcome_mock_search))

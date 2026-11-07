@@ -343,6 +343,20 @@ class SettingsRepository @Inject constructor(
 
     suspend fun resetSearchFieldAppearance() = resetElementAppearanceFor("search_field")
 
+    /** The Text search's category rail; null = the same look as the search field. */
+    val searchRailAppearance: Flow<ElementAppearance?> = customElementAppearanceFor(SEARCH_RAIL_PREFIX, ElementAppearance(borderEnabled = true))
+
+    suspend fun setSearchRailAppearance(appearance: ElementAppearance) = setElementAppearanceFor(SEARCH_RAIL_PREFIX, appearance)
+
+    suspend fun resetSearchRailAppearance() = resetElementAppearanceFor(SEARCH_RAIL_PREFIX)
+
+    /** Null = same roundness as the search field. */
+    val searchRailCornerRadiusPercent: Flow<Int?> = dataStore.data.map { it[SEARCH_RAIL_CORNER_RADIUS_KEY] }
+
+    suspend fun setSearchRailCornerRadiusPercent(percent: Int) {
+        dataStore.edit { it[SEARCH_RAIL_CORNER_RADIUS_KEY] = percent.coerceIn(0, 100) }
+    }
+
     /** Null = same roundness as the search bar. */
     val searchFieldCornerRadiusPercent: Flow<Int?> = dataStore.data.map { it[SEARCH_FIELD_CORNER_RADIUS_KEY] }
 
@@ -1113,6 +1127,8 @@ class SettingsRepository @Inject constructor(
         private const val SEARCH_BAR_PREFIX = "search_bar"
         private val SEARCH_BAR_CORNER_RADIUS_KEY = intPreferencesKey("search_bar_corner_radius_percent")
         private val SEARCH_FIELD_CORNER_RADIUS_KEY = intPreferencesKey("search_field_corner_radius_percent")
+        private val SEARCH_RAIL_CORNER_RADIUS_KEY = intPreferencesKey("search_category_rail_corner_radius_percent")
+        const val SEARCH_RAIL_PREFIX = "search_category_rail"
         private const val SEARCH_RESULTS_PREFIX = "search_results"
         private val SEARCH_RESULTS_CORNER_RADIUS_KEY = intPreferencesKey("search_results_corner_radius_percent")
         private val SEARCH_RESULTS_EDGE_TO_EDGE_KEY = booleanPreferencesKey("search_results_edge_to_edge")

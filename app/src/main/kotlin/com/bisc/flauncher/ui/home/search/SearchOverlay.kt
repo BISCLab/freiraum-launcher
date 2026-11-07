@@ -134,7 +134,10 @@ fun SearchOverlay(
     favoriteIds: Set<String> = emptySet(),
     favoritesOnOpen: Boolean = true,
     onToggleFavorite: (AppInfo) -> Unit = {},
-    railLeft: Boolean = false
+    railLeft: Boolean = false,
+    /** The rail's own look and roundness; null = like the search field. */
+    railAppearance: ElementAppearance? = null,
+    railCornerRadiusPercent: Int? = null
 ) {
     val context = LocalContext.current
     val aiAppLabel = remember(aiAppPackage) {
@@ -326,8 +329,8 @@ fun SearchOverlay(
                             present = cards.keys,
                             focus = focus,
                             left = railLeft,
-                            appearance = fieldAppearance ?: automaticRailAppearance(colors.contentColor.luminance() > 0.5f),
-                            cornerRadiusPercent = fieldCornerRadiusPercent ?: barCornerRadiusPercent ?: cornerRadiusPercent,
+                            appearance = railAppearance ?: fieldAppearance ?: automaticRailAppearance(colors.contentColor.luminance() > 0.5f),
+                            cornerRadiusPercent = railCornerRadiusPercent ?: fieldCornerRadiusPercent ?: barCornerRadiusPercent ?: cornerRadiusPercent,
                             onTap = onRailTap,
                             onScrub = onRailScrub,
                             modifier = Modifier.align(if (railLeft) Alignment.CenterStart else Alignment.CenterEnd)

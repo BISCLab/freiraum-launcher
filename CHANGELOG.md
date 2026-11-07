@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Text search: the category rail has a look of its own (fill, border, corners) on its own page
+  Category rail, which also holds showing it and which edge it sits on; until changed it looks like
+  the search field. It is a part of its own in Corners of all parts and in designs
+
 - Text search tidied up after the rebuild: the search field settings now hold its position (top or
   on the keyboard), the old bar page with its box, category row and floating switch is gone, and
   designs no longer carry a look for the bar box (Neon Light 1.4, Neon Dark 1.2)

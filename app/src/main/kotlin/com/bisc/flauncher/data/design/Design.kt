@@ -69,7 +69,7 @@ data class Design(
 
 /** The parts of the launcher a design can style, by the name they're stored under. */
 val DESIGN_ELEMENTS = listOf(
-    "search_appearance", "search_field", "search_results", "folder_card",
+    "search_appearance", "search_field", "search_category_rail", "search_results", "folder_card",
     "app_list_search_button", "app_list_search_field", "search_alphabet_rail", "search_header_letter",
     "app_grid_search_bar", "widget_arrow"
 )
