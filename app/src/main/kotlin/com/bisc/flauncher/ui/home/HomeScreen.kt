@@ -1355,6 +1355,11 @@ fun HomeScreen(
                 onBack = viewModel::closeFolder,
                 cardAppearance = folder.effectiveAppearance(folderCardAppearance),
                 onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) },
+                onEditWidget = { item ->
+                    viewModel.closeAllFolders()
+                    viewModel.closeOverview()
+                    onNavigateToSettings("settings/folder/${item.folderId}/widget/${item.id}")
+                },
                 showLabels = if (folder.showLabelsOverrideEnabled) folder.showLabels else folderShowLabels
             )
             }

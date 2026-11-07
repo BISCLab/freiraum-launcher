@@ -7,6 +7,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import kotlinx.coroutines.withTimeoutOrNull
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -155,6 +160,8 @@ fun FolderView(
     cardAppearance: ElementAppearance,
     /** Runs a clock widget's tap action. */
     onExecuteAction: (com.bisc.flauncher.data.model.GestureAction) -> Unit = {},
+    /** Opens a widget's own settings (long press on it, then Edit). */
+    onEditWidget: (FolderItem) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     // A pending removal asks first; picking "move" instead switches into reorder mode below.
@@ -197,7 +204,17 @@ fun FolderView(
         ) {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 for (widgetItem in widgetItems) {
-                    key("widget_${widgetItem.id}") { FolderWidgetRow(item = widgetItem, onExecuteAction = onExecuteAction) }
+                    key("widget_${widgetItem.id}") {
+                        FolderWidgetRow(
+                            item = widgetItem,
+                            onExecuteAction = onExecuteAction,
+                            menuExpanded = menuForItemId == widgetItem.id,
+                            onLongPress = { if (movingItemId == null) menuForItemId = widgetItem.id },
+                            onDismissMenu = { menuForItemId = null },
+                            onEdit = { menuForItemId = null; onEditWidget(widgetItem) },
+                            onRemove = { menuForItemId = null; pendingRemoval = widgetItem }
+                        )
+                    }
                 }
                 for (row in gridRows) {
                     key("grid_${row.items.first().id}") {
@@ -269,7 +286,8 @@ fun FolderView(
 
     pendingRemoval?.let { entry ->
         ConfirmRemoveDialog(
-            label = folderItemLabel(entry, folders, savedMapTargets, pinnedWebsites, resolveLabel),
+            label = folderItemLabel(entry, folders, savedMapTargets, pinnedWebsites, resolveLabel)
+                .ifBlank { stringResource(R.string.settings_layer_surface_widget) },
             onConfirm = { onRemoveItem(entry); pendingRemoval = null },
             onDismiss = { pendingRemoval = null }
         )
@@ -292,9 +310,43 @@ private fun folderItemLabel(
     GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE, GridItemType.CONTACT, GridItemType.ACTION_BUTTON -> ""
 }
 
+/** Fires [onLongPress] when a finger rests on the widget, watching before the widget itself sees the
+ *  touch (an Android widget would otherwise keep it), without taking taps or swipes away from it. */
+private fun Modifier.watchLongPress(onLongPress: () -> Unit): Modifier = pointerInput(Unit) {
+    awaitEachGesture {
+        val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+        val released = withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
+            while (true) {
+                val change = awaitPointerEvent(PointerEventPass.Initial).changes.firstOrNull { it.id == down.id } ?: break
+                if (!change.pressed || (change.position - down.position).getDistance() > viewConfiguration.touchSlop) break
+            }
+        }
+        if (released == null) onLongPress()
+    }
+}
+
+/** A widget in a folder; a long press opens Edit and Remove. */
 @Composable
-private fun FolderWidgetRow(item: FolderItem, onExecuteAction: (com.bisc.flauncher.data.model.GestureAction) -> Unit) {
-    Box(modifier = Modifier.fillMaxWidth().height(PageRowDimens.spanHeight(PageRowDimens.rowUnitHeight, item.spanY)).padding(bottom = 8.dp)) {
+private fun FolderWidgetRow(
+    item: FolderItem,
+    onExecuteAction: (com.bisc.flauncher.data.model.GestureAction) -> Unit,
+    menuExpanded: Boolean,
+    onLongPress: () -> Unit,
+    onDismissMenu: () -> Unit,
+    onEdit: () -> Unit,
+    onRemove: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(PageRowDimens.spanHeight(PageRowDimens.rowUnitHeight, item.spanY))
+            .padding(bottom = 8.dp)
+            .watchLongPress(onLongPress)
+    ) {
+        androidx.compose.material3.DropdownMenu(expanded = menuExpanded, onDismissRequest = onDismissMenu) {
+            androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.folder_widget_edit)) }, onClick = onEdit)
+            androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.folder_widget_remove)) }, onClick = onRemove)
+        }
         when (item.type) {
             GridItemType.WIDGET -> when (item.payload) {
                 WidgetKind.CLOCK -> {

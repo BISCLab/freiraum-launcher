@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Folder widgets: long press a widget in an open folder to edit or remove it; folder settings have a
+  remove button per widget, with a question
+- Settings: the path bar at the bottom shows names on every page, never a raw path with slashes
+
 ## 0.10.2
 
 - Corners of all parts: changes only apply with Save, and leaving with unsaved changes asks first

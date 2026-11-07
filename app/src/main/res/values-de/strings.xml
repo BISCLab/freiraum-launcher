@@ -791,4 +791,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_corners_all">Ecken aller Teile</string>
     <string name="settings_corners_all_summary">Rund, weich oder eckig, für alles oder Teil für Teil</string>
     <string name="settings_corners_intro">Wähle eine Form für alles oder jedes Teil einzeln in der Tabelle. Die kleinen Bildschirme zeigen, welches Teil welches ist.</string>
+    <string name="folder_widget_edit">Bearbeiten</string>
+    <string name="folder_widget_remove">Entfernen</string>
+    <string name="folder_widget_remove_title">%1$s entfernen?</string>
+    <string name="folder_widget_remove_text">Das Widget wird aus diesem Ordner entfernt. Seine Einstellungen gehen dabei verloren.</string>
 </resources>

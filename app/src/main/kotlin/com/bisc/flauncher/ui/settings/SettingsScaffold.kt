@@ -134,6 +134,16 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
         "settings/app_overview" -> stringResource(R.string.settings_section_app_overview)
         "settings/app_overview/appearance" -> stringResource(R.string.settings_home_appearance_title)
         "settings/app_overview/page" -> stringResource(R.string.settings_search_page_label)
+        "settings/app_overview/search_field" -> stringResource(R.string.settings_app_grid_search_field)
+        "settings/app_grid" -> stringResource(R.string.settings_pages_app_grid)
+        "settings/app_grid/appearance" -> stringResource(R.string.settings_home_appearance_title)
+        "settings/app_grid/page" -> stringResource(R.string.settings_search_page_label)
+        "settings/app_grid/grid" -> stringResource(R.string.settings_app_grid_grid_label)
+        "settings/app_grid/search_field" -> stringResource(R.string.settings_app_grid_search_field)
+        "settings/app_grid/behavior" -> stringResource(R.string.settings_search_behavior_label)
+        "settings/appearance/designs" -> stringResource(R.string.designs_title)
+        "settings/appearance/widget_paging" -> stringResource(R.string.settings_widget_paging_title)
+        "settings/folder/{folderId}/widget/{itemId}" -> stringResource(R.string.settings_layer_surface_widget)
         "settings/app_overview/search_button" -> stringResource(R.string.settings_app_list_search_button)
         "settings/app_overview/behavior" -> stringResource(R.string.settings_search_behavior_label)
         "settings/app_overview/section_letters" -> stringResource(R.string.settings_layer_surface_section_letter)
@@ -181,6 +191,7 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
             val buttonId = entry.arguments?.getLong("buttonId")
             buttons.find { it.id == buttonId }?.label ?: stringResource(R.string.settings_elements_actionbuttons_title)
         }
-        else -> entry.destination.route.orEmpty()
+        // Never the raw route: a page without a name of its own shows as an ellipsis.
+        else -> "…"
     }
 }

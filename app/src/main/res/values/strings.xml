@@ -791,4 +791,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_corners_all">Corners of all parts</string>
     <string name="settings_corners_all_summary">Round, soft or square, for everything or part by part</string>
     <string name="settings_corners_intro">Pick one shape for everything, or each part on its own in the table. The small screens show which part is which.</string>
+    <string name="folder_widget_edit">Edit</string>
+    <string name="folder_widget_remove">Remove</string>
+    <string name="folder_widget_remove_title">Remove %1$s?</string>
+    <string name="folder_widget_remove_text">The widget is taken out of this folder. Its settings are lost.</string>
 </resources>

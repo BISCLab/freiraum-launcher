@@ -23,6 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Add
@@ -135,6 +136,7 @@ fun SettingsFolderEditScreen(
     var appearanceOpen by remember { mutableStateOf(false) }
     var borderOpen by remember { mutableStateOf(false) }
     var showWidgetKindPicker by remember { mutableStateOf(false) }
+    var removingWidget by remember { mutableStateOf<com.bisc.flauncher.data.model.FolderItem?>(null) }
     var sizingWidgetKind by remember { mutableStateOf<String?>(null) }
     var sizingWidgetSpanY by remember { mutableStateOf(1) }
     var editingWidget by remember { mutableStateOf<com.bisc.flauncher.data.model.FolderItem?>(null) }
@@ -211,6 +213,21 @@ fun SettingsFolderEditScreen(
         // Widgets sit above the icon grid in full folder width (as FolderView draws them), so they
         // get their own list here and never take an icon slot.
         val (widgetItems, iconItems) = items.partition { it.type == GridItemType.WIDGET || it.type == GridItemType.SYSTEM_WIDGET }
+        removingWidget?.let { item ->
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { removingWidget = null },
+                title = { androidx.compose.material3.Text(stringResource(R.string.folder_widget_remove_title, folderWidgetLabel(item, homeViewModel))) },
+                text = { androidx.compose.material3.Text(stringResource(R.string.folder_widget_remove_text)) },
+                confirmButton = {
+                    androidx.compose.material3.TextButton(onClick = { homeViewModel.removeFromFolder(item); removingWidget = null }) {
+                        androidx.compose.material3.Text(stringResource(R.string.folder_widget_remove), color = androidx.compose.material3.MaterialTheme.colorScheme.error)
+                    }
+                },
+                dismissButton = {
+                    androidx.compose.material3.TextButton(onClick = { removingWidget = null }) { androidx.compose.material3.Text(stringResource(R.string.widget_notes_cancel)) }
+                }
+            )
+        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_folder_widgets_label)) {
             widgetItems.forEachIndexed { index, item ->
                 fun move(delta: Int) {
@@ -229,6 +246,13 @@ fun SettingsFolderEditScreen(
                             }
                             IconButton(onClick = { move(1) }, enabled = index < widgetItems.lastIndex) {
                                 Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null)
+                            }
+                            IconButton(onClick = { removingWidget = item }) {
+                                Icon(
+                                    Icons.Filled.Delete,
+                                    contentDescription = stringResource(R.string.folder_widget_remove),
+                                    tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
                     }
