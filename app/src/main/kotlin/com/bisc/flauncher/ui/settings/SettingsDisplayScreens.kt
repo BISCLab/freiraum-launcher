@@ -115,12 +115,15 @@ fun SettingsStatusBarScreen(navController: NavController, onBack: () -> Unit, vi
     }
 }
 
-/** Animations: one switch for all, then each animation on its own. */
+/** Animations: one switch for all, then each animation on its own, and the charging animation. */
 @Composable
 fun SettingsAnimationsScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val level by viewModel.motionLevel.collectAsState()
     val prefs by viewModel.motionPrefs.collectAsState()
+    val chargingAnimation by viewModel.chargingAnimationEnabled.collectAsState()
+    val chargingColor by viewModel.chargingAnimationColor.collectAsState()
+    val accentColor by viewModel.accentColor.collectAsState()
     var systemOff by remember { mutableStateOf(systemAnimationsOff(context)) }
     androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
         systemOff = systemAnimationsOff(context)
@@ -156,6 +159,25 @@ fun SettingsAnimationsScreen(navController: NavController, onBack: () -> Unit, v
             SlimSwitchRow(stringResource(R.string.settings_motion_back_gesture), prefs.backGesture, on) { set(prefs.copy(backGesture = it)) }
             SlimSwitchRow(stringResource(R.string.settings_motion_settings_slide), prefs.settingsSlide, on) { set(prefs.copy(settingsSlide = it)) }
             SlimSwitchRow(stringResource(R.string.settings_motion_ripples), prefs.gestureRipples, on) { set(prefs.copy(gestureRipples = it)) }
+        }
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_charging_label),
+            info = stringResource(R.string.settings_charging_animation_summary)
+        ) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_charging_animation),
+                onClick = { viewModel.setChargingAnimationEnabled(!chargingAnimation) },
+                trailing = { Switch(checked = chargingAnimation, onCheckedChange = viewModel::setChargingAnimationEnabled) }
+            )
+            if (chargingAnimation) {
+                AccentOverrideRows(
+                    title = stringResource(R.string.settings_charging_color),
+                    own = chargingColor,
+                    global = accentColor,
+                    onChange = viewModel::setChargingAnimationColor
+                )
+            }
         }
     }
 }

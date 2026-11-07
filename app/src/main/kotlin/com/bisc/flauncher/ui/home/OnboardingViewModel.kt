@@ -92,6 +92,9 @@ class OnboardingViewModel @Inject constructor(
 
     fun applyPart(part: ShapePart, preset: ShapePreset) = apply(mapOf(part to part.percentOf(preset)))
 
+    /** Saves what was edited in the settings; only parts that changed are written. */
+    fun saveCorners(edited: Map<ShapePart, Int>) = apply(edited.filter { (part, percent) -> _corners.value[part] != percent })
+
     private fun apply(shape: Map<ShapePart, Int>) {
         _corners.value = _corners.value + shape
         viewModelScope.launch {

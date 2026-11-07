@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Corners of all parts: changes only apply with Save, and leaving with unsaved changes asks first
+- The charging animation moved to Appearance → Animations, as its own group below the animations
+
 ## 0.10.1
 
 - Appearance now holds everything about look and motion: color modes (launcher, and settings with

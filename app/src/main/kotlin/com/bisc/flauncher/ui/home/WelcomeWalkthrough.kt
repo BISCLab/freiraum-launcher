@@ -385,9 +385,16 @@ private enum class ShapeScreen(val label: Int) {
 /** Small screens in a row showing every part with its corners, live; above the table one shape
  *  for all, below it each part on its own. Starts from what the chosen design brought. */
 @Composable
-internal fun ShapeChoice(viewModel: OnboardingViewModel) {
+private fun ShapeChoice(viewModel: OnboardingViewModel) {
     val corners by viewModel.corners.collectAsState()
     LaunchedEffect(Unit) { viewModel.loadCorners() }
+    ShapeEditor(corners, onAll = viewModel::applyAll, onPart = viewModel::applyPart)
+}
+
+/** The shape previews, the choice for all and the table; [onAll] and [onPart] decide whether a
+ *  change applies at once (welcome tour) or waits for Save (settings). */
+@Composable
+internal fun ShapeEditor(corners: Map<ShapePart, Int>, onAll: (ShapePreset) -> Unit, onPart: (ShapePart, ShapePreset) -> Unit) {
     var focus by remember { mutableStateOf<ShapePart?>(null) }
     Column(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -408,7 +415,7 @@ internal fun ShapeChoice(viewModel: OnboardingViewModel) {
             options = ShapePreset.entries,
             label = { stringResource(it.label()) },
             selected = all,
-            onSelect = { focus = null; viewModel.applyAll(it) },
+            onSelect = { focus = null; onAll(it) },
             modifier = Modifier.fillMaxWidth(),
             large = true
         )
@@ -443,7 +450,7 @@ internal fun ShapeChoice(viewModel: OnboardingViewModel) {
                         options = ShapePreset.entries,
                         label = { stringResource(it.label()) },
                         selected = corners[part]?.let(part::presetOf),
-                        onSelect = { focus = part; viewModel.applyPart(part, it) }
+                        onSelect = { focus = part; onPart(part, it) }
                     )
                 }
                 if (i < ShapePart.entries.lastIndex) {

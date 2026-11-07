@@ -22,9 +22,9 @@ import com.bisc.flauncher.ui.theme.FontPreference
 import com.bisc.flauncher.ui.theme.SettingsThemeMode
 import com.bisc.flauncher.ui.theme.ThemePreference
 
-/** Appearance: everything about how the launcher looks and moves - color modes, accent, font,
- *  background and icons, status bar and rotation, animations and the charging animation. Pages and
- *  elements can override parts of it on their own screens. */
+/** Appearance: everything about how the launcher looks and moves - ready-made looks, color modes,
+ *  accent, font, corners, background and icons, status bar and rotation, animations and tips. Pages
+ *  and elements can override parts of it on their own screens. */
 @Composable
 fun SettingsAppearanceScreen(
     navController: NavController,
@@ -37,8 +37,6 @@ fun SettingsAppearanceScreen(
     val fontPreference by viewModel.fontPreference.collectAsState()
     val accentColor by viewModel.accentColor.collectAsState()
     val lockPortrait by viewModel.lockPortrait.collectAsState()
-    val chargingAnimation by viewModel.chargingAnimationEnabled.collectAsState()
-    val chargingColor by viewModel.chargingAnimationColor.collectAsState()
     val showSettingsTips by viewModel.showSettingsTips.collectAsState()
     var confirmingTheme by remember { mutableStateOf<ThemePreference?>(null) }
     var launcherThemePickerOpen by remember { mutableStateOf(false) }
@@ -144,25 +142,6 @@ fun SettingsAppearanceScreen(
                 onClick = { onNavigate("appearance/animations") },
                 trailing = null
             )
-        }
-        SettingsPreferenceGroup(
-            title = stringResource(R.string.settings_charging_label),
-            info = stringResource(R.string.settings_charging_animation_summary)
-        ) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_charging_animation),
-                onClick = { viewModel.setChargingAnimationEnabled(!chargingAnimation) },
-                trailing = { Switch(checked = chargingAnimation, onCheckedChange = viewModel::setChargingAnimationEnabled) }
-            )
-            if (chargingAnimation) {
-                AccentOverrideRows(
-                    title = stringResource(R.string.settings_charging_color),
-                    own = chargingColor,
-                    global = accentColor,
-                    onChange = viewModel::setChargingAnimationColor
-                )
-            }
         }
         // Turns every "?" tip button across the settings on or off (see LocalShowSettingsTips).
         SettingsPreferenceGroup(title = stringResource(R.string.settings_tips_label)) {
