@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A single folder: one Appearance window with a preview instead of separate Fill and Border; fill
+  and border still follow all folders until changed, and one button sets both back
+
 - Dock, Panel, folders, search field, category rail and search results each have one page for their
   look instead of separate Fill and Border pages: a live preview on top, then fill, text color,
   opacity, border and corners, saved together. Elements, visibility and the other options of the

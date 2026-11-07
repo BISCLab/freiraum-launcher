@@ -134,7 +134,6 @@ fun SettingsFolderEditScreen(
     var pendingRemoval by remember { mutableStateOf<com.bisc.flauncher.data.model.FolderItem?>(null) }
     var pickingFolderIcon by remember { mutableStateOf(false) }
     var appearanceOpen by remember { mutableStateOf(false) }
-    var borderOpen by remember { mutableStateOf(false) }
     var showWidgetKindPicker by remember { mutableStateOf(false) }
     var removingWidget by remember { mutableStateOf<com.bisc.flauncher.data.model.FolderItem?>(null) }
     var sizingWidgetKind by remember { mutableStateOf<String?>(null) }
@@ -198,14 +197,12 @@ fun SettingsFolderEditScreen(
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
-                title = stringResource(R.string.settings_element_fill_label),
+                title = stringResource(R.string.settings_home_appearance_title),
+                summary = stringResource(
+                    if (folder?.appearanceOverrideEnabled == true || folder?.borderOverrideEnabled == true) R.string.settings_folder_look_own
+                    else R.string.settings_folder_look_like_all
+                ),
                 onClick = { appearanceOpen = true },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_element_border_label),
-                onClick = { borderOpen = true },
                 trailing = null
             )
         }
@@ -352,44 +349,34 @@ fun SettingsFolderEditScreen(
     }
 
     if (appearanceOpen) {
-        val effectiveContentAppearance = if (folder?.appearanceOverrideEnabled == true) folder.contentAppearance() else globalCardAppearance
-        var draft by rememberDraft(effectiveContentAppearance)
+        // Fill and border are kept apart (each can follow all folders on its own), but edited together.
+        val content = if (folder?.appearanceOverrideEnabled == true) folder.contentAppearance() else globalCardAppearance
+        val border = if (folder?.borderOverrideEnabled == true) folder.borderAppearance() else globalCardAppearance
+        val saved = content.copy(borderEnabled = border.borderEnabled, borderColor = border.borderColor, borderWidth = border.borderWidth)
+        var draft by rememberDraft(saved)
         SettingsEditPage(
-            title = stringResource(R.string.settings_element_fill_label),
+            title = stringResource(R.string.settings_home_appearance_title),
             onDismiss = { appearanceOpen = false },
-            onSave = { viewModel.setFolderAppearance(folderId, draft) },
-            dirty = draft != effectiveContentAppearance
+            onSave = {
+                val fillChanged = draft.fillMode != saved.fillMode || draft.fill != saved.fill || draft.opacity != saved.opacity || draft.contentColor != saved.contentColor
+                val borderChanged = draft.borderEnabled != saved.borderEnabled || draft.borderColor != saved.borderColor || draft.borderWidth != saved.borderWidth
+                if (fillChanged) viewModel.setFolderAppearance(folderId, draft)
+                if (borderChanged) viewModel.setFolderBorderAppearance(folderId, draft)
+            },
+            dirty = draft != saved
         ) {
-            ElementBackgroundSection(appearance = draft, onAppearanceChange = { draft = it })
-            if (folder?.appearanceOverrideEnabled == true) {
+            LookSample(LookSampleKind.FOLDER, draft, 100)
+            ElementAppearanceSection(appearance = draft, onAppearanceChange = { draft = it }, styleGroupTitle = stringResource(R.string.settings_element_fill_label))
+            if (folder?.appearanceOverrideEnabled == true || folder?.borderOverrideEnabled == true) {
                 SettingsPreferenceGroup {
                     SettingsPreference(
                         icon = null,
-                        title = stringResource(R.string.settings_folder_appearance_reset_label),
-                        onClick = { viewModel.setFolderAppearanceOverrideEnabled(folderId, false) },
-                        trailing = null
-                    )
-                }
-            }
-        }
-    }
-
-    if (borderOpen) {
-        val effectiveBorderAppearance = if (folder?.borderOverrideEnabled == true) folder.borderAppearance() else globalCardAppearance
-        var draft by rememberDraft(effectiveBorderAppearance)
-        SettingsEditPage(
-            title = stringResource(R.string.settings_element_border_label),
-            onDismiss = { borderOpen = false },
-            onSave = { viewModel.setFolderBorderAppearance(folderId, draft) },
-            dirty = draft != effectiveBorderAppearance
-        ) {
-            ElementBorderSection(appearance = draft, onAppearanceChange = { draft = it })
-            if (folder?.borderOverrideEnabled == true) {
-                SettingsPreferenceGroup {
-                    SettingsPreference(
-                        icon = null,
-                        title = stringResource(R.string.settings_folder_border_reset_label),
-                        onClick = { viewModel.setFolderBorderOverrideEnabled(folderId, false) },
+                        title = stringResource(R.string.settings_folder_look_reset),
+                        onClick = {
+                            viewModel.setFolderAppearanceOverrideEnabled(folderId, false)
+                            viewModel.setFolderBorderOverrideEnabled(folderId, false)
+                            appearanceOpen = false
+                        },
                         trailing = null
                     )
                 }

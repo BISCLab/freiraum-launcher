@@ -826,4 +826,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_rail_hidden">Ausgeblendet</string>
     <string name="settings_search_rail_side_label">Rand</string>
     <string name="settings_search_rail_like_field">Aussehen wie das Suchfeld</string>
+    <string name="settings_folder_look_own">Eigenes Aussehen</string>
+    <string name="settings_folder_look_like_all">Wie alle Ordner</string>
+    <string name="settings_folder_look_reset">Aussehen wie alle Ordner</string>
 </resources>
