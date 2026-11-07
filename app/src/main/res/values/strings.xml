@@ -795,4 +795,25 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="folder_widget_remove">Remove</string>
     <string name="folder_widget_remove_title">Remove %1$s?</string>
     <string name="folder_widget_remove_text">The widget is taken out of this folder. Its settings are lost.</string>
+    <string name="search_filter_favorites">Favorites</string>
+    <string name="settings_search_include_favorites">Favorites</string>
+    <string name="search_section_favorites">Favorites</string>
+    <string name="search_favorite_add">Add to favorites</string>
+    <string name="search_favorite_remove">Remove from favorites</string>
+    <string name="settings_search_rail_label">Category rail</string>
+    <string name="settings_search_rail_info">The categories run down a rail beside the results, always above the keyboard. Tap one to jump to its results; drag along the rail to run through them.</string>
+    <string name="settings_search_rail_show">Show category rail</string>
+    <string name="settings_search_rail_left">On the left</string>
+    <string name="settings_search_rail_right">On the right</string>
+    <string name="settings_search_favorites_info">Favorites are the apps you want at hand right away. Pick them yourself, let Freiraum add the apps you open most, or both. A long press on an app in the search also adds or removes it. The counting stays on your phone.</string>
+    <string name="settings_search_favorites_on_open">Show when search opens</string>
+    <string name="settings_search_favorites_on_open_summary">Otherwise only after tapping the star in the rail</string>
+    <string name="settings_search_favorites_mode_both">Picked, topped up with the most opened</string>
+    <string name="settings_search_favorites_mode_manual">Only picked by me</string>
+    <string name="settings_search_favorites_mode_auto">Only the most opened</string>
+    <string name="settings_search_favorites_pick">Pick favorites</string>
+    <plurals name="settings_search_favorites_count">
+        <item quantity="one">%1$d app picked</item>
+        <item quantity="other">%1$d apps picked</item>
+    </plurals>
 </resources>

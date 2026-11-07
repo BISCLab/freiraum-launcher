@@ -70,7 +70,9 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, o
 
 /** Appearance hub: the page itself, then each of its elements. */
 @Composable
-fun SettingsSearchAppearanceScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
+fun SettingsSearchAppearanceScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+    val railShown by viewModel.searchBarShowCategories.collectAsState()
+    val railLeft by viewModel.searchCategoryRailLeft.collectAsState()
     SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
         // Tap a part of the miniature to edit it; the list below stays as the second way in.
         SearchPreview(onNavigate = onNavigate)
@@ -79,12 +81,6 @@ fun SettingsSearchAppearanceScreen(navController: NavController, onBack: () -> U
                 icon = null,
                 title = stringResource(R.string.settings_search_page_label),
                 onClick = { onNavigate("page") },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_bar_label),
-                onClick = { onNavigate(SearchElement.BAR.route) },
                 trailing = null
             )
             SettingsPreference(
@@ -105,6 +101,21 @@ fun SettingsSearchAppearanceScreen(navController: NavController, onBack: () -> U
                 onClick = { onNavigate("keyboard") },
                 trailing = null
             )
+        }
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_search_rail_label),
+            info = stringResource(R.string.settings_search_rail_info)
+        ) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_search_rail_show),
+                onClick = { viewModel.setSearchBarShowCategories(!railShown) },
+                trailing = { Switch(checked = railShown, onCheckedChange = viewModel::setSearchBarShowCategories) }
+            )
+            if (railShown) {
+                RadioPreference(stringResource(R.string.settings_search_rail_left), true, railLeft, viewModel::setSearchCategoryRailLeft)
+                RadioPreference(stringResource(R.string.settings_search_rail_right), false, railLeft, viewModel::setSearchCategoryRailLeft)
+            }
         }
     }
 }
@@ -236,6 +247,11 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
     LaunchedEffect(savedCustomUrl) { if (!customUrlEdited) customUrl = savedCustomUrl }
     var customUrlSheetOpen by remember { mutableStateOf(false) }
     var enginePickerOpen by remember { mutableStateOf(false) }
+    val favorites by viewModel.searchFavorites.collectAsState()
+    val favoritesMode by viewModel.searchFavoritesMode.collectAsState()
+    val favoritesOnOpen by viewModel.searchFavoritesOnOpen.collectAsState()
+    val labeledApps by viewModel.labeledApps.collectAsState()
+    var favoritesPickerOpen by remember { mutableStateOf(false) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_search_behavior_label), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
@@ -265,6 +281,30 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
             )
         }
 
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.search_section_favorites),
+            info = stringResource(R.string.settings_search_favorites_info)
+        ) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_search_favorites_on_open),
+                summary = stringResource(R.string.settings_search_favorites_on_open_summary),
+                onClick = { viewModel.setSearchFavoritesOnOpen(!favoritesOnOpen) },
+                trailing = { Switch(checked = favoritesOnOpen, onCheckedChange = viewModel::setSearchFavoritesOnOpen) }
+            )
+            RadioPreference(stringResource(R.string.settings_search_favorites_mode_both), com.bisc.flauncher.data.model.SearchFavoritesMode.BOTH, favoritesMode, viewModel::setSearchFavoritesMode)
+            RadioPreference(stringResource(R.string.settings_search_favorites_mode_manual), com.bisc.flauncher.data.model.SearchFavoritesMode.MANUAL, favoritesMode, viewModel::setSearchFavoritesMode)
+            RadioPreference(stringResource(R.string.settings_search_favorites_mode_auto), com.bisc.flauncher.data.model.SearchFavoritesMode.AUTO, favoritesMode, viewModel::setSearchFavoritesMode)
+            if (favoritesMode != com.bisc.flauncher.data.model.SearchFavoritesMode.AUTO) {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_search_favorites_pick),
+                    summary = androidx.compose.ui.res.pluralStringResource(R.plurals.settings_search_favorites_count, favorites.size, favorites.size),
+                    onClick = { favoritesPickerOpen = true },
+                    trailing = null
+                )
+            }
+        }
         SettingsPreferenceGroup(
             title = stringResource(R.string.settings_search_categories_label),
             info = stringResource(R.string.settings_search_categories_info)
@@ -321,6 +361,38 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
                 }
             }
         }
+    }
+
+    if (favoritesPickerOpen) {
+        var picked by remember { mutableStateOf(favorites) }
+        AlertDialog(
+            onDismissRequest = { favoritesPickerOpen = false },
+            title = { Text(stringResource(R.string.settings_search_favorites_pick)) },
+            text = {
+                LazyColumn(modifier = Modifier.heightIn(max = 420.dp)) {
+                    val apps = labeledApps.sortedBy { it.label.lowercase() }
+                    items(apps, key = { it.componentName.flattenToString() }) { app ->
+                        val id = app.componentName.flattenToString()
+                        val on = id in picked
+                        val full = !on && picked.size >= com.bisc.flauncher.data.model.SEARCH_FAVORITES_MAX
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(enabled = !full) { picked = if (on) picked - id else picked + id }
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            androidx.compose.material3.Checkbox(checked = on, enabled = !full, onCheckedChange = { picked = if (on) picked - id else picked + id })
+                            Text(app.label, modifier = Modifier.padding(start = 8.dp))
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { viewModel.setSearchFavorites(picked); favoritesPickerOpen = false }) { Text(stringResource(R.string.widget_notes_save)) }
+            },
+            dismissButton = { TextButton(onClick = { favoritesPickerOpen = false }) { Text(stringResource(R.string.widget_notes_cancel)) } }
+        )
     }
 
     if (enginePickerOpen) {

@@ -387,6 +387,20 @@ class SettingsViewModel @Inject constructor(
 
     val lockPortrait: StateFlow<Boolean> = repository.lockPortrait.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    val searchCategoryRailLeft: StateFlow<Boolean> =
+        repository.searchCategoryRailLeft.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    fun setSearchCategoryRailLeft(left: Boolean) { viewModelScope.launch { repository.setSearchCategoryRailLeft(left) } }
+
+    val searchFavorites: StateFlow<List<String>> = repository.searchFavorites.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    fun setSearchFavorites(components: List<String>) { viewModelScope.launch { repository.setSearchFavorites(components) } }
+
+    val searchFavoritesMode: StateFlow<com.bisc.flauncher.data.model.SearchFavoritesMode> =
+        repository.searchFavoritesMode.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.data.model.SearchFavoritesMode.BOTH)
+    fun setSearchFavoritesMode(mode: com.bisc.flauncher.data.model.SearchFavoritesMode) { viewModelScope.launch { repository.setSearchFavoritesMode(mode) } }
+
+    val searchFavoritesOnOpen: StateFlow<Boolean> = repository.searchFavoritesOnOpen.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    fun setSearchFavoritesOnOpen(show: Boolean) { viewModelScope.launch { repository.setSearchFavoritesOnOpen(show) } }
+
     val settingsThemeMode: StateFlow<com.bisc.flauncher.ui.theme.SettingsThemeMode> =
         repository.settingsThemeMode.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.theme.SettingsThemeMode.LAUNCHER)
 

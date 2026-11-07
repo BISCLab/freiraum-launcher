@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.ui.home.search.defaultColor
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -61,7 +62,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
     val capCorner by viewModel.searchKeyboardCapCornerRadiusPercent.collectAsState()
     val barAtBottom by viewModel.searchBarAtBottom.collectAsState()
     val barShowCategories by viewModel.searchBarShowCategories.collectAsState()
-    val barFloating by viewModel.searchBarFloating.collectAsState()
+    val railLeft by viewModel.searchCategoryRailLeft.collectAsState()
     val fieldOwn by viewModel.searchFieldAppearance.collectAsState()
 
     // Same resolution rules as the real screen (HomeViewModel.searchBackground, SearchOverlay).
@@ -91,25 +92,29 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
 
             Column(modifier = Modifier.fillMaxSize()) {
                 if (!barAtBottom) {
-                    MiniSearchBar(barAppearance, surfaceDark, RoundedCornerShape(bottomStart = barRadius, bottomEnd = barRadius), barShowCategories, atBottom = false, floating = barFloating, fieldAppearance = fieldOwn) {
-                        onNavigate(SearchElement.BAR.route)
+                    MiniSearchBar(barAppearance, surfaceDark, RoundedCornerShape(bottomStart = barRadius, bottomEnd = barRadius), false, atBottom = false, floating = true, fieldAppearance = fieldOwn) {
+                        onNavigate(SearchElement.FIELD.route)
                     }
                 }
-                Column(
-                    modifier = Modifier.padding(start = sideMargin, end = sideMargin, top = if (barAtBottom) 14.dp else 6.dp),
-                    verticalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
-                    MiniResultCard(cardAppearance, surfaceDark, RoundedCornerShape(cardRadius), rows = 3) {
-                        onNavigate(SearchElement.RESULTS.route)
+                Row(modifier = Modifier.padding(top = if (barAtBottom) 14.dp else 6.dp)) {
+                    if (barShowCategories && railLeft) MiniCategoryRail(surfaceDark) { onNavigate(SearchElement.FIELD.route) }
+                    Column(
+                        modifier = Modifier.weight(1f).padding(start = sideMargin, end = sideMargin),
+                        verticalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        MiniResultCard(cardAppearance, surfaceDark, RoundedCornerShape(cardRadius), rows = 3) {
+                            onNavigate(SearchElement.RESULTS.route)
+                        }
+                        MiniResultCard(cardAppearance, surfaceDark, RoundedCornerShape(cardRadius), rows = 2) {
+                            onNavigate(SearchElement.RESULTS.route)
+                        }
                     }
-                    MiniResultCard(cardAppearance, surfaceDark, RoundedCornerShape(cardRadius), rows = 2) {
-                        onNavigate(SearchElement.RESULTS.route)
-                    }
+                    if (barShowCategories && !railLeft) MiniCategoryRail(surfaceDark) { onNavigate(SearchElement.FIELD.route) }
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 if (barAtBottom) {
-                    MiniSearchBar(barAppearance, surfaceDark, RoundedCornerShape(topStart = barRadius, topEnd = barRadius), barShowCategories, atBottom = true, floating = barFloating, fieldAppearance = fieldOwn) {
-                        onNavigate(SearchElement.BAR.route)
+                    MiniSearchBar(barAppearance, surfaceDark, RoundedCornerShape(topStart = barRadius, topEnd = barRadius), false, atBottom = true, floating = true, fieldAppearance = fieldOwn) {
+                        onNavigate(SearchElement.FIELD.route)
                     }
                 }
                 MiniKeyboard(
@@ -224,6 +229,29 @@ private fun MiniKeyboard(capColor: Color?, capRadius: Dp, dark: Boolean, onClick
                     .clip(RoundedCornerShape(2.dp))
                     .background(keyColor)
             )
+        }
+    }
+}
+
+/** The category rail in small: a slim pill with colored dots, like the real one beside the results. */
+@Composable
+private fun MiniCategoryRail(surfaceDark: Boolean, onClick: () -> Unit) {
+    val colors = resolveElementColors(com.bisc.flauncher.ui.home.search.automaticRailAppearance(surfaceDark))
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 3.dp)
+            .size(width = 12.dp, height = 70.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .background(colors.background, alpha = colors.backgroundAlpha)
+            .clickable(onClick = onClick),
+        verticalArrangement = Arrangement.SpaceEvenly,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        listOf(
+            com.bisc.flauncher.data.model.SearchCategory.FAVORITES, com.bisc.flauncher.data.model.SearchCategory.APPS,
+            com.bisc.flauncher.data.model.SearchCategory.CONTACTS, com.bisc.flauncher.data.model.SearchCategory.WEB
+        ).forEach { category ->
+            Box(Modifier.size(5.dp).clip(androidx.compose.foundation.shape.CircleShape).background(category.defaultColor))
         }
     }
 }

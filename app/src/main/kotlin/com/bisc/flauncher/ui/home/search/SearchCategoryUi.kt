@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.bisc.flauncher.R
@@ -21,6 +22,7 @@ import com.bisc.flauncher.data.model.SearchCategory
  *  overrides it (see [SettingsRepository.categoryColor]/[HomeViewModel.categoryColors]). */
 val SearchCategory.defaultColor: Color
     get() = when (this) {
+        SearchCategory.FAVORITES -> Color(0xFFFFB300)
         SearchCategory.APPS -> Color(0xFF4F86F7)
         SearchCategory.FOLDERS -> Color(0xFFFF8A65)
         SearchCategory.CONTACTS -> Color(0xFF34A853)
@@ -35,6 +37,7 @@ val SearchCategory.defaultColor: Color
 
 val SearchCategory.icon: ImageVector
     get() = when (this) {
+        SearchCategory.FAVORITES -> Icons.Filled.Star
         SearchCategory.APPS -> Icons.Filled.Apps
         SearchCategory.CONTACTS -> Icons.Filled.Person
         SearchCategory.SETTINGS -> Icons.Filled.Settings
@@ -51,6 +54,7 @@ val SearchCategory.icon: ImageVector
 @get:StringRes
 val SearchCategory.filterLabelRes: Int
     get() = when (this) {
+        SearchCategory.FAVORITES -> R.string.search_filter_favorites
         SearchCategory.APPS -> R.string.search_filter_apps
         SearchCategory.CONTACTS -> R.string.search_filter_contacts
         SearchCategory.SETTINGS -> R.string.search_filter_settings
@@ -67,6 +71,7 @@ val SearchCategory.filterLabelRes: Int
 @get:StringRes
 val SearchCategory.settingsLabelRes: Int
     get() = when (this) {
+        SearchCategory.FAVORITES -> R.string.settings_search_include_favorites
         SearchCategory.APPS -> R.string.settings_search_include_apps
         SearchCategory.CONTACTS -> R.string.settings_search_include_contacts
         SearchCategory.SETTINGS -> R.string.settings_search_include_settings

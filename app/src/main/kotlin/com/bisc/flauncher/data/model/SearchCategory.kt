@@ -2,6 +2,8 @@ package com.bisc.flauncher.data.model
 
 /** A group of text-search results; [storageKey] names its "searched by default" preference. */
 enum class SearchCategory(val storageKey: String, val legacyKey: String? = null) {
+    // Picked by hand and/or the most opened apps; shown while nothing is typed.
+    FAVORITES("favorites"),
     APPS("apps"),
     FOLDERS("folders", legacyKey = "apps"),
     CONTACTS("contacts"),

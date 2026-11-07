@@ -210,6 +210,10 @@ fun HomeScreen(
     val mapTargetResults by viewModel.mapTargetResults.collectAsState()
     val appListHeaderLetterAppearance by viewModel.appListHeaderLetterAppearance.collectAsState()
     val searchCategoryOrder by viewModel.searchCategoryOrder.collectAsState()
+    val searchFavoriteApps by viewModel.searchFavoriteApps.collectAsState()
+    val searchFavoriteIds by viewModel.searchFavoriteIds.collectAsState()
+    val searchFavoritesOnOpen by viewModel.searchFavoritesOnOpen.collectAsState()
+    val searchCategoryRailLeft by viewModel.searchCategoryRailLeft.collectAsState()
     val activeSearchCategories by viewModel.activeSearchCategories.collectAsState()
     val searchFilter by viewModel.searchFilter.collectAsState()
     val searchAiApp by viewModel.searchAiApp.collectAsState()
@@ -1031,6 +1035,7 @@ fun HomeScreen(
                     cornerRadiusPercent = railCorner ?: cornerRadiusPercent,
                     loadIcon = viewModel::loadIcon,
                     onAppClick = { app ->
+                        viewModel.recordAppLaunch(app.componentName)
                         launchApp(context, app.componentName)
                         viewModel.closeAppList()
                     },
@@ -1050,6 +1055,7 @@ fun HomeScreen(
                         onQueryChange = viewModel::updateAppQuery,
                         onSubmit = {
                             appQueryResults.firstOrNull()?.let { app ->
+                                viewModel.recordAppLaunch(app.componentName)
                                 launchApp(context, app.componentName)
                                 viewModel.closeAppList()
                             }
@@ -1125,6 +1131,7 @@ fun HomeScreen(
                     loadPackIcon = viewModel::loadPackIcon,
                     onQueryChange = viewModel::updateAppQuery,
                     onAppClick = { app ->
+                        viewModel.recordAppLaunch(app.componentName)
                         launchApp(context, app.componentName)
                         viewModel.closeAppGrid()
                     },
@@ -1185,6 +1192,7 @@ fun HomeScreen(
             loadIcon = viewModel::loadIcon,
             onQueryChange = viewModel::updateSearchQuery,
             onAppClick = { app ->
+                viewModel.recordAppLaunch(app.componentName)
                 launchApp(context, app.componentName)
                 viewModel.closeSearch()
             },
@@ -1219,7 +1227,13 @@ fun HomeScreen(
             onRefreshContactsPermission = viewModel::refreshContactsPermission,
             onWebCommand = { viewModel.runWebSearchCommand(context) },
             onMapsCommand = { viewModel.runMapsCommand(context) },
-            onAiCommand = { viewModel.runAiCommand(context) }
+            onAiCommand = { viewModel.runAiCommand(context) },
+            onSetFilter = viewModel::setSearchFilter,
+            favoriteApps = searchFavoriteApps,
+            favoriteIds = searchFavoriteIds,
+            favoritesOnOpen = searchFavoritesOnOpen,
+            onToggleFavorite = viewModel::toggleSearchFavorite,
+            railLeft = searchCategoryRailLeft
         )
     }
 

@@ -255,10 +255,66 @@ class SettingsRepository @Inject constructor(
 
     /** Whether the system keyboard shows itself immediately when search opens, vs. staying
      *  unfocused until the user taps the input field. */
-    val searchKeyboardAutoOpen: Flow<Boolean> = dataStore.data.map { it[SEARCH_KEYBOARD_AUTO_OPEN_KEY] ?: true }
+    val searchKeyboardAutoOpen: Flow<Boolean> = dataStore.data.map { it[SEARCH_KEYBOARD_OPEN_KEY] ?: true }
 
     suspend fun setSearchKeyboardAutoOpen(enabled: Boolean) {
-        dataStore.edit { it[SEARCH_KEYBOARD_AUTO_OPEN_KEY] = enabled }
+        dataStore.edit { it[SEARCH_KEYBOARD_OPEN_KEY] = enabled }
+    }
+
+    /** The category rail of the Text search on the left instead of the right. */
+    val searchCategoryRailLeft: Flow<Boolean> = dataStore.data.map { it[SEARCH_CATEGORY_RAIL_LEFT_KEY] ?: false }
+
+    suspend fun setSearchCategoryRailLeft(left: Boolean) {
+        dataStore.edit { it[SEARCH_CATEGORY_RAIL_LEFT_KEY] = left }
+    }
+
+    /** Favorites picked by hand, as flattened component names, in their order. */
+    val searchFavorites: Flow<List<String>> = dataStore.data.map { prefs ->
+        prefs[SEARCH_FAVORITES_KEY].orEmpty().split('\n').filter { it.isNotBlank() }
+    }
+
+    suspend fun setSearchFavorites(components: List<String>) {
+        dataStore.edit { it[SEARCH_FAVORITES_KEY] = components.distinct().joinToString("\n") }
+    }
+
+    suspend fun toggleSearchFavorite(component: String) {
+        dataStore.edit { prefs ->
+            val current = prefs[SEARCH_FAVORITES_KEY].orEmpty().split('\n').filter { it.isNotBlank() }
+            prefs[SEARCH_FAVORITES_KEY] = (if (component in current) current - component else current + component).joinToString("\n")
+        }
+    }
+
+    val searchFavoritesMode: Flow<com.bisc.flauncher.data.model.SearchFavoritesMode> = dataStore.data.map { prefs ->
+        prefs[SEARCH_FAVORITES_MODE_KEY]?.let { v -> com.bisc.flauncher.data.model.SearchFavoritesMode.entries.firstOrNull { it.name == v } }
+            ?: com.bisc.flauncher.data.model.SearchFavoritesMode.BOTH
+    }
+
+    suspend fun setSearchFavoritesMode(mode: com.bisc.flauncher.data.model.SearchFavoritesMode) {
+        dataStore.edit { it[SEARCH_FAVORITES_MODE_KEY] = mode.name }
+    }
+
+    /** Favorites show as soon as the search opens, before anything is typed. */
+    val searchFavoritesOnOpen: Flow<Boolean> = dataStore.data.map { it[SEARCH_FAVORITES_ON_OPEN_KEY] ?: true }
+
+    suspend fun setSearchFavoritesOnOpen(show: Boolean) {
+        dataStore.edit { it[SEARCH_FAVORITES_ON_OPEN_KEY] = show }
+    }
+
+    /** How often each app was opened from the launcher (search, App list, App grid), for automatic
+     *  favorites. Only counts, kept on the phone. */
+    val appLaunchCounts: Flow<Map<String, Int>> = dataStore.data.map { prefs ->
+        runCatching {
+            val json = org.json.JSONObject(prefs[APP_LAUNCH_COUNTS_KEY] ?: "{}")
+            json.keys().asSequence().associateWith { json.getInt(it) }
+        }.getOrDefault(emptyMap())
+    }
+
+    suspend fun recordAppLaunch(component: String) {
+        dataStore.edit { prefs ->
+            val json = runCatching { org.json.JSONObject(prefs[APP_LAUNCH_COUNTS_KEY] ?: "{}") }.getOrDefault(org.json.JSONObject())
+            json.put(component, json.optInt(component) + 1)
+            prefs[APP_LAUNCH_COUNTS_KEY] = json.toString()
+        }
     }
 
     /** Own corners of the App list's search button and its A-Z rail; null = the general roundness. */
@@ -421,7 +477,9 @@ class SettingsRepository @Inject constructor(
                 else -> listOfNotNull(SearchCategory.entries.firstOrNull { it.name == name })
             }
         }
-        (saved + SearchCategory.entries).distinct()
+        // Favorites came later and belong on top.
+        val favoritesFirst = if (SearchCategory.FAVORITES.name in names) emptyList() else listOf(SearchCategory.FAVORITES)
+        (favoritesFirst + saved + SearchCategory.entries).distinct()
     }
 
     suspend fun setSearchCategoryOrder(order: List<SearchCategory>) {
@@ -1022,7 +1080,13 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_BROWSER_APP_KEY = stringPreferencesKey("search_browser_app")
         private val SEARCH_MAPS_APP_KEY = stringPreferencesKey("search_maps_app")
         private fun searchIncludeKey(storageKey: String) = booleanPreferencesKey("search_include_$storageKey")
-        private val SEARCH_KEYBOARD_AUTO_OPEN_KEY = booleanPreferencesKey("search_keyboard_auto_open")
+        // A new key: the keyboard opens by itself for everyone again, once, since search needs it.
+        private val SEARCH_KEYBOARD_OPEN_KEY = booleanPreferencesKey("search_keyboard_open")
+        private val SEARCH_CATEGORY_RAIL_LEFT_KEY = booleanPreferencesKey("search_category_rail_left")
+        private val SEARCH_FAVORITES_KEY = stringPreferencesKey("search_favorites")
+        private val SEARCH_FAVORITES_MODE_KEY = stringPreferencesKey("search_favorites_mode")
+        private val SEARCH_FAVORITES_ON_OPEN_KEY = booleanPreferencesKey("search_favorites_on_open")
+        private val APP_LAUNCH_COUNTS_KEY = stringPreferencesKey("app_launch_counts")
         private val LOCK_PORTRAIT_KEY = booleanPreferencesKey("lock_portrait")
         private val SETTINGS_THEME_KEY = stringPreferencesKey("settings_theme")
         private val ACTIVE_WALLPAPER_PACK_KEY = stringPreferencesKey("active_wallpaper_pack")

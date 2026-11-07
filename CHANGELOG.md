@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Text search rebuilt: only the search field stays at the top (or on the keyboard), the box with the
+  category row is gone. The categories run down a rail beside the results, left or right, always
+  above the keyboard. Tapping one jumps to its results and greys out the others until you scroll;
+  dragging along the rail runs through the categories like the A-Z rail, with a bubble
+- New search category Favorites: picked by hand, the most opened apps, or both; shown as soon as
+  search opens or only via the star in the rail. A long press on an app in the search adds or
+  removes it. Launch counts stay on the phone
+- The keyboard opens with the search again for everyone (it can still be switched off and hidden)
+
 - Welcome tour: the gestures can be set right there; tapping one opens the same choices as in the
   settings
 

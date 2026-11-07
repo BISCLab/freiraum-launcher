@@ -795,4 +795,25 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="folder_widget_remove">Entfernen</string>
     <string name="folder_widget_remove_title">%1$s entfernen?</string>
     <string name="folder_widget_remove_text">Das Widget wird aus diesem Ordner entfernt. Seine Einstellungen gehen dabei verloren.</string>
+    <string name="search_filter_favorites">Favoriten</string>
+    <string name="settings_search_include_favorites">Favoriten</string>
+    <string name="search_section_favorites">Favoriten</string>
+    <string name="search_favorite_add">Zu Favoriten hinzufügen</string>
+    <string name="search_favorite_remove">Aus Favoriten entfernen</string>
+    <string name="settings_search_rail_label">Kategorienleiste</string>
+    <string name="settings_search_rail_info">Die Kategorien stehen in einer Leiste neben den Ergebnissen, immer über der Tastatur. Antippen springt zu den Ergebnissen der Kategorie, Ziehen über die Leiste geht sie der Reihe nach durch.</string>
+    <string name="settings_search_rail_show">Kategorienleiste zeigen</string>
+    <string name="settings_search_rail_left">Links</string>
+    <string name="settings_search_rail_right">Rechts</string>
+    <string name="settings_search_favorites_info">Favoriten sind die Apps, die du sofort griffbereit haben willst. Wähle sie selbst, lass Freiraum die am häufigsten geöffneten Apps ergänzen, oder beides. Langes Drücken auf eine App in der Suche fügt sie auch hinzu oder entfernt sie. Das Zählen bleibt auf deinem Handy.</string>
+    <string name="settings_search_favorites_on_open">Beim Öffnen der Suche zeigen</string>
+    <string name="settings_search_favorites_on_open_summary">Sonst erst nach Antippen des Sterns in der Leiste</string>
+    <string name="settings_search_favorites_mode_both">Gewählte, ergänzt um die häufigsten</string>
+    <string name="settings_search_favorites_mode_manual">Nur selbst gewählte</string>
+    <string name="settings_search_favorites_mode_auto">Nur die häufigsten</string>
+    <string name="settings_search_favorites_pick">Favoriten wählen</string>
+    <plurals name="settings_search_favorites_count">
+        <item quantity="one">%1$d App gewählt</item>
+        <item quantity="other">%1$d Apps gewählt</item>
+    </plurals>
 </resources>

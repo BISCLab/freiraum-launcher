@@ -472,6 +472,37 @@ class HomeViewModel @Inject constructor(
         refreshContactResults()
     }
 
+    fun setSearchFilter(category: SearchCategory?) {
+        if (_searchFilter.value == category) return
+        _searchFilter.value = category
+        refreshContactResults()
+    }
+
+    val searchCategoryRailLeft: StateFlow<Boolean> =
+        settingsRepository.searchCategoryRailLeft.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val searchFavoritesOnOpen: StateFlow<Boolean> =
+        settingsRepository.searchFavoritesOnOpen.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val searchFavoriteIds: StateFlow<Set<String>> =
+        settingsRepository.searchFavorites.map { it.toSet() }.stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
+
+    /** The favorites the search shows: picked ones first, then (depending on the mode) the most opened. */
+    val searchFavoriteApps: StateFlow<List<AppInfo>> =
+        combine(settingsRepository.searchFavorites, settingsRepository.appLaunchCounts, settingsRepository.searchFavoritesMode, labeledApps) { picked, counts, mode, apps ->
+            val byId = apps.associateBy { it.componentName.flattenToString() }
+            val manual = if (mode == com.bisc.flauncher.data.model.SearchFavoritesMode.AUTO) emptyList() else picked.mapNotNull { byId[it] }
+            val auto = if (mode == com.bisc.flauncher.data.model.SearchFavoritesMode.MANUAL) emptyList()
+                else counts.entries.sortedByDescending { it.value }.mapNotNull { byId[it.key] }
+            (manual + auto).distinct().take(com.bisc.flauncher.data.model.SEARCH_FAVORITES_MAX)
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    fun toggleSearchFavorite(app: AppInfo) {
+        viewModelScope.launch { settingsRepository.toggleSearchFavorite(app.componentName.flattenToString()) }
+    }
+
+    fun recordAppLaunch(component: android.content.ComponentName) {
+        viewModelScope.launch { settingsRepository.recordAppLaunch(component.flattenToString()) }
+    }
+
     val appListHeaderLetterAppearance: StateFlow<ElementAppearance> =
         settingsRepository.appListHeaderLetterAppearance.stateIn(
             viewModelScope, SharingStarted.Eagerly, ElementAppearance(fillMode = ElementFillMode.NONE, borderEnabled = true)

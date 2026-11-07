@@ -44,6 +44,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.ImageBitmap
@@ -65,13 +66,11 @@ import com.bisc.flauncher.ui.home.dock.BackgroundFill
 import com.bisc.flauncher.data.model.BackgroundConfig
 
 /**
- * Full-screen search, decoupled from the dock - reachable from a dock action button, a gesture, or
- * (later) a standalone icon, and fully optional/ignorable if none of those is configured. The
- * whole screen shares one flat [appearance]: result cards float on it with a small gap between
- * them (see [SearchResultsColumn]). The search field + category filter is one combined element
- * ([SearchInputBar]) pinned flush to the top, the same "permanently-shown Panel" treatment the
- * home screen's own Panel uses; results fill the space below it, with the real system keyboard
- * (no custom in-app keyboard) appearing at the very bottom when focused.
+ * Full-screen search, reachable from a dock action button or a gesture. Only the search field sits
+ * at the top (or on the keyboard); the categories run down a rail beside the results, like the App
+ * list's A-Z rail, always above the keyboard. Tapping a category jumps to its results and greys out
+ * the others until the list is scrolled; dragging along the rail runs through them. Favorites show
+ * while nothing is typed.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -132,7 +131,14 @@ fun SearchOverlay(
     onRefreshContactsPermission: () -> Unit,
     onWebCommand: () -> Unit,
     onMapsCommand: () -> Unit,
-    onAiCommand: () -> Unit
+    onAiCommand: () -> Unit,
+    /** Narrows the search to one category, or back to all (null). */
+    onSetFilter: (SearchCategory?) -> Unit = {},
+    favoriteApps: List<AppInfo> = emptyList(),
+    favoriteIds: Set<String> = emptySet(),
+    favoritesOnOpen: Boolean = true,
+    onToggleFavorite: (AppInfo) -> Unit = {},
+    railLeft: Boolean = false
 ) {
     val context = LocalContext.current
     val aiAppLabel = remember(aiAppPackage) {
@@ -177,6 +183,46 @@ fun SearchOverlay(
     // screen; the next one leaves the search (HomeScreen's own BackHandler for it).
     val imeVisible = WindowInsets.isImeVisible
 
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var focus by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<SearchCategory?>(null) }
+    var cards by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<Map<SearchCategory, Int>>(emptyMap()) }
+    var pendingJump by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<SearchCategory?>(null) }
+    // Typing on ends the focus on one category.
+    LaunchedEffect(query) { focus = null }
+    // Jumps as soon as the card is there - right away, or once a narrowed search has found it.
+    LaunchedEffect(cards, pendingJump) {
+        val target = pendingJump ?: return@LaunchedEffect
+        cards[target]?.let { index ->
+            pendingJump = null
+            listState.animateScrollToItem(index)
+        }
+    }
+    val shownFavorites = when {
+        SearchCategory.FAVORITES !in activeCategories -> emptyList()
+        query.isBlank() -> if (favoritesOnOpen || focus == SearchCategory.FAVORITES) favoriteApps else emptyList()
+        focus == SearchCategory.FAVORITES -> favoriteApps.filter { it.label.contains(query.trim(), ignoreCase = true) }
+        else -> emptyList()
+    }
+    val railCategories = categoryOrder.filter {
+        (it != SearchCategory.AI || aiAppLabel != null) && (it != SearchCategory.FAVORITES || favoriteApps.isNotEmpty())
+    }
+    val onRailTap: (SearchCategory) -> Unit = { category ->
+        if (focus == category) {
+            focus = null
+            if (categoryFilter == category) onSetFilter(null)
+        } else {
+            focus = category
+            // Not among the results right now (not searched by default, or narrowed to another):
+            // search only this one, like the old filter.
+            if (category !in cards || (categoryFilter != null && categoryFilter != category)) onSetFilter(category)
+            pendingJump = category
+        }
+    }
+    val onRailScrub: (SearchCategory) -> Unit = { category ->
+        cards[category]?.let { index -> scope.launch { listState.scrollToItem(index) } }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         // The screen's own backdrop (global, own image or own color), always fully opaque so the
         // home page and its dock never show through - same as the app list.
@@ -211,16 +257,15 @@ fun SearchOverlay(
                         cornerRadiusPercent = barCornerRadiusPercent ?: cornerRadiusPercent,
                         topInset = if (barAtBottom) 0.dp else topInset,
                         atBottom = barAtBottom,
-                        showCategories = barShowCategories,
-                        floating = barFloating,
+                        // Only the field; the categories are the rail beside the results now.
+                        showCategories = false,
+                        floating = true,
                         fieldAppearance = fieldAppearance,
                         fieldCornerRadiusPercent = fieldCornerRadiusPercent,
                         // At the bottom the bar's own background runs down behind the navigation
                         // bar; with the keyboard open it sits right on the keyboard.
                         bottomInsets = if (barAtBottom) WindowInsets.navigationBars.exclude(WindowInsets.ime) else null,
-                        topDecoration = {
-                            if (keyboardCapColor != null && !barFloating) KeyboardCap(keyboardCapColor, keyboardCapCornerRadiusPercent, keyboardCapArrow)
-                        }
+                        topDecoration = {}
                     )
                 }
                 Column(
@@ -231,6 +276,15 @@ fun SearchOverlay(
                         .windowInsetsPadding(if (barAtBottom) WindowInsets.ime else WindowInsets.ime.union(WindowInsets.navigationBars))
                 ) {
                     if (!barAtBottom) Bar()
+                    // Results with the category rail beside them; this area ends above the keyboard, so
+                    // the rail never runs under it.
+                    val showRail = barShowCategories && railCategories.size > 1
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .then(if (barAtBottom) Modifier.padding(top = topInset) else Modifier)
+                    ) {
                     SearchResultsColumn(
                         query = query,
                         calculatorResult = calculatorResult,
@@ -263,20 +317,43 @@ fun SearchOverlay(
                         onAiCommand = onAiCommand,
                         onCalculatorResultClick = { result -> onQueryChange(result) },
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .then(if (barAtBottom) Modifier.padding(top = topInset) else Modifier),
+                            .fillMaxSize()
+                            .padding(
+                                start = if (showRail && railLeft) SEARCH_RAIL_SPACE else 0.dp,
+                                end = if (showRail && !railLeft) SEARCH_RAIL_SPACE else 0.dp
+                            ),
                         cardCornerRadiusPercent = resultsCornerRadiusPercent,
-                        edgeToEdge = resultsEdgeToEdge
+                        edgeToEdge = resultsEdgeToEdge,
+                        listState = listState,
+                        favoriteApps = shownFavorites,
+                        favoriteIds = favoriteIds,
+                        onToggleFavorite = onToggleFavorite,
+                        focus = focus,
+                        onClearFocus = { focus = null },
+                        onCardsChange = { cards = it }
                     )
+                    if (showRail) {
+                        SearchCategoryRail(
+                            categories = railCategories,
+                            categoryColors = categoryColors,
+                            present = cards.keys,
+                            focus = focus,
+                            left = railLeft,
+                            appearance = fieldAppearance ?: automaticRailAppearance(colors.contentColor.luminance() > 0.5f),
+                            cornerRadiusPercent = fieldCornerRadiusPercent ?: barCornerRadiusPercent ?: cornerRadiusPercent,
+                            onTap = onRailTap,
+                            onScrub = onRailScrub,
+                            modifier = Modifier.align(if (railLeft) Alignment.CenterStart else Alignment.CenterEnd)
+                        )
+                    }
+                    }
                     // With the bar at the top, the strip sits directly on top of the keyboard (this
                     // Column is IME-padded), so the results' bottom edge and fade end at the strip.
                     // It fades out as soon as the keyboard *starts* closing (the animation target,
                     // not the current inset), riding down with it, so both leave in one motion.
                     // With the bar at the bottom it tops the bar instead.
                     if (barAtBottom) Bar()
-                    // A floating field has no box to top, so the strip stays on the keyboard.
-                    if (keyboardCapColor != null && (!barAtBottom || barFloating)) KeyboardCap(keyboardCapColor, keyboardCapCornerRadiusPercent, keyboardCapArrow)
+                    if (keyboardCapColor != null) KeyboardCap(keyboardCapColor, keyboardCapCornerRadiusPercent, keyboardCapArrow)
                 }
             }
         }

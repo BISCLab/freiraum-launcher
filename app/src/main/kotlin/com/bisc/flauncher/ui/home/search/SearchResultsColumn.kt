@@ -3,6 +3,8 @@ package com.bisc.flauncher.ui.home.search
 import com.bisc.flauncher.ui.home.rememberAppIcon
 import android.content.ComponentName
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -100,7 +102,17 @@ fun SearchResultsColumn(
     /** Card corner roundness, 0-100% of [SearchDimens.cornerRadius]; null = fully rounded. */
     cardCornerRadiusPercent: Int? = null,
     /** Off = the same fine side margin every other element keeps. */
-    edgeToEdge: Boolean = false
+    edgeToEdge: Boolean = false,
+    listState: androidx.compose.foundation.lazy.LazyListState = rememberLazyListState(),
+    /** Favorites to show as their own card; empty = no card. */
+    favoriteApps: List<AppInfo> = emptyList(),
+    favoriteIds: Set<String> = emptySet(),
+    onToggleFavorite: (AppInfo) -> Unit = {},
+    /** The category picked in the rail: its card stays as it is, the others are greyed out. */
+    focus: SearchCategory? = null,
+    onClearFocus: () -> Unit = {},
+    /** Each category with a card, and the position of its card in the list. */
+    onCardsChange: (Map<SearchCategory, Int>) -> Unit = {}
 ) {
     val sideMargin = if (edgeToEdge) 0.dp else com.bisc.flauncher.ui.home.dock.DockDimens.horizontalMargin
     val cardShape = RoundedCornerShape(SearchDimens.cornerRadius * ((cardCornerRadiusPercent ?: 100).coerceIn(0, 100) / 100f))
@@ -128,11 +140,41 @@ fun SearchResultsColumn(
 
     fun categoryColor(category: SearchCategory): Color = categoryColors[category]?.let { Color(it) } ?: category.defaultColor
 
+    // Where each category's card sits in the list, worked out the same way the list below is built,
+    // so the rail can jump to it.
+    val cards = buildMap {
+        var index = 0
+        if (calculatorResult != null) index++
+        if (converterResult != null) index++
+        order.forEach { category ->
+            val count = when (category) {
+                SearchCategory.FAVORITES -> if (favoriteApps.isNotEmpty()) 1 else 0
+                SearchCategory.APPS -> if (shownAppResults.isNotEmpty()) 1 else 0
+                SearchCategory.FOLDERS -> if (shownFolderResults.isNotEmpty()) 1 else 0
+                SearchCategory.CONTACTS -> if (shownContactResults.isNotEmpty()) 1 else 0
+                SearchCategory.SETTINGS -> if (shownSettingsResults.isNotEmpty()) 1 else 0
+                SearchCategory.WEBSITES -> if (shownWebsiteResults.isNotEmpty()) 1 else 0
+                SearchCategory.PLACES -> (if (shownMapTargetResults.isNotEmpty()) 1 else 0) + (if (showMaps) 1 else 0)
+                SearchCategory.SHORTCUTS -> if (shownShortcutResults.isNotEmpty()) 1 else 0
+                SearchCategory.LAUNCHER_SETTINGS -> if (shownLauncherSettingsResults.isNotEmpty()) 1 else 0
+                SearchCategory.WEB -> if (showWeb) 1 else 0
+                SearchCategory.AI -> if (showAi) 1 else 0
+            }
+            if (count > 0) put(category, index)
+            index += count
+        }
+    }
+    androidx.compose.runtime.LaunchedEffect(cards) { onCardsChange(cards) }
+    // Scrolling by hand ends the focus on one category.
+    androidx.compose.runtime.LaunchedEffect(listState) {
+        listState.interactionSource.interactions.collect { if (it is androidx.compose.foundation.interaction.DragInteraction.Start) onClearFocus() }
+    }
+    fun dimmed(category: SearchCategory) = focus != null && focus != category
+
     CompositionLocalProvider(LocalResultCardShape provides cardShape) {
     BoxWithConstraints(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         // Same edge fades as the app list: cards fade out toward the keyboard while there's more to
         // scroll, and toward the input bar once scrolled away from the top.
-        val listState = rememberLazyListState()
         val fadeStart = (1f - FADE_TRANSITION_DISTANCE / maxHeight).coerceIn(0f, 1f)
         val canScrollFurther by remember { derivedStateOf { listState.canScrollForward } }
         val topFadePx = with(LocalDensity.current) { TOP_FADE_HEIGHT.toPx() }
@@ -152,14 +194,14 @@ fun SearchResultsColumn(
         ) {
             if (calculatorResult != null) {
                 item {
-                    ResultCard(cardAppearance) {
+                    ResultCard(cardAppearance, dimmed = focus != null, onUndim = onClearFocus) {
                         CalculatorResultRow(expression = query, result = calculatorResult, onClick = { onCalculatorResultClick(calculatorResult) })
                     }
                 }
             }
             if (converterResult != null) {
                 item {
-                    ResultCard(cardAppearance) {
+                    ResultCard(cardAppearance, dimmed = focus != null, onUndim = onClearFocus) {
                         CalculatorResultRow(expression = query, result = converterResult, onClick = {})
                     }
                 }
@@ -167,24 +209,42 @@ fun SearchResultsColumn(
 
             order.forEach { category ->
                 when (category) {
+                    SearchCategory.FAVORITES -> if (favoriteApps.isNotEmpty()) {
+                        item(key = category.name) {
+                            ResultCard(cardAppearance, dimmed = dimmed(category), onUndim = onClearFocus) {
+                                SectionTitle(stringResource(R.string.search_section_favorites), categoryColor(category))
+                                AppTileGrid(
+                                    apps = favoriteApps,
+                                    expanded = true,
+                                    loadIcon = loadIcon,
+                                    onAppClick = onAppClick,
+                                    onToggleExpand = {},
+                                    favoriteIds = favoriteIds,
+                                    onToggleFavorite = onToggleFavorite
+                                )
+                            }
+                        }
+                    }
                     SearchCategory.APPS -> if (shownAppResults.isNotEmpty()) {
-                        item {
-                            ResultCard(cardAppearance) {
+                        item(key = category.name) {
+                            ResultCard(cardAppearance, dimmed = dimmed(category), onUndim = onClearFocus) {
                                 SectionTitle(stringResource(R.string.search_section_apps), categoryColor(category))
                                 AppTileGrid(
                                     apps = shownAppResults,
                                     expanded = isExpanded(category),
                                     loadIcon = loadIcon,
                                     onAppClick = onAppClick,
-                                    onToggleExpand = { toggleExpanded(category) }
+                                    onToggleExpand = { toggleExpanded(category) },
+                                    favoriteIds = favoriteIds,
+                                    onToggleFavorite = onToggleFavorite
                                 )
                             }
                         }
                     }
-                    SearchCategory.FOLDERS -> sectionCard(category, shownFolderResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { folder ->
+                    SearchCategory.FOLDERS -> sectionCard(dimmed(category), onClearFocus, category, shownFolderResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { folder ->
                         ResultRow(leading = { Icon(Icons.Filled.Folder, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = folder.name, onClick = { onFolderClick(folder) })
                     }
-                    SearchCategory.CONTACTS -> sectionCard(category, shownContactResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { contact ->
+                    SearchCategory.CONTACTS -> sectionCard(dimmed(category), onClearFocus, category, shownContactResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { contact ->
                         ResultRow(
                             leading = { Icon(Icons.Filled.Person, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) },
                             title = contact.displayName,
@@ -192,14 +252,14 @@ fun SearchResultsColumn(
                             onClick = { onContactClick(contact) }
                         )
                     }
-                    SearchCategory.SETTINGS -> sectionCard(category, shownSettingsResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { shortcut ->
+                    SearchCategory.SETTINGS -> sectionCard(dimmed(category), onClearFocus, category, shownSettingsResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { shortcut ->
                         ResultRow(leading = { Icon(Icons.Filled.Search, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = stringResource(shortcut.labelRes), onClick = { onSettingsShortcutClick(shortcut) })
                     }
-                    SearchCategory.WEBSITES -> sectionCard(category, shownWebsiteResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { website ->
+                    SearchCategory.WEBSITES -> sectionCard(dimmed(category), onClearFocus, category, shownWebsiteResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { website ->
                         ResultRow(leading = { Icon(Icons.Filled.Bookmark, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = website.label, onClick = { onWebsiteClick(website) })
                     }
                     SearchCategory.PLACES -> {
-                        sectionCard(category, shownMapTargetResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { target ->
+                        sectionCard(dimmed(category), onClearFocus, category, shownMapTargetResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { target ->
                             ResultRow(
                                 leading = { Icon(Icons.Filled.Place, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) },
                                 title = target.label,
@@ -208,14 +268,14 @@ fun SearchResultsColumn(
                             )
                         }
                         if (showMaps) {
-                            item {
-                                ResultCard(cardAppearance) {
+                            item(key = "maps_command") {
+                                ResultCard(cardAppearance, dimmed = dimmed(category), onUndim = onClearFocus) {
                                     CommandRow(icon = Icons.Filled.Place, color = categoryColor(category), text = stringResource(R.string.search_command_maps, query), prominent = false, onClick = onMapsCommand)
                                 }
                             }
                         }
                     }
-                    SearchCategory.SHORTCUTS -> sectionCard(category, shownShortcutResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { result ->
+                    SearchCategory.SHORTCUTS -> sectionCard(dimmed(category), onClearFocus, category, shownShortcutResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { result ->
                         ResultRow(
                             leading = { Icon(Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) },
                             title = result.shortcut.label,
@@ -223,19 +283,19 @@ fun SearchResultsColumn(
                             onClick = { onShortcutClick(result.shortcut) }
                         )
                     }
-                    SearchCategory.LAUNCHER_SETTINGS -> sectionCard(category, shownLauncherSettingsResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { target ->
+                    SearchCategory.LAUNCHER_SETTINGS -> sectionCard(dimmed(category), onClearFocus, category, shownLauncherSettingsResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { target ->
                         ResultRow(leading = { Icon(category.icon, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = stringResource(target.labelRes), onClick = { onLauncherSettingsClick(target) })
                     }
                     SearchCategory.WEB -> if (showWeb) {
-                        item {
-                            ResultCard(cardAppearance) {
+                        item(key = category.name) {
+                            ResultCard(cardAppearance, dimmed = dimmed(category), onUndim = onClearFocus) {
                                 CommandRow(icon = Icons.Filled.Language, color = categoryColor(category), text = stringResource(R.string.search_command_web, query), prominent = !hasDirectResults, onClick = onWebCommand)
                             }
                         }
                     }
                     SearchCategory.AI -> if (showAi) {
-                        item {
-                            ResultCard(cardAppearance) {
+                        item(key = category.name) {
+                            ResultCard(cardAppearance, dimmed = dimmed(category), onUndim = onClearFocus) {
                                 CommandRow(icon = SearchCategory.AI.icon, color = categoryColor(category), text = stringResource(R.string.search_command_ai, aiAppLabel.orEmpty(), query), prominent = !hasDirectResults && !showWeb, onClick = onAiCommand)
                             }
                         }
@@ -249,6 +309,8 @@ fun SearchResultsColumn(
 
 /** One category's section as its own card: title + up to [SECTION_COLLAPSED_LIMIT] rows + a "More" toggle. */
 private fun <T> androidx.compose.foundation.lazy.LazyListScope.sectionCard(
+    dimmed: Boolean,
+    onUndim: () -> Unit,
     category: SearchCategory,
     results: List<T>,
     color: Color,
@@ -258,8 +320,8 @@ private fun <T> androidx.compose.foundation.lazy.LazyListScope.sectionCard(
     row: @Composable (T) -> Unit
 ) {
     if (results.isEmpty()) return
-    item {
-        ResultCard(cardAppearance) {
+    item(key = category.name) {
+        ResultCard(cardAppearance, dimmed = dimmed, onUndim = onUndim) {
             SectionTitle(stringResource(category.sectionTitleRes), color)
             val shown = if (expanded || results.size <= SECTION_COLLAPSED_LIMIT) results else results.take(SECTION_COLLAPSED_LIMIT)
             shown.forEach { row(it) }
@@ -284,20 +346,27 @@ private val SearchCategory.sectionTitleRes: Int
         SearchCategory.LAUNCHER_SETTINGS -> R.string.search_section_launcher_settings
         SearchCategory.WEB -> R.string.search_section_apps
         SearchCategory.AI -> R.string.search_section_apps
+        SearchCategory.FAVORITES -> R.string.search_section_favorites
     }
 
 /** Every card's shape, provided once by [SearchResultsColumn] instead of threaded through each call. */
 private val LocalResultCardShape = staticCompositionLocalOf { RoundedCornerShape(SearchDimens.cornerRadius) }
 
+/** One result card. [dimmed] greys it out while another category is picked in the rail; a tap on
+ *  it then only ends that, it doesn't open anything. */
 @Composable
-private fun ResultCard(appearance: ElementAppearance, content: @Composable () -> Unit) {
+private fun ResultCard(appearance: ElementAppearance, dimmed: Boolean = false, onUndim: () -> Unit = {}, content: @Composable () -> Unit) {
+    val alpha by androidx.compose.animation.core.animateFloatAsState(if (dimmed) 0.3f else 1f, label = "cardDim")
     DockPanelSurface(
         appearance = appearance,
         shape = LocalResultCardShape.current,
         effectTarget = "cards",
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().graphicsLayer { this.alpha = alpha }
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) { content() }
+        Box {
+            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) { content() }
+            if (dimmed) Box(Modifier.matchParentSize().noRippleClickable(onClick = onUndim))
+        }
     }
 }
 
@@ -317,8 +386,12 @@ private fun AppTileGrid(
     expanded: Boolean,
     loadIcon: (ComponentName) -> ImageBitmap?,
     onAppClick: (AppInfo) -> Unit,
-    onToggleExpand: () -> Unit
+    onToggleExpand: () -> Unit,
+    favoriteIds: Set<String> = emptySet(),
+    onToggleFavorite: (AppInfo) -> Unit = {}
 ) {
+    // A long press on an app offers to add it to the favorites, or take it out.
+    var menuFor by remember { mutableStateOf<AppInfo?>(null) }
     val collapsedLimit = APP_GRID_COLUMNS * APP_GRID_COLLAPSED_ROWS
     val shown = if (expanded || apps.size <= collapsedLimit) apps else apps.take(collapsedLimit)
 
@@ -330,10 +403,22 @@ private fun AppTileGrid(
                     Column(
                         modifier = Modifier
                             .weight(1f)
-                            .noRippleClickable { onAppClick(app) }
+                            .combinedClickable(
+                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                indication = null,
+                                onClick = { onAppClick(app) },
+                                onLongClick = { menuFor = app }
+                            )
                             .padding(vertical = 6.dp, horizontal = 3.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        val favorite = app.componentName.flattenToString() in favoriteIds
+                        androidx.compose.material3.DropdownMenu(expanded = menuFor == app, onDismissRequest = { menuFor = null }) {
+                            androidx.compose.material3.DropdownMenuItem(
+                                text = { Text(stringResource(if (favorite) R.string.search_favorite_remove else R.string.search_favorite_add)) },
+                                onClick = { menuFor = null; onToggleFavorite(app) }
+                            )
+                        }
                         if (bitmap != null) {
                             Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(48.dp))
                         } else {
