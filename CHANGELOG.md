@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- App grid: choose between scrolling up and down and swiping pages sideways; sideways with as many
+  rows as fit or a set number (3 to 8) and optional page dots
+
 - Text search rebuilt: only the search field stays at the top (or on the keyboard), the box with the
   category row is gone. The categories run down a rail beside the results, left or right, always
   above the keyboard. Tapping one jumps to its results and greys out the others until you scroll;

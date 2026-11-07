@@ -841,6 +841,26 @@ class SettingsRepository @Inject constructor(
 
     val appGridColumns: Flow<Int> = dataStore.data.map { (it[APP_GRID_COLUMNS_KEY] ?: 4).coerceIn(3, 6) }
 
+    /** Pages side by side to swipe through, instead of one long list scrolled up and down. */
+    val appGridHorizontal: Flow<Boolean> = dataStore.data.map { it[APP_GRID_HORIZONTAL_KEY] ?: false }
+
+    suspend fun setAppGridHorizontal(horizontal: Boolean) {
+        dataStore.edit { it[APP_GRID_HORIZONTAL_KEY] = horizontal }
+    }
+
+    /** Rows per page when swiping sideways; 0 = as many as fit. */
+    val appGridRows: Flow<Int> = dataStore.data.map { (it[APP_GRID_ROWS_KEY] ?: 0).let { r -> if (r == 0) 0 else r.coerceIn(3, 8) } }
+
+    suspend fun setAppGridRows(rows: Int) {
+        dataStore.edit { it[APP_GRID_ROWS_KEY] = if (rows <= 0) 0 else rows.coerceIn(3, 8) }
+    }
+
+    val appGridPageDots: Flow<Boolean> = dataStore.data.map { it[APP_GRID_PAGE_DOTS_KEY] ?: true }
+
+    suspend fun setAppGridPageDots(show: Boolean) {
+        dataStore.edit { it[APP_GRID_PAGE_DOTS_KEY] = show }
+    }
+
     suspend fun setAppGridColumns(columns: Int) {
         dataStore.edit { it[APP_GRID_COLUMNS_KEY] = columns.coerceIn(3, 6) }
     }
@@ -1122,6 +1142,9 @@ class SettingsRepository @Inject constructor(
         private val APP_LIST_SHOW_SEARCH_BUTTON_KEY = booleanPreferencesKey("app_list_show_search_button")
         private val APP_LIST_OWN_SEARCH_KEY = booleanPreferencesKey("app_list_own_search")
         private val APP_GRID_COLUMNS_KEY = intPreferencesKey("app_grid_columns")
+        private val APP_GRID_HORIZONTAL_KEY = booleanPreferencesKey("app_grid_horizontal")
+        private val APP_GRID_ROWS_KEY = intPreferencesKey("app_grid_rows")
+        private val APP_GRID_PAGE_DOTS_KEY = booleanPreferencesKey("app_grid_page_dots")
         private val APP_GRID_ICON_SIZE_KEY = intPreferencesKey("app_grid_icon_size")
         private val APP_GRID_SHOW_LABELS_KEY = booleanPreferencesKey("app_grid_show_labels")
         private val APP_GRID_BAR_POSITION_KEY = stringPreferencesKey("app_grid_bar_position")

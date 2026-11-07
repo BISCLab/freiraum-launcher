@@ -391,6 +391,9 @@ class HomeViewModel @Inject constructor(
         pageContentRepository.appGridPageId.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val appGridColumns: StateFlow<Int> = settingsRepository.appGridColumns.stateIn(viewModelScope, SharingStarted.Eagerly, 4)
+    val appGridHorizontal: StateFlow<Boolean> = settingsRepository.appGridHorizontal.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val appGridRows: StateFlow<Int> = settingsRepository.appGridRows.stateIn(viewModelScope, SharingStarted.Eagerly, 0)
+    val appGridPageDots: StateFlow<Boolean> = settingsRepository.appGridPageDots.stateIn(viewModelScope, SharingStarted.Eagerly, true)
     val appGridIconSizePercent: StateFlow<Int> = settingsRepository.appGridIconSizePercent.stateIn(viewModelScope, SharingStarted.Eagerly, 100)
     val appGridShowLabels: StateFlow<Boolean> = settingsRepository.appGridShowLabels.stateIn(viewModelScope, SharingStarted.Eagerly, true)
     val appGridBarPosition: StateFlow<AppGridBarPosition> =

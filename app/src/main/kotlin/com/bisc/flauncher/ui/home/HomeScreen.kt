@@ -226,6 +226,9 @@ fun HomeScreen(
     val appGridHideStatusBar by remember(appGridPageId) { viewModel.pageHideStatusBar(appGridPageId ?: -1L) }
         .collectAsState(initial = false)
     val appGridColumns by viewModel.appGridColumns.collectAsState()
+    val appGridHorizontal by viewModel.appGridHorizontal.collectAsState()
+    val appGridRows by viewModel.appGridRows.collectAsState()
+    val appGridPageDots by viewModel.appGridPageDots.collectAsState()
     val appGridIconSizePercent by viewModel.appGridIconSizePercent.collectAsState()
     val appGridShowLabels by viewModel.appGridShowLabels.collectAsState()
     val appGridBarPosition by viewModel.appGridBarPosition.collectAsState()
@@ -1113,6 +1116,9 @@ fun HomeScreen(
                     query = appQuery,
                     queryResults = appQueryResults,
                     columns = appGridColumns,
+                    horizontal = appGridHorizontal,
+                    rowsPerPage = appGridRows,
+                    pageDots = appGridPageDots,
                     globalIconScale = iconSizeScale,
                     gridIconScale = appGridIconSizePercent / 100f,
                     showLabels = appGridShowLabels,

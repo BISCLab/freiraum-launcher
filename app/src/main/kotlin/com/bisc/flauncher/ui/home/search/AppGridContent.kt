@@ -36,6 +36,8 @@ import com.bisc.flauncher.ui.home.LocalIconSizeResolver
 import com.bisc.flauncher.ui.home.rememberAppIcon
 import com.bisc.flauncher.ui.theme.noRippleClickable
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -62,8 +64,9 @@ private sealed interface GridEntry {
     }
 }
 
-/** The App grid page: all apps (and the chosen folders) in a fixed-column grid, with an optional
- *  search field above or below that filters it, or opens Text search. */
+/** The App grid page: all apps (and the chosen folders) in a fixed-column grid, scrolled up and down
+ *  or as pages swiped sideways, with an optional search field above or below that filters it, or
+ *  opens Text search. */
 @Composable
 fun AppGridContent(
     apps: List<AppInfo>,
@@ -73,6 +76,11 @@ fun AppGridContent(
     query: String,
     queryResults: List<AppInfo>,
     columns: Int,
+    /** Pages to swipe sideways instead of one list scrolled up and down. */
+    horizontal: Boolean = false,
+    /** Rows on each page when [horizontal]; 0 = as many as fit. */
+    rowsPerPage: Int = 0,
+    pageDots: Boolean = true,
     /** The global icon size; apps with their own size use theirs instead. */
     globalIconScale: Float,
     /** The grid's own size on top. */
@@ -131,10 +139,79 @@ fun AppGridContent(
 
     Column(modifier = modifier.fillMaxSize().windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))) {
         if (barPosition == AppGridBarPosition.TOP) Bar(Modifier.align(Alignment.CenterHorizontally).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).padding(horizontal = 20.dp, vertical = 8.dp))
+        @Composable
+        fun Cell(entry: GridEntry) {
+            when (entry) {
+                is GridEntry.App -> AppGridCell(
+                    app = entry.app,
+                    loadIcon = loadIcon,
+                    iconSize = APP_ICON_SIZE * ((iconSizeResolver?.invoke(entry.key.removePrefix("app:")) ?: globalIconScale) * gridIconScale),
+                    showLabel = showLabels,
+                    labelColor = labelColor,
+                    onClick = { onAppClick(entry.app) }
+                )
+                is GridEntry.FolderEntry -> FolderCell(
+                    folder = entry.folder,
+                    previewItems = folderItemsByFolder[entry.folder.id].orEmpty(),
+                    loadIcon = loadIcon,
+                    loadPackIcon = loadPackIcon,
+                    onClick = { onFolderClick(entry.folder.id) },
+                    showLabel = showLabels,
+                    labelColor = labelColor,
+                    iconSizeScale = globalIconScale * gridIconScale
+                )
+            }
+        }
         BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
-            val gridState = rememberLazyGridState()
             // The column setting is meant for a phone; a wider screen gets proportionally more.
             val effectiveColumns = maxOf(columns, (columns * (maxWidth / com.bisc.flauncher.ui.PhoneReferenceWidth)).toInt())
+            if (horizontal) {
+                // As many rows as fit, unless a number is set; each page is full before the next starts.
+                val dotsSpace = if (pageDots) PAGE_DOTS_SPACE else 0.dp
+                val cellHeight = APP_ICON_SIZE * globalIconScale * gridIconScale + 8.dp + (if (showLabels) 24.dp else 0.dp) + ROW_GAP
+                val fitting = ((maxHeight - dotsSpace - 16.dp + ROW_GAP) / cellHeight).toInt().coerceAtLeast(1)
+                val rows = if (rowsPerPage > 0) minOf(rowsPerPage, fitting) else fitting
+                val pages = entries.chunked(effectiveColumns * rows).ifEmpty { listOf(emptyList()) }
+                val pagerState = androidx.compose.foundation.pager.rememberPagerState { pages.size }
+                androidx.compose.runtime.LaunchedEffect(query) { pagerState.scrollToPage(0) }
+                Column(modifier = Modifier.fillMaxSize()) {
+                    androidx.compose.foundation.pager.HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        verticalAlignment = Alignment.Top
+                    ) { page ->
+                        Column(
+                            modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(ROW_GAP)
+                        ) {
+                            pages[page].chunked(effectiveColumns).forEach { row ->
+                                androidx.compose.foundation.layout.Row(modifier = Modifier.fillMaxWidth()) {
+                                    row.forEach { entry -> Box(modifier = Modifier.weight(1f)) { Cell(entry) } }
+                                    repeat(effectiveColumns - row.size) { Spacer(Modifier.weight(1f)) }
+                                }
+                            }
+                        }
+                    }
+                    if (pageDots && pages.size > 1) {
+                        androidx.compose.foundation.layout.Row(
+                            modifier = Modifier.fillMaxWidth().height(PAGE_DOTS_SPACE),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            repeat(pages.size) { i ->
+                                val active = i == pagerState.currentPage
+                                Box(
+                                    modifier = Modifier
+                                        .size(width = if (active) 18.dp else 7.dp, height = 7.dp)
+                                        .clip(androidx.compose.foundation.shape.CircleShape)
+                                        .background(labelColor.copy(alpha = if (active) 0.9f else 0.35f))
+                                )
+                            }
+                        }
+                    }
+                }
+            } else {
+            val gridState = rememberLazyGridState()
             val fadeStart = (1f - FADE_TRANSITION_DISTANCE / maxHeight).coerceIn(0f, 1f)
             val canScrollFurther by remember { derivedStateOf { gridState.canScrollForward } }
             val topFadePx = with(LocalDensity.current) { TOP_FADE_HEIGHT.toPx() }
@@ -150,30 +227,10 @@ fun AppGridContent(
                         if (gridState.firstVisibleItemIndex > 0) 1f else (gridState.firstVisibleItemScrollOffset / topFadePx).coerceIn(0f, 1f)
                     },
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(ROW_GAP)
             ) {
-                items(entries, key = { it.key }, contentType = { it::class }) { entry ->
-                    when (entry) {
-                        is GridEntry.App -> AppGridCell(
-                            app = entry.app,
-                            loadIcon = loadIcon,
-                            iconSize = APP_ICON_SIZE * ((iconSizeResolver?.invoke(entry.key.removePrefix("app:")) ?: globalIconScale) * gridIconScale),
-                            showLabel = showLabels,
-                            labelColor = labelColor,
-                            onClick = { onAppClick(entry.app) }
-                        )
-                        is GridEntry.FolderEntry -> FolderCell(
-                            folder = entry.folder,
-                            previewItems = folderItemsByFolder[entry.folder.id].orEmpty(),
-                            loadIcon = loadIcon,
-                            loadPackIcon = loadPackIcon,
-                            onClick = { onFolderClick(entry.folder.id) },
-                            showLabel = showLabels,
-                            labelColor = labelColor,
-                            iconSizeScale = globalIconScale * gridIconScale
-                        )
-                    }
-                }
+                items(entries, key = { it.key }, contentType = { it::class }) { entry -> Cell(entry) }
+            }
             }
         }
         if (barPosition == AppGridBarPosition.BOTTOM) Bar(Modifier.align(Alignment.CenterHorizontally).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 16.dp))
@@ -182,6 +239,8 @@ fun AppGridContent(
 }
 
 private val APP_ICON_SIZE = 56.dp
+private val ROW_GAP = 12.dp
+private val PAGE_DOTS_SPACE = 24.dp
 
 /** Lightweight cell, like the app list's rows: no ripple, no per-cell lookups, plain text. */
 @Composable

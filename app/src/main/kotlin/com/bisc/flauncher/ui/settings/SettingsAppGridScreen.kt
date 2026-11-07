@@ -112,7 +112,39 @@ fun SettingsAppGridGridScreen(navController: NavController, onBack: () -> Unit, 
     val columns by viewModel.appGridColumns.collectAsState()
     val iconSize by viewModel.appGridIconSizePercent.collectAsState()
     val showLabels by viewModel.appGridShowLabels.collectAsState()
+    val horizontal by viewModel.appGridHorizontal.collectAsState()
+    val rows by viewModel.appGridRows.collectAsState()
+    val pageDots by viewModel.appGridPageDots.collectAsState()
     SettingsSubScreen(title = stringResource(R.string.settings_app_grid_grid_label), navController = navController, onBack = onBack) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_app_grid_direction)) {
+            RadioPreference(stringResource(R.string.settings_app_grid_vertical), false, horizontal, viewModel::setAppGridHorizontal)
+            RadioPreference(stringResource(R.string.settings_app_grid_horizontal), true, horizontal, viewModel::setAppGridHorizontal)
+            if (horizontal) {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_app_grid_rows),
+                    summary = if (rows == 0) stringResource(R.string.settings_app_grid_rows_auto) else rows.toString(),
+                    onClick = {},
+                    trailing = {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            // Below 3 comes "as many as fit".
+                            IconButton(onClick = { viewModel.setAppGridRows(if (rows <= 3) 0 else rows - 1) }, enabled = rows != 0) {
+                                Icon(Icons.Filled.Remove, contentDescription = null)
+                            }
+                            IconButton(onClick = { viewModel.setAppGridRows(if (rows == 0) 3 else rows + 1) }, enabled = rows < 8) {
+                                Icon(Icons.Filled.Add, contentDescription = null)
+                            }
+                        }
+                    }
+                )
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_app_grid_page_dots),
+                    onClick = { viewModel.setAppGridPageDots(!pageDots) },
+                    trailing = { Switch(checked = pageDots, onCheckedChange = viewModel::setAppGridPageDots) }
+                )
+            }
+        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_app_grid_columns)) {
             SettingsPreference(
                 icon = null,

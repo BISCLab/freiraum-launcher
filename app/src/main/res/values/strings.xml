@@ -816,4 +816,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
         <item quantity="one">%1$d app picked</item>
         <item quantity="other">%1$d apps picked</item>
     </plurals>
+    <string name="settings_app_grid_direction">Direction</string>
+    <string name="settings_app_grid_vertical">Scroll up and down</string>
+    <string name="settings_app_grid_horizontal">Swipe pages sideways</string>
+    <string name="settings_app_grid_rows">Rows per page</string>
+    <string name="settings_app_grid_rows_auto">As many as fit</string>
+    <string name="settings_app_grid_page_dots">Show page dots</string>
 </resources>

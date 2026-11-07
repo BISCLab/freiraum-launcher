@@ -511,6 +511,13 @@ class SettingsViewModel @Inject constructor(
     val appGridColumns: StateFlow<Int> = repository.appGridColumns.stateIn(viewModelScope, SharingStarted.Eagerly, 4)
     fun setAppGridColumns(columns: Int) { viewModelScope.launch { repository.setAppGridColumns(columns) } }
 
+    val appGridHorizontal: StateFlow<Boolean> = repository.appGridHorizontal.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    fun setAppGridHorizontal(horizontal: Boolean) { viewModelScope.launch { repository.setAppGridHorizontal(horizontal) } }
+    val appGridRows: StateFlow<Int> = repository.appGridRows.stateIn(viewModelScope, SharingStarted.Eagerly, 0)
+    fun setAppGridRows(rows: Int) { viewModelScope.launch { repository.setAppGridRows(rows) } }
+    val appGridPageDots: StateFlow<Boolean> = repository.appGridPageDots.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    fun setAppGridPageDots(show: Boolean) { viewModelScope.launch { repository.setAppGridPageDots(show) } }
+
     val appGridIconSizePercent: StateFlow<Int> = repository.appGridIconSizePercent.stateIn(viewModelScope, SharingStarted.Eagerly, 100)
     fun setAppGridIconSizePercent(percent: Int) { viewModelScope.launch { repository.setAppGridIconSizePercent(percent) } }
 
