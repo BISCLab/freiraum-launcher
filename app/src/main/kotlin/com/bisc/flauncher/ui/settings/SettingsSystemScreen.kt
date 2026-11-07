@@ -21,8 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-/** System: how the launcher fits into the phone - permissions, language, display, which apps links
- *  and places open in, the charging animation, settings tips and backups. */
+/** System: how the launcher fits into the phone - permissions and default launcher, language, which
+ *  apps links and places open in, settings tips and backups. */
 @Composable
 fun SettingsSystemScreen(
     navController: NavController,
@@ -31,9 +31,6 @@ fun SettingsSystemScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val chargingAnimation by viewModel.chargingAnimationEnabled.collectAsState()
-    val chargingColor by viewModel.chargingAnimationColor.collectAsState()
-    val accentColor by viewModel.accentColor.collectAsState()
     val showSettingsTips by viewModel.showSettingsTips.collectAsState()
     val browserPackage by viewModel.searchBrowserApp.collectAsState()
     val mapsPackage by viewModel.searchMapsApp.collectAsState()
@@ -45,8 +42,6 @@ fun SettingsSystemScreen(
     } ?: defaultAppLabel
     var pendingImport by remember { mutableStateOf<android.net.Uri?>(null) }
     var confirmingExport by remember { mutableStateOf(false) }
-    val settingsThemeMode by viewModel.settingsThemeMode.collectAsState()
-    var settingsThemePickerOpen by remember { mutableStateOf(false) }
     var language by remember { mutableStateOf(com.bisc.flauncher.util.AppLanguage.current(context)) }
     // Only the chosen language shows; the full list opens on tap, so it stays short as more come.
     val languages = listOf("" to stringResource(R.string.settings_language_system), "en" to "English", "de" to "Deutsch")
@@ -83,38 +78,6 @@ fun SettingsSystemScreen(
                 trailing = null
             )
         }
-        val lockPortrait by viewModel.lockPortrait.collectAsState()
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_display_label)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_statusbar_label),
-                summary = statusBarSummary(viewModel),
-                onClick = { onNavigate("system/statusbar") },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_motion_label),
-                summary = motionSummary(viewModel),
-                onClick = { onNavigate("system/animations") },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_lock_portrait),
-                summary = stringResource(R.string.settings_lock_portrait_summary),
-                onClick = { viewModel.setLockPortrait(!lockPortrait) },
-                trailing = { Switch(checked = lockPortrait, onCheckedChange = viewModel::setLockPortrait) }
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_settings_theme_label),
-                summary = settingsThemeLabel(settingsThemeMode),
-                info = stringResource(R.string.settings_settings_theme_info),
-                onClick = { settingsThemePickerOpen = true },
-                trailing = null
-            )
-        }
         SettingsPreferenceGroup(
             title = stringResource(R.string.settings_standard_apps_label),
             info = stringResource(R.string.settings_search_open_with_info)
@@ -133,25 +96,6 @@ fun SettingsSystemScreen(
                 onClick = { mapsPickerOpen = true },
                 trailing = null
             )
-        }
-        SettingsPreferenceGroup(
-            title = stringResource(R.string.settings_charging_label),
-            info = stringResource(R.string.settings_charging_animation_summary)
-        ) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_charging_animation),
-                onClick = { viewModel.setChargingAnimationEnabled(!chargingAnimation) },
-                trailing = { Switch(checked = chargingAnimation, onCheckedChange = viewModel::setChargingAnimationEnabled) }
-            )
-            if (chargingAnimation) {
-                AccentOverrideRows(
-                    title = stringResource(R.string.settings_charging_color),
-                    own = chargingColor,
-                    global = accentColor,
-                    onChange = viewModel::setChargingAnimationColor
-                )
-            }
         }
         // Turns every "?" tip button across the settings on or off (see LocalShowSettingsTips).
         SettingsPreferenceGroup(title = stringResource(R.string.settings_tips_label)) {
@@ -217,15 +161,6 @@ fun SettingsSystemScreen(
             onDismiss = { languagePickerOpen = false }
         )
     }
-    if (settingsThemePickerOpen) {
-        ChoiceDialog(
-            title = stringResource(R.string.settings_settings_theme_label),
-            options = com.bisc.flauncher.ui.theme.SettingsThemeMode.entries.map { it to settingsThemeLabel(it) },
-            selected = settingsThemeMode,
-            onPick = { settingsThemePickerOpen = false; viewModel.setSettingsThemeMode(it) },
-            onDismiss = { settingsThemePickerOpen = false }
-        )
-    }
     if (confirmingExport) {
         var understood by remember { mutableStateOf(false) }
         AlertDialog(
@@ -279,16 +214,6 @@ fun SettingsSystemScreen(
         )
     }
 }
-
-@Composable
-private fun settingsThemeLabel(mode: com.bisc.flauncher.ui.theme.SettingsThemeMode): String = stringResource(
-    when (mode) {
-        com.bisc.flauncher.ui.theme.SettingsThemeMode.LAUNCHER -> R.string.settings_settings_theme_launcher
-        com.bisc.flauncher.ui.theme.SettingsThemeMode.LIGHT -> R.string.settings_theme_light
-        com.bisc.flauncher.ui.theme.SettingsThemeMode.DARK -> R.string.settings_theme_dark
-        com.bisc.flauncher.ui.theme.SettingsThemeMode.SYSTEM -> R.string.settings_theme_system
-    }
-)
 
 /** A short list of radio choices that closes on pick. */
 @Composable

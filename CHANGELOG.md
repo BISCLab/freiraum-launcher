@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Appearance now holds everything about look and motion: color modes (launcher, and settings with
+  the welcome tour) side by side, accent, font, background and icons, status bar and portrait lock,
+  animations and the charging animation; System keeps permissions, language, default apps, tips
+  and backup
+- Icons moved back from Apps & elements to Appearance
+- The paging buttons look is reached from each widget that uses buttons, no longer from Appearance
+- Switching the launcher color mode no longer touches backgrounds; only the plain default color
+  swaps between matte black and chalk white
+- Designs: Back to my design is now Remove design, with a clearer explanation
+
 ## 0.10.0
 
 - Settings rebuilt: "Design" is now "Appearance" (launcher color mode, accent, font, background,

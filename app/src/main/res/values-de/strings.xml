@@ -91,7 +91,7 @@
 
     <string name="settings_title">Einstellungen</string>
     <string name="settings_theme_confirm_title">„%1$s“ anwenden?</string>
-    <string name="settings_theme_confirm_message">Überschreibt Hintergrund und alle angepassten Farb- und Stileinstellungen im gesamten Launcher. Danach bleibt jede Fläche einzeln bearbeitbar. Diese Aktion kann nicht automatisch rückgängig gemacht werden.</string>
+    <string name="settings_theme_confirm_message">Setzt die Farben aller Widgets, Karten, von Dock, Panel und Suche auf den neuen Modus. Deine Hintergründe und Bilder bleiben, wie sie sind. Jede Fläche lässt sich danach weiter einzeln anpassen.</string>
     <string name="settings_theme_apply">Anwenden</string>
     <string name="settings_language_label">Sprache</string>
     <string name="settings_language_system">Systemstandard</string>
@@ -105,11 +105,11 @@
     <string name="settings_accent_use_global">Globale Akzentfarbe verwenden</string>
     <string name="settings_accent_custom">Eigene Farbe</string>
     <string name="settings_design_title">Aussehen</string>
-    <string name="settings_card_design_subtitle">Farbmodus, Akzentfarbe, Schrift, Hintergrund</string>
+    <string name="settings_card_design_subtitle">Farbmodi, Akzentfarbe, Schrift, Hintergrund, Icons, Statusleiste, Animationen</string>
     <string name="settings_icons_label">Icons</string>
     <string name="settings_icons_summary">Form, Größe und Icon-Pack für alle Apps</string>
     <string name="settings_system_title">System</string>
-    <string name="settings_card_system_subtitle">Berechtigungen, Sprache, Anzeige, Standard-Apps, Sicherung</string>
+    <string name="settings_card_system_subtitle">Berechtigungen, Sprache, Standard-Apps, Tipps, Sicherung</string>
     <string name="settings_element_fill_label">Fläche</string>
     <string name="settings_font_label">Schriftart</string>
     <string name="settings_font_system">Systemstandard</string>
@@ -153,7 +153,7 @@
     <string name="settings_captions_label">Beschriftung</string>
 
     <string name="settings_section_elements">Apps &amp; Elemente</string>
-    <string name="settings_card_elements_subtitle">Apps, Icons, Ordner, Adressen, Links, Aktionsbuttons</string>
+    <string name="settings_card_elements_subtitle">Apps, Ordner, Adressen, Links, Aktionsbuttons</string>
     <string name="settings_elements_addresses_title">Adressen</string>
     <string name="settings_elements_addresses_empty">Noch keine Adressen.</string>
     <string name="settings_elements_add_address">Adresse hinzufügen</string>
@@ -686,8 +686,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="designs_add_summary">Eine heruntergeladene .freiraum-design-Datei wählen</string>
     <string name="designs_installed">Installiert</string>
     <string name="designs_active">Aktiv</string>
-    <string name="designs_restore">Zurück zu meinem Design</string>
-    <string name="designs_restore_summary">So, wie es vor dem ersten Design aussah</string>
+    <string name="designs_restore">Design entfernen</string>
+    <string name="designs_restore_summary">Holt die Farben, Rahmen, Ecken und Effekte zurück, die du vor dem Anwenden eines Designs hattest</string>
     <string name="designs_export">Aktuelles Aussehen als Design speichern</string>
     <string name="designs_export_summary">Zum Teilen oder als Grundlage für ein eigenes Design</string>
     <string name="designs_export_default_name">Mein Design</string>
@@ -710,9 +710,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_group_extensions">Erweiterungen</string>
     <string name="settings_plugins_title">Plugins</string>
     <string name="settings_plugins_soon">Bald: weitere Widgets als Erweiterung</string>
-    <string name="settings_launcher_theme_label">Launcher-Farbmodus</string>
+    <string name="settings_launcher_theme_label">Launcher</string>
     <string name="settings_display_label">Anzeige</string>
-    <string name="settings_settings_theme_label">Farbmodus der Einstellungen</string>
+    <string name="settings_settings_theme_label">Einstellungen und Einführung</string>
     <string name="settings_settings_theme_launcher">Wie der Launcher</string>
     <string name="settings_settings_theme_info">Gilt nur für die Einstellungen und die Einführung. Der Launcher selbst behält seinen Farbmodus aus „Aussehen“.</string>
     <string name="settings_statusbar_summary">Ausgeblendet auf %1$d von %2$d</string>
@@ -769,5 +769,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_shape_part_search_button">Suchbutton und A–Z-Leiste</string>
     <string name="welcome_shape_part_text_search">Textsuche</string>
     <string name="welcome_shape_part_folders">Ordner und Element-Boxen</string>
-    <string name="settings_widget_paging_mode_row_info">Wie dieses Widget blättert (Stunden und Tage, Notizen). Das Aussehen der Pfeiltasten stellst du einmal für alle Widgets unter Aussehen ein.</string>
+    <string name="settings_widget_paging_mode_row_info">Wie dieses Widget blättert (Stunden und Tage, Notizen). Das Aussehen der Pfeiltasten gilt für alle Widgets gemeinsam.</string>
+    <string name="settings_color_modes_label">Farbmodi</string>
+    <string name="settings_color_modes_info">Launcher: der Startbildschirm mit seinen Seiten, Widgets und Ordnern. Einstellungen und Einführung: nur diese Bildschirme, so können sie hell sein, während der Launcher dunkel ist, oder umgekehrt.</string>
+    <string name="settings_background_icons_label">Hintergrund und Icons</string>
+    <string name="settings_motion_group_label">Bewegung</string>
 </resources>

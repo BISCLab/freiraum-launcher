@@ -196,6 +196,14 @@ internal fun WidgetEditor(
             ) {
                 RadioPreference(stringResource(R.string.settings_widget_paging_gesture), false, row.pagingButtons, { row = row.copy(pagingButtons = it) })
                 RadioPreference(stringResource(R.string.settings_widget_paging_buttons), true, row.pagingButtons, { row = row.copy(pagingButtons = it) })
+                if (row.pagingButtons) {
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(R.string.settings_widget_paging_title),
+                        summary = stringResource(R.string.settings_widget_paging_summary),
+                        onClick = { navController.navigate("settings/appearance/widget_paging") }
+                    )
+                }
             }
         }
         if (isBuiltIn && row.payload == WidgetKind.MUSIC) {

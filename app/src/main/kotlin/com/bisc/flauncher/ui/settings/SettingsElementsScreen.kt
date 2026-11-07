@@ -4,7 +4,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.Composable
@@ -25,12 +24,6 @@ fun SettingsElementsScreen(navController: NavController, onBack: () -> Unit) {
                 title = stringResource(R.string.settings_section_manage_apps),
                 summary = stringResource(R.string.settings_card_manage_apps_subtitle),
                 onClick = { navController.navigate("settings/apps") }
-            )
-            SettingsPreference(
-                icon = Icons.Filled.Category,
-                title = stringResource(R.string.settings_icons_label),
-                summary = stringResource(R.string.settings_icons_summary),
-                onClick = { navController.navigate("settings/appearance/icons") }
             )
             SettingsPreference(
                 icon = Icons.AutoMirrored.Filled.List,

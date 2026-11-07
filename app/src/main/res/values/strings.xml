@@ -91,7 +91,7 @@
 
     <string name="settings_title">Settings</string>
     <string name="settings_theme_confirm_title">Apply “%1$s”?</string>
-    <string name="settings_theme_confirm_message">Overwrites the background and all customized color and style settings throughout the launcher. Every surface remains individually editable afterwards. This action cannot be undone automatically.</string>
+    <string name="settings_theme_confirm_message">Resets the colors of every widget, card, Dock, Panel and search part to the new mode. Your backgrounds and pictures stay as they are. Each surface can still be changed on its own afterwards.</string>
     <string name="settings_theme_apply">Apply</string>
     <string name="settings_language_label">Language</string>
     <string name="settings_language_system">System default</string>
@@ -105,11 +105,11 @@
     <string name="settings_accent_use_global">Use global accent color</string>
     <string name="settings_accent_custom">Custom color</string>
     <string name="settings_design_title">Appearance</string>
-    <string name="settings_card_design_subtitle">Color mode, accent, font, background</string>
+    <string name="settings_card_design_subtitle">Color modes, accent, font, background, icons, status bar, animations</string>
     <string name="settings_icons_label">Icons</string>
     <string name="settings_icons_summary">Shape, size and icon pack for every app</string>
     <string name="settings_system_title">System</string>
-    <string name="settings_card_system_subtitle">Permissions, language, display, default apps, backup</string>
+    <string name="settings_card_system_subtitle">Permissions, language, default apps, tips, backup</string>
     <string name="settings_element_fill_label">Fill</string>
     <string name="settings_font_label">Font</string>
     <string name="settings_font_system">System default</string>
@@ -152,7 +152,7 @@
     <string name="settings_captions_label">Captions</string>
 
     <string name="settings_section_elements">Apps &amp; elements</string>
-    <string name="settings_card_elements_subtitle">Apps, icons, folders, addresses, links, action buttons</string>
+    <string name="settings_card_elements_subtitle">Apps, folders, addresses, links, action buttons</string>
     <string name="settings_elements_addresses_title">Addresses</string>
     <string name="settings_elements_addresses_empty">No addresses yet.</string>
     <string name="settings_elements_add_address">Add address</string>
@@ -686,8 +686,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="designs_add_summary">Choose a downloaded .freiraum-design file</string>
     <string name="designs_installed">Installed</string>
     <string name="designs_active">Active</string>
-    <string name="designs_restore">Back to my own look</string>
-    <string name="designs_restore_summary">How it looked before the first design</string>
+    <string name="designs_restore">Remove design</string>
+    <string name="designs_restore_summary">Brings back the colors, borders, corners and effects you had before you applied a design</string>
     <string name="designs_export">Save current look as design</string>
     <string name="designs_export_summary">To share it or as a start for your own design</string>
     <string name="designs_export_default_name">My design</string>
@@ -710,9 +710,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_group_extensions">Extensions</string>
     <string name="settings_plugins_title">Plugins</string>
     <string name="settings_plugins_soon">Coming soon: more widgets as add-ons</string>
-    <string name="settings_launcher_theme_label">Launcher color mode</string>
+    <string name="settings_launcher_theme_label">Launcher</string>
     <string name="settings_display_label">Display</string>
-    <string name="settings_settings_theme_label">Color mode of the settings</string>
+    <string name="settings_settings_theme_label">Settings and welcome tour</string>
     <string name="settings_settings_theme_launcher">Like the launcher</string>
     <string name="settings_settings_theme_info">Only for the settings and the welcome tour. The launcher itself keeps its own color mode from Appearance.</string>
     <string name="settings_statusbar_summary">Hidden on %1$d of %2$d</string>
@@ -769,5 +769,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_shape_part_search_button">Search button and A-Z rail</string>
     <string name="welcome_shape_part_text_search">Text search</string>
     <string name="welcome_shape_part_folders">Folders and element boxes</string>
-    <string name="settings_widget_paging_mode_row_info">How this widget turns its pages (hours and days, notes). The look of the buttons is set once for all widgets under Appearance.</string>
+    <string name="settings_widget_paging_mode_row_info">How this widget turns its pages (hours and days, notes). The look of the buttons is shared by all widgets.</string>
+    <string name="settings_color_modes_label">Color modes</string>
+    <string name="settings_color_modes_info">Launcher: the home screen, its pages, widgets and folders. Settings and welcome tour: only these screens, so they can be light while the launcher is dark, or the other way round.</string>
+    <string name="settings_background_icons_label">Background and icons</string>
+    <string name="settings_motion_group_label">Motion</string>
 </resources>

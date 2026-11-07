@@ -1,18 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
-import androidx.compose.ui.draw.alpha
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.unit.dp
-import com.bisc.flauncher.ui.theme.noRippleClickable
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -22,19 +11,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
-import com.bisc.flauncher.data.model.LauncherPageKind
-import com.bisc.flauncher.ui.pageLabel
 import com.bisc.flauncher.ui.theme.FontPreference
+import com.bisc.flauncher.ui.theme.SettingsThemeMode
 import com.bisc.flauncher.ui.theme.ThemePreference
 
-/** Appearance: what looks the same across the whole launcher - color mode, accent, font, background
- *  and the widget paging buttons. Pages and elements can override parts of it on their own screens. */
+/** Appearance: everything about how the launcher looks and moves - color modes, accent, font,
+ *  background and icons, status bar and rotation, animations and the charging animation. Pages and
+ *  elements can override parts of it on their own screens. */
 @Composable
 fun SettingsAppearanceScreen(
     navController: NavController,
@@ -43,16 +33,36 @@ fun SettingsAppearanceScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val theme by viewModel.theme.collectAsState()
+    val settingsThemeMode by viewModel.settingsThemeMode.collectAsState()
     val fontPreference by viewModel.fontPreference.collectAsState()
     val accentColor by viewModel.accentColor.collectAsState()
+    val lockPortrait by viewModel.lockPortrait.collectAsState()
+    val chargingAnimation by viewModel.chargingAnimationEnabled.collectAsState()
+    val chargingColor by viewModel.chargingAnimationColor.collectAsState()
     var confirmingTheme by remember { mutableStateOf<ThemePreference?>(null) }
+    var launcherThemePickerOpen by remember { mutableStateOf(false) }
+    var settingsThemePickerOpen by remember { mutableStateOf(false) }
     var accentPickerOpen by remember { mutableStateOf(false) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_design_title), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_launcher_theme_label)) {
-            RadioPreference(stringResource(R.string.settings_theme_light), ThemePreference.LIGHT, theme, onSelect = { confirmingTheme = it })
-            RadioPreference(stringResource(R.string.settings_theme_dark), ThemePreference.DARK, theme, onSelect = { confirmingTheme = it })
-            RadioPreference(stringResource(R.string.settings_theme_system), ThemePreference.SYSTEM, theme, onSelect = { confirmingTheme = it })
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_color_modes_label),
+            info = stringResource(R.string.settings_color_modes_info)
+        ) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_launcher_theme_label),
+                summary = themeLabel(theme),
+                onClick = { launcherThemePickerOpen = true },
+                trailing = null
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_settings_theme_label),
+                summary = settingsThemeLabel(settingsThemeMode),
+                onClick = { settingsThemePickerOpen = true },
+                trailing = null
+            )
         }
         SettingsPreferenceGroup(
             title = stringResource(R.string.settings_accent_label),
@@ -68,7 +78,7 @@ fun SettingsAppearanceScreen(
             RadioPreference(stringResource(R.string.settings_font_monospace), FontPreference.MONOSPACE, fontPreference, viewModel::setFontPreference, font = FontPreference.MONOSPACE.fontFamily)
             RadioPreference(stringResource(R.string.settings_font_rounded), FontPreference.ROUNDED, fontPreference, viewModel::setFontPreference, font = FontPreference.ROUNDED.fontFamily)
         }
-        SettingsPreferenceGroup {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_icons_label)) {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_section_global_background),
@@ -78,36 +88,92 @@ fun SettingsAppearanceScreen(
             )
             SettingsPreference(
                 icon = null,
-                title = stringResource(R.string.settings_widget_paging_title),
-                summary = stringResource(R.string.settings_widget_paging_summary),
-                onClick = { onNavigate("appearance/widget_paging") },
+                title = stringResource(R.string.settings_icons_label),
+                summary = stringResource(R.string.settings_icons_summary),
+                onClick = { onNavigate("appearance/icons") },
                 trailing = null
             )
         }
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_display_label)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_statusbar_label),
+                summary = statusBarSummary(viewModel),
+                onClick = { onNavigate("appearance/statusbar") },
+                trailing = null
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_lock_portrait),
+                summary = stringResource(R.string.settings_lock_portrait_summary),
+                onClick = { viewModel.setLockPortrait(!lockPortrait) },
+                trailing = { Switch(checked = lockPortrait, onCheckedChange = viewModel::setLockPortrait) }
+            )
+        }
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_motion_group_label)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_motion_label),
+                summary = motionSummary(viewModel),
+                onClick = { onNavigate("appearance/animations") },
+                trailing = null
+            )
+        }
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_charging_label),
+            info = stringResource(R.string.settings_charging_animation_summary)
+        ) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_charging_animation),
+                onClick = { viewModel.setChargingAnimationEnabled(!chargingAnimation) },
+                trailing = { Switch(checked = chargingAnimation, onCheckedChange = viewModel::setChargingAnimationEnabled) }
+            )
+            if (chargingAnimation) {
+                AccentOverrideRows(
+                    title = stringResource(R.string.settings_charging_color),
+                    own = chargingColor,
+                    global = accentColor,
+                    onChange = viewModel::setChargingAnimationColor
+                )
+            }
+        }
+    }
+
+    if (launcherThemePickerOpen) {
+        ChoiceDialog(
+            title = stringResource(R.string.settings_launcher_theme_label),
+            options = ThemePreference.entries.map { it to themeLabel(it) },
+            selected = theme,
+            onPick = { launcherThemePickerOpen = false; if (it != theme) confirmingTheme = it },
+            onDismiss = { launcherThemePickerOpen = false }
+        )
+    }
+    if (settingsThemePickerOpen) {
+        ChoiceDialog(
+            title = stringResource(R.string.settings_settings_theme_label),
+            options = SettingsThemeMode.entries.map { it to settingsThemeLabel(it) },
+            selected = settingsThemeMode,
+            onPick = { settingsThemePickerOpen = false; viewModel.setSettingsThemeMode(it) },
+            onDismiss = { settingsThemePickerOpen = false }
+        )
     }
 
     if (accentPickerOpen) {
         var draft by rememberDraft(accentColor)
         SettingsEditPage(title = stringResource(R.string.settings_accent_custom), onDismiss = { accentPickerOpen = false }, onSave = { viewModel.setAccentColor(draft) }, dirty = draft != accentColor) {
             ColorPickerControls(
-                color = androidx.compose.ui.graphics.Color(draft),
+                color = Color(draft),
                 onColorChange = { draft = it.toArgb() },
-                modifier = androidx.compose.ui.Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
 
     confirmingTheme?.let { pref ->
-        val label = stringResource(
-            when (pref) {
-                ThemePreference.LIGHT -> R.string.settings_theme_light
-                ThemePreference.DARK -> R.string.settings_theme_dark
-                ThemePreference.SYSTEM -> R.string.settings_theme_system
-            }
-        )
         AlertDialog(
             onDismissRequest = { confirmingTheme = null },
-            title = { Text(stringResource(R.string.settings_theme_confirm_title, label)) },
+            title = { Text(stringResource(R.string.settings_theme_confirm_title, themeLabel(pref))) },
             text = { Text(stringResource(R.string.settings_theme_confirm_message)) },
             confirmButton = {
                 TextButton(onClick = {
@@ -123,3 +189,22 @@ fun SettingsAppearanceScreen(
         )
     }
 }
+
+@Composable
+private fun themeLabel(theme: ThemePreference): String = stringResource(
+    when (theme) {
+        ThemePreference.LIGHT -> R.string.settings_theme_light
+        ThemePreference.DARK -> R.string.settings_theme_dark
+        ThemePreference.SYSTEM -> R.string.settings_theme_system
+    }
+)
+
+@Composable
+internal fun settingsThemeLabel(mode: SettingsThemeMode): String = stringResource(
+    when (mode) {
+        SettingsThemeMode.LAUNCHER -> R.string.settings_settings_theme_launcher
+        SettingsThemeMode.LIGHT -> R.string.settings_theme_light
+        SettingsThemeMode.DARK -> R.string.settings_theme_dark
+        SettingsThemeMode.SYSTEM -> R.string.settings_theme_system
+    }
+)

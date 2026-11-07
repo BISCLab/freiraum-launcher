@@ -564,10 +564,10 @@ class MainActivity : ComponentActivity() {
                         settingsComposable("settings/wallpaper_packs") {
                             com.bisc.flauncher.ui.settings.SettingsWallpaperPacksScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
-                        settingsComposable("settings/system/statusbar") {
+                        settingsComposable("settings/appearance/statusbar") {
                             com.bisc.flauncher.ui.settings.SettingsStatusBarScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
-                        settingsComposable("settings/system/animations") {
+                        settingsComposable("settings/appearance/animations") {
                             com.bisc.flauncher.ui.settings.SettingsAnimationsScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         settingsComposable("settings/folder") {
