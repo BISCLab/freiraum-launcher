@@ -1,0 +1,7 @@
+- Appearance holds look and motion: color modes, corners, icons, status bar, animations, charging, tips
+- New page: corners of all parts
+- Color mode no longer changes backgrounds
+- Welcome tour: swipeable designs and packs, shape with previews and table, keeps its step
+- Search button and A-Z rail have own corners
+- A-Z bubble stays round
+- Neon: glow on search button and rail, softly glowing surfaces

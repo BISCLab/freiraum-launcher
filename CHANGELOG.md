@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.10.1
+
 - Appearance now holds everything about look and motion: color modes (launcher, and settings with
   the welcome tour) side by side, accent, font, background and icons, status bar and portrait lock,
   animations and the charging animation; System keeps permissions, language, default apps, tips

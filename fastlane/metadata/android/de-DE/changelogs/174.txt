@@ -1,0 +1,7 @@
+- Aussehen bündelt Look und Bewegung: Farbmodi, Ecken, Icons, Statusleiste, Animationen, Ladeanimation, Tipps
+- Neue Seite: Ecken aller Teile
+- Farbmodus ändert keine Hintergründe mehr
+- Einführung: Designs und Packs zum Wischen, Form mit Vorschau und Tabelle, bleibt beim Schritt
+- Suchbutton und A-Z-Leiste mit eigenen Ecken
+- A-Z-Blase bleibt rund
+- Neon: Leuchten auch an Suchbutton und Leiste, sanft leuchtende Flächen
