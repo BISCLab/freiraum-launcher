@@ -23,7 +23,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.addOutline
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -94,6 +97,7 @@ fun Modifier.designGlow(shape: Shape, target: String): Modifier {
     val (colors, stops) = remember(effects) { sweepColors(effects) }
     val angle = rememberGlowAngle(effects)
     val strength = effects.glowStrength
+    val surfaceGlow = effects.surfaceGlow
     return this
         .drawBehind {
             if (strength > 0f) {
@@ -106,7 +110,16 @@ fun Modifier.designGlow(shape: Shape, target: String): Modifier {
         .drawWithContent {
             drawContent()
             val outline = shape.createOutline(size, layoutDirection, this)
-            drawOutline(outline, TurningSweep(colors, stops, angle.value), style = Stroke(width = 1.5.dp.toPx()))
+            val brush = TurningSweep(colors, stops, angle.value)
+            if (surfaceGlow > 0f) {
+                // Light falling in from the edge, fading towards the middle, and a faint tint.
+                clipPath(Path().apply { addOutline(outline) }) {
+                    drawOutline(outline, brush, alpha = 0.10f * surfaceGlow, style = Stroke(width = 28.dp.toPx()))
+                    drawOutline(outline, brush, alpha = 0.16f * surfaceGlow, style = Stroke(width = 12.dp.toPx()))
+                    drawOutline(outline, brush, alpha = 0.05f * surfaceGlow)
+                }
+            }
+            drawOutline(outline, brush, style = Stroke(width = 1.5.dp.toPx()))
         }
 }
 

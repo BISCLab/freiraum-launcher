@@ -105,11 +105,11 @@
     <string name="settings_accent_use_global">Globale Akzentfarbe verwenden</string>
     <string name="settings_accent_custom">Eigene Farbe</string>
     <string name="settings_design_title">Aussehen</string>
-    <string name="settings_card_design_subtitle">Farbmodi, Akzentfarbe, Schrift, Hintergrund, Icons, Statusleiste, Animationen</string>
+    <string name="settings_card_design_subtitle">Designs, Farbmodi, Akzentfarbe, Schrift, Ecken, Hintergrund, Icons, Animationen</string>
     <string name="settings_icons_label">Icons</string>
     <string name="settings_icons_summary">Form, Größe und Icon-Pack für alle Apps</string>
     <string name="settings_system_title">System</string>
-    <string name="settings_card_system_subtitle">Berechtigungen, Sprache, Standard-Apps, Tipps, Sicherung</string>
+    <string name="settings_card_system_subtitle">Berechtigungen, Sprache, Standard-Apps, Sicherung</string>
     <string name="settings_element_fill_label">Fläche</string>
     <string name="settings_font_label">Schriftart</string>
     <string name="settings_font_system">Systemstandard</string>
@@ -786,4 +786,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_shape_part_alphabet_rail">A–Z-Leiste</string>
     <string name="welcome_shape_part_search_bar">Suchleisten</string>
     <string name="welcome_shape_part_search_results">Suchergebnisse</string>
+    <string name="settings_ready_look_label">Fertiger Look</string>
+    <string name="settings_corners_label">Ecken</string>
+    <string name="settings_corners_all">Ecken aller Teile</string>
+    <string name="settings_corners_all_summary">Rund, weich oder eckig, für alles oder Teil für Teil</string>
+    <string name="settings_corners_intro">Wähle eine Form für alles oder jedes Teil einzeln in der Tabelle. Die kleinen Bildschirme zeigen, welches Teil welches ist.</string>
 </resources>

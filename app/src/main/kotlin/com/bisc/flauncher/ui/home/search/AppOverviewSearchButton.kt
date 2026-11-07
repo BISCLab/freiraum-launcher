@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.search
 
+import com.bisc.flauncher.ui.theme.designGlow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -47,6 +48,7 @@ fun AppOverviewSearchButton(
         Box(
             modifier = Modifier
                 .size(AppOverviewDimens.buttonSize)
+                .then(Modifier.designGlow(shape, "buttons"))
                 .clip(shape)
                 .background(colors.background, alpha = colors.backgroundAlpha)
                 .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)

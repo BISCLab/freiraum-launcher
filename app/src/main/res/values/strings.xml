@@ -105,11 +105,11 @@
     <string name="settings_accent_use_global">Use global accent color</string>
     <string name="settings_accent_custom">Custom color</string>
     <string name="settings_design_title">Appearance</string>
-    <string name="settings_card_design_subtitle">Color modes, accent, font, background, icons, status bar, animations</string>
+    <string name="settings_card_design_subtitle">Designs, color modes, accent, font, corners, background, icons, animations</string>
     <string name="settings_icons_label">Icons</string>
     <string name="settings_icons_summary">Shape, size and icon pack for every app</string>
     <string name="settings_system_title">System</string>
-    <string name="settings_card_system_subtitle">Permissions, language, default apps, tips, backup</string>
+    <string name="settings_card_system_subtitle">Permissions, language, default apps, backup</string>
     <string name="settings_element_fill_label">Fill</string>
     <string name="settings_font_label">Font</string>
     <string name="settings_font_system">System default</string>
@@ -786,4 +786,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_shape_part_alphabet_rail">A-Z rail</string>
     <string name="welcome_shape_part_search_bar">Search bars</string>
     <string name="welcome_shape_part_search_results">Search results</string>
+    <string name="settings_ready_look_label">Ready-made look</string>
+    <string name="settings_corners_label">Corners</string>
+    <string name="settings_corners_all">Corners of all parts</string>
+    <string name="settings_corners_all_summary">Round, soft or square, for everything or part by part</string>
+    <string name="settings_corners_intro">Pick one shape for everything, or each part on its own in the table. The small screens show which part is which.</string>
 </resources>

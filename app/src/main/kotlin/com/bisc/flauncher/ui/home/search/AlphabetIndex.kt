@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bisc.flauncher.data.settings.Handedness
+import com.bisc.flauncher.ui.theme.designGlow
 import com.bisc.flauncher.ui.theme.noRippleClickable
 
 /** One entry in the [AlphabetIndex] rail. */
@@ -102,6 +103,7 @@ fun AlphabetIndex(
                     )
                     .width(RAIL_BAR_WIDTH)
                     .fillMaxHeight()
+                    .then(Modifier.designGlow(RoundedCornerShape(railBarCorner), "rail"))
                     .clip(RoundedCornerShape(railBarCorner))
                     .background(railColors.box, alpha = railColors.boxAlpha)
                     .then(

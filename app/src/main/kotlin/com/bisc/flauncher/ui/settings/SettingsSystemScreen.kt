@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 /** System: how the launcher fits into the phone - permissions and default launcher, language, which
- *  apps links and places open in, settings tips and backups. */
+ *  apps links and places open in, and backups. */
 @Composable
 fun SettingsSystemScreen(
     navController: NavController,
@@ -31,7 +31,6 @@ fun SettingsSystemScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val showSettingsTips by viewModel.showSettingsTips.collectAsState()
     val browserPackage by viewModel.searchBrowserApp.collectAsState()
     val mapsPackage by viewModel.searchMapsApp.collectAsState()
     var browserPickerOpen by remember { mutableStateOf(false) }
@@ -95,15 +94,6 @@ fun SettingsSystemScreen(
                 summary = appLabel(mapsPackage),
                 onClick = { mapsPickerOpen = true },
                 trailing = null
-            )
-        }
-        // Turns every "?" tip button across the settings on or off (see LocalShowSettingsTips).
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_tips_label)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_tips_show),
-                onClick = { viewModel.setShowSettingsTips(!showSettingsTips) },
-                trailing = { Switch(checked = showSettingsTips, onCheckedChange = viewModel::setShowSettingsTips) }
             )
         }
         SettingsPreferenceGroup(

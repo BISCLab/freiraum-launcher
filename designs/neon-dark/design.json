@@ -4,7 +4,7 @@
   "name": "Neon Dark",
   "name_de": "Neon Dunkel",
   "author": "BISC Lab",
-  "version": "1.0",
+  "version": "1.1",
   "theme": "DARK",
   "accent": "#FF3DA5FF",
   "font": "SYSTEM",
@@ -169,7 +169,8 @@
       "folders",
       "cards",
       "widgets",
-      "buttons"
+      "buttons",
+      "rail"
     ],
     "grid": false,
     "gridColor": "#06FFFFFF",
@@ -180,6 +181,7 @@
       "#FFA78BFA",
       "#FF3DA5FF"
     ],
-    "blobStrength": 0.6
+    "blobStrength": 0.6,
+    "surfaceGlow": 0.7
   }
 }

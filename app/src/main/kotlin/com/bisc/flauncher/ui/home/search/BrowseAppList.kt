@@ -371,10 +371,10 @@ private fun ScrubMagnifier(label: String, verticalFraction: Float, pull: Float, 
                 }
                 .size(bubbleSize)
                 .graphicsLayer {
-                    // A little bigger and squeezed along the pull, like something elastic under tension.
+                    // A little bigger under tension, but always a circle.
                     val grow = 1f + 0.12f * tension
-                    scaleX = grow * (1f + 0.08f * tension)
-                    scaleY = grow * (1f - 0.06f * tension)
+                    scaleX = grow
+                    scaleY = grow
                 }
                 .clip(CircleShape)
                 .background(bubbleColor.copy(alpha = 0.92f)),

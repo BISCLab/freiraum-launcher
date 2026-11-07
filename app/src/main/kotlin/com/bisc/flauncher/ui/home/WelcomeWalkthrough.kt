@@ -385,7 +385,7 @@ private enum class ShapeScreen(val label: Int) {
 /** Small screens in a row showing every part with its corners, live; above the table one shape
  *  for all, below it each part on its own. Starts from what the chosen design brought. */
 @Composable
-private fun ShapeChoice(viewModel: OnboardingViewModel) {
+internal fun ShapeChoice(viewModel: OnboardingViewModel) {
     val corners by viewModel.corners.collectAsState()
     LaunchedEffect(Unit) { viewModel.loadCorners() }
     var focus by remember { mutableStateOf<ShapePart?>(null) }

@@ -22,7 +22,9 @@ data class DesignEffects(
     val speedSeconds: Float = 4.5f,
     val motion: EffectMotion = EffectMotion.ONCE,
     val glowStrength: Float = 0.55f,
-    /** Where the glowing border appears: dock, panel, search, widgets, folders, cards, buttons. */
+    /** Soft light from the glowing border into the surface itself, 0 (off) to 1. */
+    val surfaceGlow: Float = 0f,
+    /** Where the glowing border appears: dock, panel, search, widgets, folders, cards, buttons, rail. */
     val targets: Set<String> = emptySet(),
     val grid: Boolean = false,
     val gridColor: Int = 0x06FFFFFF,
@@ -137,6 +139,7 @@ object DesignJson {
         speedSeconds = json.optDouble("speedSeconds", 4.5).toFloat().coerceIn(1f, 30f),
         motion = json.optString("motion").let { v -> EffectMotion.entries.firstOrNull { it.name == v } } ?: EffectMotion.ONCE,
         glowStrength = json.optDouble("glowStrength", 0.55).toFloat().coerceIn(0f, 1f),
+        surfaceGlow = json.optDouble("surfaceGlow", 0.0).toFloat().coerceIn(0f, 1f),
         targets = json.optJSONArray("targets")?.let { a -> (0 until a.length()).map { a.getString(it) }.toSet() }.orEmpty(),
         grid = json.optBoolean("grid"),
         gridColor = color(json.optString("gridColor")) ?: 0x06FFFFFF,
@@ -153,6 +156,7 @@ object DesignJson {
         put("speedSeconds", e.speedSeconds.toDouble())
         put("motion", e.motion.name)
         put("glowStrength", e.glowStrength.toDouble())
+        put("surfaceGlow", e.surfaceGlow.toDouble())
         put("targets", JSONArray(e.targets.toList()))
         put("grid", e.grid)
         put("gridColor", hex(e.gridColor))

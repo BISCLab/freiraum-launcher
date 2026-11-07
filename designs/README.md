@@ -55,7 +55,8 @@ A look (`box`, `dock`, … ) is `{"style": "COLOR" or "NONE", "fill": "#…", "f
 | `glowColors`, `baseColor` | Colors of the glowing stretch, and of the rest of the border |
 | `motion`, `speedSeconds` | `STILL`, `ONCE` (one turn when shown) or `SLOW` (keeps running round) |
 | `glowStrength` | 0–1 |
-| `targets` | Where it glows: `dock`, `panel`, `search`, `folders`, `cards`, `widgets`, `buttons` |
+| `surfaceGlow` | 0–1, soft light from the border into the surface itself |
+| `targets` | Where it glows: `dock`, `panel`, `search`, `folders`, `cards`, `widgets`, `buttons`, `rail` (the A-Z rail) |
 | `grid`, `gridColor`, `gridSpacing` | Fine grid over the backgrounds |
 | `blobs`, `blobColors`, `blobStrength` | Soft colored light spots over the backgrounds |
 

@@ -20,6 +20,12 @@
   search results. It starts from what the design brought
 - The App list search button and the A-Z rail have corners of their own now
 - Welcome tour: after setting Freiraum as default launcher you are back at the step you left
+- Appearance: Designs and Wallpaper packs at the top as a shortcut, a new page Corners of all parts
+  (the same screens and table as in the welcome tour), and the tips switch moved here
+- App list: the letter bubble stays a perfect circle when pulled
+- Design effects: the glowing border now also reaches the App list search button and the A-Z rail,
+  and designs can let surfaces glow softly from their border (surfaceGlow); Neon Light and Neon
+  Dark use it
 
 ## 0.10.0
 

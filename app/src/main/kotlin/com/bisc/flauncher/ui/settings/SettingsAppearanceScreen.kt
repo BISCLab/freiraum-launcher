@@ -39,12 +39,29 @@ fun SettingsAppearanceScreen(
     val lockPortrait by viewModel.lockPortrait.collectAsState()
     val chargingAnimation by viewModel.chargingAnimationEnabled.collectAsState()
     val chargingColor by viewModel.chargingAnimationColor.collectAsState()
+    val showSettingsTips by viewModel.showSettingsTips.collectAsState()
     var confirmingTheme by remember { mutableStateOf<ThemePreference?>(null) }
     var launcherThemePickerOpen by remember { mutableStateOf(false) }
     var settingsThemePickerOpen by remember { mutableStateOf(false) }
     var accentPickerOpen by remember { mutableStateOf(false) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_design_title), navController = navController, onBack = onBack) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_ready_look_label)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.designs_title),
+                summary = stringResource(R.string.designs_entry_summary),
+                onClick = { onNavigate("appearance/designs") },
+                trailing = null
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.packs_title),
+                summary = stringResource(R.string.packs_entry_summary),
+                onClick = { onNavigate("wallpaper_packs") },
+                trailing = null
+            )
+        }
         SettingsPreferenceGroup(
             title = stringResource(R.string.settings_color_modes_label),
             info = stringResource(R.string.settings_color_modes_info)
@@ -77,6 +94,15 @@ fun SettingsAppearanceScreen(
             RadioPreference(stringResource(R.string.settings_font_serif), FontPreference.SERIF, fontPreference, viewModel::setFontPreference, font = FontPreference.SERIF.fontFamily)
             RadioPreference(stringResource(R.string.settings_font_monospace), FontPreference.MONOSPACE, fontPreference, viewModel::setFontPreference, font = FontPreference.MONOSPACE.fontFamily)
             RadioPreference(stringResource(R.string.settings_font_rounded), FontPreference.ROUNDED, fontPreference, viewModel::setFontPreference, font = FontPreference.ROUNDED.fontFamily)
+        }
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_corners_label)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_corners_all),
+                summary = stringResource(R.string.settings_corners_all_summary),
+                onClick = { onNavigate("appearance/corners") },
+                trailing = null
+            )
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_background_icons_label)) {
             SettingsPreference(
@@ -137,6 +163,15 @@ fun SettingsAppearanceScreen(
                     onChange = viewModel::setChargingAnimationColor
                 )
             }
+        }
+        // Turns every "?" tip button across the settings on or off (see LocalShowSettingsTips).
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_tips_label)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_tips_show),
+                onClick = { viewModel.setShowSettingsTips(!showSettingsTips) },
+                trailing = { Switch(checked = showSettingsTips, onCheckedChange = viewModel::setShowSettingsTips) }
+            )
         }
     }
 
