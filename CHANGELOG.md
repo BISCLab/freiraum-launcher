@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Status bar page: every page and folders as a small screen, with the bar on top while it shows;
+  tap one to switch it. The switch for all stays on top
+
 - App list and App grid appearance pages start with a miniature drawn from the live settings, like
   Text search already had; tapping the section letters, the A-Z rail, the search button, the grid or
   the search field opens its settings. The Text search miniature shows the category rail in its own

@@ -837,4 +837,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_colors_dark">Dunkel</string>
     <string name="settings_colors_glass">Glas</string>
     <string name="settings_colors_accent">Akzent</string>
+    <string name="settings_statusbar_tile_shown">Sichtbar</string>
+    <string name="settings_statusbar_tile_hidden">Ausgeblendet</string>
 </resources>
