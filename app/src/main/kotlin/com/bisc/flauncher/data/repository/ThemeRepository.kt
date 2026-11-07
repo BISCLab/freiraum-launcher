@@ -3,7 +3,6 @@ package com.bisc.flauncher.data.repository
 import android.content.Context
 import com.bisc.flauncher.data.db.FolderItemDao
 import com.bisc.flauncher.data.db.PageRowDao
-import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.BackgroundSource
 import com.bisc.flauncher.data.model.ColorFill
 import com.bisc.flauncher.data.model.withAppearance

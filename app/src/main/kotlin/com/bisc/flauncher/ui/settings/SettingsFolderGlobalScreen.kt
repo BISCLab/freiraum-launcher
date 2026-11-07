@@ -1,8 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BorderAll
-import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable

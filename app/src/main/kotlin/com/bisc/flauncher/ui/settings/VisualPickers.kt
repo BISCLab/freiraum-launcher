@@ -123,48 +123,6 @@ private fun CustomSwatch(current: Color?, onClick: () -> Unit) {
 /** The corner-roundness presets offered as tiles. */
 private val CORNER_PRESETS = listOf(0, 25, 50, 75, 100)
 
-/** Corner roundness as a row of tiles that each show their own rounding, instead of a percent
- *  slider. A value between presets selects no tile. Rendered as one card row of a group. */
-@Composable
-fun CornerShapeTiles(percent: Int, onSelect: (Int) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        CORNER_PRESETS.forEach { preset ->
-            val selected = preset == percent
-            // 100% = a fully round corner; RoundedCornerShape's percent tops out at 50 (half the side).
-            val shape = RoundedCornerShape(percent = preset / 2)
-            Column(
-                modifier = Modifier.weight(1f).noRippleClickable { onSelect(preset) },
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .clip(shape)
-                        .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.18f) else MaterialTheme.colorScheme.surfaceContainerHighest)
-                        .border(
-                            if (selected) 2.dp else 1.dp,
-                            if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-                            shape
-                        )
-                )
-                Text(
-                    stringResource(R.string.settings_corner_radius_value, preset),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}
-
 /** Left/right alignment as two miniature app lists - a few app rows plus the A–Z rail on the
  *  chosen side - instead of a Left | Right switch. Rendered as one card row of a group. */
 @Composable

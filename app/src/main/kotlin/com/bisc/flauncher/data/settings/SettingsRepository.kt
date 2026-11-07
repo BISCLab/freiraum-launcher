@@ -69,10 +69,8 @@ class SettingsRepository @Inject constructor(
     // individually on the same scale (see AppOverride.iconSizePercent).
     val iconSizePercent: Flow<Int> = dataStore.data.map { prefs -> prefs[ICON_SIZE_PERCENT_KEY] ?: 100 }
 
-    // New elements (rows, folders) are created with this value; changing it also immediately
-    // re-stamps every existing row/folder item to match (see PageContentRepository/FolderRepository
-    // .applyCornerRadiusToAll, called from SettingsViewModel.setDefaultCornerRadiusPercent) - each
-    // element's own Appearance screen can still override it individually afterwards.
+    // The general roundness: new rows and folders start with it, and parts without corners of their
+    // own (search fields, rails) follow it. Set by designs and by the corners of the search bars.
     val defaultCornerRadiusPercent: Flow<Int> = dataStore.data.map { prefs -> prefs[DEFAULT_CORNER_RADIUS_PERCENT_KEY] ?: com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT }
 
     val folderCardAppearance: Flow<ElementAppearance> = elementAppearanceFor("folder_card", ElementAppearance(borderEnabled = true))
@@ -293,12 +291,6 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[SEARCH_FAVORITES_MODE_KEY] = mode.name }
     }
 
-    /** Favorites show as soon as the search opens, before anything is typed. */
-    val searchFavoritesOnOpen: Flow<Boolean> = dataStore.data.map { it[SEARCH_FAVORITES_ON_OPEN_KEY] ?: true }
-
-    suspend fun setSearchFavoritesOnOpen(show: Boolean) {
-        dataStore.edit { it[SEARCH_FAVORITES_ON_OPEN_KEY] = show }
-    }
 
     /** How often each app was opened from the launcher (search, App list, App grid), for automatic
      *  favorites. Only counts, kept on the phone. */
@@ -1105,7 +1097,6 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_CATEGORY_RAIL_LEFT_KEY = booleanPreferencesKey("search_category_rail_left")
         private val SEARCH_FAVORITES_KEY = stringPreferencesKey("search_favorites")
         private val SEARCH_FAVORITES_MODE_KEY = stringPreferencesKey("search_favorites_mode")
-        private val SEARCH_FAVORITES_ON_OPEN_KEY = booleanPreferencesKey("search_favorites_on_open")
         private val APP_LAUNCH_COUNTS_KEY = stringPreferencesKey("app_launch_counts")
         private val LOCK_PORTRAIT_KEY = booleanPreferencesKey("lock_portrait")
         private val SETTINGS_THEME_KEY = stringPreferencesKey("settings_theme")

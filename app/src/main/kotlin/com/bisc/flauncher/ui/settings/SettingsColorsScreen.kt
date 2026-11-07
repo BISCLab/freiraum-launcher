@@ -26,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,12 +42,9 @@ import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.data.model.withAppearance
 import com.bisc.flauncher.data.settings.SettingsRepository
-import com.bisc.flauncher.ui.home.OnboardingViewModel
-import com.bisc.flauncher.ui.home.PartScreensRow
-import com.bisc.flauncher.ui.home.ShapePart
 import com.bisc.flauncher.ui.home.dock.resolveElementColors
-import com.bisc.flauncher.ui.home.label
 import com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor
+import com.bisc.flauncher.ui.theme.isDark
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -57,7 +53,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/** Where each part keeps its look: in its rows (Dock, Panel, widgets, element boxes) or under a name. */
+/** Where each part keeps its look: in its rows (Dock, Panel, widgets, element boxes) or under a name.
+ *  The search bars are the Text search field, read from there and written to all three fields. */
+private val SEARCH_FIELDS = listOf("search_field", "app_list_search_field", "app_grid_search_bar")
+
 private val NAMED_LOOKS = mapOf(
     ShapePart.FOLDERS to "folder_card",
     ShapePart.SEARCH_BUTTON to "app_list_search_button",
@@ -69,6 +68,7 @@ private val NAMED_LOOKS = mapOf(
 
 @HiltViewModel
 class PartColorsViewModel @Inject constructor(
+    @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
     private val settingsRepository: SettingsRepository,
     private val pageRowDao: PageRowDao,
     private val folderItemDao: FolderItemDao
@@ -76,9 +76,11 @@ class PartColorsViewModel @Inject constructor(
     private val _looks = MutableStateFlow<Map<ShapePart, ElementAppearance>>(emptyMap())
     val looks: StateFlow<Map<ShapePart, ElementAppearance>> = _looks.asStateFlow()
 
-    /** What each part looks like now; parts still on automatic show the default box of [dark]. */
-    fun load(dark: Boolean) = viewModelScope.launch {
+    /** What each part looks like now; parts still on automatic show the default box of the
+     *  launcher's color mode (not the settings' own). */
+    fun load() = viewModelScope.launch {
         val rows = pageRowDao.observeAll().first()
+        val dark = settingsRepository.theme.first().isDark(context)
         val fallback = defaultBoxAppearanceFor(dark)
         fun row(vararg types: PageRowType) = rows.firstOrNull { it.type in types }?.appearance() ?: fallback
         val named = NAMED_LOOKS.mapValues { (_, key) -> settingsRepository.elementAppearanceOrNull(key) ?: fallback }
@@ -96,14 +98,16 @@ class PartColorsViewModel @Inject constructor(
         if (changed.isEmpty()) return
         _looks.value = _looks.value + changed
         viewModelScope.launch {
-            changed.forEach { (part, look) -> NAMED_LOOKS[part]?.let { settingsRepository.setElementAppearanceByName(it, look) } }
+            changed.forEach { (part, look) ->
+                if (part == ShapePart.SEARCH_BAR) SEARCH_FIELDS.forEach { settingsRepository.setElementAppearanceByName(it, look) }
+                else NAMED_LOOKS[part]?.let { settingsRepository.setElementAppearanceByName(it, look) }
+            }
             pageRowDao.updateAll(pageRowDao.observeAll().first().map { row ->
                 val look = when (row.type) {
                     PageRowType.SEARCH_BAR -> changed[ShapePart.DOCK]
                     PageRowType.PANEL -> changed[ShapePart.PANEL]
                     PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET -> changed[ShapePart.WIDGETS]
                     PageRowType.ELEMENT_BOX -> changed[ShapePart.ELEMENT_BOXES]
-                    else -> null
                 }
                 if (look != null) row.withAppearance(look) else row
             })
@@ -133,11 +137,10 @@ fun SettingsColorsScreen(
     navController: NavController,
     onBack: () -> Unit,
     viewModel: PartColorsViewModel = hiltViewModel(),
-    cornersViewModel: OnboardingViewModel = hiltViewModel(),
+    cornersViewModel: PartCornersViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
-    LaunchedEffect(Unit) { viewModel.load(dark); cornersViewModel.loadCorners() }
+    LaunchedEffect(Unit) { viewModel.load(); cornersViewModel.loadCorners() }
     val saved by viewModel.looks.collectAsState()
     val corners by cornersViewModel.corners.collectAsState()
     val accent by settingsViewModel.accentColor.collectAsState()

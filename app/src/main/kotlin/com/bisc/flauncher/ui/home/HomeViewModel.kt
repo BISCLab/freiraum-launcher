@@ -468,11 +468,6 @@ class HomeViewModel @Inject constructor(
         combine(_searchFilter, searchIncluded, searchRemoved) { filter, included, removed -> (filter?.let { setOf(it) } ?: included) - removed }
             .stateIn(viewModelScope, SharingStarted.Eagerly, SearchCategory.entries.toSet())
 
-    fun toggleSearchFilter(category: SearchCategory) {
-        _searchFilter.value = if (_searchFilter.value == category) null else category
-        refreshContactResults()
-    }
-
     fun setSearchFilter(category: SearchCategory?) {
         if (_searchFilter.value == category) return
         _searchFilter.value = category
@@ -481,8 +476,6 @@ class HomeViewModel @Inject constructor(
 
     val searchCategoryRailLeft: StateFlow<Boolean> =
         settingsRepository.searchCategoryRailLeft.stateIn(viewModelScope, SharingStarted.Eagerly, false)
-    val searchFavoritesOnOpen: StateFlow<Boolean> =
-        settingsRepository.searchFavoritesOnOpen.stateIn(viewModelScope, SharingStarted.Eagerly, true)
     val searchFavoriteIds: StateFlow<Set<String>> =
         settingsRepository.searchFavorites.map { it.toSet() }.stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
 

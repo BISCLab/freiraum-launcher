@@ -14,14 +14,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
-import com.bisc.flauncher.ui.home.OnboardingViewModel
-import com.bisc.flauncher.ui.home.ShapeEditor
-import com.bisc.flauncher.ui.home.ShapePart
 
 /** Corners of every part at once, the same screens and table as in the welcome tour. Nothing
  *  changes until Save; leaving with changes asks first. */
 @Composable
-fun SettingsCornersScreen(navController: NavController, onBack: () -> Unit, viewModel: OnboardingViewModel = hiltViewModel()) {
+fun SettingsCornersScreen(navController: NavController, onBack: () -> Unit, viewModel: PartCornersViewModel = hiltViewModel()) {
     val saved by viewModel.corners.collectAsState()
     LaunchedEffect(Unit) { viewModel.loadCorners() }
     var draft by rememberDraft(saved)

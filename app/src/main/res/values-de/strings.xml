@@ -95,7 +95,6 @@
     <string name="settings_theme_apply">Anwenden</string>
     <string name="settings_language_label">Sprache</string>
     <string name="settings_language_system">Systemstandard</string>
-    <string name="settings_theme_label">Farbmodus</string>
     <string name="settings_theme_light">Hell</string>
     <string name="settings_theme_dark">Dunkel</string>
     <string name="settings_theme_system">System</string>
@@ -242,8 +241,6 @@
     <string name="settings_folder_title">Ordner</string>
     <string name="settings_folder_global_label">Globale Ordner-Einstellungen</string>
     <string name="settings_folder_global_subtitle">Aussehen, Rahmen und Sichtbarkeit für alle Ordner</string>
-    <string name="settings_folder_appearance_reset_label">Auf globale Fläche zurücksetzen</string>
-    <string name="settings_folder_border_reset_label">Auf globalen Rahmen zurücksetzen</string>
     <string name="settings_folder_visibility_label">Sichtbarkeit</string>
     <string name="settings_folder_list_label">Ordner</string>
     <string name="settings_folder_create">Ordner erstellen</string>
@@ -436,9 +433,6 @@
     <string name="settings_statusbar_hide_all">Überall ausblenden</string>
     <string name="settings_statusbar_hide_all_summary">Schaltet die Statusleiste auf jeder Seite, der Schnellübersicht, der Textsuche und in Ordnern aus. Danach kann sie pro Bildschirm einzeln wieder eingeschaltet werden. Wischen vom oberen Rand zeigt sie immer kurzzeitig an.</string>
     <string name="settings_statusbar_confirm_hide_message">Dadurch wird die Statusleiste auf jeder Seite, der Schnellübersicht, der Textsuche und in Ordnern auf einmal ausgeblendet — unabhängig davon, wie jede einzeln aktuell eingestellt ist.</string>
-    <string name="settings_statusbar_confirm_show_message">Dadurch wird die Statusleiste auf jeder Seite, der Schnellübersicht, der Textsuche und in Ordnern auf einmal eingeblendet — unabhängig davon, wie jede einzeln aktuell eingestellt ist.</string>
-    <string name="settings_corner_style_label">Eckenrundung</string>
-    <string name="settings_corner_style_info">Gilt für alle Elemente auf einmal, auch für Widgets, die neu mit 10 Prozent starten. Bei ganz runden Ecken können Widgets ziemlich witzig aussehen, weil die Rundung in ihren Inhalt schneidet. Jedes Element kann in seinen eigenen Einstellungen trotzdem eigene Ecken bekommen.</string>
     <string name="settings_corner_radius_value">%1$d%%</string>
     <string name="settings_statusbar_hide_page">Statusleiste ausblenden</string>
     <string name="settings_folder_hide_status_bar">Statusleiste in Ordnern ausblenden</string>
@@ -457,7 +451,6 @@
     <string name="settings_folder_creator_search">Apps suchen</string>
     <string name="settings_folder_creator_selected">%1$d ausgewählt</string>
     <string name="settings_search_keyboard_auto_open">Tastatur automatisch öffnen</string>
-    <string name="settings_search_bar_label">Suchleiste</string>
     <string name="settings_search_page_label">Seite</string>
     <string name="settings_search_keyboard_label">Tastatur</string>
     <string name="settings_search_behavior_label">Verhalten</string>
@@ -623,16 +616,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_categories_removed_label">Entfernt</string>
     <string name="settings_search_categories_removed_info">Entfernte Kategorien werden nicht durchsucht und erscheinen nicht in der Suchleiste. Tippe eine an, um sie zurückzuholen.</string>
     <string name="settings_search_bar_position_label">Position</string>
-    <string name="settings_search_bar_show_categories">Kategorie-Symbole</string>
-    <string name="settings_search_bar_show_categories_info">Die Reihe der Kategorie-Symbole, mit denen sich die Suche auf eine Kategorie eingrenzen lässt.</string>
-    <string name="settings_search_bar_floating">Frei schwebend</string>
-    <string name="settings_search_bar_floating_info">Nur das Suchfeld, ohne den Kasten drumherum, wie beim App-Raster.</string>
     <string name="settings_pages_carousel_endless_summary">Kann das Wischen zwischen den Seiten weniger flüssig machen</string>
-    <string name="lock_wallpaper_offer_title">Sperrbildschirm</string>
-    <string name="lock_wallpaper_offer_text">Soll der Sperrbildschirm einen passenden Freiraum-Hintergrund bekommen? Das Android-Hintergrundbild hinter dem Startbildschirm bleibt, wie es ist.</string>
     <string name="lock_wallpaper_offer_yes">Ja, setzen</string>
     <string name="lock_wallpaper_offer_no">Nein danke</string>
-    <string name="settings_rotation_label">Drehen</string>
     <string name="settings_lock_portrait">Auf Hochformat sperren</string>
     <string name="settings_lock_portrait_summary">Der Launcher bleibt aufrecht, wenn das Gerät gedreht wird</string>
     <string name="settings_tablet_beta_title">Tablet-Ansicht (Beta)</string>
@@ -642,7 +628,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_widget_paging_title">Pfeiltasten in Widgets</string>
     <string name="settings_widget_paging_summary">Symbol, Deckkraft, Füllung, Rahmen und Ecken</string>
     <string name="settings_widget_paging_mode">Blättern per</string>
-    <string name="settings_widget_paging_mode_info">Wischen in einem Widget auf Daumenhöhe kann mit dem Wischen zwischen den Seiten kollidieren. Mit Pfeiltasten reagieren Widgets nicht mehr auf Wischen.</string>
     <string name="settings_widget_paging_gesture">Wischen</string>
     <string name="settings_widget_paging_buttons">Pfeiltasten</string>
     <string name="settings_widget_paging_symbol">Symbol</string>
@@ -665,7 +650,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_permissions_text">Alles hier ist freiwillig, und Freiraum hat keinen Internetzugriff. Tippe auf eine Zeile, um es jetzt zu erlauben, oder später in den Einstellungen.</string>
     <string name="welcome_lock_title">Sperrbildschirm</string>
     <string name="welcome_lock_text">Dein Wallpaper-Pack hat auch ein Bild für den Sperrbildschirm. Dort verwenden? Nur der Sperrbildschirm ändert sich.</string>
-    <string name="welcome_gesture_panel">Panel</string>
     <string name="settings_motion_label">Animationen</string>
     <string name="settings_motion_info">Apps, Ordner und Seiten zoomen aus dem Angetippten heraus, Seiten treten beim Wischen leicht zurück, und die Zurück-Geste lässt den Bildschirm mit dem Finger schrumpfen. Ist in Android „Animationen entfernen“ an, gibt es keine.</string>
     <string name="settings_motion_system_off">In Android ist „Animationen entfernen“ an</string>
@@ -714,7 +698,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_display_label">Anzeige</string>
     <string name="settings_settings_theme_label">Einstellungen und Einführung</string>
     <string name="settings_settings_theme_launcher">Wie der Launcher</string>
-    <string name="settings_settings_theme_info">Gilt nur für die Einstellungen und die Einführung. Der Launcher selbst behält seinen Farbmodus aus „Aussehen“.</string>
     <string name="settings_statusbar_summary">Ausgeblendet auf %1$d von %2$d</string>
     <string name="settings_motion_summary_on">An, %1$d von %2$d</string>
     <string name="settings_motion_summary_off">Aus</string>
@@ -747,7 +730,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_own_setup">Selbst einrichten</string>
     <string name="welcome_design_title">Design wählen</string>
     <string name="welcome_design_text">Farben, Rahmen und Effekte. Zur Seite wischen für mehr; Neon gibt es zum Herunterladen: im Browser laden, dann hier die Datei wählen.</string>
-    <string name="welcome_design_none">Keins</string>
     <string name="welcome_design_neon_light">Neon Hell</string>
     <string name="welcome_design_neon_dark">Neon Dunkel</string>
     <string name="welcome_wallpaper_title">Wallpaper-Pack wählen</string>
@@ -759,7 +741,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_download">Herunterladen</string>
     <string name="welcome_shape_title">Form wählen</string>
     <string name="welcome_shape_text">Wie rund die Ecken sind. Das Design hat schon eigene mitgebracht; hier kannst du sie ändern. Widgets bleiben immer etwas weniger rund, damit nichts abgeschnitten wird.</string>
-    <string name="welcome_shape_design">Wie das Design</string>
     <string name="welcome_shape_round">Rund</string>
     <string name="welcome_shape_soft">Weich</string>
     <string name="welcome_shape_square">Eckig</string>
@@ -767,7 +748,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_shape_part_dock">Dock</string>
     <string name="welcome_shape_part_widgets">Widgets</string>
     <string name="welcome_shape_part_search_button">Suchbutton</string>
-    <string name="welcome_shape_part_text_search">Textsuche</string>
     <string name="welcome_shape_part_folders">Apps in Ordnern</string>
     <string name="settings_widget_paging_mode_row_info">Wie dieses Widget blättert (Stunden und Tage, Notizen). Das Aussehen der Pfeiltasten gilt für alle Widgets gemeinsam.</string>
     <string name="settings_color_modes_label">Farbmodi</string>
@@ -787,7 +767,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_shape_part_search_bar">Suchleisten</string>
     <string name="welcome_shape_part_search_results">Suchergebnisse</string>
     <string name="settings_ready_look_label">Fertiger Look</string>
-    <string name="settings_corners_label">Ecken</string>
     <string name="settings_corners_all">Ecken aller Teile</string>
     <string name="settings_corners_all_summary">Rund, weich oder eckig, für alles oder Teil für Teil</string>
     <string name="settings_corners_intro">Wähle eine Form für alles oder jedes Teil einzeln in der Tabelle. Die kleinen Bildschirme zeigen, welches Teil welches ist.</string>
@@ -805,9 +784,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_rail_show">Kategorienleiste zeigen</string>
     <string name="settings_search_rail_left">Links</string>
     <string name="settings_search_rail_right">Rechts</string>
-    <string name="settings_search_favorites_info">Favoriten sind die Apps, die du sofort griffbereit haben willst. Wähle sie selbst, lass Freiraum die am häufigsten geöffneten Apps ergänzen, oder beides. Langes Drücken auf eine App in der Suche fügt sie auch hinzu oder entfernt sie. Das Zählen bleibt auf deinem Handy.</string>
-    <string name="settings_search_favorites_on_open">Beim Öffnen der Suche zeigen</string>
-    <string name="settings_search_favorites_on_open_summary">Sonst erst nach Antippen des Sterns in der Leiste</string>
+    <string name="settings_search_favorites_info">Favoriten sind die Apps, die du sofort griffbereit haben willst. Wähle sie selbst, lass Freiraum die am häufigsten geöffneten Apps ergänzen, oder beides. Sie erscheinen gleich beim Öffnen der Suche, solange Favoriten unten bei den Kategorien eingeschaltet ist; sonst über den Stern in der Leiste. Langes Drücken auf eine App in der Suche fügt sie hinzu oder entfernt sie. Das Zählen bleibt auf deinem Handy.</string>
     <string name="settings_search_favorites_mode_both">Gewählte, ergänzt um die häufigsten</string>
     <string name="settings_search_favorites_mode_manual">Nur selbst gewählte</string>
     <string name="settings_search_favorites_mode_auto">Nur die häufigsten</string>
@@ -824,7 +801,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_app_grid_page_dots">Seitenpunkte zeigen</string>
     <string name="settings_search_field_position_info">Oben, oder direkt auf der Tastatur in Reichweite des Daumens.</string>
     <string name="settings_search_rail_hidden">Ausgeblendet</string>
-    <string name="settings_search_rail_side_label">Rand</string>
     <string name="settings_search_rail_like_field">Aussehen wie das Suchfeld</string>
     <string name="settings_folder_look_own">Eigenes Aussehen</string>
     <string name="settings_folder_look_like_all">Wie alle Ordner</string>

@@ -132,7 +132,6 @@ fun SearchOverlay(
     onSetFilter: (SearchCategory?) -> Unit = {},
     favoriteApps: List<AppInfo> = emptyList(),
     favoriteIds: Set<String> = emptySet(),
-    favoritesOnOpen: Boolean = true,
     onToggleFavorite: (AppInfo) -> Unit = {},
     railLeft: Boolean = false,
     /** The rail's own look and roundness; null = like the search field. */
@@ -178,9 +177,7 @@ fun SearchOverlay(
     }
 
     // The results take whatever height is left above the system keyboard. The first back gesture
-    // only closes the keyboard (the system handles that itself), so the results get the whole
-    // screen; the next one leaves the search (HomeScreen's own BackHandler for it).
-    val imeVisible = WindowInsets.isImeVisible
+    // only closes the keyboard; the next one leaves the search (HomeScreen's own BackHandler for it).
 
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
     val scope = androidx.compose.runtime.rememberCoroutineScope()
@@ -199,7 +196,8 @@ fun SearchOverlay(
     }
     val shownFavorites = when {
         SearchCategory.FAVORITES !in activeCategories -> emptyList()
-        query.isBlank() -> if (favoritesOnOpen || focus == SearchCategory.FAVORITES) favoriteApps else emptyList()
+        // Searched by default (the switch in the category list) = shown as soon as the search opens.
+        query.isBlank() -> favoriteApps
         focus == SearchCategory.FAVORITES -> favoriteApps.filter { it.label.contains(query.trim(), ignoreCase = true) }
         else -> emptyList()
     }

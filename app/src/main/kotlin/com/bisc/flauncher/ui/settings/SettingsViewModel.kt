@@ -398,8 +398,6 @@ class SettingsViewModel @Inject constructor(
         repository.searchFavoritesMode.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.data.model.SearchFavoritesMode.BOTH)
     fun setSearchFavoritesMode(mode: com.bisc.flauncher.data.model.SearchFavoritesMode) { viewModelScope.launch { repository.setSearchFavoritesMode(mode) } }
 
-    val searchFavoritesOnOpen: StateFlow<Boolean> = repository.searchFavoritesOnOpen.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-    fun setSearchFavoritesOnOpen(show: Boolean) { viewModelScope.launch { repository.setSearchFavoritesOnOpen(show) } }
 
     val settingsThemeMode: StateFlow<com.bisc.flauncher.ui.theme.SettingsThemeMode> =
         repository.settingsThemeMode.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.theme.SettingsThemeMode.LAUNCHER)
@@ -717,14 +715,6 @@ class SettingsViewModel @Inject constructor(
 
     fun setIconSizePercent(percent: Int) {
         viewModelScope.launch { repository.setIconSizePercent(percent) }
-    }
-
-    fun setDefaultCornerRadiusPercent(percent: Int) {
-        viewModelScope.launch {
-            repository.setDefaultCornerRadiusPercent(percent)
-            pageContentRepository.applyCornerRadiusToAllRows(percent)
-            folderRepository.applyCornerRadiusToAllItems(percent)
-        }
     }
 
     fun setFolderCardAppearance(appearance: ElementAppearance) {

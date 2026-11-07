@@ -1,12 +1,8 @@
 ﻿package com.bisc.flauncher.ui.home
 
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.Text
-import androidx.compose.ui.res.stringResource
-import com.bisc.flauncher.R
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.slideInVertically
 import androidx.activity.compose.BackHandler
 import androidx.compose.ui.graphics.luminance
 import android.app.Activity
@@ -19,8 +15,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -73,7 +67,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -93,7 +86,6 @@ import com.bisc.flauncher.data.model.appearance
 import com.bisc.flauncher.data.model.effectiveAppearance
 import com.bisc.flauncher.data.model.dockRows
 import com.bisc.flauncher.data.model.panelRows
-import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.ui.home.dock.AddMapTargetDialog
 import com.bisc.flauncher.ui.home.dock.ContactPickerSheet
 import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
@@ -153,16 +145,13 @@ fun HomeScreen(
     val calculatorResult by viewModel.calculatorResult.collectAsState()
     val contactResults by viewModel.contactResults.collectAsState()
     val contactsPermissionGranted by viewModel.contactsPermissionGranted.collectAsState()
-    val hasShortcutHostPermission by viewModel.hasShortcutHostPermission.collectAsState()
     val folders by viewModel.folders.collectAsState()
     val folderItemsByFolder by viewModel.folderItemsByFolder.collectAsState()
     val openFolderPath by viewModel.openFolderPath.collectAsState()
     val folderOpen = openFolderPath.isNotEmpty()
     val folderHideStatusBar by viewModel.folderHideStatusBar.collectAsState()
-    val notes by viewModel.notes.collectAsState()
     val savedMapTargets by viewModel.savedMapTargets.collectAsState()
     val pinnedWebsites by viewModel.pinnedWebsites.collectAsState()
-    val pinnedShortcuts by viewModel.pinnedShortcuts.collectAsState()
     val pinnedContacts by viewModel.pinnedContacts.collectAsState()
     val contactPickerOpen by viewModel.contactPickerOpen.collectAsState()
     val contactPickerList by viewModel.contactPickerList.collectAsState()
@@ -212,7 +201,6 @@ fun HomeScreen(
     val searchCategoryOrder by viewModel.searchCategoryOrder.collectAsState()
     val searchFavoriteApps by viewModel.searchFavoriteApps.collectAsState()
     val searchFavoriteIds by viewModel.searchFavoriteIds.collectAsState()
-    val searchFavoritesOnOpen by viewModel.searchFavoritesOnOpen.collectAsState()
     val searchCategoryRailLeft by viewModel.searchCategoryRailLeft.collectAsState()
     val activeSearchCategories by viewModel.activeSearchCategories.collectAsState()
     val searchFilter by viewModel.searchFilter.collectAsState()
@@ -1236,7 +1224,6 @@ fun HomeScreen(
             onSetFilter = viewModel::setSearchFilter,
             favoriteApps = searchFavoriteApps,
             favoriteIds = searchFavoriteIds,
-            favoritesOnOpen = searchFavoritesOnOpen,
             onToggleFavorite = viewModel::toggleSearchFavorite,
             railLeft = searchCategoryRailLeft
         )

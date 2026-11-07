@@ -95,7 +95,6 @@
     <string name="settings_theme_apply">Apply</string>
     <string name="settings_language_label">Language</string>
     <string name="settings_language_system">System default</string>
-    <string name="settings_theme_label">Color mode</string>
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_theme_system">System</string>
@@ -230,8 +229,6 @@
 <string name="settings_folder_title">Folder</string>
     <string name="settings_folder_global_label">Global folder settings</string>
     <string name="settings_folder_global_subtitle">Appearance, border and visibility shared by every folder</string>
-    <string name="settings_folder_appearance_reset_label">Reset to global fill</string>
-    <string name="settings_folder_border_reset_label">Reset to global border</string>
     <string name="settings_folder_visibility_label">Visibility</string>
     <string name="settings_folder_list_label">Folders</string>
     <string name="settings_folder_create">Create folder</string>
@@ -435,9 +432,6 @@
     <string name="settings_statusbar_hide_all">Hide everywhere</string>
     <string name="settings_statusbar_hide_all_summary">Turns the status bar off on every page, quick overview, text search and folders. You can turn it back on individually per screen afterwards. A swipe down from the top edge always shows it briefly.</string>
     <string name="settings_statusbar_confirm_hide_message">This hides the status bar on every page, quick overview, text search and folders at once, overriding whatever each one is currently set to.</string>
-    <string name="settings_statusbar_confirm_show_message">This shows the status bar on every page, quick overview, text search and folders at once, overriding whatever each one is currently set to.</string>
-    <string name="settings_corner_style_label">Corner roundness</string>
-    <string name="settings_corner_style_info">Applies to every element at once, widgets included — new widgets start at 10%. With fully round corners, widgets can look rather funny, since the rounding cuts into their content. Each element can still get its own corners in its own settings.</string>
     <string name="settings_corner_radius_value">%1$d%%</string>
     <string name="settings_statusbar_hide_page">Hide status bar</string>
     <string name="settings_folder_hide_status_bar">Hide status bar in folders</string>
@@ -457,7 +451,6 @@
     <string name="settings_folder_creator_search">Search apps</string>
     <string name="settings_folder_creator_selected">%1$d selected</string>
     <string name="settings_search_keyboard_auto_open">Open keyboard automatically</string>
-    <string name="settings_search_bar_label">Search bar</string>
     <string name="settings_search_page_label">Page</string>
     <string name="settings_search_keyboard_label">Keyboard</string>
     <string name="settings_search_behavior_label">Behavior</string>
@@ -623,16 +616,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_search_categories_removed_label">Removed</string>
     <string name="settings_search_categories_removed_info">Removed categories are not searched and don\'t appear in the search bar. Tap one to add it back.</string>
     <string name="settings_search_bar_position_label">Position</string>
-    <string name="settings_search_bar_show_categories">Category symbols</string>
-    <string name="settings_search_bar_show_categories_info">The row of category symbols for narrowing the search to one category.</string>
-    <string name="settings_search_bar_floating">Floating</string>
-    <string name="settings_search_bar_floating_info">Only the search field, without the box around it, like the field on the App grid.</string>
     <string name="settings_pages_carousel_endless_summary">Can make swiping between pages less smooth</string>
-    <string name="lock_wallpaper_offer_title">Lock screen</string>
-    <string name="lock_wallpaper_offer_text">Give the lock screen a matching Freiraum wallpaper? The Android wallpaper behind your home screen stays as it is.</string>
     <string name="lock_wallpaper_offer_yes">Set it</string>
     <string name="lock_wallpaper_offer_no">No thanks</string>
-    <string name="settings_rotation_label">Rotation</string>
     <string name="settings_lock_portrait">Lock to portrait</string>
     <string name="settings_lock_portrait_summary">The launcher stays upright when the device is turned</string>
     <string name="settings_tablet_beta_title">Tablet view (beta)</string>
@@ -642,7 +628,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_widget_paging_title">Paging buttons in widgets</string>
     <string name="settings_widget_paging_summary">Symbol, opacity, fill, border and corners</string>
     <string name="settings_widget_paging_mode">Move by</string>
-    <string name="settings_widget_paging_mode_info">Swiping inside a widget near your thumb can collide with swiping between pages. With buttons, widgets no longer react to swiping.</string>
     <string name="settings_widget_paging_gesture">Swiping</string>
     <string name="settings_widget_paging_buttons">Buttons</string>
     <string name="settings_widget_paging_symbol">Symbol</string>
@@ -665,7 +650,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_permissions_text">Everything here is optional, and Freiraum has no internet access. Tap a row to allow it now, or later in the settings.</string>
     <string name="welcome_lock_title">Lock screen</string>
     <string name="welcome_lock_text">Your wallpaper pack has a picture for the lock screen too. Use it there? Only the lock screen changes.</string>
-    <string name="welcome_gesture_panel">Panel</string>
     <string name="settings_motion_label">Animations</string>
     <string name="settings_motion_info">Apps, folders and pages zoom out of what you tapped, pages sink back a little while swiping, and the back swipe shrinks the screen with your finger. If Android\'s Remove animations is on, there are none.</string>
     <string name="settings_motion_system_off">Android\'s Remove animations is on</string>
@@ -714,7 +698,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_display_label">Display</string>
     <string name="settings_settings_theme_label">Settings and welcome tour</string>
     <string name="settings_settings_theme_launcher">Like the launcher</string>
-    <string name="settings_settings_theme_info">Only for the settings and the welcome tour. The launcher itself keeps its own color mode from Appearance.</string>
     <string name="settings_statusbar_summary">Hidden on %1$d of %2$d</string>
     <string name="settings_motion_summary_on">On, %1$d of %2$d</string>
     <string name="settings_motion_summary_off">Off</string>
@@ -747,7 +730,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_own_setup">Set up myself</string>
     <string name="welcome_design_title">Choose a design</string>
     <string name="welcome_design_text">Colors, borders and effects. Swipe for more; Neon is a download: get it in the browser, then pick the file here.</string>
-    <string name="welcome_design_none">None</string>
     <string name="welcome_design_neon_light">Neon Light</string>
     <string name="welcome_design_neon_dark">Neon Dark</string>
     <string name="welcome_wallpaper_title">Choose a wallpaper pack</string>
@@ -759,7 +741,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_download">Download</string>
     <string name="welcome_shape_title">Choose a shape</string>
     <string name="welcome_shape_text">How round the corners are. The design brought its own; change them here if you like. Widgets always stay a little less round, so nothing gets cut off.</string>
-    <string name="welcome_shape_design">Like the design</string>
     <string name="welcome_shape_round">Round</string>
     <string name="welcome_shape_soft">Soft</string>
     <string name="welcome_shape_square">Square</string>
@@ -767,7 +748,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_shape_part_dock">Dock</string>
     <string name="welcome_shape_part_widgets">Widgets</string>
     <string name="welcome_shape_part_search_button">Search button</string>
-    <string name="welcome_shape_part_text_search">Text search</string>
     <string name="welcome_shape_part_folders">Apps in folders</string>
     <string name="settings_widget_paging_mode_row_info">How this widget turns its pages (hours and days, notes). The look of the buttons is shared by all widgets.</string>
     <string name="settings_color_modes_label">Color modes</string>
@@ -787,7 +767,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_shape_part_search_bar">Search bars</string>
     <string name="welcome_shape_part_search_results">Search results</string>
     <string name="settings_ready_look_label">Ready-made look</string>
-    <string name="settings_corners_label">Corners</string>
     <string name="settings_corners_all">Corners of all parts</string>
     <string name="settings_corners_all_summary">Round, soft or square, for everything or part by part</string>
     <string name="settings_corners_intro">Pick one shape for everything, or each part on its own in the table. The small screens show which part is which.</string>
@@ -805,9 +784,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_search_rail_show">Show category rail</string>
     <string name="settings_search_rail_left">On the left</string>
     <string name="settings_search_rail_right">On the right</string>
-    <string name="settings_search_favorites_info">Favorites are the apps you want at hand right away. Pick them yourself, let Freiraum add the apps you open most, or both. A long press on an app in the search also adds or removes it. The counting stays on your phone.</string>
-    <string name="settings_search_favorites_on_open">Show when search opens</string>
-    <string name="settings_search_favorites_on_open_summary">Otherwise only after tapping the star in the rail</string>
+    <string name="settings_search_favorites_info">Favorites are the apps you want at hand right away. Pick them yourself, let Freiraum add the apps you open most, or both. They show as soon as the search opens while Favorites is switched on in the categories below; otherwise tap the star in the rail. A long press on an app in the search adds or removes it. The counting stays on your phone.</string>
     <string name="settings_search_favorites_mode_both">Picked, topped up with the most opened</string>
     <string name="settings_search_favorites_mode_manual">Only picked by me</string>
     <string name="settings_search_favorites_mode_auto">Only the most opened</string>
@@ -824,7 +801,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_app_grid_page_dots">Show page dots</string>
     <string name="settings_search_field_position_info">At the top, or right on the keyboard within easy reach of the thumb.</string>
     <string name="settings_search_rail_hidden">Hidden</string>
-    <string name="settings_search_rail_side_label">Edge</string>
     <string name="settings_search_rail_like_field">Same look as the search field</string>
     <string name="settings_folder_look_own">Own look</string>
     <string name="settings_folder_look_like_all">Like all folders</string>

@@ -526,11 +526,6 @@ class PageContentRepository @Inject constructor(
         rowDao.update(row.copy(cornerRadiusPercent = percent))
     }
 
-    suspend fun applyCornerRadiusToAllRows(percent: Int) {
-        val rows = rowDao.observeAll().first().map { it.copy(cornerRadiusPercent = percent) }
-        rowDao.updateAll(rows)
-    }
-
     suspend fun setRowEdgeToEdge(row: PageRow, edgeToEdge: Boolean) {
         rowDao.update(row.copy(edgeToEdge = edgeToEdge))
     }

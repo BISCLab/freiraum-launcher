@@ -241,7 +241,6 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
     var enginePickerOpen by remember { mutableStateOf(false) }
     val favorites by viewModel.searchFavorites.collectAsState()
     val favoritesMode by viewModel.searchFavoritesMode.collectAsState()
-    val favoritesOnOpen by viewModel.searchFavoritesOnOpen.collectAsState()
     val labeledApps by viewModel.labeledApps.collectAsState()
     var favoritesPickerOpen by remember { mutableStateOf(false) }
 
@@ -277,13 +276,6 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
             title = stringResource(R.string.search_section_favorites),
             info = stringResource(R.string.settings_search_favorites_info)
         ) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_favorites_on_open),
-                summary = stringResource(R.string.settings_search_favorites_on_open_summary),
-                onClick = { viewModel.setSearchFavoritesOnOpen(!favoritesOnOpen) },
-                trailing = { Switch(checked = favoritesOnOpen, onCheckedChange = viewModel::setSearchFavoritesOnOpen) }
-            )
             RadioPreference(stringResource(R.string.settings_search_favorites_mode_both), com.bisc.flauncher.data.model.SearchFavoritesMode.BOTH, favoritesMode, viewModel::setSearchFavoritesMode)
             RadioPreference(stringResource(R.string.settings_search_favorites_mode_manual), com.bisc.flauncher.data.model.SearchFavoritesMode.MANUAL, favoritesMode, viewModel::setSearchFavoritesMode)
             RadioPreference(stringResource(R.string.settings_search_favorites_mode_auto), com.bisc.flauncher.data.model.SearchFavoritesMode.AUTO, favoritesMode, viewModel::setSearchFavoritesMode)

@@ -36,8 +36,7 @@ import com.bisc.flauncher.ui.home.dock.BackgroundFill
 import com.bisc.flauncher.ui.home.dock.resolveElementColors
 import com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark
 
-/** Corner radii of the miniature, scaled down from the real ones (search bar 28dp, cards 28dp). */
-private val MINI_BAR_RADIUS = 14.dp
+/** Corner radius of the miniature's cards, scaled down from the real ones (28dp). */
 private val MINI_CARD_RADIUS = 10.dp
 private val MINI_SIDE_MARGIN = 4.dp
 private val MINI_CAP_HEIGHT = 8.dp
@@ -47,12 +46,9 @@ private val MINI_CAP_HEIGHT = 8.dp
  *  tappable and opens its own settings via [onNavigate] (the same routes as the list below it). */
 @Composable
 fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val pageAppearance by viewModel.searchAppearance.collectAsState()
     val override by viewModel.searchBackgroundOverride.collectAsState()
     val globalBackground by viewModel.globalBackground.collectAsState()
     val globalShade by viewModel.searchGlobalShade.collectAsState()
-    val barCorner by viewModel.searchBarCornerRadiusPercent.collectAsState()
-    val defaultCorner by viewModel.defaultCornerRadiusPercent.collectAsState()
     val resultsOwn by viewModel.searchResultsAppearance.collectAsState()
     val resultsCorner by viewModel.searchResultsCornerRadiusPercent.collectAsState()
     val resultsEdgeToEdge by viewModel.searchResultsEdgeToEdge.collectAsState()
@@ -69,9 +65,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
     val background = override ?: globalBackground.copy(shade = globalShade ?: globalBackground.shade)
     val surfaceDark = rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), background)
     val defaultElement = com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor(MaterialTheme.colorScheme.background.luminance() < 0.5f)
-    val barAppearance = defaultElement
     val cardAppearance = resultsOwn ?: defaultElement
-    val barRadius = MINI_BAR_RADIUS * ((barCorner ?: defaultCorner).coerceIn(0, 100) / 100f)
     val cardRadius = MINI_CARD_RADIUS * ((resultsCorner ?: 100).coerceIn(0, 100) / 100f)
     val sideMargin = if (resultsEdgeToEdge) 0.dp else MINI_SIDE_MARGIN
     val phoneShape = RoundedCornerShape(24.dp)
@@ -92,7 +86,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
 
             Column(modifier = Modifier.fillMaxSize()) {
                 if (!barAtBottom) {
-                    MiniSearchBar(barAppearance, surfaceDark, RoundedCornerShape(bottomStart = barRadius, bottomEnd = barRadius), false, atBottom = false, floating = true, fieldAppearance = fieldOwn) {
+                    MiniSearchField(surfaceDark, atBottom = false, fieldAppearance = fieldOwn) {
                         onNavigate(SearchElement.FIELD.route)
                     }
                 }
@@ -113,7 +107,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 if (barAtBottom) {
-                    MiniSearchBar(barAppearance, surfaceDark, RoundedCornerShape(topStart = barRadius, topEnd = barRadius), false, atBottom = true, floating = true, fieldAppearance = fieldOwn) {
+                    MiniSearchField(surfaceDark, atBottom = true, fieldAppearance = fieldOwn) {
                         onNavigate(SearchElement.FIELD.route)
                     }
                 }
@@ -127,44 +121,24 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
     }
 }
 
+/** The search field on the page, at the top or on the keyboard. */
 @Composable
-private fun MiniSearchBar(appearance: ElementAppearance, surfaceDark: Boolean, shape: Shape, showCategories: Boolean, atBottom: Boolean, floating: Boolean, fieldAppearance: ElementAppearance?, onClick: () -> Unit) {
-    // Floating: no box, the field sits on the page itself.
-    val colors = resolveElementColors(if (floating) appearance.copy(fillMode = ElementFillMode.NONE) else appearance, surfaceDark)
-    Column(
+private fun MiniSearchField(surfaceDark: Boolean, atBottom: Boolean, fieldAppearance: ElementAppearance?, onClick: () -> Unit) {
+    val fieldColors = resolveElementColors(fieldAppearance ?: com.bisc.flauncher.ui.home.search.automaticRailAppearance(surfaceDark), surfaceDark)
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(shape)
-            .background(colors.background, alpha = colors.backgroundAlpha)
             .clickable(onClick = onClick)
-            .padding(start = 8.dp, end = 8.dp, top = if (atBottom) 8.dp else 14.dp, bottom = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+            .padding(start = 10.dp, end = 10.dp, top = if (atBottom) 6.dp else 14.dp, bottom = 6.dp)
     ) {
-        val fieldColors = resolveElementColors(
-            fieldAppearance ?: com.bisc.flauncher.ui.home.search.automaticRailAppearance(colors.contentColor.luminance() > 0.5f)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(12.dp)
+                .clip(CircleShape)
+                .background(fieldColors.background, alpha = fieldColors.backgroundAlpha)
+                .border(0.5.dp, fieldColors.borderColor, CircleShape)
         )
-        val field = @Composable {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(12.dp)
-                    .clip(CircleShape)
-                    .background(fieldColors.background, alpha = fieldColors.backgroundAlpha)
-                    .border(0.5.dp, fieldColors.borderColor, CircleShape)
-            )
-        }
-        val categories = @Composable {
-            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp)) {
-                repeat(8) { Box(modifier = Modifier.size(5.dp).clip(CircleShape).background(colors.contentColor.copy(alpha = 0.45f))) }
-            }
-        }
-        if (atBottom) {
-            if (showCategories) categories()
-            field()
-        } else {
-            field()
-            if (showCategories) categories()
-        }
     }
 }
 

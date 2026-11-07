@@ -2,63 +2,44 @@
 
 ## Unreleased
 
-- Status bar page: every page and folders as a small screen, with the bar on top while it shows;
-  tap one to switch it. The switch for all stays on top
-
-- App list and App grid appearance pages start with a miniature drawn from the live settings, like
-  Text search already had; tapping the section letters, the A-Z rail, the search button, the grid or
-  the search field opens its settings. The Text search miniature shows the category rail in its own
-  look and opens its page
-
-- Icons page redesigned: real apps on top as a live preview of shape, size and icon pack; the shape
-  as picture tiles; icon packs as cards with three of their own icons
-
-- New page Appearance → Colors of all parts: the same small screens as for the corners, now in the
-  real colors; a color set for everything (Light, Dark, Glass, Accent) and a table to give each part
-  its own fill, text color and border, with a preview. Saved together
-
-- A single folder: one Appearance window with a preview instead of separate Fill and Border; fill
-  and border still follow all folders until changed, and one button sets both back
-
-- Dock, Panel, folders, search field, category rail and search results each have one page for their
-  look instead of separate Fill and Border pages: a live preview on top, then fill, text color,
-  opacity, border and corners, saved together. Elements, visibility and the other options of the
-  part sit right under the preview
-
-- Settings use the same words everywhere: Appearance (no more Erscheinungsbild in German), element
-  box, icon pack, A-Z rail, and Edge for the left or right side of rails and buttons
-
-- Text search: the category rail has a look of its own (fill, border, corners) on its own page
-  Category rail, which also holds showing it and which edge it sits on; until changed it looks like
-  the search field. It is a part of its own in Corners of all parts and in designs
-
-- Text search tidied up after the rebuild: the search field settings now hold its position (top or
-  on the keyboard), the old bar page with its box, category row and floating switch is gone, and
-  designs no longer carry a look for the bar box (Neon Light 1.4, Neon Dark 1.2)
-
-- App grid: choose between scrolling up and down and swiping pages sideways; sideways with as many
-  rows as fit or a set number (3 to 8) and optional page dots
-
-- Text search rebuilt: only the search field stays at the top (or on the keyboard), the box with the
-  category row is gone. The categories run down a rail beside the results, left or right, always
-  above the keyboard. Tapping one jumps to its results and greys out the others until you scroll;
-  dragging along the rail runs through the categories like the A-Z rail, with a bubble
-- New search category Favorites: picked by hand, the most opened apps, or both; shown as soon as
-  search opens or only via the star in the rail. A long press on an app in the search adds or
-  removes it. Launch counts stay on the phone
+### Text search
+- Rebuilt: only the search field stays, at the top or on the keyboard; the box with the category
+  row is gone
+- The categories run down a rail beside the results, left or right, always above the keyboard.
+  Tapping one jumps to its results and greys out the others until you scroll; dragging along the
+  rail runs through the categories like the A-Z rail, with a bubble
+- The category rail has its own page with its own look (fill, border, corners), showing it and its
+  edge; until changed it looks like the search field
+- New category Favorites: picked by hand, the most opened apps, or both. They show as soon as the
+  search opens while Favorites is switched on in the categories, otherwise via the star in the rail.
+  A long press on an app in the search adds or removes it. Launch counts stay on the phone
 - The keyboard opens with the search again for everyone (it can still be switched off and hidden)
 
-- Welcome tour: the gestures can be set right there; tapping one opens the same choices as in the
-  settings
+### Settings
+- Dock, Panel, folders, a single folder, search field, category rail and search results each have
+  one page for their look instead of separate Fill and Border pages: a live preview on top, then
+  fill, text color, opacity, border and corners, saved together; their other options sit right
+  under the preview
+- New page Appearance → Colors of all parts: the small screens in the real colors, a color set for
+  everything (Light, Dark, Glass, Accent) and a table to give each part its own look
+- Corners of all parts: exactly three screens fit side by side; the category rail is a part of its own
+- Icons page redesigned: real apps as a live preview of shape, size and icon pack, the shape as
+  picture tiles, icon packs as cards with three of their own icons
+- App list and App grid appearance pages start with a miniature to tap, like Text search
+- Status bar page: every page and folders as a small screen, tap one to switch it
+- The same words everywhere: Appearance, element box, icon pack, A-Z rail, and Edge for left or right
+- The path bar at the bottom shows names on every page, never a raw path with slashes
 
-- Backups now hold the whole launcher to move it or set it up again: besides the look, pages and
-  personal things also the installed designs (with your saved own look) and wallpaper packs; texts
-  explain what is inside
-- Corners of all parts: exactly three screens fit side by side, the others a swipe away
-
-- Folder widgets: long press a widget in an open folder to edit or remove it; folder settings have a
+### Also
+- App grid: scroll up and down or swipe pages sideways, with as many rows as fit or 3 to 8, and
+  optional page dots
+- Folder widgets: long press one in an open folder to edit or remove it; folder settings have a
   remove button per widget, with a question
-- Settings: the path bar at the bottom shows names on every page, never a raw path with slashes
+- Welcome tour: the gestures can be set right there; design and wallpaper tiles fit three side by side
+- Backups hold the whole launcher to move it or set it up again: besides the look, pages and
+  personal things also the installed designs (with your saved own look) and wallpaper packs
+- Designs: the category rail is a part of its own, the old search bar box is gone
+  (Neon Light 1.5, Neon Dark 1.3)
 
 ## 0.10.2
 
