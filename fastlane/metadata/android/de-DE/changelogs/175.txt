@@ -1,0 +1,2 @@
+- Ecken aller Teile: Änderungen erst mit Speichern, Rückfrage beim Verlassen
+- Ladeanimation jetzt unter Aussehen → Animationen

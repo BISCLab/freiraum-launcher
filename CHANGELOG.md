@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.10.2
+
 - Corners of all parts: changes only apply with Save, and leaving with unsaved changes asks first
 - The charging animation moved to Appearance → Animations, as its own group below the animations
 

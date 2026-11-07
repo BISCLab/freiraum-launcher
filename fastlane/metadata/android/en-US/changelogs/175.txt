@@ -1,0 +1,2 @@
+- Corners of all parts: changes apply only with Save, asks before leaving
+- Charging animation now under Appearance → Animations
