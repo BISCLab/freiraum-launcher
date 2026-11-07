@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- App list and App grid appearance pages start with a miniature drawn from the live settings, like
+  Text search already had; tapping the section letters, the A-Z rail, the search button, the grid or
+  the search field opens its settings. The Text search miniature shows the category rail in its own
+  look and opens its page
+
 - Icons page redesigned: real apps on top as a live preview of shape, size and icon pack; the shape
   as picture tiles; icon packs as cards with three of their own icons
 

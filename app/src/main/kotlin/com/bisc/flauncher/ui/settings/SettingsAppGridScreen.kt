@@ -63,6 +63,8 @@ fun SettingsAppGridScreen(navController: NavController, onBack: () -> Unit, onNa
 fun SettingsAppGridAppearanceHubScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val position by viewModel.appGridBarPosition.collectAsState()
     SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
+        // Tap a part of the miniature to edit it; the list below stays as the second way in.
+        AppGridPreview(onNavigate = onNavigate)
         SettingsPreferenceGroup {
             SettingsPreference(icon = null, title = stringResource(R.string.settings_search_page_label), onClick = { onNavigate("page") }, trailing = null)
             SettingsPreference(icon = null, title = stringResource(R.string.settings_app_grid_grid_label), onClick = { onNavigate("grid") }, trailing = null)

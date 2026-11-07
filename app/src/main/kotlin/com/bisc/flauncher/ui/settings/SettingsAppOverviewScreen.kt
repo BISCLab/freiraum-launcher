@@ -56,6 +56,8 @@ fun SettingsAppOverviewAppearanceHubScreen(navController: NavController, onBack:
     val showSearchButton by viewModel.appListShowSearchButton.collectAsState()
     val ownSearch by viewModel.appListOwnSearch.collectAsState()
     SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
+        // Tap a part of the miniature to edit it; the list below stays as the second way in.
+        AppListPreview(onNavigate = onNavigate)
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,

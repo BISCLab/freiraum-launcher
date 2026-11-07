@@ -63,6 +63,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
     val barShowCategories by viewModel.searchBarShowCategories.collectAsState()
     val railLeft by viewModel.searchCategoryRailLeft.collectAsState()
     val fieldOwn by viewModel.searchFieldAppearance.collectAsState()
+    val railOwn by viewModel.searchRailAppearance.collectAsState()
 
     // Same resolution rules as the real screen (HomeViewModel.searchBackground, SearchOverlay).
     val background = override ?: globalBackground.copy(shade = globalShade ?: globalBackground.shade)
@@ -96,7 +97,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
                     }
                 }
                 Row(modifier = Modifier.padding(top = if (barAtBottom) 14.dp else 6.dp)) {
-                    if (barShowCategories && railLeft) MiniCategoryRail(surfaceDark) { onNavigate(SearchElement.FIELD.route) }
+                    if (barShowCategories && railLeft) MiniCategoryRail(surfaceDark, railOwn ?: fieldOwn) { onNavigate(SearchElement.RAIL.route) }
                     Column(
                         modifier = Modifier.weight(1f).padding(start = sideMargin, end = sideMargin),
                         verticalArrangement = Arrangement.spacedBy(5.dp)
@@ -108,7 +109,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
                             onNavigate(SearchElement.RESULTS.route)
                         }
                     }
-                    if (barShowCategories && !railLeft) MiniCategoryRail(surfaceDark) { onNavigate(SearchElement.FIELD.route) }
+                    if (barShowCategories && !railLeft) MiniCategoryRail(surfaceDark, railOwn ?: fieldOwn) { onNavigate(SearchElement.RAIL.route) }
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 if (barAtBottom) {
@@ -234,8 +235,8 @@ private fun MiniKeyboard(capColor: Color?, capRadius: Dp, dark: Boolean, onClick
 
 /** The category rail in small: a slim pill with colored dots, like the real one beside the results. */
 @Composable
-private fun MiniCategoryRail(surfaceDark: Boolean, onClick: () -> Unit) {
-    val colors = resolveElementColors(com.bisc.flauncher.ui.home.search.automaticRailAppearance(surfaceDark))
+private fun MiniCategoryRail(surfaceDark: Boolean, look: ElementAppearance?, onClick: () -> Unit) {
+    val colors = resolveElementColors(look ?: com.bisc.flauncher.ui.home.search.automaticRailAppearance(surfaceDark), surfaceDark)
     Column(
         modifier = Modifier
             .padding(horizontal = 3.dp)
