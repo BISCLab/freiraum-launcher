@@ -14,6 +14,10 @@
   search opens while Favorites is switched on in the categories, otherwise via the star in the rail.
   A long press on an app in the search adds or removes it. Launch counts stay on the phone
 - The keyboard opens with the search again for everyone (it can still be switched off and hidden)
+- Opening the search is one smooth motion: a gentle zoom, the background fades in, the field slides
+  in (from the top, or from below with the keyboard), the rail from its edge and the cards one after
+  another, while the keyboard comes up at the same time and everything follows it frame by frame.
+  Closing takes the keyboard along right away. Without animations everything is there at once
 
 ### Settings
 - Dock, Panel, folders, a single folder, search field, category rail and search results each have

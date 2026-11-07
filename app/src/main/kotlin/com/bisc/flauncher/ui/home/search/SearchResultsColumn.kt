@@ -112,7 +112,9 @@ fun SearchResultsColumn(
     focus: SearchCategory? = null,
     onClearFocus: () -> Unit = {},
     /** Each category with a card, and the position of its card in the list. */
-    onCardsChange: (Map<SearchCategory, Int>) -> Unit = {}
+    onCardsChange: (Map<SearchCategory, Int>) -> Unit = {},
+    /** How far the card at a position has arrived while the search opens, 0 to 1. */
+    arrival: (Int) -> Float = { 1f }
 ) {
     val sideMargin = if (edgeToEdge) 0.dp else com.bisc.flauncher.ui.home.dock.DockDimens.horizontalMargin
     val cardShape = RoundedCornerShape(SearchDimens.cornerRadius * ((cardCornerRadiusPercent ?: 100).coerceIn(0, 100) / 100f))
@@ -171,7 +173,7 @@ fun SearchResultsColumn(
     }
     fun dimmed(category: SearchCategory) = focus != null && focus != category
 
-    CompositionLocalProvider(LocalResultCardShape provides cardShape) {
+    CompositionLocalProvider(LocalResultCardShape provides cardShape, LocalCardArrival provides arrival) {
     BoxWithConstraints(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         // Same edge fades as the app list: cards fade out toward the keyboard while there's more to
         // scroll, and toward the input bar once scrolled away from the top.
@@ -194,14 +196,14 @@ fun SearchResultsColumn(
         ) {
             if (calculatorResult != null) {
                 item {
-                    ResultCard(cardAppearance, dimmed = focus != null, onUndim = onClearFocus) {
+                    ResultCard(cardAppearance, order = 0, dimmed = focus != null, onUndim = onClearFocus) {
                         CalculatorResultRow(expression = query, result = calculatorResult, onClick = { onCalculatorResultClick(calculatorResult) })
                     }
                 }
             }
             if (converterResult != null) {
                 item {
-                    ResultCard(cardAppearance, dimmed = focus != null, onUndim = onClearFocus) {
+                    ResultCard(cardAppearance, order = if (calculatorResult != null) 1 else 0, dimmed = focus != null, onUndim = onClearFocus) {
                         CalculatorResultRow(expression = query, result = converterResult, onClick = {})
                     }
                 }
@@ -211,7 +213,7 @@ fun SearchResultsColumn(
                 when (category) {
                     SearchCategory.FAVORITES -> if (favoriteApps.isNotEmpty()) {
                         item(key = category.name) {
-                            ResultCard(cardAppearance, dimmed = dimmed(category), onUndim = onClearFocus) {
+                            ResultCard(cardAppearance, order = cards[category] ?: 0, dimmed = dimmed(category), onUndim = onClearFocus) {
                                 SectionTitle(stringResource(R.string.search_section_favorites), categoryColor(category))
                                 AppTileGrid(
                                     apps = favoriteApps,
@@ -227,7 +229,7 @@ fun SearchResultsColumn(
                     }
                     SearchCategory.APPS -> if (shownAppResults.isNotEmpty()) {
                         item(key = category.name) {
-                            ResultCard(cardAppearance, dimmed = dimmed(category), onUndim = onClearFocus) {
+                            ResultCard(cardAppearance, order = cards[category] ?: 0, dimmed = dimmed(category), onUndim = onClearFocus) {
                                 SectionTitle(stringResource(R.string.search_section_apps), categoryColor(category))
                                 AppTileGrid(
                                     apps = shownAppResults,
@@ -241,10 +243,10 @@ fun SearchResultsColumn(
                             }
                         }
                     }
-                    SearchCategory.FOLDERS -> sectionCard(dimmed(category), onClearFocus, category, shownFolderResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { folder ->
+                    SearchCategory.FOLDERS -> sectionCard(cards[category] ?: 0, dimmed(category), onClearFocus, category, shownFolderResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { folder ->
                         ResultRow(leading = { Icon(Icons.Filled.Folder, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = folder.name, onClick = { onFolderClick(folder) })
                     }
-                    SearchCategory.CONTACTS -> sectionCard(dimmed(category), onClearFocus, category, shownContactResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { contact ->
+                    SearchCategory.CONTACTS -> sectionCard(cards[category] ?: 0, dimmed(category), onClearFocus, category, shownContactResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { contact ->
                         ResultRow(
                             leading = { Icon(Icons.Filled.Person, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) },
                             title = contact.displayName,
@@ -252,14 +254,14 @@ fun SearchResultsColumn(
                             onClick = { onContactClick(contact) }
                         )
                     }
-                    SearchCategory.SETTINGS -> sectionCard(dimmed(category), onClearFocus, category, shownSettingsResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { shortcut ->
+                    SearchCategory.SETTINGS -> sectionCard(cards[category] ?: 0, dimmed(category), onClearFocus, category, shownSettingsResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { shortcut ->
                         ResultRow(leading = { Icon(Icons.Filled.Search, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = stringResource(shortcut.labelRes), onClick = { onSettingsShortcutClick(shortcut) })
                     }
-                    SearchCategory.WEBSITES -> sectionCard(dimmed(category), onClearFocus, category, shownWebsiteResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { website ->
+                    SearchCategory.WEBSITES -> sectionCard(cards[category] ?: 0, dimmed(category), onClearFocus, category, shownWebsiteResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { website ->
                         ResultRow(leading = { Icon(Icons.Filled.Bookmark, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = website.label, onClick = { onWebsiteClick(website) })
                     }
                     SearchCategory.PLACES -> {
-                        sectionCard(dimmed(category), onClearFocus, category, shownMapTargetResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { target ->
+                        sectionCard(cards[category] ?: 0, dimmed(category), onClearFocus, category, shownMapTargetResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { target ->
                             ResultRow(
                                 leading = { Icon(Icons.Filled.Place, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) },
                                 title = target.label,
@@ -269,13 +271,13 @@ fun SearchResultsColumn(
                         }
                         if (showMaps) {
                             item(key = "maps_command") {
-                                ResultCard(cardAppearance, dimmed = dimmed(category), onUndim = onClearFocus) {
+                                ResultCard(cardAppearance, order = cards[category] ?: 0, dimmed = dimmed(category), onUndim = onClearFocus) {
                                     CommandRow(icon = Icons.Filled.Place, color = categoryColor(category), text = stringResource(R.string.search_command_maps, query), prominent = false, onClick = onMapsCommand)
                                 }
                             }
                         }
                     }
-                    SearchCategory.SHORTCUTS -> sectionCard(dimmed(category), onClearFocus, category, shownShortcutResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { result ->
+                    SearchCategory.SHORTCUTS -> sectionCard(cards[category] ?: 0, dimmed(category), onClearFocus, category, shownShortcutResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { result ->
                         ResultRow(
                             leading = { Icon(Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) },
                             title = result.shortcut.label,
@@ -283,19 +285,19 @@ fun SearchResultsColumn(
                             onClick = { onShortcutClick(result.shortcut) }
                         )
                     }
-                    SearchCategory.LAUNCHER_SETTINGS -> sectionCard(dimmed(category), onClearFocus, category, shownLauncherSettingsResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { target ->
+                    SearchCategory.LAUNCHER_SETTINGS -> sectionCard(cards[category] ?: 0, dimmed(category), onClearFocus, category, shownLauncherSettingsResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { target ->
                         ResultRow(leading = { Icon(category.icon, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = stringResource(target.labelRes), onClick = { onLauncherSettingsClick(target) })
                     }
                     SearchCategory.WEB -> if (showWeb) {
                         item(key = category.name) {
-                            ResultCard(cardAppearance, dimmed = dimmed(category), onUndim = onClearFocus) {
+                            ResultCard(cardAppearance, order = cards[category] ?: 0, dimmed = dimmed(category), onUndim = onClearFocus) {
                                 CommandRow(icon = Icons.Filled.Language, color = categoryColor(category), text = stringResource(R.string.search_command_web, query), prominent = !hasDirectResults, onClick = onWebCommand)
                             }
                         }
                     }
                     SearchCategory.AI -> if (showAi) {
                         item(key = category.name) {
-                            ResultCard(cardAppearance, dimmed = dimmed(category), onUndim = onClearFocus) {
+                            ResultCard(cardAppearance, order = cards[category] ?: 0, dimmed = dimmed(category), onUndim = onClearFocus) {
                                 CommandRow(icon = SearchCategory.AI.icon, color = categoryColor(category), text = stringResource(R.string.search_command_ai, aiAppLabel.orEmpty(), query), prominent = !hasDirectResults && !showWeb, onClick = onAiCommand)
                             }
                         }
@@ -309,6 +311,7 @@ fun SearchResultsColumn(
 
 /** One category's section as its own card: title + up to [SECTION_COLLAPSED_LIMIT] rows + a "More" toggle. */
 private fun <T> androidx.compose.foundation.lazy.LazyListScope.sectionCard(
+    order: Int,
     dimmed: Boolean,
     onUndim: () -> Unit,
     category: SearchCategory,
@@ -321,7 +324,7 @@ private fun <T> androidx.compose.foundation.lazy.LazyListScope.sectionCard(
 ) {
     if (results.isEmpty()) return
     item(key = category.name) {
-        ResultCard(cardAppearance, dimmed = dimmed, onUndim = onUndim) {
+        ResultCard(cardAppearance, order = order, dimmed = dimmed, onUndim = onUndim) {
             SectionTitle(stringResource(category.sectionTitleRes), color)
             val shown = if (expanded || results.size <= SECTION_COLLAPSED_LIMIT) results else results.take(SECTION_COLLAPSED_LIMIT)
             shown.forEach { row(it) }
@@ -349,19 +352,28 @@ private val SearchCategory.sectionTitleRes: Int
         SearchCategory.FAVORITES -> R.string.search_section_favorites
     }
 
+/** How far a card at a position has arrived while the search opens; see [SearchResultsColumn]. */
+private val LocalCardArrival = staticCompositionLocalOf<(Int) -> Float> { { 1f } }
+
 /** Every card's shape, provided once by [SearchResultsColumn] instead of threaded through each call. */
 private val LocalResultCardShape = staticCompositionLocalOf { RoundedCornerShape(SearchDimens.cornerRadius) }
 
 /** One result card. [dimmed] greys it out while another category is picked in the rail; a tap on
  *  it then only ends that, it doesn't open anything. */
 @Composable
-private fun ResultCard(appearance: ElementAppearance, dimmed: Boolean = false, onUndim: () -> Unit = {}, content: @Composable () -> Unit) {
+private fun ResultCard(appearance: ElementAppearance, order: Int = 0, dimmed: Boolean = false, onUndim: () -> Unit = {}, content: @Composable () -> Unit) {
     val alpha by androidx.compose.animation.core.animateFloatAsState(if (dimmed) 0.3f else 1f, label = "cardDim")
+    val arrival = LocalCardArrival.current
+    val rise = with(LocalDensity.current) { 18.dp.toPx() }
     DockPanelSurface(
         appearance = appearance,
         shape = LocalResultCardShape.current,
         effectTarget = "cards",
-        modifier = Modifier.fillMaxWidth().graphicsLayer { this.alpha = alpha }
+        modifier = Modifier.fillMaxWidth().graphicsLayer {
+            val p = arrival(order)
+            this.alpha = alpha * p
+            translationY = (1f - p) * rise
+        }
     ) {
         Box {
             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) { content() }

@@ -297,6 +297,15 @@ fun HomeScreen(
     val appListOrigin = com.bisc.flauncher.ui.rememberOpenOrigin(appListOpen)
     val appGridOrigin = com.bisc.flauncher.ui.rememberOpenOrigin(appGridOpen)
     val searchOrigin = com.bisc.flauncher.ui.rememberOpenOrigin(searchOpen)
+    // The keyboard leaves with the search in one motion, not after the page is already gone.
+    val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+    LaunchedEffect(searchOpen) {
+        if (!searchOpen) {
+            keyboardController?.hide()
+            focusManager.clearFocus(force = true)
+        }
+    }
     // How far a back swipe has gone (Android 14+): the open overlay shrinks with the finger.
     var backProgress by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
     val backGestureModifier = if (motion == com.bisc.flauncher.ui.MotionLevel.OFF || !motionPrefs.backGesture) Modifier else Modifier.graphicsLayer {
@@ -1145,8 +1154,8 @@ fun HomeScreen(
     AnimatedVisibility(
         visible = searchOpen,
         modifier = Modifier.fillMaxSize().then(backGestureModifier),
-        enter = com.bisc.flauncher.ui.zoomIn(overlayMotion, searchOrigin),
-        exit = com.bisc.flauncher.ui.zoomOut(overlayMotion, searchOrigin)
+        enter = com.bisc.flauncher.ui.searchIn(overlayMotion, searchOrigin),
+        exit = com.bisc.flauncher.ui.searchOut(overlayMotion, searchOrigin)
     ) {
         SearchOverlay(
             query = searchQuery,

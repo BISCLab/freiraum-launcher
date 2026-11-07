@@ -179,6 +179,18 @@ fun SearchOverlay(
     // The results take whatever height is left above the system keyboard. The first back gesture
     // only closes the keyboard; the next one leaves the search (HomeScreen's own BackHandler for it).
 
+    // Arrival in stages, one smooth motion together with the keyboard: background, then the field
+    // (from the top, or from below with the keyboard), the rail from its edge, the cards one after
+    // another. Without animations everything is there at once.
+    val motionOn = com.bisc.flauncher.ui.LocalMotion.current != com.bisc.flauncher.ui.MotionLevel.OFF &&
+        com.bisc.flauncher.ui.LocalMotionPrefs.current.overlayZoom
+    val appear = androidx.compose.runtime.remember { androidx.compose.animation.core.Animatable(if (motionOn) 0f else 1f) }
+    LaunchedEffect(Unit) {
+        if (motionOn) appear.animateTo(1f, androidx.compose.animation.core.tween(ARRIVAL_MILLIS, easing = androidx.compose.animation.core.LinearEasing))
+    }
+    val stage: (Float, Float) -> Float = { start, end -> stageProgress(appear.value, start, end) }
+    val density = LocalDensity.current
+
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     var focus by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<SearchCategory?>(null) }
@@ -224,7 +236,7 @@ fun SearchOverlay(
         // The screen's own backdrop (global, own image or own color), always fully opaque so the
         // home page and its dock never show through - same as the app list.
         if (background != null) {
-            BackgroundFill(background, Modifier.matchParentSize())
+            BackgroundFill(background, Modifier.matchParentSize().graphicsLayer { alpha = stage(0f, 0.45f) })
         }
         CompositionLocalProvider(LocalContentColor provides colors.contentColor) {
             // The top inset goes *inside* the input bar (its background fills it up to the screen
@@ -241,6 +253,11 @@ fun SearchOverlay(
                 @Composable
                 fun Bar() {
                     SearchInputBar(
+                        modifier = Modifier.graphicsLayer {
+                            val p = stage(0.08f, 0.62f)
+                            alpha = p
+                            translationY = (1f - p) * with(density) { 28.dp.toPx() } * (if (barAtBottom) 1f else -1f)
+                        },
                         query = query,
                         placeholder = stringResource(R.string.search_field_hint),
                         onQueryChange = onQueryChange,
@@ -318,7 +335,8 @@ fun SearchOverlay(
                         onToggleFavorite = onToggleFavorite,
                         focus = focus,
                         onClearFocus = { focus = null },
-                        onCardsChange = { cards = it }
+                        onCardsChange = { cards = it },
+                        arrival = { order -> stage((0.3f + order * 0.07f).coerceAtMost(0.75f), (0.72f + order * 0.07f).coerceAtMost(1f)) }
                     )
                     if (showRail) {
                         SearchCategoryRail(
@@ -331,7 +349,13 @@ fun SearchOverlay(
                             cornerRadiusPercent = railCornerRadiusPercent ?: fieldCornerRadiusPercent ?: barCornerRadiusPercent ?: cornerRadiusPercent,
                             onTap = onRailTap,
                             onScrub = onRailScrub,
-                            modifier = Modifier.align(if (railLeft) Alignment.CenterStart else Alignment.CenterEnd)
+                            modifier = Modifier
+                                .align(if (railLeft) Alignment.CenterStart else Alignment.CenterEnd)
+                                .graphicsLayer {
+                                    val p = stage(0.25f, 0.85f)
+                                    alpha = p
+                                    translationX = (1f - p) * with(density) { 36.dp.toPx() } * (if (railLeft) -1f else 1f)
+                                }
                         )
                     }
                     }
@@ -346,6 +370,15 @@ fun SearchOverlay(
             }
         }
     }
+}
+
+private const val ARRIVAL_MILLIS = 420
+
+/** How far one part has arrived, 0 to 1, while the whole search goes from 0 to 1: it starts at
+ *  [start] and is there at [end], easing out like the other motions. */
+private fun stageProgress(overall: Float, start: Float, end: Float): Float {
+    val t = ((overall - start) / (end - start)).coerceIn(0f, 1f)
+    return com.bisc.flauncher.ui.EmphasizedEasing.transform(t)
 }
 
 /** The colored strip on top of the keyboard (Text search settings), shown while the keyboard is up.

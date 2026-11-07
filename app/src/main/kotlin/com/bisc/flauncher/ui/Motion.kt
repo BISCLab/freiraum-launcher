@@ -63,6 +63,19 @@ fun zoomIn(level: MotionLevel, origin: TransformOrigin): EnterTransition = when 
     MotionLevel.OFF -> EnterTransition.None
 }
 
+/** The Text search coming in: only a slight zoom and a fade, since its parts arrive one after
+ *  another on their own (see SearchOverlay). */
+fun searchIn(level: MotionLevel, origin: TransformOrigin): EnterTransition = when (level) {
+    MotionLevel.FULL -> scaleIn(tween(300, easing = EmphasizedEasing), initialScale = 0.95f, transformOrigin = origin) + fadeIn(tween(180))
+    MotionLevel.OFF -> EnterTransition.None
+}
+
+/** The Text search leaving, together with the keyboard. */
+fun searchOut(level: MotionLevel, origin: TransformOrigin): ExitTransition = when (level) {
+    MotionLevel.FULL -> scaleOut(tween(220, easing = EmphasizedEasing), targetScale = 0.96f, transformOrigin = origin) + fadeOut(tween(160))
+    MotionLevel.OFF -> ExitTransition.None
+}
+
 /** The reverse of [zoomIn]: shrinking back towards [origin]. */
 fun zoomOut(level: MotionLevel, origin: TransformOrigin): ExitTransition = when (level) {
     MotionLevel.FULL -> scaleOut(tween(240, easing = EmphasizedEasing), targetScale = 0.86f, transformOrigin = origin) + fadeOut(tween(180))
