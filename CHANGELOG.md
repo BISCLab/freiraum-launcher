@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Icons page redesigned: real apps on top as a live preview of shape, size and icon pack; the shape
+  as picture tiles; icon packs as cards with three of their own icons
+
 - New page Appearance → Colors of all parts: the same small screens as for the corners, now in the
   real colors; a color set for everything (Light, Dark, Glass, Accent) and a table to give each part
   its own fill, text color and border, with a preview. Saved together
