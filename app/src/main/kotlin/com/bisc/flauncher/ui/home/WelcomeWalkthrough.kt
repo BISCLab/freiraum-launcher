@@ -375,8 +375,31 @@ private fun WallpaperChoice(viewModel: WallpaperPacksViewModel, dark: Boolean) {
 
 private val SHAPE_SCREEN_GAP = 10.dp
 
+/** The small screens side by side; exactly three fit, like the page tiles, the rest are a swipe away. */
+@Composable
+internal fun PartScreensRow(
+    corners: Map<ShapePart, Int>,
+    focus: ShapePart?,
+    looks: Map<ShapePart, com.bisc.flauncher.data.model.ElementAppearance>? = null
+) {
+    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val screenWidth = (maxWidth - SHAPE_SCREEN_GAP * 2) / 3
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(SHAPE_SCREEN_GAP)
+        ) {
+            ShapeScreen.entries.forEach { screen ->
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(screenWidth)) {
+                    MockScreen(screen, corners, focus, screenWidth, looks)
+                    Text(stringResource(screen.label), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 6.dp))
+                }
+            }
+        }
+    }
+}
+
 /** The screens the shape previews show, each with the parts that live on it. */
-private enum class ShapeScreen(val label: Int) {
+internal enum class ShapeScreen(val label: Int) {
     HOME(R.string.welcome_screen_home),
     PANEL(R.string.welcome_screen_panel),
     APP_LIST(R.string.welcome_screen_app_list),
@@ -399,21 +422,7 @@ private fun ShapeChoice(viewModel: OnboardingViewModel) {
 internal fun ShapeEditor(corners: Map<ShapePart, Int>, onAll: (ShapePreset) -> Unit, onPart: (ShapePart, ShapePreset) -> Unit) {
     var focus by remember { mutableStateOf<ShapePart?>(null) }
     Column(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.fillMaxWidth()) {
-        // Exactly three screens fit side by side, like the page tiles; the rest are a swipe away.
-        androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
-            val screenWidth = (maxWidth - SHAPE_SCREEN_GAP * 2) / 3
-            Row(
-                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(SHAPE_SCREEN_GAP)
-            ) {
-                ShapeScreen.entries.forEach { screen ->
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(screenWidth)) {
-                        MockScreen(screen, corners, focus, screenWidth)
-                        Text(stringResource(screen.label), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 6.dp))
-                    }
-                }
-            }
-        }
+        PartScreensRow(corners, focus)
         val all = ShapePreset.entries.firstOrNull { preset ->
             corners.isNotEmpty() && ShapePart.entries.all { corners[it] == it.percentOf(preset) }
         }
@@ -510,7 +519,7 @@ private fun ShapePreset.label() = when (this) {
     ShapePreset.SQUARE -> R.string.welcome_shape_square
 }
 
-private fun ShapePart.label() = when (this) {
+internal fun ShapePart.label() = when (this) {
     ShapePart.DOCK -> R.string.welcome_shape_part_dock
     ShapePart.PANEL -> R.string.welcome_shape_part_panel
     ShapePart.WIDGETS -> R.string.welcome_shape_part_widgets
@@ -526,22 +535,35 @@ private fun ShapePart.label() = when (this) {
 /** One screen in small with its parts drawn at their corners; the part picked in the table glows
  *  in the accent so it's clear which one it is. */
 @Composable
-private fun MockScreen(screen: ShapeScreen, corners: Map<ShapePart, Int>, focus: ShapePart?, width: androidx.compose.ui.unit.Dp) {
+internal fun MockScreen(
+    screen: ShapeScreen,
+    corners: Map<ShapePart, Int>,
+    focus: ShapePart?,
+    width: androidx.compose.ui.unit.Dp,
+    /** The parts' real looks; null = plain shapes, as in the corners editor. */
+    looks: Map<ShapePart, com.bisc.flauncher.data.model.ElementAppearance>? = null
+) {
     val frame = RoundedCornerShape(18.dp)
     val neutral = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f)
     val accent = MaterialTheme.colorScheme.primary
     @Composable
     fun Part(part: ShapePart, modifier: Modifier, text: String? = null, content: @Composable BoxScope.() -> Unit = {}) {
         val shape = RoundedCornerShape(percent = ((corners[part] ?: 50) / 2).coerceIn(0, 50))
+        val look = looks?.get(part)
+        val colors = look?.let { com.bisc.flauncher.ui.home.dock.resolveElementColors(it) }
         Box(
             modifier = modifier
                 .clip(shape)
-                .background(if (focus == part) accent.copy(alpha = 0.55f) else neutral)
-                .then(if (focus == part) Modifier.border(1.5.dp, accent, shape) else Modifier),
+                .then(
+                    if (colors != null) Modifier.background(colors.background, alpha = colors.backgroundAlpha)
+                    else Modifier.background(if (focus == part) accent.copy(alpha = 0.55f) else neutral)
+                )
+                .then(if (colors != null && look.borderEnabled) Modifier.border(1.dp, colors.borderColor, shape) else Modifier)
+                .then(if (focus == part) Modifier.border(2.dp, accent, shape) else Modifier),
             contentAlignment = Alignment.Center
         ) {
             content()
-            if (text != null) Text(text, fontSize = 8.sp, maxLines = 1, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f))
+            if (text != null) Text(text, fontSize = 8.sp, maxLines = 1, color = colors?.contentColor ?: MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f))
         }
     }
     @Composable

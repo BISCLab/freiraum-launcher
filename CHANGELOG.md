@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- New page Appearance → Colors of all parts: the same small screens as for the corners, now in the
+  real colors; a color set for everything (Light, Dark, Glass, Accent) and a table to give each part
+  its own fill, text color and border, with a preview. Saved together
+
 - A single folder: one Appearance window with a preview instead of separate Fill and Border; fill
   and border still follow all folders until changed, and one button sets both back
 

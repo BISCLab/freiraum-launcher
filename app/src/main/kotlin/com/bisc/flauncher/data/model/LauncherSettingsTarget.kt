@@ -35,6 +35,8 @@ object LauncherSettingsTargets {
             listOf("app-liste", "a-z", "suchbutton", "app list", "search button")),
         LauncherSettingsTarget(R.string.designs_title, "settings/appearance/designs",
             listOf("design", "designs", "neon", "thema", "theme", "erweiterung", "extension")),
+        LauncherSettingsTarget(R.string.settings_colors_all, "settings/appearance/colors",
+            listOf("farben", "füllung", "textfarbe", "durchsichtig", "glas", "colors", "fill", "text color", "glass")),
         LauncherSettingsTarget(R.string.settings_corners_all, "settings/appearance/corners",
             listOf("ecken", "rund", "eckig", "form", "corners", "round", "square", "shape")),
         LauncherSettingsTarget(R.string.packs_title, "settings/wallpaper_packs",

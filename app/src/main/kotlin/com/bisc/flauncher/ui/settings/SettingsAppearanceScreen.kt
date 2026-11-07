@@ -93,7 +93,14 @@ fun SettingsAppearanceScreen(
             RadioPreference(stringResource(R.string.settings_font_monospace), FontPreference.MONOSPACE, fontPreference, viewModel::setFontPreference, font = FontPreference.MONOSPACE.fontFamily)
             RadioPreference(stringResource(R.string.settings_font_rounded), FontPreference.ROUNDED, fontPreference, viewModel::setFontPreference, font = FontPreference.ROUNDED.fontFamily)
         }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_corners_label)) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_parts_label)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_colors_all),
+                summary = stringResource(R.string.settings_colors_all_summary),
+                onClick = { onNavigate("appearance/colors") },
+                trailing = null
+            )
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_corners_all),

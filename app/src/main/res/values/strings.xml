@@ -829,4 +829,12 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_folder_look_own">Own look</string>
     <string name="settings_folder_look_like_all">Like all folders</string>
     <string name="settings_folder_look_reset">Same look as all folders</string>
+    <string name="settings_parts_label">Parts</string>
+    <string name="settings_colors_all">Colors of all parts</string>
+    <string name="settings_colors_all_summary">Fill, text and border, for everything or part by part</string>
+    <string name="settings_colors_intro">Pick a color set for everything, or tap a part in the table to give it its own fill, text color and border. The small screens show the result.</string>
+    <string name="settings_colors_light">Light</string>
+    <string name="settings_colors_dark">Dark</string>
+    <string name="settings_colors_glass">Glass</string>
+    <string name="settings_colors_accent">Accent</string>
 </resources>
