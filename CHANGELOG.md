@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Backups now hold the whole launcher to move it or set it up again: besides the look, pages and
+  personal things also the installed designs (with your saved own look) and wallpaper packs; texts
+  explain what is inside
+- Corners of all parts: exactly three screens fit side by side, the others a swipe away
+
 - Folder widgets: long press a widget in an open folder to edit or remove it; folder settings have a
   remove button per widget, with a question
 - Settings: the path bar at the bottom shows names on every page, never a raw path with slashes

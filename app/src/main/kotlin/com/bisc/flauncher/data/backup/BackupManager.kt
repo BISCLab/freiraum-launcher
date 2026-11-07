@@ -16,7 +16,9 @@ import java.util.zip.ZipOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** Exports and imports settings, database and background images as a single zip archive. */
+/** Exports and imports everything needed to move the launcher or set it up again: settings,
+ *  database, background images, installed designs (with the saved own look) and wallpaper packs,
+ *  as a single zip archive. */
 @Singleton
 class BackupManager @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -41,6 +43,12 @@ class BackupManager @Inject constructor(
                     zip.putFile(DB_ENTRY, databaseFile(context))
                     settingsFile(context).takeIf { it.exists() }?.let { zip.putFile(SETTINGS_ENTRY, it) }
                     backgroundsDir(context).listFiles()?.filter { it.isFile }?.forEach { zip.putFile("$BACKGROUNDS/${it.name}", it) }
+                    // Designs and packs: one folder each, files directly inside.
+                    FOLDER_TREES.forEach { tree ->
+                        File(context.filesDir, tree).listFiles()?.filter { it.isDirectory }?.forEach { folder ->
+                            folder.listFiles()?.filter { it.isFile }?.forEach { zip.putFile("$tree/${folder.name}/${it.name}", it) }
+                        }
+                    }
                 }
             }
         }.isSuccess
@@ -63,6 +71,7 @@ class BackupManager @Inject constructor(
                             entry.name == SETTINGS_ENTRY -> File(staging, SETTINGS_ENTRY)
                             entry.name.startsWith("$BACKGROUNDS/") && SAFE_NAME.matches(entry.name.removePrefix("$BACKGROUNDS/")) ->
                                 File(staging, entry.name).also { it.parentFile?.mkdirs() }
+                            isTreeEntry(entry.name) -> File(staging, entry.name).also { it.parentFile?.mkdirs() }
                             else -> null
                         }
                         if (entry.name == MANIFEST) {
@@ -120,6 +129,13 @@ class BackupManager @Inject constructor(
         private const val DB_NAME = "flauncher.db"
         private const val SETTINGS_NAME = "datastore/flauncher_settings.preferences_pb"
         private val SAFE_NAME = Regex("[A-Za-z0-9_.-]+")
+        private val FOLDER_TREES = listOf("designs", "wallpaper_packs")
+
+        /** `designs/<folder>/<file>` or `wallpaper_packs/<folder>/<file>`, nothing deeper or odd. */
+        private fun isTreeEntry(name: String): Boolean {
+            val parts = name.split('/')
+            return parts.size == 3 && parts[0] in FOLDER_TREES && parts.drop(1).all { SAFE_NAME.matches(it) && it != "." && it != ".." }
+        }
 
         private fun databaseFile(context: Context) = context.getDatabasePath(DB_NAME)
         private fun settingsFile(context: Context) = File(context.filesDir, SETTINGS_NAME)
@@ -165,6 +181,16 @@ class BackupManager @Inject constructor(
                 File(staging, BACKGROUNDS).listFiles()?.forEach {
                     backgrounds.mkdirs()
                     it.copyTo(File(backgrounds, it.name), overwrite = true)
+                }
+
+                // Older backups have no designs or packs; then the installed ones stay.
+                FOLDER_TREES.forEach { tree ->
+                    val staged = File(staging, tree)
+                    if (staged.isDirectory) {
+                        val target = File(context.filesDir, tree)
+                        target.deleteRecursively()
+                        staged.copyRecursively(target, overwrite = true)
+                    }
                 }
             }
             staging.deleteRecursively()

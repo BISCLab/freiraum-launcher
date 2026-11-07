@@ -421,11 +421,11 @@
     <string name="settings_row_entry_new_folder">New folder</string>
     <string name="settings_row_entry_no_folders">No other folders. Create one above.</string>
     <string name="settings_backup_label">Backup</string>
-    <string name="settings_backup_info">Export saves settings, pages, widgets, folders and backgrounds to one file. Import replaces all current data with the content of a backup file.</string>
+    <string name="settings_backup_info">A backup holds everything to move Freiraum to a new phone or set it up again without starting over: your look (color modes, colors, borders, corners, effects, backgrounds, installed designs and wallpaper packs) and your own things (pages, apps, folders, notes, addresses, contacts, links). Importing replaces everything and restarts the launcher.</string>
     <string name="settings_backup_export">Export backup</string>
     <string name="settings_backup_import">Import backup</string>
     <string name="settings_backup_import_confirm_title">Import backup?</string>
-    <string name="settings_backup_import_confirm_message">Replaces all current settings, pages, folders and backgrounds with the content of the file. Freiraum restarts afterwards.</string>
+    <string name="settings_backup_import_confirm_message">Replaces everything with the content of the file: look, designs, wallpaper packs, backgrounds, pages, apps, folders and personal data. Freiraum restarts afterwards.</string>
     <string name="settings_backup_export_done">Backup saved</string>
     <string name="settings_backup_export_failed">Backup could not be saved</string>
     <string name="settings_backup_import_restarting">Backup found. Restarting to apply it…</string>
@@ -719,7 +719,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_motion_summary_on">On, %1$d of %2$d</string>
     <string name="settings_motion_summary_off">Off</string>
     <string name="settings_motion_summary_system_off">Off in the Android settings</string>
-    <string name="settings_backup_export_warning">The backup holds personal data: notes, addresses, contacts, links and your apps. Keep it for yourself and do not share it.</string>
+    <string name="settings_backup_export_warning">The backup holds your whole launcher: the look with designs, wallpaper packs and backgrounds, and personal data like notes, addresses, contacts, links and your apps. Keep it for yourself and do not share it. To share only a look, save it as a design instead.</string>
     <string name="settings_backup_export_understood">Understood</string>
     <string name="settings_backup_export_confirm">Export</string>
     <string name="settings_widgets_corner_hint">Up to 50%. Above about 25%, the corners start cutting into the widget content.</string>

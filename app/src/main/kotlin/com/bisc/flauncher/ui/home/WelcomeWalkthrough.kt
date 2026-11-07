@@ -373,6 +373,8 @@ private fun WallpaperChoice(viewModel: WallpaperPacksViewModel, dark: Boolean) {
     )
 }
 
+private val SHAPE_SCREEN_GAP = 10.dp
+
 /** The screens the shape previews show, each with the parts that live on it. */
 private enum class ShapeScreen(val label: Int) {
     HOME(R.string.welcome_screen_home),
@@ -397,14 +399,18 @@ private fun ShapeChoice(viewModel: OnboardingViewModel) {
 internal fun ShapeEditor(corners: Map<ShapePart, Int>, onAll: (ShapePreset) -> Unit, onPart: (ShapePart, ShapePreset) -> Unit) {
     var focus by remember { mutableStateOf<ShapePart?>(null) }
     Column(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            ShapeScreen.entries.forEach { screen ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    MockScreen(screen, corners, focus)
-                    Text(stringResource(screen.label), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 6.dp))
+        // Exactly three screens fit side by side, like the page tiles; the rest are a swipe away.
+        androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val screenWidth = (maxWidth - SHAPE_SCREEN_GAP * 2) / 3
+            Row(
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(SHAPE_SCREEN_GAP)
+            ) {
+                ShapeScreen.entries.forEach { screen ->
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(screenWidth)) {
+                        MockScreen(screen, corners, focus, screenWidth)
+                        Text(stringResource(screen.label), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 6.dp))
+                    }
                 }
             }
         }
@@ -519,7 +525,7 @@ private fun ShapePart.label() = when (this) {
 /** One screen in small with its parts drawn at their corners; the part picked in the table glows
  *  in the accent so it's clear which one it is. */
 @Composable
-private fun MockScreen(screen: ShapeScreen, corners: Map<ShapePart, Int>, focus: ShapePart?) {
+private fun MockScreen(screen: ShapeScreen, corners: Map<ShapePart, Int>, focus: ShapePart?, width: androidx.compose.ui.unit.Dp) {
     val frame = RoundedCornerShape(18.dp)
     val neutral = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f)
     val accent = MaterialTheme.colorScheme.primary
@@ -545,7 +551,7 @@ private fun MockScreen(screen: ShapeScreen, corners: Map<ShapePart, Int>, focus:
     }
     Box(
         modifier = Modifier
-            .width(120.dp)
+            .width(width)
             .aspectRatio(0.5f)
             .clip(frame)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)

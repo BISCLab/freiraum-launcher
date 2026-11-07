@@ -422,11 +422,11 @@
     <string name="settings_row_entry_new_folder">Neuer Ordner</string>
     <string name="settings_row_entry_no_folders">Keine weiteren Ordner. Oben einen anlegen.</string>
     <string name="settings_backup_label">Sicherung</string>
-    <string name="settings_backup_info">Export speichert Einstellungen, Seiten, Widgets, Ordner und Hintergründe in einer Datei. Import ersetzt alle aktuellen Daten durch den Inhalt einer Sicherungsdatei.</string>
+    <string name="settings_backup_info">Eine Sicherung enthält alles, um Freiraum auf ein neues Handy umzuziehen oder neu zu installieren, ohne neu einzurichten: dein Aussehen (Farbmodi, Farben, Rahmen, Ecken, Effekte, Hintergründe, installierte Designs und Wallpaper-Packs) und deine eigenen Sachen (Seiten, Apps, Ordner, Notizen, Adressen, Kontakte, Links). Beim Importieren wird alles ersetzt und der Launcher neu gestartet.</string>
     <string name="settings_backup_export">Sicherung exportieren</string>
     <string name="settings_backup_import">Sicherung importieren</string>
     <string name="settings_backup_import_confirm_title">Sicherung importieren?</string>
-    <string name="settings_backup_import_confirm_message">Ersetzt alle aktuellen Einstellungen, Seiten, Ordner und Hintergründe durch den Inhalt der Datei. Freiraum wird anschließend neu gestartet.</string>
+    <string name="settings_backup_import_confirm_message">Ersetzt alles durch den Inhalt der Datei: Aussehen, Designs, Wallpaper-Packs, Hintergründe, Seiten, Apps, Ordner und persönliche Daten. Freiraum wird anschließend neu gestartet.</string>
     <string name="settings_backup_export_done">Sicherung gespeichert</string>
     <string name="settings_backup_export_failed">Sicherung konnte nicht gespeichert werden</string>
     <string name="settings_backup_import_restarting">Sicherung gefunden. Neustart zum Anwenden…</string>
@@ -719,7 +719,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_motion_summary_on">An, %1$d von %2$d</string>
     <string name="settings_motion_summary_off">Aus</string>
     <string name="settings_motion_summary_system_off">In den Android-Einstellungen aus</string>
-    <string name="settings_backup_export_warning">Die Sicherung enthält persönliche Daten: Notizen, Adressen, Kontakte, Links und deine Apps. Bewahre sie nur für dich auf und teile sie nicht.</string>
+    <string name="settings_backup_export_warning">Die Sicherung enthält deinen ganzen Launcher: das Aussehen mit Designs, Wallpaper-Packs und Hintergründen und persönliche Daten wie Notizen, Adressen, Kontakte, Links und deine Apps. Bewahre sie nur für dich auf und teile sie nicht. Wenn du nur einen Look teilen willst, speichere ihn als Design.</string>
     <string name="settings_backup_export_understood">Verstanden</string>
     <string name="settings_backup_export_confirm">Exportieren</string>
     <string name="settings_widgets_corner_hint">Bis 50 %. Ab etwa 25 % schneiden die Ecken in den Inhalt des Widgets.</string>
