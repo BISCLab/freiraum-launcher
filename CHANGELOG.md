@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Welcome tour: the gestures can be set right there; tapping one opens the same choices as in the
+  settings
+
 - Backups now hold the whole launcher to move it or set it up again: besides the look, pages and
   personal things also the installed designs (with your saved own look) and wallpaper packs; texts
   explain what is inside

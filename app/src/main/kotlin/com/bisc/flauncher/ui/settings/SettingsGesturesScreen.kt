@@ -55,6 +55,15 @@ import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 /** One row per [HomeGesture], each bindable to any [GestureActionType]. */
 @Composable
 fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+    SettingsSubScreen(title = stringResource(R.string.settings_section_gestures), navController = navController, onBack = onBack) {
+        EditableGesturePhone(viewModel)
+    }
+}
+
+/** The gestures phone with every marker tappable, and the pickers that set what a gesture does.
+ *  Shared by the gestures settings and the welcome tour. */
+@Composable
+internal fun EditableGesturePhone(viewModel: SettingsViewModel, widthFraction: Float = 0.82f) {
     val gestureActions by viewModel.gestureActions.collectAsState()
     // Unfiltered - a gesture already bound to an app keeps showing its.
     val labeledApps by viewModel.labeledApps.collectAsState()
@@ -82,18 +91,16 @@ fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, vie
     var pickingPageFor by remember { mutableStateOf<HomeGesture?>(null) }
     var pendingShortcutGesture by remember { mutableStateOf<HomeGesture?>(null) }
 
-    SettingsSubScreen(title = stringResource(R.string.settings_section_gestures), navController = navController, onBack = onBack) {
-        // A phone with each gesture marked where it happens, instead of a list - tap a marker to
-        // change what it does.
-        val markers = HomeGesture.entries.associateWith { gesture ->
-            val locked = lockedReason(gesture)
-            GestureMarker(
-                summary = locked ?: gestureActionSummary(gestureActions[gesture] ?: GestureAction.NONE, allPages, labeledApps),
-                enabled = locked == null
-            )
-        }
-        GesturePhone(markers = markers, onEdit = { editingGesture = it })
+    // A phone with each gesture marked where it happens, instead of a list - tap a marker to change
+    // what it does.
+    val markers = HomeGesture.entries.associateWith { gesture ->
+        val locked = lockedReason(gesture)
+        GestureMarker(
+            summary = locked ?: gestureActionSummary(gestureActions[gesture] ?: GestureAction.NONE, allPages, labeledApps),
+            enabled = locked == null
+        )
     }
+    GesturePhone(markers = markers, onEdit = { editingGesture = it }, widthFraction = widthFraction)
 
     editingGesture?.let { gesture ->
         GestureActionTypeSheet(

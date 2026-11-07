@@ -658,7 +658,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_hello_title">Willkommen bei Freiraum Launcher</string>
     <string name="welcome_hello_text">Ein ruhiger, aufgeräumter Startbildschirm. Seiten, Widgets, Suche und Aussehen richten sich nach dir, und nichts verlässt dein Handy.</string>
     <string name="welcome_gestures_title">Gesten</string>
-    <string name="welcome_gestures_text">So kommst du überall hin. Ändern kannst du das jederzeit unter Einstellungen, Seiten.</string>
+    <string name="welcome_gestures_text">So kommst du überall hin. Tipp eine Geste an, um festzulegen, was sie öffnet. Später geht das jederzeit unter Einstellungen → Seiten → Gesten.</string>
     <string name="welcome_settings_title">Einstellungen</string>
     <string name="welcome_settings_text">Der Knopf mit den Reglern im Dock öffnet die Einstellungen. Entfernst du ihn, findest du sie in der Textsuche unter Freiraum-Einstellungen oder in der App-Info von Freiraum in Android.</string>
     <string name="welcome_permissions_title">Berechtigungen</string>

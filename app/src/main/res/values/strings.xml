@@ -658,7 +658,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_hello_title">Welcome to Freiraum Launcher</string>
     <string name="welcome_hello_text">A calm, tidy home screen. Pages, widgets, search and looks all adapt to you, and nothing leaves your phone.</string>
     <string name="welcome_gestures_title">Gestures</string>
-    <string name="welcome_gestures_text">This is how you get everywhere. You can change it any time under Settings, Pages.</string>
+    <string name="welcome_gestures_text">This is how you get everywhere. Tap a gesture to choose what it opens. Later you can change it any time under Settings → Pages → Gestures.</string>
     <string name="welcome_settings_title">Settings</string>
     <string name="welcome_settings_text">The button with the sliders in the Dock opens the settings. If you remove it, you still find them in Text search under Freiraum settings, or in Android\'s app info for Freiraum.</string>
     <string name="welcome_permissions_title">Permissions</string>
