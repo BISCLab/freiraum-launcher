@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.11.0
+
 ### Text search
 - Rebuilt: only the search field stays, at the top or on the keyboard; the box with the category
   row is gone

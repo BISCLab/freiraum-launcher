@@ -1,0 +1,7 @@
+- Text search rebuilt: field only, category rail beside the results, favorites, smooth opening with the keyboard
+- App grid can swipe pages sideways
+- One look page per part with preview
+- New: colors of all parts
+- Icons, App list, App grid, status bar with previews
+- Edit and remove folder widgets
+- Backups include designs and wallpaper packs

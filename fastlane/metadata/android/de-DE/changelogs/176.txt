@@ -1,0 +1,7 @@
+- Textsuche neu: nur das Suchfeld, Kategorien als Leiste neben den Ergebnissen, Favoriten, flüssiges Öffnen mit Tastatur
+- App-Raster seitlich blätterbar
+- Eine Aussehen-Seite pro Teil mit Vorschau
+- Neu: Farben aller Teile
+- Icons, App-Liste, App-Raster, Statusleiste mit Vorschau
+- Ordner-Widgets bearbeiten und entfernen
+- Sicherung inklusive Designs und Wallpaper-Packs
