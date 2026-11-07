@@ -208,6 +208,11 @@ class HomeViewModel @Inject constructor(
     val searchBarFloating: StateFlow<Boolean> =
         settingsRepository.searchBarFloating.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    val appListSearchButtonCornerPercent: StateFlow<Int?> =
+        settingsRepository.appListSearchButtonCornerPercent.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    val alphabetRailCornerPercent: StateFlow<Int?> =
+        settingsRepository.alphabetRailCornerPercent.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
     val searchResultsCornerRadiusPercent: StateFlow<Int?> =
         settingsRepository.searchResultsCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 

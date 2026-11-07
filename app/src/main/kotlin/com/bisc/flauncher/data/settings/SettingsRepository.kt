@@ -261,6 +261,18 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[SEARCH_KEYBOARD_AUTO_OPEN_KEY] = enabled }
     }
 
+    /** Own corners of the App list's search button and its A-Z rail; null = the general roundness. */
+    val appListSearchButtonCornerPercent: Flow<Int?> = dataStore.data.map { it[APP_LIST_SEARCH_BUTTON_CORNER_KEY] }
+    val alphabetRailCornerPercent: Flow<Int?> = dataStore.data.map { it[ALPHABET_RAIL_CORNER_KEY] }
+
+    suspend fun setAppListSearchButtonCornerPercent(percent: Int) {
+        dataStore.edit { it[APP_LIST_SEARCH_BUTTON_CORNER_KEY] = percent.coerceIn(0, 100) }
+    }
+
+    suspend fun setAlphabetRailCornerPercent(percent: Int) {
+        dataStore.edit { it[ALPHABET_RAIL_CORNER_KEY] = percent.coerceIn(0, 100) }
+    }
+
     /** The search screen's top input bar (field + category row) - its own fill/border, separate
      *  from [searchAppearance]; null until customized, so the bar keeps following the screen's look. */
     val searchBarAppearance: Flow<ElementAppearance?> = customElementAppearanceFor(SEARCH_BAR_PREFIX, ElementAppearance())
@@ -1014,6 +1026,8 @@ class SettingsRepository @Inject constructor(
         private val LOCK_PORTRAIT_KEY = booleanPreferencesKey("lock_portrait")
         private val SETTINGS_THEME_KEY = stringPreferencesKey("settings_theme")
         private val ACTIVE_WALLPAPER_PACK_KEY = stringPreferencesKey("active_wallpaper_pack")
+        private val APP_LIST_SEARCH_BUTTON_CORNER_KEY = intPreferencesKey("app_list_search_button_corner_percent")
+        private val ALPHABET_RAIL_CORNER_KEY = intPreferencesKey("alphabet_rail_corner_percent")
         private val DESIGN_EFFECTS_KEY = stringPreferencesKey("design_effects")
         private val ACTIVE_DESIGN_KEY = stringPreferencesKey("active_design")
         private val MOTION_LEVEL_KEY = stringPreferencesKey("motion_level")

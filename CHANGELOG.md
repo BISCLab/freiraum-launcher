@@ -11,6 +11,15 @@
 - Switching the launcher color mode no longer touches backgrounds; only the plain default color
   swaps between matte black and chalk white
 - Designs: Back to my design is now Remove design, with a clearer explanation
+- Welcome tour: designs and wallpaper packs side by side to swipe through; a design is always
+  chosen (no more None), Modern in the tour mode to begin with
+- Welcome tour: hint that your own pictures can be picked any time later
+- Welcome tour, shape: five small screens (Home, Panel, App list, Text search, Folder) show every
+  part with its corners live; one choice for all, and below it a table with each part on its own:
+  Dock, Panel, widgets, element boxes, apps in folders, search button, A-Z rail, search bars and
+  search results. It starts from what the design brought
+- The App list search button and the A-Z rail have corners of their own now
+- Welcome tour: after setting Freiraum as default launcher you are back at the step you left
 
 ## 0.10.0
 

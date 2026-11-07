@@ -200,6 +200,8 @@ fun HomeScreen(
     val folderCardAppearance by viewModel.folderCardAppearance.collectAsState()
     val folderShowLabels by viewModel.folderShowLabels.collectAsState()
     val cornerRadiusPercent by viewModel.cornerRadiusPercent.collectAsState()
+    val searchButtonCorner by viewModel.appListSearchButtonCornerPercent.collectAsState()
+    val railCorner by viewModel.alphabetRailCornerPercent.collectAsState()
     val appListShowAzIndex by viewModel.appListShowAzIndex.collectAsState()
     val searchHideStatusBar by viewModel.searchHideStatusBar.collectAsState()
     val websiteResults by viewModel.websiteResults.collectAsState()
@@ -1026,7 +1028,7 @@ fun HomeScreen(
                     railAppearance = railAppearance,
                     accentColor = appListAccentColor,
                     handedness = appOverviewHandedness,
-                    cornerRadiusPercent = cornerRadiusPercent,
+                    cornerRadiusPercent = railCorner ?: cornerRadiusPercent,
                     loadIcon = viewModel::loadIcon,
                     onAppClick = { app ->
                         launchApp(context, app.componentName)
@@ -1066,7 +1068,7 @@ fun HomeScreen(
                     com.bisc.flauncher.ui.home.search.AppOverviewSearchButton(
                         onClick = { if (appListOwnSearch) appListSearching = true else viewModel.openSearch() },
                         handedness = appOverviewHandedness,
-                        cornerRadiusPercent = cornerRadiusPercent,
+                        cornerRadiusPercent = searchButtonCorner ?: cornerRadiusPercent,
                         appearance = appListSearchButtonAppearance ?: railAppearance ?: automaticRailAppearance(overviewSurfaceDark)
                     )
                 }
