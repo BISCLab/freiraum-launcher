@@ -412,9 +412,6 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setLockPortrait(lock) }
     }
 
-    val searchBarAppearance: StateFlow<ElementAppearance?> =
-        repository.searchBarAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
     val searchBarCornerRadiusPercent: StateFlow<Int?> =
         repository.searchBarCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
@@ -746,10 +743,6 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setSearchKeyboardAutoOpen(enabled) }
     }
 
-    fun setSearchBarAppearance(appearance: ElementAppearance) {
-        viewModelScope.launch { repository.setSearchBarAppearance(appearance) }
-    }
-
     fun setSearchBarCornerRadiusPercent(percent: Int) {
         viewModelScope.launch { repository.setSearchBarCornerRadiusPercent(percent) }
     }
@@ -789,11 +782,6 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setSearchBarShowCategories(show) }
     }
 
-    val searchBarFloating: StateFlow<Boolean> = repository.searchBarFloating.stateIn(viewModelScope, SharingStarted.Eagerly, false)
-
-    fun setSearchBarFloating(floating: Boolean) {
-        viewModelScope.launch { repository.setSearchBarFloating(floating) }
-    }
 
     fun setSearchResultsEdgeToEdge(edgeToEdge: Boolean) {
         viewModelScope.launch { repository.setSearchResultsEdgeToEdge(edgeToEdge) }

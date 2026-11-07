@@ -822,4 +822,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_app_grid_rows">Zeilen pro Seite</string>
     <string name="settings_app_grid_rows_auto">So viele, wie passen</string>
     <string name="settings_app_grid_page_dots">Seitenpunkte zeigen</string>
+    <string name="settings_search_field_position_info">Oben, oder direkt auf der Tastatur in Reichweite des Daumens. Die Kategorienleiste übernimmt Aussehen und Ecken des Suchfelds.</string>
 </resources>

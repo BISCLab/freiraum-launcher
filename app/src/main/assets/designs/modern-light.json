@@ -43,14 +43,6 @@
       "border": true,
       "borderWidth": 1.0
     },
-    "search_bar": {
-      "style": "COLOR",
-      "fill": "#FFF9F9F9",
-      "fillMode": "SOLID",
-      "opacity": 1.0,
-      "border": false,
-      "borderWidth": 1.0
-    },
     "search_results": {
       "style": "COLOR",
       "fill": "#FFF9F9F9",

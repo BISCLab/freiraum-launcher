@@ -44,7 +44,6 @@ class ThemeRepository @Inject constructor(
         // whatever you'd customized before".
         settingsRepository.resetAppListRailAppearance()
         settingsRepository.resetAppListSearchButtonAppearance()
-        settingsRepository.resetSearchBarAppearance()
         settingsRepository.resetSearchResultsAppearance()
         settingsRepository.setFolderCardAppearance(boxAppearance)
         settingsRepository.setSearchAppearance(boxAppearance)

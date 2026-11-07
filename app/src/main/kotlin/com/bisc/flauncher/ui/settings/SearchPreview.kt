@@ -51,7 +51,6 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
     val override by viewModel.searchBackgroundOverride.collectAsState()
     val globalBackground by viewModel.globalBackground.collectAsState()
     val globalShade by viewModel.searchGlobalShade.collectAsState()
-    val barOwn by viewModel.searchBarAppearance.collectAsState()
     val barCorner by viewModel.searchBarCornerRadiusPercent.collectAsState()
     val defaultCorner by viewModel.defaultCornerRadiusPercent.collectAsState()
     val resultsOwn by viewModel.searchResultsAppearance.collectAsState()
@@ -69,7 +68,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
     val background = override ?: globalBackground.copy(shade = globalShade ?: globalBackground.shade)
     val surfaceDark = rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), background)
     val defaultElement = com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor(MaterialTheme.colorScheme.background.luminance() < 0.5f)
-    val barAppearance = barOwn ?: defaultElement
+    val barAppearance = defaultElement
     val cardAppearance = resultsOwn ?: defaultElement
     val barRadius = MINI_BAR_RADIUS * ((barCorner ?: defaultCorner).coerceIn(0, 100) / 100f)
     val cardRadius = MINI_CARD_RADIUS * ((resultsCorner ?: 100).coerceIn(0, 100) / 100f)

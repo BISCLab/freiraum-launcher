@@ -176,7 +176,6 @@ fun HomeScreen(
     val chargingAnimationEnabled by viewModel.chargingAnimationEnabled.collectAsState()
     val chargingAnimationColor by viewModel.chargingAnimationColor.collectAsState()
     val searchAppearance by viewModel.searchAppearance.collectAsState()
-    val searchBarAppearance by viewModel.searchBarAppearance.collectAsState()
     val searchBackground by viewModel.searchBackground.collectAsState()
     val searchBarCornerRadiusPercent by viewModel.searchBarCornerRadiusPercent.collectAsState()
     val searchResultsAppearance by viewModel.searchResultsAppearance.collectAsState()
@@ -184,7 +183,6 @@ fun HomeScreen(
     val searchResultsEdgeToEdge by viewModel.searchResultsEdgeToEdge.collectAsState()
     val searchBarAtBottom by viewModel.searchBarAtBottom.collectAsState()
     val searchBarShowCategories by viewModel.searchBarShowCategories.collectAsState()
-    val searchBarFloating by viewModel.searchBarFloating.collectAsState()
     val searchFieldAppearance by viewModel.searchFieldAppearance.collectAsState()
     val searchFieldCornerRadiusPercent by viewModel.searchFieldCornerRadiusPercent.collectAsState()
     val appListSearchFieldAppearance by viewModel.appListSearchFieldAppearance.collectAsState()
@@ -1177,19 +1175,16 @@ fun HomeScreen(
             categoryFilter = searchFilter,
             categoryColors = categoryColors,
             aiAppPackage = searchAiApp,
-            onToggleFilter = viewModel::toggleSearchFilter,
             keyboardAutoOpen = searchKeyboardAutoOpen,
             appearance = searchAppearance,
             cornerRadiusPercent = cornerRadiusPercent,
             background = searchBackground,
-            barAppearance = searchBarAppearance,
             barCornerRadiusPercent = searchBarCornerRadiusPercent,
             resultsAppearance = searchResultsAppearance,
             resultsCornerRadiusPercent = searchResultsCornerRadiusPercent,
             resultsEdgeToEdge = searchResultsEdgeToEdge,
             barAtBottom = searchBarAtBottom,
-            barShowCategories = searchBarShowCategories,
-            barFloating = searchBarFloating,
+            showCategoryRail = searchBarShowCategories,
             fieldAppearance = searchFieldAppearance,
             fieldCornerRadiusPercent = searchFieldCornerRadiusPercent,
             keyboardCapColor = if (searchKeyboardCapEnabled) searchKeyboardCapColor else null,

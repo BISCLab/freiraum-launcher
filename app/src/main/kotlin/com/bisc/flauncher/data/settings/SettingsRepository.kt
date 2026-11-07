@@ -329,14 +329,6 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[ALPHABET_RAIL_CORNER_KEY] = percent.coerceIn(0, 100) }
     }
 
-    /** The search screen's top input bar (field + category row) - its own fill/border, separate
-     *  from [searchAppearance]; null until customized, so the bar keeps following the screen's look. */
-    val searchBarAppearance: Flow<ElementAppearance?> = customElementAppearanceFor(SEARCH_BAR_PREFIX, ElementAppearance())
-
-    suspend fun setSearchBarAppearance(appearance: ElementAppearance) = setElementAppearanceFor(SEARCH_BAR_PREFIX, appearance)
-
-    suspend fun resetSearchBarAppearance() = resetElementAppearanceFor(SEARCH_BAR_PREFIX)
-
     /** Null = follow the global default corner roundness. */
     val searchBarCornerRadiusPercent: Flow<Int?> = dataStore.data.map { it[SEARCH_BAR_CORNER_RADIUS_KEY] }
 
@@ -366,7 +358,7 @@ class SettingsRepository @Inject constructor(
 
     suspend fun resetAppListSearchFieldAppearance() = resetElementAppearanceFor("app_list_search_field")
 
-    /** The search result cards - same split as [searchBarAppearance]: null until customized. */
+    /** The search result cards' own look: null until customized. */
     val searchResultsAppearance: Flow<ElementAppearance?> = customElementAppearanceFor(SEARCH_RESULTS_PREFIX, ElementAppearance())
 
     suspend fun setSearchResultsAppearance(appearance: ElementAppearance) = setElementAppearanceFor(SEARCH_RESULTS_PREFIX, appearance)
@@ -388,12 +380,6 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[SEARCH_BAR_SHOW_CATEGORIES_KEY] = show }
     }
 
-    /** Only the search field (and categories), floating without the bar's box around them. */
-    val searchBarFloating: Flow<Boolean> = dataStore.data.map { it[SEARCH_BAR_FLOATING_KEY] ?: false }
-
-    suspend fun setSearchBarFloating(floating: Boolean) {
-        dataStore.edit { it[SEARCH_BAR_FLOATING_KEY] = floating }
-    }
 
     val searchResultsEdgeToEdge: Flow<Boolean> = dataStore.data.map { it[SEARCH_RESULTS_EDGE_TO_EDGE_KEY] ?: false }
 
@@ -1132,7 +1118,6 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_RESULTS_EDGE_TO_EDGE_KEY = booleanPreferencesKey("search_results_edge_to_edge")
         private val SEARCH_BAR_AT_BOTTOM_KEY = booleanPreferencesKey("search_bar_at_bottom")
         private val SEARCH_BAR_SHOW_CATEGORIES_KEY = booleanPreferencesKey("search_bar_show_categories")
-        private val SEARCH_BAR_FLOATING_KEY = booleanPreferencesKey("search_bar_floating")
         private val SEARCH_KEYBOARD_CAP_ENABLED_KEY = booleanPreferencesKey("search_keyboard_cap_enabled")
         private val SEARCH_KEYBOARD_CAP_COLOR_KEY = intPreferencesKey("search_keyboard_cap_color")
         private val SEARCH_KEYBOARD_CAP_CORNER_RADIUS_KEY = intPreferencesKey("search_keyboard_cap_corner_radius_percent")

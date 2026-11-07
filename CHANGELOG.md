@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Text search tidied up after the rebuild: the search field settings now hold its position (top or
+  on the keyboard), the old bar page with its box, category row and floating switch is gone, and
+  designs no longer carry a look for the bar box (Neon Light 1.4, Neon Dark 1.2)
+
 - App grid: choose between scrolling up and down and swiping pages sideways; sideways with as many
   rows as fit or a set number (3 to 8) and optional page dots
 

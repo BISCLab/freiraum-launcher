@@ -89,8 +89,7 @@ fun SearchOverlay(
     cornerRadiusPercent: Int,
     /** Backdrop under [appearance]'s fill; null = none (whatever is behind shows through). */
     background: BackgroundConfig? = null,
-    /** The input bar's own look; null = same as [appearance] / [cornerRadiusPercent]. */
-    barAppearance: ElementAppearance? = null,
+    /** Roundness of the field when it has none of its own; null = [cornerRadiusPercent]. */
     barCornerRadiusPercent: Int? = null,
     /** The result cards' own look; null = same as [appearance], fully rounded. */
     resultsAppearance: ElementAppearance? = null,
@@ -104,10 +103,8 @@ fun SearchOverlay(
     keyboardCapArrow: Boolean = false,
     /** The search bar at the bottom, on the keyboard, instead of at the top. */
     barAtBottom: Boolean = false,
-    /** The category symbols in the search bar. */
-    barShowCategories: Boolean = true,
-    /** Only the field (and categories), without the bar's box, like the App grid's field. */
-    barFloating: Boolean = false,
+    /** The category rail beside the results. */
+    showCategoryRail: Boolean = true,
     fieldAppearance: ElementAppearance? = null,
     fieldCornerRadiusPercent: Int? = null,
     statusBarHidden: Boolean,
@@ -116,7 +113,6 @@ fun SearchOverlay(
     categoryFilter: SearchCategory?,
     categoryColors: Map<SearchCategory, Int?>,
     aiAppPackage: String?,
-    onToggleFilter: (SearchCategory) -> Unit,
     keyboardAutoOpen: Boolean,
     loadIcon: (ComponentName) -> ImageBitmap?,
     onQueryChange: (String) -> Unit,
@@ -248,24 +244,15 @@ fun SearchOverlay(
                         placeholder = stringResource(R.string.search_field_hint),
                         onQueryChange = onQueryChange,
                         onSubmit = { appResults.firstOrNull()?.let(onAppClick) ?: onWebCommand() },
-                        appearance = barAppearance ?: defaultElement,
                         autoOpen = keyboardAutoOpen,
-                        categories = categoryOrder.filter { it != SearchCategory.AI || aiAppLabel != null },
-                        categoryColors = categoryColors,
-                        selectedCategory = categoryFilter,
-                        onToggleCategory = onToggleFilter,
                         cornerRadiusPercent = barCornerRadiusPercent ?: cornerRadiusPercent,
                         topInset = if (barAtBottom) 0.dp else topInset,
                         atBottom = barAtBottom,
-                        // Only the field; the categories are the rail beside the results now.
-                        showCategories = false,
-                        floating = true,
                         fieldAppearance = fieldAppearance,
                         fieldCornerRadiusPercent = fieldCornerRadiusPercent,
-                        // At the bottom the bar's own background runs down behind the navigation
-                        // bar; with the keyboard open it sits right on the keyboard.
-                        bottomInsets = if (barAtBottom) WindowInsets.navigationBars.exclude(WindowInsets.ime) else null,
-                        topDecoration = {}
+                        // At the bottom it keeps clear of the navigation bar; with the keyboard open
+                        // it sits right on the keyboard.
+                        bottomInsets = if (barAtBottom) WindowInsets.navigationBars.exclude(WindowInsets.ime) else null
                     )
                 }
                 Column(
@@ -278,7 +265,7 @@ fun SearchOverlay(
                     if (!barAtBottom) Bar()
                     // Results with the category rail beside them; this area ends above the keyboard, so
                     // the rail never runs under it.
-                    val showRail = barShowCategories && railCategories.size > 1
+                    val showRail = showCategoryRail && railCategories.size > 1
                     Box(
                         modifier = Modifier
                             .weight(1f)

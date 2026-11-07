@@ -178,9 +178,6 @@ class HomeViewModel @Inject constructor(
     val searchKeyboardAutoOpen: StateFlow<Boolean> =
         settingsRepository.searchKeyboardAutoOpen.stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
-    val searchBarAppearance: StateFlow<ElementAppearance?> =
-        settingsRepository.searchBarAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
     val searchBarCornerRadiusPercent: StateFlow<Int?> =
         settingsRepository.searchBarCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
@@ -204,9 +201,6 @@ class HomeViewModel @Inject constructor(
 
     val searchBarShowCategories: StateFlow<Boolean> =
         settingsRepository.searchBarShowCategories.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-
-    val searchBarFloating: StateFlow<Boolean> =
-        settingsRepository.searchBarFloating.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val appListSearchButtonCornerPercent: StateFlow<Int?> =
         settingsRepository.appListSearchButtonCornerPercent.stateIn(viewModelScope, SharingStarted.Eagerly, null)
