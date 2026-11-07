@@ -2,3 +2,6 @@
 gradlew text eol=lf
 *.sh text eol=lf
 *.bat text eol=crlf
+
+# Helper scripts for building design and wallpaper pack files; not part of the app.
+tools/** linguist-vendored
