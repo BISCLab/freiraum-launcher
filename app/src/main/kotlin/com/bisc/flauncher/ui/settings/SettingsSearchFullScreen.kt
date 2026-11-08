@@ -47,6 +47,8 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.draw.alpha
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.bisc.flauncher.data.model.SearchCategory
@@ -361,23 +363,41 @@ private enum class CategoryPreset(val label: Int) {
     }
 }
 
+/** Three equal boxes side by side, so they always fit the width; a long label wraps instead of
+ *  running off the edge. */
 @Composable
 private fun CategoryPresets(modes: Map<SearchCategory, com.bisc.flauncher.data.model.CategoryMode>, onPick: (Map<SearchCategory, com.bisc.flauncher.data.model.CategoryMode>) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .horizontalScroll(androidx.compose.foundation.rememberScrollState())
+            .height(androidx.compose.foundation.layout.IntrinsicSize.Min)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         CategoryPreset.entries.forEach { preset ->
             val presetModes = preset.modes()
-            androidx.compose.material3.FilterChip(
-                selected = modes.isNotEmpty() && presetModes == modes,
-                onClick = { onPick(presetModes) },
-                label = { Text(stringResource(preset.label)) }
-            )
+            val selected = modes.isNotEmpty() && presetModes == modes
+            val shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp)
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .clip(shape)
+                    .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent)
+                    .border(1.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, shape)
+                    .clickable { onPick(presetModes) }
+                    .padding(horizontal = 6.dp, vertical = 10.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    stringResource(preset.label),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    maxLines = 2
+                )
+            }
         }
     }
 }
