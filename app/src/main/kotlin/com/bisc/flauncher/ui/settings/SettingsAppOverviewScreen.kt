@@ -119,7 +119,8 @@ fun SettingsAppOverviewBehaviorScreen(navController: NavController, onBack: () -
     }
 }
 
-/** The floating search button's own look - follows the A–Z index's until customized here. */
+/** The floating search button's own look. Independent of the A-Z rail: until set here it has the
+ *  automatic look for the page's brightness. */
 @Composable
 fun SettingsAppOverviewSearchButtonScreen(
     navController: NavController,
@@ -128,22 +129,30 @@ fun SettingsAppOverviewSearchButtonScreen(
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
     val own by viewModel.appListSearchButtonAppearance.collectAsState()
-    val railAppearance by viewModel.appListRailAppearance.collectAsState()
+    val corner by viewModel.appListSearchButtonCornerPercent.collectAsState()
+    val surfaceIsDark = appListPageDark(homeViewModel)
+    // Keyed on the stored value only: the automatic look is re-derived once the page background
+    // has loaded, and that must not wipe what is being edited.
+    val saved = remember(own) { own ?: automaticRailAppearance(surfaceIsDark) }
+    ElementLookScreen(
+        title = stringResource(R.string.settings_app_list_search_button),
+        navController = navController,
+        onBack = onBack,
+        saved = saved,
+        savedCorner = null,
+        onSave = { look, _ -> viewModel.setAppListSearchButtonAppearance(look) },
+        kind = LookSampleKind.SEARCH_BUTTON,
+        backdropDark = surfaceIsDark,
+        previewCorner = corner ?: 100
+    )
+}
+
+/** Whether the App list page is dark, from its background. */
+@Composable
+private fun appListPageDark(homeViewModel: HomeViewModel): Boolean {
     val pageId by homeViewModel.appOverviewPageId.collectAsState()
     val pageBackground by remember(pageId) { homeViewModel.pageBackgroundConfig(pageId ?: -1L) }.collectAsState(initial = BackgroundConfig())
-    val surfaceIsDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), pageBackground)
-
-    // Keyed on the stored values only: the automatic look is re-derived once the page background
-    // has loaded, and that must not wipe what is being edited.
-    val saved = remember(own, railAppearance) { own ?: railAppearance ?: automaticRailAppearance(surfaceIsDark) }
-    var draft by rememberDraft(saved)
-    SettingsSubScreen(title = stringResource(R.string.settings_app_list_search_button), navController = navController, onBack = onBack, onSave = { viewModel.setAppListSearchButtonAppearance(draft) }, dirty = draft != saved) {
-        ElementAppearanceSection(
-            appearance = draft,
-            onAppearanceChange = { draft = it },
-            styleGroupTitle = null
-        )
-    }
+    return com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), pageBackground)
 }
 
 /** The app-list page itself: its own background and status-bar switch - same pairing as
@@ -182,20 +191,27 @@ fun SettingsAppOverviewPageScreen(navController: NavController, onBack: () -> Un
 
 /** The letter-group header circles (e.g. "A", "B", "C" above each section). */
 @Composable
-fun SettingsAppOverviewSectionLettersScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsAppOverviewSectionLettersScreen(
+    navController: NavController,
+    onBack: () -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel(),
+    homeViewModel: HomeViewModel = hiltViewModel()
+) {
     val saved by viewModel.appListHeaderLetterAppearance.collectAsState()
-    var draft by rememberDraft(saved)
-    SettingsSubScreen(title = surfaceLabel(R.string.settings_layer_surface_section_letter), navController = navController, onBack = onBack, onSave = { viewModel.setAppListHeaderLetterAppearance(draft) }, dirty = draft != saved) {
-        ElementAppearanceSection(
-            appearance = draft,
-            onAppearanceChange = { draft = it },
-            styleGroupTitle = null
-        )
-    }
+    ElementLookScreen(
+        title = surfaceLabel(R.string.settings_layer_surface_section_letter),
+        navController = navController,
+        onBack = onBack,
+        saved = saved,
+        savedCorner = null,
+        onSave = { look, _ -> viewModel.setAppListHeaderLetterAppearance(look) },
+        kind = LookSampleKind.LETTER,
+        backdropDark = appListPageDark(homeViewModel)
+    )
 }
 
-/** The right-edge fast-scroll rail - its box fill/border and letter text color are one appearance
- *  (see [com.bisc.flauncher.ui.home.search.AlphabetIndex]). */
+/** The fast-scroll rail; its box and its letters are one look (see
+ *  [com.bisc.flauncher.ui.home.search.AlphabetIndex]). Only the rail follows it, nothing else. */
 @Composable
 fun SettingsAppOverviewAzIndexScreen(
     navController: NavController,
@@ -204,32 +220,36 @@ fun SettingsAppOverviewAzIndexScreen(
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
     val railAppearance by viewModel.appListRailAppearance.collectAsState()
-    val pageId by homeViewModel.appOverviewPageId.collectAsState()
-    val pageBackground by remember(pageId) { homeViewModel.pageBackgroundConfig(pageId ?: -1L) }.collectAsState(initial = BackgroundConfig())
-    val surfaceIsDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), pageBackground)
-
+    val corner by viewModel.alphabetRailCornerPercent.collectAsState()
+    val surfaceIsDark = appListPageDark(homeViewModel)
     val saved = remember(railAppearance) { railAppearance ?: automaticRailAppearance(surfaceIsDark) }
-    var draft by rememberDraft(saved)
-    SettingsSubScreen(title = stringResource(R.string.settings_app_overview_az_index_label), navController = navController, onBack = onBack, onSave = { viewModel.setAppListRailAppearance(draft) }, dirty = draft != saved) {
-        ElementAppearanceSection(
-            appearance = draft,
-            onAppearanceChange = { draft = it },
-            styleGroupTitle = null
-        )
-        if (railAppearance != null) {
-            SettingsPreferenceGroup {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_element_color_reset),
-                    onClick = viewModel::resetAppListRailAppearance,
-                    trailing = null
-                )
+    ElementLookScreen(
+        title = stringResource(R.string.settings_app_overview_az_index_label),
+        navController = navController,
+        onBack = onBack,
+        saved = saved,
+        savedCorner = null,
+        onSave = { look, _ -> viewModel.setAppListRailAppearance(look) },
+        kind = LookSampleKind.AZ_INDEX,
+        backdropDark = surfaceIsDark,
+        previewCorner = corner ?: 100,
+        extras = {
+            if (railAppearance != null) {
+                SettingsPreferenceGroup {
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(R.string.settings_element_color_reset),
+                        onClick = viewModel::resetAppListRailAppearance,
+                        trailing = null
+                    )
+                }
             }
         }
-    }
+    )
 }
 
-/** The app list's own search field - looks like the search button until customized here. */
+/** The app list's own search field. Independent of the button and the rail: until set here it has
+ *  the automatic look for the page's brightness. */
 @Composable
 fun SettingsAppOverviewSearchFieldScreen(
     navController: NavController,
@@ -238,25 +258,28 @@ fun SettingsAppOverviewSearchFieldScreen(
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
     val own by viewModel.appListSearchFieldAppearance.collectAsState()
-    val button by viewModel.appListSearchButtonAppearance.collectAsState()
-    val railAppearance by viewModel.appListRailAppearance.collectAsState()
-    val pageId by homeViewModel.appOverviewPageId.collectAsState()
-    val pageBackground by remember(pageId) { homeViewModel.pageBackgroundConfig(pageId ?: -1L) }.collectAsState(initial = BackgroundConfig())
-    val surfaceIsDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), pageBackground)
-
-    val saved = remember(own, button, railAppearance) { own ?: button ?: railAppearance ?: automaticRailAppearance(surfaceIsDark) }
-    var draft by rememberDraft(saved)
-    SettingsSubScreen(title = stringResource(R.string.settings_app_grid_search_field), navController = navController, onBack = onBack, onSave = { viewModel.setAppListSearchFieldAppearance(draft) }, dirty = draft != saved) {
-        ElementAppearanceSection(appearance = draft, onAppearanceChange = { draft = it }, styleGroupTitle = null)
-        if (own != null) {
-            SettingsPreferenceGroup {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_element_color_reset),
-                    onClick = viewModel::resetAppListSearchFieldAppearance,
-                    trailing = null
-                )
+    val surfaceIsDark = appListPageDark(homeViewModel)
+    val saved = remember(own) { own ?: automaticRailAppearance(surfaceIsDark) }
+    ElementLookScreen(
+        title = stringResource(R.string.settings_app_grid_search_field),
+        navController = navController,
+        onBack = onBack,
+        saved = saved,
+        savedCorner = null,
+        onSave = { look, _ -> viewModel.setAppListSearchFieldAppearance(look) },
+        kind = LookSampleKind.FIELD,
+        backdropDark = surfaceIsDark,
+        extras = {
+            if (own != null) {
+                SettingsPreferenceGroup {
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(R.string.settings_element_color_reset),
+                        onClick = viewModel::resetAppListSearchFieldAppearance,
+                        trailing = null
+                    )
+                }
             }
         }
-    }
+    )
 }

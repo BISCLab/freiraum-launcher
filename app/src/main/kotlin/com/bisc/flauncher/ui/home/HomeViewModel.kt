@@ -620,6 +620,7 @@ class HomeViewModel @Inject constructor(
     private var inFlightSystemWidget: InFlightSystemWidget? = null
 
     init {
+        viewModelScope.launch { settingsRepository.separateRailFollowers() }
         viewModelScope.launch { pageContentRepository.ensureSeeded() }
         viewModelScope.launch {
             _installedApps.value = installedAppsRepository.getLaunchableApps()

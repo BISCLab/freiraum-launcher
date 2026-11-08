@@ -60,7 +60,6 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
     val railLeft by viewModel.searchCategoryRailLeft.collectAsState()
     val fieldOwn by viewModel.searchFieldAppearance.collectAsState()
     val railOwn by viewModel.searchRailAppearance.collectAsState()
-    val alphabetRail by viewModel.appListRailAppearance.collectAsState()
 
     // Same resolution rules as the real screen (HomeViewModel.searchBackground, SearchOverlay).
     val background = override ?: globalBackground.copy(shade = globalShade ?: globalBackground.shade)
@@ -92,7 +91,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
                     }
                 }
                 Row(modifier = Modifier.padding(top = if (barAtBottom) 14.dp else 6.dp)) {
-                    if (barShowCategories && railLeft) MiniCategoryRail(surfaceDark, railOwn ?: alphabetRail) { onNavigate(SearchElement.RAIL.route) }
+                    if (barShowCategories && railLeft) MiniCategoryRail(surfaceDark, railOwn) { onNavigate(SearchElement.RAIL.route) }
                     Column(
                         modifier = Modifier.weight(1f).padding(start = sideMargin, end = sideMargin),
                         verticalArrangement = Arrangement.spacedBy(5.dp)
@@ -104,7 +103,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
                             onNavigate(SearchElement.RESULTS.route)
                         }
                     }
-                    if (barShowCategories && !railLeft) MiniCategoryRail(surfaceDark, railOwn ?: alphabetRail) { onNavigate(SearchElement.RAIL.route) }
+                    if (barShowCategories && !railLeft) MiniCategoryRail(surfaceDark, railOwn) { onNavigate(SearchElement.RAIL.route) }
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 if (barAtBottom) {

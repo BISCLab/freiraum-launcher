@@ -762,6 +762,20 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setAppListRailAppearance(appearance: ElementAppearance) = setElementAppearanceFor(RAIL_PREFIX, appearance)
 
+    /** The search button, the App list's search field and the Text search rail used to look like
+     *  the A-Z rail until changed; now each has its own look. Once, they keep what they showed. */
+    suspend fun separateRailFollowers() {
+        if (dataStore.data.first()[RAIL_FOLLOWERS_SEPARATED_KEY] == true) return
+        val rail = appListRailAppearance.first()
+        if (rail != null) {
+            val button = appListSearchButtonAppearance.first()
+            if (button == null) setAppListSearchButtonAppearance(rail)
+            if (appListSearchFieldAppearance.first() == null) setAppListSearchFieldAppearance(button ?: rail)
+            if (searchRailAppearance.first() == null) setSearchRailAppearance(rail)
+        }
+        dataStore.edit { it[RAIL_FOLLOWERS_SEPARATED_KEY] = true }
+    }
+
     suspend fun resetAppListRailAppearance() = resetElementAppearanceFor(RAIL_PREFIX)
 
     val appListSearchButtonAppearance: Flow<ElementAppearance?> =
@@ -1124,6 +1138,7 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_AI_APP_KEY = stringPreferencesKey("search_ai_app")
         private val SEARCH_AI_APPS_KEY = stringPreferencesKey("search_ai_apps")
         private val SEARCH_RAIL_HIDDEN_KEY = stringPreferencesKey("search_rail_hidden")
+        private val RAIL_FOLLOWERS_SEPARATED_KEY = booleanPreferencesKey("rail_followers_separated")
         private val SEARCH_ENGINES_KEY = stringPreferencesKey("search_engines")
         private val SEARCH_BROWSER_APP_KEY = stringPreferencesKey("search_browser_app")
         private val SEARCH_MAPS_APP_KEY = stringPreferencesKey("search_maps_app")

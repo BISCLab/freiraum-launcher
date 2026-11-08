@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- App list looks: A-Z rail, search button, letter circles and search field each get one page with a
+  live preview that stays on top while scrolling. The preview sits on a backdrop as light or dark
+  as the App list page really is, and "automatic" colors show as they will turn out there
+- Search button, App list search field and the Text search category rail no longer follow the A-Z
+  rail: each has its own look, or the automatic one until set. What they showed so far is kept
+- Every look page (Dock, Panel, folders, Text search parts) keeps its preview in view while scrolling
+
 - Text search category rail: dragging along it works like a magnifier. The symbol under the thumb and
   its neighbours grow, light up and lean towards the results, a ring in the category color follows
   the finger, and a soft tick marks each new category. The bubble now sits above the thumb and names

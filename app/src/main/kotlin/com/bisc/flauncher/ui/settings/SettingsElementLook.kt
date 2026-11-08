@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -38,7 +39,7 @@ import com.bisc.flauncher.ui.home.dock.resolveElementColors
 import com.bisc.flauncher.ui.theme.designGlow
 
 /** Which part the preview on top of an [ElementLookScreen] draws. */
-enum class LookSampleKind { DOCK, PANEL, FOLDER, FIELD, RAIL, CARDS }
+enum class LookSampleKind { DOCK, PANEL, FOLDER, FIELD, RAIL, CARDS, AZ_INDEX, SEARCH_BUTTON, LETTER }
 
 /**
  * One page for everything about how a part looks: a live preview on top, then fill, text color,
@@ -57,19 +58,26 @@ internal fun ElementLookScreen(
     kind: LookSampleKind,
     cornerMax: Int = 100,
     allowNone: Boolean = true,
+    /** Whether the page the part sits on is dark; the preview's backdrop and every "automatic"
+     *  color follow it. Null = like the settings themselves. */
+    backdropDark: Boolean? = null,
+    /** Roundness the preview shows when the part has no corners to set here. */
+    previewCorner: Int = 100,
     links: @Composable ColumnScope.() -> Unit = {},
     extras: @Composable ColumnScope.() -> Unit = {}
 ) {
     var look by rememberDraft(saved)
     var corner by rememberDraft(savedCorner)
+    androidx.compose.runtime.CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalSurfaceIsDark provides backdropDark) {
     SettingsSubScreen(
         title = title,
         navController = navController,
         onBack = onBack,
         onSave = { onSave(look, corner) },
-        dirty = look != saved || corner != savedCorner
+        dirty = look != saved || corner != savedCorner,
+        // The preview stays in view while the settings below are scrolled through.
+        header = { LookSample(kind, look, corner ?: previewCorner, backdropDark) }
     ) {
-        LookSample(kind, look, corner ?: 100)
         links()
         ElementAppearanceSection(
             appearance = look,
@@ -84,14 +92,19 @@ internal fun ElementLookScreen(
         }
         extras()
     }
+    }
 }
 
 /** The part in small on a neutral backdrop, drawn from the draft so every change shows at once. */
 @Composable
-internal fun LookSample(kind: LookSampleKind, look: ElementAppearance, cornerPercent: Int) {
-    val colors = resolveElementColors(look)
+internal fun LookSample(kind: LookSampleKind, look: ElementAppearance, cornerPercent: Int, backdropDark: Boolean? = null) {
+    val colors = if (backdropDark != null) resolveElementColors(look, backdropDark) else resolveElementColors(look)
     val pct = cornerPercent.coerceIn(0, 100) / 100f
-    val backdrop = Brush.verticalGradient(listOf(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.surfaceContainerHighest))
+    val backdrop = when (backdropDark) {
+        true -> Brush.verticalGradient(listOf(Color(0xFF2E2E33), Color(0xFF16161A)))
+        false -> Brush.verticalGradient(listOf(Color(0xFFF6F6F8), Color(0xFFDDDDE2)))
+        null -> Brush.verticalGradient(listOf(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.surfaceContainerHighest))
+    }
     val ink = colors.contentColor
     @Composable
     fun Surface(modifier: Modifier, shape: Shape, target: String, content: @Composable () -> Unit) {
@@ -113,7 +126,7 @@ internal fun LookSample(kind: LookSampleKind, look: ElementAppearance, cornerPer
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(150.dp)
+            .height(136.dp)
             .clip(RoundedCornerShape(24.dp))
             .background(backdrop)
             .padding(20.dp),
@@ -140,11 +153,45 @@ internal fun LookSample(kind: LookSampleKind, look: ElementAppearance, cornerPer
                     }
                 }
             }
+            LookSampleKind.AZ_INDEX -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(28.dp)) {
+                AppRowsHint(backdropDark)
+                Surface(Modifier.width(28.dp).height(104.dp), RoundedCornerShape(14.dp * pct), "rail") {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        listOf("A", "B", "C", "D", "E").forEach { Text(it, color = ink, style = MaterialTheme.typography.labelSmall) }
+                    }
+                }
+            }
+            LookSampleKind.SEARCH_BUTTON -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(28.dp)) {
+                AppRowsHint(backdropDark)
+                Surface(Modifier.size(56.dp), RoundedCornerShape(28.dp * pct), "buttons") {
+                    Icon(Icons.Filled.Search, contentDescription = null, tint = ink)
+                }
+            }
+            LookSampleKind.LETTER -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Surface(Modifier.size(40.dp), CircleShape, "buttons") {
+                    Text("A", color = ink, style = MaterialTheme.typography.titleMedium)
+                }
+                AppRowsHint(backdropDark)
+            }
             LookSampleKind.CARDS -> Surface(Modifier.fillMaxWidth().height(96.dp), RoundedCornerShape(28.dp * pct), "cards") {
                 Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(stringResource(R.string.search_section_apps), color = ink.copy(alpha = 0.7f), style = MaterialTheme.typography.labelMedium)
                     Dots(4, size = 30.dp, round = 9.dp)
                 }
+            }
+        }
+    }
+}
+
+/** A few faint app rows beside the part, so it reads as sitting on the list. */
+@Composable
+private fun AppRowsHint(dark: Boolean?) {
+    val ink = (if (dark ?: (MaterialTheme.colorScheme.background.luminance() < 0.5f)) Color.White else Color.Black).copy(alpha = 0.22f)
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        repeat(3) { i ->
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Box(Modifier.size(22.dp).clip(RoundedCornerShape(7.dp)).background(ink))
+                Box(Modifier.width(if (i == 1) 70.dp else 96.dp).height(8.dp).clip(RoundedCornerShape(4.dp)).background(ink))
             }
         }
     }

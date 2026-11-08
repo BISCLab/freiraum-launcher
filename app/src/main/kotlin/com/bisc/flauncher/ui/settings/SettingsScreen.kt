@@ -341,6 +341,8 @@ fun SettingsSubScreen(
     onSave: (() -> Unit)? = null,
     /** Whether the draft differs from what's saved - enables Save and makes leaving ask first. */
     dirty: Boolean = false,
+    /** Stays on top while the content below scrolls, e.g. a live preview of what is edited. */
+    header: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     // Every way out (back gesture, the arrow, a breadcrumb) goes through this: with unsaved changes
@@ -371,16 +373,21 @@ fun SettingsSubScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-            Column(
-                modifier = Modifier
-                    .widthIn(max = com.bisc.flauncher.ui.MaxContentWidth)
-                    .fillMaxWidth()
-                    .imePadding()
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp),
-                content = content
-            )
+            Column(modifier = Modifier.widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth()) {
+                if (header != null) {
+                    Box(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp)) { header() }
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .imePadding()
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp),
+                    content = content
+                )
+            }
         }
     }
 

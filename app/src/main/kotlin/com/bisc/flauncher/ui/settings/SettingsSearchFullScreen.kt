@@ -656,10 +656,9 @@ private fun searchPageDark(viewModel: SettingsViewModel): Boolean {
 @Composable
 private fun effectiveSearchElementAppearance(element: SearchElement, viewModel: SettingsViewModel): com.bisc.flauncher.data.model.ElementAppearance {
     if (element == SearchElement.RAIL) {
-        // Until changed, like the App list's A-Z rail.
+        // Until changed, the automatic look for the page's brightness; never tied to the A-Z rail.
         val railOwn by viewModel.searchRailAppearance.collectAsState()
-        val alphabetRail by viewModel.appListRailAppearance.collectAsState()
-        return railOwn ?: alphabetRail ?: com.bisc.flauncher.ui.home.search.automaticRailAppearance(searchPageDark(viewModel))
+        return railOwn ?: com.bisc.flauncher.ui.home.search.automaticRailAppearance(searchPageDark(viewModel))
     }
     val own by when (element) {
         SearchElement.RAIL, SearchElement.FIELD -> viewModel.searchFieldAppearance

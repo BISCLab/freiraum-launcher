@@ -1024,7 +1024,7 @@ fun HomeScreen(
                                 viewModel.closeAppList()
                             }
                         },
-                        appearance = appListSearchFieldAppearance ?: appListSearchButtonAppearance ?: railAppearance ?: automaticRailAppearance(overviewSurfaceDark),
+                        appearance = appListSearchFieldAppearance ?: automaticRailAppearance(overviewSurfaceDark),
                         cornerRadiusPercent = cornerRadiusPercent,
                         autoOpen = true,
                         modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 16.dp)
@@ -1039,7 +1039,7 @@ fun HomeScreen(
                         onClick = { if (appListOwnSearch) appListSearching = true else viewModel.openSearch() },
                         handedness = appOverviewHandedness,
                         cornerRadiusPercent = searchButtonCorner ?: cornerRadiusPercent,
-                        appearance = appListSearchButtonAppearance ?: railAppearance ?: automaticRailAppearance(overviewSurfaceDark)
+                        appearance = appListSearchButtonAppearance ?: automaticRailAppearance(overviewSurfaceDark)
                     )
                 }
             }
@@ -1296,7 +1296,6 @@ private fun HomeSearchOverlay(
     onContactActions: (com.bisc.flauncher.data.model.ContactInfo) -> Unit
 ) {
     val context = LocalContext.current
-    val alphabetRailAppearance by viewModel.appListRailAppearance.collectAsState()
     val alphabetRailCorner by viewModel.alphabetRailCornerPercent.collectAsState()
     val searchAppearance by viewModel.searchAppearance.collectAsState()
     val searchBackground by viewModel.searchBackground.collectAsState()
@@ -1366,7 +1365,7 @@ private fun HomeSearchOverlay(
         showCategoryRail = searchBarShowCategories,
         fieldAppearance = searchFieldAppearance,
         fieldCornerRadiusPercent = searchFieldCornerRadiusPercent,
-        railAppearance = searchRailAppearance ?: alphabetRailAppearance,
+        railAppearance = searchRailAppearance,
         railCornerRadiusPercent = searchRailCornerRadiusPercent ?: alphabetRailCorner,
         keyboardCapColor = if (searchKeyboardCapEnabled) searchKeyboardCapColor else null,
         keyboardCapCornerRadiusPercent = searchKeyboardCapCornerRadiusPercent,

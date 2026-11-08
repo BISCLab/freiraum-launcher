@@ -99,7 +99,7 @@ fun AppListPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = 
     val buttonOwn by viewModel.appListSearchButtonAppearance.collectAsState()
     val letter by viewModel.appListHeaderLetterAppearance.collectAsState()
     val rail = railOwn ?: automaticRailAppearance(dark)
-    val button = buttonOwn ?: rail
+    val button = buttonOwn ?: automaticRailAppearance(dark)
     val left = handedness == Handedness.LEFT
     val ink = resolveElementColors(ElementAppearance(fillMode = ElementFillMode.NONE), dark).contentColor
 
