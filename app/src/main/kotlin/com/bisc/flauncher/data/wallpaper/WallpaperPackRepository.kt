@@ -136,7 +136,7 @@ class WallpaperPackRepository @Inject constructor(
     }
 
     /** Puts the pack's pictures on the pages: Home together with the pages beside it, App list,
-     *  Text search and App grid. The extras stay in the pack to pick by hand. */
+     *  Text search and App grid. The extra pictures are not placed on their own. */
     suspend fun apply(pack: WallpaperPack, lockScreen: Boolean) = withContext(Dispatchers.IO) {
         val pages = pageContentRepository.allPages.first()
         val home = pages.firstOrNull { it.isHome }

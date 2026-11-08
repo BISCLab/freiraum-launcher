@@ -1,0 +1,5 @@
+- Modern and Neon designs reworked in detail, light/dark switch keeps the design
+- Text search: categories as a Search/Rail table, rail with magnifier, in place at once
+- Folders with fixed places, close as smoothly as they open
+- Look pages with a pinned live preview, parts independent
+- Pages beside Home share its background; cleanup

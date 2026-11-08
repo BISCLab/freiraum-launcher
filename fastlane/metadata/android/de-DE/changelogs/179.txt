@@ -1,0 +1,5 @@
+- Modern- und Neon-Designs bis ins Detail überarbeitet, Hell/Dunkel-Wechsel behält das Design
+- Textsuche: Kategorien als Tabelle mit Suche/Leiste, Leiste mit Lupe, sofort am Platz
+- Ordner mit festen Plätzen, schließen so weich wie öffnen
+- Aussehen-Seiten mit fester Live-Vorschau, Bausteine unabhängig
+- Seiten neben Home teilen dessen Hintergrund; Aufräumen

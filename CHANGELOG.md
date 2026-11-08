@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.12.0
 
 - Wallpaper packs: the pages beside Home show the same picture as Home instead of getting a picture of
   their own, as they belong together
