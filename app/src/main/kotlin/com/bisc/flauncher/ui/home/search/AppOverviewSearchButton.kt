@@ -34,7 +34,7 @@ fun AppOverviewSearchButton(
     modifier: Modifier = Modifier
 ) {
     val colors = resolveElementColors(appearance)
-    val shape = RoundedCornerShape(percent = cornerRadiusPercent.coerceIn(0, 100))
+    val shape = com.bisc.flauncher.ui.theme.PartCornerShape(cornerRadiusPercent)
     Box(
         modifier = modifier
             .fillMaxSize()

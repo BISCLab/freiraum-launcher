@@ -9,7 +9,7 @@
   "accent": "#FF1E8FFF",
   "font": "SYSTEM",
   "cornerRadiusPercent": 100,
-  "widgetCornerRadiusPercent": 10,
+  "widgetCornerRadiusPercent": 80,
   "box": {
     "style": "COLOR",
     "fill": "#FFFFFFFF",
@@ -191,9 +191,9 @@
     "alphabet_rail": 100,
     "category_rail": 100,
     "search_field": 100,
-    "element_boxes": 25,
-    "folders": 25,
-    "widgets": 10,
-    "search_results": 25
+    "element_boxes": 50,
+    "folders": 50,
+    "widgets": 80,
+    "search_results": 80
   }
 }

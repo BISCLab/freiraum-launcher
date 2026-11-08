@@ -56,9 +56,9 @@ import kotlinx.coroutines.launch
 /** Corner presets for every part: one value for elements, a smaller one for widgets, since
  *  round corners cut into a widget's content. */
 enum class ShapePreset(val elements: Int, val widgets: Int) {
-    ROUND(100, 20),
-    SOFT(40, 12),
-    SQUARE(10, 4)
+    ROUND(100, 80),
+    SOFT(45, 45),
+    SQUARE(12, 12)
 }
 
 /** Every part that can get its own corners and colors. */
@@ -310,7 +310,7 @@ internal fun MockScreen(
     val accent = MaterialTheme.colorScheme.primary
     @Composable
     fun Part(part: ShapePart, modifier: Modifier, text: String? = null, content: @Composable BoxScope.() -> Unit = {}) {
-        val shape = RoundedCornerShape(percent = ((corners[part] ?: 50) / 2).coerceIn(0, 50))
+        val shape = com.bisc.flauncher.ui.theme.PartCornerShape(corners[part] ?: 50, full = 9.dp)
         val look = looks?.get(part)
         val colors = look?.let { com.bisc.flauncher.ui.home.dock.resolveElementColors(it) }
         Box(

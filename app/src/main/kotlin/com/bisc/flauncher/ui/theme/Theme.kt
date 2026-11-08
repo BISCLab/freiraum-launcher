@@ -52,7 +52,7 @@ const val DEFAULT_ACCENT_COLOR = 0xFF0758F5.toInt()
 const val DEFAULT_CORNER_RADIUS_PERCENT = 100
 
 /** Widgets' own default: only slightly rounded - fully round corners cut into a widget's content. */
-const val DEFAULT_WIDGET_CORNER_RADIUS_PERCENT = 10
+const val DEFAULT_WIDGET_CORNER_RADIUS_PERCENT = 80
 
 /** The one transparency every default element fill uses. */
 const val DEFAULT_ELEMENT_OPACITY = 0.8f

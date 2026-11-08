@@ -52,7 +52,7 @@ fun AppSearchField(
     onOpenTextSearch: (() -> Unit)? = null
 ) {
     val colors = resolveElementColors(appearance)
-    val shape = RoundedCornerShape(FIELD_HEIGHT / 2 * (cornerRadiusPercent.coerceIn(0, 100) / 100f))
+    val shape = com.bisc.flauncher.ui.theme.PartCornerShape(cornerRadiusPercent)
     val focusRequester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
     LaunchedEffect(Unit) {

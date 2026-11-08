@@ -60,7 +60,7 @@ fun AlphabetIndex(
     modifier: Modifier = Modifier,
     edgeInset: Dp = FLUSH_INSET
 ) {
-    val railBarCorner = (RAIL_BAR_WIDTH / 2) * (cornerRadiusPercent.coerceIn(0, 100) / 100f)
+    val railBarCorner = com.bisc.flauncher.ui.theme.partCornerRadius(cornerRadiusPercent, RAIL_BAR_WIDTH)
     val entries = remember(letters, hasOtherGroup) {
         buildList {
             letters.forEach { add(IndexEntry.Letter(it)) }

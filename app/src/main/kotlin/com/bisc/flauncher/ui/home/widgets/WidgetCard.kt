@@ -31,7 +31,7 @@ fun WidgetCard(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val colors = resolveElementColors(appearance)
-    val shape = RoundedCornerShape(percent = cornerRadiusPercent.coerceIn(0, 100))
+    val shape = com.bisc.flauncher.ui.theme.PartCornerShape(cornerRadiusPercent)
 
     CompositionLocalProvider(LocalContentColor provides colors.contentColor) {
         Column(

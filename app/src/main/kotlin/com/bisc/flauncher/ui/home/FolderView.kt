@@ -77,7 +77,6 @@ import com.bisc.flauncher.ui.home.widgets.NotesWidget
 import com.bisc.flauncher.ui.home.widgets.SystemWidgetView
 import com.bisc.flauncher.ui.home.widgets.WeatherWidget
 
-private val FolderCornerRadius = 28.dp
 private val FOLDER_TOP_GAP = 24.dp
 private val FOLDER_CARD_PADDING = 16.dp
 private val FOLDER_WIDGET_GAP = 8.dp
@@ -198,7 +197,7 @@ fun FolderView(
         content = {
         DockPanelSurface(
             appearance = cardAppearance,
-            shape = RoundedCornerShape(FolderCornerRadius * (cornerPercent.coerceIn(0, 100) / 100f)),
+            shape = com.bisc.flauncher.ui.theme.PartCornerShape(cornerPercent),
             effectTarget = "folders",
             modifier = Modifier
                 .width(dockPillWidth)

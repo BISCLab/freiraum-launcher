@@ -683,7 +683,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_backup_export_warning">The backup holds your whole launcher: the look with designs, wallpaper packs and backgrounds, and personal data like notes, addresses, contacts, links and your apps. Keep it for yourself and do not share it. To share only a look, save it as a design instead.</string>
     <string name="settings_backup_export_understood">Understood</string>
     <string name="settings_backup_export_confirm">Export</string>
-    <string name="settings_widgets_corner_hint" formatted="false">Up to 50%. Above about 25%, the corners start cutting into the widget content.</string>
+    <string name="settings_widgets_corner_hint" formatted="false">The higher, the rounder. Very round corners can cut into the content at the edge of the widget.</string>
     <string name="designs_export_info">A design holds only the look: colors, borders, corners and effects. No personal data and no pictures, so you can share it safely.</string>
     <string name="packs_title">Wallpaper packs</string>
     <string name="packs_entry_summary">Backgrounds for every page</string>

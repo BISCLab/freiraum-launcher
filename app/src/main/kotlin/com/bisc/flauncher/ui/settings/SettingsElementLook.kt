@@ -133,20 +133,20 @@ internal fun LookSample(kind: LookSampleKind, look: ElementAppearance, cornerPer
         contentAlignment = Alignment.Center
     ) {
         when (kind) {
-            LookSampleKind.DOCK -> Surface(Modifier.fillMaxWidth().height(64.dp), RoundedCornerShape(28.dp * pct), "dock") { Dots(5) }
-            LookSampleKind.PANEL -> Surface(Modifier.fillMaxWidth().height(104.dp), RoundedCornerShape(28.dp * pct), "panel") {
+            LookSampleKind.DOCK -> Surface(Modifier.fillMaxWidth().height(64.dp), com.bisc.flauncher.ui.theme.PartCornerShape(cornerPercent), "dock") { Dots(5) }
+            LookSampleKind.PANEL -> Surface(Modifier.fillMaxWidth().height(104.dp), com.bisc.flauncher.ui.theme.PartCornerShape(cornerPercent), "panel") {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { Dots(5); Dots(5) }
             }
-            LookSampleKind.FOLDER -> Surface(Modifier.width(200.dp).height(104.dp), RoundedCornerShape(28.dp * pct), "folders") {
+            LookSampleKind.FOLDER -> Surface(Modifier.width(200.dp).height(104.dp), com.bisc.flauncher.ui.theme.PartCornerShape(cornerPercent), "folders") {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { Dots(4); Dots(4) }
             }
-            LookSampleKind.FIELD -> Surface(Modifier.fillMaxWidth().height(52.dp), RoundedCornerShape(26.dp * pct), "search") {
+            LookSampleKind.FIELD -> Surface(Modifier.fillMaxWidth().height(52.dp), com.bisc.flauncher.ui.theme.PartCornerShape(cornerPercent), "search") {
                 Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Icon(Icons.Filled.Search, contentDescription = null, tint = ink)
                     Text(stringResource(R.string.search_field_hint), color = ink.copy(alpha = 0.6f), style = MaterialTheme.typography.bodyLarge)
                 }
             }
-            LookSampleKind.RAIL -> Surface(Modifier.width(28.dp).height(120.dp), RoundedCornerShape(14.dp * pct), "rail") {
+            LookSampleKind.RAIL -> Surface(Modifier.width(28.dp).height(120.dp), com.bisc.flauncher.ui.theme.PartCornerShape(cornerPercent), "rail") {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     listOf(Color(0xFFFFB300), Color(0xFF4F86F7), Color(0xFF34A853), Color(0xFF00ACC1)).forEach {
                         Box(Modifier.size(12.dp).clip(CircleShape).background(it))
@@ -155,7 +155,7 @@ internal fun LookSample(kind: LookSampleKind, look: ElementAppearance, cornerPer
             }
             LookSampleKind.AZ_INDEX -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(28.dp)) {
                 AppRowsHint(backdropDark)
-                Surface(Modifier.width(28.dp).height(104.dp), RoundedCornerShape(14.dp * pct), "rail") {
+                Surface(Modifier.width(28.dp).height(104.dp), com.bisc.flauncher.ui.theme.PartCornerShape(cornerPercent), "rail") {
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         listOf("A", "B", "C", "D", "E").forEach { Text(it, color = ink, style = MaterialTheme.typography.labelSmall) }
                     }
@@ -163,7 +163,7 @@ internal fun LookSample(kind: LookSampleKind, look: ElementAppearance, cornerPer
             }
             LookSampleKind.SEARCH_BUTTON -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(28.dp)) {
                 AppRowsHint(backdropDark)
-                Surface(Modifier.size(56.dp), RoundedCornerShape(28.dp * pct), "buttons") {
+                Surface(Modifier.size(56.dp), com.bisc.flauncher.ui.theme.PartCornerShape(cornerPercent), "buttons") {
                     Icon(Icons.Filled.Search, contentDescription = null, tint = ink)
                 }
             }
@@ -173,7 +173,7 @@ internal fun LookSample(kind: LookSampleKind, look: ElementAppearance, cornerPer
                 }
                 AppRowsHint(backdropDark)
             }
-            LookSampleKind.CARDS -> Surface(Modifier.fillMaxWidth().height(96.dp), RoundedCornerShape(28.dp * pct), "cards") {
+            LookSampleKind.CARDS -> Surface(Modifier.fillMaxWidth().height(96.dp), com.bisc.flauncher.ui.theme.PartCornerShape(cornerPercent), "cards") {
                 Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(stringResource(R.string.search_section_apps), color = ink.copy(alpha = 0.7f), style = MaterialTheme.typography.labelMedium)
                     Dots(4, size = 30.dp, round = 9.dp)

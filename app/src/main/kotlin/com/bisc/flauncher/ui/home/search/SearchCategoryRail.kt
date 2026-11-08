@@ -101,7 +101,7 @@ fun SearchCategoryRail(
     val currentOnTap by androidx.compose.runtime.rememberUpdatedState(onTap)
     val currentOnScrub by androidx.compose.runtime.rememberUpdatedState(onScrub)
     val colors = resolveElementColors(appearance)
-    val radius = SEARCH_RAIL_WIDTH / 2 * (cornerRadiusPercent.coerceIn(0, 100) / 100f)
+    val radius = com.bisc.flauncher.ui.theme.partCornerRadius(cornerRadiusPercent, SEARCH_RAIL_WIDTH)
     val shape = RoundedCornerShape(radius)
     // On a dark rail the category colors are lifted towards white, so darker ones (blue, violet)
     // still stand out; on a light rail they stay as they are.

@@ -683,7 +683,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_backup_export_warning">Die Sicherung enthält deinen ganzen Launcher: das Aussehen mit Designs, Wallpaper-Packs und Hintergründen und persönliche Daten wie Notizen, Adressen, Kontakte, Links und deine Apps. Bewahre sie nur für dich auf und teile sie nicht. Wenn du nur einen Look teilen willst, speichere ihn als Design.</string>
     <string name="settings_backup_export_understood">Verstanden</string>
     <string name="settings_backup_export_confirm">Exportieren</string>
-    <string name="settings_widgets_corner_hint" formatted="false">Bis 50 %. Ab etwa 25 % schneiden die Ecken in den Inhalt des Widgets.</string>
+    <string name="settings_widgets_corner_hint" formatted="false">Je höher, desto runder. Sehr runde Ecken können in den Inhalt am Rand des Widgets schneiden.</string>
     <string name="designs_export_info">Ein Design enthält nur das Aussehen: Farben, Rahmen, Ecken und Effekte. Keine persönlichen Daten und keine Bilder, du kannst es also gefahrlos teilen.</string>
     <string name="packs_title">Wallpaper-Packs</string>
     <string name="packs_entry_summary">Hintergrundbilder für alle Seiten</string>

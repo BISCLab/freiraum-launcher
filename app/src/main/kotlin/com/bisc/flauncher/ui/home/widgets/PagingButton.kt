@@ -43,7 +43,7 @@ fun PagingButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val shape = RoundedCornerShape(percent = style.cornerRadiusPercent.coerceIn(0, 100) / 2)
+    val shape = com.bisc.flauncher.ui.theme.PartCornerShape(style.cornerRadiusPercent)
     val own = style.appearance
     val colors = own?.let { resolveElementColors(it) }
     val tint = colors?.contentColor ?: LocalContentColor.current

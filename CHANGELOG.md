@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Corners mean the same everywhere now: 100 % is the same radius on every part (never more than
+  fully round). Before, widgets, element boxes and the search button counted from their own size, so
+  50 % was already fully round there and the same value looked different on each part. What is
+  stored is converted once; widgets on the old slight default get the new one
+- Widgets and result cards are clearly rounder by default (80 %), in Modern and Neon too; element
+  boxes and folders medium (50 %). The widget corner setting uses the whole range again
+
 - Text search look pages: the previews sit on the same light backdrop as on the other pages again
   instead of a black one
 

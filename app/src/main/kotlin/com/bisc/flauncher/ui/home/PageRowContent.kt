@@ -705,7 +705,7 @@ fun PillRow(
     ) {
         val itemShape = pillItemShape(iconShape)
         val barShape = remember(row.cornerRadiusPercent) {
-            RoundedCornerShape(percent = row.cornerRadiusPercent.coerceIn(0, 100))
+            com.bisc.flauncher.ui.theme.PartCornerShape(row.cornerRadiusPercent)
         }
         val barHeight = if (row.showLabels) DockDimens.barHeight + DockDimens.labelExtraHeight else DockDimens.barHeight
 

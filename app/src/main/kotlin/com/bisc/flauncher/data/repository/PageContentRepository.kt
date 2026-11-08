@@ -64,6 +64,21 @@ class PageContentRepository @Inject constructor(
 
     suspend fun ensureSeeded() {
         ensureGlobalBackgroundSeeded()
+        if (settingsRepository.consumeCornerScaleChange()) {
+            // Widgets still on the old slight default get the new one; the rest keeps its look roughly.
+            fun converted(isWidget: Boolean, old: Int) = if (isWidget && old <= 10) com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT else (old * 2).coerceAtMost(100)
+            rowDao.updateAll(rowDao.observeAll().first().map { row ->
+                when (row.type) {
+                    PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET -> row.copy(cornerRadiusPercent = converted(true, row.cornerRadiusPercent))
+                    PageRowType.ELEMENT_BOX -> row.copy(cornerRadiusPercent = converted(false, row.cornerRadiusPercent))
+                    else -> row
+                }
+            })
+            folderItemDao.updateAll(folderItemDao.observeAll().first().map { item ->
+                val widget = item.type == com.bisc.flauncher.data.model.GridItemType.WIDGET || item.type == com.bisc.flauncher.data.model.GridItemType.SYSTEM_WIDGET
+                if (widget) item.copy(cornerRadiusPercent = converted(true, item.cornerRadiusPercent)) else item
+            })
+        }
         if (settingsRepository.consumeLegacyPagingButtons()) {
             rowDao.updateAll(rowDao.observeAll().first().map { it.copy(pagingButtons = true) })
             folderItemDao.updateAll(folderItemDao.observeAll().first().map { it.copy(pagingButtons = true) })

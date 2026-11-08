@@ -176,7 +176,7 @@ internal fun WidgetEditor(
                 ExpandablePercentSlider(
                     percent = row.cornerRadiusPercent,
                     onSettled = { row = row.copy(cornerRadiusPercent = it) },
-                    max = 50
+                    max = 100
                 )
             }
             if (showEdgeToEdge) SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_edge_label)) {

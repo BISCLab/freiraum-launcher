@@ -93,8 +93,7 @@ fun SearchInputBar(
     val ownAppearance = fieldAppearance ?: automaticRailAppearance(false)
     val fieldColors = resolveElementColors(ownAppearance)
     val content = fieldColors.contentColor
-    val percent = (fieldCornerRadiusPercent ?: cornerRadiusPercent).coerceIn(0, 100) / 100f
-    val fieldShape = RoundedCornerShape(FIELD_HEIGHT / 2 * percent)
+    val fieldShape = com.bisc.flauncher.ui.theme.PartCornerShape(fieldCornerRadiusPercent ?: cornerRadiusPercent)
 
     Column(
         modifier = modifier

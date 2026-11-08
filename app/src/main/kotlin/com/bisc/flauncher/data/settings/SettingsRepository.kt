@@ -331,6 +331,19 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    /** Corners were once a share of each part's shorter side for widgets, element boxes and the
+     *  search button; now every part uses one scale. True once, to convert what is stored. */
+    suspend fun consumeCornerScaleChange(): Boolean {
+        if (dataStore.data.first()[CORNER_SCALE_KEY] == true) return false
+        dataStore.edit { prefs ->
+            prefs[CORNER_SCALE_KEY] = true
+            prefs[APP_LIST_SEARCH_BUTTON_CORNER_KEY]?.let { prefs[APP_LIST_SEARCH_BUTTON_CORNER_KEY] = (it * 2).coerceAtMost(100) }
+            prefs[NEW_BOX_CORNER_KEY]?.let { prefs[NEW_BOX_CORNER_KEY] = (it * 2).coerceAtMost(100) }
+            prefs[NEW_WIDGET_CORNER_KEY]?.let { prefs[NEW_WIDGET_CORNER_KEY] = if (it <= 10) 80 else (it * 2).coerceAtMost(100) }
+        }
+        return true
+    }
+
     /** How much height the open keyboard took from the Text search's results last time (px). */
     val searchKeyboardOverlapPx: Flow<Int> = dataStore.data.map { it[SEARCH_KEYBOARD_OVERLAP_KEY] ?: 0 }
 
@@ -1175,6 +1188,7 @@ class SettingsRepository @Inject constructor(
         private const val NEW_WIDGET_LOOK = "design_new_widget"
         private val NEW_BOX_CORNER_KEY = intPreferencesKey("design_new_box_corner")
         private val NEW_WIDGET_CORNER_KEY = intPreferencesKey("design_new_widget_corner")
+        private val CORNER_SCALE_KEY = booleanPreferencesKey("corners_one_scale")
         private val SEARCH_ENGINES_KEY = stringPreferencesKey("search_engines")
         private val SEARCH_BROWSER_APP_KEY = stringPreferencesKey("search_browser_app")
         private val SEARCH_MAPS_APP_KEY = stringPreferencesKey("search_maps_app")
