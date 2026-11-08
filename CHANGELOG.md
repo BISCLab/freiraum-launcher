@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Going back to automatic looks the same everywhere and says what it does: a color set by hand (text,
+  border, accent) shows a small "Automatic" pill right beside its color instead of an extra row. A
+  part's whole look shows its state under the pinned preview ("Own look" or "Automatic, matching
+  the page") with "Back to automatic" right there. The same on every look page, folders included;
+  no more two identical reset rows on one page
+
 - Corners mean the same everywhere now: 100 % is the same radius on every part (never more than
   fully round). Before, widgets, element boxes and the search button counted from their own size, so
   50 % was already fully round there and the same value looked different on each part. What is

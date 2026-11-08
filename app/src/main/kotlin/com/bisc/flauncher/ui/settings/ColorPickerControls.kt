@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.material.icons.filled.Restore
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -262,13 +263,13 @@ private fun EyedropperDialog(bitmap: ImageBitmap, onPick: (Color) -> Unit, onDis
  *  group with other rows) so the rows merge into one connected card instead of each getting their
  *  own separate rounded box. */
 @Composable
-fun ColorPickerSection(title: String, summary: String? = null, info: String? = null, color: Int, onColorChange: (Int) -> Unit, ownGroup: Boolean = true) {
+fun ColorPickerSection(title: String, summary: String? = null, info: String? = null, color: Int, onColorChange: (Int) -> Unit, ownGroup: Boolean = true, onReset: (() -> Unit)? = null) {
     if (ownGroup) {
         SettingsPreferenceGroup {
-            ColorPickerRow(title = title, summary = summary, info = info, color = color, onColorChange = onColorChange)
+            ColorPickerRow(title = title, summary = summary, info = info, color = color, onColorChange = onColorChange, onReset = onReset)
         }
     } else {
-        ColorPickerRow(title = title, summary = summary, info = info, color = color, onColorChange = onColorChange)
+        ColorPickerRow(title = title, summary = summary, info = info, color = color, onColorChange = onColorChange, onReset = onReset)
     }
 }
 
@@ -280,16 +281,10 @@ fun AccentOverrideRows(title: String, own: Int?, global: Int, onChange: (Int?) -
         title = title,
         summary = if (own == null) stringResource(R.string.settings_accent_follows_global) else null,
         color = own ?: global,
-        onColorChange = { onChange(it) }
+        onColorChange = { onChange(it) },
+        onReset = if (own != null) ({ onChange(null) }) else null,
+        resetLabel = stringResource(R.string.settings_reset_global_short)
     )
-    if (own != null) {
-        SettingsPreference(
-            icon = null,
-            title = stringResource(R.string.settings_accent_use_global),
-            onClick = { onChange(null) },
-            trailing = null
-        )
-    }
 }
 
 /** The row+opener content of [ColorPickerSection], without its own [SettingsPreferenceGroup] wrapper - 
@@ -297,7 +292,16 @@ fun AccentOverrideRows(title: String, own: Int?, global: Int, onChange: (Int?) -
  *  opens the actual [ColorPickerControls] in their own [SettingsEditPage] rather than expanding inline,
  *  so a color menu never pushes the rest of a long settings list around. */
 @Composable
-fun ColorPickerRow(title: String, summary: String? = null, info: String? = null, color: Int, onColorChange: (Int) -> Unit) {
+fun ColorPickerRow(
+    title: String,
+    summary: String? = null,
+    info: String? = null,
+    color: Int,
+    onColorChange: (Int) -> Unit,
+    /** Set when the color was chosen by hand: a pill beside it takes it back to automatic. */
+    onReset: (() -> Unit)? = null,
+    resetLabel: String? = null
+) {
     var open by remember { mutableStateOf(false) }
     SettingsPreference(
         icon = null,
@@ -307,13 +311,19 @@ fun ColorPickerRow(title: String, summary: String? = null, info: String? = null,
         leading = null,
         onClick = { open = true },
         trailing = {
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .background(Color(color))
-                    .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-            )
+            androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
+                onReset?.let {
+                    AutoResetChip(onClick = it, label = resetLabel ?: stringResource(R.string.settings_reset_auto_short))
+                    androidx.compose.foundation.layout.Spacer(Modifier.size(10.dp))
+                }
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .background(Color(color))
+                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                )
+            }
         }
     )
     if (open) {
@@ -477,4 +487,38 @@ internal fun hexToColor(text: String): Color? {
         val rgb = cleaned.toLong(16).toInt()
         Color(0xFF000000.toInt() or rgb)
     }.getOrNull()
+}
+
+/** Takes a hand-picked value back to automatic: a small pill with an undo arrow, the same everywhere. */
+@Composable
+fun AutoResetChip(onClick: () -> Unit, label: String = stringResource(R.string.settings_reset_auto_short)) {
+    androidx.compose.foundation.layout.Row(
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+            .clickable(onClick = onClick)
+            .padding(start = 8.dp, end = 12.dp, top = 6.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        androidx.compose.material3.Icon(
+            androidx.compose.material.icons.Icons.Filled.Restore,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(16.dp)
+        )
+        androidx.compose.foundation.layout.Spacer(Modifier.size(4.dp))
+        androidx.compose.material3.Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary, maxLines = 1)
+    }
+}
+
+/** A line inside a settings card that only holds [AutoResetChip], at its end. */
+@Composable
+fun AutoResetLine(onClick: () -> Unit, label: String = stringResource(R.string.settings_reset_auto_short)) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        contentAlignment = Alignment.CenterEnd
+    ) { AutoResetChip(onClick, label) }
 }

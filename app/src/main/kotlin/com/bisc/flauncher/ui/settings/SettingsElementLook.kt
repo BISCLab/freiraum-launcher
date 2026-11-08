@@ -63,6 +63,10 @@ internal fun ElementLookScreen(
     backdropDark: Boolean? = null,
     /** Roundness the preview shows when the part has no corners to set here. */
     previewCorner: Int = 100,
+    /** Whether the part has a look of its own (true) or the automatic one (false); null = the
+     *  part has no automatic look to go back to. */
+    custom: Boolean? = null,
+    onResetLook: () -> Unit = {},
     links: @Composable ColumnScope.() -> Unit = {},
     extras: @Composable ColumnScope.() -> Unit = {}
 ) {
@@ -76,7 +80,25 @@ internal fun ElementLookScreen(
         onSave = { onSave(look, corner) },
         dirty = look != saved || corner != savedCorner,
         // The preview stays in view while the settings below are scrolled through.
-        header = { LookSample(kind, look, corner ?: previewCorner, backdropDark) }
+        header = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                LookSample(kind, look, corner ?: previewCorner, backdropDark)
+                if (custom != null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            stringResource(if (custom) R.string.settings_look_custom else R.string.settings_look_automatic),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (custom) AutoResetChip(onClick = onResetLook, label = stringResource(R.string.settings_look_reset))
+                    }
+                }
+            }
+        }
     ) {
         links()
         ElementAppearanceSection(

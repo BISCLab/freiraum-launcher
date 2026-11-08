@@ -193,18 +193,8 @@ fun SettingsAppGridSearchFieldScreen(
         onSave = { look, _ -> viewModel.setAppGridBarAppearance(look) },
         kind = LookSampleKind.FIELD,
         backdropDark = surfaceIsDark,
-        extras = {
-            if (own != null) {
-                SettingsPreferenceGroup {
-                    SettingsPreference(
-                        icon = null,
-                        title = stringResource(R.string.settings_element_color_reset),
-                        onClick = viewModel::resetAppGridBarAppearance,
-                        trailing = null
-                    )
-                }
-            }
-        }
+        custom = own != null,
+        onResetLook = viewModel::resetAppGridBarAppearance
     )
 }
 

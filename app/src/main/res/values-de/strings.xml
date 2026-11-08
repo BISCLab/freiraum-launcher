@@ -99,7 +99,6 @@
     <string name="settings_accent_label">Akzentfarbe</string>
     <string name="settings_accent_global_info">Gilt für die Blase beim Scrollen in der App-Liste und die Ladeanimation. Die Ladeanimation kann in ihren eigenen Einstellungen auch eine eigene Farbe bekommen.</string>
     <string name="settings_accent_follows_global">Folgt der globalen Akzentfarbe</string>
-    <string name="settings_accent_use_global">Globale Akzentfarbe verwenden</string>
     <string name="settings_accent_custom">Eigene Farbe</string>
     <string name="settings_design_title">Aussehen</string>
     <string name="settings_card_design_subtitle">Designs, Farbmodi, Akzentfarbe, Schrift, Ecken, Hintergrund, Icons, Animationen</string>
@@ -142,7 +141,6 @@
     <string name="settings_element_border_color">Rahmenfarbe</string>
     <string name="settings_element_border_width_value">Stärke: %1$s dp</string>
     <string name="settings_element_color_auto_hint">Automatisch</string>
-    <string name="settings_element_color_reset">Auf automatisch zurücksetzen</string>
     <string name="settings_element_text_color_label">Schriftfarbe</string>
     <string name="settings_element_border_label">Rahmen</string>
     <string name="settings_element_show_labels_label">Beschriftung anzeigen</string>
@@ -777,7 +775,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_app_grid_page_dots">Seitenpunkte zeigen</string>
     <string name="settings_search_field_position_info">Oben, oder direkt auf der Tastatur in Reichweite des Daumens.</string>
     <string name="settings_search_rail_hidden">Ausgeblendet</string>
-    <string name="settings_search_rail_like_field">Aussehen wie die A–Z-Leiste</string>
     <string name="settings_folder_look_own">Eigenes Aussehen</string>
     <string name="settings_folder_look_like_all">Wie alle Ordner</string>
     <string name="settings_folder_look_reset">Aussehen wie alle Ordner</string>
@@ -849,4 +846,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_categories_rail_on">Die Kategorien als Leiste neben den Ergebnissen</string>
     <string name="settings_search_categories_rail_off">Aus: nur die Spalte Suche zählt</string>
     <string name="settings_apps_icons_link_summary">Icon-Pack: %1$s · Form und Größe für alle Apps</string>
+    <string name="settings_reset_auto_short">Automatisch</string>
+    <string name="settings_reset_global_short">Global</string>
+    <string name="settings_look_custom">Eigenes Aussehen</string>
+    <string name="settings_look_automatic">Automatisch, passend zur Seite</string>
+    <string name="settings_look_reset">Zurück auf automatisch</string>
 </resources>

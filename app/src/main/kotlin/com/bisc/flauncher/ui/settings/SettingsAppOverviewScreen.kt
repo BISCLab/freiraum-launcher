@@ -143,6 +143,8 @@ fun SettingsAppOverviewSearchButtonScreen(
         onSave = { look, _ -> viewModel.setAppListSearchButtonAppearance(look) },
         kind = LookSampleKind.SEARCH_BUTTON,
         backdropDark = surfaceIsDark,
+        custom = own != null,
+        onResetLook = viewModel::resetAppListSearchButtonAppearance,
         previewCorner = corner ?: 100
     )
 }
@@ -233,18 +235,8 @@ fun SettingsAppOverviewAzIndexScreen(
         kind = LookSampleKind.AZ_INDEX,
         backdropDark = surfaceIsDark,
         previewCorner = corner ?: 100,
-        extras = {
-            if (railAppearance != null) {
-                SettingsPreferenceGroup {
-                    SettingsPreference(
-                        icon = null,
-                        title = stringResource(R.string.settings_element_color_reset),
-                        onClick = viewModel::resetAppListRailAppearance,
-                        trailing = null
-                    )
-                }
-            }
-        }
+        custom = railAppearance != null,
+        onResetLook = viewModel::resetAppListRailAppearance
     )
 }
 
@@ -269,17 +261,7 @@ fun SettingsAppOverviewSearchFieldScreen(
         onSave = { look, _ -> viewModel.setAppListSearchFieldAppearance(look) },
         kind = LookSampleKind.FIELD,
         backdropDark = surfaceIsDark,
-        extras = {
-            if (own != null) {
-                SettingsPreferenceGroup {
-                    SettingsPreference(
-                        icon = null,
-                        title = stringResource(R.string.settings_element_color_reset),
-                        onClick = viewModel::resetAppListSearchFieldAppearance,
-                        trailing = null
-                    )
-                }
-            }
-        }
+        custom = own != null,
+        onResetLook = viewModel::resetAppListSearchFieldAppearance
     )
 }

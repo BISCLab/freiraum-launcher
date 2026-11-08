@@ -99,7 +99,6 @@
     <string name="settings_accent_label">Accent color</string>
     <string name="settings_accent_global_info">Used by the app list\'s scroll bubble and the charging animation. The charging animation can also get its own color in its own settings.</string>
     <string name="settings_accent_follows_global">Follows the global accent color</string>
-    <string name="settings_accent_use_global">Use global accent color</string>
     <string name="settings_accent_custom">Custom color</string>
     <string name="settings_design_title">Appearance</string>
     <string name="settings_card_design_subtitle">Designs, color modes, accent, font, corners, background, icons, animations</string>
@@ -141,7 +140,6 @@
     <string name="settings_element_border_color">Border color</string>
     <string name="settings_element_border_width_value">Thickness: %1$s dp</string>
     <string name="settings_element_color_auto_hint">Automatic</string>
-    <string name="settings_element_color_reset">Reset to automatic</string>
     <string name="settings_element_text_color_label">Text color</string>
     <string name="settings_element_border_label">Border</string>
     <string name="settings_element_show_labels_label">Show captions</string>
@@ -777,7 +775,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_app_grid_page_dots">Show page dots</string>
     <string name="settings_search_field_position_info">At the top, or right on the keyboard within easy reach of the thumb.</string>
     <string name="settings_search_rail_hidden">Hidden</string>
-    <string name="settings_search_rail_like_field">Same look as the A-Z rail</string>
     <string name="settings_folder_look_own">Own look</string>
     <string name="settings_folder_look_like_all">Like all folders</string>
     <string name="settings_folder_look_reset">Same look as all folders</string>
@@ -849,4 +846,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_search_categories_rail_on">The categories as a rail beside the results</string>
     <string name="settings_search_categories_rail_off">Off: only the Search column counts</string>
     <string name="settings_apps_icons_link_summary">Icon pack: %1$s · shape and size for all apps</string>
+    <string name="settings_reset_auto_short">Automatic</string>
+    <string name="settings_reset_global_short">Global</string>
+    <string name="settings_look_custom">Own look</string>
+    <string name="settings_look_automatic">Automatic, matching the page</string>
+    <string name="settings_look_reset">Back to automatic</string>
 </resources>

@@ -554,6 +554,8 @@ class SettingsViewModel @Inject constructor(
         repository.appGridBarAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
     fun setAppGridBarAppearance(appearance: ElementAppearance) { viewModelScope.launch { repository.setAppGridBarAppearance(appearance) } }
     fun resetAppGridBarAppearance() { viewModelScope.launch { repository.resetAppGridBarAppearance() } }
+    fun resetAppListSearchButtonAppearance() { viewModelScope.launch { repository.resetAppListSearchButtonAppearance() } }
+    fun resetSearchResultsAppearance() { viewModelScope.launch { repository.resetSearchResultsAppearance() } }
 
     val appGridFolderIds: StateFlow<List<Long>> = repository.appGridFolderIds.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     fun setAppGridFolderIds(ids: List<Long>) { viewModelScope.launch { repository.setAppGridFolderIds(ids) } }

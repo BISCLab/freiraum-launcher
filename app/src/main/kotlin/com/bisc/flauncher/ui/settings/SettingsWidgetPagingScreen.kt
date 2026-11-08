@@ -95,14 +95,7 @@ fun SettingsWidgetPagingScreen(navController: NavController, onBack: () -> Unit,
                 ExpandablePercentSlider(percent = draft.cornerRadiusPercent, onSettled = { draft = draft.copy(cornerRadiusPercent = it) })
             }
             if (draft.appearance != null) {
-                SettingsPreferenceGroup {
-                    SettingsPreference(
-                        icon = null,
-                        title = stringResource(R.string.settings_element_color_reset),
-                        onClick = { draft = draft.copy(appearance = null) },
-                        trailing = null
-                    )
-                }
+                SettingsPreferenceGroup { AutoResetLine(onClick = { draft = draft.copy(appearance = null) }, label = stringResource(R.string.settings_look_reset)) }
             }
             Text(
                 stringResource(R.string.settings_widget_paging_hint),

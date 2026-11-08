@@ -145,16 +145,9 @@ fun SettingsSearchPageScreen(navController: NavController, onBack: () -> Unit, v
                 title = stringResource(R.string.settings_element_text_color_label),
                 summary = if (searchAppearance.contentColor == null) stringResource(R.string.settings_element_color_auto_hint) else null,
                 color = searchAppearance.contentColor ?: MaterialTheme.colorScheme.onSurface.toArgb(),
-                onColorChange = { searchAppearance = searchAppearance.copy(contentColor = it) }
+                onColorChange = { searchAppearance = searchAppearance.copy(contentColor = it) },
+                onReset = if (searchAppearance.contentColor != null) ({ searchAppearance = searchAppearance.copy(contentColor = null) }) else null
             )
-            if (searchAppearance.contentColor != null) {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_element_color_reset),
-                    onClick = { searchAppearance = searchAppearance.copy(contentColor = null) },
-                    trailing = null
-                )
-            }
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_statusbar_label)) {
             SettingsPreference(
@@ -560,6 +553,9 @@ fun SettingsSearchElementScreen(
         SearchElement.RAIL -> railCorner ?: defaultCornerPercent
         SearchElement.RESULTS -> resultsCorner ?: 100
     }
+    val fieldOwn by viewModel.searchFieldAppearance.collectAsState()
+    val railOwn by viewModel.searchRailAppearance.collectAsState()
+    val resultsOwn by viewModel.searchResultsAppearance.collectAsState()
     ElementLookScreen(
         title = stringResource(element.titleRes),
         navController = navController,
@@ -617,23 +613,16 @@ fun SettingsSearchElementScreen(
                 }
             }
         },
-        extras = {
-            val fieldOwn by viewModel.searchFieldAppearance.collectAsState()
-            val railOwn by viewModel.searchRailAppearance.collectAsState()
-            val reset: (() -> Unit)? = when {
-                element == SearchElement.FIELD && fieldOwn != null -> viewModel::resetSearchFieldAppearance
-                element == SearchElement.RAIL && railOwn != null -> viewModel::resetSearchRailAppearance
-                else -> null
-            }
-            if (reset != null) {
-                SettingsPreferenceGroup {
-                    SettingsPreference(
-                        icon = null,
-                        title = stringResource(if (element == SearchElement.RAIL) R.string.settings_search_rail_like_field else R.string.settings_element_color_reset),
-                        onClick = reset,
-                        trailing = null
-                    )
-                }
+        custom = when (element) {
+            SearchElement.FIELD -> fieldOwn != null
+            SearchElement.RAIL -> railOwn != null
+            SearchElement.RESULTS -> resultsOwn != null
+        },
+        onResetLook = {
+            when (element) {
+                SearchElement.FIELD -> viewModel.resetSearchFieldAppearance()
+                SearchElement.RAIL -> viewModel.resetSearchRailAppearance()
+                SearchElement.RESULTS -> viewModel.resetSearchResultsAppearance()
             }
         }
     )

@@ -175,14 +175,7 @@ fun ExpandableOptionalIconSizeSlider(percent: Int?, globalDefault: Int, onSettle
             else stringResource(R.string.settings_icon_size_value, it.roundToInt())
         }
     )
-    if (percent != null) {
-        SettingsPreference(
-            icon = null,
-            title = stringResource(R.string.settings_element_color_reset),
-            onClick = { onSettled(null) },
-            trailing = null
-        )
-    }
+    if (percent != null) AutoResetLine(onClick = { onSettled(null) })
 }
 
 /** Shared generic radio-list row, one [SettingsPreference] with a trailing [RadioButton]. */
@@ -280,16 +273,9 @@ fun ElementAppearanceSection(
             title = stringResource(R.string.settings_element_text_color_label),
             summary = if (appearance.contentColor == null) stringResource(R.string.settings_element_color_auto_hint) else null,
             color = appearance.contentColor ?: textColorSeed,
-            onColorChange = { onAppearanceChange(appearance.copy(contentColor = it)) }
+            onColorChange = { onAppearanceChange(appearance.copy(contentColor = it)) },
+            onReset = if (appearance.contentColor != null) ({ onAppearanceChange(appearance.copy(contentColor = null)) }) else null
         )
-        if (appearance.contentColor != null) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_element_color_reset),
-                onClick = { onAppearanceChange(appearance.copy(contentColor = null)) },
-                trailing = null
-            )
-        }
     }
     if (colorEditorOpen) {
         var draft by rememberDraft(appearance)
@@ -340,16 +326,9 @@ fun ElementAppearanceSection(
                 title = stringResource(R.string.settings_element_border_color),
                 summary = if (appearance.borderColor == null) stringResource(R.string.settings_element_color_auto_hint) else null,
                 color = appearance.borderColor ?: borderColorSeed,
-                onColorChange = { onAppearanceChange(appearance.copy(borderColor = it)) }
+                onColorChange = { onAppearanceChange(appearance.copy(borderColor = it)) },
+                onReset = if (appearance.borderColor != null) ({ onAppearanceChange(appearance.copy(borderColor = null)) }) else null
             )
-            if (appearance.borderColor != null) {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_element_color_reset),
-                    onClick = { onAppearanceChange(appearance.copy(borderColor = null)) },
-                    trailing = null
-                )
-            }
         }
     }
 }
@@ -393,16 +372,9 @@ fun CaptionsRows(
                 title = stringResource(R.string.settings_element_text_color_label),
                 summary = if (appearance.contentColor == null) stringResource(R.string.settings_element_color_auto_hint) else null,
                 color = textColorValue,
-                onColorChange = { onAppearanceChange(appearance.copy(contentColor = it)) }
+                onColorChange = { onAppearanceChange(appearance.copy(contentColor = it)) },
+                onReset = if (appearance.contentColor != null) ({ onAppearanceChange(appearance.copy(contentColor = null)) }) else null
             )
-            if (appearance.contentColor != null) {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_element_color_reset),
-                    onClick = { onAppearanceChange(appearance.copy(contentColor = null)) },
-                    trailing = null
-                )
-            }
         }
     }
 }
@@ -419,19 +391,9 @@ fun AutomaticColorPicker(title: String, custom: Int?, automaticSeed: Int, onChan
         summary = if (custom == null) stringResource(R.string.settings_element_color_auto_hint) else null,
         color = custom ?: automaticSeed,
         onColorChange = { onChange(it) },
-        ownGroup = ownGroup
+        ownGroup = ownGroup,
+        onReset = if (custom != null) ({ onChange(null) }) else null
     )
-    if (custom != null) {
-        val resetRow = @Composable {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_element_color_reset),
-                onClick = { onChange(null) },
-                trailing = null
-            )
-        }
-        if (ownGroup) SettingsPreferenceGroup { resetRow() } else resetRow()
-    }
 }
 
 private fun autoBorderSeed(appearance: ElementAppearance): Int = autoTextSeed(appearance)
