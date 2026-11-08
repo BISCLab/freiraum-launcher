@@ -39,7 +39,7 @@ import com.bisc.flauncher.data.model.PinnedWebsite
 import com.bisc.flauncher.data.model.RevealMode
 import com.bisc.flauncher.data.model.SavedMapTarget
 import com.bisc.flauncher.data.model.SearchCategory
-import com.bisc.flauncher.data.model.SearchEngine
+import com.bisc.flauncher.data.model.WebEngine
 import com.bisc.flauncher.util.launchAiApp
 import com.bisc.flauncher.data.model.WeatherSnapshot
 import com.bisc.flauncher.data.model.ElementAppearance
@@ -434,10 +434,8 @@ class HomeViewModel @Inject constructor(
         settingsRepository.appListShowAzIndex.stateIn(viewModelScope, SharingStarted.Eagerly, true)
     val searchHideStatusBar: StateFlow<Boolean> =
         settingsRepository.searchHideStatusBar.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-    private val searchEngine: StateFlow<SearchEngine> =
-        settingsRepository.searchEngine.stateIn(viewModelScope, SharingStarted.Eagerly, SearchEngine.DUCKDUCKGO)
-    private val searchEngineCustomUrl: StateFlow<String> =
-        settingsRepository.searchEngineCustomUrl.stateIn(viewModelScope, SharingStarted.Eagerly, "")
+    val searchEngines: StateFlow<List<WebEngine>> =
+        settingsRepository.searchEngines.stateIn(viewModelScope, SharingStarted.Eagerly, listOf(WebEngine.presets.first()))
 
     private val searchIncluded: StateFlow<Set<SearchCategory>> =
         settingsRepository.searchIncluded.stateIn(viewModelScope, SharingStarted.Eagerly, SearchCategory.entries.toSet())
@@ -465,8 +463,8 @@ class HomeViewModel @Inject constructor(
     fun setCategoryColor(category: SearchCategory, color: Int) {
         viewModelScope.launch { settingsRepository.setCategoryColor(category, color) }
     }
-    val searchAiApp: StateFlow<String?> =
-        settingsRepository.searchAiApp.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    val searchAiApps: StateFlow<List<String>> =
+        settingsRepository.searchAiApps.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     /** The one category the results are narrowed to, or null to search every category enabled in the settings. */
     private val _searchFilter = MutableStateFlow<SearchCategory?>(null)
@@ -850,10 +848,13 @@ class HomeViewModel @Inject constructor(
         refreshContactResults()
     }
 
-    fun runWebSearchCommand(context: Context) {
+    /** [engineId] null = the first engine. */
+    fun runWebSearchCommand(context: Context, engineId: String? = null) {
         val q = _searchQuery.value.trim()
         if (q.isEmpty()) return
-        if (launchWebSearch(context, q, searchEngine.value, searchEngineCustomUrl.value)) closeSearch()
+        val engines = searchEngines.value
+        val engine = engines.firstOrNull { it.id == engineId } ?: engines.firstOrNull() ?: WebEngine.presets.first()
+        if (launchWebSearch(context, q, engine)) closeSearch()
     }
 
     fun runMapsCommand(context: Context) {
@@ -862,9 +863,10 @@ class HomeViewModel @Inject constructor(
         if (launchMapsQuery(context, q)) closeSearch()
     }
 
-    fun runAiCommand(context: Context) {
+    /** [packageName] null = the first AI app. */
+    fun runAiCommand(context: Context, packageName: String? = null) {
         val q = _searchQuery.value.trim()
-        val app = searchAiApp.value ?: return
+        val app = packageName ?: searchAiApps.value.firstOrNull() ?: return
         if (q.isEmpty()) return
         launchAiApp(context, app, q)
         closeSearch()

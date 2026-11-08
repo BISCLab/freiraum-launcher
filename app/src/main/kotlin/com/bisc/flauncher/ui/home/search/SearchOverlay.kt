@@ -112,7 +112,8 @@ fun SearchOverlay(
     activeCategories: Set<SearchCategory>,
     categoryFilter: SearchCategory?,
     categoryColors: Map<SearchCategory, Int?>,
-    aiAppPackage: String?,
+    webChoices: List<CommandChoice>,
+    aiChoices: List<CommandChoice>,
     keyboardAutoOpen: Boolean,
     loadIcon: (ComponentName) -> ImageBitmap?,
     onQueryChange: (String) -> Unit,
@@ -125,9 +126,9 @@ fun SearchOverlay(
     onWebsiteClick: (PinnedWebsite) -> Unit,
     onShortcutClick: (PinnedShortcut) -> Unit,
     onRefreshContactsPermission: () -> Unit,
-    onWebCommand: () -> Unit,
+    onWebCommand: (String?) -> Unit,
     onMapsCommand: () -> Unit,
-    onAiCommand: () -> Unit,
+    onAiCommand: (String?) -> Unit,
     /** Narrows the search to one category, or back to all (null). */
     onSetFilter: (SearchCategory?) -> Unit = {},
     favoriteApps: List<AppInfo> = emptyList(),
@@ -139,11 +140,6 @@ fun SearchOverlay(
     railCornerRadiusPercent: Int? = null
 ) {
     val context = LocalContext.current
-    val aiAppLabel = remember(aiAppPackage) {
-        aiAppPackage?.let { pkg ->
-            runCatching { context.packageManager.getApplicationLabel(context.packageManager.getApplicationInfo(pkg, 0)).toString() }.getOrNull()
-        }
-    }
 
     LaunchedEffect(Unit) { onRefreshContactsPermission() }
 
@@ -222,7 +218,7 @@ fun SearchOverlay(
         else -> emptyList()
     }
     val railCategories = categoryOrder.filter {
-        (it != SearchCategory.AI || aiAppLabel != null) && (it != SearchCategory.FAVORITES || favoriteApps.isNotEmpty())
+        (it != SearchCategory.AI || aiChoices.isNotEmpty()) && (it != SearchCategory.FAVORITES || favoriteApps.isNotEmpty())
     }
     val onRailTap: (SearchCategory) -> Unit = { category ->
         if (focus == category) {
@@ -270,7 +266,7 @@ fun SearchOverlay(
                         query = query,
                         placeholder = stringResource(R.string.search_field_hint),
                         onQueryChange = onQueryChange,
-                        onSubmit = { appResults.firstOrNull()?.let(onAppClick) ?: onWebCommand() },
+                        onSubmit = { appResults.firstOrNull()?.let(onAppClick) ?: onWebCommand(null) },
                         autoOpen = keyboardAutoOpen,
                         cornerRadiusPercent = barCornerRadiusPercent ?: 100,
                         topInset = if (barAtBottom) 0.dp else topInset,
@@ -316,7 +312,8 @@ fun SearchOverlay(
                         contactsPermissionGranted = contactsPermissionGranted,
                         order = categoryOrder,
                         active = activeCategories,
-                        aiAppLabel = aiAppLabel,
+                        webChoices = webChoices,
+                        aiChoices = aiChoices,
                         cardAppearance = resultsAppearance ?: defaultElement,
                         categoryColors = categoryColors,
                         loadIcon = loadIcon,

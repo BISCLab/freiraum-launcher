@@ -55,7 +55,6 @@
     <string name="search_filter_shortcuts">Shortcuts</string>
     <string name="search_show_all">Show all</string>
     <string name="search_show_less">Show less</string>
-    <string name="search_command_web">Search the web for “%1$s”</string>
     <string name="search_command_maps">Search the map for “%1$s”</string>
 
     <string name="settings_shortcut_wifi">Wi-Fi</string>
@@ -472,11 +471,6 @@
     <string name="contact_action_telegram">Telegram</string>
     <string name="contact_action_open_in_contacts">Open in Contacts app</string>
     <string name="contact_action_no_number">No phone number for this contact.</string>
-    <string name="settings_search_ai_title">AI app</string>
-    <string name="settings_search_ai_none">None selected</string>
-    <string name="settings_search_ai_pick">Choose AI app</string>
-    <string name="settings_search_ai_clear">Remove</string>
-    <string name="settings_search_ai_info">The query is handed to this app like a share. It appears as its own category with its own icon; the switch below turns it on or off. The launcher itself does not access the network.</string>
     <string name="settings_search_categories_info">Drag to change the order of the result sections. The switch decides whether a category is searched by default. In the results you can still tap a category icon at the bottom to show only that category, even if it is switched off here. Web and maps only hand the query to your browser or maps app; the launcher itself does not access the network.</string>
     <string name="settings_search_categories_label">Search categories</string>
     <string name="settings_search_include_apps">Apps</string>
@@ -485,8 +479,6 @@
     <string name="settings_search_include_web">Web search</string>
     <string name="settings_search_include_maps">Maps / navigation</string>
     <string name="settings_search_include_shortcuts">Shortcuts</string>
-    <string name="settings_search_engine_label">Search engine</string>
-    <string name="settings_search_engine_custom">Custom URL</string>
     <string name="settings_search_open_with_default">System default</string>
     <string name="settings_search_open_with_clear">Use system default</string>
     <string name="settings_search_open_with_info">By default the browser and maps app set in Android are used. Here you can pick a different one just for Freiraum. If it cannot open a request, the system default is used instead.</string>
@@ -495,9 +487,6 @@
     <string name="settings_search_maps_title">Maps app</string>
     <string name="settings_search_maps_pick">Choose maps app</string>
     <string name="settings_standard_apps_label">Standard apps</string>
-    <string name="settings_search_engine_custom_url_row">Custom search URL</string>
-    <string name="settings_search_engine_custom_url_unset">Not set</string>
-    <string name="settings_search_engine_custom_info" formatted="false">Write %s where the search term belongs, for example https://www.google.com/search?q=%s. Without %s the term is appended as ?q=, and a missing https:// is added automatically.</string>
 
     <string name="picker_widget_clock">Clock</string>
     <string name="picker_widget_music">Music</string>
@@ -843,4 +832,25 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_folder_creator_empty">Pick apps below; you can add widgets and more right after.</string>
     <string name="settings_category_symbol">Symbol</string>
     <string name="settings_category_color">Color</string>
+    <string name="settings_search_web_title">Web &amp; AI</string>
+    <string name="settings_search_web_intro">Search engines and AI apps each get one card in the Text search. The first one runs with a tap on the card, the others sit right below it to pick instead. Tap a symbol to give it a picture of your own.</string>
+    <string name="settings_search_web_engines">Search engines</string>
+    <string name="settings_search_web_engines_info">The first engine runs with a tap on the card and with Enter. Drag to change the order.</string>
+    <string name="settings_search_web_ai">AI apps</string>
+    <string name="settings_search_web_ai_info">The query is handed to the app like a share. The launcher itself never goes online.</string>
+    <string name="settings_search_web_add_engine">Add search engine</string>
+    <string name="settings_search_web_add_ai">Add AI app</string>
+    <string name="settings_search_web_custom_engine">Own search engine</string>
+    <string name="settings_search_web_name">Name</string>
+    <string name="settings_search_web_url">Search address</string>
+    <string name="settings_search_web_url_info" formatted="false">Put %s where the query goes, for example https://example.org/search?q=%s. Without %s the query is added as ?q=.</string>
+    <string name="settings_search_web_default">Default</string>
+    <string name="settings_search_web_choice">To pick in the same card</string>
+    <string name="settings_search_web_icon_pick">Choose picture</string>
+    <string name="settings_search_web_icon_reset">Standard symbol</string>
+    <string name="settings_search_web_icon_info">A picture of your own is cut to a square and shown round.</string>
+    <string name="settings_search_web_no_ai">No AI app yet. Without one the AI card stays hidden.</string>
+    <string name="settings_search_web_preview_query">weather tomorrow</string>
+    <string name="settings_search_web_all_added">All ready-made engines are added.</string>
+    <string name="search_command_web_with">Search “%1$s” with %2$s</string>
 </resources>

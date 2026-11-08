@@ -18,7 +18,7 @@ import com.bisc.flauncher.data.model.PageRow
 import com.bisc.flauncher.data.model.PageRowType
 import com.bisc.flauncher.data.model.RevealMode
 import com.bisc.flauncher.data.model.SearchCategory
-import com.bisc.flauncher.data.model.SearchEngine
+import com.bisc.flauncher.data.model.WebEngine
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.ElementFillMode
 import com.bisc.flauncher.data.repository.AppOverrideRepository
@@ -478,16 +478,14 @@ class SettingsViewModel @Inject constructor(
     fun setCategoryIcon(category: SearchCategory, icon: String?) {
         viewModelScope.launch { repository.setCategoryIcon(category, icon) }
     }
-    val searchAiApp: StateFlow<String?> =
-        repository.searchAiApp.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    val searchAiApps: StateFlow<List<String>> =
+        repository.searchAiApps.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     val searchBrowserApp: StateFlow<String?> =
         repository.searchBrowserApp.stateIn(viewModelScope, SharingStarted.Eagerly, null)
     val searchMapsApp: StateFlow<String?> =
         repository.searchMapsApp.stateIn(viewModelScope, SharingStarted.Eagerly, null)
-    val searchEngine: StateFlow<SearchEngine> =
-        repository.searchEngine.stateIn(viewModelScope, SharingStarted.Eagerly, SearchEngine.DUCKDUCKGO)
-    val searchEngineCustomUrl: StateFlow<String> =
-        repository.searchEngineCustomUrl.stateIn(viewModelScope, SharingStarted.Eagerly, "")
+    val searchEngines: StateFlow<List<WebEngine>> =
+        repository.searchEngines.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     val appListHeaderLetterAppearance: StateFlow<ElementAppearance> =
         repository.appListHeaderLetterAppearance.stateIn(
             viewModelScope, SharingStarted.Eagerly, ElementAppearance(fillMode = ElementFillMode.NONE, borderEnabled = true)
@@ -841,8 +839,8 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setCategoryColor(category, color) }
     }
 
-    fun setSearchAiApp(packageName: String?) {
-        viewModelScope.launch { repository.setSearchAiApp(packageName) }
+    fun setSearchAiApps(packages: List<String>) {
+        viewModelScope.launch { repository.setSearchAiApps(packages) }
     }
 
     fun setSearchBrowserApp(packageName: String?) {
@@ -853,12 +851,8 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setSearchMapsApp(packageName) }
     }
 
-    fun setSearchEngine(engine: SearchEngine) {
-        viewModelScope.launch { repository.setSearchEngine(engine) }
-    }
-
-    fun setSearchEngineCustomUrl(url: String) {
-        viewModelScope.launch { repository.setSearchEngineCustomUrl(url) }
+    fun setSearchEngines(engines: List<WebEngine>) {
+        viewModelScope.launch { repository.setSearchEngines(engines) }
     }
 
     fun setAppListHeaderLetterAppearance(appearance: ElementAppearance) {

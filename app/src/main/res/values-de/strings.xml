@@ -55,7 +55,6 @@
     <string name="search_filter_shortcuts">Verknüpfungen</string>
     <string name="search_show_all">Alle anzeigen</string>
     <string name="search_show_less">Weniger anzeigen</string>
-    <string name="search_command_web">Im Web nach „%1$s“ suchen</string>
     <string name="search_command_maps">Auf der Karte nach „%1$s“ suchen</string>
 
     <string name="settings_shortcut_wifi">WLAN</string>
@@ -472,11 +471,6 @@
     <string name="contact_action_telegram">Telegram</string>
     <string name="contact_action_open_in_contacts">In Kontakte-App öffnen</string>
     <string name="contact_action_no_number">Keine Telefonnummer für diesen Kontakt.</string>
-    <string name="settings_search_ai_title">KI-App</string>
-    <string name="settings_search_ai_none">Keine ausgewählt</string>
-    <string name="settings_search_ai_pick">KI-App auswählen</string>
-    <string name="settings_search_ai_clear">Entfernen</string>
-    <string name="settings_search_ai_info">Die Suchanfrage wird wie beim Teilen an diese App übergeben. Sie erscheint als eigene Kategorie mit eigenem Symbol; mit dem Schalter darunter schaltest du sie ein oder aus. Der Launcher selbst greift nicht auf das Netz zu.</string>
     <string name="settings_search_categories_info">Ziehe die Kategorien, um die Reihenfolge der Ergebnisse zu ändern. Der Schalter legt fest, ob eine Kategorie standardmäßig durchsucht wird. Im Ergebnisfeld kannst du unten trotzdem ein Kategorie-Symbol antippen, um nur diese Kategorie zu zeigen – auch wenn sie hier ausgeschaltet ist. Web und Karten übergeben die Anfrage nur an deinen Browser bzw. deine Karten-App; der Launcher selbst greift nicht auf das Netz zu.</string>
     <string name="settings_search_categories_label">Suchkategorien</string>
     <string name="settings_search_include_apps">Apps</string>
@@ -485,8 +479,6 @@
     <string name="settings_search_include_web">Websuche</string>
     <string name="settings_search_include_maps">Karten / Navigation</string>
     <string name="settings_search_include_shortcuts">Verknüpfungen</string>
-    <string name="settings_search_engine_label">Suchmaschine</string>
-    <string name="settings_search_engine_custom">Eigene URL</string>
     <string name="settings_search_open_with_default">Systemstandard</string>
     <string name="settings_search_open_with_clear">Systemstandard verwenden</string>
     <string name="settings_search_open_with_info">Standardmäßig werden der Browser und die Karten-App aus den Android-Einstellungen verwendet. Hier kannst du nur für Freiraum eine andere App wählen. Kann sie eine Anfrage nicht öffnen, wird stattdessen der Systemstandard genutzt.</string>
@@ -495,9 +487,6 @@
     <string name="settings_search_maps_title">Karten-App</string>
     <string name="settings_search_maps_pick">Karten-App auswählen</string>
     <string name="settings_standard_apps_label">Standard-Apps</string>
-    <string name="settings_search_engine_custom_url_row">Eigene Such-URL</string>
-    <string name="settings_search_engine_custom_url_unset">Nicht festgelegt</string>
-    <string name="settings_search_engine_custom_info" formatted="false">Schreibe %s an die Stelle des Suchbegriffs, zum Beispiel https://www.google.com/search?q=%s. Ohne %s wird der Begriff als ?q= angehängt, ein fehlendes https:// wird automatisch ergänzt.</string>
 
     <string name="picker_widget_clock">Uhr</string>
     <string name="picker_widget_music">Musik</string>
@@ -843,4 +832,25 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_folder_creator_empty">Wähle unten Apps; Widgets und mehr kannst du gleich danach hinzufügen.</string>
     <string name="settings_category_symbol">Symbol</string>
     <string name="settings_category_color">Farbe</string>
+    <string name="settings_search_web_title">Web &amp; KI</string>
+    <string name="settings_search_web_intro">Suchmaschinen und KI-Apps bekommen in der Textsuche je eine Karte. Die erste startet mit einem Tipp auf die Karte, die anderen liegen direkt darunter zur Auswahl. Tippe auf ein Symbol, um ihm ein eigenes Bild zu geben.</string>
+    <string name="settings_search_web_engines">Suchmaschinen</string>
+    <string name="settings_search_web_engines_info">Die erste Suchmaschine startet mit einem Tipp auf die Karte und mit Enter. Ziehen ändert die Reihenfolge.</string>
+    <string name="settings_search_web_ai">KI-Apps</string>
+    <string name="settings_search_web_ai_info">Die Suchanfrage wird wie beim Teilen an die App übergeben. Der Launcher selbst geht nie ins Netz.</string>
+    <string name="settings_search_web_add_engine">Suchmaschine hinzufügen</string>
+    <string name="settings_search_web_add_ai">KI-App hinzufügen</string>
+    <string name="settings_search_web_custom_engine">Eigene Suchmaschine</string>
+    <string name="settings_search_web_name">Name</string>
+    <string name="settings_search_web_url">Suchadresse</string>
+    <string name="settings_search_web_url_info" formatted="false">Schreibe %s an die Stelle des Suchbegriffs, zum Beispiel https://example.org/search?q=%s. Ohne %s wird der Begriff als ?q= angehängt.</string>
+    <string name="settings_search_web_default">Standard</string>
+    <string name="settings_search_web_choice">Zur Auswahl in derselben Karte</string>
+    <string name="settings_search_web_icon_pick">Bild wählen</string>
+    <string name="settings_search_web_icon_reset">Standardsymbol</string>
+    <string name="settings_search_web_icon_info">Ein eigenes Bild wird quadratisch zugeschnitten und rund gezeigt.</string>
+    <string name="settings_search_web_no_ai">Noch keine KI-App. Ohne sie bleibt die KI-Karte ausgeblendet.</string>
+    <string name="settings_search_web_preview_query">Wetter morgen</string>
+    <string name="settings_search_web_all_added">Alle fertigen Suchmaschinen sind hinzugefügt.</string>
+    <string name="search_command_web_with">„%1$s“ mit %2$s suchen</string>
 </resources>

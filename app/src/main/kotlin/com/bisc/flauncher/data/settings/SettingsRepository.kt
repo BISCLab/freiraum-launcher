@@ -21,7 +21,7 @@ import com.bisc.flauncher.data.model.GradientDirection
 import com.bisc.flauncher.data.model.GestureActionType
 import com.bisc.flauncher.data.model.HomeGesture
 import com.bisc.flauncher.data.model.SearchCategory
-import com.bisc.flauncher.data.model.SearchEngine
+import com.bisc.flauncher.data.model.WebEngine
 import com.bisc.flauncher.ui.theme.FontPreference
 import com.bisc.flauncher.ui.theme.ThemePreference
 import com.bisc.flauncher.ui.theme.defaultBoxFillColorFor
@@ -427,12 +427,15 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[SEARCH_KEYBOARD_CAP_ARROW_KEY] = enabled }
     }
 
-    val searchEngine: Flow<SearchEngine> = dataStore.data.map { prefs ->
-        prefs[SEARCH_ENGINE_KEY]?.let { runCatching { SearchEngine.valueOf(it) }.getOrNull() }
-            ?: SearchEngine.DUCKDUCKGO
+    /** The engines of the web result in order; the first one is used with a tap on the card. */
+    val searchEngines: Flow<List<WebEngine>> = dataStore.data.map { prefs ->
+        prefs[SEARCH_ENGINES_KEY]?.let { WebEngine.fromJson(it) }?.takeIf { it.isNotEmpty() }
+            ?: WebEngine.fromLegacy(prefs[SEARCH_ENGINE_KEY], prefs[SEARCH_ENGINE_CUSTOM_URL_KEY])
     }
 
-    val searchEngineCustomUrl: Flow<String> = dataStore.data.map { it[SEARCH_ENGINE_CUSTOM_URL_KEY] ?: "" }
+    suspend fun setSearchEngines(engines: List<WebEngine>) {
+        dataStore.edit { it[SEARCH_ENGINES_KEY] = WebEngine.toJson(engines) }
+    }
 
     val searchIncluded: Flow<Set<SearchCategory>> = dataStore.data.map { prefs ->
         SearchCategory.entries.filter { c ->
@@ -498,10 +501,13 @@ class SettingsRepository @Inject constructor(
 
     private fun categoryIconKey(category: SearchCategory) = stringPreferencesKey("category_icon_${category.storageKey}")
 
-    val searchAiApp: Flow<String?> = dataStore.data.map { it[SEARCH_AI_APP_KEY] }
+    /** The AI apps of the AI result in order, by package; the first one is used with a tap. */
+    val searchAiApps: Flow<List<String>> = dataStore.data.map { prefs ->
+        prefs[SEARCH_AI_APPS_KEY]?.split('\n')?.filter { it.isNotBlank() } ?: listOfNotNull(prefs[SEARCH_AI_APP_KEY])
+    }
 
-    suspend fun setSearchAiApp(packageName: String?) {
-        dataStore.edit { if (packageName == null) it.remove(SEARCH_AI_APP_KEY) else it[SEARCH_AI_APP_KEY] = packageName }
+    suspend fun setSearchAiApps(packages: List<String>) {
+        dataStore.edit { it[SEARCH_AI_APPS_KEY] = packages.distinct().joinToString("\n") }
     }
 
     val searchBrowserApp: Flow<String?> = dataStore.data.map { it[SEARCH_BROWSER_APP_KEY] }
@@ -817,14 +823,6 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[SEARCH_HIDE_STATUS_BAR_KEY] = hide }
     }
 
-    suspend fun setSearchEngine(engine: SearchEngine) {
-        dataStore.edit { it[SEARCH_ENGINE_KEY] = engine.name }
-    }
-
-    suspend fun setSearchEngineCustomUrl(url: String) {
-        dataStore.edit { it[SEARCH_ENGINE_CUSTOM_URL_KEY] = url }
-    }
-
     suspend fun setAppListHeaderLetterAppearance(appearance: ElementAppearance) = setElementAppearanceFor("search_header_letter", appearance)
 
 
@@ -1098,6 +1096,8 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_CATEGORY_ORDER_KEY = stringPreferencesKey("search_category_order")
         private val SEARCH_REMOVED_KEY = stringPreferencesKey("search_removed_categories")
         private val SEARCH_AI_APP_KEY = stringPreferencesKey("search_ai_app")
+        private val SEARCH_AI_APPS_KEY = stringPreferencesKey("search_ai_apps")
+        private val SEARCH_ENGINES_KEY = stringPreferencesKey("search_engines")
         private val SEARCH_BROWSER_APP_KEY = stringPreferencesKey("search_browser_app")
         private val SEARCH_MAPS_APP_KEY = stringPreferencesKey("search_maps_app")
         private fun searchIncludeKey(storageKey: String) = booleanPreferencesKey("search_include_$storageKey")

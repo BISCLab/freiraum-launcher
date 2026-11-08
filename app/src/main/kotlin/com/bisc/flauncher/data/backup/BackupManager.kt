@@ -129,7 +129,7 @@ class BackupManager @Inject constructor(
         private const val DB_NAME = "flauncher.db"
         private const val SETTINGS_NAME = "datastore/flauncher_settings.preferences_pb"
         private val SAFE_NAME = Regex("[A-Za-z0-9_.-]+")
-        private val FOLDER_TREES = listOf("designs", "wallpaper_packs")
+        private val FOLDER_TREES = listOf("designs", "wallpaper_packs", "search_icons")
 
         /** `designs/<folder>/<file>` or `wallpaper_packs/<folder>/<file>`, nothing deeper or odd. */
         private fun isTreeEntry(name: String): Boolean {

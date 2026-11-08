@@ -41,10 +41,10 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.border
 import androidx.compose.foundation.background
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.bisc.flauncher.data.model.SearchCategory
-import com.bisc.flauncher.data.model.SearchEngine
 import com.bisc.flauncher.ui.home.search.defaultColor
 import com.bisc.flauncher.ui.home.search.icon
 import com.bisc.flauncher.ui.home.search.shownIcon
@@ -220,23 +220,10 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
     val categoryOrder by viewModel.searchCategoryOrder.collectAsState()
     val removedCategories by viewModel.searchRemoved.collectAsState()
     val categoryColors by viewModel.categoryColors.collectAsState()
-    val aiAppPackage by viewModel.searchAiApp.collectAsState()
-    val installedApps by viewModel.browsableApps.collectAsState()
-    var aiPickerOpen by remember { mutableStateOf(false) }
+    val engines by viewModel.searchEngines.collectAsState()
+    val aiApps by viewModel.searchAiApps.collectAsState()
+    val aiChoices = com.bisc.flauncher.ui.home.search.rememberAiChoices(aiApps)
     var pickingColorFor by remember { mutableStateOf<SearchCategory?>(null) }
-    val aiAppLabel = remember(aiAppPackage) {
-        aiAppPackage?.let { pkg ->
-            runCatching { context.packageManager.getApplicationLabel(context.packageManager.getApplicationInfo(pkg, 0)).toString() }.getOrNull()
-        }
-    }
-    val engine by viewModel.searchEngine.collectAsState()
-    val savedCustomUrl by viewModel.searchEngineCustomUrl.collectAsState()
-    // Typing goes through local state; the stored value arrives too late and would swallow characters.
-    var customUrl by remember { mutableStateOf(savedCustomUrl) }
-    var customUrlEdited by remember { mutableStateOf(false) }
-    LaunchedEffect(savedCustomUrl) { if (!customUrlEdited) customUrl = savedCustomUrl }
-    var customUrlSheetOpen by remember { mutableStateOf(false) }
-    var enginePickerOpen by remember { mutableStateOf(false) }
     val favorites by viewModel.searchFavorites.collectAsState()
     val favoritesMode by viewModel.searchFavoritesMode.collectAsState()
     val labeledApps by viewModel.labeledApps.collectAsState()
@@ -245,28 +232,10 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
     SettingsSubScreen(title = stringResource(R.string.settings_search_behavior_label), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
             SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_engine_label),
-                summary = searchEngineLabel(engine),
-                onClick = { enginePickerOpen = true },
-                trailing = null
-            )
-            if (engine == SearchEngine.CUSTOM) {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_search_engine_custom_url_row),
-                    summary = customUrl.ifBlank { stringResource(R.string.settings_search_engine_custom_url_unset) },
-                    onClick = { customUrlSheetOpen = true },
-                    trailing = null
-                )
-            }
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_ai_title),
-                summary = aiAppLabel ?: stringResource(R.string.settings_search_ai_none),
-                info = stringResource(R.string.settings_search_ai_info),
-                onClick = { aiPickerOpen = true },
-                trailing = null
+                icon = androidx.compose.material.icons.Icons.Filled.Public,
+                title = stringResource(R.string.settings_search_web_title),
+                summary = (engines.map { it.name } + aiChoices.map { it.label }).joinToString(", "),
+                onClick = { navController.navigate("settings/search/web") }
             )
         }
 
@@ -382,70 +351,6 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
                 TextButton(onClick = { viewModel.setSearchFavorites(picked); favoritesPickerOpen = false }) { Text(stringResource(R.string.widget_notes_save)) }
             },
             dismissButton = { TextButton(onClick = { favoritesPickerOpen = false }) { Text(stringResource(R.string.widget_notes_cancel)) } }
-        )
-    }
-
-    if (enginePickerOpen) {
-        AlertDialog(
-            onDismissRequest = { enginePickerOpen = false },
-            title = { Text(stringResource(R.string.settings_search_engine_label)) },
-            text = {
-                Column {
-                    SearchEngine.entries.forEach { e ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { viewModel.setSearchEngine(e); enginePickerOpen = false }
-                                .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(selected = e == engine, onClick = { viewModel.setSearchEngine(e); enginePickerOpen = false })
-                            Text(searchEngineLabel(e), modifier = Modifier.padding(start = 8.dp))
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { enginePickerOpen = false }) { Text(stringResource(R.string.widget_notes_cancel)) }
-            }
-        )
-    }
-
-    if (customUrlSheetOpen) {
-        AlertDialog(
-            onDismissRequest = { customUrlSheetOpen = false },
-            title = { Text(stringResource(R.string.settings_search_engine_custom_url_row)) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(stringResource(R.string.settings_search_engine_custom_info), style = MaterialTheme.typography.bodyMedium)
-                    OutlinedTextField(
-                        value = customUrl,
-                        onValueChange = {
-                            customUrlEdited = true
-                            customUrl = it
-                            viewModel.setSearchEngineCustomUrl(it)
-                        },
-                        singleLine = true,
-                        shape = SettingsTextFieldShape,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { customUrlSheetOpen = false }) { Text(stringResource(R.string.widget_notes_done)) }
-            }
-        )
-    }
-
-    if (aiPickerOpen) {
-        AppPickerDialog(
-            title = stringResource(R.string.settings_search_ai_pick),
-            clearLabel = stringResource(R.string.settings_search_ai_clear),
-            apps = remember(installedApps) { installedApps.map { PickableApp(it.componentName.packageName, it.label) }.distinctBy { it.packageName } },
-            selectedPackage = aiAppPackage,
-            onPick = { viewModel.setSearchAiApp(it); aiPickerOpen = false },
-            onClear = { viewModel.setSearchAiApp(null); aiPickerOpen = false },
-            onDismiss = { aiPickerOpen = false }
         )
     }
 
@@ -658,15 +563,6 @@ private fun SettingsViewModel.setSearchElementAppearance(element: SearchElement,
         SearchElement.RAIL -> setSearchRailAppearance(appearance)
         SearchElement.RESULTS -> setSearchResultsAppearance(appearance)
     }
-
-@Composable
-private fun searchEngineLabel(engine: SearchEngine): String = when (engine) {
-    SearchEngine.DUCKDUCKGO -> "DuckDuckGo"
-    SearchEngine.STARTPAGE -> "Startpage"
-    SearchEngine.GOOGLE -> "Google"
-    SearchEngine.BRAVE -> "Brave"
-    SearchEngine.CUSTOM -> stringResource(R.string.settings_search_engine_custom)
-}
 
 internal data class PickableApp(val packageName: String, val label: String)
 

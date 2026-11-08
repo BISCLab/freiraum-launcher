@@ -1289,7 +1289,8 @@ private fun HomeSearchOverlay(
     val searchCategoryRailLeft by viewModel.searchCategoryRailLeft.collectAsState()
     val activeSearchCategories by viewModel.activeSearchCategories.collectAsState()
     val searchFilter by viewModel.searchFilter.collectAsState()
-    val searchAiApp by viewModel.searchAiApp.collectAsState()
+    val searchEngines by viewModel.searchEngines.collectAsState()
+    val searchAiApps by viewModel.searchAiApps.collectAsState()
     val categoryColors by viewModel.categoryColors.collectAsState()
     val converterResult by viewModel.converterResult.collectAsState()
     SearchOverlay(
@@ -1308,7 +1309,8 @@ private fun HomeSearchOverlay(
         activeCategories = activeSearchCategories,
         categoryFilter = searchFilter,
         categoryColors = categoryColors,
-        aiAppPackage = searchAiApp,
+        webChoices = com.bisc.flauncher.ui.home.search.rememberEngineChoices(searchEngines),
+        aiChoices = com.bisc.flauncher.ui.home.search.rememberAiChoices(searchAiApps),
         keyboardAutoOpen = searchKeyboardAutoOpen,
         appearance = searchAppearance,
         cornerRadiusPercent = cornerRadiusPercent,
@@ -1361,9 +1363,9 @@ private fun HomeSearchOverlay(
             viewModel.closeSearch()
         },
         onRefreshContactsPermission = viewModel::refreshContactsPermission,
-        onWebCommand = { viewModel.runWebSearchCommand(context) },
+        onWebCommand = { viewModel.runWebSearchCommand(context, it) },
         onMapsCommand = { viewModel.runMapsCommand(context) },
-        onAiCommand = { viewModel.runAiCommand(context) },
+        onAiCommand = { viewModel.runAiCommand(context, it) },
         onSetFilter = viewModel::setSearchFilter,
         favoriteApps = searchFavoriteApps,
         favoriteIds = searchFavoriteIds,

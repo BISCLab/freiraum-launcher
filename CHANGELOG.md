@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Text search: several search engines and several AI apps. Each still gets one result card: the
+  first runs with a tap, the others sit below it as chips to pick instead
+- New settings page Text search > Behavior > Web & AI: engines and AI apps in a list to drag into
+  order, ready-made engines (DuckDuckGo, Startpage, Google, Brave, Ecosia, Bing, Qwant, Wikipedia)
+  or your own with name and address, and a live preview of both cards
+- Every engine and AI app can get a picture of your own as its symbol (tap the symbol); without one,
+  engines show their initial on their color and AI apps their app icon. Backups take the pictures
+  along
+- The earlier single engine, own search address and AI app carry over
+
 - Text search categories get their own symbol: tap a category in the behavior settings to pick one
   of 32 symbols and its color, with a large preview; the rail and the result cards show it
 - Text search behavior: long category names stay on one line and slide sideways to be read in full

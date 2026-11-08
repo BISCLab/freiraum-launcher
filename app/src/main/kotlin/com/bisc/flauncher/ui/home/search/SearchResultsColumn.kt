@@ -84,7 +84,8 @@ fun SearchResultsColumn(
     contactsPermissionGranted: Boolean,
     order: List<SearchCategory>,
     active: Set<SearchCategory>,
-    aiAppLabel: String?,
+    webChoices: List<CommandChoice>,
+    aiChoices: List<CommandChoice>,
     cardAppearance: ElementAppearance,
     categoryColors: Map<SearchCategory, Int?>,
     loadIcon: (ComponentName) -> ImageBitmap?,
@@ -96,9 +97,9 @@ fun SearchResultsColumn(
     onMapTargetClick: (com.bisc.flauncher.data.model.SavedMapTarget) -> Unit = {},
     onWebsiteClick: (PinnedWebsite) -> Unit,
     onShortcutClick: (PinnedShortcut) -> Unit,
-    onWebCommand: () -> Unit,
+    onWebCommand: (String) -> Unit,
     onMapsCommand: () -> Unit,
-    onAiCommand: () -> Unit,
+    onAiCommand: (String) -> Unit,
     onCalculatorResultClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     /** Card corner roundness, 0-100% of [SearchDimens.cornerRadius]; null = fully rounded. */
@@ -134,9 +135,9 @@ fun SearchResultsColumn(
     val shownShortcutResults = if (SearchCategory.SHORTCUTS in active) shortcutResults else emptyList()
     val shownFolderResults = if (SearchCategory.FOLDERS in active) folderResults else emptyList()
     val shownMapTargetResults = if (SearchCategory.PLACES in active) mapTargetResults else emptyList()
-    val showWeb = SearchCategory.WEB in active && query.isNotBlank()
+    val showWeb = SearchCategory.WEB in active && webChoices.isNotEmpty() && query.isNotBlank()
     val showMaps = SearchCategory.PLACES in active && query.isNotBlank()
-    val showAi = SearchCategory.AI in active && aiAppLabel != null && query.isNotBlank()
+    val showAi = SearchCategory.AI in active && aiChoices.isNotEmpty() && query.isNotBlank()
     val hasDirectResults = shownAppResults.isNotEmpty() || shownContactResults.isNotEmpty() || shownSettingsResults.isNotEmpty() ||
         shownLauncherSettingsResults.isNotEmpty() ||
         shownWebsiteResults.isNotEmpty() || shownShortcutResults.isNotEmpty() ||
@@ -293,14 +294,16 @@ fun SearchResultsColumn(
                     SearchCategory.WEB -> if (showWeb) {
                         item(key = category.name) {
                             ResultCard(cardAppearance, order = cards[category] ?: 0, dimmed = dimmed(category), onUndim = onClearFocus) {
-                                CommandRow(icon = Icons.Filled.Language, color = categoryColor(category), text = stringResource(R.string.search_command_web, query), prominent = !hasDirectResults, onClick = onWebCommand)
+                                val withEngine = stringResource(R.string.search_command_web_with)
+                                CommandChoicesContent(webChoices, text = { withEngine.format(query, it.label) }, tint = categoryColor(category), prominent = !hasDirectResults, onRun = onWebCommand)
                             }
                         }
                     }
                     SearchCategory.AI -> if (showAi) {
                         item(key = category.name) {
                             ResultCard(cardAppearance, order = cards[category] ?: 0, dimmed = dimmed(category), onUndim = onClearFocus) {
-                                CommandRow(icon = SearchCategory.AI.icon, color = categoryColor(category), text = stringResource(R.string.search_command_ai, aiAppLabel.orEmpty(), query), prominent = !hasDirectResults && !showWeb, onClick = onAiCommand)
+                                val askApp = stringResource(R.string.search_command_ai)
+                                CommandChoicesContent(aiChoices, text = { askApp.format(it.label, query) }, tint = categoryColor(category), prominent = !hasDirectResults && !showWeb, onRun = onAiCommand)
                             }
                         }
                     }
