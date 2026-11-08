@@ -135,8 +135,8 @@ class WallpaperPackRepository @Inject constructor(
         refresh()
     }
 
-    /** Puts the pack's pictures on the pages: Home (and every page without one of its own), App
-     *  list, Text search, App grid, and the extras on the other pages in their order. */
+    /** Puts the pack's pictures on the pages: Home together with the pages beside it, App list,
+     *  Text search and App grid. The extras stay in the pack to pick by hand. */
     suspend fun apply(pack: WallpaperPack, lockScreen: Boolean) = withContext(Dispatchers.IO) {
         val pages = pageContentRepository.allPages.first()
         val home = pages.firstOrNull { it.isHome }
@@ -149,9 +149,8 @@ class WallpaperPackRepository @Inject constructor(
         pages.firstOrNull { it.kind == LauncherPageKind.APP_GRID }?.let { page -> setPage(page.id, image(pack.images["appGrid"], "page_${page.id}")) }
         val search = image(pack.images["search"], SettingsRepository.SEARCH_BACKGROUND_KEY)
         if (search != null) settingsRepository.setSearchBackgroundConfig(search) else settingsRepository.clearSearchBackgroundConfig()
-        pages.filter { it.kind == LauncherPageKind.ROWS && !it.isHome }.sortedBy { it.orderIndex }.forEachIndexed { i, page ->
-            setPage(page.id, image(pack.extras.getOrNull(i), "page_${page.id}"))
-        }
+        // The pages beside Home belong to it: they show the same picture (the global one).
+        pages.filter { it.kind == LauncherPageKind.ROWS && !it.isHome }.forEach { page -> setPage(page.id, null) }
         if (lockScreen) pack.lock?.let { file ->
             runCatching { file.inputStream().use { WallpaperManager.getInstance(context).setStream(it, null, true, WallpaperManager.FLAG_LOCK) } }
         }

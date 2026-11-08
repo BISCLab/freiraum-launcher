@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Wallpaper packs: the pages beside Home show the same picture as Home instead of getting a picture of
+  their own, as they belong together
+- Neon Dark and Neon Light: element boxes and folders only softly rounded, so nothing inside is cut
+  off; widgets and result cards slightly rounded
+
 - Switching between light and dark with a design that has both versions (Modern, Neon) now switches to
   the other version of that design instead of resetting every surface to plain defaults; with System
   this happens on its own when the phone changes mode
