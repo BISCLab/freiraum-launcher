@@ -386,7 +386,9 @@ private fun CategoryDesigner(category: SearchCategory, color: Color, iconKey: St
     }
     SettingsPreferenceGroup(title = stringResource(R.string.settings_category_symbol)) {
         val choices: List<Pair<String?, androidx.compose.ui.graphics.vector.ImageVector>> =
-            listOf<Pair<String?, androidx.compose.ui.graphics.vector.ImageVector>>(null to category.icon) + com.bisc.flauncher.ui.home.search.CategoryIconChoices
+            // Always 6 x 6: its own first, then the others without a twin of its own.
+            listOf<Pair<String?, androidx.compose.ui.graphics.vector.ImageVector>>(null to category.icon) +
+                com.bisc.flauncher.ui.home.search.CategoryIconChoices.filter { it.second != category.icon }.take(35)
         androidx.compose.foundation.layout.Column(
             modifier = Modifier.fillMaxWidth().padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)

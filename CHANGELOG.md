@@ -4,6 +4,8 @@
 
 - Web & AI: a symbol can also come from an installed icon pack (tap the symbol, then From icon pack);
   AI apps show their icon from the active icon pack on their own, like every other app
+- Category symbols: the choice is always a full 6 x 6 grid (four new symbols: calendar, plane,
+  fitness, games), and the category's own symbol no longer shows twice
 
 ## 0.11.2
 

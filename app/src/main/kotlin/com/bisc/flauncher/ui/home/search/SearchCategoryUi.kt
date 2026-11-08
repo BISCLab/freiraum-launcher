@@ -34,6 +34,10 @@ import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Flight
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.bisc.flauncher.R
@@ -106,7 +110,8 @@ val SearchCategory.settingsLabelRes: Int
     }
 
 
-/** Symbols a category can get instead of its own, by the name they are stored under. */
+/** Symbols a category can get instead of its own, by the name they are stored under. 36, so the
+ *  picker is a full 6 x 6 grid with the category's own symbol first. */
 val CategoryIconChoices: List<Pair<String, ImageVector>> = listOf(
     "apps" to Icons.Filled.Apps,
     "star" to Icons.Filled.Star,
@@ -139,7 +144,11 @@ val CategoryIconChoices: List<Pair<String, ImageVector>> = listOf(
     "photo" to Icons.Filled.Photo,
     "cart" to Icons.Filled.ShoppingCart,
     "restaurant" to Icons.Filled.Restaurant,
-    "pets" to Icons.Filled.Pets
+    "pets" to Icons.Filled.Pets,
+    "event" to Icons.Filled.Event,
+    "flight" to Icons.Filled.Flight,
+    "fitness" to Icons.Filled.FitnessCenter,
+    "games" to Icons.Filled.SportsEsports
 )
 
 /** Each category's own chosen symbol, if any; provided once for the whole app. */
