@@ -850,6 +850,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_look_reset">Zurück auf automatisch</string>
     <string name="settings_search_bubble_label">Leisten-Blase</string>
     <string name="settings_search_bubble_summary">Namensblase und Lupe beim Wischen über die Leiste</string>
-    <string name="settings_search_legend_search">Suche: Ihre Ergebnisse erscheinen bei jeder Eingabe</string>
-    <string name="settings_search_legend_rail">Leiste: Sie bekommt einen Platz in der Leiste. Nur Leiste = auf Abruf, Ergebnisse nach einem Tipp dort</string>
+    <string name="settings_search_legend_search_body">Ihre Ergebnisse erscheinen bei jeder Eingabe.</string>
+    <string name="settings_search_legend_rail_body">Ein Platz in der Leiste. Nur Leiste = auf Abruf, Ergebnisse nach einem Tipp dort.</string>
+    <string name="settings_search_table_hint">Symbol antippen: Symbol und Farbe ändern. ≡ ziehen: Reihenfolge ändern.</string>
 </resources>

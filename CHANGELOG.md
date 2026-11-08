@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Text search behavior laid out anew: Web & AI, then the rail switch in its own section, then the
+  categories. What Search and Rail do sits in two small cards above the table, not inside it. The
+  table is a card of its own with a tinted head and fixed columns divided by vertical and horizontal
+  lines; a short how-to sits below it
+
 ## 0.12.1
 
 - Text search behavior: the rail switch has its own section above the table, since it turns the

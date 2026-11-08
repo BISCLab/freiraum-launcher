@@ -50,6 +50,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.bisc.flauncher.data.model.SearchCategory
@@ -253,30 +254,38 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
             )
         }
 
-        SettingsPreferenceGroup(
-            title = stringResource(R.string.settings_search_categories_label),
-            info = stringResource(R.string.settings_search_categories_info)
-        ) {
+        Column {
+            SettingsGroupLabel(stringResource(R.string.settings_search_categories_label), info = stringResource(R.string.settings_search_categories_info))
+            // What the two columns do, on its own above the table.
             CategoryLegend(railShown)
-            CategoryTableHeader(railShown)
-            ReorderableList(
-                items = categoryOrder,
-                key = { it },
-                onReorder = viewModel::setSearchCategoryOrder,
-                itemHeight = 76.dp,
-                shape = androidx.compose.ui.graphics.RectangleShape,
-                dividers = true
-            ) { category ->
-                CategoryModeRow(
-                    category = category,
-                    color = categoryColors[category]?.let { Color(it) } ?: category.defaultColor,
-                    mode = modes[category] ?: com.bisc.flauncher.data.model.CategoryMode(search = true, rail = true),
-                    railShown = railShown,
-                    onDesign = { pickingColorFor = category },
-                    onChange = { viewModel.setSearchCategoryModes(mapOf(category to it)) },
-                    onOpen = if (category == SearchCategory.FAVORITES) ({ navController.navigate("settings/search/favorites") }) else null
-                )
+            androidx.compose.foundation.layout.Spacer(Modifier.height(14.dp))
+            Column(modifier = Modifier.fillMaxWidth().clip(SettingsCardShape)) {
+                CategoryTableHeader(railShown)
+                ReorderableList(
+                    items = categoryOrder,
+                    key = { it },
+                    onReorder = viewModel::setSearchCategoryOrder,
+                    itemHeight = 76.dp,
+                    shape = androidx.compose.ui.graphics.RectangleShape,
+                    dividers = true
+                ) { category ->
+                    CategoryModeRow(
+                        category = category,
+                        color = categoryColors[category]?.let { Color(it) } ?: category.defaultColor,
+                        mode = modes[category] ?: com.bisc.flauncher.data.model.CategoryMode(search = true, rail = true),
+                        railShown = railShown,
+                        onDesign = { pickingColorFor = category },
+                        onChange = { viewModel.setSearchCategoryModes(mapOf(category to it)) },
+                        onOpen = if (category == SearchCategory.FAVORITES) ({ navController.navigate("settings/search/favorites") }) else null
+                    )
+                }
             }
+            Text(
+                stringResource(R.string.settings_search_table_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 10.dp)
+            )
         }
     }
 
@@ -300,44 +309,66 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
     }
 }
 
-private val MODE_COLUMN = 48.dp
+private val MODE_COLUMN = 60.dp
+/** The drag handle's column at the end of each row (see ReorderableList). */
+private val HANDLE_COLUMN = 32.dp
 
-/** What the two columns do, once, above the table. */
+/** What the two columns do: two small cards side by side, apart from the table. */
 @Composable
 private fun CategoryLegend(railShown: Boolean) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 6.dp)
-            .clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.07f))
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+    Row(
+        modifier = Modifier.fillMaxWidth().height(androidx.compose.foundation.layout.IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         listOf(
-            Triple(Icons.Filled.Search, R.string.settings_search_legend_search, true),
-            Triple(Icons.AutoMirrored.Filled.ViewSidebar, R.string.settings_search_legend_rail, railShown)
-        ).forEach { (icon, text, active) ->
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.alpha(if (active) 1f else 0.45f)) {
-                androidx.compose.foundation.layout.Box(
-                    modifier = Modifier.size(28.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)),
-                    contentAlignment = Alignment.Center
-                ) { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp)) }
-                Text(stringResource(text), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 10.dp))
+            Triple(Icons.Filled.Search, R.string.settings_search_col_search to R.string.settings_search_legend_search_body, true),
+            Triple(Icons.AutoMirrored.Filled.ViewSidebar, R.string.settings_search_col_rail to R.string.settings_search_legend_rail_body, railShown)
+        ).forEach { (icon, texts, active) ->
+            val shape = androidx.compose.foundation.shape.RoundedCornerShape(18.dp)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .alpha(if (active) 1f else 0.45f)
+                    .clip(shape)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    androidx.compose.foundation.layout.Box(
+                        modifier = Modifier.size(28.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
+                        contentAlignment = Alignment.Center
+                    ) { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp)) }
+                    Text(
+                        stringResource(texts.first),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
+                Text(stringResource(texts.second), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
 }
 
-/** The heads of the two columns, lined up with the toggles below (and the drag handle). */
+/** The table's head: column names on a tinted band, the same column lines as the rows below. */
 @Composable
 private fun CategoryTableHeader(railShown: Boolean) {
+    val line = MaterialTheme.colorScheme.outlineVariant
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 8.dp),
+            .height(48.dp)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .drawBehind {
+                val col = MODE_COLUMN.toPx()
+                val end = size.width - 16.dp.toPx() - HANDLE_COLUMN.toPx()
+                listOf(end - col * 2, end - col, end).forEach { x -> drawLine(line, androidx.compose.ui.geometry.Offset(x, 0f), androidx.compose.ui.geometry.Offset(x, size.height), 1.dp.toPx()) }
+                drawLine(line, androidx.compose.ui.geometry.Offset(0f, size.height), androidx.compose.ui.geometry.Offset(size.width, size.height), 1.dp.toPx())
+            }
+            .padding(start = 16.dp, end = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -357,12 +388,8 @@ private fun CategoryTableHeader(railShown: Boolean) {
                 modifier = Modifier.width(MODE_COLUMN)
             )
         }
-        androidx.compose.foundation.layout.Spacer(Modifier.width(32.dp))
+        androidx.compose.foundation.layout.Spacer(Modifier.width(HANDLE_COLUMN))
     }
-    androidx.compose.foundation.layout.Box(
-        Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(horizontal = 14.dp)
-            .height(1.dp).background(MaterialTheme.colorScheme.outlineVariant)
-    )
 }
 
 /** One category: symbol (tap to design it), name with what it does right now, and the two toggles. */
@@ -385,7 +412,19 @@ private fun CategoryModeRow(
         else -> R.string.settings_search_mode_off to MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
     }
     val off = !mode.search && !inRail
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    val line = MaterialTheme.colorScheme.outlineVariant
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .drawBehind {
+                val col = MODE_COLUMN.toPx()
+                listOf(size.width - col * 2, size.width - col, size.width).forEach { x ->
+                    drawLine(line, androidx.compose.ui.geometry.Offset(x, 0f), androidx.compose.ui.geometry.Offset(x, size.height), 1.dp.toPx())
+                }
+            },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Icon(
             category.shownIcon(),
             contentDescription = null,

@@ -850,6 +850,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_look_reset">Back to automatic</string>
     <string name="settings_search_bubble_label">Rail bubble</string>
     <string name="settings_search_bubble_summary">The name bubble and the magnifier while dragging along the rail</string>
-    <string name="settings_search_legend_search">Search: its results show with every query</string>
-    <string name="settings_search_legend_rail">Rail: it gets a place in the rail. Rail only = on demand, results after a tap there</string>
+    <string name="settings_search_legend_search_body">Its results show with every query.</string>
+    <string name="settings_search_legend_rail_body">A place in the rail. Rail only = on demand, results after a tap there.</string>
+    <string name="settings_search_table_hint">Tap a symbol to change it and its color, drag ≡ to change the order.</string>
 </resources>
