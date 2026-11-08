@@ -862,4 +862,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_search_preset_demand">All on demand</string>
     <string name="settings_search_categories_rail_on">The categories as a rail beside the results</string>
     <string name="settings_search_categories_rail_off">Off: only the Search column counts</string>
+    <string name="settings_apps_icons_link_summary">Icon pack: %1$s · shape and size for all apps</string>
 </resources>

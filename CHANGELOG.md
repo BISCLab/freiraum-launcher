@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Apps & Elements > Apps: a link to Icons on top (icon pack, shape and size for all apps), showing the
+  active icon pack
+
 - Corners of all parts: "Apps in folders" did nothing visible and is now "Folders", the corners
   of the opened folder card. They can also be set on the folder look page
 - "Element box" is called "App box" everywhere now, the box of apps, links and more on a page

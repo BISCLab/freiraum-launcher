@@ -862,4 +862,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_preset_demand">Alles auf Abruf</string>
     <string name="settings_search_categories_rail_on">Die Kategorien als Leiste neben den Ergebnissen</string>
     <string name="settings_search_categories_rail_off">Aus: nur die Spalte Suche zählt</string>
+    <string name="settings_apps_icons_link_summary">Icon-Pack: %1$s · Form und Größe für alle Apps</string>
 </resources>

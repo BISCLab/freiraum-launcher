@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -71,6 +72,8 @@ fun SettingsAppsScreen(navController: NavController, onBack: () -> Unit, onNavig
     val overrides by viewModel.appOverrides.collectAsState()
     var filter by rememberSaveable { mutableStateOf("") }
     var editingApp by remember { mutableStateOf<AppInfo?>(null) }
+    val iconPacks by viewModel.iconPacks.collectAsState()
+    val activeIconPack by viewModel.activeIconPack.collectAsState()
 
     val searching = filter.isNotBlank()
     val filteredApps = remember(apps, filter) {
@@ -102,7 +105,22 @@ fun SettingsAppsScreen(navController: NavController, onBack: () -> Unit, onNavig
             modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            // The icon presets every app shares (shape, size, pack) live under Design → Icons.
+            // Icon pack, shape and size for all apps live under Appearance, but many look for them
+            // here first, so a way there sits on top.
+            item {
+                SettingsPreferenceGroup {
+                    SettingsPreference(
+                        icon = Icons.Filled.Palette,
+                        title = stringResource(R.string.settings_icons_label),
+                        summary = stringResource(
+                            R.string.settings_apps_icons_link_summary,
+                            iconPacks.firstOrNull { it.packageName == activeIconPack }?.label ?: stringResource(R.string.settings_icon_pack_default)
+                        ),
+                        onClick = { navController.navigate("settings/appearance/icons") }
+                    )
+                }
+            }
+            item { Spacer24() }
             if (customizedApps.isNotEmpty()) {
                 item { SettingsGroupLabel(stringResource(R.string.settings_manage_apps_customized_label)) }
                 itemsIndexed(customizedApps, key = { _, app -> app.componentName.flattenToString() }) { index, app ->
