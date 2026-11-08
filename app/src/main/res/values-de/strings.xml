@@ -830,4 +830,15 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_hub_app_list_behavior">Rand, was angezeigt wird, eigene Suche</string>
     <string name="settings_hub_app_grid_appearance">Seite, Raster, Suchfeld</string>
     <string name="settings_hub_app_grid_behavior">Suchfeld, Tastatur, Ordner</string>
+    <string name="settings_folder_icon_tap_hint">Symbol antippen, um es zu ändern</string>
+    <string name="settings_folder_live_hint">So sieht der Ordner geöffnet aus. Tippe ein Widget, eine App oder ein Element an, um es zu ändern oder zu verschieben; das leere Feld fügt etwas hinzu.</string>
+    <string name="settings_folder_add_content">App oder Element</string>
+    <string name="settings_folder_add_widget">Widget</string>
+    <string name="settings_folder_position">Position</string>
+    <string name="settings_folder_widget_all_settings">Alle Einstellungen</string>
+    <string name="settings_folder_rows_label">Reihen</string>
+    <string name="settings_folder_rows_info">Wie viele Apps und Elemente in jeder Reihe nebeneinander stehen. Widgets nehmen immer die ganze Breite ein.</string>
+    <string name="settings_folder_intro">Ordner fassen Apps, Orte, Links und Widgets hinter einem Symbol zusammen. Tippe einen Ordner an, um ihn einzurichten, oder lege einen neuen an.</string>
+    <string name="settings_folder_tile_count_widgets">%1$d Elemente, %2$d Widgets</string>
+    <string name="settings_folder_creator_empty">Wähle unten Apps; Widgets und mehr kannst du gleich danach hinzufügen.</string>
 </resources>

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Folders rebuilt in the settings: all folders as tiles with their icon and what is inside, a tile
+  to make a new one, and the look of all folders above
+- Making a folder shows it while picking: the name and the picked apps in a small folder card, the
+  apps to pick as an icon grid with a tick; afterwards it opens straight away to arrange it
+- Arranging a folder happens on the folder itself, live: its icon and name side by side, the folder
+  as it opens with widgets at their height and the real apps in their rows. Tap a part to change it
+  right below (height, position, all settings, remove), two large buttons add an app or element or a
+  widget, and each row shows as a line of boxes with - and +
+
 ## 0.11.1
 
 - Page previews in the settings are true to scale: every row at its real height and gap, element

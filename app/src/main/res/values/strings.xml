@@ -830,4 +830,15 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_hub_app_list_behavior">Edge, what is shown, its own search</string>
     <string name="settings_hub_app_grid_appearance">Page, grid, search field</string>
     <string name="settings_hub_app_grid_behavior">Search field, keyboard, folders</string>
+    <string name="settings_folder_icon_tap_hint">Tap the icon to change it</string>
+    <string name="settings_folder_live_hint">This is the folder as it opens. Tap a widget, app or element to change or move it; the empty tile adds something.</string>
+    <string name="settings_folder_add_content">App or element</string>
+    <string name="settings_folder_add_widget">Widget</string>
+    <string name="settings_folder_position">Position</string>
+    <string name="settings_folder_widget_all_settings">All settings</string>
+    <string name="settings_folder_rows_label">Rows</string>
+    <string name="settings_folder_rows_info">How many apps and elements sit side by side in each row. Widgets always take the whole width.</string>
+    <string name="settings_folder_intro">Folders gather apps, places, links and widgets behind one icon. Tap a folder to arrange it, or make a new one.</string>
+    <string name="settings_folder_tile_count_widgets">%1$d items, %2$d widgets</string>
+    <string name="settings_folder_creator_empty">Pick apps below; you can add widgets and more right after.</string>
 </resources>

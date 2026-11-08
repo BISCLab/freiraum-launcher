@@ -179,10 +179,11 @@ class SettingsViewModel @Inject constructor(
     }
 
     /** Names a new, empty-or-not folder in one step, matching the home screen's own folder creator. */
-    fun createFolderWithApps(name: String, apps: List<AppInfo>) {
+    fun createFolderWithApps(name: String, apps: List<AppInfo>, onCreated: (Long) -> Unit = {}) {
         viewModelScope.launch {
             val folderId = folderRepository.createFolder(name)
             apps.forEach { folderRepository.addItemToFolder(folderId, com.bisc.flauncher.data.model.GridItemType.APP, it.componentName.flattenToString()) }
+            onCreated(folderId)
         }
     }
 

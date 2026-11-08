@@ -2,6 +2,9 @@ package com.bisc.flauncher.ui.settings
 
 import android.content.ComponentName
 import androidx.compose.foundation.Image
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +30,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -268,29 +270,100 @@ fun FolderCreatorSheet(
             shape = SettingsTextFieldShape,
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         )
+        // The new folder as it will look, filling up while apps are picked.
+        FolderCreatorPreview(name, selected, loadIcon)
         Text(
             text = stringResource(R.string.settings_folder_creator_selected, selected.size),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(vertical = 8.dp)
         )
-        LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth(), contentPadding = PaddingValues(bottom = 8.dp)) {
-            items(filtered, key = { it.componentName.flattenToString() }) { app ->
+        androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
+            columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(4),
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+            contentPadding = PaddingValues(bottom = 8.dp),
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp)
+        ) {
+            items(filtered.size, key = { filtered[it].componentName.flattenToString() }) { index ->
+                val app = filtered[index]
                 val bitmap = com.bisc.flauncher.ui.home.rememberAppIcon(app.componentName, loadIcon)
                 val isSelected = selected.contains(app)
-                Row(
+                val tileShape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+                androidx.compose.foundation.layout.Column(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .padding(2.dp)
+                        .clip(tileShape)
+                        .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f) else androidx.compose.ui.graphics.Color.Transparent)
                         .clickable { if (isSelected) selected.remove(app) else selected.add(app) }
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(vertical = 8.dp, horizontal = 4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Checkbox(checked = isSelected, onCheckedChange = { checked -> if (checked) selected.add(app) else selected.remove(app) })
-                    if (bitmap != null) Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(28.dp))
-                    else androidx.compose.foundation.layout.Spacer(Modifier.size(28.dp))
-                    Text(app.label, modifier = Modifier.padding(start = 12.dp))
+                    androidx.compose.foundation.layout.Box {
+                        if (bitmap != null) Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(44.dp))
+                        else androidx.compose.foundation.layout.Spacer(Modifier.size(44.dp))
+                        if (isSelected) {
+                            androidx.compose.foundation.layout.Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .size(18.dp)
+                                    .clip(androidx.compose.foundation.shape.CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(androidx.compose.material.icons.Icons.Filled.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(12.dp))
+                            }
+                        }
+                    }
+                    Text(
+                        app.label,
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 }
             }
+        }
+    }
+}
+
+/** A folder card in small with the chosen name and the picked apps, so creating one shows it. */
+@Composable
+private fun FolderCreatorPreview(name: String, apps: List<AppInfo>, loadIcon: (ComponentName) -> ImageBitmap?) {
+    val shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp)
+    androidx.compose.foundation.layout.Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp)
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .padding(12.dp),
+        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            name.ifBlank { stringResource(R.string.settings_folder_creator_name_hint) },
+            style = MaterialTheme.typography.titleSmall,
+            color = if (name.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+            maxLines = 1
+        )
+        val shown = apps.take(8)
+        if (shown.isEmpty()) {
+            Text(stringResource(R.string.settings_folder_creator_empty), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        shown.chunked(4).forEach { line ->
+            Row(modifier = Modifier.fillMaxWidth()) {
+                line.forEach { app ->
+                    androidx.compose.foundation.layout.Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        val bitmap = com.bisc.flauncher.ui.home.rememberAppIcon(app.componentName, loadIcon)
+                        if (bitmap != null) Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(32.dp))
+                    }
+                }
+                repeat(4 - line.size) { androidx.compose.foundation.layout.Spacer(Modifier.weight(1f)) }
+            }
+        }
+        if (apps.size > shown.size) {
+            Text("+${apps.size - shown.size}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
