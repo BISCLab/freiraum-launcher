@@ -225,35 +225,49 @@ fun SettingsFolderEditScreen(
                 }
             )
         }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_folder_widgets_label)) {
-            widgetItems.forEachIndexed { index, item ->
-                fun move(delta: Int) {
-                    val reordered = widgetItems.toMutableList().apply { add(index + delta, removeAt(index)) }
-                    homeViewModel.reorderFolderItems(reordered + iconItems)
-                }
-                SettingsPreference(
-                    icon = folderWidgetIcon(item),
-                    title = folderWidgetLabel(item, homeViewModel),
-                    summary = androidx.compose.ui.res.pluralStringResource(R.plurals.settings_widget_size_rows, item.spanY, item.spanY),
-                    onClick = { navController.navigate("settings/folder/$folderId/widget/${item.id}") },
-                    trailing = {
-                        Row {
-                            IconButton(onClick = { move(-1) }, enabled = index > 0) {
-                                Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null)
-                            }
-                            IconButton(onClick = { move(1) }, enabled = index < widgetItems.lastIndex) {
-                                Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null)
-                            }
-                            IconButton(onClick = { removingWidget = item }) {
-                                Icon(
-                                    Icons.Filled.Delete,
-                                    contentDescription = stringResource(R.string.folder_widget_remove),
-                                    tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
+        // Widgets sit above the icon grid in full folder width (as FolderView draws them); each is a
+        // card with its height right there, so the two parts of a folder read apart at a glance.
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_folder_widgets_section),
+            info = stringResource(R.string.settings_folder_widgets_section_info)
+        ) {
+            androidx.compose.foundation.layout.Column(
+                modifier = Modifier.fillMaxWidth().padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                widgetItems.forEachIndexed { index, item ->
+                    fun move(delta: Int) {
+                        val reordered = widgetItems.toMutableList().apply { add(index + delta, removeAt(index)) }
+                        homeViewModel.reorderFolderItems(reordered + iconItems)
                     }
-                )
+                    val isBuiltIn = item.type == GridItemType.WIDGET
+                    val minSpan = if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.minSpan(item.payload) else 1
+                    val kindMax = if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.maxSpan(item.payload) else MAX_FOLDER_APP_WIDGET_SPAN
+                    val fits = com.bisc.flauncher.ui.home.folderWidgetMaxSpan(folder, items, item, globalShowLabels)
+                    // Its own height always counts as possible, so a widget can always be made smaller.
+                    val maxSpan = maxOf(minOf(kindMax, fits), item.spanY, minSpan)
+                    FolderWidgetCard(
+                        icon = folderWidgetIcon(item),
+                        label = folderWidgetLabel(item, homeViewModel),
+                        span = item.spanY,
+                        canGrow = item.spanY < maxSpan,
+                        canShrink = item.spanY > minSpan,
+                        onSpan = { viewModel.updateFolderItem(item.copy(spanY = it)) },
+                        canMoveUp = index > 0,
+                        canMoveDown = index < widgetItems.lastIndex,
+                        onMove = ::move,
+                        onEdit = { navController.navigate("settings/folder/$folderId/widget/${item.id}") },
+                        onRemove = { removingWidget = item }
+                    )
+                }
+                if (widgetItems.isEmpty()) {
+                    Text(
+                        stringResource(R.string.settings_folder_widgets_none),
+                        style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    )
+                }
             }
             SettingsPreference(
                 icon = Icons.Filled.Add,
@@ -267,7 +281,10 @@ fun SettingsFolderEditScreen(
         val gridEntries = remember(iconItems) {
             iconItems.map { item -> RowEntry(id = item.id, pageRowId = 0L, orderIndex = item.orderIndex, type = item.type, payload = item.payload) }
         }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_folder_items_label)) {
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_folder_items_section),
+            info = stringResource(R.string.settings_folder_items_section_info)
+        ) {
             androidx.compose.foundation.layout.Column(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -874,10 +891,15 @@ fun SettingsFolderWidgetEditScreen(
     if (item == null || folder == null) return
     val isBuiltIn = item.type == GridItemType.WIDGET
     val minSpan = if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.minSpan(item.payload) else 1
-    val maxSpan = minOf(
-        if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.maxSpan(item.payload) else MAX_FOLDER_APP_WIDGET_SPAN,
-        com.bisc.flauncher.ui.home.folderWidgetMaxSpan(folder, items, item, showLabels)
-    ).coerceAtLeast(minSpan)
+    // Its own height always counts as possible, so it can always be made smaller again.
+    val maxSpan = maxOf(
+        minOf(
+            if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.maxSpan(item.payload) else MAX_FOLDER_APP_WIDGET_SPAN,
+            com.bisc.flauncher.ui.home.folderWidgetMaxSpan(folder, items, item, showLabels)
+        ),
+        item.spanY,
+        minSpan
+    )
     WidgetEditor(
         savedRow = remember(item) { item.asWidgetRow() },
         navController = navController,
@@ -891,4 +913,74 @@ fun SettingsFolderWidgetEditScreen(
         showEdgeToEdge = false,
         viewModel = homeViewModel
     )
+}
+
+/** One widget of a folder as a card: a small block as tall as the widget, its name, its height in
+ *  rows with - and +, moving it up or down, and removing it. A tap opens all its settings. */
+@Composable
+private fun FolderWidgetCard(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    span: Int,
+    canGrow: Boolean,
+    canShrink: Boolean,
+    onSpan: (Int) -> Unit,
+    canMoveUp: Boolean,
+    canMoveDown: Boolean,
+    onMove: (Int) -> Unit,
+    onEdit: () -> Unit,
+    onRemove: () -> Unit
+) {
+    val scheme = androidx.compose.material3.MaterialTheme.colorScheme
+    val shape = androidx.compose.foundation.shape.RoundedCornerShape(18.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(scheme.surfaceContainerHigh)
+            .clickable(onClick = onEdit)
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // As tall as the widget, in small: one step per row.
+        androidx.compose.foundation.layout.Box(
+            modifier = Modifier
+                .size(width = 44.dp, height = (14 + span * 12).coerceAtMost(86).dp)
+                .clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
+                .background(scheme.primary.copy(alpha = 0.16f))
+                .border(1.dp, scheme.primary.copy(alpha = 0.5f), androidx.compose.foundation.shape.RoundedCornerShape(10.dp)),
+            contentAlignment = Alignment.Center
+        ) { Icon(icon, contentDescription = null, tint = scheme.primary, modifier = Modifier.size(20.dp)) }
+        androidx.compose.foundation.layout.Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(label, style = androidx.compose.material3.MaterialTheme.typography.titleSmall, maxLines = 1)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.settings_folder_widget_height),
+                    style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
+                    color = scheme.onSurfaceVariant,
+                    modifier = Modifier.padding(end = 4.dp)
+                )
+                IconButton(onClick = { onSpan(span - 1) }, enabled = canShrink, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Filled.Remove, contentDescription = null, modifier = Modifier.size(18.dp))
+                }
+                Text(
+                    androidx.compose.ui.res.pluralStringResource(R.plurals.settings_widget_size_rows, span, span),
+                    style = androidx.compose.material3.MaterialTheme.typography.labelLarge
+                )
+                IconButton(onClick = { onSpan(span + 1) }, enabled = canGrow, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                }
+            }
+        }
+        androidx.compose.foundation.layout.Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Row {
+                IconButton(onClick = { onMove(-1) }, enabled = canMoveUp, modifier = Modifier.size(36.dp)) { Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null) }
+                IconButton(onClick = { onMove(1) }, enabled = canMoveDown, modifier = Modifier.size(36.dp)) { Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null) }
+            }
+            IconButton(onClick = onRemove, modifier = Modifier.size(36.dp)) {
+                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.folder_widget_remove), tint = scheme.onSurfaceVariant)
+            }
+        }
+    }
 }

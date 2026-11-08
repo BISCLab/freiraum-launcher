@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Folder settings: widgets and apps are two clearly named parts, Widgets at the top and Apps and
+  elements below, each with a short explanation. Every widget is a card with a block as tall as the
+  widget, its height with - and + right there, moving and removing; a tap opens all its settings.
+  A widget can always be made smaller again, even when the folder is full
+
 - Text search: the field starts white and round like the App grid's, and reaches from the cards'
   edge to the rail's edge; the category rail starts with the look of the A-Z rail and sits as far
   from the cards as from the screen edge. Rail and field are set apart from each other

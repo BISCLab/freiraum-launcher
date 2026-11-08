@@ -815,4 +815,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_colors_accent">Accent</string>
     <string name="settings_statusbar_tile_shown">Shown</string>
     <string name="settings_statusbar_tile_hidden">Hidden</string>
+    <string name="settings_folder_widgets_section">Widgets, at the top</string>
+    <string name="settings_folder_widgets_section_info">Widgets sit above the apps across the whole folder. Set the height of each one right here; a folder never scrolls, so everything has to fit on the screen, and a widget only grows as far as there is room. Tap a widget for all its settings.</string>
+    <string name="settings_folder_widgets_none">No widgets in this folder yet.</string>
+    <string name="settings_folder_widget_height">Height</string>
+    <string name="settings_folder_items_section">Apps and elements, below</string>
+    <string name="settings_folder_items_section_info">Below the widgets, in rows. Tap + to add, tap an item to remove it; the rows underneath set how many fit side by side.</string>
 </resources>

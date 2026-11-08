@@ -815,4 +815,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_colors_accent">Akzent</string>
     <string name="settings_statusbar_tile_shown">Sichtbar</string>
     <string name="settings_statusbar_tile_hidden">Ausgeblendet</string>
+    <string name="settings_folder_widgets_section">Widgets, oben im Ordner</string>
+    <string name="settings_folder_widgets_section_info">Widgets stehen über den Apps, über die ganze Breite des Ordners. Ihre Höhe stellst du direkt hier ein. Ein Ordner scrollt nie, deshalb muss alles auf den Bildschirm passen, und ein Widget wächst nur so weit, wie Platz ist. Antippen öffnet alle Einstellungen des Widgets.</string>
+    <string name="settings_folder_widgets_none">Noch keine Widgets in diesem Ordner.</string>
+    <string name="settings_folder_widget_height">Höhe</string>
+    <string name="settings_folder_items_section">Apps und Elemente, darunter</string>
+    <string name="settings_folder_items_section_info">Unter den Widgets, in Reihen. Mit + hinzufügen, Antippen eines Elements entfernt es; die Reihen darunter legen fest, wie viele nebeneinander passen.</string>
 </resources>
