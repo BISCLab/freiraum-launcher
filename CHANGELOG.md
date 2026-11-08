@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Closing a folder is the opening backwards: it shrinks back towards where it was tapped while it
+  fades, and the darkened, blurred home screen behind it clears at the same pace instead of
+  snapping back
+
 - Folders have fixed places now, like the Dock: every empty cell in the folder editor shows a +
   that adds something exactly there, so apps can sit with gaps in between to make your own pattern.
   Moving an app steps through the cells, empty ones too; removing one leaves its cell empty. When

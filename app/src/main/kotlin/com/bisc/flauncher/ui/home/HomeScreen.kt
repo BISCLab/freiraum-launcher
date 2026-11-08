@@ -425,7 +425,8 @@ fun HomeScreen(
     // Whether *any* level of the folder stack is open.
     val blurRadius by animateDpAsState(
         targetValue = if (folderOpen && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) 20.dp else 0.dp,
-        animationSpec = tween(220),
+        // Same pace as the folder itself growing and shrinking.
+        animationSpec = tween(if (folderOpen) 300 else 260, easing = com.bisc.flauncher.ui.EmphasizedEasing),
         label = "folderBackdropBlur"
     )
     val overlayHidesPage = searchOpen || appListOpen || appGridOpen || (isPanelOpen && !folderOpen)
@@ -436,7 +437,8 @@ fun HomeScreen(
     )
     val scrimAlpha by animateFloatAsState(
         targetValue = if (folderOpen) 0.45f else 0f,
-        animationSpec = tween(220),
+        // Same pace as the folder itself growing and shrinking.
+        animationSpec = tween(if (folderOpen) 300 else 260, easing = com.bisc.flauncher.ui.EmphasizedEasing),
         label = "folderBackdropScrim"
     )
 
@@ -788,12 +790,14 @@ fun HomeScreen(
             )
         }
 
-        if (folderOpen) {
+        // Stays while it fades out, so closing darkens back as smoothly as opening.
+        if (folderOpen || scrimAlpha > 0f) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = scrimAlpha))
                     .clickable(
+                        enabled = folderOpen,
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() },
                         onClick = viewModel::closeAllFolders
@@ -1182,62 +1186,99 @@ fun HomeScreen(
         )
     }
 
-    openFolderPath.lastOrNull()?.let { folderId ->
-        val folder = folders.find { it.id == folderId }
-        if (folder != null) androidx.compose.runtime.key(folderId) {
-            val folderOrigin = remember { com.bisc.flauncher.ui.TouchOrigin.transformOrigin(view.width, view.height) }
-            val appear = remember { androidx.compose.animation.core.Animatable(if (folderMotion == com.bisc.flauncher.ui.MotionLevel.OFF) 1f else 0f) }
-            LaunchedEffect(Unit) { appear.animateTo(1f, tween(300, easing = com.bisc.flauncher.ui.EmphasizedEasing)) }
-            val startScale = if (folderMotion == com.bisc.flauncher.ui.MotionLevel.FULL) 0.8f else 0.94f
-            Box(modifier = Modifier.fillMaxSize().graphicsLayer {
-                val s = startScale + (1f - startScale) * appear.value
-                scaleX = s
-                scaleY = s
-                alpha = appear.value
-                transformOrigin = folderOrigin
-            }) {
-            FolderView(
-                folder = folder,
-                items = folderItemsByFolder[folderId].orEmpty(),
-                folders = folders,
-                folderItemsByFolder = folderItemsByFolder,
-                savedMapTargets = savedMapTargets,
-                pinnedWebsites = pinnedWebsites,
-                loadIcon = viewModel::loadIcon,
-                loadPackIcon = viewModel::loadPackIcon,
-                resolveLabel = resolveLabel,
-                onAppClick = { item ->
-                    when (item.type) {
-                        GridItemType.APP -> ComponentName.unflattenFromString(item.payload)?.let { launchApp(context, it) }
-                        GridItemType.SHORTCUT -> viewModel.launchFolderShortcut(item.payload)
-                        GridItemType.MAP_TARGET -> item.payload.toLongOrNull()
-                            ?.let { id -> savedMapTargets.find { it.id == id } }
-                            ?.let { target -> launchMapTarget(context, target) }
-                        GridItemType.WEBSITE -> item.payload.toLongOrNull()
-                            ?.let { id -> pinnedWebsites.find { it.id == id } }
-                            ?.let { website -> openWebsite(context, website) }
-                        GridItemType.FOLDER, GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE, GridItemType.CONTACT, GridItemType.ACTION_BUTTON -> Unit
-                    }
-                    viewModel.closeAllFolders()
-                    viewModel.closeOverview()
-                },
-                onFolderClick = { item -> item.payload.toLongOrNull()?.let(viewModel::openFolder) },
-                onRemoveItem = viewModel::removeFromFolder,
-                onMoveItemToSlot = viewModel::moveFolderItemToSlot,
-                onBack = viewModel::closeFolder,
-                cardAppearance = folder.effectiveAppearance(folderCardAppearance),
-                onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) },
-                onEditWidget = { item ->
-                    viewModel.closeAllFolders()
-                    viewModel.closeOverview()
-                    onNavigateToSettings("settings/folder/${item.folderId}/widget/${item.id}")
-                },
-                showLabels = if (folder.showLabelsOverrideEnabled) folder.showLabels else folderShowLabels
-            )
+    HomeFolderOverlay(viewModel, openFolderPath, folderMotion, openPageById, openSettingsFromGesture, onNavigateToSettings)
+
+}
+
+/** The open folder over the home screen. It grows out of where it was tapped and, when closed,
+ *  shrinks back there the same way before it goes; kept out of [HomeScreen] so that one stays
+ *  small enough for Android to load. */
+@Composable
+private fun HomeFolderOverlay(
+    viewModel: HomeViewModel,
+    openFolderPath: List<Long>,
+    folderMotion: com.bisc.flauncher.ui.MotionLevel,
+    openPageById: (Long) -> Unit,
+    openSettingsFromGesture: () -> Unit,
+    onNavigateToSettings: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val view = LocalView.current
+    val folders by viewModel.folders.collectAsState()
+    val folderItemsByFolder by viewModel.folderItemsByFolder.collectAsState()
+    val savedMapTargets by viewModel.savedMapTargets.collectAsState()
+    val pinnedWebsites by viewModel.pinnedWebsites.collectAsState()
+    val folderCardAppearance by viewModel.folderCardAppearance.collectAsState()
+    val folderShowLabels by viewModel.folderShowLabels.collectAsState()
+    val resolveLabel = viewModel::resolveLabel
+    val currentId = openFolderPath.lastOrNull()
+    // The last folder stays on screen while it closes.
+    var shownId by remember { mutableStateOf(currentId) }
+    if (currentId != null && currentId != shownId) shownId = currentId
+    val open = currentId != null
+    val folderId = shownId ?: return
+    val folder = folders.find { it.id == folderId } ?: return
+    androidx.compose.runtime.key(folderId) {
+        val folderOrigin = remember { com.bisc.flauncher.ui.TouchOrigin.transformOrigin(view.width, view.height) }
+        val off = folderMotion == com.bisc.flauncher.ui.MotionLevel.OFF
+        val appear = remember { androidx.compose.animation.core.Animatable(if (off) 1f else 0f) }
+        LaunchedEffect(open) {
+            if (open) {
+                appear.animateTo(1f, tween(300, easing = com.bisc.flauncher.ui.EmphasizedEasing))
+            } else {
+                // The opening backwards: shrinking towards where it came from while fading.
+                if (!off) appear.animateTo(0f, tween(260, easing = com.bisc.flauncher.ui.EmphasizedEasing))
+                shownId = null
             }
         }
+        val startScale = if (folderMotion == com.bisc.flauncher.ui.MotionLevel.FULL) 0.8f else 0.94f
+        Box(modifier = Modifier.fillMaxSize().graphicsLayer {
+            val s = startScale + (1f - startScale) * appear.value
+            scaleX = s
+            scaleY = s
+            alpha = appear.value
+            transformOrigin = folderOrigin
+        }) {
+        FolderView(
+            folder = folder,
+            items = folderItemsByFolder[folderId].orEmpty(),
+            folders = folders,
+            folderItemsByFolder = folderItemsByFolder,
+            savedMapTargets = savedMapTargets,
+            pinnedWebsites = pinnedWebsites,
+            loadIcon = viewModel::loadIcon,
+            loadPackIcon = viewModel::loadPackIcon,
+            resolveLabel = resolveLabel,
+            onAppClick = { item ->
+                when (item.type) {
+                    GridItemType.APP -> ComponentName.unflattenFromString(item.payload)?.let { launchApp(context, it) }
+                    GridItemType.SHORTCUT -> viewModel.launchFolderShortcut(item.payload)
+                    GridItemType.MAP_TARGET -> item.payload.toLongOrNull()
+                        ?.let { id -> savedMapTargets.find { it.id == id } }
+                        ?.let { target -> launchMapTarget(context, target) }
+                    GridItemType.WEBSITE -> item.payload.toLongOrNull()
+                        ?.let { id -> pinnedWebsites.find { it.id == id } }
+                        ?.let { website -> openWebsite(context, website) }
+                    GridItemType.FOLDER, GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE, GridItemType.CONTACT, GridItemType.ACTION_BUTTON -> Unit
+                }
+                viewModel.closeAllFolders()
+                viewModel.closeOverview()
+            },
+            onFolderClick = { item -> item.payload.toLongOrNull()?.let(viewModel::openFolder) },
+            onRemoveItem = viewModel::removeFromFolder,
+            onMoveItemToSlot = viewModel::moveFolderItemToSlot,
+            onBack = viewModel::closeFolder,
+            cardAppearance = folder.effectiveAppearance(folderCardAppearance),
+            onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) },
+            onEditWidget = { item ->
+                viewModel.closeAllFolders()
+                viewModel.closeOverview()
+                onNavigateToSettings("settings/folder/${item.folderId}/widget/${item.id}")
+            },
+            showLabels = if (folder.showLabelsOverrideEnabled) folder.showLabels else folderShowLabels
+        )
+        }
     }
-
 }
 
 /** Virtual rounds an endless carousel spans (it starts in the middle) - far more than anyone swipes. */
