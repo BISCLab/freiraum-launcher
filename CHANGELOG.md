@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Text search categories get their own symbol: tap a category in the behavior settings to pick one
+  of 32 symbols and its color, with a large preview; the rail and the result cards show it
+- Text search behavior: long category names stay on one line and slide sideways to be read in full
+
 - Text search: with the keyboard up, the category rail reaches from the field to the keyboard with
   the same gap at both ends, its top level with the first result card; with the keyboard down it
   sits in the middle as before

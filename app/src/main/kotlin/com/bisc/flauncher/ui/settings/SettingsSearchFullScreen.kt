@@ -37,12 +37,17 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.data.model.SearchEngine
 import com.bisc.flauncher.ui.home.search.defaultColor
 import com.bisc.flauncher.ui.home.search.icon
+import com.bisc.flauncher.ui.home.search.shownIcon
 import com.bisc.flauncher.ui.home.search.settingsLabelRes
 
 /** Text search settings hub: everything about how it looks under Appearance, everything about
@@ -299,19 +304,20 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Icon(
-                        category.icon,
+                        category.shownIcon(),
                         contentDescription = null,
                         tint = color,
                         modifier = Modifier.size(28.dp).clip(CircleShape).clickable { pickingColorFor = category }.padding(2.dp)
                     )
-                    Text(
-                        stringResource(category.settingsLabelRes),
-                        style = MaterialTheme.typography.bodyLarge,
-                        maxLines = 1,
-                        softWrap = false,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
+                    // One line; a longer name slides sideways to be read in full.
+                    androidx.compose.foundation.layout.Box(modifier = Modifier.weight(1f).horizontalScroll(androidx.compose.foundation.rememberScrollState())) {
+                        Text(
+                            stringResource(category.settingsLabelRes),
+                            style = MaterialTheme.typography.bodyLarge,
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
                     Switch(checked = category in included, onCheckedChange = { viewModel.setSearchIncluded(category, it) })
                     androidx.compose.material3.IconButton(onClick = { viewModel.setSearchRemoved(category, true) }, modifier = Modifier.size(28.dp)) {
                         Icon(
@@ -444,19 +450,64 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
     }
 
     pickingColorFor?.let { category ->
-        val current = categoryColors[category]?.let { Color(it) } ?: category.defaultColor
-        var draft by rememberDraft(current)
+        val categoryIcons by viewModel.categoryIcons.collectAsState()
+        val savedColor = categoryColors[category]?.let { Color(it) } ?: category.defaultColor
+        val savedIcon = categoryIcons[category]
+        var color by rememberDraft(savedColor)
+        var iconKey by rememberDraft(savedIcon)
         SettingsEditPage(
             title = stringResource(category.settingsLabelRes),
             onDismiss = { pickingColorFor = null },
-            onSave = { viewModel.setCategoryColor(category, draft.toArgb()) },
-            dirty = draft != current
+            onSave = {
+                if (color != savedColor) viewModel.setCategoryColor(category, color.toArgb())
+                if (iconKey != savedIcon) viewModel.setCategoryIcon(category, iconKey)
+            },
+            dirty = color != savedColor || iconKey != savedIcon
         ) {
-            ColorPickerControls(
-                color = draft,
-                onColorChange = { draft = it }
-            )
+            CategoryDesigner(category, color, iconKey, onIcon = { iconKey = it }, onColor = { color = it })
         }
+    }
+}
+
+/** A category's symbol and color: a large preview, the symbols to pick (its own first), the color. */
+@Composable
+private fun CategoryDesigner(category: SearchCategory, color: Color, iconKey: String?, onIcon: (String?) -> Unit, onColor: (Color) -> Unit) {
+    val shown = iconKey?.let { key -> com.bisc.flauncher.ui.home.search.CategoryIconChoices.firstOrNull { it.first == key }?.second } ?: category.icon
+    androidx.compose.foundation.layout.Box(Modifier.fillMaxWidth().padding(vertical = 12.dp), contentAlignment = Alignment.Center) {
+        androidx.compose.foundation.layout.Box(
+            modifier = Modifier.size(72.dp).clip(CircleShape).background(color.copy(alpha = 0.18f)),
+            contentAlignment = Alignment.Center
+        ) { Icon(shown, contentDescription = null, tint = color, modifier = Modifier.size(36.dp)) }
+    }
+    SettingsPreferenceGroup(title = stringResource(R.string.settings_category_symbol)) {
+        val choices: List<Pair<String?, androidx.compose.ui.graphics.vector.ImageVector>> =
+            listOf<Pair<String?, androidx.compose.ui.graphics.vector.ImageVector>>(null to category.icon) + com.bisc.flauncher.ui.home.search.CategoryIconChoices
+        androidx.compose.foundation.layout.Column(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            choices.chunked(6).forEach { line ->
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    line.forEach { (key, vector) ->
+                        val picked = key == iconKey
+                        androidx.compose.foundation.layout.Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .aspectRatio(1f)
+                                .clip(androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
+                                .background(if (picked) color.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceContainerHigh)
+                                .then(if (picked) Modifier.border(2.dp, color, androidx.compose.foundation.shape.RoundedCornerShape(14.dp)) else Modifier)
+                                .clickable { onIcon(key) },
+                            contentAlignment = Alignment.Center
+                        ) { Icon(vector, contentDescription = null, tint = if (picked) color else MaterialTheme.colorScheme.onSurfaceVariant) }
+                    }
+                    repeat(6 - line.size) { androidx.compose.foundation.layout.Spacer(Modifier.weight(1f)) }
+                }
+            }
+        }
+    }
+    SettingsPreferenceGroup(title = stringResource(R.string.settings_category_color)) {
+        ColorPickerControls(color = color, onColorChange = onColor, modifier = Modifier.padding(12.dp))
     }
 }
 

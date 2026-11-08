@@ -470,6 +470,14 @@ class SettingsViewModel @Inject constructor(
     val categoryColors: StateFlow<Map<SearchCategory, Int?>> =
         combine(SearchCategory.entries.map { c -> repository.categoryColor(c).map { color -> c to color } }) { pairs -> pairs.toMap() }
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+
+    val categoryIcons: StateFlow<Map<SearchCategory, String?>> =
+        combine(SearchCategory.entries.map { c -> repository.categoryIcon(c).map { icon -> c to icon } }) { pairs -> pairs.toMap() }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+
+    fun setCategoryIcon(category: SearchCategory, icon: String?) {
+        viewModelScope.launch { repository.setCategoryIcon(category, icon) }
+    }
     val searchAiApp: StateFlow<String?> =
         repository.searchAiApp.stateIn(viewModelScope, SharingStarted.Eagerly, null)
     val searchBrowserApp: StateFlow<String?> =

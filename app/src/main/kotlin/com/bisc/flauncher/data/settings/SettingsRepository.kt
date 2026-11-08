@@ -489,6 +489,15 @@ class SettingsRepository @Inject constructor(
 
     private fun categoryColorKey(category: SearchCategory) = intPreferencesKey("category_color_${category.storageKey}")
 
+    /** A symbol chosen for a category (see CategoryIconChoices); null = its own. */
+    fun categoryIcon(category: SearchCategory): Flow<String?> = dataStore.data.map { it[categoryIconKey(category)] }
+
+    suspend fun setCategoryIcon(category: SearchCategory, icon: String?) {
+        dataStore.edit { if (icon == null) it.remove(categoryIconKey(category)) else it[categoryIconKey(category)] = icon }
+    }
+
+    private fun categoryIconKey(category: SearchCategory) = stringPreferencesKey("category_icon_${category.storageKey}")
+
     val searchAiApp: Flow<String?> = dataStore.data.map { it[SEARCH_AI_APP_KEY] }
 
     suspend fun setSearchAiApp(packageName: String?) {

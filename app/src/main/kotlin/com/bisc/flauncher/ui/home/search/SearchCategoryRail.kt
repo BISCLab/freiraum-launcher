@@ -134,7 +134,7 @@ fun SearchCategoryRail(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        category.icon,
+                        category.shownIcon(),
                         contentDescription = stringResource(category.filterLabelRes),
                         tint = color,
                         modifier = Modifier.size(17.dp).alpha(if (faded) 0.3f else 0.9f)
@@ -156,7 +156,7 @@ fun SearchCategoryRail(
                     .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(category.icon, contentDescription = null, tint = colorOf(category), modifier = Modifier.size(28.dp))
+                Icon(category.shownIcon(), contentDescription = null, tint = colorOf(category), modifier = Modifier.size(28.dp))
             }
         }
     }

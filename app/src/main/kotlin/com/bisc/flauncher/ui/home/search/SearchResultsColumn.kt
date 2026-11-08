@@ -288,7 +288,7 @@ fun SearchResultsColumn(
                         )
                     }
                     SearchCategory.LAUNCHER_SETTINGS -> sectionCard(cards[category] ?: 0, dimmed(category), onClearFocus, category, shownLauncherSettingsResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { target ->
-                        ResultRow(leading = { Icon(category.icon, contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = stringResource(target.labelRes), onClick = { onLauncherSettingsClick(target) })
+                        ResultRow(leading = { Icon(category.shownIcon(), contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = stringResource(target.labelRes), onClick = { onLauncherSettingsClick(target) })
                     }
                     SearchCategory.WEB -> if (showWeb) {
                         item(key = category.name) {

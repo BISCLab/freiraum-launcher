@@ -2,6 +2,7 @@ package com.bisc.flauncher.ui.home.search
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -13,6 +14,26 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Mail
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Work
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.Photo
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Pets
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.bisc.flauncher.R
@@ -83,3 +104,48 @@ val SearchCategory.settingsLabelRes: Int
         SearchCategory.WEB -> R.string.settings_search_include_web
         SearchCategory.AI -> R.string.settings_search_include_ai
     }
+
+
+/** Symbols a category can get instead of its own, by the name they are stored under. */
+val CategoryIconChoices: List<Pair<String, ImageVector>> = listOf(
+    "apps" to Icons.Filled.Apps,
+    "star" to Icons.Filled.Star,
+    "favorite" to Icons.Filled.Favorite,
+    "folder" to Icons.Filled.Folder,
+    "person" to Icons.Filled.Person,
+    "group" to Icons.Filled.Group,
+    "phone" to Icons.Filled.Phone,
+    "mail" to Icons.Filled.Mail,
+    "chat" to Icons.AutoMirrored.Filled.Chat,
+    "settings" to Icons.Filled.Settings,
+    "tune" to Icons.Filled.Tune,
+    "build" to Icons.Filled.Build,
+    "bookmark" to Icons.Filled.Bookmark,
+    "link" to Icons.Filled.Link,
+    "language" to Icons.Filled.Language,
+    "public" to Icons.Filled.Public,
+    "place" to Icons.Filled.Place,
+    "map" to Icons.Filled.Map,
+    "home" to Icons.Filled.Home,
+    "work" to Icons.Filled.Work,
+    "school" to Icons.Filled.School,
+    "shortcut" to Icons.AutoMirrored.Filled.Shortcut,
+    "bolt" to Icons.Filled.Bolt,
+    "auto_awesome" to Icons.Filled.AutoAwesome,
+    "lightbulb" to Icons.Filled.Lightbulb,
+    "search" to Icons.Filled.Search,
+    "music" to Icons.Filled.MusicNote,
+    "movie" to Icons.Filled.Movie,
+    "photo" to Icons.Filled.Photo,
+    "cart" to Icons.Filled.ShoppingCart,
+    "restaurant" to Icons.Filled.Restaurant,
+    "pets" to Icons.Filled.Pets
+)
+
+/** Each category's own chosen symbol, if any; provided once for the whole app. */
+val LocalCategoryIcons = androidx.compose.runtime.compositionLocalOf<Map<SearchCategory, String?>> { emptyMap() }
+
+/** The symbol a category shows: the one chosen for it, or its own. */
+@androidx.compose.runtime.Composable
+fun SearchCategory.shownIcon(): ImageVector =
+    LocalCategoryIcons.current[this]?.let { key -> CategoryIconChoices.firstOrNull { it.first == key }?.second } ?: icon

@@ -841,4 +841,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_folder_intro">Ordner fassen Apps, Orte, Links und Widgets hinter einem Symbol zusammen. Tippe einen Ordner an, um ihn einzurichten, oder lege einen neuen an.</string>
     <string name="settings_folder_tile_count_widgets">%1$d Elemente, %2$d Widgets</string>
     <string name="settings_folder_creator_empty">Wähle unten Apps; Widgets und mehr kannst du gleich danach hinzufügen.</string>
+    <string name="settings_category_symbol">Symbol</string>
+    <string name="settings_category_color">Farbe</string>
 </resources>

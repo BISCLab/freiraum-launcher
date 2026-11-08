@@ -454,6 +454,14 @@ class HomeViewModel @Inject constructor(
         combine(SearchCategory.entries.map { c -> settingsRepository.categoryColor(c).map { color -> c to color } }) { pairs -> pairs.toMap() }
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
+    val categoryIcons: StateFlow<Map<SearchCategory, String?>> =
+        combine(SearchCategory.entries.map { c -> settingsRepository.categoryIcon(c).map { icon -> c to icon } }) { pairs -> pairs.toMap() }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+
+    fun setCategoryIcon(category: SearchCategory, icon: String?) {
+        viewModelScope.launch { settingsRepository.setCategoryIcon(category, icon) }
+    }
+
     fun setCategoryColor(category: SearchCategory, color: Int) {
         viewModelScope.launch { settingsRepository.setCategoryColor(category, color) }
     }
