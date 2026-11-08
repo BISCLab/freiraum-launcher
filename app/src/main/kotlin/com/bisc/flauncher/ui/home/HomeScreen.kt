@@ -1210,6 +1210,7 @@ private fun HomeFolderOverlay(
     val pinnedWebsites by viewModel.pinnedWebsites.collectAsState()
     val folderCardAppearance by viewModel.folderCardAppearance.collectAsState()
     val folderShowLabels by viewModel.folderShowLabels.collectAsState()
+    val folderCorner by viewModel.folderCornerPercent.collectAsState()
     val resolveLabel = viewModel::resolveLabel
     val currentId = openFolderPath.lastOrNull()
     // The last folder stays on screen while it closes.
@@ -1267,6 +1268,7 @@ private fun HomeFolderOverlay(
             onFolderClick = { item -> item.payload.toLongOrNull()?.let(viewModel::openFolder) },
             onRemoveItem = viewModel::removeFromFolder,
             onMoveItemToSlot = viewModel::moveFolderItemToSlot,
+            cornerPercent = folderCorner,
             onBack = viewModel::closeFolder,
             cardAppearance = folder.effectiveAppearance(folderCardAppearance),
             onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) },

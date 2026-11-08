@@ -156,6 +156,8 @@ fun FolderView(
     onFolderClick: (FolderItem) -> Unit,
     onRemoveItem: (FolderItem) -> Unit,
     onMoveItemToSlot: (FolderItem, Int) -> Unit = { _, _ -> },
+    /** The card's corners, 0-100 % of its full rounding. */
+    cornerPercent: Int = 100,
     onBack: () -> Unit,
     cardAppearance: ElementAppearance,
     /** Runs a clock widget's tap action. */
@@ -196,7 +198,7 @@ fun FolderView(
         content = {
         DockPanelSurface(
             appearance = cardAppearance,
-            shape = RoundedCornerShape(FolderCornerRadius),
+            shape = RoundedCornerShape(FolderCornerRadius * (cornerPercent.coerceIn(0, 100) / 100f)),
             effectTarget = "folders",
             modifier = Modifier
                 .width(dockPillWidth)

@@ -289,7 +289,7 @@
 
     <string name="settings_section_pages">Seiten</string>
     <string name="settings_section_app_overview">App-Übersicht</string>
-    <string name="settings_card_pages_subtitle">Widgets, Element-Boxen, Hintergründe</string>
+    <string name="settings_card_pages_subtitle">Widgets, App-Kästen, Hintergründe</string>
     <string name="settings_pages_home">Startbildschirm</string>
     <string name="settings_home_appearance_title">Aussehen</string>
     <string name="settings_home_appearance_subtitle">Hintergrund, Statusleiste</string>
@@ -332,7 +332,7 @@
     <string name="settings_page_icon_glyph_widget_page">Widget-Seite</string>
 
     <string name="settings_rows_title">Zeilen</string>
-    <string name="settings_rows_empty">Keine Zeilen auf dieser Seite. Über „Zeile hinzufügen“ ein Widget oder eine Element-Box ergänzen.</string>
+    <string name="settings_rows_empty">Keine Zeilen auf dieser Seite. Über „Zeile hinzufügen“ ein Widget oder einen App-Kasten ergänzen.</string>
     <string name="settings_page_app_overview_description">Vollbildliste aller Apps. Wird per Geste geöffnet (Standard: Nach oben wischen, siehe Gesten).</string>
     <plurals name="settings_widget_size_rows">
         <item quantity="one">%1$d Zeile</item>
@@ -342,7 +342,7 @@
     <string name="settings_widget_size_increase">Um %1$d erhöhen</string>
     <string name="settings_widget_size_decrease">Um %1$d verringern</string>
     <string name="settings_rows_add">Zeile hinzufügen</string>
-    <string name="settings_rows_add_element_box">Element-Box</string>
+    <string name="settings_rows_add_element_box">App-Kasten</string>
     <string name="settings_rows_add_search_bar">Dock</string>
     <string name="settings_rows_size_title">Widget-Höhe</string>
     <string name="settings_rows_save">Speichern</string>
@@ -381,7 +381,7 @@
     <string name="settings_clock_show_next_alarm">Nächsten Alarm anzeigen</string>
     <string name="settings_clock_show_next_alarm_summary">Zeigt den nächsten Alarm unter dem Datum. Keine zusätzliche Berechtigung erforderlich.</string>
 
-    <string name="settings_element_box_edit_title">Element-Box bearbeiten</string>
+    <string name="settings_element_box_edit_title">App-Kasten bearbeiten</string>
     <string name="settings_element_box_columns_label">Spalten</string>
     <string name="settings_panel_rows_label">Zeilen</string>
     <string name="settings_panel_row_number">Zeile %1$d</string>
@@ -733,7 +733,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_shape_part_dock">Dock</string>
     <string name="welcome_shape_part_widgets">Widgets</string>
     <string name="welcome_shape_part_search_button">Suchbutton</string>
-    <string name="welcome_shape_part_folders">Apps in Ordnern</string>
+    <string name="welcome_shape_part_folders">Ordner</string>
     <string name="settings_widget_paging_mode_row_info">Wie dieses Widget blättert (Stunden und Tage, Notizen). Das Aussehen der Pfeiltasten gilt für alle Widgets gemeinsam.</string>
     <string name="settings_color_modes_label">Farbmodi</string>
     <string name="settings_color_modes_info">Launcher: der Startbildschirm mit seinen Seiten, Widgets und Ordnern. Einstellungen und Einführung: nur diese Bildschirme, so können sie hell sein, während der Launcher dunkel ist, oder umgekehrt.</string>
@@ -747,7 +747,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_screen_folder">Ordner</string>
     <string name="welcome_mock_search">Suche</string>
     <string name="welcome_shape_part_panel">Panel</string>
-    <string name="welcome_shape_part_element_boxes">Element-Boxen</string>
+    <string name="welcome_shape_part_element_boxes">App-Kästen</string>
     <string name="welcome_shape_part_alphabet_rail">A–Z-Leiste</string>
     <string name="welcome_shape_part_search_bar">Suchleisten</string>
     <string name="welcome_shape_part_search_results">Suchergebnisse</string>

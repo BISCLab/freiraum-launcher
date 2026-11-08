@@ -94,7 +94,7 @@ class PartCornersViewModel @Inject constructor(
             ShapePart.PANEL to (row(PageRowType.PANEL) ?: general),
             ShapePart.WIDGETS to (row(PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET) ?: DEFAULT_WIDGET_CORNER_RADIUS_PERCENT),
             ShapePart.ELEMENT_BOXES to (row(PageRowType.ELEMENT_BOX) ?: general),
-            ShapePart.FOLDERS to (items.firstOrNull { !it.isWidget() }?.cornerRadiusPercent ?: general),
+            ShapePart.FOLDERS to settingsRepository.folderCornerPercent.first(),
             ShapePart.SEARCH_BUTTON to (settingsRepository.appListSearchButtonCornerPercent.first() ?: general),
             ShapePart.ALPHABET_RAIL to (settingsRepository.alphabetRailCornerPercent.first() ?: general),
             ShapePart.SEARCH_BAR to (settingsRepository.searchFieldCornerRadiusPercent.first() ?: settingsRepository.searchBarCornerRadiusPercent.first() ?: 100),
@@ -134,10 +134,10 @@ class PartCornersViewModel @Inject constructor(
                 }
                 if (corner != null) row.copy(cornerRadiusPercent = corner) else row
             })
-            folderItemDao.updateAll(folderItemDao.observeAll().first().map { item ->
-                val corner = if (item.isWidget()) shape[ShapePart.WIDGETS] else shape[ShapePart.FOLDERS]
-                if (corner != null) item.copy(cornerRadiusPercent = corner) else item
-            })
+            shape[ShapePart.FOLDERS]?.let { settingsRepository.setFolderCornerPercent(it) }
+            shape[ShapePart.WIDGETS]?.let { corner ->
+                folderItemDao.updateAll(folderItemDao.observeAll().first().filter { it.isWidget() }.map { it.copy(cornerRadiusPercent = corner) })
+            }
         }
     }
 
@@ -396,20 +396,18 @@ internal fun MockScreen(
                 Part(ShapePart.SEARCH_BAR, Modifier.fillMaxWidth().height(26.dp), stringResource(R.string.welcome_mock_search))
             }
             ShapeScreen.FOLDER -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                        .padding(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    repeat(2) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            repeat(3) { Part(ShapePart.FOLDERS, Modifier.weight(1f).aspectRatio(1f)) }
+                // The folder card itself is the part; apps inside are plain icons.
+                Part(ShapePart.FOLDERS, Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Part(ShapePart.WIDGETS, Modifier.fillMaxWidth().height(40.dp), stringResource(R.string.welcome_shape_part_widgets))
+                        repeat(2) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                repeat(3) {
+                                    Box(Modifier.weight(1f).aspectRatio(1f).clip(RoundedCornerShape(6.dp)).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.18f)))
+                                }
+                            }
                         }
                     }
-                    Part(ShapePart.WIDGETS, Modifier.fillMaxWidth().height(40.dp), stringResource(R.string.welcome_shape_part_widgets))
                 }
             }
         }

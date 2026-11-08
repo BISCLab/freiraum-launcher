@@ -162,6 +162,13 @@ class SettingsViewModel @Inject constructor(
     val accentColor: StateFlow<Int> =
         repository.accentColor.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.theme.DEFAULT_ACCENT_COLOR)
 
+    val folderCornerPercent: StateFlow<Int> =
+        repository.folderCornerPercent.stateIn(viewModelScope, SharingStarted.Eagerly, 100)
+
+    fun setFolderCornerPercent(percent: Int) {
+        viewModelScope.launch { repository.setFolderCornerPercent(percent) }
+    }
+
     val folderCardAppearance: StateFlow<ElementAppearance> =
         repository.folderCardAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
 

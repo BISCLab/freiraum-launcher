@@ -137,7 +137,7 @@ internal fun LookSample(kind: LookSampleKind, look: ElementAppearance, cornerPer
             LookSampleKind.PANEL -> Surface(Modifier.fillMaxWidth().height(104.dp), RoundedCornerShape(28.dp * pct), "panel") {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { Dots(5); Dots(5) }
             }
-            LookSampleKind.FOLDER -> Surface(Modifier.width(200.dp).height(104.dp), RoundedCornerShape(24.dp), "folders") {
+            LookSampleKind.FOLDER -> Surface(Modifier.width(200.dp).height(104.dp), RoundedCornerShape(28.dp * pct), "folders") {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { Dots(4); Dots(4) }
             }
             LookSampleKind.FIELD -> Surface(Modifier.fillMaxWidth().height(52.dp), RoundedCornerShape(26.dp * pct), "search") {

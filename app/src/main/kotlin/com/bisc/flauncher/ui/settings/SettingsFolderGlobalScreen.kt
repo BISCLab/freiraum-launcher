@@ -19,13 +19,17 @@ import com.bisc.flauncher.R
 @Composable
 fun SettingsFolderGlobalScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val saved by viewModel.folderCardAppearance.collectAsState()
+    val corner by viewModel.folderCornerPercent.collectAsState()
     ElementLookScreen(
         title = stringResource(R.string.settings_folder_global_label),
         navController = navController,
         onBack = onBack,
         saved = saved,
-        savedCorner = null,
-        onSave = { look, _ -> viewModel.setFolderCardAppearance(look) },
+        savedCorner = corner,
+        onSave = { look, newCorner ->
+            if (look != saved) viewModel.setFolderCardAppearance(look)
+            if (newCorner != null && newCorner != corner) viewModel.setFolderCornerPercent(newCorner)
+        },
         kind = LookSampleKind.FOLDER,
         links = {
             SettingsPreferenceGroup {

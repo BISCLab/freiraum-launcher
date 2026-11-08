@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Corners of all parts: "Apps in folders" did nothing visible and is now "Folders", the corners
+  of the opened folder card. They can also be set on the folder look page
+- "Element box" is called "App box" everywhere now, the box of apps, links and more on a page
+
 - Text search category rail: the symbols are much easier to see. On a dark rail their colors are
   lifted towards white, and categories without results are only slightly faint instead of nearly
   invisible
