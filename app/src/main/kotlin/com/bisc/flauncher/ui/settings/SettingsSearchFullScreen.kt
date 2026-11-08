@@ -574,7 +574,6 @@ fun SettingsSearchElementScreen(
                 SearchElement.RESULTS -> viewModel.setSearchResultsCornerRadiusPercent(corner)
             }
         },
-        backdropDark = searchPageDark(viewModel),
         kind = when (element) {
             SearchElement.FIELD -> LookSampleKind.FIELD
             SearchElement.RAIL -> LookSampleKind.RAIL

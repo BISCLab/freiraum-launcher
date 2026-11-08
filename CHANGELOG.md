@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Text search look pages: the previews sit on the same light backdrop as on the other pages again
+  instead of a black one
+
 ## 0.12.0
 
 - Wallpaper packs: the pages beside Home show the same picture as Home instead of getting a picture of
