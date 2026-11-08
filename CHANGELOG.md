@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Category rail: the magnifier grows the symbols in place, centred on the rail, on a solid round
+  ground instead of reaching out sideways half transparent; a little less strong so it stays on
+  screen at the edge
+- The name bubble and the magnifier ground share one look, by default the result cards' look, and
+  have their own look page: Text search > Appearance > Rail bubble
+
 - Going back to automatic looks the same everywhere and says what it does: a color set by hand (text,
   border, accent) shows a small "Automatic" pill right beside its color instead of an extra row. A
   part's whole look shows its state under the pinned preview ("Own look" or "Automatic, matching

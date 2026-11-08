@@ -445,6 +445,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setSearchGlobalShade(shade) }
     }
 
+    val searchRailBubbleAppearance: StateFlow<ElementAppearance?> =
+        repository.searchRailBubbleAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    fun setSearchRailBubbleAppearance(appearance: ElementAppearance) { viewModelScope.launch { repository.setSearchRailBubbleAppearance(appearance) } }
+    fun resetSearchRailBubbleAppearance() { viewModelScope.launch { repository.resetSearchRailBubbleAppearance() } }
     val searchResultsAppearance: StateFlow<ElementAppearance?> =
         repository.searchResultsAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 

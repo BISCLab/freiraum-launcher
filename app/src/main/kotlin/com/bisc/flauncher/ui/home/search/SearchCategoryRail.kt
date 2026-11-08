@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
@@ -63,13 +64,14 @@ private val BUBBLE_HEIGHT = 52.dp
 /** How far the bubble sits above the finger, so the thumb never covers it. */
 private val BUBBLE_LIFT = 72.dp
 /** How much the symbol under the finger grows; its neighbours grow less. */
-private const val MAGNIFY = 0.85f
+private const val MAGNIFY = 0.45f
 
 /**
  * The categories of the Text search as a vertical rail beside the results, like the App list's
  * A-Z rail. A tap jumps to that category; dragging along the rail runs through the categories like
- * a magnifier: the symbol under the finger and its neighbours grow and light up, a ring in the
- * category's color follows the finger, and a bubble above the thumb names the category. Categories
+ * a magnifier: the symbol under the finger and its neighbours grow in place on a ground in the
+ * bubble's look, a ring in the category's color follows the finger, and a bubble above the thumb
+ * names the category. Categories
  * without results right now are faint.
  * [focus] is the one tapped last; the others are greyed out until the results are scrolled.
  */
@@ -93,7 +95,9 @@ fun SearchCategoryRail(
     /** How much height the open keyboard took from the rail's area last time (px); 0 = not known yet. */
     keyboardOverlapPx: Int = 0,
     /** Called with that height once the keyboard is fully up, when it differs. */
-    onKeyboardOverlap: (Int) -> Unit = {}
+    onKeyboardOverlap: (Int) -> Unit = {},
+    /** The bubble and the ground under magnified symbols. */
+    bubbleAppearance: ElementAppearance = ElementAppearance()
 ) {
     if (categories.isEmpty()) return
     // The gesture below lives as long as the categories do; it must always call the current
@@ -101,6 +105,7 @@ fun SearchCategoryRail(
     val currentOnTap by androidx.compose.runtime.rememberUpdatedState(onTap)
     val currentOnScrub by androidx.compose.runtime.rememberUpdatedState(onScrub)
     val colors = resolveElementColors(appearance)
+    val bubbleColors = resolveElementColors(bubbleAppearance)
     val radius = com.bisc.flauncher.ui.theme.partCornerRadius(cornerRadiusPercent, SEARCH_RAIL_WIDTH)
     val shape = RoundedCornerShape(radius)
     // On a dark rail the category colors are lifted towards white, so darker ones (blue, violet)
@@ -212,7 +217,6 @@ fun SearchCategoryRail(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             val slotPx = with(LocalDensity.current) { RAIL_SLOT.toPx() }
-            val pullPx = with(LocalDensity.current) { 10.dp.toPx() } * (if (left) 1f else -1f)
             categories.forEachIndexed { index, category ->
                 val color = colorOf(category)
                 val chosen = category == (scrubbing ?: focus)
@@ -221,18 +225,21 @@ fun SearchCategoryRail(
                     modifier = Modifier
                         .onGloballyPositioned { centers[index] = top.value + it.positionInParent().y + it.size.height / 2f }
                         .graphicsLayer {
-                            // 1 right under the finger, falling off over about two symbols each way.
-                            val near = (1f - kotlin.math.abs(scrubY - centers[index]) / (slotPx * 2.2f)).coerceIn(0f, 1f) * lens
-                            val eased = near * near * (3f - 2f * near)
+                            // Grows in place, centred on the rail; 1 right under the finger, falling
+                            // off over about two symbols each way.
+                            val eased = magnified(scrubY, centers[index], slotPx, lens)
                             val scale = 1f + MAGNIFY * eased
                             scaleX = scale
                             scaleY = scale
-                            // Leans a little towards the results, out of the thumb's shadow.
-                            translationX = pullPx * eased
                             // Faint ones stay readable; the magnifier brings them to full.
                             alpha = if (faded) 0.55f + 0.45f * eased else 1f
                         }
                         .size(26.dp)
+                        // A solid ground in the bubble's look, so a magnified symbol never floats.
+                        .drawBehind {
+                            val eased = magnified(scrubY, centers[index], slotPx, lens)
+                            if (eased > 0.01f) drawCircle(bubbleColors.background, alpha = eased * bubbleColors.backgroundAlpha.coerceAtLeast(0.85f))
+                        }
                         .clip(CircleShape)
                         .background(color.copy(alpha = if (chosen) 0.24f else 0f))
                         .then(if (chosen && scrubbing != null) Modifier.border(1.5.dp, color.copy(alpha = 0.7f), CircleShape) else Modifier),
@@ -262,7 +269,8 @@ fun SearchCategoryRail(
                     .height(BUBBLE_HEIGHT)
                     .shadow(8.dp, CircleShape)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                    .background(bubbleColors.background, CircleShape, bubbleColors.backgroundAlpha)
+                    .then(if (bubbleAppearance.borderEnabled) Modifier.border(bubbleColors.borderWidth, bubbleColors.borderColor, CircleShape) else Modifier)
                     .padding(start = 8.dp, end = 18.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -273,7 +281,7 @@ fun SearchCategoryRail(
                 Text(
                     stringResource(category.filterLabelRes),
                     style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = bubbleColors.contentColor,
                     maxLines = 1,
                     softWrap = false,
                     modifier = Modifier.padding(start = 10.dp)
@@ -281,4 +289,10 @@ fun SearchCategoryRail(
             }
         }
     }
+}
+
+/** How far the magnifier reaches a symbol whose middle is at [center]: 1 under the finger at [fingerY]. */
+private fun magnified(fingerY: Float, center: Float, slotPx: Float, lens: Float): Float {
+    val near = (1f - kotlin.math.abs(fingerY - center) / (slotPx * 2.2f)).coerceIn(0f, 1f) * lens
+    return near * near * (3f - 2f * near)
 }

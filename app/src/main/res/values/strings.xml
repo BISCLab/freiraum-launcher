@@ -851,4 +851,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_look_custom">Own look</string>
     <string name="settings_look_automatic">Automatic, matching the page</string>
     <string name="settings_look_reset">Back to automatic</string>
+    <string name="settings_search_bubble_label">Rail bubble</string>
+    <string name="settings_search_bubble_summary">The name bubble and the magnifier while dragging along the rail</string>
 </resources>

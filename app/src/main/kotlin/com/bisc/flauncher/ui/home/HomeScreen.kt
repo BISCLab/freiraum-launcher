@@ -1357,6 +1357,7 @@ private fun HomeSearchOverlay(
         keyboardAutoOpen = searchKeyboardAutoOpen,
         keyboardOverlapPx = viewModel.searchKeyboardOverlapPx.collectAsState().value,
         onKeyboardOverlap = viewModel::setSearchKeyboardOverlapPx,
+        railBubbleAppearance = viewModel.searchRailBubbleAppearance.collectAsState().value,
         appearance = searchAppearance,
         cornerRadiusPercent = cornerRadiusPercent,
         background = searchBackground,

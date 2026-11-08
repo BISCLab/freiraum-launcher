@@ -39,7 +39,7 @@ import com.bisc.flauncher.ui.home.dock.resolveElementColors
 import com.bisc.flauncher.ui.theme.designGlow
 
 /** Which part the preview on top of an [ElementLookScreen] draws. */
-enum class LookSampleKind { DOCK, PANEL, FOLDER, FIELD, RAIL, CARDS, AZ_INDEX, SEARCH_BUTTON, LETTER }
+enum class LookSampleKind { DOCK, PANEL, FOLDER, FIELD, RAIL, CARDS, AZ_INDEX, SEARCH_BUTTON, LETTER, BUBBLE }
 
 /**
  * One page for everything about how a part looks: a live preview on top, then fill, text color,
@@ -194,6 +194,20 @@ internal fun LookSample(kind: LookSampleKind, look: ElementAppearance, cornerPer
                     Text("A", color = ink, style = MaterialTheme.typography.titleMedium)
                 }
                 AppRowsHint(backdropDark)
+            }
+            LookSampleKind.BUBBLE -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(22.dp)) {
+                Surface(Modifier.height(48.dp), CircleShape, "cards") {
+                    Row(Modifier.padding(start = 8.dp, end = 18.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(32.dp).clip(CircleShape).background(Color(0xFF00ACC1).copy(alpha = 0.2f)), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Filled.Search, contentDescription = null, tint = Color(0xFF00ACC1), modifier = Modifier.size(20.dp))
+                        }
+                        Text(stringResource(R.string.search_filter_web), color = ink, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(start = 10.dp))
+                    }
+                }
+                // The magnified symbol on the rail, on the same ground.
+                Surface(Modifier.size(38.dp), CircleShape, "rail") {
+                    Icon(Icons.Filled.Search, contentDescription = null, tint = Color(0xFF00ACC1), modifier = Modifier.size(22.dp))
+                }
             }
             LookSampleKind.CARDS -> Surface(Modifier.fillMaxWidth().height(96.dp), com.bisc.flauncher.ui.theme.PartCornerShape(cornerPercent), "cards") {
                 Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {

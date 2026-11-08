@@ -414,6 +414,13 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setSearchResultsAppearance(appearance: ElementAppearance) = setElementAppearanceFor(SEARCH_RESULTS_PREFIX, appearance)
 
+    /** The bubble and magnifier of the category rail; null = like the result cards. */
+    val searchRailBubbleAppearance: Flow<ElementAppearance?> = customElementAppearanceFor("search_rail_bubble", ElementAppearance())
+
+    suspend fun setSearchRailBubbleAppearance(appearance: ElementAppearance) = setElementAppearanceFor("search_rail_bubble", appearance)
+
+    suspend fun resetSearchRailBubbleAppearance() = resetElementAppearanceFor("search_rail_bubble")
+
     suspend fun resetSearchResultsAppearance() = resetElementAppearanceFor(SEARCH_RESULTS_PREFIX)
 
     /** Off by default: the cards keep the same fine side margin as every other element. */

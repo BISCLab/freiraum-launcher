@@ -208,6 +208,8 @@ class HomeViewModel @Inject constructor(
     val appListSearchFieldAppearance: StateFlow<ElementAppearance?> =
         settingsRepository.appListSearchFieldAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
+    val searchRailBubbleAppearance: StateFlow<ElementAppearance?> =
+        settingsRepository.searchRailBubbleAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
     val searchResultsAppearance: StateFlow<ElementAppearance?> =
         settingsRepository.searchResultsAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 

@@ -109,6 +109,13 @@ fun SettingsSearchAppearanceScreen(navController: NavController, onBack: () -> U
             )
             SettingsPreference(
                 icon = null,
+                title = stringResource(R.string.settings_search_bubble_label),
+                summary = stringResource(R.string.settings_search_bubble_summary),
+                onClick = { onNavigate(SearchElement.BUBBLE.route) },
+                trailing = null
+            )
+            SettingsPreference(
+                icon = null,
                 title = stringResource(R.string.settings_search_keyboard_label),
                 onClick = { onNavigate("keyboard") },
                 trailing = null
@@ -527,7 +534,8 @@ private fun CategoryDesigner(category: SearchCategory, color: Color, iconKey: St
 enum class SearchElement(val route: String, val titleRes: Int) {
     FIELD("field", R.string.settings_app_grid_search_field),
     RAIL("rail", R.string.settings_search_rail_label),
-    RESULTS("results", R.string.settings_search_results_label)
+    RESULTS("results", R.string.settings_search_results_label),
+    BUBBLE("bubble", R.string.settings_search_bubble_label)
 }
 
 /** One search part: its look with a live preview, its corners, and what else belongs to it. */
@@ -552,10 +560,13 @@ fun SettingsSearchElementScreen(
         SearchElement.FIELD -> fieldCorner ?: barCorner ?: 100
         SearchElement.RAIL -> railCorner ?: defaultCornerPercent
         SearchElement.RESULTS -> resultsCorner ?: 100
+        // Always round; nothing to set.
+        SearchElement.BUBBLE -> null
     }
     val fieldOwn by viewModel.searchFieldAppearance.collectAsState()
     val railOwn by viewModel.searchRailAppearance.collectAsState()
     val resultsOwn by viewModel.searchResultsAppearance.collectAsState()
+    val bubbleOwn by viewModel.searchRailBubbleAppearance.collectAsState()
     ElementLookScreen(
         title = stringResource(element.titleRes),
         navController = navController,
@@ -568,12 +579,14 @@ fun SettingsSearchElementScreen(
                 SearchElement.FIELD -> viewModel.setSearchFieldCornerRadiusPercent(corner)
                 SearchElement.RAIL -> viewModel.setSearchRailCornerRadiusPercent(corner)
                 SearchElement.RESULTS -> viewModel.setSearchResultsCornerRadiusPercent(corner)
+                SearchElement.BUBBLE -> Unit
             }
         },
         kind = when (element) {
             SearchElement.FIELD -> LookSampleKind.FIELD
             SearchElement.RAIL -> LookSampleKind.RAIL
             SearchElement.RESULTS -> LookSampleKind.CARDS
+            SearchElement.BUBBLE -> LookSampleKind.BUBBLE
         },
         links = {
             if (element == SearchElement.FIELD) {
@@ -617,12 +630,14 @@ fun SettingsSearchElementScreen(
             SearchElement.FIELD -> fieldOwn != null
             SearchElement.RAIL -> railOwn != null
             SearchElement.RESULTS -> resultsOwn != null
+            SearchElement.BUBBLE -> bubbleOwn != null
         },
         onResetLook = {
             when (element) {
                 SearchElement.FIELD -> viewModel.resetSearchFieldAppearance()
                 SearchElement.RAIL -> viewModel.resetSearchRailAppearance()
                 SearchElement.RESULTS -> viewModel.resetSearchResultsAppearance()
+                SearchElement.BUBBLE -> viewModel.resetSearchRailBubbleAppearance()
             }
         }
     )
@@ -651,8 +666,14 @@ private fun effectiveSearchElementAppearance(element: SearchElement, viewModel: 
     val own by when (element) {
         SearchElement.RAIL, SearchElement.FIELD -> viewModel.searchFieldAppearance
         SearchElement.RESULTS -> viewModel.searchResultsAppearance
+        SearchElement.BUBBLE -> viewModel.searchRailBubbleAppearance
     }.collectAsState()
     val defaultBox = com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor(MaterialTheme.colorScheme.background.luminance() < 0.5f)
+    // The bubble starts like the result cards.
+    if (element == SearchElement.BUBBLE && own == null) {
+        val results by viewModel.searchResultsAppearance.collectAsState()
+        return results ?: defaultBox
+    }
     // The field starts white and round, like the App grid's.
     if (element == SearchElement.FIELD && own == null) return com.bisc.flauncher.ui.home.search.automaticRailAppearance(false)
     return own ?: defaultBox
@@ -663,6 +684,7 @@ private fun SettingsViewModel.setSearchElementAppearance(element: SearchElement,
         SearchElement.FIELD -> setSearchFieldAppearance(appearance)
         SearchElement.RAIL -> setSearchRailAppearance(appearance)
         SearchElement.RESULTS -> setSearchResultsAppearance(appearance)
+        SearchElement.BUBBLE -> setSearchRailBubbleAppearance(appearance)
     }
 
 internal data class PickableApp(val packageName: String, val label: String)

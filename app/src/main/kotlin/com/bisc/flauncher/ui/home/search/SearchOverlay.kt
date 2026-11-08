@@ -119,6 +119,7 @@ fun SearchOverlay(
     keyboardAutoOpen: Boolean,
     /** What the open keyboard took from the results area last time, for the rail (px). */
     keyboardOverlapPx: Int = 0,
+    railBubbleAppearance: ElementAppearance? = null,
     onKeyboardOverlap: (Int) -> Unit = {},
     loadIcon: (ComponentName) -> ImageBitmap?,
     onQueryChange: (String) -> Unit,
@@ -368,6 +369,8 @@ fun SearchOverlay(
                             expectKeyboard = keyboardAutoOpen,
                             keyboardOverlapPx = keyboardOverlapPx,
                             onKeyboardOverlap = onKeyboardOverlap,
+                            // Until set on its own, like the result cards.
+                            bubbleAppearance = railBubbleAppearance ?: resultsAppearance ?: defaultElement,
                             modifier = Modifier
                                 .align(if (railLeft) Alignment.CenterStart else Alignment.CenterEnd)
                                 .padding(horizontal = com.bisc.flauncher.ui.home.dock.DockDimens.horizontalMargin)

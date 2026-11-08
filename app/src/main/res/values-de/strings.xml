@@ -851,4 +851,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_look_custom">Eigenes Aussehen</string>
     <string name="settings_look_automatic">Automatisch, passend zur Seite</string>
     <string name="settings_look_reset">Zurück auf automatisch</string>
+    <string name="settings_search_bubble_label">Leisten-Blase</string>
+    <string name="settings_search_bubble_summary">Namensblase und Lupe beim Wischen über die Leiste</string>
 </resources>
