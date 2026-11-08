@@ -347,7 +347,7 @@ fun HomeScreen(
     // further down share one dockExpanded state.
     val rowUnitCounts by viewModel.rowUnitCounts.collectAsState()
     val homeGestureExclusion = remember { HomeGestureExclusion() }
-    var pagerHeightPx by remember { mutableStateOf(0) }
+    var pagerHeightPx by remember { androidx.compose.runtime.mutableIntStateOf(0) }
     val homeDockRow = pages.find { it.isHome }
         ?.let { rowsByPage[it.id] }
         ?.find { it.type == PageRowType.SEARCH_BAR }

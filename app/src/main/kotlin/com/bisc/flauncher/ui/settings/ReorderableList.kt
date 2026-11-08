@@ -48,7 +48,7 @@ fun <T> ReorderableList(
     val itemHeightPx = remember(itemHeight, density) { with(density) { itemHeight.toPx() } }
     val itemsState = rememberUpdatedState(items)
     var draggingKey by remember { mutableStateOf<Any?>(null) }
-    var dragOffsetPx by remember { mutableStateOf(0f) }
+    var dragOffsetPx by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
     // The order while dragging. Saving is async, so showing [items] mid-drag would jump back.
     var dragOrder by remember { mutableStateOf<List<T>?>(null) }
     androidx.compose.runtime.LaunchedEffect(items) {

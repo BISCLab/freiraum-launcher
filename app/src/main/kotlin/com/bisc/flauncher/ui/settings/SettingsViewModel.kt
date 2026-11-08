@@ -607,7 +607,6 @@ class SettingsViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val _installedApps = MutableStateFlow<List<AppInfo>>(emptyList())
-    val installedApps: StateFlow<List<AppInfo>> = _installedApps.asStateFlow()
 
     val appOverrides: StateFlow<Map<String, AppOverride>> =
         appOverrideRepository.overrides

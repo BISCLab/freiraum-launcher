@@ -277,7 +277,7 @@ private fun PagesCarousel(
     // Local working order while dragging; reset whenever the saved order arrives.
     var order by remember(pages) { mutableStateOf(pages) }
     var draggingId by remember { mutableStateOf<Long?>(null) }
-    var dragOffset by remember { mutableStateOf(0f) }
+    var dragOffset by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
     val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
     val homeIndex = pages.indexOfFirst { it.isHome }.coerceAtLeast(0)
     val listState = rememberLazyListState()

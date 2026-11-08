@@ -130,7 +130,7 @@ fun SettingsFolderEditScreen(
     var appearanceOpen by remember { mutableStateOf(false) }
     var showWidgetKindPicker by remember { mutableStateOf(false) }
     var sizingWidgetKind by remember { mutableStateOf<String?>(null) }
-    var sizingWidgetSpanY by remember { mutableStateOf(1) }
+    var sizingWidgetSpanY by remember { androidx.compose.runtime.mutableIntStateOf(1) }
     var selectedId by remember(folderId) { mutableStateOf<Long?>(null) }
     val systemWidgetPickerForFolder by homeViewModel.systemWidgetPickerOpenForFolder.collectAsState()
     val pendingBindIntent by homeViewModel.pendingBindIntent.collectAsState()
@@ -151,7 +151,7 @@ fun SettingsFolderEditScreen(
         title = stringResource(R.string.settings_folder_edit_title),
         navController = navController,
         onBack = onBack,
-        onSave = { if (nameChanged && newName != null) viewModel.renameFolder(folderId, newName) },
+        onSave = { newName?.takeIf { nameChanged }?.let { viewModel.renameFolder(folderId, it) } },
         dirty = nameChanged
     ) {
         if (folder == null) return@SettingsSubScreen

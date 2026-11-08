@@ -8,8 +8,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -73,7 +73,7 @@ fun PagingButton(
 
 /** The icon for [style] and whether it has to be turned around to point back. */
 fun arrowIcon(style: WidgetArrowStyle, forward: Boolean): Pair<ImageVector, Boolean> = when (style) {
-    WidgetArrowStyle.CHEVRON -> (if (forward) Icons.Filled.KeyboardArrowRight else Icons.Filled.KeyboardArrowLeft) to false
+    WidgetArrowStyle.CHEVRON -> (if (forward) Icons.AutoMirrored.Filled.KeyboardArrowRight else Icons.AutoMirrored.Filled.KeyboardArrowLeft) to false
     WidgetArrowStyle.TRIANGLE -> Icons.Filled.PlayArrow to !forward
     WidgetArrowStyle.ARROW -> (if (forward) Icons.AutoMirrored.Filled.ArrowForward else Icons.AutoMirrored.Filled.ArrowBack) to false
 }

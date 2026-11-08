@@ -116,13 +116,22 @@ class DesignRepository @Inject constructor(
     }
 
     /** Applies [design] on top of the launcher; the user's own look is saved first, once. */
-    suspend fun apply(design: Design) = withContext(Dispatchers.IO) {
+    suspend fun apply(design: Design, keepTheme: Boolean = false) = withContext(Dispatchers.IO) {
         if (settingsRepository.activeDesignId.first() == null) {
             mineDir.deleteRecursively()
             writeDesign(captureCurrent(id = MINE, name = MINE, withRows = true), mineDir)
         }
-        write(design)
+        write(if (keepTheme) design.copy(theme = null) else design)
         settingsRepository.setActiveDesignId(design.id)
+    }
+
+    /** The light or dark version of the active design ("…-light" / "…-dark"), if it has one. */
+    suspend fun counterpartFor(dark: Boolean): Design? {
+        val id = settingsRepository.activeDesignId.first() ?: return null
+        val base = id.removeSuffix("-dark").removeSuffix("-light").takeIf { it != id } ?: return null
+        if (_designs.value.isEmpty()) refresh()
+        val wanted = if (dark) com.bisc.flauncher.ui.theme.ThemePreference.DARK else com.bisc.flauncher.ui.theme.ThemePreference.LIGHT
+        return _designs.value.firstOrNull { it.id == base + if (dark) "-dark" else "-light" }?.takeIf { it.theme == wanted }
     }
 
     /** Back to the look the user had before the first design. */

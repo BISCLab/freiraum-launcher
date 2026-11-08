@@ -85,7 +85,7 @@ fun SettingsPageRowsScreen(
 
     var showAddSheet by remember { mutableStateOf(false) }
     var sizingKind by remember { mutableStateOf<String?>(null) }
-    var sizingSpan by remember { mutableStateOf(1) }
+    var sizingSpan by remember { androidx.compose.runtime.mutableIntStateOf(1) }
 
     val bindWidgetLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()

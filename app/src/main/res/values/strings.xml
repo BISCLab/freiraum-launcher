@@ -4,7 +4,6 @@
 
 
     <string name="folder_icon_auto">Use app preview as icon</string>
-    <string name="folder_overview_empty">No folders yet.</string>
     <string name="folder_item_move">Move</string>
     <string name="folder_item_remove">Remove</string>
     <string name="folder_move_hint">Choose a position</string>
@@ -139,7 +138,6 @@
 
     <string name="element_fill_mode_none">None</string>
     <string name="element_fill_mode_color">Color</string>
-    <string name="settings_element_border_style_label">Border</string>
     <string name="settings_element_border_color">Border color</string>
     <string name="settings_element_border_width_value">Thickness: %1$s dp</string>
     <string name="settings_element_color_auto_hint">Automatic</string>
@@ -229,16 +227,12 @@
     <string name="settings_folder_global_label">Global folder settings</string>
     <string name="settings_folder_global_subtitle">Appearance, border and visibility shared by every folder</string>
     <string name="settings_folder_visibility_label">Visibility</string>
-    <string name="settings_folder_list_label">Folders</string>
     <string name="settings_folder_create">Create folder</string>
     <string name="settings_folder_items_count">%1$d items</string>
     <string name="settings_folder_edit_title">Edit folder</string>
     <string name="settings_folder_name_label">Name</string>
     <string name="settings_folder_delete">Delete folder</string>
     <string name="settings_folder_delete_confirm_message">Deletes the folder and all its contents permanently.</string>
-    <string name="settings_folder_items_label">Contents</string>
-    <string name="settings_folder_widgets_label">Widgets</string>
-    <string name="settings_folder_widget_add">Add widget</string>
     <string name="settings_folder_widget_app_widget">App widget</string>
     <string name="settings_folder_icon_pack_label">Icon pack</string>
     <string name="settings_folder_icon_pack_choose_icon">Choose icon</string>
@@ -536,7 +530,6 @@
     <string name="widget_system_unavailable">This widget is no longer available. Its app was removed or the widget was restored from a backup — remove it and add it again.</string>
     <string name="widget_notes_add">New note</string>
     <string name="widget_notes_edit">Edit</string>
-    <string name="widget_notes_done">Done</string>
     <string name="widget_notes_close">Close</string>
     <string name="widget_notes_updated">Edited %1$s</string>
     <string name="widget_notes_empty_note">Empty note</string>
@@ -690,7 +683,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_backup_export_warning">The backup holds your whole launcher: the look with designs, wallpaper packs and backgrounds, and personal data like notes, addresses, contacts, links and your apps. Keep it for yourself and do not share it. To share only a look, save it as a design instead.</string>
     <string name="settings_backup_export_understood">Understood</string>
     <string name="settings_backup_export_confirm">Export</string>
-    <string name="settings_widgets_corner_hint">Up to 50%. Above about 25%, the corners start cutting into the widget content.</string>
+    <string name="settings_widgets_corner_hint" formatted="false">Up to 50%. Above about 25%, the corners start cutting into the widget content.</string>
     <string name="designs_export_info">A design holds only the look: colors, borders, corners and effects. No personal data and no pictures, so you can share it safely.</string>
     <string name="packs_title">Wallpaper packs</string>
     <string name="packs_entry_summary">Backgrounds for every page</string>
@@ -757,8 +750,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_corners_intro">Pick one shape for everything, or each part on its own in the table. The small screens show which part is which.</string>
     <string name="folder_widget_edit">Edit</string>
     <string name="folder_widget_remove">Remove</string>
-    <string name="folder_widget_remove_title">Remove %1$s?</string>
-    <string name="folder_widget_remove_text">The widget is taken out of this folder. Its settings are lost.</string>
     <string name="search_filter_favorites">Favorites</string>
     <string name="settings_search_include_favorites">Favorites</string>
     <string name="search_section_favorites">Favorites</string>
@@ -800,12 +791,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_colors_accent">Accent</string>
     <string name="settings_statusbar_tile_shown">Shown</string>
     <string name="settings_statusbar_tile_hidden">Hidden</string>
-    <string name="settings_folder_widgets_section">Widgets, at the top</string>
-    <string name="settings_folder_widgets_section_info">Widgets sit above the apps across the whole folder. Set the height of each one right here; a folder never scrolls, so everything has to fit on the screen, and a widget only grows as far as there is room. Tap a widget for all its settings.</string>
-    <string name="settings_folder_widgets_none">No widgets in this folder yet.</string>
     <string name="settings_folder_widget_height">Height</string>
-    <string name="settings_folder_items_section">Apps and elements, below</string>
-    <string name="settings_folder_items_section_info">Below the widgets, in rows. Tap + to add, tap an item to remove it; the rows underneath set how many fit side by side.</string>
     <string name="settings_page_search_description">One field for everything: apps, contacts, addresses, links, settings and more, and whatever is not on the phone goes on to your search engine, maps or AI app.</string>
     <string name="settings_hub_appearance_what">How it looks</string>
     <string name="settings_hub_behavior_what">What it does</string>

@@ -24,10 +24,17 @@ class ThemeRepository @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val pageContentRepository: PageContentRepository,
     private val pageRowDao: PageRowDao,
-    private val folderItemDao: FolderItemDao
+    private val folderItemDao: FolderItemDao,
+    private val designRepository: com.bisc.flauncher.data.design.DesignRepository
 ) {
     suspend fun reapplyTheme() {
         val isDark = settingsRepository.theme.first().isDark(context)
+        // A design with a light and a dark version (like Modern) switches to the other version
+        // instead of falling back to plain defaults; the chosen mode (System too) stays.
+        designRepository.counterpartFor(isDark)?.let { design ->
+            designRepository.apply(design, keepTheme = true)
+            return
+        }
         val boxAppearance = defaultBoxAppearanceFor(isDark)
 
         // Backgrounds stay as they are; only the plain default color of the old mode swaps over.

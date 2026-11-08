@@ -15,7 +15,7 @@ data class WebEngine(val id: String, val name: String, val template: String) {
     val host: String get() = Uri.parse(if (template.contains("://")) template else "https://$template").host?.removePrefix("www.") ?: template
 
     companion object {
-        val presets: List<WebEngine> = listOf(
+        val presets: List<WebEngine> get() = listOf(
             WebEngine("duckduckgo", "DuckDuckGo", "https://duckduckgo.com/?q=%s"),
             WebEngine("startpage", "Startpage", "https://www.startpage.com/sp/search?query=%s"),
             WebEngine("google", "Google", "https://www.google.com/search?q=%s"),

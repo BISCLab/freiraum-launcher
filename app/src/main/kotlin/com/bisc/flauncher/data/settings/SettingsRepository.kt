@@ -475,9 +475,6 @@ class SettingsRepository @Inject constructor(
         }.toSet()
     }
 
-    suspend fun setSearchIncluded(category: SearchCategory, include: Boolean) {
-        dataStore.edit { it[searchIncludeKey(category.storageKey)] = include }
-    }
 
     /** Each category: searched with every query, and shown in the rail. Neither = off. Both are
      *  set together here; categories removed by older versions count as off. */

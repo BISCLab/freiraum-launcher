@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Switching between light and dark with a design that has both versions (Modern, Neon) now switches to
+  the other version of that design instead of resetting every surface to plain defaults; with System
+  this happens on its own when the phone changes mode
+- Cleanup: unused texts and code removed, a German text whose percent sign was read as a placeholder
+  fixed, outdated arrow icons replaced; search engine presets follow a language change right away
+
 - Modern Dark and Modern Light reworked down to every part: deep grey (dark) or white (light)
   surfaces, nearly opaque; blue accent borders on search fields, element boxes, folders, the A-Z and
   category rails, the search button and the letter circles; no borders on Dock, Panel, widgets and

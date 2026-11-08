@@ -62,7 +62,7 @@ fun WidgetSizeEditor(
 ) {
     val density = LocalDensity.current
     val unitPx = remember(density) { with(density) { PageRowDimens.rowUnitHeight.toPx() } }
-    var dragOffsetPx by remember { mutableStateOf(0f) }
+    var dragOffsetPx by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
 
     Column(modifier = modifier.fillMaxWidth()) {
         PageRowContent(

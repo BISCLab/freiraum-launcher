@@ -111,7 +111,7 @@ fun SearchCategoryRail(
         return if (darkRail) androidx.compose.ui.graphics.lerp(base, Color.White, 0.35f) else base
     }
     var scrubbing by remember { mutableStateOf<SearchCategory?>(null) }
-    var scrubY by remember { mutableStateOf(0f) }
+    var scrubY by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
     // Fades the magnifier in and out instead of switching it.
     val lens by androidx.compose.animation.core.animateFloatAsState(
         targetValue = if (scrubbing != null) 1f else 0f,
@@ -141,7 +141,7 @@ fun SearchCategoryRail(
         val areaPx = constraints.maxHeight.toFloat()
         val gapPx = with(density) { edgeGap.toPx() }
         // The area's height without the keyboard, kept while the keyboard is up.
-        var restPx by remember { mutableStateOf(0f) }
+        var restPx by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
         if (imeNow == 0 && imeTarget == 0) restPx = areaPx
         else if (restPx == 0f) restPx = areaPx + keyboardOverlapPx
         // Once the keyboard is fully up, how much it really takes (navigation bar, the strip on top

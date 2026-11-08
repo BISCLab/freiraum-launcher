@@ -4,7 +4,6 @@
 
 
     <string name="folder_icon_auto">App-Vorschau als Symbol verwenden</string>
-    <string name="folder_overview_empty">Noch keine Ordner.</string>
     <string name="folder_item_move">Verschieben</string>
     <string name="folder_item_remove">Entfernen</string>
     <string name="folder_move_hint">Position wählen</string>
@@ -140,7 +139,6 @@
 
     <string name="element_fill_mode_none">Ohne</string>
     <string name="element_fill_mode_color">Farbe</string>
-    <string name="settings_element_border_style_label">Rahmen</string>
     <string name="settings_element_border_color">Rahmenfarbe</string>
     <string name="settings_element_border_width_value">Stärke: %1$s dp</string>
     <string name="settings_element_color_auto_hint">Automatisch</string>
@@ -241,16 +239,12 @@
     <string name="settings_folder_global_label">Globale Ordner-Einstellungen</string>
     <string name="settings_folder_global_subtitle">Aussehen, Rahmen und Sichtbarkeit für alle Ordner</string>
     <string name="settings_folder_visibility_label">Sichtbarkeit</string>
-    <string name="settings_folder_list_label">Ordner</string>
     <string name="settings_folder_create">Ordner erstellen</string>
     <string name="settings_folder_items_count">%1$d Elemente</string>
     <string name="settings_folder_edit_title">Ordner bearbeiten</string>
     <string name="settings_folder_name_label">Name</string>
     <string name="settings_folder_delete">Ordner löschen</string>
     <string name="settings_folder_delete_confirm_message">Löscht den Ordner und alle enthaltenen Elemente dauerhaft.</string>
-    <string name="settings_folder_items_label">Inhalt</string>
-    <string name="settings_folder_widgets_label">Widgets</string>
-    <string name="settings_folder_widget_add">Widget hinzufügen</string>
     <string name="settings_folder_widget_app_widget">App-Widget</string>
     <string name="settings_folder_icon_pack_label">Icon-Pack</string>
     <string name="settings_folder_icon_pack_choose_icon">Symbol auswählen</string>
@@ -536,7 +530,6 @@
     <string name="widget_system_unavailable">Dieses Widget ist nicht mehr verfügbar. Seine App wurde entfernt oder es stammt aus einem Backup – entferne es und füge es neu hinzu.</string>
     <string name="widget_notes_add">Neue Notiz</string>
     <string name="widget_notes_edit">Bearbeiten</string>
-    <string name="widget_notes_done">Fertig</string>
     <string name="widget_notes_close">Schließen</string>
     <string name="widget_notes_updated">Bearbeitet %1$s</string>
     <string name="widget_notes_empty_note">Leere Notiz</string>
@@ -690,7 +683,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_backup_export_warning">Die Sicherung enthält deinen ganzen Launcher: das Aussehen mit Designs, Wallpaper-Packs und Hintergründen und persönliche Daten wie Notizen, Adressen, Kontakte, Links und deine Apps. Bewahre sie nur für dich auf und teile sie nicht. Wenn du nur einen Look teilen willst, speichere ihn als Design.</string>
     <string name="settings_backup_export_understood">Verstanden</string>
     <string name="settings_backup_export_confirm">Exportieren</string>
-    <string name="settings_widgets_corner_hint">Bis 50 %. Ab etwa 25 % schneiden die Ecken in den Inhalt des Widgets.</string>
+    <string name="settings_widgets_corner_hint" formatted="false">Bis 50 %. Ab etwa 25 % schneiden die Ecken in den Inhalt des Widgets.</string>
     <string name="designs_export_info">Ein Design enthält nur das Aussehen: Farben, Rahmen, Ecken und Effekte. Keine persönlichen Daten und keine Bilder, du kannst es also gefahrlos teilen.</string>
     <string name="packs_title">Wallpaper-Packs</string>
     <string name="packs_entry_summary">Hintergrundbilder für alle Seiten</string>
@@ -757,8 +750,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_corners_intro">Wähle eine Form für alles oder jedes Teil einzeln in der Tabelle. Die kleinen Bildschirme zeigen, welches Teil welches ist.</string>
     <string name="folder_widget_edit">Bearbeiten</string>
     <string name="folder_widget_remove">Entfernen</string>
-    <string name="folder_widget_remove_title">%1$s entfernen?</string>
-    <string name="folder_widget_remove_text">Das Widget wird aus diesem Ordner entfernt. Seine Einstellungen gehen dabei verloren.</string>
     <string name="search_filter_favorites">Favoriten</string>
     <string name="settings_search_include_favorites">Favoriten</string>
     <string name="search_section_favorites">Favoriten</string>
@@ -800,12 +791,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_colors_accent">Akzent</string>
     <string name="settings_statusbar_tile_shown">Sichtbar</string>
     <string name="settings_statusbar_tile_hidden">Ausgeblendet</string>
-    <string name="settings_folder_widgets_section">Widgets, oben im Ordner</string>
-    <string name="settings_folder_widgets_section_info">Widgets stehen über den Apps, über die ganze Breite des Ordners. Ihre Höhe stellst du direkt hier ein. Ein Ordner scrollt nie, deshalb muss alles auf den Bildschirm passen, und ein Widget wächst nur so weit, wie Platz ist. Antippen öffnet alle Einstellungen des Widgets.</string>
-    <string name="settings_folder_widgets_none">Noch keine Widgets in diesem Ordner.</string>
     <string name="settings_folder_widget_height">Höhe</string>
-    <string name="settings_folder_items_section">Apps und Elemente, darunter</string>
-    <string name="settings_folder_items_section_info">Unter den Widgets, in Reihen. Mit + hinzufügen, Antippen eines Elements entfernt es; die Reihen darunter legen fest, wie viele nebeneinander passen.</string>
     <string name="settings_page_search_description">Ein Feld für alles: Apps, Kontakte, Adressen, Links, Einstellungen und mehr, und was nicht auf dem Handy ist, geht weiter an Suchmaschine, Karten oder KI-App.</string>
     <string name="settings_hub_appearance_what">Wie es aussieht</string>
     <string name="settings_hub_behavior_what">Was es tut</string>
