@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.12.2
 
 - Text search behavior laid out anew: Web & AI, then the rail switch in its own section, then the
   categories. What Search and Rail do sits in two small cards above the table, not inside it. The

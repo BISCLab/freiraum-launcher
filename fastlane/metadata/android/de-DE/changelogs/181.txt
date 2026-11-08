@@ -1,0 +1,1 @@
+- Verhalten der Textsuche neu geordnet: Leiste mit eigenem Bereich, Legende als eigene Kärtchen, Tabelle mit Spaltenlinien und deutlichem Kopf

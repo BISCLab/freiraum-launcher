@@ -1,0 +1,1 @@
+- Text search behavior laid out anew: rail in its own section, legend as small cards, table with column lines and a clear head
