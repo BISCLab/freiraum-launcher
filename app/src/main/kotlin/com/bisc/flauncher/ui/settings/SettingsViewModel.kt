@@ -165,6 +165,12 @@ class SettingsViewModel @Inject constructor(
     val folderCardAppearance: StateFlow<ElementAppearance> =
         repository.folderCardAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, ElementAppearance(borderEnabled = true))
 
+    fun moveFolderItemToSlot(item: com.bisc.flauncher.data.model.FolderItem, slot: Int) {
+        viewModelScope.launch { folderRepository.moveToSlot(item, slot) }
+    }
+
+    fun reserveFolderSlot(folderId: Long, slot: Int?) = folderRepository.reserveSlot(folderId, slot)
+
     val folders: StateFlow<List<com.bisc.flauncher.data.model.Folder>> =
         folderRepository.folders.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 

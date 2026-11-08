@@ -194,7 +194,7 @@ fun SettingsFolderEditScreen(
             showLabels = showLabels,
             selectedId = selectedId,
             onSelect = { selectedId = if (selectedId == it.id) null else it.id },
-            onAdd = { showAddChooser = true },
+            onAdd = { slot -> viewModel.reserveFolderSlot(folderId, slot); showAddChooser = true },
             widgetIcon = ::folderWidgetIcon,
             widgetLabel = { folderWidgetLabel(it, homeViewModel) },
             itemLabel = { item ->
@@ -217,6 +217,7 @@ fun SettingsFolderEditScreen(
             val isWidget = selected.isWidget()
             val siblings = if (isWidget) widgetItems else iconItems
             val position = siblings.indexOfFirst { it.id == selected.id }
+            val cellCount = com.bisc.flauncher.ui.home.folderSlotRows(iconItems, rowShape, keepEmptyRows = true).sumOf { it.size } + rowShape.ifEmpty { listOf(4) }.last()
             val isBuiltIn = selected.type == GridItemType.WIDGET
             val minSpan = if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.minSpan(selected.payload) else 1
             val maxSpan = if (isWidget) maxOf(
@@ -237,11 +238,16 @@ fun SettingsFolderEditScreen(
                 canGrow = selected.spanY < maxSpan,
                 canShrink = selected.spanY > minSpan,
                 onSpan = { viewModel.updateFolderItem(selected.copy(spanY = it)) },
-                canMoveBack = position > 0,
-                canMoveOn = position in 0 until siblings.lastIndex,
+                // Widgets swap with their neighbour; apps and elements step through the cells, empty ones too.
+                canMoveBack = if (isWidget) position > 0 else selected.orderIndex > 0,
+                canMoveOn = if (isWidget) position in 0 until siblings.lastIndex else selected.orderIndex < cellCount - 1,
                 onMove = { delta ->
-                    val reordered = siblings.toMutableList().apply { add(position + delta, removeAt(position)) }
-                    homeViewModel.reorderFolderItems(if (isWidget) reordered + iconItems else widgetItems + reordered)
+                    if (isWidget) {
+                        val reordered = siblings.toMutableList().apply { add(position + delta, removeAt(position)) }
+                        homeViewModel.reorderFolderItems(reordered + iconItems)
+                    } else {
+                        viewModel.moveFolderItemToSlot(selected, selected.orderIndex + delta)
+                    }
                 },
                 onOpenSettings = if (isWidget) ({ navController.navigate("settings/folder/$folderId/widget/${selected.id}") }) else null,
                 onRemove = { pendingRemoval = selected },
@@ -249,7 +255,7 @@ fun SettingsFolderEditScreen(
             )
         }
 
-        FolderAddButtons(onAddContent = { showAddChooser = true }, onAddWidget = { showWidgetKindPicker = true })
+        FolderAddButtons(onAddContent = { viewModel.reserveFolderSlot(folderId, null); showAddChooser = true }, onAddWidget = { showWidgetKindPicker = true })
 
         SettingsPreferenceGroup(
             title = stringResource(R.string.settings_folder_rows_label),

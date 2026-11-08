@@ -1312,6 +1312,12 @@ class HomeViewModel @Inject constructor(
         if (parts.size >= 2) shortcutRepository.launch(parts[0], parts[1])
     }
 
+    fun moveFolderItemToSlot(item: FolderItem, slot: Int) {
+        viewModelScope.launch { folderRepository.moveToSlot(item, slot) }
+    }
+
+    fun reserveFolderSlot(folderId: Long, slot: Int?) = folderRepository.reserveSlot(folderId, slot)
+
     fun reorderFolderItems(orderedItems: List<FolderItem>) {
         viewModelScope.launch { folderRepository.reorderItems(orderedItems) }
     }

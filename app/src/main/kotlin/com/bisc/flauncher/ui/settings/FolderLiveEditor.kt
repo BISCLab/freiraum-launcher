@@ -70,7 +70,7 @@ internal fun FolderItem.isWidget() = type == GridItemType.WIDGET || type == Grid
 /**
  * The folder as it looks when opened, live: its card in its own look, the widgets on top at their
  * real height, then its apps and elements in their rows. Every part can be tapped to pick it; the
- * picked one is outlined in the accent. A last empty tile adds something.
+ * picked one is outlined in the accent. Every empty cell adds something right there.
  */
 @Composable
 internal fun FolderLivePreview(
@@ -81,7 +81,8 @@ internal fun FolderLivePreview(
     showLabels: Boolean,
     selectedId: Long?,
     onSelect: (FolderItem) -> Unit,
-    onAdd: () -> Unit,
+    /** An empty cell was tapped: add something exactly there. */
+    onAdd: (slot: Int) -> Unit,
     widgetIcon: (FolderItem) -> ImageVector,
     widgetLabel: @Composable (FolderItem) -> String,
     itemLabel: @Composable (FolderItem) -> String,
@@ -131,25 +132,18 @@ internal fun FolderLivePreview(
                     )
                 }
             }
-            // The apps and elements in their rows, the last row with a tile to add more.
-            val widths = rowShape.ifEmpty { listOf(4) }
-            val rows = mutableListOf<List<FolderItem?>>()
-            var index = 0
-            var r = 0
-            while (index < gridItems.size || rows.isEmpty()) {
-                val width = widths.getOrElse(r) { widths.last() }
-                rows += gridItems.subList(index, minOf(index + width, gridItems.size)) + List(maxOf(0, width - (gridItems.size - index))) { null }
-                index += width
-                r++
-                if (index >= gridItems.size) break
+            // The apps and elements at their places; every empty cell adds something there, and
+            // when all are taken a further row offers more.
+            val rows = com.bisc.flauncher.ui.home.folderSlotRows(gridItems, rowShape, keepEmptyRows = true).toMutableList()
+            if (rows.none { line -> line.any { it == null } }) {
+                val widths = rowShape.ifEmpty { listOf(4) }
+                rows += List(widths.getOrElse(rows.size) { widths.last() }.coerceAtLeast(1)) { null }
             }
-            // Room for the add tile: in the last row if there's a gap, otherwise a new one.
-            val lastHasGap = rows.last().any { it == null }
-            if (!lastHasGap) rows += List(widths.getOrElse(r) { widths.last() }) { null }
-            var addPlaced = false
+            var cellIndex = 0
             rows.forEach { line ->
                 Row(modifier = Modifier.fillMaxWidth()) {
                     line.forEach { item ->
+                        val slot = cellIndex++
                         Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.TopCenter) {
                             when {
                                 item != null -> {
@@ -176,19 +170,17 @@ internal fun FolderLivePreview(
                                         }
                                     }
                                 }
-                                !addPlaced -> {
-                                    addPlaced = true
+                                else -> {
                                     Box(
                                         modifier = Modifier
                                             .padding(4.dp)
                                             .size(LIVE_ICON)
                                             .clip(RoundedCornerShape(12.dp))
                                             .border(1.5.dp, colors.contentColor.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
-                                            .clickable(onClick = onAdd),
+                                            .clickable { onAdd(slot) },
                                         contentAlignment = Alignment.Center
                                     ) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.settings_folder_add_content), tint = colors.contentColor.copy(alpha = 0.7f)) }
                                 }
-                                else -> Spacer(Modifier.size(LIVE_ICON))
                             }
                         }
                     }

@@ -147,6 +147,23 @@ private val MIGRATION_62_63 = object : Migration(62, 63) {
     }
 }
 
+// Apps and elements in a folder sit at fixed places now: orderIndex is the cell, counted across the
+// rows. Renumbered here so nothing moves; widgets get their own count, as they sit above the grid.
+private val MIGRATION_63_64 = object : Migration(63, 64) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        val rows = mutableListOf<Triple<Long, Long, String>>()
+        db.query("SELECT id, folderId, type FROM folder_items ORDER BY folderId, orderIndex, id").use { c ->
+            while (c.moveToNext()) rows += Triple(c.getLong(0), c.getLong(1), c.getString(2))
+        }
+        rows.groupBy { it.second }.values.forEach { items ->
+            val (widgets, icons) = items.partition { it.third == "WIDGET" || it.third == "SYSTEM_WIDGET" }
+            listOf(widgets, icons).forEach { list ->
+                list.forEachIndexed { index, row -> db.execSQL("UPDATE folder_items SET orderIndex = ? WHERE id = ?", arrayOf<Any>(index, row.first)) }
+            }
+        }
+    }
+}
+
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "flauncher_settings")
 
 @Module
@@ -163,7 +180,7 @@ object AppModule {
             .addMigrations(
                 MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33,
                 MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36, MIGRATION_36_37, MIGRATION_60_61, MIGRATION_61_62,
-                MIGRATION_62_63
+                MIGRATION_62_63, MIGRATION_63_64
             )
             // Only a last resort now for jumps with no migration path above (e.g. a much older install
             // skipping several versions at once, or a version older than 27). Every future version bump

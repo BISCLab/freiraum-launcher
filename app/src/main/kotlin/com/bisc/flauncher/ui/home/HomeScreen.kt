@@ -1223,7 +1223,7 @@ fun HomeScreen(
                 },
                 onFolderClick = { item -> item.payload.toLongOrNull()?.let(viewModel::openFolder) },
                 onRemoveItem = viewModel::removeFromFolder,
-                onReorderItems = viewModel::reorderFolderItems,
+                onMoveItemToSlot = viewModel::moveFolderItemToSlot,
                 onBack = viewModel::closeFolder,
                 cardAppearance = folder.effectiveAppearance(folderCardAppearance),
                 onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) },

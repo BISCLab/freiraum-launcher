@@ -24,7 +24,7 @@ import com.bisc.flauncher.data.model.SavedMapTarget
         PinnedShortcut::class, AppOverride::class,
         PinnedContact::class, ActionButton::class
     ],
-    version = 63,
+    version = 64,
     exportSchema = true
 )
 @TypeConverters(Converters::class)

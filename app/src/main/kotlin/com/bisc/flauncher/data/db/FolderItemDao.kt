@@ -19,6 +19,9 @@ interface FolderItemDao {
     @Query("SELECT MAX(orderIndex) FROM folder_items WHERE folderId = :folderId")
     suspend fun maxOrderIndex(folderId: Long): Int?
 
+    @Query("SELECT * FROM folder_items WHERE folderId = :folderId")
+    suspend fun itemsForFolder(folderId: Long): List<FolderItem>
+
     @Insert
     suspend fun insert(item: FolderItem): Long
 

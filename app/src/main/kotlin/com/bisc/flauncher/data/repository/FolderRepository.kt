@@ -92,7 +92,31 @@ class FolderRepository @Inject constructor(
         folderDao.get(id)?.let { folderDao.update(it.copy(showLabelsOverrideEnabled = true, showLabels = show)) }
     }
 
-    private suspend fun nextOrderIndex(folderId: Long): Int = (folderItemDao.maxOrderIndex(folderId) ?: -1) + 1
+    /** The place for a new app or element: the one reserved by tapping an empty cell, or the first free one. */
+    private suspend fun nextOrderIndex(folderId: Long): Int {
+        val used = folderItemDao.itemsForFolder(folderId).filter { !it.isWidgetItem() }.map { it.orderIndex }.toSet()
+        reservedSlots.remove(folderId)?.takeIf { it >= 0 && it !in used }?.let { return it }
+        return generateSequence(0) { it + 1 }.first { it !in used }
+    }
+
+    private suspend fun nextWidgetIndex(folderId: Long): Int =
+        (folderItemDao.itemsForFolder(folderId).filter { it.isWidgetItem() }.maxOfOrNull { it.orderIndex } ?: -1) + 1
+
+    private fun FolderItem.isWidgetItem() = type == GridItemType.WIDGET || type == GridItemType.SYSTEM_WIDGET
+
+    /** The next app or element added to [folderId] goes to [slot]; null = the first free place. */
+    fun reserveSlot(folderId: Long, slot: Int?) {
+        if (slot == null) reservedSlots.remove(folderId) else reservedSlots[folderId] = slot
+    }
+
+    /** Moves an app or element to [slot]; whatever sits there takes its old place. */
+    suspend fun moveToSlot(item: FolderItem, slot: Int) {
+        if (slot < 0 || slot == item.orderIndex) return
+        folderItemDao.itemsForFolder(item.folderId)
+            .firstOrNull { !it.isWidgetItem() && it.orderIndex == slot && it.id != item.id }
+            ?.let { folderItemDao.update(it.copy(orderIndex = item.orderIndex)) }
+        folderItemDao.update(item.copy(orderIndex = slot))
+    }
 
     suspend fun addItemToFolder(folderId: Long, type: GridItemType, payload: String) {
         folderItemDao.insert(FolderItem(folderId = folderId, type = type, payload = payload, orderIndex = nextOrderIndex(folderId)))
@@ -101,7 +125,7 @@ class FolderRepository @Inject constructor(
     suspend fun addWidgetToFolder(folderId: Long, kind: String, spanY: Int = WidgetKind.defaultSpan(kind)): Long {
         val isDark = settingsRepository.theme.first().isDark(context)
         var item = FolderItem(
-            folderId = folderId, type = GridItemType.WIDGET, payload = kind, spanY = spanY, orderIndex = nextOrderIndex(folderId),
+            folderId = folderId, type = GridItemType.WIDGET, payload = kind, spanY = spanY, orderIndex = nextWidgetIndex(folderId),
             // Widgets start only slightly rounded, same as on a page.
             cornerRadiusPercent = com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT
         )
@@ -114,7 +138,7 @@ class FolderRepository @Inject constructor(
         val isDark = settingsRepository.theme.first().isDark(context)
         var item = FolderItem(
             folderId = folderId, type = GridItemType.SYSTEM_WIDGET, payload = appWidgetId.toString(), spanY = spanY,
-            orderIndex = nextOrderIndex(folderId),
+            orderIndex = nextWidgetIndex(folderId),
             cornerRadiusPercent = com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT
         )
         item = item.withAppearance(defaultBoxAppearanceFor(isDark))
@@ -151,10 +175,16 @@ class FolderRepository @Inject constructor(
         return childId
     }
 
-    /** Rewrites [orderedItems]' positions to match the given order; they must all belong to the same folder. */
+    /** Puts [orderedItems] (all of one folder) in this order: widgets one after another, apps and
+     *  elements into the places they had between them, so empty cells stay where they are. */
     suspend fun reorderItems(orderedItems: List<FolderItem>) {
-        orderedItems.forEachIndexed { index, item ->
+        val (widgets, icons) = orderedItems.partition { it.isWidgetItem() }
+        widgets.forEachIndexed { index, item ->
             if (item.orderIndex != index) folderItemDao.update(item.copy(orderIndex = index))
+        }
+        val slots = icons.map { it.orderIndex }.sorted()
+        icons.forEachIndexed { index, item ->
+            if (item.orderIndex != slots[index]) folderItemDao.update(item.copy(orderIndex = slots[index]))
         }
     }
 
@@ -175,5 +205,9 @@ class FolderRepository @Inject constructor(
 
     suspend fun deleteFolderById(id: Long) {
         folderDao.get(id)?.let { deleteFolder(it) }
+    }
+
+    companion object {
+        private val reservedSlots = java.util.concurrent.ConcurrentHashMap<Long, Int>()
     }
 }

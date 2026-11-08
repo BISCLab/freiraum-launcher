@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Folders have fixed places now, like the Dock: every empty cell in the folder editor shows a +
+  that adds something exactly there, so apps can sit with gaps in between to make your own pattern.
+  Moving an app steps through the cells, empty ones too; removing one leaves its cell empty. When
+  all cells are taken, a further row offers more. Existing folders keep their order
+- Text search behavior: the states under each category show in full again (on two lines if needed)
+
 - Text search behavior rebuilt: the categories as a table with two columns, Search (results with
   every query) and Rail (a place in the rail). Together they give four clear states, shown under
   each name: always there, results only without a rail place, on demand (results only after a tap

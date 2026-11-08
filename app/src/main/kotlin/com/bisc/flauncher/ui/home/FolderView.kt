@@ -106,33 +106,37 @@ internal fun folderWidgetMaxSpan(folder: Folder, items: List<FolderItem>, editin
         .partition { it.type == GridItemType.WIDGET || it.type == GridItemType.SYSTEM_WIDGET }
     val othersHeight = widgets.fold(0.dp) { sum, w -> sum + PageRowDimens.spanHeight(PageRowDimens.rowUnitHeight, w.spanY) + FOLDER_WIDGET_GAP }
     val cell = FOLDER_CELL_HEIGHT + if (showLabels) FOLDER_CELL_LABEL_HEIGHT else 0.dp
-    val gridHeight = cell * gridRowsFor(grid, folder.rows()).size
+    val gridHeight = cell * folderSlotRows(grid, folder.rows(), keepEmptyRows = false).size
     val left = available - othersHeight - gridHeight - FOLDER_WIDGET_GAP
     var span = 1
     while (PageRowDimens.spanHeight(PageRowDimens.rowUnitHeight, span + 1) <= left) span++
     return span
 }
 
-/** One sub-row of the folder's content grid: its configured column [width] (from
- *  [com.bisc.flauncher.data.model.Folder.rows], reserved even if this row isn't fully filled, so
- *  columns stay aligned across rows the way a fully-filled row's do) and the [items] that actually
- *  landed in it. */
-private data class FolderGridRow(val width: Int, val items: List<FolderItem>)
-
-/** Slices [gridItems] into rows sized by [rowShape]; any items beyond what [rowShape] accounts for
- *  overflow into further rows reusing its last width, so a folder never silently hides content just
- *  because it has more items than its configured rows add up to. */
-private fun gridRowsFor(gridItems: List<FolderItem>, rowShape: List<Int>): List<FolderGridRow> {
-    val widths = rowShape.ifEmpty { listOf(4) }.toMutableList()
-    val lastWidth = widths.last()
-    var consumed = widths.sum()
-    while (consumed < gridItems.size) {
-        widths += lastWidth
-        consumed += lastWidth
+/**
+ * The apps and elements of a folder as rows of cells. Each sits at its own place (its orderIndex
+ * counts the cells across the rows), so cells can stay empty in between. Rows follow [rowShape];
+ * further rows reuse its last width when there is more to place. [keepEmptyRows] also gives the
+ * configured rows that are still empty (for the editor); otherwise empty rows at the end are left out.
+ */
+internal fun folderSlotRows(gridItems: List<FolderItem>, rowShape: List<Int>, keepEmptyRows: Boolean): List<List<FolderItem?>> {
+    val bySlot = HashMap<Int, FolderItem>()
+    gridItems.sortedWith(compareBy({ it.orderIndex }, { it.id })).forEach { item ->
+        var slot = item.orderIndex.coerceAtLeast(0)
+        while (slot in bySlot) slot++
+        bySlot[slot] = item
     }
-    var index = 0
-    return widths.map { width -> FolderGridRow(width, gridItems.drop(index).take(width).also { index += width }) }
-        .filter { it.items.isNotEmpty() }
+    val widths = rowShape.ifEmpty { listOf(4) }.map { it.coerceAtLeast(1) }
+    val needed = maxOf((bySlot.keys.maxOrNull() ?: -1) + 1, if (keepEmptyRows) widths.sum() else 0)
+    val rows = mutableListOf<List<FolderItem?>>()
+    var start = 0
+    while (start < needed) {
+        val width = widths.getOrElse(rows.size) { widths.last() }
+        val first = start
+        rows += List(width) { bySlot[first + it] }
+        start += width
+    }
+    return rows
 }
 
 /** Folder card with its items, shown above the home screen. */
@@ -151,7 +155,7 @@ fun FolderView(
     onAppClick: (FolderItem) -> Unit,
     onFolderClick: (FolderItem) -> Unit,
     onRemoveItem: (FolderItem) -> Unit,
-    onReorderItems: (List<FolderItem>) -> Unit = {},
+    onMoveItemToSlot: (FolderItem, Int) -> Unit = { _, _ -> },
     onBack: () -> Unit,
     cardAppearance: ElementAppearance,
     /** Runs a clock widget's tap action. */
@@ -172,14 +176,14 @@ fun FolderView(
         WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
     )
     val (widgetItems, gridItems) = items.partition { it.type == GridItemType.WIDGET || it.type == GridItemType.SYSTEM_WIDGET }
-    val gridRows = gridRowsFor(gridItems, folder.rows())
+    val gridRows = folderSlotRows(gridItems, folder.rows(), keepEmptyRows = false)
     val movingItem = gridItems.find { it.id == movingItemId }
+    // Moves step by step through the cells, empty ones too.
     fun moveBy(delta: Int) {
-        val from = gridItems.indexOfFirst { it.id == movingItemId }
-        val to = (from + delta).coerceIn(0, gridItems.lastIndex)
-        if (from < 0 || from == to) return
-        val reordered = gridItems.toMutableList().apply { add(to, removeAt(from)) }
-        onReorderItems(reordered)
+        val item = movingItem ?: return
+        val cells = folderSlotRows(gridItems, folder.rows(), keepEmptyRows = true).sumOf { it.size }
+        val to = (item.orderIndex + delta).coerceIn(0, cells - 1)
+        if (to != item.orderIndex) onMoveItemToSlot(item, to)
     }
 
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -212,12 +216,12 @@ fun FolderView(
                         )
                     }
                 }
-                for (row in gridRows) {
-                    key("grid_${row.items.first().id}") {
+                gridRows.forEachIndexed { rowIndex, row ->
+                    key("grid_$rowIndex") {
                         Row(modifier = Modifier.fillMaxWidth()) {
-                            repeat(row.width) { slot ->
+                            repeat(row.size) { slot ->
                                 Box(modifier = Modifier.weight(1f)) {
-                                    val entry = row.items.getOrNull(slot)
+                                    val entry = row[slot]
                                     if (entry != null) {
                                         key(entry.id) {
                                             FolderContentCell(
