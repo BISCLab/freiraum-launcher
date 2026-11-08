@@ -24,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -33,6 +32,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Row
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.ui.home.dock.resolveElementColors
@@ -44,12 +51,18 @@ val SEARCH_RAIL_WIDTH = 28.dp
 /** Between the rail and the result cards. */
 val SEARCH_RAIL_GAP = 10.dp
 private val RAIL_SLOT = 40.dp
-private val BUBBLE_SIZE = 56.dp
+private val BUBBLE_HEIGHT = 52.dp
+/** How far the bubble sits above the finger, so the thumb never covers it. */
+private val BUBBLE_LIFT = 72.dp
+/** How much the symbol under the finger grows; its neighbours grow less. */
+private const val MAGNIFY = 0.85f
 
 /**
  * The categories of the Text search as a vertical rail beside the results, like the App list's
- * A-Z rail. A tap jumps to that category; dragging along the rail runs through the categories and
- * shows the one under the finger in a bubble. Categories without results right now are faint.
+ * A-Z rail. A tap jumps to that category; dragging along the rail runs through the categories like
+ * a magnifier: the symbol under the finger and its neighbours grow and light up, a ring in the
+ * category's color follows the finger, and a bubble above the thumb names the category. Categories
+ * without results right now are faint.
  * [focus] is the one tapped last; the others are greyed out until the results are scrolled.
  */
 @Composable
@@ -80,6 +93,15 @@ fun SearchCategoryRail(
     fun colorOf(category: SearchCategory) = categoryColors[category]?.let { Color(it) } ?: category.defaultColor
     var scrubbing by remember { mutableStateOf<SearchCategory?>(null) }
     var scrubY by remember { mutableStateOf(0f) }
+    // Fades the magnifier in and out instead of switching it.
+    val lens by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (scrubbing != null) 1f else 0f,
+        animationSpec = androidx.compose.animation.core.tween(if (scrubbing != null) 140 else 220),
+        label = "railLens"
+    )
+    val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
+    // Each symbol's middle, from the top of the rail box, for the magnifier.
+    val centers = remember(categories) { FloatArray(categories.size) }
 
     BoxWithConstraints(modifier = modifier.fillMaxHeight().width(SEARCH_RAIL_WIDTH), contentAlignment = Alignment.Center) {
         val railHeight = if (fill) (maxHeight - edgeGap * 2).coerceAtLeast(0.dp) else minOf(maxHeight, RAIL_SLOT * categories.size)
@@ -90,8 +112,8 @@ fun SearchCategoryRail(
                 .heightIn(max = railHeight)
                 .fillMaxHeight()
                 .designGlow(shape, "rail")
-                .clip(shape)
-                .background(colors.background, alpha = colors.backgroundAlpha)
+                // No clipping: the magnified symbols may reach out of the rail.
+                .background(colors.background, shape, colors.backgroundAlpha)
                 .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)
                 .pointerInput(categories) {
                     fun at(y: Float) = categories[((y / size.height) * categories.size).toInt().coerceIn(0, categories.lastIndex)]
@@ -109,6 +131,7 @@ fun SearchCategoryRail(
                                 val now = at(change.position.y)
                                 scrubY = railTopPx + change.position.y.coerceIn(0f, size.height.toFloat())
                                 if (now != last || scrubbing == null) {
+                                    if (now != last) haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
                                     last = now
                                     scrubbing = now
                                     currentOnScrub(now)
@@ -122,41 +145,72 @@ fun SearchCategoryRail(
             verticalArrangement = Arrangement.SpaceEvenly,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            categories.forEach { category ->
+            val slotPx = with(LocalDensity.current) { RAIL_SLOT.toPx() }
+            val pullPx = with(LocalDensity.current) { 10.dp.toPx() } * (if (left) 1f else -1f)
+            categories.forEachIndexed { index, category ->
                 val color = colorOf(category)
-                val chosen = category == focus
+                val chosen = category == (scrubbing ?: focus)
                 val faded = (focus != null && !chosen) || category !in present
                 Box(
                     modifier = Modifier
+                        .onGloballyPositioned { centers[index] = railTopPx + it.positionInParent().y + it.size.height / 2f }
+                        .graphicsLayer {
+                            // 1 right under the finger, falling off over about two symbols each way.
+                            val near = (1f - kotlin.math.abs(scrubY - centers[index]) / (slotPx * 2.2f)).coerceIn(0f, 1f) * lens
+                            val eased = near * near * (3f - 2f * near)
+                            val scale = 1f + MAGNIFY * eased
+                            scaleX = scale
+                            scaleY = scale
+                            // Leans a little towards the results, out of the thumb's shadow.
+                            translationX = pullPx * eased
+                            alpha = if (faded) 0.3f + 0.7f * eased else 0.9f + 0.1f * eased
+                        }
                         .size(26.dp)
                         .clip(CircleShape)
-                        .background(color.copy(alpha = if (chosen) 0.22f else 0f)),
+                        .background(color.copy(alpha = if (chosen) 0.24f else 0f))
+                        .then(if (chosen && scrubbing != null) Modifier.border(1.5.dp, color.copy(alpha = 0.7f), CircleShape) else Modifier),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         category.shownIcon(),
                         contentDescription = stringResource(category.filterLabelRes),
                         tint = color,
-                        modifier = Modifier.size(17.dp).alpha(if (faded) 0.3f else 0.9f)
+                        modifier = Modifier.size(17.dp)
                     )
                 }
             }
         }
-        // While dragging, the category under the finger sits in a bubble beside the rail.
+        // While dragging, the category under the finger is named in a bubble above the thumb.
         scrubbing?.let { category ->
-            val bubblePx = with(LocalDensity.current) { BUBBLE_SIZE.toPx() }
-            val gapPx = with(LocalDensity.current) { (SEARCH_RAIL_WIDTH + 12.dp).toPx() }
-            Box(
+            val density = LocalDensity.current
+            val bubblePx = with(density) { BUBBLE_HEIGHT.toPx() }
+            val liftPx = with(density) { BUBBLE_LIFT.toPx() }
+            val gapPx = with(density) { (SEARCH_RAIL_WIDTH + 20.dp).toPx() }
+            val color = colorOf(category)
+            Row(
                 modifier = Modifier
                     .align(if (left) Alignment.TopStart else Alignment.TopEnd)
-                    .offset { IntOffset(if (left) gapPx.roundToInt() else -gapPx.roundToInt(), (scrubY - bubblePx / 2).roundToInt()) }
-                    .size(BUBBLE_SIZE)
-                    .shadow(6.dp, CircleShape)
+                    .offset { IntOffset(if (left) gapPx.roundToInt() else -gapPx.roundToInt(), (scrubY - liftPx - bubblePx / 2).coerceAtLeast(0f).roundToInt()) }
+                    .wrapContentWidth(unbounded = true, align = if (left) Alignment.Start else Alignment.End)
+                    .height(BUBBLE_HEIGHT)
+                    .shadow(8.dp, CircleShape)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest),
-                contentAlignment = Alignment.Center
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                    .padding(start = 8.dp, end = 18.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(category.shownIcon(), contentDescription = null, tint = colorOf(category), modifier = Modifier.size(28.dp))
+                Box(
+                    modifier = Modifier.size(36.dp).clip(CircleShape).background(color.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) { Icon(category.shownIcon(), contentDescription = null, tint = color, modifier = Modifier.size(22.dp)) }
+                Text(
+                    stringResource(category.filterLabelRes),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    softWrap = false,
+                    modifier = Modifier.padding(start = 10.dp)
+                )
             }
         }
     }

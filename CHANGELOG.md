@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Text search category rail: dragging along it works like a magnifier. The symbol under the thumb and
+  its neighbours grow, light up and lean towards the results, a ring in the category color follows
+  the finger, and a soft tick marks each new category. The bubble now sits above the thumb and names
+  the category next to its symbol
+
 - Closing a folder is the opening backwards: it shrinks back towards where it was tapped while it
   fades, and the darkened, blurred home screen behind it clears at the same pace instead of
   snapping back
