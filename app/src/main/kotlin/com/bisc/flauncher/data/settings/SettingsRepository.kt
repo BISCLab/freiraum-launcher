@@ -773,6 +773,8 @@ class SettingsRepository @Inject constructor(
             if (appListSearchFieldAppearance.first() == null) setAppListSearchFieldAppearance(button ?: rail)
             if (searchRailAppearance.first() == null) setSearchRailAppearance(rail)
         }
+        val railCorner = alphabetRailCornerPercent.first()
+        if (railCorner != null && searchRailCornerRadiusPercent.first() == null) setSearchRailCornerRadiusPercent(railCorner)
         dataStore.edit { it[RAIL_FOLLOWERS_SEPARATED_KEY] = true }
     }
 

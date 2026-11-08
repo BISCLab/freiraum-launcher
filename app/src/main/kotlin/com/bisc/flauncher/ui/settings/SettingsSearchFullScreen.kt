@@ -554,11 +554,10 @@ fun SettingsSearchElementScreen(
     val resultsCorner by viewModel.searchResultsCornerRadiusPercent.collectAsState()
     val fieldCorner by viewModel.searchFieldCornerRadiusPercent.collectAsState()
     val railCorner by viewModel.searchRailCornerRadiusPercent.collectAsState()
-    val alphabetCorner by viewModel.alphabetRailCornerPercent.collectAsState()
     val defaultCornerPercent by viewModel.defaultCornerRadiusPercent.collectAsState()
     val savedCorner = when (element) {
         SearchElement.FIELD -> fieldCorner ?: barCorner ?: 100
-        SearchElement.RAIL -> railCorner ?: alphabetCorner ?: defaultCornerPercent
+        SearchElement.RAIL -> railCorner ?: defaultCornerPercent
         SearchElement.RESULTS -> resultsCorner ?: 100
     }
     ElementLookScreen(
@@ -575,6 +574,7 @@ fun SettingsSearchElementScreen(
                 SearchElement.RESULTS -> viewModel.setSearchResultsCornerRadiusPercent(corner)
             }
         },
+        backdropDark = searchPageDark(viewModel),
         kind = when (element) {
             SearchElement.FIELD -> LookSampleKind.FIELD
             SearchElement.RAIL -> LookSampleKind.RAIL

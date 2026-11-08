@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -90,7 +91,13 @@ fun SearchCategoryRail(
     val colors = resolveElementColors(appearance)
     val radius = SEARCH_RAIL_WIDTH / 2 * (cornerRadiusPercent.coerceIn(0, 100) / 100f)
     val shape = RoundedCornerShape(radius)
-    fun colorOf(category: SearchCategory) = categoryColors[category]?.let { Color(it) } ?: category.defaultColor
+    // On a dark rail the category colors are lifted towards white, so darker ones (blue, violet)
+    // still stand out; on a light rail they stay as they are.
+    val darkRail = colors.contentColor.luminance() > 0.5f
+    fun colorOf(category: SearchCategory): Color {
+        val base = categoryColors[category]?.let { Color(it) } ?: category.defaultColor
+        return if (darkRail) androidx.compose.ui.graphics.lerp(base, Color.White, 0.35f) else base
+    }
     var scrubbing by remember { mutableStateOf<SearchCategory?>(null) }
     var scrubY by remember { mutableStateOf(0f) }
     // Fades the magnifier in and out instead of switching it.
@@ -163,7 +170,8 @@ fun SearchCategoryRail(
                             scaleY = scale
                             // Leans a little towards the results, out of the thumb's shadow.
                             translationX = pullPx * eased
-                            alpha = if (faded) 0.3f + 0.7f * eased else 0.9f + 0.1f * eased
+                            // Faint ones stay readable; the magnifier brings them to full.
+                            alpha = if (faded) 0.55f + 0.45f * eased else 1f
                         }
                         .size(26.dp)
                         .clip(CircleShape)

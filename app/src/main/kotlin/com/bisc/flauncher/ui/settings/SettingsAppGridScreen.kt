@@ -170,7 +170,7 @@ fun SettingsAppGridGridScreen(navController: NavController, onBack: () -> Unit, 
     }
 }
 
-/** The search field's own look - follows the app list's A-Z index look until customized here. */
+/** The App grid's search field: its own look, or the automatic one for the page's brightness. */
 @Composable
 fun SettingsAppGridSearchFieldScreen(
     navController: NavController,
@@ -184,20 +184,28 @@ fun SettingsAppGridSearchFieldScreen(
     val surfaceIsDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), pageBackground)
 
     val saved = remember(own) { own ?: automaticRailAppearance(surfaceIsDark) }
-    var draft by rememberDraft(saved)
-    SettingsSubScreen(title = stringResource(R.string.settings_app_grid_search_field), navController = navController, onBack = onBack, onSave = { viewModel.setAppGridBarAppearance(draft) }, dirty = draft != saved) {
-        ElementAppearanceSection(appearance = draft, onAppearanceChange = { draft = it }, styleGroupTitle = null)
-        if (own != null) {
-            SettingsPreferenceGroup {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_element_color_reset),
-                    onClick = viewModel::resetAppGridBarAppearance,
-                    trailing = null
-                )
+    ElementLookScreen(
+        title = stringResource(R.string.settings_app_grid_search_field),
+        navController = navController,
+        onBack = onBack,
+        saved = saved,
+        savedCorner = null,
+        onSave = { look, _ -> viewModel.setAppGridBarAppearance(look) },
+        kind = LookSampleKind.FIELD,
+        backdropDark = surfaceIsDark,
+        extras = {
+            if (own != null) {
+                SettingsPreferenceGroup {
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(R.string.settings_element_color_reset),
+                        onClick = viewModel::resetAppGridBarAppearance,
+                        trailing = null
+                    )
+                }
             }
         }
-    }
+    )
 }
 
 /** Search field position and behavior, and which folders the grid shows. */

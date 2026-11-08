@@ -1296,7 +1296,6 @@ private fun HomeSearchOverlay(
     onContactActions: (com.bisc.flauncher.data.model.ContactInfo) -> Unit
 ) {
     val context = LocalContext.current
-    val alphabetRailCorner by viewModel.alphabetRailCornerPercent.collectAsState()
     val searchAppearance by viewModel.searchAppearance.collectAsState()
     val searchBackground by viewModel.searchBackground.collectAsState()
     val searchKeyboardCapEnabled by viewModel.searchKeyboardCapEnabled.collectAsState()
@@ -1366,7 +1365,7 @@ private fun HomeSearchOverlay(
         fieldAppearance = searchFieldAppearance,
         fieldCornerRadiusPercent = searchFieldCornerRadiusPercent,
         railAppearance = searchRailAppearance,
-        railCornerRadiusPercent = searchRailCornerRadiusPercent ?: alphabetRailCorner,
+        railCornerRadiusPercent = searchRailCornerRadiusPercent,
         keyboardCapColor = if (searchKeyboardCapEnabled) searchKeyboardCapColor else null,
         keyboardCapCornerRadiusPercent = searchKeyboardCapCornerRadiusPercent,
         keyboardCapArrow = searchKeyboardCapArrow,

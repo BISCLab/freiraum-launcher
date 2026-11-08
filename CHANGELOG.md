@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Text search category rail: the symbols are much easier to see. On a dark rail their colors are
+  lifted towards white, and categories without results are only slightly faint instead of nearly
+  invisible
+- The Text search rail's corners are its own too, no longer the A-Z rail's (kept as they were)
+- App grid search field and the Text search parts use the same look page with the preview pinned
+  on top and shown on the page's real light or dark tone
+
 - App list looks: A-Z rail, search button, letter circles and search field each get one page with a
   live preview that stays on top while scrolling. The preview sits on a backdrop as light or dark
   as the App list page really is, and "automatic" colors show as they will turn out there
