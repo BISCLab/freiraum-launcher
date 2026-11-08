@@ -140,11 +140,6 @@ fun HomeScreen(
     val appOverviewPageId by viewModel.appOverviewPageId.collectAsState()
     val appOverviewBackground by remember(appOverviewPageId) { viewModel.pageBackgroundConfig(appOverviewPageId ?: -1L) }
         .collectAsState(initial = BackgroundConfig())
-    val searchQuery by viewModel.searchQuery.collectAsState()
-    val searchResults by viewModel.searchResults.collectAsState()
-    val calculatorResult by viewModel.calculatorResult.collectAsState()
-    val contactResults by viewModel.contactResults.collectAsState()
-    val contactsPermissionGranted by viewModel.contactsPermissionGranted.collectAsState()
     val folders by viewModel.folders.collectAsState()
     val folderItemsByFolder by viewModel.folderItemsByFolder.collectAsState()
     val openFolderPath by viewModel.openFolderPath.collectAsState()
@@ -166,22 +161,11 @@ fun HomeScreen(
     val chargingAnimationColor by viewModel.chargingAnimationColor.collectAsState()
     val searchAppearance by viewModel.searchAppearance.collectAsState()
     val searchBackground by viewModel.searchBackground.collectAsState()
-    val searchBarCornerRadiusPercent by viewModel.searchBarCornerRadiusPercent.collectAsState()
-    val searchResultsAppearance by viewModel.searchResultsAppearance.collectAsState()
-    val searchResultsCornerRadiusPercent by viewModel.searchResultsCornerRadiusPercent.collectAsState()
-    val searchResultsEdgeToEdge by viewModel.searchResultsEdgeToEdge.collectAsState()
-    val searchBarAtBottom by viewModel.searchBarAtBottom.collectAsState()
-    val searchBarShowCategories by viewModel.searchBarShowCategories.collectAsState()
-    val searchFieldAppearance by viewModel.searchFieldAppearance.collectAsState()
-    val searchFieldCornerRadiusPercent by viewModel.searchFieldCornerRadiusPercent.collectAsState()
-    val searchRailAppearance by viewModel.searchRailAppearance.collectAsState()
-    val searchRailCornerRadiusPercent by viewModel.searchRailCornerRadiusPercent.collectAsState()
     val appListSearchFieldAppearance by viewModel.appListSearchFieldAppearance.collectAsState()
     val searchKeyboardCapEnabled by viewModel.searchKeyboardCapEnabled.collectAsState()
     val searchKeyboardCapColor by viewModel.searchKeyboardCapColor.collectAsState()
     val searchKeyboardCapCornerRadiusPercent by viewModel.searchKeyboardCapCornerRadiusPercent.collectAsState()
     val searchKeyboardCapArrow by viewModel.searchKeyboardCapArrow.collectAsState()
-    val searchKeyboardAutoOpen by viewModel.searchKeyboardAutoOpen.collectAsState()
     val appListSearchButtonAppearance by viewModel.appListSearchButtonAppearance.collectAsState()
     val appListShowSearchButton by viewModel.appListShowSearchButton.collectAsState()
     val appListAccentColor by viewModel.appListAccentColor.collectAsState()
@@ -193,38 +177,14 @@ fun HomeScreen(
     val railCorner by viewModel.alphabetRailCornerPercent.collectAsState()
     val appListShowAzIndex by viewModel.appListShowAzIndex.collectAsState()
     val searchHideStatusBar by viewModel.searchHideStatusBar.collectAsState()
-    val websiteResults by viewModel.websiteResults.collectAsState()
-    val shortcutResults by viewModel.shortcutResults.collectAsState()
-    val folderResults by viewModel.folderResults.collectAsState()
-    val mapTargetResults by viewModel.mapTargetResults.collectAsState()
     val appListHeaderLetterAppearance by viewModel.appListHeaderLetterAppearance.collectAsState()
-    val searchCategoryOrder by viewModel.searchCategoryOrder.collectAsState()
-    val searchFavoriteApps by viewModel.searchFavoriteApps.collectAsState()
-    val searchFavoriteIds by viewModel.searchFavoriteIds.collectAsState()
-    val searchCategoryRailLeft by viewModel.searchCategoryRailLeft.collectAsState()
-    val activeSearchCategories by viewModel.activeSearchCategories.collectAsState()
-    val searchFilter by viewModel.searchFilter.collectAsState()
-    val searchAiApp by viewModel.searchAiApp.collectAsState()
-    val categoryColors by viewModel.categoryColors.collectAsState()
-    val converterResult by viewModel.converterResult.collectAsState()
     val appGridOpen by viewModel.appGridOpen.collectAsState()
     val appGridPageId by viewModel.appGridPageId.collectAsState()
     val appGridBackground by remember(appGridPageId) { viewModel.pageBackgroundConfig(appGridPageId ?: -1L) }
         .collectAsState(initial = BackgroundConfig())
     val appGridHideStatusBar by remember(appGridPageId) { viewModel.pageHideStatusBar(appGridPageId ?: -1L) }
         .collectAsState(initial = false)
-    val appGridColumns by viewModel.appGridColumns.collectAsState()
-    val appGridHorizontal by viewModel.appGridHorizontal.collectAsState()
-    val appGridRows by viewModel.appGridRows.collectAsState()
-    val appGridPageDots by viewModel.appGridPageDots.collectAsState()
-    val appGridIconSizePercent by viewModel.appGridIconSizePercent.collectAsState()
-    val appGridShowLabels by viewModel.appGridShowLabels.collectAsState()
-    val appGridBarPosition by viewModel.appGridBarPosition.collectAsState()
-    val appGridBarOpensTextSearch by viewModel.appGridBarOpensTextSearch.collectAsState()
-    val appGridKeyboardAutoOpen by viewModel.appGridKeyboardAutoOpen.collectAsState()
-    val appGridBarAppearance by viewModel.appGridBarAppearance.collectAsState()
     val appGridFolderIds by viewModel.appGridFolderIds.collectAsState()
-    val appGridFoldersAlphabetical by viewModel.appGridFoldersAlphabetical.collectAsState()
     val appGridHideFolderApps by viewModel.appGridHideFolderApps.collectAsState()
     val appListOwnSearch by viewModel.appListOwnSearch.collectAsState()
     val appQuery by viewModel.appQuery.collectAsState()
@@ -1105,47 +1065,15 @@ fun HomeScreen(
         ) {
             BackgroundFill(appGridBackground, Modifier.fillMaxSize())
             CompositionLocalProvider(LocalAppIconLoader provides viewModel.iconLoader) {
-                com.bisc.flauncher.ui.home.search.AppGridContent(
-                    apps = gridApps,
-                    folders = gridFolders,
-                    foldersAlphabetical = appGridFoldersAlphabetical,
+                HomeAppGrid(
+                    viewModel = viewModel,
+                    gridApps = gridApps,
+                    gridFolders = gridFolders,
                     folderItemsByFolder = folderItemsByFolder,
-                    query = appQuery,
-                    queryResults = appQueryResults,
-                    columns = appGridColumns,
-                    horizontal = appGridHorizontal,
-                    rowsPerPage = appGridRows,
-                    pageDots = appGridPageDots,
-                    globalIconScale = iconSizeScale,
-                    gridIconScale = appGridIconSizePercent / 100f,
-                    showLabels = appGridShowLabels,
-                    labelColor = com.bisc.flauncher.ui.home.dock.resolveElementColors(
-                        ElementAppearance(fillMode = ElementFillMode.NONE), gridSurfaceDark
-                    ).contentColor,
-                    barPosition = appGridBarPosition,
-                    barOpensTextSearch = appGridBarOpensTextSearch,
-                    keyboardAutoOpen = appGridKeyboardAutoOpen,
-                    barAppearance = appGridBarAppearance ?: automaticRailAppearance(gridSurfaceDark),
+                    iconSizeScale = iconSizeScale,
+                    gridSurfaceDark = gridSurfaceDark,
                     cornerRadiusPercent = cornerRadiusPercent,
-                    keyboardCapColor = if (searchKeyboardCapEnabled) searchKeyboardCapColor else null,
-                    keyboardCapCornerRadiusPercent = searchKeyboardCapCornerRadiusPercent,
-                    keyboardCapArrow = searchKeyboardCapArrow,
-                    loadIcon = viewModel::loadIcon,
-                    loadPackIcon = viewModel::loadPackIcon,
-                    onQueryChange = viewModel::updateAppQuery,
-                    onAppClick = { app ->
-                        viewModel.recordAppLaunch(app.componentName)
-                        launchApp(context, app.componentName)
-                        viewModel.closeAppGrid()
-                    },
-                    onFolderClick = viewModel::openFolder,
-                    onOpenTextSearch = viewModel::openSearch,
-                    modifier = Modifier
-                        .then(
-                            if (appGridHideStatusBar) Modifier.windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top))
-                            else Modifier.statusBarsPadding()
-                        )
-                        .padding(top = 16.dp)
+                    hideStatusBar = appGridHideStatusBar
                 )
             }
         }
@@ -1157,84 +1085,13 @@ fun HomeScreen(
         enter = com.bisc.flauncher.ui.searchIn(overlayMotion, searchOrigin),
         exit = com.bisc.flauncher.ui.searchOut(overlayMotion, searchOrigin)
     ) {
-        SearchOverlay(
-            query = searchQuery,
-            appResults = searchResults,
-            calculatorResult = calculatorResult,
-            converterResult = converterResult,
-            contactResults = contactResults,
-            websiteResults = websiteResults,
-            shortcutResults = shortcutResults,
-            folderResults = folderResults,
-            mapTargetResults = mapTargetResults,
-            contactsPermissionGranted = contactsPermissionGranted,
+        HomeSearchOverlay(
+            viewModel = viewModel,
             statusBarHidden = immersiveSearch,
-            categoryOrder = searchCategoryOrder,
-            activeCategories = activeSearchCategories,
-            categoryFilter = searchFilter,
-            categoryColors = categoryColors,
-            aiAppPackage = searchAiApp,
-            keyboardAutoOpen = searchKeyboardAutoOpen,
-            appearance = searchAppearance,
             cornerRadiusPercent = cornerRadiusPercent,
-            background = searchBackground,
-            barCornerRadiusPercent = searchBarCornerRadiusPercent,
-            resultsAppearance = searchResultsAppearance,
-            resultsCornerRadiusPercent = searchResultsCornerRadiusPercent,
-            resultsEdgeToEdge = searchResultsEdgeToEdge,
-            barAtBottom = searchBarAtBottom,
-            showCategoryRail = searchBarShowCategories,
-            fieldAppearance = searchFieldAppearance,
-            fieldCornerRadiusPercent = searchFieldCornerRadiusPercent,
-            railAppearance = searchRailAppearance,
-            railCornerRadiusPercent = searchRailCornerRadiusPercent,
-            keyboardCapColor = if (searchKeyboardCapEnabled) searchKeyboardCapColor else null,
-            keyboardCapCornerRadiusPercent = searchKeyboardCapCornerRadiusPercent,
-            keyboardCapArrow = searchKeyboardCapArrow,
-            loadIcon = viewModel::loadIcon,
-            onQueryChange = viewModel::updateSearchQuery,
-            onAppClick = { app ->
-                viewModel.recordAppLaunch(app.componentName)
-                launchApp(context, app.componentName)
-                viewModel.closeSearch()
-            },
-            onContactClick = { contact -> contactActionsFor = contact },
-            onSettingsShortcutClick = { shortcut ->
-                launchSettingsShortcut(context, shortcut.action)
-                viewModel.closeSearch()
-            },
-            onLauncherSettingsClick = { target ->
-                viewModel.closeSearch()
-                val homeId = pages.find { it.isHome }?.id
-                if (homeId != null || com.bisc.flauncher.data.model.LauncherSettingsTarget.HOME !in target.route) {
-                    onNavigateToSettings(target.route.replace(com.bisc.flauncher.data.model.LauncherSettingsTarget.HOME, homeId.toString()))
-                }
-            },
-            onFolderClick = { folder ->
-                viewModel.closeSearch()
-                viewModel.openFolder(folder.id)
-            },
-            onMapTargetClick = { target ->
-                com.bisc.flauncher.util.launchMapTarget(context, target)
-                viewModel.closeSearch()
-            },
-            onWebsiteClick = { website ->
-                openWebsite(context, website)
-                viewModel.closeSearch()
-            },
-            onShortcutClick = { shortcut ->
-                viewModel.launchShortcut(shortcut)
-                viewModel.closeSearch()
-            },
-            onRefreshContactsPermission = viewModel::refreshContactsPermission,
-            onWebCommand = { viewModel.runWebSearchCommand(context) },
-            onMapsCommand = { viewModel.runMapsCommand(context) },
-            onAiCommand = { viewModel.runAiCommand(context) },
-            onSetFilter = viewModel::setSearchFilter,
-            favoriteApps = searchFavoriteApps,
-            favoriteIds = searchFavoriteIds,
-            onToggleFavorite = viewModel::toggleSearchFavorite,
-            railLeft = searchCategoryRailLeft
+            homeId = pages.find { it.isHome }?.id,
+            onNavigateToSettings = onNavigateToSettings,
+            onContactActions = { contact -> contactActionsFor = contact }
         )
     }
 
@@ -1385,3 +1242,205 @@ fun HomeScreen(
 
 /** Virtual rounds an endless carousel spans (it starts in the middle) - far more than anyone swipes. */
 private const val ENDLESS_CAROUSEL_LOOPS = 1000
+
+/** The Text search with everything it reads, kept out of [HomeScreen] so that one stays small
+ *  enough for Android to load. */
+@Composable
+private fun HomeSearchOverlay(
+    viewModel: HomeViewModel,
+    statusBarHidden: Boolean,
+    cornerRadiusPercent: Int,
+    homeId: Long?,
+    onNavigateToSettings: (String) -> Unit,
+    onContactActions: (com.bisc.flauncher.data.model.ContactInfo) -> Unit
+) {
+    val context = LocalContext.current
+    val searchAppearance by viewModel.searchAppearance.collectAsState()
+    val searchBackground by viewModel.searchBackground.collectAsState()
+    val searchKeyboardCapEnabled by viewModel.searchKeyboardCapEnabled.collectAsState()
+    val searchKeyboardCapColor by viewModel.searchKeyboardCapColor.collectAsState()
+    val searchKeyboardCapCornerRadiusPercent by viewModel.searchKeyboardCapCornerRadiusPercent.collectAsState()
+    val searchKeyboardCapArrow by viewModel.searchKeyboardCapArrow.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val searchResults by viewModel.searchResults.collectAsState()
+    val calculatorResult by viewModel.calculatorResult.collectAsState()
+    val contactResults by viewModel.contactResults.collectAsState()
+    val contactsPermissionGranted by viewModel.contactsPermissionGranted.collectAsState()
+    val searchBarCornerRadiusPercent by viewModel.searchBarCornerRadiusPercent.collectAsState()
+    val searchResultsAppearance by viewModel.searchResultsAppearance.collectAsState()
+    val searchResultsCornerRadiusPercent by viewModel.searchResultsCornerRadiusPercent.collectAsState()
+    val searchResultsEdgeToEdge by viewModel.searchResultsEdgeToEdge.collectAsState()
+    val searchBarAtBottom by viewModel.searchBarAtBottom.collectAsState()
+    val searchBarShowCategories by viewModel.searchBarShowCategories.collectAsState()
+    val searchFieldAppearance by viewModel.searchFieldAppearance.collectAsState()
+    val searchFieldCornerRadiusPercent by viewModel.searchFieldCornerRadiusPercent.collectAsState()
+    val searchRailAppearance by viewModel.searchRailAppearance.collectAsState()
+    val searchRailCornerRadiusPercent by viewModel.searchRailCornerRadiusPercent.collectAsState()
+    val searchKeyboardAutoOpen by viewModel.searchKeyboardAutoOpen.collectAsState()
+    val websiteResults by viewModel.websiteResults.collectAsState()
+    val shortcutResults by viewModel.shortcutResults.collectAsState()
+    val folderResults by viewModel.folderResults.collectAsState()
+    val mapTargetResults by viewModel.mapTargetResults.collectAsState()
+    val searchCategoryOrder by viewModel.searchCategoryOrder.collectAsState()
+    val searchFavoriteApps by viewModel.searchFavoriteApps.collectAsState()
+    val searchFavoriteIds by viewModel.searchFavoriteIds.collectAsState()
+    val searchCategoryRailLeft by viewModel.searchCategoryRailLeft.collectAsState()
+    val activeSearchCategories by viewModel.activeSearchCategories.collectAsState()
+    val searchFilter by viewModel.searchFilter.collectAsState()
+    val searchAiApp by viewModel.searchAiApp.collectAsState()
+    val categoryColors by viewModel.categoryColors.collectAsState()
+    val converterResult by viewModel.converterResult.collectAsState()
+    SearchOverlay(
+        query = searchQuery,
+        appResults = searchResults,
+        calculatorResult = calculatorResult,
+        converterResult = converterResult,
+        contactResults = contactResults,
+        websiteResults = websiteResults,
+        shortcutResults = shortcutResults,
+        folderResults = folderResults,
+        mapTargetResults = mapTargetResults,
+        contactsPermissionGranted = contactsPermissionGranted,
+        statusBarHidden = statusBarHidden,
+        categoryOrder = searchCategoryOrder,
+        activeCategories = activeSearchCategories,
+        categoryFilter = searchFilter,
+        categoryColors = categoryColors,
+        aiAppPackage = searchAiApp,
+        keyboardAutoOpen = searchKeyboardAutoOpen,
+        appearance = searchAppearance,
+        cornerRadiusPercent = cornerRadiusPercent,
+        background = searchBackground,
+        barCornerRadiusPercent = searchBarCornerRadiusPercent,
+        resultsAppearance = searchResultsAppearance,
+        resultsCornerRadiusPercent = searchResultsCornerRadiusPercent,
+        resultsEdgeToEdge = searchResultsEdgeToEdge,
+        barAtBottom = searchBarAtBottom,
+        showCategoryRail = searchBarShowCategories,
+        fieldAppearance = searchFieldAppearance,
+        fieldCornerRadiusPercent = searchFieldCornerRadiusPercent,
+        railAppearance = searchRailAppearance,
+        railCornerRadiusPercent = searchRailCornerRadiusPercent,
+        keyboardCapColor = if (searchKeyboardCapEnabled) searchKeyboardCapColor else null,
+        keyboardCapCornerRadiusPercent = searchKeyboardCapCornerRadiusPercent,
+        keyboardCapArrow = searchKeyboardCapArrow,
+        loadIcon = viewModel::loadIcon,
+        onQueryChange = viewModel::updateSearchQuery,
+        onAppClick = { app ->
+            viewModel.recordAppLaunch(app.componentName)
+            launchApp(context, app.componentName)
+            viewModel.closeSearch()
+        },
+        onContactClick = onContactActions,
+        onSettingsShortcutClick = { shortcut ->
+            launchSettingsShortcut(context, shortcut.action)
+            viewModel.closeSearch()
+        },
+        onLauncherSettingsClick = { target ->
+            viewModel.closeSearch()
+            if (homeId != null || com.bisc.flauncher.data.model.LauncherSettingsTarget.HOME !in target.route) {
+                onNavigateToSettings(target.route.replace(com.bisc.flauncher.data.model.LauncherSettingsTarget.HOME, homeId.toString()))
+            }
+        },
+        onFolderClick = { folder ->
+            viewModel.closeSearch()
+            viewModel.openFolder(folder.id)
+        },
+        onMapTargetClick = { target ->
+            com.bisc.flauncher.util.launchMapTarget(context, target)
+            viewModel.closeSearch()
+        },
+        onWebsiteClick = { website ->
+            openWebsite(context, website)
+            viewModel.closeSearch()
+        },
+        onShortcutClick = { shortcut ->
+            viewModel.launchShortcut(shortcut)
+            viewModel.closeSearch()
+        },
+        onRefreshContactsPermission = viewModel::refreshContactsPermission,
+        onWebCommand = { viewModel.runWebSearchCommand(context) },
+        onMapsCommand = { viewModel.runMapsCommand(context) },
+        onAiCommand = { viewModel.runAiCommand(context) },
+        onSetFilter = viewModel::setSearchFilter,
+        favoriteApps = searchFavoriteApps,
+        favoriteIds = searchFavoriteIds,
+        onToggleFavorite = viewModel::toggleSearchFavorite,
+        railLeft = searchCategoryRailLeft
+    )
+}
+
+/** The App grid with everything it reads, kept out of [HomeScreen] so that one stays small enough
+ *  for Android to load. */
+@Composable
+private fun HomeAppGrid(
+    viewModel: HomeViewModel,
+    gridApps: List<com.bisc.flauncher.data.model.AppInfo>,
+    gridFolders: List<com.bisc.flauncher.data.model.Folder>,
+    folderItemsByFolder: Map<Long, List<com.bisc.flauncher.data.model.FolderItem>>,
+    iconSizeScale: Float,
+    gridSurfaceDark: Boolean,
+    cornerRadiusPercent: Int,
+    hideStatusBar: Boolean
+) {
+    val context = LocalContext.current
+    val appGridColumns by viewModel.appGridColumns.collectAsState()
+    val appGridHorizontal by viewModel.appGridHorizontal.collectAsState()
+    val appGridRows by viewModel.appGridRows.collectAsState()
+    val appGridPageDots by viewModel.appGridPageDots.collectAsState()
+    val appGridIconSizePercent by viewModel.appGridIconSizePercent.collectAsState()
+    val appGridShowLabels by viewModel.appGridShowLabels.collectAsState()
+    val appGridBarPosition by viewModel.appGridBarPosition.collectAsState()
+    val appGridBarOpensTextSearch by viewModel.appGridBarOpensTextSearch.collectAsState()
+    val appGridKeyboardAutoOpen by viewModel.appGridKeyboardAutoOpen.collectAsState()
+    val appGridBarAppearance by viewModel.appGridBarAppearance.collectAsState()
+    val appGridFoldersAlphabetical by viewModel.appGridFoldersAlphabetical.collectAsState()
+    val searchKeyboardCapEnabled by viewModel.searchKeyboardCapEnabled.collectAsState()
+    val searchKeyboardCapColor by viewModel.searchKeyboardCapColor.collectAsState()
+    val searchKeyboardCapCornerRadiusPercent by viewModel.searchKeyboardCapCornerRadiusPercent.collectAsState()
+    val searchKeyboardCapArrow by viewModel.searchKeyboardCapArrow.collectAsState()
+    val appQuery by viewModel.appQuery.collectAsState()
+    val appQueryResults by viewModel.appQueryResults.collectAsState()
+    com.bisc.flauncher.ui.home.search.AppGridContent(
+        apps = gridApps,
+        folders = gridFolders,
+        foldersAlphabetical = appGridFoldersAlphabetical,
+        folderItemsByFolder = folderItemsByFolder,
+        query = appQuery,
+        queryResults = appQueryResults,
+        columns = appGridColumns,
+        horizontal = appGridHorizontal,
+        rowsPerPage = appGridRows,
+        pageDots = appGridPageDots,
+        globalIconScale = iconSizeScale,
+        gridIconScale = appGridIconSizePercent / 100f,
+        showLabels = appGridShowLabels,
+        labelColor = com.bisc.flauncher.ui.home.dock.resolveElementColors(
+            ElementAppearance(fillMode = ElementFillMode.NONE), gridSurfaceDark
+        ).contentColor,
+        barPosition = appGridBarPosition,
+        barOpensTextSearch = appGridBarOpensTextSearch,
+        keyboardAutoOpen = appGridKeyboardAutoOpen,
+        barAppearance = appGridBarAppearance ?: automaticRailAppearance(gridSurfaceDark),
+        cornerRadiusPercent = cornerRadiusPercent,
+        keyboardCapColor = if (searchKeyboardCapEnabled) searchKeyboardCapColor else null,
+        keyboardCapCornerRadiusPercent = searchKeyboardCapCornerRadiusPercent,
+        keyboardCapArrow = searchKeyboardCapArrow,
+        loadIcon = viewModel::loadIcon,
+        loadPackIcon = viewModel::loadPackIcon,
+        onQueryChange = viewModel::updateAppQuery,
+        onAppClick = { app ->
+            viewModel.recordAppLaunch(app.componentName)
+            launchApp(context, app.componentName)
+            viewModel.closeAppGrid()
+        },
+        onFolderClick = viewModel::openFolder,
+        onOpenTextSearch = viewModel::openSearch,
+        modifier = Modifier
+            .then(
+                if (hideStatusBar) Modifier.windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top))
+                else Modifier.statusBarsPadding()
+            )
+            .padding(top = 16.dp)
+    )
+}
