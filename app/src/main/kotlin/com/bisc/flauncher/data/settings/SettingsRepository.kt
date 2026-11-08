@@ -314,6 +314,13 @@ class SettingsRepository @Inject constructor(
     val appListSearchButtonCornerPercent: Flow<Int?> = dataStore.data.map { it[APP_LIST_SEARCH_BUTTON_CORNER_KEY] }
     val alphabetRailCornerPercent: Flow<Int?> = dataStore.data.map { it[ALPHABET_RAIL_CORNER_KEY] }
 
+    /** How much height the open keyboard took from the Text search's results last time (px). */
+    val searchKeyboardOverlapPx: Flow<Int> = dataStore.data.map { it[SEARCH_KEYBOARD_OVERLAP_KEY] ?: 0 }
+
+    suspend fun setSearchKeyboardOverlapPx(px: Int) {
+        dataStore.edit { it[SEARCH_KEYBOARD_OVERLAP_KEY] = px }
+    }
+
     /** The opened folder card's corners, 0-100 % of its full rounding. */
     val folderCornerPercent: Flow<Int> = dataStore.data.map { it[FOLDER_CORNER_KEY] ?: 100 }
 
@@ -1149,6 +1156,7 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_RAIL_HIDDEN_KEY = stringPreferencesKey("search_rail_hidden")
         private val RAIL_FOLLOWERS_SEPARATED_KEY = booleanPreferencesKey("rail_followers_separated")
         private val FOLDER_CORNER_KEY = intPreferencesKey("folder_corner_percent")
+        private val SEARCH_KEYBOARD_OVERLAP_KEY = intPreferencesKey("search_keyboard_overlap_px")
         private val SEARCH_ENGINES_KEY = stringPreferencesKey("search_engines")
         private val SEARCH_BROWSER_APP_KEY = stringPreferencesKey("search_browser_app")
         private val SEARCH_MAPS_APP_KEY = stringPreferencesKey("search_maps_app")

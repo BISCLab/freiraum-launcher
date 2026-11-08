@@ -1355,6 +1355,8 @@ private fun HomeSearchOverlay(
         webChoices = com.bisc.flauncher.ui.home.search.rememberEngineChoices(searchEngines),
         aiChoices = com.bisc.flauncher.ui.home.search.rememberAiChoices(searchAiApps, viewModel::loadIcon),
         keyboardAutoOpen = searchKeyboardAutoOpen,
+        keyboardOverlapPx = viewModel.searchKeyboardOverlapPx.collectAsState().value,
+        onKeyboardOverlap = viewModel::setSearchKeyboardOverlapPx,
         appearance = searchAppearance,
         cornerRadiusPercent = cornerRadiusPercent,
         background = searchBackground,

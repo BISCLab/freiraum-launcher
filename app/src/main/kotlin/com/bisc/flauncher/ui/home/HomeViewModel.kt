@@ -166,6 +166,13 @@ class HomeViewModel @Inject constructor(
         settingsRepository.accentColor
             .stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.theme.DEFAULT_ACCENT_COLOR)
 
+    val searchKeyboardOverlapPx: StateFlow<Int> =
+        settingsRepository.searchKeyboardOverlapPx.stateIn(viewModelScope, SharingStarted.Eagerly, 0)
+
+    fun setSearchKeyboardOverlapPx(px: Int) {
+        viewModelScope.launch { settingsRepository.setSearchKeyboardOverlapPx(px) }
+    }
+
     val folderCornerPercent: StateFlow<Int> =
         settingsRepository.folderCornerPercent.stateIn(viewModelScope, SharingStarted.Eagerly, 100)
 

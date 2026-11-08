@@ -117,6 +117,9 @@ fun SearchOverlay(
     webChoices: List<CommandChoice>,
     aiChoices: List<CommandChoice>,
     keyboardAutoOpen: Boolean,
+    /** What the open keyboard took from the results area last time, for the rail (px). */
+    keyboardOverlapPx: Int = 0,
+    onKeyboardOverlap: (Int) -> Unit = {},
     loadIcon: (ComponentName) -> ImageBitmap?,
     onQueryChange: (String) -> Unit,
     onAppClick: (AppInfo) -> Unit,
@@ -361,8 +364,10 @@ fun SearchOverlay(
                             onTap = onRailTap,
                             onScrub = onRailScrub,
                             // Same gap to the field as to the keyboard, top level with the first card.
-                            fill = imeOpen,
                             edgeGap = SEARCH_CARD_GAP,
+                            expectKeyboard = keyboardAutoOpen,
+                            keyboardOverlapPx = keyboardOverlapPx,
+                            onKeyboardOverlap = onKeyboardOverlap,
                             modifier = Modifier
                                 .align(if (railLeft) Alignment.CenterStart else Alignment.CenterEnd)
                                 .padding(horizontal = com.bisc.flauncher.ui.home.dock.DockDimens.horizontalMargin)

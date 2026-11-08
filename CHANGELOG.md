@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Text search: the category rail is in place the moment the search opens, together with the field
+  and cards, instead of building up late while the keyboard comes. It knows how much room the
+  keyboard takes (learned the first time and kept up to date, also with the strip on top of the
+  keyboard) and only the keyboard slides in below it
+- Closing the keyboard: the rail glides calmly into the middle instead of jumping up and down
+
 - Apps & Elements > Apps: a link to Icons on top (icon pack, shape and size for all apps), showing the
   active icon pack
 
