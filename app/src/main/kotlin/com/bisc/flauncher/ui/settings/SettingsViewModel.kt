@@ -745,6 +745,9 @@ class SettingsViewModel @Inject constructor(
     val searchFieldCornerRadiusPercent: StateFlow<Int?> =
         repository.searchFieldCornerRadiusPercent.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
+    val alphabetRailCornerPercent: StateFlow<Int?> =
+        repository.alphabetRailCornerPercent.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
     val searchRailAppearance: StateFlow<ElementAppearance?> =
         repository.searchRailAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
     fun setSearchRailAppearance(appearance: ElementAppearance) { viewModelScope.launch { repository.setSearchRailAppearance(appearance) } }

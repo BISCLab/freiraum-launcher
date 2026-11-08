@@ -71,7 +71,9 @@ fun SearchInputBar(
     fieldAppearance: ElementAppearance? = null,
     fieldCornerRadiusPercent: Int? = null,
     /** Kept below the field, e.g. the navigation bar when it sits at the bottom. */
-    bottomInsets: WindowInsets? = null
+    bottomInsets: WindowInsets? = null,
+    /** Distance to the screen's side edges. */
+    sideMargin: Dp = 20.dp
 ) {
     val focusRequester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
@@ -87,8 +89,8 @@ fun SearchInputBar(
         }
     }
 
-    // Until customized, the same look as the App grid's search field: its automatic box against the page.
-    val ownAppearance = fieldAppearance ?: automaticRailAppearance(LocalContentColor.current.luminance() > 0.5f)
+    // Until customized, white and round like the App grid's search field.
+    val ownAppearance = fieldAppearance ?: automaticRailAppearance(false)
     val fieldColors = resolveElementColors(ownAppearance)
     val content = fieldColors.contentColor
     val percent = (fieldCornerRadiusPercent ?: cornerRadiusPercent).coerceIn(0, 100) / 100f
@@ -102,7 +104,7 @@ fun SearchInputBar(
     ) {
         Row(
             modifier = Modifier
-                .padding(start = 20.dp, end = 20.dp, top = if (atBottom) 0.dp else 8.dp, bottom = if (atBottom) 16.dp else 0.dp)
+                .padding(start = sideMargin, end = sideMargin, top = if (atBottom) 0.dp else 8.dp, bottom = if (atBottom) 16.dp else 0.dp)
                 .fillMaxWidth()
                 .height(FIELD_HEIGHT)
                 .designGlow(fieldShape, "search")

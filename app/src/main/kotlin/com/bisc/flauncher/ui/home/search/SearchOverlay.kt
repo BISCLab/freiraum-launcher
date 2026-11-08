@@ -134,7 +134,7 @@ fun SearchOverlay(
     favoriteIds: Set<String> = emptySet(),
     onToggleFavorite: (AppInfo) -> Unit = {},
     railLeft: Boolean = false,
-    /** The rail's own look and roundness; null = like the search field. */
+    /** The rail's look and roundness; null = the automatic A-Z rail look and the general roundness. */
     railAppearance: ElementAppearance? = null,
     railCornerRadiusPercent: Int? = null
 ) {
@@ -196,8 +196,15 @@ fun SearchOverlay(
     var focus by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<SearchCategory?>(null) }
     var cards by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<Map<SearchCategory, Int>>(emptyMap()) }
     var pendingJump by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<SearchCategory?>(null) }
-    // Typing on ends the focus on one category.
-    LaunchedEffect(query) { focus = null }
+    // Typing on ends the focus on one category, and with it any narrowing to it.
+    LaunchedEffect(query) {
+        focus = null
+        if (categoryFilter != null) onSetFilter(null)
+    }
+    val clearFocus = {
+        focus = null
+        if (categoryFilter != null) onSetFilter(null)
+    }
     // Jumps as soon as the card is there - right away, or once a narrowed search has found it.
     LaunchedEffect(cards, pendingJump) {
         val target = pendingJump ?: return@LaunchedEffect
@@ -218,8 +225,9 @@ fun SearchOverlay(
     }
     val onRailTap: (SearchCategory) -> Unit = { category ->
         if (focus == category) {
-            focus = null
-            if (categoryFilter == category) onSetFilter(null)
+            clearFocus()
+        } else if (query.isBlank() && category != SearchCategory.FAVORITES) {
+            // Nothing typed yet: there is nothing to jump to.
         } else {
             focus = category
             // Not among the results right now (not searched by default, or narrowed to another):
@@ -263,8 +271,10 @@ fun SearchOverlay(
                         onQueryChange = onQueryChange,
                         onSubmit = { appResults.firstOrNull()?.let(onAppClick) ?: onWebCommand() },
                         autoOpen = keyboardAutoOpen,
-                        cornerRadiusPercent = barCornerRadiusPercent ?: cornerRadiusPercent,
+                        cornerRadiusPercent = barCornerRadiusPercent ?: 100,
                         topInset = if (barAtBottom) 0.dp else topInset,
+                        // Flush with the cards on one side and the rail on the other.
+                        sideMargin = com.bisc.flauncher.ui.home.dock.DockDimens.horizontalMargin,
                         atBottom = barAtBottom,
                         fieldAppearance = fieldAppearance,
                         fieldCornerRadiusPercent = fieldCornerRadiusPercent,
@@ -324,8 +334,8 @@ fun SearchOverlay(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(
-                                start = if (showRail && railLeft) SEARCH_RAIL_SPACE else 0.dp,
-                                end = if (showRail && !railLeft) SEARCH_RAIL_SPACE else 0.dp
+                                start = if (showRail && railLeft) SEARCH_RAIL_WIDTH + SEARCH_RAIL_GAP else 0.dp,
+                                end = if (showRail && !railLeft) SEARCH_RAIL_WIDTH + SEARCH_RAIL_GAP else 0.dp
                             ),
                         cardCornerRadiusPercent = resultsCornerRadiusPercent,
                         edgeToEdge = resultsEdgeToEdge,
@@ -334,7 +344,7 @@ fun SearchOverlay(
                         favoriteIds = favoriteIds,
                         onToggleFavorite = onToggleFavorite,
                         focus = focus,
-                        onClearFocus = { focus = null },
+                        onClearFocus = clearFocus,
                         onCardsChange = { cards = it },
                         arrival = { order -> stage((0.3f + order * 0.07f).coerceAtMost(0.75f), (0.72f + order * 0.07f).coerceAtMost(1f)) }
                     )
@@ -345,12 +355,14 @@ fun SearchOverlay(
                             present = cards.keys,
                             focus = focus,
                             left = railLeft,
-                            appearance = railAppearance ?: fieldAppearance ?: automaticRailAppearance(colors.contentColor.luminance() > 0.5f),
-                            cornerRadiusPercent = railCornerRadiusPercent ?: fieldCornerRadiusPercent ?: barCornerRadiusPercent ?: cornerRadiusPercent,
+                            // Its own look, or like the App list's A-Z rail; never tied to the field.
+                            appearance = railAppearance ?: automaticRailAppearance(colors.contentColor.luminance() > 0.5f),
+                            cornerRadiusPercent = railCornerRadiusPercent ?: cornerRadiusPercent,
                             onTap = onRailTap,
                             onScrub = onRailScrub,
                             modifier = Modifier
                                 .align(if (railLeft) Alignment.CenterStart else Alignment.CenterEnd)
+                                .padding(horizontal = com.bisc.flauncher.ui.home.dock.DockDimens.horizontalMargin)
                                 .graphicsLayer {
                                     val p = stage(0.25f, 0.85f)
                                     alpha = p

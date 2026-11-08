@@ -484,10 +484,11 @@ fun SettingsSearchElementScreen(
     val resultsCorner by viewModel.searchResultsCornerRadiusPercent.collectAsState()
     val fieldCorner by viewModel.searchFieldCornerRadiusPercent.collectAsState()
     val railCorner by viewModel.searchRailCornerRadiusPercent.collectAsState()
+    val alphabetCorner by viewModel.alphabetRailCornerPercent.collectAsState()
     val defaultCornerPercent by viewModel.defaultCornerRadiusPercent.collectAsState()
     val savedCorner = when (element) {
-        SearchElement.FIELD -> fieldCorner ?: barCorner ?: defaultCornerPercent
-        SearchElement.RAIL -> railCorner ?: fieldCorner ?: barCorner ?: defaultCornerPercent
+        SearchElement.FIELD -> fieldCorner ?: barCorner ?: 100
+        SearchElement.RAIL -> railCorner ?: alphabetCorner ?: defaultCornerPercent
         SearchElement.RESULTS -> resultsCorner ?: 100
     }
     ElementLookScreen(
@@ -569,29 +570,34 @@ fun SettingsSearchElementScreen(
     )
 }
 
+/** Whether the search page is dark, from its background - for the parts that follow it. */
+@Composable
+private fun searchPageDark(viewModel: SettingsViewModel): Boolean {
+    val override by viewModel.searchBackgroundOverride.collectAsState()
+    val global by viewModel.globalBackground.collectAsState()
+    val shade by viewModel.searchGlobalShade.collectAsState()
+    val background = override ?: global.copy(shade = shade ?: global.shade)
+    return com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(
+        com.bisc.flauncher.data.model.ElementAppearance(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE), background
+    )
+}
+
 /** Until customized here, an element looks like every other element: the theme's default box. */
 @Composable
 private fun effectiveSearchElementAppearance(element: SearchElement, viewModel: SettingsViewModel): com.bisc.flauncher.data.model.ElementAppearance {
     if (element == SearchElement.RAIL) {
+        // Until changed, like the App list's A-Z rail.
         val railOwn by viewModel.searchRailAppearance.collectAsState()
-        return railOwn ?: effectiveSearchElementAppearance(SearchElement.FIELD, viewModel)
+        val alphabetRail by viewModel.appListRailAppearance.collectAsState()
+        return railOwn ?: alphabetRail ?: com.bisc.flauncher.ui.home.search.automaticRailAppearance(searchPageDark(viewModel))
     }
     val own by when (element) {
         SearchElement.RAIL, SearchElement.FIELD -> viewModel.searchFieldAppearance
         SearchElement.RESULTS -> viewModel.searchResultsAppearance
     }.collectAsState()
     val defaultBox = com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor(MaterialTheme.colorScheme.background.luminance() < 0.5f)
-    if (element == SearchElement.FIELD && own == null) {
-        // The field's automatic look, against the search page (as on the search screen).
-        val override by viewModel.searchBackgroundOverride.collectAsState()
-        val global by viewModel.globalBackground.collectAsState()
-        val shade by viewModel.searchGlobalShade.collectAsState()
-        val background = override ?: global.copy(shade = shade ?: global.shade)
-        val pageDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(
-            com.bisc.flauncher.data.model.ElementAppearance(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE), background
-        )
-        return com.bisc.flauncher.ui.home.search.automaticRailAppearance(pageDark)
-    }
+    // The field starts white and round, like the App grid's.
+    if (element == SearchElement.FIELD && own == null) return com.bisc.flauncher.ui.home.search.automaticRailAppearance(false)
     return own ?: defaultBox
 }
 

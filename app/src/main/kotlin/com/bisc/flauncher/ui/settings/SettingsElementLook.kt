@@ -133,7 +133,7 @@ internal fun LookSample(kind: LookSampleKind, look: ElementAppearance, cornerPer
                     Text(stringResource(R.string.search_field_hint), color = ink.copy(alpha = 0.6f), style = MaterialTheme.typography.bodyLarge)
                 }
             }
-            LookSampleKind.RAIL -> Surface(Modifier.width(44.dp).height(110.dp), RoundedCornerShape(22.dp * pct), "rail") {
+            LookSampleKind.RAIL -> Surface(Modifier.width(28.dp).height(120.dp), RoundedCornerShape(14.dp * pct), "rail") {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     listOf(Color(0xFFFFB300), Color(0xFF4F86F7), Color(0xFF34A853), Color(0xFF00ACC1)).forEach {
                         Box(Modifier.size(12.dp).clip(CircleShape).background(it))

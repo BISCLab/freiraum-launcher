@@ -4,7 +4,7 @@
   "name": "Neon Light",
   "name_de": "Neon Hell",
   "author": "BISC Lab",
-  "version": "1.5",
+  "version": "1.6",
   "theme": "LIGHT",
   "accent": "#FF1E8FFF",
   "font": "SYSTEM",
@@ -140,13 +140,13 @@
     },
     "search_category_rail": {
       "style": "COLOR",
-      "fill": "#CCFFFFFF",
+      "fill": "#FFFFFFFF",
       "fillMode": "SOLID",
       "opacity": 1.0,
       "border": true,
       "borderWidth": 1.0,
-      "borderColor": "#1A000000",
-      "contentColor": "#FF14161B"
+      "borderColor": "#FF1E8FFF",
+      "contentColor": "#FF3A3F48"
     }
   },
   "keyboardCapColor": "#FFFFFFFF",

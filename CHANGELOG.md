@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Text search: the field starts white and round like the App grid's, and reaches from the cards'
+  edge to the rail's edge; the category rail starts with the look of the A-Z rail and sits as far
+  from the cards as from the screen edge. Rail and field are set apart from each other
+- Text search: tapping a category no longer leaves the search narrowed to it after typing on or
+  scrolling, so contacts, addresses and the rest show again
+- Fixed a crash on start in the debug build (the home screen had grown too large to load)
+
 ## 0.11.0
 
 ### Text search

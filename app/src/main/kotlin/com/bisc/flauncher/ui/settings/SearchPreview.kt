@@ -60,6 +60,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
     val railLeft by viewModel.searchCategoryRailLeft.collectAsState()
     val fieldOwn by viewModel.searchFieldAppearance.collectAsState()
     val railOwn by viewModel.searchRailAppearance.collectAsState()
+    val alphabetRail by viewModel.appListRailAppearance.collectAsState()
 
     // Same resolution rules as the real screen (HomeViewModel.searchBackground, SearchOverlay).
     val background = override ?: globalBackground.copy(shade = globalShade ?: globalBackground.shade)
@@ -91,7 +92,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
                     }
                 }
                 Row(modifier = Modifier.padding(top = if (barAtBottom) 14.dp else 6.dp)) {
-                    if (barShowCategories && railLeft) MiniCategoryRail(surfaceDark, railOwn ?: fieldOwn) { onNavigate(SearchElement.RAIL.route) }
+                    if (barShowCategories && railLeft) MiniCategoryRail(surfaceDark, railOwn ?: alphabetRail) { onNavigate(SearchElement.RAIL.route) }
                     Column(
                         modifier = Modifier.weight(1f).padding(start = sideMargin, end = sideMargin),
                         verticalArrangement = Arrangement.spacedBy(5.dp)
@@ -103,7 +104,7 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
                             onNavigate(SearchElement.RESULTS.route)
                         }
                     }
-                    if (barShowCategories && !railLeft) MiniCategoryRail(surfaceDark, railOwn ?: fieldOwn) { onNavigate(SearchElement.RAIL.route) }
+                    if (barShowCategories && !railLeft) MiniCategoryRail(surfaceDark, railOwn ?: alphabetRail) { onNavigate(SearchElement.RAIL.route) }
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 if (barAtBottom) {
@@ -124,12 +125,12 @@ fun SearchPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = h
 /** The search field on the page, at the top or on the keyboard. */
 @Composable
 private fun MiniSearchField(surfaceDark: Boolean, atBottom: Boolean, fieldAppearance: ElementAppearance?, onClick: () -> Unit) {
-    val fieldColors = resolveElementColors(fieldAppearance ?: com.bisc.flauncher.ui.home.search.automaticRailAppearance(surfaceDark), surfaceDark)
+    val fieldColors = resolveElementColors(fieldAppearance ?: com.bisc.flauncher.ui.home.search.automaticRailAppearance(false), surfaceDark)
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(start = 10.dp, end = 10.dp, top = if (atBottom) 6.dp else 14.dp, bottom = 6.dp)
+            .padding(start = 4.dp, end = 4.dp, top = if (atBottom) 6.dp else 14.dp, bottom = 6.dp)
     ) {
         Box(
             modifier = Modifier

@@ -97,10 +97,10 @@ class PartCornersViewModel @Inject constructor(
             ShapePart.FOLDERS to (items.firstOrNull { !it.isWidget() }?.cornerRadiusPercent ?: general),
             ShapePart.SEARCH_BUTTON to (settingsRepository.appListSearchButtonCornerPercent.first() ?: general),
             ShapePart.ALPHABET_RAIL to (settingsRepository.alphabetRailCornerPercent.first() ?: general),
-            ShapePart.SEARCH_BAR to (settingsRepository.searchBarCornerRadiusPercent.first() ?: general),
+            ShapePart.SEARCH_BAR to (settingsRepository.searchFieldCornerRadiusPercent.first() ?: settingsRepository.searchBarCornerRadiusPercent.first() ?: 100),
             ShapePart.SEARCH_RESULTS to (settingsRepository.searchResultsCornerRadiusPercent.first() ?: general),
             ShapePart.CATEGORY_RAIL to (settingsRepository.searchRailCornerRadiusPercent.first()
-                ?: settingsRepository.searchFieldCornerRadiusPercent.first() ?: settingsRepository.searchBarCornerRadiusPercent.first() ?: general)
+                ?: settingsRepository.alphabetRailCornerPercent.first() ?: general)
         )
     }
 

@@ -39,10 +39,11 @@ import com.bisc.flauncher.ui.home.dock.resolveElementColors
 import com.bisc.flauncher.ui.theme.designGlow
 import kotlin.math.roundToInt
 
-/** Width the rail takes beside the results, its touch area included. */
-val SEARCH_RAIL_SPACE = 56.dp
-private val RAIL_WIDTH = 44.dp
-private val RAIL_SLOT = 46.dp
+/** The rail is as slim as the App list's A-Z rail. */
+val SEARCH_RAIL_WIDTH = 28.dp
+/** Between the rail and the result cards. */
+val SEARCH_RAIL_GAP = 10.dp
+private val RAIL_SLOT = 40.dp
 private val BUBBLE_SIZE = 56.dp
 
 /**
@@ -66,19 +67,18 @@ fun SearchCategoryRail(
 ) {
     if (categories.isEmpty()) return
     val colors = resolveElementColors(appearance)
-    val radius = RAIL_WIDTH / 2 * (cornerRadiusPercent.coerceIn(0, 100) / 100f)
+    val radius = SEARCH_RAIL_WIDTH / 2 * (cornerRadiusPercent.coerceIn(0, 100) / 100f)
     val shape = RoundedCornerShape(radius)
     fun colorOf(category: SearchCategory) = categoryColors[category]?.let { Color(it) } ?: category.defaultColor
     var scrubbing by remember { mutableStateOf<SearchCategory?>(null) }
     var scrubY by remember { mutableStateOf(0f) }
 
-    BoxWithConstraints(modifier = modifier.fillMaxHeight().width(SEARCH_RAIL_SPACE), contentAlignment = if (left) Alignment.CenterStart else Alignment.CenterEnd) {
+    BoxWithConstraints(modifier = modifier.fillMaxHeight().width(SEARCH_RAIL_WIDTH), contentAlignment = Alignment.Center) {
         val railHeight = minOf(maxHeight, RAIL_SLOT * categories.size)
         val railTopPx = with(LocalDensity.current) { ((maxHeight - railHeight) / 2).toPx() }
         Column(
             modifier = Modifier
-                .offset(x = if (left) 6.dp else (-6).dp)
-                .width(RAIL_WIDTH)
+                .width(SEARCH_RAIL_WIDTH)
                 .heightIn(max = railHeight)
                 .fillMaxHeight()
                 .designGlow(shape, "rail")
@@ -120,7 +120,7 @@ fun SearchCategoryRail(
                 val faded = (focus != null && !chosen) || category !in present
                 Box(
                     modifier = Modifier
-                        .size(34.dp)
+                        .size(26.dp)
                         .clip(CircleShape)
                         .background(color.copy(alpha = if (chosen) 0.22f else 0f)),
                     contentAlignment = Alignment.Center
@@ -129,7 +129,7 @@ fun SearchCategoryRail(
                         category.icon,
                         contentDescription = stringResource(category.filterLabelRes),
                         tint = color,
-                        modifier = Modifier.size(20.dp).alpha(if (faded) 0.3f else 0.9f)
+                        modifier = Modifier.size(17.dp).alpha(if (faded) 0.3f else 0.9f)
                     )
                 }
             }
@@ -137,7 +137,7 @@ fun SearchCategoryRail(
         // While dragging, the category under the finger sits in a bubble beside the rail.
         scrubbing?.let { category ->
             val bubblePx = with(LocalDensity.current) { BUBBLE_SIZE.toPx() }
-            val gapPx = with(LocalDensity.current) { (SEARCH_RAIL_SPACE + 8.dp).toPx() }
+            val gapPx = with(LocalDensity.current) { (SEARCH_RAIL_WIDTH + 12.dp).toPx() }
             Box(
                 modifier = Modifier
                     .align(if (left) Alignment.TopStart else Alignment.TopEnd)

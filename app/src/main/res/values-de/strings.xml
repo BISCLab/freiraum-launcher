@@ -801,7 +801,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_app_grid_page_dots">Seitenpunkte zeigen</string>
     <string name="settings_search_field_position_info">Oben, oder direkt auf der Tastatur in Reichweite des Daumens.</string>
     <string name="settings_search_rail_hidden">Ausgeblendet</string>
-    <string name="settings_search_rail_like_field">Aussehen wie das Suchfeld</string>
+    <string name="settings_search_rail_like_field">Aussehen wie die A–Z-Leiste</string>
     <string name="settings_folder_look_own">Eigenes Aussehen</string>
     <string name="settings_folder_look_like_all">Wie alle Ordner</string>
     <string name="settings_folder_look_reset">Aussehen wie alle Ordner</string>

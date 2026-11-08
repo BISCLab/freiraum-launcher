@@ -4,7 +4,7 @@
   "name": "Neon Dark",
   "name_de": "Neon Dunkel",
   "author": "BISC Lab",
-  "version": "1.3",
+  "version": "1.4",
   "theme": "DARK",
   "accent": "#FF3DA5FF",
   "font": "SYSTEM",
@@ -140,13 +140,13 @@
     },
     "search_category_rail": {
       "style": "COLOR",
-      "fill": "#CC14171E",
+      "fill": "#FF0B0D12",
       "fillMode": "SOLID",
       "opacity": 1.0,
       "border": true,
       "borderWidth": 1.0,
-      "borderColor": "#1FFFFFFF",
-      "contentColor": "#FFE8EAF0"
+      "borderColor": "#FF3DA5FF",
+      "contentColor": "#FFB8BECB"
     }
   },
   "keyboardCapColor": "#FF14171E",
