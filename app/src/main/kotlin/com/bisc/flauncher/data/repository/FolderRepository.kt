@@ -127,9 +127,9 @@ class FolderRepository @Inject constructor(
         var item = FolderItem(
             folderId = folderId, type = GridItemType.WIDGET, payload = kind, spanY = spanY, orderIndex = nextWidgetIndex(folderId),
             // Widgets start only slightly rounded, same as on a page.
-            cornerRadiusPercent = com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT
+            cornerRadiusPercent = settingsRepository.newPartCorner(widget = true) ?: com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT
         )
-        item = item.withAppearance(defaultBoxAppearanceFor(isDark))
+        item = item.withAppearance(settingsRepository.newPartLook(widget = true, isDark = isDark))
         return folderItemDao.insert(item)
     }
 
@@ -139,9 +139,9 @@ class FolderRepository @Inject constructor(
         var item = FolderItem(
             folderId = folderId, type = GridItemType.SYSTEM_WIDGET, payload = appWidgetId.toString(), spanY = spanY,
             orderIndex = nextWidgetIndex(folderId),
-            cornerRadiusPercent = com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT
+            cornerRadiusPercent = settingsRepository.newPartCorner(widget = true) ?: com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT
         )
-        item = item.withAppearance(defaultBoxAppearanceFor(isDark))
+        item = item.withAppearance(settingsRepository.newPartLook(widget = true, isDark = isDark))
         return folderItemDao.insert(item)
     }
 

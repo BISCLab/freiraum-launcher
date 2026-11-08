@@ -48,8 +48,12 @@ data class Design(
     val cornerRadiusPercent: Int? = null,
     /** Widgets' own roundness (they're only slightly rounded by default, see DEFAULT_WIDGET_CORNER_RADIUS_PERCENT). */
     val widgetCornerRadiusPercent: Int? = null,
-    /** Widgets, element boxes and folder items. */
+    /** Element boxes and folder items; widgets too unless [widget] is set. */
     val box: ElementAppearance? = null,
+    /** Widgets on pages and in folders; null = like [box]. */
+    val widget: ElementAppearance? = null,
+    /** Corners of single parts, see [DESIGN_CORNERS]; parts left out keep the general ones. */
+    val corners: Map<String, Int> = emptyMap(),
     val dock: ElementAppearance? = null,
     val panel: ElementAppearance? = null,
     /** Search bar, field, results, app list parts, … by their settings name, see [DESIGN_ELEMENTS]. */
@@ -66,6 +70,12 @@ data class Design(
 ) {
     fun displayName(german: Boolean): String = if (german && !nameDe.isNullOrBlank()) nameDe else name
 }
+
+/** The parts whose corners a design can set one by one. */
+val DESIGN_CORNERS = listOf(
+    "dock", "panel", "element_boxes", "folders", "widgets", "search_button", "alphabet_rail",
+    "category_rail", "search_field", "search_results"
+)
 
 /** The parts of the launcher a design can style, by the name they're stored under. */
 val DESIGN_ELEMENTS = listOf(
@@ -93,6 +103,10 @@ object DesignJson {
             cornerRadiusPercent = if (json.has("cornerRadiusPercent")) json.getInt("cornerRadiusPercent").coerceIn(0, 100) else null,
             widgetCornerRadiusPercent = if (json.has("widgetCornerRadiusPercent")) json.getInt("widgetCornerRadiusPercent").coerceIn(0, 100) else null,
             box = json.optJSONObject("box")?.let(::appearance),
+            widget = json.optJSONObject("widget")?.let(::appearance),
+            corners = json.optJSONObject("corners")?.let { obj ->
+                obj.keys().asSequence().filter { it in DESIGN_CORNERS }.associateWith { obj.getInt(it).coerceIn(0, 100) }
+            }.orEmpty(),
             dock = json.optJSONObject("dock")?.let(::appearance),
             panel = json.optJSONObject("panel")?.let(::appearance),
             elements = json.optJSONObject("elements")?.let { obj ->
@@ -121,6 +135,8 @@ object DesignJson {
         design.cornerRadiusPercent?.let { put("cornerRadiusPercent", it) }
         design.widgetCornerRadiusPercent?.let { put("widgetCornerRadiusPercent", it) }
         design.box?.let { put("box", appearanceJson(it)) }
+        design.widget?.let { put("widget", appearanceJson(it)) }
+        if (design.corners.isNotEmpty()) put("corners", JSONObject().apply { design.corners.forEach { (k, v) -> put(k, v) } })
         design.dock?.let { put("dock", appearanceJson(it)) }
         design.panel?.let { put("panel", appearanceJson(it)) }
         put("elements", JSONObject().apply { design.elements.forEach { (k, v) -> put(k, appearanceJson(v)) } })

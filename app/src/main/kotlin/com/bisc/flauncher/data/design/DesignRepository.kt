@@ -166,6 +166,24 @@ class DesignRepository @Inject constructor(
         DESIGN_ELEMENTS.forEach { settingsRepository.setElementAppearanceByName(it, design.elements[it]) }
         design.keyboardCapColor?.let { settingsRepository.setSearchKeyboardCapColor(it) }
 
+        val corners = design.corners
+        corners["folders"]?.let { settingsRepository.setFolderCornerPercent(it) }
+        corners["search_button"]?.let { settingsRepository.setAppListSearchButtonCornerPercent(it) }
+        corners["alphabet_rail"]?.let { settingsRepository.setAlphabetRailCornerPercent(it) }
+        corners["category_rail"]?.let { settingsRepository.setSearchRailCornerRadiusPercent(it) }
+        corners["search_field"]?.let {
+            settingsRepository.setSearchFieldCornerRadiusPercent(it)
+            settingsRepository.setSearchBarCornerRadiusPercent(it)
+        }
+        corners["search_results"]?.let { settingsRepository.setSearchResultsCornerRadiusPercent(it) }
+        // Widgets and element boxes added later look like the ones there now.
+        settingsRepository.setNewPartLooks(
+            box = design.box,
+            widget = design.widget ?: design.box,
+            boxCorner = corners["element_boxes"] ?: design.cornerRadiusPercent,
+            widgetCorner = corners["widgets"] ?: design.widgetCornerRadiusPercent
+        )
+
         val rows = pageRowDao.observeAll().first()
         val items = folderItemDao.observeAll().first()
         val ownRows = design.rowAppearances
@@ -174,22 +192,29 @@ class DesignRepository @Inject constructor(
         // general roundness - never one value for both.
         // Snapshots from before corners were saved per widget fall back to Freiraum's widget default.
         fun cornerFor(isWidget: Boolean): Int? = if (isWidget) {
-            design.widgetCornerRadiusPercent ?: if (design.rowAppearances != null) com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT else null
+            corners["widgets"] ?: design.widgetCornerRadiusPercent ?: if (design.rowAppearances != null) com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT else null
         } else design.cornerRadiusPercent
         pageRowDao.updateAll(rows.map { row ->
             val look = when {
                 ownRows != null -> ownRows[row.id]
                 row.type == PageRowType.SEARCH_BAR -> design.dock ?: design.box
                 row.type == PageRowType.PANEL -> design.panel ?: design.box
+                row.type == PageRowType.WIDGET || row.type == PageRowType.SYSTEM_WIDGET -> design.widget ?: design.box
                 else -> design.box
             }
             val isWidget = row.type == PageRowType.WIDGET || row.type == PageRowType.SYSTEM_WIDGET
-            val corner = design.rowCorners?.get(row.id) ?: cornerFor(isWidget)
+            val partCorner = when (row.type) {
+                PageRowType.SEARCH_BAR -> corners["dock"]
+                PageRowType.PANEL -> corners["panel"]
+                PageRowType.ELEMENT_BOX -> corners["element_boxes"]
+                else -> null
+            }
+            val corner = design.rowCorners?.get(row.id) ?: partCorner ?: cornerFor(isWidget)
             (if (look != null) row.withAppearance(look) else row).let { if (corner != null) it.copy(cornerRadiusPercent = corner) else it }
         })
         folderItemDao.updateAll(items.map { item ->
-            val look = if (ownItems != null) ownItems[item.id] else design.box
             val isWidget = item.type == com.bisc.flauncher.data.model.GridItemType.WIDGET || item.type == com.bisc.flauncher.data.model.GridItemType.SYSTEM_WIDGET
+            val look = if (ownItems != null) ownItems[item.id] else if (isWidget) design.widget ?: design.box else design.box
             val corner = design.folderItemCorners?.get(item.id) ?: cornerFor(isWidget)
             (if (look != null) item.withAppearance(look) else item).let { if (corner != null) it.copy(cornerRadiusPercent = corner) else it }
         })
@@ -209,7 +234,19 @@ class DesignRepository @Inject constructor(
             accent = settingsRepository.accentColor.first(),
             font = settingsRepository.fontPreference.first(),
             cornerRadiusPercent = settingsRepository.defaultCornerRadiusPercent.first(),
-            box = firstBox?.appearance(),
+            box = (rows.firstOrNull { it.type == PageRowType.ELEMENT_BOX } ?: firstBox)?.appearance(),
+            widget = rows.firstOrNull { it.type == PageRowType.WIDGET || it.type == PageRowType.SYSTEM_WIDGET }?.appearance(),
+            corners = buildMap {
+                homeRows.firstOrNull { it.type == PageRowType.SEARCH_BAR }?.let { put("dock", it.cornerRadiusPercent) }
+                homeRows.firstOrNull { it.type == PageRowType.PANEL }?.let { put("panel", it.cornerRadiusPercent) }
+                rows.firstOrNull { it.type == PageRowType.ELEMENT_BOX }?.let { put("element_boxes", it.cornerRadiusPercent) }
+                put("folders", settingsRepository.folderCornerPercent.first())
+                settingsRepository.appListSearchButtonCornerPercent.first()?.let { put("search_button", it) }
+                settingsRepository.alphabetRailCornerPercent.first()?.let { put("alphabet_rail", it) }
+                settingsRepository.searchRailCornerRadiusPercent.first()?.let { put("category_rail", it) }
+                settingsRepository.searchFieldCornerRadiusPercent.first()?.let { put("search_field", it) }
+                settingsRepository.searchResultsCornerRadiusPercent.first()?.let { put("search_results", it) }
+            },
             dock = homeRows.firstOrNull { it.type == PageRowType.SEARCH_BAR }?.appearance(),
             panel = homeRows.firstOrNull { it.type == PageRowType.PANEL }?.appearance(),
             elements = DESIGN_ELEMENTS.mapNotNull { key -> settingsRepository.elementAppearanceOrNull(key)?.let { key to it } }.toMap(),

@@ -4,7 +4,7 @@
   "name": "Modern Light",
   "name_de": "Modern Hell",
   "author": "BISC Lab",
-  "version": "1.0",
+  "version": "2.0",
   "theme": "LIGHT",
   "accent": "#FF0758F5",
   "font": "ROUNDED",
@@ -14,15 +14,24 @@
     "style": "COLOR",
     "fill": "#FFFFFFFF",
     "fillMode": "SOLID",
-    "opacity": 0.8,
+    "opacity": 0.92,
     "border": true,
+    "borderWidth": 1.0,
+    "borderColor": "#FF0758F5"
+  },
+  "widget": {
+    "style": "COLOR",
+    "fill": "#FFFFFFFF",
+    "fillMode": "SOLID",
+    "opacity": 0.92,
+    "border": false,
     "borderWidth": 1.0
   },
   "dock": {
     "style": "COLOR",
     "fill": "#FFFFFFFF",
     "fillMode": "SOLID",
-    "opacity": 0.8,
+    "opacity": 0.92,
     "border": false,
     "borderWidth": 1.0
   },
@@ -30,24 +39,46 @@
     "style": "COLOR",
     "fill": "#FFFFFFFF",
     "fillMode": "SOLID",
-    "opacity": 0.8,
+    "opacity": 0.92,
     "border": false,
     "borderWidth": 1.0
   },
+  "corners": {
+    "dock": 100,
+    "panel": 100,
+    "search_button": 100,
+    "alphabet_rail": 100,
+    "category_rail": 100,
+    "search_field": 100,
+    "element_boxes": 25,
+    "folders": 25,
+    "widgets": 10,
+    "search_results": 25
+  },
   "elements": {
-    "search_appearance": {
+    "search_field": {
       "style": "COLOR",
       "fill": "#FFFFFFFF",
       "fillMode": "SOLID",
-      "opacity": 1.0,
+      "opacity": 0.92,
       "border": true,
-      "borderWidth": 1.0
+      "borderWidth": 1.0,
+      "borderColor": "#FF0758F5"
+    },
+    "search_category_rail": {
+      "style": "COLOR",
+      "fill": "#FFFFFFFF",
+      "fillMode": "SOLID",
+      "opacity": 0.92,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#FF0758F5"
     },
     "search_results": {
       "style": "COLOR",
-      "fill": "#FFF9F9F9",
+      "fill": "#FFF2F2F7",
       "fillMode": "SOLID",
-      "opacity": 1.0,
+      "opacity": 0.96,
       "border": false,
       "borderWidth": 1.0
     },
@@ -55,38 +86,64 @@
       "style": "COLOR",
       "fill": "#FFFFFFFF",
       "fillMode": "SOLID",
-      "opacity": 0.8,
+      "opacity": 0.92,
       "border": true,
-      "borderWidth": 1.0
+      "borderWidth": 1.0,
+      "borderColor": "#FF0758F5"
     },
     "app_list_search_button": {
       "style": "COLOR",
-      "fill": "#FFF0F0F0",
+      "fill": "#FFFFFFFF",
       "fillMode": "SOLID",
-      "opacity": 1.0,
+      "opacity": 0.92,
       "border": true,
       "borderWidth": 1.0,
-      "borderColor": "#FF0D5CF5"
+      "borderColor": "#FF0758F5"
+    },
+    "app_list_search_field": {
+      "style": "COLOR",
+      "fill": "#FFFFFFFF",
+      "fillMode": "SOLID",
+      "opacity": 0.92,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#FF0758F5"
     },
     "search_alphabet_rail": {
       "style": "COLOR",
-      "fill": "#FFF0F0F0",
+      "fill": "#FFFFFFFF",
       "fillMode": "SOLID",
-      "opacity": 1.0,
+      "opacity": 0.92,
       "border": true,
       "borderWidth": 1.0,
-      "borderColor": "#FF0D5CF5"
+      "borderColor": "#FF0758F5"
     },
     "search_header_letter": {
       "style": "COLOR",
-      "fill": "#FFF0F0F0",
+      "fill": "#FFFFFFFF",
       "fillMode": "SOLID",
-      "opacity": 1.0,
+      "opacity": 0.92,
       "border": true,
       "borderWidth": 1.0,
-      "borderColor": "#FF0D5CF5",
-      "contentColor": "#FF0D5CF5"
+      "borderColor": "#FF0758F5"
+    },
+    "app_grid_search_bar": {
+      "style": "COLOR",
+      "fill": "#FFFFFFFF",
+      "fillMode": "SOLID",
+      "opacity": 0.92,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#FF0758F5"
+    },
+    "widget_arrow": {
+      "style": "COLOR",
+      "fill": "#FFFFFFFF",
+      "fillMode": "SOLID",
+      "opacity": 0.92,
+      "border": false,
+      "borderWidth": 1.0
     }
   },
-  "keyboardCapColor": "#FFF9F9F9"
+  "keyboardCapColor": "#FFF2F2F7"
 }

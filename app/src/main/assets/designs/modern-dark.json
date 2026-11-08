@@ -4,7 +4,7 @@
   "name": "Modern Dark",
   "name_de": "Modern Dunkel",
   "author": "BISC Lab",
-  "version": "1.0",
+  "version": "2.0",
   "theme": "DARK",
   "accent": "#FF0758F5",
   "font": "ROUNDED",
@@ -12,81 +12,138 @@
   "widgetCornerRadiusPercent": 10,
   "box": {
     "style": "COLOR",
-    "fill": "#FF000000",
+    "fill": "#FF1C1C1E",
     "fillMode": "SOLID",
-    "opacity": 0.8,
+    "opacity": 0.9,
     "border": true,
+    "borderWidth": 1.0,
+    "borderColor": "#FF0758F5"
+  },
+  "widget": {
+    "style": "COLOR",
+    "fill": "#FF1C1C1E",
+    "fillMode": "SOLID",
+    "opacity": 0.9,
+    "border": false,
     "borderWidth": 1.0
   },
   "dock": {
     "style": "COLOR",
-    "fill": "#FF000000",
+    "fill": "#FF1C1C1E",
     "fillMode": "SOLID",
-    "opacity": 0.8,
+    "opacity": 0.9,
     "border": false,
     "borderWidth": 1.0
   },
   "panel": {
     "style": "COLOR",
-    "fill": "#FF000000",
+    "fill": "#FF1C1C1E",
     "fillMode": "SOLID",
-    "opacity": 0.8,
+    "opacity": 0.9,
     "border": false,
     "borderWidth": 1.0
   },
+  "corners": {
+    "dock": 100,
+    "panel": 100,
+    "search_button": 100,
+    "alphabet_rail": 100,
+    "category_rail": 100,
+    "search_field": 100,
+    "element_boxes": 25,
+    "folders": 25,
+    "widgets": 10,
+    "search_results": 25
+  },
   "elements": {
-    "search_appearance": {
+    "search_field": {
       "style": "COLOR",
-      "fill": "#FF000000",
+      "fill": "#FF1C1C1E",
       "fillMode": "SOLID",
-      "opacity": 1.0,
+      "opacity": 0.9,
       "border": true,
-      "borderWidth": 1.0
+      "borderWidth": 1.0,
+      "borderColor": "#FF0758F5"
+    },
+    "search_category_rail": {
+      "style": "COLOR",
+      "fill": "#FF1C1C1E",
+      "fillMode": "SOLID",
+      "opacity": 0.9,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#FF0758F5"
     },
     "search_results": {
       "style": "COLOR",
-      "fill": "#FF1A1A1A",
+      "fill": "#FF2A2A2E",
       "fillMode": "SOLID",
-      "opacity": 1.0,
+      "opacity": 0.96,
       "border": false,
       "borderWidth": 1.0
     },
     "folder_card": {
       "style": "COLOR",
-      "fill": "#FF000000",
+      "fill": "#FF1C1C1E",
       "fillMode": "SOLID",
-      "opacity": 0.8,
+      "opacity": 0.9,
       "border": true,
-      "borderWidth": 1.0
+      "borderWidth": 1.0,
+      "borderColor": "#FF0758F5"
     },
     "app_list_search_button": {
       "style": "COLOR",
-      "fill": "#FF1F1F1F",
+      "fill": "#FF1C1C1E",
       "fillMode": "SOLID",
-      "opacity": 1.0,
+      "opacity": 0.9,
       "border": true,
       "borderWidth": 1.0,
-      "borderColor": "#FF0D5CF5"
+      "borderColor": "#FF0758F5"
+    },
+    "app_list_search_field": {
+      "style": "COLOR",
+      "fill": "#FF1C1C1E",
+      "fillMode": "SOLID",
+      "opacity": 0.9,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#FF0758F5"
     },
     "search_alphabet_rail": {
       "style": "COLOR",
-      "fill": "#FF1F1F1F",
+      "fill": "#FF1C1C1E",
       "fillMode": "SOLID",
-      "opacity": 1.0,
+      "opacity": 0.9,
       "border": true,
       "borderWidth": 1.0,
-      "borderColor": "#FF0D5CF5"
+      "borderColor": "#FF0758F5"
     },
     "search_header_letter": {
       "style": "COLOR",
-      "fill": "#FF1F1F1F",
+      "fill": "#FF1C1C1E",
       "fillMode": "SOLID",
-      "opacity": 1.0,
+      "opacity": 0.9,
       "border": true,
       "borderWidth": 1.0,
-      "borderColor": "#FF0D5CF5",
-      "contentColor": "#FF0D5CF5"
+      "borderColor": "#FF0758F5"
+    },
+    "app_grid_search_bar": {
+      "style": "COLOR",
+      "fill": "#FF1C1C1E",
+      "fillMode": "SOLID",
+      "opacity": 0.9,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#FF0758F5"
+    },
+    "widget_arrow": {
+      "style": "COLOR",
+      "fill": "#FF1C1C1E",
+      "fillMode": "SOLID",
+      "opacity": 0.9,
+      "border": false,
+      "borderWidth": 1.0
     }
   },
-  "keyboardCapColor": "#FF1A1A1A"
+  "keyboardCapColor": "#FF2A2A2E"
 }

@@ -333,9 +333,9 @@ class PageContentRepository @Inject constructor(
             pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.WIDGET, payload = kind, spanY = spanY,
             // Widgets start only slightly rounded, whatever the global corner style; the global
             // corner setting still restamps them when it's changed (see its hint in Design).
-            cornerRadiusPercent = com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT
+            cornerRadiusPercent = settingsRepository.newPartCorner(widget = true) ?: com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT
         )
-        row = row.withAppearance(defaultBoxAppearanceFor(isDark()))
+        row = row.withAppearance(settingsRepository.newPartLook(widget = true, isDark = isDark()))
         val id = rowDao.insert(row)
         rebalancePageOverflow(pageId)
         return id
@@ -346,9 +346,9 @@ class PageContentRepository @Inject constructor(
             pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.SYSTEM_WIDGET, payload = appWidgetId.toString(), spanY = spanY,
             // Widgets start only slightly rounded, whatever the global corner style; the global
             // corner setting still restamps them when it's changed (see its hint in Design).
-            cornerRadiusPercent = com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT
+            cornerRadiusPercent = settingsRepository.newPartCorner(widget = true) ?: com.bisc.flauncher.ui.theme.DEFAULT_WIDGET_CORNER_RADIUS_PERCENT
         )
-        row = row.withAppearance(defaultBoxAppearanceFor(isDark()))
+        row = row.withAppearance(settingsRepository.newPartLook(widget = true, isDark = isDark()))
         val id = rowDao.insert(row)
         rebalancePageOverflow(pageId)
         return id
@@ -357,9 +357,9 @@ class PageContentRepository @Inject constructor(
     suspend fun addElementBox(pageId: Long): Long {
         var row = PageRow(
             pageId = pageId, orderIndex = nextRowOrderIndex(pageId), type = PageRowType.ELEMENT_BOX, columns = GridConstants.DEFAULT_ELEMENT_BOX_COLUMNS,
-            cornerRadiusPercent = settingsRepository.defaultCornerRadiusPercent.first()
+            cornerRadiusPercent = settingsRepository.newPartCorner(widget = false) ?: settingsRepository.defaultCornerRadiusPercent.first()
         )
-        row = row.withAppearance(defaultBoxAppearanceFor(isDark()))
+        row = row.withAppearance(settingsRepository.newPartLook(widget = false, isDark = isDark()))
         val id = rowDao.insert(row)
         rebalancePageOverflow(pageId)
         return id

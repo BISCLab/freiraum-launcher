@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Modern Dark and Modern Light reworked down to every part: deep grey (dark) or white (light)
+  surfaces, nearly opaque; blue accent borders on search fields, element boxes, folders, the A-Z and
+  category rails, the search button and the letter circles; no borders on Dock, Panel, widgets and
+  result cards. Dock, Panel, rails, search button and fields fully round; element boxes and folders
+  only softly rounded so nothing inside is cut off; widgets and result cards slightly rounded. Result
+  cards and the strip over the keyboard are set slightly apart from the surfaces
+- Designs can now set widgets apart from element boxes and the corners of each part; widgets and
+  element boxes added later take the active design's look instead of a fixed default
+
 - Text search: the category rail is in place the moment the search opens, together with the field
   and cards, instead of building up late while the keyboard comes. It knows how much room the
   keyboard takes (learned the first time and kept up to date, also with the strip on top of the

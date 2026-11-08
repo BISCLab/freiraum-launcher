@@ -314,6 +314,23 @@ class SettingsRepository @Inject constructor(
     val appListSearchButtonCornerPercent: Flow<Int?> = dataStore.data.map { it[APP_LIST_SEARCH_BUTTON_CORNER_KEY] }
     val alphabetRailCornerPercent: Flow<Int?> = dataStore.data.map { it[ALPHABET_RAIL_CORNER_KEY] }
 
+    /** The look and corners new widgets and element boxes start with: the active design's, or
+     *  Freiraum's default for the mode ([isDark]). */
+    suspend fun newPartLook(widget: Boolean, isDark: Boolean): ElementAppearance =
+        elementAppearanceOrNull(if (widget) NEW_WIDGET_LOOK else NEW_BOX_LOOK)
+            ?: com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor(isDark)
+
+    suspend fun newPartCorner(widget: Boolean): Int? = dataStore.data.first()[if (widget) NEW_WIDGET_CORNER_KEY else NEW_BOX_CORNER_KEY]
+
+    suspend fun setNewPartLooks(box: ElementAppearance?, widget: ElementAppearance?, boxCorner: Int?, widgetCorner: Int?) {
+        setElementAppearanceByName(NEW_BOX_LOOK, box)
+        setElementAppearanceByName(NEW_WIDGET_LOOK, widget)
+        dataStore.edit {
+            if (boxCorner == null) it.remove(NEW_BOX_CORNER_KEY) else it[NEW_BOX_CORNER_KEY] = boxCorner
+            if (widgetCorner == null) it.remove(NEW_WIDGET_CORNER_KEY) else it[NEW_WIDGET_CORNER_KEY] = widgetCorner
+        }
+    }
+
     /** How much height the open keyboard took from the Text search's results last time (px). */
     val searchKeyboardOverlapPx: Flow<Int> = dataStore.data.map { it[SEARCH_KEYBOARD_OVERLAP_KEY] ?: 0 }
 
@@ -1157,6 +1174,10 @@ class SettingsRepository @Inject constructor(
         private val RAIL_FOLLOWERS_SEPARATED_KEY = booleanPreferencesKey("rail_followers_separated")
         private val FOLDER_CORNER_KEY = intPreferencesKey("folder_corner_percent")
         private val SEARCH_KEYBOARD_OVERLAP_KEY = intPreferencesKey("search_keyboard_overlap_px")
+        private const val NEW_BOX_LOOK = "design_new_box"
+        private const val NEW_WIDGET_LOOK = "design_new_widget"
+        private val NEW_BOX_CORNER_KEY = intPreferencesKey("design_new_box_corner")
+        private val NEW_WIDGET_CORNER_KEY = intPreferencesKey("design_new_widget_corner")
         private val SEARCH_ENGINES_KEY = stringPreferencesKey("search_engines")
         private val SEARCH_BROWSER_APP_KEY = stringPreferencesKey("search_browser_app")
         private val SEARCH_MAPS_APP_KEY = stringPreferencesKey("search_maps_app")
