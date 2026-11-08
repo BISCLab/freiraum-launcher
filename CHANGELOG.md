@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.11.2
 
 - Text search: several search engines and several AI apps. Each still gets one result card: the
   first runs with a tap, the others sit below it as chips to pick instead

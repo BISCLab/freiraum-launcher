@@ -1,0 +1,4 @@
+- Text search: several search engines and AI apps, one card each with the others to pick below; new "Web & AI" page with your own pictures as symbols
+- Categories get their own symbol and color; long names slide sideways
+- Category rail: fits between field and keyboard, tapping again shows everything
+- Folders redesigned: tiles, live preview while making one, arranging right on the folder

@@ -1,0 +1,4 @@
+- Textsuche: mehrere Suchmaschinen und KI-Apps in je einer Karte, die weiteren als Auswahl darunter; neue Seite „Web & KI“ mit eigenen Bildern als Symbol
+- Kategorien mit eigenem Symbol und Farbe; lange Namen lassen sich seitlich lesen
+- Kategorienleiste: bündig zwischen Suchfeld und Tastatur, erneuter Tipp zeigt wieder alles
+- Ordner neu gestaltet: Kacheln, Live-Vorschau beim Erstellen und Anordnen direkt am Ordner
