@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Text search: with the keyboard up, the category rail reaches from the field to the keyboard with
+  the same gap at both ends, its top level with the first result card; with the keyboard down it
+  sits in the middle as before
+- Text search: tapping a picked category again shows all categories again (the rail kept an old
+  state and did not notice the category was picked)
+
 - Folders rebuilt in the settings: all folders as tiles with their icon and what is inside, a tile
   to make a new one, and the look of all folders above
 - Making a folder shows it while picking: the name and the picked apps in a small folder card, the

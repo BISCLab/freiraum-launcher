@@ -191,6 +191,7 @@ fun SearchOverlay(
     val stage: (Float, Float) -> Float = { start, end -> stageProgress(appear.value, start, end) }
     val density = LocalDensity.current
 
+    val imeOpen = WindowInsets.isImeVisible
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     var focus by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<SearchCategory?>(null) }
@@ -360,6 +361,9 @@ fun SearchOverlay(
                             cornerRadiusPercent = railCornerRadiusPercent ?: cornerRadiusPercent,
                             onTap = onRailTap,
                             onScrub = onRailScrub,
+                            // Same gap to the field as to the keyboard, top level with the first card.
+                            fill = imeOpen,
+                            edgeGap = SEARCH_CARD_GAP,
                             modifier = Modifier
                                 .align(if (railLeft) Alignment.CenterStart else Alignment.CenterEnd)
                                 .padding(horizontal = com.bisc.flauncher.ui.home.dock.DockDimens.horizontalMargin)

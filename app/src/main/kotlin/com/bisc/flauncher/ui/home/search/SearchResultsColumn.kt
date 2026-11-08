@@ -63,7 +63,9 @@ import androidx.compose.ui.res.stringResource
 private const val APP_GRID_COLUMNS = 4
 private const val APP_GRID_COLLAPSED_ROWS = 2
 private const val SECTION_COLLAPSED_LIMIT = 3
-private val CARD_GAP = 10.dp
+/** Between the cards, and between the field and the first card. */
+internal val SEARCH_CARD_GAP = 10.dp
+private val CARD_GAP = SEARCH_CARD_GAP
 
 /** Search results, one rounded card per category (Quick-Search-style), stacked with a small gap. */
 @Composable
@@ -190,7 +192,7 @@ fun SearchResultsColumn(
                     if (listState.firstVisibleItemIndex > 0) 1f else (listState.firstVisibleItemScrollOffset / topFadePx).coerceIn(0f, 1f)
                 },
             contentPadding = PaddingValues(
-                start = sideMargin, end = sideMargin, top = CARD_GAP, bottom = 4.dp
+                start = sideMargin, end = sideMargin, top = CARD_GAP, bottom = CARD_GAP
             ),
             verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(CARD_GAP)
         ) {

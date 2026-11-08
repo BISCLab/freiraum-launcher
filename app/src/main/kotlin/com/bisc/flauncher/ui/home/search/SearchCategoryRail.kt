@@ -63,9 +63,17 @@ fun SearchCategoryRail(
     cornerRadiusPercent: Int,
     onTap: (SearchCategory) -> Unit,
     onScrub: (SearchCategory) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** With the keyboard up the rail fills the space between field and keyboard, [edgeGap] from
+     *  each, so its top lines up with the first result card; otherwise it sits in the middle. */
+    fill: Boolean = false,
+    edgeGap: androidx.compose.ui.unit.Dp = 0.dp
 ) {
     if (categories.isEmpty()) return
+    // The gesture below lives as long as the categories do; it must always call the current
+    // actions, which know what is picked right now.
+    val currentOnTap by androidx.compose.runtime.rememberUpdatedState(onTap)
+    val currentOnScrub by androidx.compose.runtime.rememberUpdatedState(onScrub)
     val colors = resolveElementColors(appearance)
     val radius = SEARCH_RAIL_WIDTH / 2 * (cornerRadiusPercent.coerceIn(0, 100) / 100f)
     val shape = RoundedCornerShape(radius)
@@ -74,7 +82,7 @@ fun SearchCategoryRail(
     var scrubY by remember { mutableStateOf(0f) }
 
     BoxWithConstraints(modifier = modifier.fillMaxHeight().width(SEARCH_RAIL_WIDTH), contentAlignment = Alignment.Center) {
-        val railHeight = minOf(maxHeight, RAIL_SLOT * categories.size)
+        val railHeight = if (fill) (maxHeight - edgeGap * 2).coerceAtLeast(0.dp) else minOf(maxHeight, RAIL_SLOT * categories.size)
         val railTopPx = with(LocalDensity.current) { ((maxHeight - railHeight) / 2).toPx() }
         Column(
             modifier = Modifier
@@ -103,11 +111,11 @@ fun SearchCategoryRail(
                                 if (now != last || scrubbing == null) {
                                     last = now
                                     scrubbing = now
-                                    onScrub(now)
+                                    currentOnScrub(now)
                                 }
                             }
                         }
-                        if (!moved) onTap(last)
+                        if (!moved) currentOnTap(last)
                         scrubbing = null
                     }
                 },
