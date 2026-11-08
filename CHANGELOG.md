@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.12.1
 
 - Text search behavior: the rail switch has its own section above the table, since it turns the
   whole rail off. The table follows the corners table: a short legend on top says what Search and

@@ -1,0 +1,5 @@
+- Corners mean the same everywhere; widgets and result cards rounder
+- One clear way back to automatic on every settings page
+- Category rail: magnifier in place, bubble with its own look
+- Text search behavior clearer, favorites with their own page
+- Text search previews light again

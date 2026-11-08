@@ -1,0 +1,5 @@
+- Ecken bedeuten überall dasselbe; Widgets und Ergebniskästen runder
+- Einheitliches Zurück auf automatisch auf allen Einstellungsseiten
+- Kategorienleiste: Lupe auf der Stelle, Blase mit eigenem Aussehen
+- Verhalten der Textsuche übersichtlicher, Favoriten mit eigener Seite
+- Vorschauen der Textsuche wieder hell
