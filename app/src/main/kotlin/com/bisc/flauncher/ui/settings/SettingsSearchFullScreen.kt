@@ -263,6 +263,7 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
                 items = categoryOrder,
                 key = { it },
                 onReorder = viewModel::setSearchCategoryOrder,
+                itemHeight = 76.dp,
                 shape = androidx.compose.ui.graphics.RectangleShape
             ) { category ->
                 CategoryModeRow(
@@ -371,33 +372,17 @@ private fun CategoryPresets(modes: Map<SearchCategory, com.bisc.flauncher.data.m
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .height(androidx.compose.foundation.layout.IntrinsicSize.Min)
+            .horizontalScroll(androidx.compose.foundation.rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         CategoryPreset.entries.forEach { preset ->
             val presetModes = preset.modes()
-            val selected = modes.isNotEmpty() && presetModes == modes
-            val shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp)
-            androidx.compose.foundation.layout.Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clip(shape)
-                    .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent)
-                    .border(1.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, shape)
-                    .clickable { onPick(presetModes) }
-                    .padding(horizontal = 6.dp, vertical = 10.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    stringResource(preset.label),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    maxLines = 2
-                )
-            }
+            androidx.compose.material3.FilterChip(
+                selected = modes.isNotEmpty() && presetModes == modes,
+                onClick = { onPick(presetModes) },
+                label = { Text(stringResource(preset.label)) }
+            )
         }
     }
 }
@@ -470,7 +455,7 @@ private fun CategoryModeRow(
                     softWrap = false
                 )
             }
-            Text(stringResource(status), style = MaterialTheme.typography.labelSmall, color = statusColor, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+            Text(stringResource(status), style = MaterialTheme.typography.labelSmall, color = statusColor, maxLines = 2)
         }
         ModeToggle(Icons.Filled.Search, on = mode.search, enabled = true, color = color) { onChange(mode.copy(search = it)) }
         ModeToggle(Icons.Filled.ViewSidebar, on = mode.rail, enabled = railShown, color = color) { onChange(mode.copy(rail = it)) }
