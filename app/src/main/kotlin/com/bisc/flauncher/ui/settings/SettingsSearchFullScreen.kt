@@ -42,6 +42,11 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.ViewSidebar
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.bisc.flauncher.data.model.SearchCategory
@@ -216,9 +221,9 @@ fun SettingsSearchKeyboardScreen(navController: NavController, onBack: () -> Uni
 @Composable
 fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val included by viewModel.searchIncluded.collectAsState()
     val categoryOrder by viewModel.searchCategoryOrder.collectAsState()
-    val removedCategories by viewModel.searchRemoved.collectAsState()
+    val modes by viewModel.searchCategoryModes.collectAsState()
+    val railShown by viewModel.searchBarShowCategories.collectAsState()
     val categoryColors by viewModel.categoryColors.collectAsState()
     val engines by viewModel.searchEngines.collectAsState()
     val aiApps by viewModel.searchAiApps.collectAsState()
@@ -240,6 +245,36 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
         }
 
         SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_search_categories_label),
+            info = stringResource(R.string.settings_search_categories_info)
+        ) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_search_rail_show),
+                summary = stringResource(if (railShown) R.string.settings_search_categories_rail_on else R.string.settings_search_categories_rail_off),
+                onClick = { viewModel.setSearchBarShowCategories(!railShown) },
+                trailing = { Switch(checked = railShown, onCheckedChange = viewModel::setSearchBarShowCategories) }
+            )
+            CategoryPresets(modes, onPick = viewModel::setSearchCategoryModes)
+            CategoryTableHeader(railShown)
+            ReorderableList(
+                items = categoryOrder,
+                key = { it },
+                onReorder = viewModel::setSearchCategoryOrder,
+                shape = androidx.compose.ui.graphics.RectangleShape
+            ) { category ->
+                CategoryModeRow(
+                    category = category,
+                    color = categoryColors[category]?.let { Color(it) } ?: category.defaultColor,
+                    mode = modes[category] ?: com.bisc.flauncher.data.model.CategoryMode(search = true, rail = true),
+                    railShown = railShown,
+                    onDesign = { pickingColorFor = category },
+                    onChange = { viewModel.setSearchCategoryModes(mapOf(category to it)) }
+                )
+            }
+        }
+
+        SettingsPreferenceGroup(
             title = stringResource(R.string.search_section_favorites),
             info = stringResource(R.string.settings_search_favorites_info)
         ) {
@@ -254,70 +289,6 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
                     onClick = { favoritesPickerOpen = true },
                     trailing = null
                 )
-            }
-        }
-        SettingsPreferenceGroup(
-            title = stringResource(R.string.settings_search_categories_label),
-            info = stringResource(R.string.settings_search_categories_info)
-        ) {
-            ReorderableList(
-                items = categoryOrder.filter { it !in removedCategories },
-                key = { it },
-                // Removed categories keep their place at the end of the saved order.
-                onReorder = { reordered -> viewModel.setSearchCategoryOrder(reordered + categoryOrder.filter { it in removedCategories }) }
-            ) { category ->
-                val color = categoryColors[category]?.let { Color(it) } ?: category.defaultColor
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Icon(
-                        category.shownIcon(),
-                        contentDescription = null,
-                        tint = color,
-                        modifier = Modifier.size(28.dp).clip(CircleShape).clickable { pickingColorFor = category }.padding(2.dp)
-                    )
-                    // One line; a longer name slides sideways to be read in full.
-                    androidx.compose.foundation.layout.Box(modifier = Modifier.weight(1f).horizontalScroll(androidx.compose.foundation.rememberScrollState())) {
-                        Text(
-                            stringResource(category.settingsLabelRes),
-                            style = MaterialTheme.typography.bodyLarge,
-                            maxLines = 1,
-                            softWrap = false
-                        )
-                    }
-                    Switch(checked = category in included, onCheckedChange = { viewModel.setSearchIncluded(category, it) })
-                    androidx.compose.material3.IconButton(onClick = { viewModel.setSearchRemoved(category, true) }, modifier = Modifier.size(28.dp)) {
-                        Icon(
-                            androidx.compose.material.icons.Icons.Filled.Close,
-                            contentDescription = stringResource(R.string.settings_search_category_remove),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-        }
-        val removedInOrder = categoryOrder.filter { it in removedCategories }
-        if (removedInOrder.isNotEmpty()) {
-            SettingsPreferenceGroup(
-                title = stringResource(R.string.settings_search_categories_removed_label),
-                info = stringResource(R.string.settings_search_categories_removed_info)
-            ) {
-                removedInOrder.forEach { category ->
-                    SettingsPreference(
-                        icon = null,
-                        title = stringResource(category.settingsLabelRes),
-                        onClick = { viewModel.setSearchRemoved(category, false) },
-                        trailing = {
-                            Icon(
-                                androidx.compose.material.icons.Icons.Filled.Add,
-                                contentDescription = stringResource(R.string.settings_search_category_restore),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    )
-                }
             }
         }
     }
@@ -370,6 +341,142 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
             dirty = color != savedColor || iconKey != savedIcon
         ) {
             CategoryDesigner(category, color, iconKey, onIcon = { iconKey = it }, onColor = { color = it })
+        }
+    }
+}
+
+/** Ready-made settings for all categories at once; the one matching right now is marked. */
+private enum class CategoryPreset(val label: Int) {
+    ALL(R.string.settings_search_preset_all),
+    APPS_FIRST(R.string.settings_search_preset_apps),
+    ON_DEMAND(R.string.settings_search_preset_demand);
+
+    fun modes(): Map<SearchCategory, com.bisc.flauncher.data.model.CategoryMode> = SearchCategory.entries.associateWith { c ->
+        val always = when (this) {
+            ALL -> true
+            APPS_FIRST -> c == SearchCategory.FAVORITES || c == SearchCategory.APPS || c == SearchCategory.FOLDERS
+            ON_DEMAND -> c == SearchCategory.FAVORITES
+        }
+        com.bisc.flauncher.data.model.CategoryMode(search = always, rail = true)
+    }
+}
+
+@Composable
+private fun CategoryPresets(modes: Map<SearchCategory, com.bisc.flauncher.data.model.CategoryMode>, onPick: (Map<SearchCategory, com.bisc.flauncher.data.model.CategoryMode>) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .horizontalScroll(androidx.compose.foundation.rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        CategoryPreset.entries.forEach { preset ->
+            val presetModes = preset.modes()
+            androidx.compose.material3.FilterChip(
+                selected = modes.isNotEmpty() && presetModes == modes,
+                onClick = { onPick(presetModes) },
+                label = { Text(stringResource(preset.label)) }
+            )
+        }
+    }
+}
+
+private val MODE_COLUMN = 48.dp
+
+/** The heads of the two columns, lined up with the toggles below (and the drag handle). */
+@Composable
+private fun CategoryTableHeader(railShown: Boolean) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            stringResource(R.string.settings_search_col_category),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f)
+        )
+        listOf(R.string.settings_search_col_search to true, R.string.settings_search_col_rail to railShown).forEach { (label, active) ->
+            Text(
+                stringResource(label),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (active) 1f else 0.4f),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                maxLines = 1,
+                modifier = Modifier.width(MODE_COLUMN)
+            )
+        }
+        androidx.compose.foundation.layout.Spacer(Modifier.width(32.dp))
+    }
+}
+
+/** One category: symbol (tap to design it), name with what it does right now, and the two toggles. */
+@Composable
+private fun CategoryModeRow(
+    category: SearchCategory,
+    color: Color,
+    mode: com.bisc.flauncher.data.model.CategoryMode,
+    railShown: Boolean,
+    onDesign: () -> Unit,
+    onChange: (com.bisc.flauncher.data.model.CategoryMode) -> Unit
+) {
+    val inRail = mode.rail && railShown
+    val (status, statusColor) = when {
+        mode.search && inRail -> R.string.settings_search_mode_always to color
+        mode.search -> R.string.settings_search_mode_results to MaterialTheme.colorScheme.onSurfaceVariant
+        inRail -> R.string.settings_search_mode_demand to MaterialTheme.colorScheme.onSurfaceVariant
+        else -> R.string.settings_search_mode_off to MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+    }
+    val off = !mode.search && !inRail
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            category.shownIcon(),
+            contentDescription = null,
+            tint = color.copy(alpha = if (off) 0.4f else 1f),
+            modifier = Modifier.size(32.dp).clip(CircleShape).clickable(onClick = onDesign).padding(4.dp)
+        )
+        Column(modifier = Modifier.weight(1f).padding(start = 10.dp, end = 4.dp)) {
+            // One line; a longer name slides sideways to be read in full.
+            androidx.compose.foundation.layout.Box(Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState())) {
+                Text(
+                    stringResource(category.settingsLabelRes),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (off) 0.5f else 1f),
+                    maxLines = 1,
+                    softWrap = false
+                )
+            }
+            Text(stringResource(status), style = MaterialTheme.typography.labelSmall, color = statusColor, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+        }
+        ModeToggle(Icons.Filled.Search, on = mode.search, enabled = true, color = color) { onChange(mode.copy(search = it)) }
+        ModeToggle(Icons.Filled.ViewSidebar, on = mode.rail, enabled = railShown, color = color) { onChange(mode.copy(rail = it)) }
+    }
+}
+
+@Composable
+private fun ModeToggle(icon: androidx.compose.ui.graphics.vector.ImageVector, on: Boolean, enabled: Boolean, color: Color, onToggle: (Boolean) -> Unit) {
+    androidx.compose.foundation.layout.Box(modifier = Modifier.width(MODE_COLUMN), contentAlignment = Alignment.Center) {
+        val shown = on && enabled
+        androidx.compose.foundation.layout.Box(
+            modifier = Modifier
+                .size(34.dp)
+                .clip(CircleShape)
+                .background(if (shown) color.copy(alpha = 0.2f) else Color.Transparent)
+                .then(if (shown) Modifier else Modifier.border(1.5.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape))
+                .clickable(enabled = enabled) { onToggle(!on) }
+                .alpha(if (enabled) 1f else 0.4f),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                icon,
+                contentDescription = null,
+                tint = if (shown) color else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier.size(18.dp)
+            )
         }
     }
 }

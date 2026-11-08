@@ -105,6 +105,8 @@ fun SearchOverlay(
     barAtBottom: Boolean = false,
     /** The category rail beside the results. */
     showCategoryRail: Boolean = true,
+    /** Categories that are searched but have no place in the rail. */
+    railHidden: Set<SearchCategory> = emptySet(),
     fieldAppearance: ElementAppearance? = null,
     fieldCornerRadiusPercent: Int? = null,
     statusBarHidden: Boolean,
@@ -218,7 +220,7 @@ fun SearchOverlay(
         else -> emptyList()
     }
     val railCategories = categoryOrder.filter {
-        (it != SearchCategory.AI || aiChoices.isNotEmpty()) && (it != SearchCategory.FAVORITES || favoriteApps.isNotEmpty())
+        it !in railHidden && (it != SearchCategory.AI || aiChoices.isNotEmpty()) && (it != SearchCategory.FAVORITES || favoriteApps.isNotEmpty())
     }
     val onRailTap: (SearchCategory) -> Unit = { category ->
         if (focus == category) {

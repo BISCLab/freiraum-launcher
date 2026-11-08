@@ -20,6 +20,7 @@ import com.bisc.flauncher.data.model.GestureAction
 import com.bisc.flauncher.data.model.GradientDirection
 import com.bisc.flauncher.data.model.GestureActionType
 import com.bisc.flauncher.data.model.HomeGesture
+import com.bisc.flauncher.data.model.CategoryMode
 import com.bisc.flauncher.data.model.SearchCategory
 import com.bisc.flauncher.data.model.WebEngine
 import com.bisc.flauncher.ui.theme.FontPreference
@@ -447,17 +448,42 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[searchIncludeKey(category.storageKey)] = include }
     }
 
+    /** Each category: searched with every query, and shown in the rail. Neither = off. Both are
+     *  set together here; categories removed by older versions count as off. */
+    val searchCategoryModes: Flow<Map<SearchCategory, CategoryMode>> = dataStore.data.map { prefs ->
+        val removed = prefs[SEARCH_REMOVED_KEY].orEmpty().split(',').toSet()
+        val railHidden = prefs[SEARCH_RAIL_HIDDEN_KEY].orEmpty().split(',').toSet()
+        SearchCategory.entries.associateWith { c ->
+            val off = c.name in removed
+            CategoryMode(
+                search = !off && (prefs[searchIncludeKey(c.storageKey)] ?: c.legacyKey?.let { prefs[searchIncludeKey(it)] } ?: true),
+                rail = !off && c.name !in railHidden
+            )
+        }
+    }
+
+    /** Categories left out of the rail (and the ones older versions removed). */
+    val searchRailHidden: Flow<Set<SearchCategory>> = searchCategoryModes.map { modes -> modes.filterValues { !it.rail }.keys }
+
+    suspend fun setSearchCategoryModes(modes: Map<SearchCategory, CategoryMode>) {
+        dataStore.edit { prefs ->
+            val removed = prefs[SEARCH_REMOVED_KEY].orEmpty().split(',').filter { it.isNotBlank() }.toMutableSet()
+            val railHidden = prefs[SEARCH_RAIL_HIDDEN_KEY].orEmpty().split(',').filter { it.isNotBlank() }.toMutableSet()
+            modes.forEach { (c, mode) ->
+                removed -= c.name
+                prefs[searchIncludeKey(c.storageKey)] = mode.search
+                if (mode.rail) railHidden -= c.name else railHidden += c.name
+            }
+            prefs[SEARCH_REMOVED_KEY] = removed.joinToString(",")
+            prefs[SEARCH_RAIL_HIDDEN_KEY] = railHidden.joinToString(",")
+        }
+    }
+
     /** Categories removed entirely: not searched and not shown in the search bar. */
     val searchRemoved: Flow<Set<SearchCategory>> = dataStore.data.map { prefs ->
         prefs[SEARCH_REMOVED_KEY].orEmpty().split(',').mapNotNull { name -> SearchCategory.entries.firstOrNull { it.name == name } }.toSet()
     }
 
-    suspend fun setSearchRemoved(category: SearchCategory, removed: Boolean) {
-        dataStore.edit { prefs ->
-            val current = prefs[SEARCH_REMOVED_KEY].orEmpty().split(',').filter { it.isNotBlank() }.toSet()
-            prefs[SEARCH_REMOVED_KEY] = (if (removed) current + category.name else current - category.name).joinToString(",")
-        }
-    }
 
     val searchCategoryOrder: Flow<List<SearchCategory>> = dataStore.data.map { prefs ->
         // Categories that were split later replace their old entry in place.
@@ -1097,6 +1123,7 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_REMOVED_KEY = stringPreferencesKey("search_removed_categories")
         private val SEARCH_AI_APP_KEY = stringPreferencesKey("search_ai_app")
         private val SEARCH_AI_APPS_KEY = stringPreferencesKey("search_ai_apps")
+        private val SEARCH_RAIL_HIDDEN_KEY = stringPreferencesKey("search_rail_hidden")
         private val SEARCH_ENGINES_KEY = stringPreferencesKey("search_engines")
         private val SEARCH_BROWSER_APP_KEY = stringPreferencesKey("search_browser_app")
         private val SEARCH_MAPS_APP_KEY = stringPreferencesKey("search_maps_app")

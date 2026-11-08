@@ -16,3 +16,9 @@ enum class SearchCategory(val storageKey: String, val legacyKey: String? = null)
     WEB("web"),
     AI("ai")
 }
+
+/** How a category takes part in the Text search: searched with every query, and shown in the rail.
+ *  Only the rail = on demand (results after a tap on it); neither = off. */
+data class CategoryMode(val search: Boolean, val rail: Boolean) {
+    val off: Boolean get() = !search && !rail
+}

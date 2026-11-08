@@ -471,7 +471,7 @@
     <string name="contact_action_telegram">Telegram</string>
     <string name="contact_action_open_in_contacts">In Kontakte-App öffnen</string>
     <string name="contact_action_no_number">Keine Telefonnummer für diesen Kontakt.</string>
-    <string name="settings_search_categories_info">Ziehe die Kategorien, um die Reihenfolge der Ergebnisse zu ändern. Der Schalter legt fest, ob eine Kategorie standardmäßig durchsucht wird. Im Ergebnisfeld kannst du unten trotzdem ein Kategorie-Symbol antippen, um nur diese Kategorie zu zeigen – auch wenn sie hier ausgeschaltet ist. Web und Karten übergeben die Anfrage nur an deinen Browser bzw. deine Karten-App; der Launcher selbst greift nicht auf das Netz zu.</string>
+    <string name="settings_search_categories_info">Zwei Schalter pro Kategorie. Suche: Ihre Ergebnisse kommen bei jeder Eingabe. Leiste: Sie hat einen Platz in der Leiste neben den Ergebnissen. Beides = immer dabei. Nur Suche = Ergebnisse ohne Platz in der Leiste. Nur Leiste = auf Abruf, ihre Ergebnisse erscheinen erst nach einem Tipp auf sie in der Leiste. Keins = aus. Tippe auf ein Symbol, um es und die Farbe zu ändern, ziehe, um die Reihenfolge zu ändern. Web und Karten übergeben die Anfrage nur an deinen Browser bzw. deine Karten-App; der Launcher selbst geht nie ins Netz.</string>
     <string name="settings_search_categories_label">Suchkategorien</string>
     <string name="settings_search_include_apps">Apps</string>
     <string name="settings_search_include_contacts">Kontakte</string>
@@ -600,10 +600,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_app_grid_hide_folder_apps">Apps aus diesen Ordnern ausblenden</string>
     <string name="settings_app_list_own_search">Eigene App-Suche</string>
     <string name="settings_app_list_own_search_info">Der Suchbutton öffnet eine Suche nur nach Apps direkt in der Liste statt der Textsuche.</string>
-    <string name="settings_search_category_remove">Kategorie entfernen</string>
-    <string name="settings_search_category_restore">Wieder hinzufügen</string>
-    <string name="settings_search_categories_removed_label">Entfernt</string>
-    <string name="settings_search_categories_removed_info">Entfernte Kategorien werden nicht durchsucht und erscheinen nicht in der Suchleiste. Tippe eine an, um sie zurückzuholen.</string>
     <string name="settings_search_bar_position_label">Position</string>
     <string name="settings_pages_carousel_endless_summary">Kann das Wischen zwischen den Seiten weniger flüssig machen</string>
     <string name="lock_wallpaper_offer_yes">Ja, setzen</string>
@@ -854,4 +850,16 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_web_all_added">Alle fertigen Suchmaschinen sind hinzugefügt.</string>
     <string name="search_command_web_with">„%1$s“ mit %2$s suchen</string>
     <string name="settings_search_web_icon_pack">Aus Icon-Pack</string>
+    <string name="settings_search_col_category">Kategorie</string>
+    <string name="settings_search_col_search">Suche</string>
+    <string name="settings_search_col_rail">Leiste</string>
+    <string name="settings_search_mode_always">Immer dabei</string>
+    <string name="settings_search_mode_results">In den Ergebnissen, nicht in der Leiste</string>
+    <string name="settings_search_mode_demand">Auf Abruf: Ergebnisse nach Tipp in der Leiste</string>
+    <string name="settings_search_mode_off">Aus</string>
+    <string name="settings_search_preset_all">Alles an</string>
+    <string name="settings_search_preset_apps">Apps zuerst, Rest auf Abruf</string>
+    <string name="settings_search_preset_demand">Alles auf Abruf</string>
+    <string name="settings_search_categories_rail_on">Die Kategorien als Leiste neben den Ergebnissen</string>
+    <string name="settings_search_categories_rail_off">Aus: nur die Spalte Suche zählt</string>
 </resources>

@@ -1284,6 +1284,7 @@ private fun HomeSearchOverlay(
     val folderResults by viewModel.folderResults.collectAsState()
     val mapTargetResults by viewModel.mapTargetResults.collectAsState()
     val searchCategoryOrder by viewModel.searchCategoryOrder.collectAsState()
+    val searchRailHidden by viewModel.searchRailHidden.collectAsState()
     val searchFavoriteApps by viewModel.searchFavoriteApps.collectAsState()
     val searchFavoriteIds by viewModel.searchFavoriteIds.collectAsState()
     val searchCategoryRailLeft by viewModel.searchCategoryRailLeft.collectAsState()
@@ -1306,6 +1307,7 @@ private fun HomeSearchOverlay(
         contactsPermissionGranted = contactsPermissionGranted,
         statusBarHidden = statusBarHidden,
         categoryOrder = searchCategoryOrder,
+        railHidden = searchRailHidden,
         activeCategories = activeSearchCategories,
         categoryFilter = searchFilter,
         categoryColors = categoryColors,

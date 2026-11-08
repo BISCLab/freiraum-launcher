@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Text search behavior rebuilt: the categories as a table with two columns, Search (results with
+  every query) and Rail (a place in the rail). Together they give four clear states, shown under
+  each name: always there, results only without a rail place, on demand (results only after a tap
+  in the rail) and off. The X and the separate Removed list are gone; off categories keep their
+  place
+- Quick choices above the table: everything on, apps first with the rest on demand, all on demand;
+  the rail itself can be switched off right there, which greys out the Rail column
+- Categories come right after Web & AI, the favorites below
+
 - Web & AI: a symbol can also come from an installed icon pack (tap the symbol, then From icon pack);
   AI apps show their icon from the active icon pack on their own, like every other app
 - Category symbols: the choice is always a full 6 x 6 grid (four new symbols: calendar, plane,

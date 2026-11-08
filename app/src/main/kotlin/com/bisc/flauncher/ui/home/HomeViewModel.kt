@@ -443,6 +443,8 @@ class HomeViewModel @Inject constructor(
         settingsRepository.searchRemoved.stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
 
     /** The search bar's categories in order, without the removed ones. */
+    val searchRailHidden: StateFlow<Set<SearchCategory>> =
+        settingsRepository.searchRailHidden.stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
     val searchCategoryOrder: StateFlow<List<SearchCategory>> =
         combine(settingsRepository.searchCategoryOrder, searchRemoved) { order, removed -> order.filter { it !in removed } }
             .stateIn(viewModelScope, SharingStarted.Eagerly, SearchCategory.entries)

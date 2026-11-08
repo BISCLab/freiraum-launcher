@@ -457,16 +457,15 @@ class SettingsViewModel @Inject constructor(
         repository.appListShowAzIndex.stateIn(viewModelScope, SharingStarted.Eagerly, true)
     val searchHideStatusBar: StateFlow<Boolean> =
         repository.searchHideStatusBar.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-    val searchIncluded: StateFlow<Set<SearchCategory>> =
-        repository.searchIncluded.stateIn(viewModelScope, SharingStarted.Eagerly, SearchCategory.entries.toSet())
     val searchCategoryOrder: StateFlow<List<SearchCategory>> =
         repository.searchCategoryOrder.stateIn(viewModelScope, SharingStarted.Eagerly, SearchCategory.entries)
-    val searchRemoved: StateFlow<Set<SearchCategory>> =
-        repository.searchRemoved.stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
+    val searchCategoryModes: StateFlow<Map<SearchCategory, com.bisc.flauncher.data.model.CategoryMode>> =
+        repository.searchCategoryModes.stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
-    fun setSearchRemoved(category: SearchCategory, removed: Boolean) {
-        viewModelScope.launch { repository.setSearchRemoved(category, removed) }
+    fun setSearchCategoryModes(modes: Map<SearchCategory, com.bisc.flauncher.data.model.CategoryMode>) {
+        viewModelScope.launch { repository.setSearchCategoryModes(modes) }
     }
+
     val categoryColors: StateFlow<Map<SearchCategory, Int?>> =
         combine(SearchCategory.entries.map { c -> repository.categoryColor(c).map { color -> c to color } }) { pairs -> pairs.toMap() }
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
@@ -825,10 +824,6 @@ class SettingsViewModel @Inject constructor(
 
     fun setSearchHideStatusBar(hide: Boolean) {
         viewModelScope.launch { repository.setSearchHideStatusBar(hide) }
-    }
-
-    fun setSearchIncluded(category: SearchCategory, include: Boolean) {
-        viewModelScope.launch { repository.setSearchIncluded(category, include) }
     }
 
     fun setSearchCategoryOrder(order: List<SearchCategory>) {
