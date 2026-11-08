@@ -26,28 +26,15 @@ import com.bisc.flauncher.ui.home.search.automaticRailAppearance
  *  everything about how it works under Behavior. */
 @Composable
 fun SettingsAppOverviewScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
-    SettingsSubScreen(title = stringResource(R.string.settings_section_app_overview), navController = navController, onBack = onBack) {
-        Text(
-            stringResource(R.string.settings_page_app_overview_description),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 4.dp)
-        )
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_home_appearance_title),
-                onClick = { onNavigate("appearance") },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_behavior_label),
-                onClick = { onNavigate("behavior") },
-                trailing = null
-            )
-        }
-    }
+    AppearanceBehaviorHub(
+        title = stringResource(R.string.settings_section_app_overview),
+        intro = stringResource(R.string.settings_page_app_overview_description),
+        appearanceContents = stringResource(R.string.settings_hub_app_list_appearance),
+        behaviorContents = stringResource(R.string.settings_hub_app_list_behavior),
+        navController = navController,
+        onBack = onBack,
+        onNavigate = onNavigate
+    )
 }
 
 /** Appearance hub: the page itself, then each of its elements. Its accents follow the global one. */

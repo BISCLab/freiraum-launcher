@@ -50,22 +50,15 @@ import com.bisc.flauncher.ui.home.search.settingsLabelRes
  *  removed - search always uses the system keyboard now, see [com.bisc.flauncher.ui.home.search.SearchInputBar]. */
 @Composable
 fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
-    SettingsSubScreen(title = stringResource(R.string.settings_section_search_full), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_home_appearance_title),
-                onClick = { onNavigate("appearance") },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_behavior_label),
-                onClick = { onNavigate("behavior") },
-                trailing = null
-            )
-        }
-    }
+    AppearanceBehaviorHub(
+        title = stringResource(R.string.settings_section_search_full),
+        intro = stringResource(R.string.settings_page_search_description),
+        appearanceContents = stringResource(R.string.settings_hub_search_appearance),
+        behaviorContents = stringResource(R.string.settings_hub_search_behavior),
+        navController = navController,
+        onBack = onBack,
+        onNavigate = onNavigate
+    )
 }
 
 /** Appearance hub: the page itself, then each of its elements. */
@@ -303,7 +296,7 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Icon(
                         category.icon,
@@ -311,9 +304,16 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
                         tint = color,
                         modifier = Modifier.size(28.dp).clip(CircleShape).clickable { pickingColorFor = category }.padding(2.dp)
                     )
-                    Text(stringResource(category.settingsLabelRes), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                    Text(
+                        stringResource(category.settingsLabelRes),
+                        style = MaterialTheme.typography.bodyLarge,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
                     Switch(checked = category in included, onCheckedChange = { viewModel.setSearchIncluded(category, it) })
-                    androidx.compose.material3.IconButton(onClick = { viewModel.setSearchRemoved(category, true) }, modifier = Modifier.size(32.dp)) {
+                    androidx.compose.material3.IconButton(onClick = { viewModel.setSearchRemoved(category, true) }, modifier = Modifier.size(28.dp)) {
                         Icon(
                             androidx.compose.material.icons.Icons.Filled.Close,
                             contentDescription = stringResource(R.string.settings_search_category_remove),

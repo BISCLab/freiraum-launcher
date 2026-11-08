@@ -108,7 +108,7 @@
     <string name="settings_icons_label">Icons</string>
     <string name="settings_icons_summary">Shape, size and icon pack for every app</string>
     <string name="settings_system_title">System</string>
-    <string name="settings_card_system_subtitle">Permissions, language, default apps, backup</string>
+    <string name="settings_card_system_subtitle">Permissions, language, default apps, tips, backup</string>
     <string name="settings_element_fill_label">Fill</string>
     <string name="settings_font_label">Font</string>
     <string name="settings_font_system">System default</string>
@@ -821,4 +821,13 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_folder_widget_height">Height</string>
     <string name="settings_folder_items_section">Apps and elements, below</string>
     <string name="settings_folder_items_section_info">Below the widgets, in rows. Tap + to add, tap an item to remove it; the rows underneath set how many fit side by side.</string>
+    <string name="settings_page_search_description">One field for everything: apps, contacts, addresses, links, settings and more, and whatever is not on the phone goes on to your search engine, maps or AI app.</string>
+    <string name="settings_hub_appearance_what">How it looks</string>
+    <string name="settings_hub_behavior_what">What it does</string>
+    <string name="settings_hub_search_appearance">Page, search field, category rail, results, keyboard</string>
+    <string name="settings_hub_search_behavior">Search engine, AI app, favorites, categories and their order</string>
+    <string name="settings_hub_app_list_appearance">Page, letters, A-Z rail, search button, search field</string>
+    <string name="settings_hub_app_list_behavior">Edge, what is shown, its own search</string>
+    <string name="settings_hub_app_grid_appearance">Page, grid, search field</string>
+    <string name="settings_hub_app_grid_behavior">Search field, keyboard, folders</string>
 </resources>

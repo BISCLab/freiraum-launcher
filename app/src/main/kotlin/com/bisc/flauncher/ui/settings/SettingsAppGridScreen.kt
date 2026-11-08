@@ -35,28 +35,15 @@ import kotlin.math.roundToInt
 /** The App grid page's settings: same structure as the app list's (Appearance, Behavior). */
 @Composable
 fun SettingsAppGridScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
-    SettingsSubScreen(title = stringResource(R.string.settings_pages_app_grid), navController = navController, onBack = onBack) {
-        Text(
-            stringResource(R.string.settings_page_app_grid_description),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 4.dp)
-        )
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_home_appearance_title),
-                onClick = { onNavigate("appearance") },
-                trailing = null
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_behavior_label),
-                onClick = { onNavigate("behavior") },
-                trailing = null
-            )
-        }
-    }
+    AppearanceBehaviorHub(
+        title = stringResource(R.string.settings_pages_app_grid),
+        intro = stringResource(R.string.settings_page_app_grid_description),
+        appearanceContents = stringResource(R.string.settings_hub_app_grid_appearance),
+        behaviorContents = stringResource(R.string.settings_hub_app_grid_behavior),
+        navController = navController,
+        onBack = onBack,
+        onNavigate = onNavigate
+    )
 }
 
 @Composable

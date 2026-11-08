@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 /** System: how the launcher fits into the phone - permissions and default launcher, language, which
- *  apps links and places open in, and backups. */
+ *  apps links and places open in, the tips in the settings, and backups. */
 @Composable
 fun SettingsSystemScreen(
     navController: NavController,
@@ -41,6 +41,7 @@ fun SettingsSystemScreen(
     } ?: defaultAppLabel
     var pendingImport by remember { mutableStateOf<android.net.Uri?>(null) }
     var confirmingExport by remember { mutableStateOf(false) }
+    val showSettingsTips by viewModel.showSettingsTips.collectAsState()
     var language by remember { mutableStateOf(com.bisc.flauncher.util.AppLanguage.current(context)) }
     // Only the chosen language shows; the full list opens on tap, so it stays short as more come.
     val languages = listOf("" to stringResource(R.string.settings_language_system), "en" to "English", "de" to "Deutsch")
@@ -94,6 +95,15 @@ fun SettingsSystemScreen(
                 summary = appLabel(mapsPackage),
                 onClick = { mapsPickerOpen = true },
                 trailing = null
+            )
+        }
+        // Turns every "?" tip button across the settings on or off (see LocalShowSettingsTips).
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_tips_label)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_tips_show),
+                onClick = { viewModel.setShowSettingsTips(!showSettingsTips) },
+                trailing = { Switch(checked = showSettingsTips, onCheckedChange = viewModel::setShowSettingsTips) }
             )
         }
         SettingsPreferenceGroup(

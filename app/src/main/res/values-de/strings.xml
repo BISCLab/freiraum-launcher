@@ -108,7 +108,7 @@
     <string name="settings_icons_label">Icons</string>
     <string name="settings_icons_summary">Form, Größe und Icon-Pack für alle Apps</string>
     <string name="settings_system_title">System</string>
-    <string name="settings_card_system_subtitle">Berechtigungen, Sprache, Standard-Apps, Sicherung</string>
+    <string name="settings_card_system_subtitle">Berechtigungen, Sprache, Standard-Apps, Tipps, Sicherung</string>
     <string name="settings_element_fill_label">Fläche</string>
     <string name="settings_font_label">Schriftart</string>
     <string name="settings_font_system">Systemstandard</string>
@@ -821,4 +821,13 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_folder_widget_height">Höhe</string>
     <string name="settings_folder_items_section">Apps und Elemente, darunter</string>
     <string name="settings_folder_items_section_info">Unter den Widgets, in Reihen. Mit + hinzufügen, Antippen eines Elements entfernt es; die Reihen darunter legen fest, wie viele nebeneinander passen.</string>
+    <string name="settings_page_search_description">Ein Feld für alles: Apps, Kontakte, Adressen, Links, Einstellungen und mehr, und was nicht auf dem Handy ist, geht weiter an Suchmaschine, Karten oder KI-App.</string>
+    <string name="settings_hub_appearance_what">Wie es aussieht</string>
+    <string name="settings_hub_behavior_what">Was es tut</string>
+    <string name="settings_hub_search_appearance">Seite, Suchfeld, Kategorienleiste, Ergebnisse, Tastatur</string>
+    <string name="settings_hub_search_behavior">Suchmaschine, KI-App, Favoriten, Kategorien und ihre Reihenfolge</string>
+    <string name="settings_hub_app_list_appearance">Seite, Buchstaben, A–Z-Leiste, Suchbutton, Suchfeld</string>
+    <string name="settings_hub_app_list_behavior">Rand, was angezeigt wird, eigene Suche</string>
+    <string name="settings_hub_app_grid_appearance">Seite, Raster, Suchfeld</string>
+    <string name="settings_hub_app_grid_behavior">Suchfeld, Tastatur, Ordner</string>
 </resources>

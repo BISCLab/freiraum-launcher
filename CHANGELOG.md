@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Page previews in the settings are true to scale: every row at its real height and gap, element
+  boxes and the Dock with their real app icons, Freiraum widgets with their symbol (the clock shows
+  a time), Android widgets with their app icon and name
+- Text search, App list and App grid open with a short introduction and two large cards,
+  Appearance (how it looks) and Behavior (what it does), each listing what is inside
+- Text search, Behavior: the categories stay on one line each
+- Tips moved back to System
+
 - Folder settings: widgets and apps are two clearly named parts, Widgets at the top and Apps and
   elements below, each with a short explanation. Every widget is a card with a block as tall as the
   widget, its height with - and + right there, moving and removing; a tap opens all its settings.

@@ -23,7 +23,7 @@ import com.bisc.flauncher.ui.theme.SettingsThemeMode
 import com.bisc.flauncher.ui.theme.ThemePreference
 
 /** Appearance: everything about how the launcher looks and moves - ready-made looks, color modes,
- *  accent, font, corners, background and icons, status bar and rotation, animations and tips. Pages
+ *  accent, font, corners, background and icons, status bar and rotation, and animations. Pages
  *  and elements can override parts of it on their own screens. */
 @Composable
 fun SettingsAppearanceScreen(
@@ -37,7 +37,6 @@ fun SettingsAppearanceScreen(
     val fontPreference by viewModel.fontPreference.collectAsState()
     val accentColor by viewModel.accentColor.collectAsState()
     val lockPortrait by viewModel.lockPortrait.collectAsState()
-    val showSettingsTips by viewModel.showSettingsTips.collectAsState()
     var confirmingTheme by remember { mutableStateOf<ThemePreference?>(null) }
     var launcherThemePickerOpen by remember { mutableStateOf(false) }
     var settingsThemePickerOpen by remember { mutableStateOf(false) }
@@ -148,15 +147,6 @@ fun SettingsAppearanceScreen(
                 summary = motionSummary(viewModel),
                 onClick = { onNavigate("appearance/animations") },
                 trailing = null
-            )
-        }
-        // Turns every "?" tip button across the settings on or off (see LocalShowSettingsTips).
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_tips_label)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_tips_show),
-                onClick = { viewModel.setShowSettingsTips(!showSettingsTips) },
-                trailing = { Switch(checked = showSettingsTips, onCheckedChange = viewModel::setShowSettingsTips) }
             )
         }
     }
