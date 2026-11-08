@@ -99,6 +99,7 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
         "settings/search/keyboard" -> stringResource(R.string.settings_search_keyboard_label)
         "settings/search/behavior" -> stringResource(R.string.settings_search_behavior_label)
         "settings/search/web" -> stringResource(R.string.settings_search_web_title)
+        "settings/search/favorites" -> stringResource(R.string.search_section_favorites)
         "settings/pages" -> stringResource(R.string.settings_section_pages)
         "settings/pages/{pageId}" -> {
             val viewModel: HomeViewModel = hiltViewModel(entry)

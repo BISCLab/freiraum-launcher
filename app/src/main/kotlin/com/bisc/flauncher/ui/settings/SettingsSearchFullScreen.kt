@@ -49,6 +49,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.bisc.flauncher.data.model.SearchCategory
@@ -231,11 +232,6 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
     val aiApps by viewModel.searchAiApps.collectAsState()
     val aiChoices = com.bisc.flauncher.ui.home.search.rememberAiChoices(aiApps, viewModel::loadIcon)
     var pickingColorFor by remember { mutableStateOf<SearchCategory?>(null) }
-    val favorites by viewModel.searchFavorites.collectAsState()
-    val favoritesMode by viewModel.searchFavoritesMode.collectAsState()
-    val labeledApps by viewModel.labeledApps.collectAsState()
-    var favoritesPickerOpen by remember { mutableStateOf(false) }
-
     SettingsSubScreen(title = stringResource(R.string.settings_search_behavior_label), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup {
             SettingsPreference(
@@ -246,10 +242,8 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
             )
         }
 
-        SettingsPreferenceGroup(
-            title = stringResource(R.string.settings_search_categories_label),
-            info = stringResource(R.string.settings_search_categories_info)
-        ) {
+        // The whole rail first: switched off, no category has a place in it.
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_search_rail_label)) {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_search_rail_show),
@@ -257,14 +251,21 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
                 onClick = { viewModel.setSearchBarShowCategories(!railShown) },
                 trailing = { Switch(checked = railShown, onCheckedChange = viewModel::setSearchBarShowCategories) }
             )
-            CategoryPresets(modes, onPick = viewModel::setSearchCategoryModes)
+        }
+
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_search_categories_label),
+            info = stringResource(R.string.settings_search_categories_info)
+        ) {
+            CategoryLegend(railShown)
             CategoryTableHeader(railShown)
             ReorderableList(
                 items = categoryOrder,
                 key = { it },
                 onReorder = viewModel::setSearchCategoryOrder,
                 itemHeight = 76.dp,
-                shape = androidx.compose.ui.graphics.RectangleShape
+                shape = androidx.compose.ui.graphics.RectangleShape,
+                dividers = true
             ) { category ->
                 CategoryModeRow(
                     category = category,
@@ -272,60 +273,11 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
                     mode = modes[category] ?: com.bisc.flauncher.data.model.CategoryMode(search = true, rail = true),
                     railShown = railShown,
                     onDesign = { pickingColorFor = category },
-                    onChange = { viewModel.setSearchCategoryModes(mapOf(category to it)) }
+                    onChange = { viewModel.setSearchCategoryModes(mapOf(category to it)) },
+                    onOpen = if (category == SearchCategory.FAVORITES) ({ navController.navigate("settings/search/favorites") }) else null
                 )
             }
         }
-
-        SettingsPreferenceGroup(
-            title = stringResource(R.string.search_section_favorites),
-            info = stringResource(R.string.settings_search_favorites_info)
-        ) {
-            RadioPreference(stringResource(R.string.settings_search_favorites_mode_both), com.bisc.flauncher.data.model.SearchFavoritesMode.BOTH, favoritesMode, viewModel::setSearchFavoritesMode)
-            RadioPreference(stringResource(R.string.settings_search_favorites_mode_manual), com.bisc.flauncher.data.model.SearchFavoritesMode.MANUAL, favoritesMode, viewModel::setSearchFavoritesMode)
-            RadioPreference(stringResource(R.string.settings_search_favorites_mode_auto), com.bisc.flauncher.data.model.SearchFavoritesMode.AUTO, favoritesMode, viewModel::setSearchFavoritesMode)
-            if (favoritesMode != com.bisc.flauncher.data.model.SearchFavoritesMode.AUTO) {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_search_favorites_pick),
-                    summary = androidx.compose.ui.res.pluralStringResource(R.plurals.settings_search_favorites_count, favorites.size, favorites.size),
-                    onClick = { favoritesPickerOpen = true },
-                    trailing = null
-                )
-            }
-        }
-    }
-
-    if (favoritesPickerOpen) {
-        var picked by remember { mutableStateOf(favorites) }
-        AlertDialog(
-            onDismissRequest = { favoritesPickerOpen = false },
-            title = { Text(stringResource(R.string.settings_search_favorites_pick)) },
-            text = {
-                LazyColumn(modifier = Modifier.heightIn(max = 420.dp)) {
-                    val apps = labeledApps.sortedBy { it.label.lowercase() }
-                    items(apps, key = { it.componentName.flattenToString() }) { app ->
-                        val id = app.componentName.flattenToString()
-                        val on = id in picked
-                        val full = !on && picked.size >= com.bisc.flauncher.data.model.SEARCH_FAVORITES_MAX
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable(enabled = !full) { picked = if (on) picked - id else picked + id }
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            androidx.compose.material3.Checkbox(checked = on, enabled = !full, onCheckedChange = { picked = if (on) picked - id else picked + id })
-                            Text(app.label, modifier = Modifier.padding(start = 8.dp))
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { viewModel.setSearchFavorites(picked); favoritesPickerOpen = false }) { Text(stringResource(R.string.widget_notes_save)) }
-            },
-            dismissButton = { TextButton(onClick = { favoritesPickerOpen = false }) { Text(stringResource(R.string.widget_notes_cancel)) } }
-        )
     }
 
     pickingColorFor?.let { category ->
@@ -348,46 +300,35 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
     }
 }
 
-/** Ready-made settings for all categories at once; the one matching right now is marked. */
-private enum class CategoryPreset(val label: Int) {
-    ALL(R.string.settings_search_preset_all),
-    APPS_FIRST(R.string.settings_search_preset_apps),
-    ON_DEMAND(R.string.settings_search_preset_demand);
+private val MODE_COLUMN = 48.dp
 
-    fun modes(): Map<SearchCategory, com.bisc.flauncher.data.model.CategoryMode> = SearchCategory.entries.associateWith { c ->
-        val always = when (this) {
-            ALL -> true
-            APPS_FIRST -> c == SearchCategory.FAVORITES || c == SearchCategory.APPS || c == SearchCategory.FOLDERS
-            ON_DEMAND -> c == SearchCategory.FAVORITES
-        }
-        com.bisc.flauncher.data.model.CategoryMode(search = always, rail = true)
-    }
-}
-
-/** Three equal boxes side by side, so they always fit the width; a long label wraps instead of
- *  running off the edge. */
+/** What the two columns do, once, above the table. */
 @Composable
-private fun CategoryPresets(modes: Map<SearchCategory, com.bisc.flauncher.data.model.CategoryMode>, onPick: (Map<SearchCategory, com.bisc.flauncher.data.model.CategoryMode>) -> Unit) {
-    Row(
+private fun CategoryLegend(railShown: Boolean) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .horizontalScroll(androidx.compose.foundation.rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 6.dp)
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.07f))
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        CategoryPreset.entries.forEach { preset ->
-            val presetModes = preset.modes()
-            androidx.compose.material3.FilterChip(
-                selected = modes.isNotEmpty() && presetModes == modes,
-                onClick = { onPick(presetModes) },
-                label = { Text(stringResource(preset.label)) }
-            )
+        listOf(
+            Triple(Icons.Filled.Search, R.string.settings_search_legend_search, true),
+            Triple(Icons.AutoMirrored.Filled.ViewSidebar, R.string.settings_search_legend_rail, railShown)
+        ).forEach { (icon, text, active) ->
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.alpha(if (active) 1f else 0.45f)) {
+                androidx.compose.foundation.layout.Box(
+                    modifier = Modifier.size(28.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)),
+                    contentAlignment = Alignment.Center
+                ) { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp)) }
+                Text(stringResource(text), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 10.dp))
+            }
         }
     }
 }
-
-private val MODE_COLUMN = 48.dp
 
 /** The heads of the two columns, lined up with the toggles below (and the drag handle). */
 @Composable
@@ -396,20 +337,21 @@ private fun CategoryTableHeader(railShown: Boolean) {
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 2.dp),
+            .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             stringResource(R.string.settings_search_col_category),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
             modifier = Modifier.weight(1f)
         )
         listOf(R.string.settings_search_col_search to true, R.string.settings_search_col_rail to railShown).forEach { (label, active) ->
             Text(
                 stringResource(label),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (active) 1f else 0.4f),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (active) 1f else 0.4f),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 maxLines = 1,
                 modifier = Modifier.width(MODE_COLUMN)
@@ -417,6 +359,10 @@ private fun CategoryTableHeader(railShown: Boolean) {
         }
         androidx.compose.foundation.layout.Spacer(Modifier.width(32.dp))
     }
+    androidx.compose.foundation.layout.Box(
+        Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(horizontal = 14.dp)
+            .height(1.dp).background(MaterialTheme.colorScheme.outlineVariant)
+    )
 }
 
 /** One category: symbol (tap to design it), name with what it does right now, and the two toggles. */
@@ -427,7 +373,9 @@ private fun CategoryModeRow(
     mode: com.bisc.flauncher.data.model.CategoryMode,
     railShown: Boolean,
     onDesign: () -> Unit,
-    onChange: (com.bisc.flauncher.data.model.CategoryMode) -> Unit
+    onChange: (com.bisc.flauncher.data.model.CategoryMode) -> Unit,
+    /** Opens the category's own settings; null = it has none. */
+    onOpen: (() -> Unit)? = null
 ) {
     val inRail = mode.rail && railShown
     val (status, statusColor) = when {
@@ -444,15 +392,29 @@ private fun CategoryModeRow(
             tint = color.copy(alpha = if (off) 0.4f else 1f),
             modifier = Modifier.size(32.dp).clip(CircleShape).clickable(onClick = onDesign).padding(4.dp)
         )
-        Column(modifier = Modifier.weight(1f).padding(start = 10.dp, end = 4.dp)) {
-            // One line; a longer name slides sideways to be read in full.
-            androidx.compose.foundation.layout.Box(Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState())) {
-                Text(
-                    stringResource(category.settingsLabelRes),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (off) 0.5f else 1f),
-                    maxLines = 1,
-                    softWrap = false
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
+                .then(if (onOpen != null) Modifier.clickable(onClick = onOpen) else Modifier)
+                .padding(start = 10.dp, end = 4.dp, top = 2.dp, bottom = 2.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // One line; a longer name slides sideways to be read in full.
+                androidx.compose.foundation.layout.Box(Modifier.weight(1f, fill = false).horizontalScroll(androidx.compose.foundation.rememberScrollState())) {
+                    Text(
+                        stringResource(category.settingsLabelRes),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (off) 0.5f else 1f),
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                }
+                if (onOpen != null) Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
                 )
             }
             Text(stringResource(status), style = MaterialTheme.typography.labelSmall, color = statusColor, maxLines = 2)
@@ -731,4 +693,61 @@ internal fun appsHandling(context: android.content.Context, uri: String, browsab
         .map { PickableApp(it.activityInfo.packageName, it.loadLabel(pm).toString()) }
         .distinctBy { it.packageName }
         .sortedBy { it.label.lowercase() }
+}
+
+/** Favorites of the Text search: which apps it shows, opened from the Favorites category. */
+@Composable
+fun SettingsSearchFavoritesScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+    val favorites by viewModel.searchFavorites.collectAsState()
+    val favoritesMode by viewModel.searchFavoritesMode.collectAsState()
+    val labeledApps by viewModel.labeledApps.collectAsState()
+    var pickerOpen by remember { mutableStateOf(false) }
+    SettingsSubScreen(title = stringResource(R.string.search_section_favorites), navController = navController, onBack = onBack) {
+        SettingsPreferenceGroup(info = stringResource(R.string.settings_search_favorites_info)) {
+            RadioPreference(stringResource(R.string.settings_search_favorites_mode_both), com.bisc.flauncher.data.model.SearchFavoritesMode.BOTH, favoritesMode, viewModel::setSearchFavoritesMode)
+            RadioPreference(stringResource(R.string.settings_search_favorites_mode_manual), com.bisc.flauncher.data.model.SearchFavoritesMode.MANUAL, favoritesMode, viewModel::setSearchFavoritesMode)
+            RadioPreference(stringResource(R.string.settings_search_favorites_mode_auto), com.bisc.flauncher.data.model.SearchFavoritesMode.AUTO, favoritesMode, viewModel::setSearchFavoritesMode)
+        }
+        if (favoritesMode != com.bisc.flauncher.data.model.SearchFavoritesMode.AUTO) {
+            SettingsPreferenceGroup {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_search_favorites_pick),
+                    summary = androidx.compose.ui.res.pluralStringResource(R.plurals.settings_search_favorites_count, favorites.size, favorites.size),
+                    onClick = { pickerOpen = true }
+                )
+            }
+        }
+    }
+    if (pickerOpen) {
+        var picked by remember { mutableStateOf(favorites) }
+        AlertDialog(
+            onDismissRequest = { pickerOpen = false },
+            title = { Text(stringResource(R.string.settings_search_favorites_pick)) },
+            text = {
+                LazyColumn(modifier = Modifier.heightIn(max = 420.dp)) {
+                    val apps = labeledApps.sortedBy { it.label.lowercase() }
+                    items(apps, key = { it.componentName.flattenToString() }) { app ->
+                        val id = app.componentName.flattenToString()
+                        val on = id in picked
+                        val full = !on && picked.size >= com.bisc.flauncher.data.model.SEARCH_FAVORITES_MAX
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(enabled = !full) { picked = if (on) picked - id else picked + id }
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            androidx.compose.material3.Checkbox(checked = on, enabled = !full, onCheckedChange = { picked = if (on) picked - id else picked + id })
+                            Text(app.label, modifier = Modifier.padding(start = 8.dp))
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { viewModel.setSearchFavorites(picked); pickerOpen = false }) { Text(stringResource(R.string.widget_notes_save)) }
+            },
+            dismissButton = { TextButton(onClick = { pickerOpen = false }) { Text(stringResource(R.string.widget_notes_cancel)) } }
+        )
+    }
 }

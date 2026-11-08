@@ -49,7 +49,7 @@ object LauncherSettingsTargets {
             listOf("kategorien", "kategorienleiste", "leiste", "categories", "category rail")),
         LauncherSettingsTarget(R.string.settings_search_web_title, "settings/search/web",
             listOf("suchmaschine", "ki", "web", "google", "duckduckgo", "search engine", "ai", "assistant")),
-        LauncherSettingsTarget(R.string.search_section_favorites, "settings/search/behavior",
+        LauncherSettingsTarget(R.string.search_section_favorites, "settings/search/favorites",
             listOf("favoriten", "häufig", "sterne", "favorites", "most used", "star")),
         LauncherSettingsTarget(R.string.settings_section_folder, "settings/folder", listOf("ordner", "folders")),
         LauncherSettingsTarget(R.string.settings_section_elements, "settings/elements", listOf("elemente", "elements", "apps")),

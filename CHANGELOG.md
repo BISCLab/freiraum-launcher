@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Text search behavior: the rail switch has its own section above the table, since it turns the
+  whole rail off. The table follows the corners table: a short legend on top says what Search and
+  Rail do, clear column heads, fine lines between the rows. The quick choices are gone
+- Favorites settings have their own page, opened with a tap on the Favorites category in the table
+  (or through the settings search)
+
 - Category rail: the magnifier grows the symbols in place, centred on the rail, on a solid round
   ground instead of reaching out sideways half transparent; a little less strong so it stays on
   screen at the edge

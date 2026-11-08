@@ -21,6 +21,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -42,6 +43,8 @@ fun <T> ReorderableList(
     modifier: Modifier = Modifier,
     itemHeight: Dp = 64.dp,
     shape: Shape = SettingsCardShape,
+    /** A fine line between the rows. */
+    dividers: Boolean = false,
     itemContent: @Composable (T) -> Unit
 ) {
     val density = LocalDensity.current
@@ -67,7 +70,8 @@ fun <T> ReorderableList(
             .clip(shape)
             .background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
-        shown.forEach { item ->
+        val dividerColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+        shown.forEachIndexed { index, item ->
             val itemKey = key(item)
             androidx.compose.runtime.key(itemKey) {
             val isDragging = itemKey == draggingKey
@@ -80,6 +84,12 @@ fun <T> ReorderableList(
                     .background(
                         if (isDragging) MaterialTheme.colorScheme.surfaceContainerHighest
                         else MaterialTheme.colorScheme.surfaceContainer
+                    )
+                    .then(
+                        if (dividers && index > 0 && !isDragging) Modifier.drawBehind {
+                            val inset = 14.dp.toPx()
+                            drawLine(dividerColor, androidx.compose.ui.geometry.Offset(inset, 0f), androidx.compose.ui.geometry.Offset(size.width - inset, 0f), 1.dp.toPx())
+                        } else Modifier
                     )
                     .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
