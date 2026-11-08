@@ -848,9 +848,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_web_choice">Zur Auswahl in derselben Karte</string>
     <string name="settings_search_web_icon_pick">Bild wählen</string>
     <string name="settings_search_web_icon_reset">Standardsymbol</string>
-    <string name="settings_search_web_icon_info">Ein eigenes Bild wird quadratisch zugeschnitten und rund gezeigt.</string>
+    <string name="settings_search_web_icon_info">Ein eigenes Bild oder ein Symbol aus dem Icon-Pack ersetzt das Standardsymbol. Bilder werden quadratisch zugeschnitten.</string>
     <string name="settings_search_web_no_ai">Noch keine KI-App. Ohne sie bleibt die KI-Karte ausgeblendet.</string>
     <string name="settings_search_web_preview_query">Wetter morgen</string>
     <string name="settings_search_web_all_added">Alle fertigen Suchmaschinen sind hinzugefügt.</string>
     <string name="search_command_web_with">„%1$s“ mit %2$s suchen</string>
+    <string name="settings_search_web_icon_pack">Aus Icon-Pack</string>
 </resources>

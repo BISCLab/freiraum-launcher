@@ -19,6 +19,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
@@ -68,7 +71,9 @@ fun SettingsSearchWebScreen(navController: NavController, onBack: () -> Unit, vi
     val categoryColors by viewModel.categoryColors.collectAsState()
     val installedApps by viewModel.browsableApps.collectAsState()
     val engineChoices = rememberEngineChoices(engines)
-    val aiChoices = rememberAiChoices(aiApps)
+    val aiChoices = rememberAiChoices(aiApps, viewModel::loadIcon)
+    val iconPacks by viewModel.iconPacks.collectAsState()
+    var packIconFor by remember { mutableStateOf<CommandChoice?>(null) }
     var addingEngine by remember { mutableStateOf(false) }
     var editingEngine by remember { mutableStateOf<WebEngine?>(null) }
     var addingAi by remember { mutableStateOf(false) }
@@ -314,32 +319,69 @@ fun SettingsSearchWebScreen(navController: NavController, onBack: () -> Unit, vi
             onDismissRequest = { iconFor = null },
             title = { Text(choice.label) },
             text = {
-                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     CommandBadge(choice, 76.dp)
                     Text(
                         stringResource(R.string.settings_search_web_icon_info),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp, bottom = 6.dp)
                     )
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    pendingIconId = choice.iconId
-                    iconFor = null
-                    imagePicker.launch(arrayOf("image/*"))
-                }) { Text(stringResource(R.string.settings_search_web_icon_pick)) }
-            },
-            dismissButton = {
-                if (choice.ownIcon) {
-                    TextButton(onClick = { SearchIconStore.remove(context, choice.iconId); iconFor = null }) {
-                        Text(stringResource(R.string.settings_search_web_icon_reset))
+                    IconSourceRow(Icons.Filled.Image, stringResource(R.string.settings_search_web_icon_pick)) {
+                        pendingIconId = choice.iconId
+                        iconFor = null
+                        imagePicker.launch(arrayOf("image/*"))
                     }
-                } else {
-                    TextButton(onClick = { iconFor = null }) { Text(stringResource(R.string.widget_notes_cancel)) }
+                    if (iconPacks.isNotEmpty()) {
+                        IconSourceRow(Icons.Filled.Apps, stringResource(R.string.settings_search_web_icon_pack)) {
+                            iconFor = null
+                            packIconFor = choice
+                        }
+                    }
+                    if (choice.ownIcon) {
+                        IconSourceRow(Icons.Filled.Restore, stringResource(R.string.settings_search_web_icon_reset)) {
+                            SearchIconStore.remove(context, choice.iconId)
+                            iconFor = null
+                        }
+                    }
                 }
-            }
+            },
+            confirmButton = { TextButton(onClick = { iconFor = null }) { Text(stringResource(R.string.widget_notes_cancel)) } }
         )
+    }
+
+    packIconFor?.let { choice ->
+        SettingsFixedDialog(
+            title = choice.label,
+            onDismiss = { packIconFor = null }
+        ) {
+            IconPackPickerContent(
+                viewModel = viewModel,
+                currentPack = null,
+                currentDrawable = null,
+                onPick = { pack, drawable ->
+                    packIconFor = null
+                    viewModel.loadPackIcon(pack, drawable)?.let { image -> scope.launch { SearchIconStore.save(context, choice.iconId, image) } }
+                }
+            )
+        }
+    }
+}
+
+/** One way to get a symbol: photo, icon pack, or back to the standard one. */
+@Composable
+private fun IconSourceRow(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(start = 14.dp))
     }
 }
 

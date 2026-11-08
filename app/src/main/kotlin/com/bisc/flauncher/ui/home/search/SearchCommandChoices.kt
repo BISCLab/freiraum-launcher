@@ -55,9 +55,10 @@ fun rememberEngineChoices(engines: List<WebEngine>): List<CommandChoice> {
     }
 }
 
-/** The AI apps still installed, with their own picture or the app icon. */
+/** The AI apps still installed, with their own picture or the app icon as the launcher shows it
+ *  (icon pack included) through [loadAppIcon]. */
 @Composable
-fun rememberAiChoices(packages: List<String>): List<CommandChoice> {
+fun rememberAiChoices(packages: List<String>, loadAppIcon: ((android.content.ComponentName) -> ImageBitmap?)? = null): List<CommandChoice> {
     val context = LocalContext.current
     val stamps by SearchIconStore.stamps(context).collectAsState()
     return remember(packages, stamps) {
@@ -66,6 +67,7 @@ fun rememberAiChoices(packages: List<String>): List<CommandChoice> {
             val info = runCatching { pm.getApplicationInfo(pkg, 0) }.getOrNull() ?: return@mapNotNull null
             val id = SearchIconStore.aiId(pkg)
             val image = SearchIconStore.load(context, id)
+                ?: loadAppIcon?.let { load -> pm.getLaunchIntentForPackage(pkg)?.component?.let { runCatching { load(it) }.getOrNull() } }
                 ?: runCatching { pm.getApplicationIcon(info).toBitmap(144, 144).asImageBitmap() }.getOrNull()
             CommandChoice(pkg, pm.getApplicationLabel(info).toString(), image, Color(0xFF7E57C2), id, id in stamps)
         }

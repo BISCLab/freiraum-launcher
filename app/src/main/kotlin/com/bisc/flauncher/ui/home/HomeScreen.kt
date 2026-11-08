@@ -1310,7 +1310,7 @@ private fun HomeSearchOverlay(
         categoryFilter = searchFilter,
         categoryColors = categoryColors,
         webChoices = com.bisc.flauncher.ui.home.search.rememberEngineChoices(searchEngines),
-        aiChoices = com.bisc.flauncher.ui.home.search.rememberAiChoices(searchAiApps),
+        aiChoices = com.bisc.flauncher.ui.home.search.rememberAiChoices(searchAiApps, viewModel::loadIcon),
         keyboardAutoOpen = searchKeyboardAutoOpen,
         appearance = searchAppearance,
         cornerRadiusPercent = cornerRadiusPercent,

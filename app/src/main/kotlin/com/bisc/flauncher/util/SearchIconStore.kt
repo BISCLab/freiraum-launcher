@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,8 @@ import java.io.File
 
 /**
  * Own pictures for search engines and AI apps, kept as small square PNGs in the app's files
- * (inside a folder the backup takes along). [stamps] changes whenever one is set or removed.
+ * (inside a folder the backup takes along), from a photo or an icon pack. [stamps] changes whenever
+ * one is set or removed.
  */
 object SearchIconStore {
     private const val SIZE = 192
@@ -45,15 +47,25 @@ object SearchIconStore {
             val source = resolver.openInputStream(uri)?.use {
                 BitmapFactory.decodeStream(it, null, BitmapFactory.Options().apply { inSampleSize = sample })
             } ?: return@runCatching false
-            val side = minOf(source.width, source.height)
-            val square = Bitmap.createBitmap(source, (source.width - side) / 2, (source.height - side) / 2, side, side)
-            val scaled = Bitmap.createScaledBitmap(square, SIZE, SIZE, true)
-            stamps(context)
-            dir(context).mkdirs()
-            file(context, id).outputStream().use { scaled.compress(Bitmap.CompressFormat.PNG, 100, it) }
-            state.value = state.value + (id to System.currentTimeMillis())
-            true
+            write(context, id, source)
         }.getOrDefault(false)
+    }
+
+    /** An icon from an icon pack, kept as the picture of [id]. */
+    suspend fun save(context: Context, id: String, image: ImageBitmap): Boolean = withContext(Dispatchers.IO) {
+        runCatching { write(context, id, image.asAndroidBitmap()) }.getOrDefault(false)
+    }
+
+    private fun write(context: Context, id: String, original: Bitmap): Boolean {
+        val source = if (original.config == Bitmap.Config.HARDWARE) original.copy(Bitmap.Config.ARGB_8888, false) else original
+        val side = minOf(source.width, source.height)
+        val square = Bitmap.createBitmap(source, (source.width - side) / 2, (source.height - side) / 2, side, side)
+        val scaled = Bitmap.createScaledBitmap(square, SIZE, SIZE, true)
+        stamps(context)
+        dir(context).mkdirs()
+        file(context, id).outputStream().use { scaled.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        state.value = state.value + (id to System.currentTimeMillis())
+        return true
     }
 
     fun remove(context: Context, id: String) {

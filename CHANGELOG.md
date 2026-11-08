@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Web & AI: a symbol can also come from an installed icon pack (tap the symbol, then From icon pack);
+  AI apps show their icon from the active icon pack on their own, like every other app
+
 ## 0.11.2
 
 - Text search: several search engines and several AI apps. Each still gets one result card: the

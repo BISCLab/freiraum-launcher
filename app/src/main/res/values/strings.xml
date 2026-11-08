@@ -848,9 +848,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_search_web_choice">To pick in the same card</string>
     <string name="settings_search_web_icon_pick">Choose picture</string>
     <string name="settings_search_web_icon_reset">Standard symbol</string>
-    <string name="settings_search_web_icon_info">A picture of your own is cut to a square and shown round.</string>
+    <string name="settings_search_web_icon_info">A picture of your own or an icon pack symbol replaces the standard one. Pictures are cut to a square.</string>
     <string name="settings_search_web_no_ai">No AI app yet. Without one the AI card stays hidden.</string>
     <string name="settings_search_web_preview_query">weather tomorrow</string>
     <string name="settings_search_web_all_added">All ready-made engines are added.</string>
     <string name="search_command_web_with">Search “%1$s” with %2$s</string>
+    <string name="settings_search_web_icon_pack">From icon pack</string>
 </resources>

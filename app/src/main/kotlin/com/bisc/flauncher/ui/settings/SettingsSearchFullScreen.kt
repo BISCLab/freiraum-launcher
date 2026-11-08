@@ -222,7 +222,7 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
     val categoryColors by viewModel.categoryColors.collectAsState()
     val engines by viewModel.searchEngines.collectAsState()
     val aiApps by viewModel.searchAiApps.collectAsState()
-    val aiChoices = com.bisc.flauncher.ui.home.search.rememberAiChoices(aiApps)
+    val aiChoices = com.bisc.flauncher.ui.home.search.rememberAiChoices(aiApps, viewModel::loadIcon)
     var pickingColorFor by remember { mutableStateOf<SearchCategory?>(null) }
     val favorites by viewModel.searchFavorites.collectAsState()
     val favoritesMode by viewModel.searchFavoritesMode.collectAsState()
