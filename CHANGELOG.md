@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.11.1
+
 - Page previews in the settings are true to scale: every row at its real height and gap, element
   boxes and the Dock with their real app icons, Freiraum widgets with their symbol (the clock shows
   a time), Android widgets with their app icon and name

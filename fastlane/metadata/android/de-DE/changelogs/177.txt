@@ -1,0 +1,5 @@
+- Textsuche: Kontakte und Adressen erscheinen wieder; Suchfeld weiß und rund, bündig mit Karten und Leiste; Kategorienleiste wie die A–Z-Leiste und getrennt vom Suchfeld
+- Ordner: Widgets als Karten mit Höhe direkt einstellbar
+- Seiten-Vorschau maßstabsgetreu mit echten Icons
+- Übersichten mit Karten für Aussehen und Verhalten
+- Tipps wieder unter System

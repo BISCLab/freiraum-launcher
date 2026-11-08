@@ -1,0 +1,5 @@
+- Text search: contacts and addresses show again; field white and round, flush with cards and rail; category rail like the A-Z rail and apart from the field
+- Folders: widgets as cards with height right there
+- Page previews true to scale with real icons
+- Overviews with cards for Appearance and Behavior
+- Tips back under System
