@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Text search keyboard motion planned as one: opening, the results and the rail stand where the
+  keyboard will end from the first frame and only the keyboard with its strip slides up; closing,
+  results and rail ride down with the keyboard frame by frame and the strip fades on the way, so
+  nothing comes apart or moves on its own afterwards
+
 ## 0.12.4
 
 - Text search: the strip over the keyboard is the keyboard's top edge now, riding up and down with it

@@ -295,7 +295,9 @@ fun SearchOverlay(
                         .align(Alignment.TopCenter)
                         .widthIn(max = com.bisc.flauncher.ui.MaxContentWidth)
                         .fillMaxSize()
-                        .windowInsetsPadding(if (barAtBottom) WindowInsets.ime else WindowInsets.ime.union(WindowInsets.navigationBars))
+                        // With the bar on top the area does not shrink with the keyboard: the results and the rail
+                        // end where it will end (see KeyboardRoom), so nothing moves while it rises.
+                        .windowInsetsPadding(if (barAtBottom) WindowInsets.ime else WindowInsets.navigationBars)
                 ) {
                     if (!barAtBottom) Bar()
                     // Results with the category rail beside them; this area ends above the keyboard, so
@@ -307,7 +309,12 @@ fun SearchOverlay(
                             .fillMaxWidth()
                             .then(if (barAtBottom) Modifier.padding(top = topInset) else Modifier)
                     ) {
-                    val room = rememberKeyboardRoom(constraints.maxHeight.toFloat(), keyboardAutoOpen, keyboardOverlapPx, onKeyboardOverlap)
+                    val room = if (barAtBottom) rememberKeyboardRoom(constraints.maxHeight.toFloat(), keyboardAutoOpen, keyboardOverlapPx, onKeyboardOverlap)
+                    else rememberKeyboardRoomOverArea(
+                        constraints.maxHeight.toFloat(), keyboardAutoOpen, keyboardOverlapPx, onKeyboardOverlap,
+                        capPx = if (keyboardCapColor != null) with(density) { KEYBOARD_CAP_HEIGHT.roundToPx() } else 0,
+                        rise = ::keyboardCapRise
+                    )
                     SearchResultsColumn(
                         query = query,
                         calculatorResult = calculatorResult,
@@ -343,6 +350,7 @@ fun SearchOverlay(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(
+                                bottom = if (barAtBottom) 0.dp else with(density) { (room.restPx - room.bottomPx).coerceAtLeast(0f).toDp() },
                                 start = if (showRail && railLeft) SEARCH_RAIL_WIDTH + SEARCH_RAIL_GAP else 0.dp,
                                 end = if (showRail && !railLeft) SEARCH_RAIL_WIDTH + SEARCH_RAIL_GAP else 0.dp
                             ),
@@ -392,19 +400,16 @@ fun SearchOverlay(
                     // With the bar at the bottom it tops the bar instead.
                     if (barAtBottom) Bar()
                     if (keyboardCapColor != null) {
-                        // With the bar on top, the strip is drawn over everything (below); here only
-                        // its room, growing with it, so the results always end right on it.
+                        // With the bar on top, the strip is drawn over everything (below).
                         if (barAtBottom) KeyboardCap(keyboardCapColor, keyboardCapCornerRadiusPercent, keyboardCapArrow)
-                        else Spacer(Modifier.layout { measurable, constraints ->
-                            val h = keyboardCapRise(imeInsets.getBottom(this), KEYBOARD_CAP_HEIGHT.roundToPx())
-                            val p = measurable.measure(constraints.copy(minHeight = h, maxHeight = h))
-                            layout(p.width, h) { p.place(0, 0) }
-                        })
                     }
                 }
                 if (keyboardCapColor != null && !barAtBottom) {
                     // The strip is the keyboard's top edge: it rides up and down with it frame by
-                    // frame, sliding out from the screen edge as the keyboard starts to rise.
+                    // frame, sliding out from the screen edge as the keyboard starts to rise. Closing,
+                    // it fades on the way down, so the two never come apart.
+                    val closing = WindowInsets.imeAnimationTarget.getBottom(density) == 0
+                    val capAlpha by animateFloatAsState(if (closing) 0f else 1f, tween(if (closing) 180 else 0), label = "capAlpha")
                     KeyboardCapStrip(
                         color = keyboardCapColor,
                         cornerRadiusPercent = keyboardCapCornerRadiusPercent,
@@ -417,6 +422,7 @@ fun SearchOverlay(
                                 val ime = imeInsets.getBottom(this)
                                 androidx.compose.ui.unit.IntOffset(0, cap - ime - keyboardCapRise(ime, cap))
                             }
+                            .graphicsLayer { alpha = capAlpha }
                     )
                 }
             }
@@ -473,7 +479,7 @@ internal val KEYBOARD_CAP_HEIGHT = 20.dp
 
 /** How much of the strip shows above a keyboard that is [imePx] high: it comes out over the first
  *  [capPx] of the keyboard's way, so at rest it is fully below the screen edge. */
-private fun keyboardCapRise(imePx: Int, capPx: Int): Int = imePx.coerceIn(0, capPx)
+internal fun keyboardCapRise(imePx: Int, capPx: Int): Int = imePx.coerceIn(0, capPx)
 
 /** The space the search bar keeps at the top so that below the front camera there is as much room
  *  as above it: the camera's distance from the top edge, twice, plus the camera itself. Null when the

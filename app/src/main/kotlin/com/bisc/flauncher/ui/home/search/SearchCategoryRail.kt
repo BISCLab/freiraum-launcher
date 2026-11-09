@@ -124,27 +124,37 @@ fun SearchCategoryRail(
         val gapPx = with(density) { edgeGap.toPx() }
         val keyboardMode = room?.keyboardMode == true
         val restPx = room?.restPx?.takeIf { it > 0f } ?: areaPx
-        val overlap = room?.overlapPx ?: 0f
+        val following = room?.following == true
+        val bottomPx = room?.bottomPx ?: restPx
         val naturalPx = with(density) { (RAIL_SLOT * categories.size).toPx() }
-        // With the keyboard: from the field down to it, top level with the first card. Without: its
-        // own height in the middle.
-        val targetHeight = if (keyboardMode) (restPx - overlap - gapPx * 2) else minOf(naturalPx, restPx - gapPx * 2)
-        val targetTop = if (keyboardMode) gapPx else gapPx + (restPx - gapPx * 2 - targetHeight) / 2
+        // With the keyboard (and while it closes): from the field down to it, top level with the
+        // first card. Without: its own height in the middle.
+        val stretched = keyboardMode || following
+        val targetHeight = (if (stretched) (bottomPx - gapPx * 2) else minOf(naturalPx, restPx - gapPx * 2)).coerceAtLeast(0f)
+        val targetTop = if (stretched) gapPx else gapPx + (restPx - gapPx * 2 - targetHeight) / 2
         val top = remember { androidx.compose.animation.core.Animatable(targetTop) }
-        val height = remember { androidx.compose.animation.core.Animatable(targetHeight.coerceAtLeast(0f)) }
-        androidx.compose.runtime.LaunchedEffect(targetTop, targetHeight) {
-            val spec = androidx.compose.animation.core.tween<Float>(300, easing = com.bisc.flauncher.ui.EmphasizedEasing)
-            launch { top.animateTo(targetTop, spec) }
-            launch { height.animateTo(targetHeight.coerceAtLeast(0f), spec) }
+        val height = remember { androidx.compose.animation.core.Animatable(targetHeight) }
+        androidx.compose.runtime.LaunchedEffect(targetTop, targetHeight, following) {
+            if (following) {
+                // Rides down with the closing keyboard frame by frame, no motion of its own.
+                top.snapTo(targetTop)
+                height.snapTo(targetHeight)
+            } else {
+                val spec = androidx.compose.animation.core.tween<Float>(300, easing = com.bisc.flauncher.ui.EmphasizedEasing)
+                launch { top.animateTo(targetTop, spec) }
+                launch { height.animateTo(targetHeight, spec) }
+            }
         }
-        val railTopPx = top.value
+        val followTop = androidx.compose.runtime.rememberUpdatedState(if (following) targetTop else null)
+        val followHeight = if (following) targetHeight else null
+        fun shownTop() = followTop.value ?: top.value
         Column(
             modifier = Modifier
-                .offset { IntOffset(0, top.value.roundToInt()) }
+                .offset { IntOffset(0, shownTop().roundToInt()) }
                 .width(SEARCH_RAIL_WIDTH)
                 // Anchored at the top even while it is briefly taller than the area around it.
                 .wrapContentHeight(align = Alignment.Top, unbounded = true)
-                .requiredHeight(with(density) { height.value.toDp() })
+                .requiredHeight(with(density) { (followHeight ?: height.value).toDp() })
                 .designGlow(shape, "rail")
                 // No clipping: the magnified symbols may reach out of the rail.
                 .background(colors.background, shape, colors.backgroundAlpha)
@@ -163,7 +173,7 @@ fun SearchCategoryRail(
                             if (!moved && kotlin.math.abs(change.position.y - down.position.y) > viewConfiguration.touchSlop) moved = true
                             if (moved) {
                                 val now = at(change.position.y)
-                                scrubY = top.value + change.position.y.coerceIn(0f, size.height.toFloat())
+                                scrubY = shownTop() + change.position.y.coerceIn(0f, size.height.toFloat())
                                 if (now != last || scrubbing == null) {
                                     if (now != last) haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
                                     last = now
@@ -186,7 +196,7 @@ fun SearchCategoryRail(
                 val faded = (focus != null && !chosen) || category !in present
                 Box(
                     modifier = Modifier
-                        .onGloballyPositioned { centers[index] = top.value + it.positionInParent().y + it.size.height / 2f }
+                        .onGloballyPositioned { centers[index] = shownTop() + it.positionInParent().y + it.size.height / 2f }
                         .graphicsLayer {
                             // Grows in place, centred on the rail; 1 right under the finger, falling
                             // off over about two symbols each way.
