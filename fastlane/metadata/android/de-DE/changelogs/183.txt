@@ -1,0 +1,1 @@
+- Textsuche: der Streifen über der Tastatur ist jetzt ihre Oberkante und fährt Bild für Bild mit ihr hoch und runter, ohne Flackern und ohne Sprung der Ergebnisse

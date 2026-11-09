@@ -1,0 +1,1 @@
+- Text search: the strip over the keyboard is now its top edge, riding up and down with it frame by frame, no flicker and no jump of the results

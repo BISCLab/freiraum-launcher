@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.12.4
 
 - Text search: the strip over the keyboard is the keyboard's top edge now, riding up and down with it
   frame by frame instead of waiting in place ahead of it; the results end right on it the whole way,
