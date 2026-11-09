@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Text search: the strip over the keyboard is the keyboard's top edge now, riding up and down with it
+  frame by frame instead of waiting in place ahead of it; the results end right on it the whole way,
+  no flicker, no jump
+
 ## 0.12.3
 
 - Text search: the strip over the keyboard is in place from the first frame, where the keyboard
