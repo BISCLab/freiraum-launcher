@@ -1,0 +1,1 @@
+- Text search: keyboard, strip, results and rail move as one. Opening, everything stands in place at once and only the keyboard with its strip slides up; closing, results and rail ride down with it frame by frame

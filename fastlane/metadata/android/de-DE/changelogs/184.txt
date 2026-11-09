@@ -1,0 +1,1 @@
+- Textsuche: Tastatur, Streifen, Ergebnisse und Leiste bewegen sich als eins. Beim Öffnen steht alles sofort am Platz und nur die Tastatur mit dem Streifen fährt hoch, beim Schließen fahren Ergebnisse und Leiste Bild für Bild mit nach unten

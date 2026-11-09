@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.12.5
 
 - Text search keyboard motion planned as one: opening, the results and the rail stand where the
   keyboard will end from the first frame and only the keyboard with its strip slides up; closing,
