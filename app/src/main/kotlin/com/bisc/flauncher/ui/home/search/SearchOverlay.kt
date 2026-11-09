@@ -46,6 +46,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -297,12 +299,13 @@ fun SearchOverlay(
                     // Results with the category rail beside them; this area ends above the keyboard, so
                     // the rail never runs under it.
                     val showRail = showCategoryRail && railCategories.size > 1
-                    Box(
+                    androidx.compose.foundation.layout.BoxWithConstraints(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth()
                             .then(if (barAtBottom) Modifier.padding(top = topInset) else Modifier)
                     ) {
+                    val room = rememberKeyboardRoom(constraints.maxHeight.toFloat(), keyboardAutoOpen, keyboardOverlapPx, onKeyboardOverlap)
                     SearchResultsColumn(
                         query = query,
                         calculatorResult = calculatorResult,
@@ -352,6 +355,20 @@ fun SearchOverlay(
                         onCardsChange = { cards = it },
                         arrival = { order -> stage((0.3f + order * 0.07f).coerceAtMost(0.75f), (0.72f + order * 0.07f).coerceAtMost(1f)) }
                     )
+                    if (keyboardCapColor != null && !barAtBottom) {
+                        // Where the keyboard will end, from the first frame on: it fades in with the
+                        // other parts and the keyboard slides up under it; it leaves as soon as the
+                        // keyboard starts closing.
+                        val capShown by animateFloatAsState(if (room.keyboardMode) 1f else 0f, tween(if (room.keyboardMode) 220 else 150), label = "capShown")
+                        if (capShown > 0f) KeyboardCapStrip(
+                            color = keyboardCapColor,
+                            cornerRadiusPercent = keyboardCapCornerRadiusPercent,
+                            arrow = keyboardCapArrow,
+                            modifier = Modifier
+                                .offset { androidx.compose.ui.unit.IntOffset(0, room.keyboardTopPx.toInt()) }
+                                .graphicsLayer { alpha = capShown * stage(0.15f, 0.7f) }
+                        )
+                    }
                     if (showRail) {
                         SearchCategoryRail(
                             categories = railCategories,
@@ -366,9 +383,7 @@ fun SearchOverlay(
                             onScrub = onRailScrub,
                             // Same gap to the field as to the keyboard, top level with the first card.
                             edgeGap = SEARCH_CARD_GAP,
-                            expectKeyboard = keyboardAutoOpen,
-                            keyboardOverlapPx = keyboardOverlapPx,
-                            onKeyboardOverlap = onKeyboardOverlap,
+                            room = room,
                             // Until set on its own, like the result cards.
                             bubbleAppearance = railBubbleAppearance ?: resultsAppearance ?: defaultElement,
                             modifier = Modifier
@@ -388,7 +403,12 @@ fun SearchOverlay(
                     // not the current inset), riding down with it, so both leave in one motion.
                     // With the bar at the bottom it tops the bar instead.
                     if (barAtBottom) Bar()
-                    if (keyboardCapColor != null) KeyboardCap(keyboardCapColor, keyboardCapCornerRadiusPercent, keyboardCapArrow)
+                    if (keyboardCapColor != null) {
+                        // With the bar on top, the strip itself is drawn with the results (see below);
+                        // here only its room, so the results end above it.
+                        if (barAtBottom) KeyboardCap(keyboardCapColor, keyboardCapCornerRadiusPercent, keyboardCapArrow)
+                        else if (WindowInsets.isImeVisible) Spacer(Modifier.height(KEYBOARD_CAP_HEIGHT))
+                    }
                 }
             }
         }
@@ -412,13 +432,18 @@ internal fun KeyboardCap(color: Int, cornerRadiusPercent: Int, arrow: Boolean) {
     if (!WindowInsets.isImeVisible) return
     val closing = WindowInsets.imeAnimationTarget.getBottom(LocalDensity.current) == 0
     val capAlpha by animateFloatAsState(if (closing) 0f else 1f, tween(150), label = "capAlpha")
+    KeyboardCapStrip(color, cornerRadiusPercent, arrow, Modifier.graphicsLayer { alpha = capAlpha })
+}
+
+/** The strip itself, wherever it is placed. */
+@Composable
+internal fun KeyboardCapStrip(color: Int, cornerRadiusPercent: Int, arrow: Boolean, modifier: Modifier = Modifier) {
     val capRadius = KEYBOARD_CAP_HEIGHT * (cornerRadiusPercent.coerceIn(0, 100) / 100f)
     val keyboardController = LocalSoftwareKeyboardController.current
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(KEYBOARD_CAP_HEIGHT)
-            .graphicsLayer { alpha = capAlpha }
             .clip(RoundedCornerShape(topStart = capRadius, topEnd = capRadius))
             .background(Color(color))
             .then(if (arrow) Modifier.noRippleClickable { keyboardController?.hide() } else Modifier),
@@ -435,7 +460,7 @@ internal fun KeyboardCap(color: Int, cornerRadiusPercent: Int, arrow: Boolean) {
     }
 }
 
-private val KEYBOARD_CAP_HEIGHT = 20.dp
+internal val KEYBOARD_CAP_HEIGHT = 20.dp
 
 /** The space the search bar keeps at the top so that below the front camera there is as much room
  *  as above it: the camera's distance from the top edge, twice, plus the camera itself. Null when the

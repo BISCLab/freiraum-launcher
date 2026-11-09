@@ -37,10 +37,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.wrapContentHeight
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.imeAnimationTarget
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.graphics.graphicsLayer
@@ -75,7 +71,6 @@ private const val MAGNIFY = 0.45f
  * without results right now are faint.
  * [focus] is the one tapped last; the others are greyed out until the results are scrolled.
  */
-@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun SearchCategoryRail(
     categories: List<SearchCategory>,
@@ -90,12 +85,8 @@ fun SearchCategoryRail(
     modifier: Modifier = Modifier,
     /** Between the rail and the field above, and the keyboard below. */
     edgeGap: androidx.compose.ui.unit.Dp = 0.dp,
-    /** The keyboard comes up on its own when the search opens. */
-    expectKeyboard: Boolean = false,
-    /** How much height the open keyboard took from the rail's area last time (px); 0 = not known yet. */
-    keyboardOverlapPx: Int = 0,
-    /** Called with that height once the keyboard is fully up, when it differs. */
-    onKeyboardOverlap: (Int) -> Unit = {},
+    /** Where the keyboard will end, shared with the strip over it; null = no keyboard to mind. */
+    room: KeyboardRoom? = null,
     /** The bubble and the ground under magnified symbols. */
     bubbleAppearance: ElementAppearance = ElementAppearance()
 ) {
@@ -128,40 +119,12 @@ fun SearchCategoryRail(
     val centers = remember(categories) { FloatArray(categories.size) }
 
     val density = LocalDensity.current
-    // The keyboard's final height is known from the start of its animation; until it starts, the
-    // height it took last time stands in, so the rail is in place right away instead of chasing
-    // the keyboard frame by frame.
-    val imeNow = WindowInsets.ime.getBottom(density)
-    val imeTarget = WindowInsets.imeAnimationTarget.getBottom(density)
-    var keyboardSeen by remember { mutableStateOf(false) }
-    if (imeTarget > 0) keyboardSeen = true
-    androidx.compose.runtime.LaunchedEffect(Unit) {
-        // A keyboard that was expected but never came does not hold the rail up for long.
-        kotlinx.coroutines.delay(900)
-        keyboardSeen = true
-    }
-    val keyboardMode = imeTarget > 0 || (expectKeyboard && !keyboardSeen)
-
     BoxWithConstraints(modifier = modifier.fillMaxHeight().width(SEARCH_RAIL_WIDTH), contentAlignment = Alignment.TopCenter) {
         val areaPx = constraints.maxHeight.toFloat()
         val gapPx = with(density) { edgeGap.toPx() }
-        // The area's height without the keyboard, kept while the keyboard is up.
-        var restPx by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
-        if (imeNow == 0 && imeTarget == 0) restPx = areaPx
-        else if (restPx == 0f) restPx = areaPx + keyboardOverlapPx
-        // Once the keyboard is fully up, how much it really takes (navigation bar, the strip on top
-        // of it and all) is remembered for the next time.
-        val measuredOverlap = (restPx - areaPx).toInt()
-        androidx.compose.runtime.LaunchedEffect(imeNow == imeTarget && imeTarget > 0, measuredOverlap) {
-            if (imeNow == imeTarget && imeTarget > 0 && measuredOverlap > 0 && kotlin.math.abs(measuredOverlap - keyboardOverlapPx) > 2) {
-                onKeyboardOverlap(measuredOverlap)
-            }
-        }
-        val overlap = when {
-            imeNow == imeTarget && imeTarget > 0 -> restPx - areaPx
-            keyboardOverlapPx > 0 -> keyboardOverlapPx.toFloat()
-            else -> imeTarget - with(density) { WindowInsets.navigationBars.getBottom(density).toFloat() }
-        }.coerceAtLeast(0f)
+        val keyboardMode = room?.keyboardMode == true
+        val restPx = room?.restPx?.takeIf { it > 0f } ?: areaPx
+        val overlap = room?.overlapPx ?: 0f
         val naturalPx = with(density) { (RAIL_SLOT * categories.size).toPx() }
         // With the keyboard: from the field down to it, top level with the first card. Without: its
         // own height in the middle.
