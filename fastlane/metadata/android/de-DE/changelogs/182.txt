@@ -1,0 +1,2 @@
+- Textsuche: der Streifen über der Tastatur steht vom ersten Bild an an seinem Platz und blendet zeitgleich mit Feld, Karten und Leiste ein
+- Websuche und KI-App öffnen ihre Einstellungen per Tipp in der Verhaltenstabelle, je eine eigene Seite mit Vorschau der Ergebniskarte

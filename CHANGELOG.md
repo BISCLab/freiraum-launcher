@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.12.3
 
 - Text search: the strip over the keyboard is in place from the first frame, where the keyboard
   will end, and fades in together with the field, cards and rail; the keyboard slides up under it
