@@ -811,8 +811,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_folder_creator_empty">Pick apps below; you can add widgets and more right after.</string>
     <string name="settings_category_symbol">Symbol</string>
     <string name="settings_category_color">Color</string>
-    <string name="settings_search_web_title">Web &amp; AI</string>
-    <string name="settings_search_web_intro">Search engines and AI apps each get one card in the Text search. The first one runs with a tap on the card, the others sit right below it to pick instead. Tap a symbol to give it a picture of your own.</string>
     <string name="settings_search_web_engines">Search engines</string>
     <string name="settings_search_web_engines_info">The first engine runs with a tap on the card and with Enter. Drag to change the order.</string>
     <string name="settings_search_web_ai">AI apps</string>
@@ -853,4 +851,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_search_legend_search_body">Its results show with every query.</string>
     <string name="settings_search_legend_rail_body">A place in the rail. Rail only = on demand, results after a tap there.</string>
     <string name="settings_search_table_hint">Tap a symbol to change it and its color, drag ≡ to change the order.</string>
+    <string name="settings_search_web_intro_web">The web result opens the first engine with a tap; the others sit right below it in the same card to pick instead. Tap a symbol to give it a picture of your own.</string>
+    <string name="settings_search_web_intro_ai">The AI result hands the query to the first app with a tap; the others sit right below it in the same card. Tap a symbol to give it a picture of your own.</string>
 </resources>

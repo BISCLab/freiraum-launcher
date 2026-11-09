@@ -61,9 +61,13 @@ import com.bisc.flauncher.ui.home.search.rememberEngineChoices
 import com.bisc.flauncher.util.SearchIconStore
 import kotlinx.coroutines.launch
 
-/** Search engines and AI apps of the Text search: several of each, in order, each with its own picture if wanted. */
+/** Which of the two command results a page is about. */
+enum class CommandPart { WEB, AI }
+
+/** The search engines (or the AI apps) of the Text search: several, in order, each with its own
+ *  picture if wanted, and their result card as a preview that stays on top. */
 @Composable
-fun SettingsSearchWebScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsSearchWebScreen(navController: NavController, onBack: () -> Unit, part: CommandPart = CommandPart.WEB, viewModel: SettingsViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val engines by viewModel.searchEngines.collectAsState()
@@ -86,35 +90,52 @@ fun SettingsSearchWebScreen(navController: NavController, onBack: () -> Unit, vi
     }
     fun tint(category: SearchCategory) = categoryColors[category]?.let { Color(it) } ?: category.defaultColor
 
-    SettingsSubScreen(title = stringResource(R.string.settings_search_web_title), navController = navController, onBack = onBack) {
+    val query = stringResource(R.string.settings_search_web_preview_query)
+    val withEngine = stringResource(R.string.search_command_web_with)
+    val askApp = stringResource(R.string.search_command_ai)
+    val previewChoices = if (part == CommandPart.WEB) engineChoices else aiChoices
+    SettingsSubScreen(
+        title = stringResource(if (part == CommandPart.WEB) R.string.settings_search_web_engines else R.string.settings_search_web_ai),
+        navController = navController,
+        onBack = onBack,
+        // The result card as the Text search shows it, on top while the list below scrolls.
+        header = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.surfaceContainerHighest)))
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                if (previewChoices.isEmpty()) {
+                    Text(
+                        stringResource(R.string.settings_search_web_no_ai),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(vertical = 18.dp)
+                    )
+                } else {
+                    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(MaterialTheme.colorScheme.surfaceContainerLowest)) {
+                        CommandChoicesContent(
+                            previewChoices,
+                            text = { c -> if (part == CommandPart.WEB) withEngine.format(query, c.label) else askApp.format(c.label, query) },
+                            tint = tint(if (part == CommandPart.WEB) SearchCategory.WEB else SearchCategory.AI),
+                            prominent = true,
+                            onRun = {}
+                        )
+                    }
+                }
+            }
+        }
+    ) {
         Text(
-            stringResource(R.string.settings_search_web_intro),
+            stringResource(if (part == CommandPart.WEB) R.string.settings_search_web_intro_web else R.string.settings_search_web_intro_ai),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 4.dp)
         )
-        // The two cards as the Text search shows them.
-        val query = stringResource(R.string.settings_search_web_preview_query)
-        val withEngine = stringResource(R.string.search_command_web_with)
-        val askApp = stringResource(R.string.search_command_ai)
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(SettingsCardShape)
-                .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            listOf(
-                Triple(engineChoices, SearchCategory.WEB) { c: CommandChoice -> withEngine.format(query, c.label) },
-                Triple(aiChoices, SearchCategory.AI) { c: CommandChoice -> askApp.format(c.label, query) }
-            ).filter { it.first.isNotEmpty() }.forEach { (choices, category, text) ->
-                Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(MaterialTheme.colorScheme.surfaceContainerHighest)) {
-                    CommandChoicesContent(choices, text = text, tint = tint(category), prominent = true, onRun = {})
-                }
-            }
-        }
-
+        if (part == CommandPart.WEB) {
         SettingsPreferenceGroup(
             title = stringResource(R.string.settings_search_web_engines),
             info = stringResource(R.string.settings_search_web_engines_info)
@@ -146,6 +167,8 @@ fun SettingsSearchWebScreen(navController: NavController, onBack: () -> Unit, vi
             )
         }
 
+        }
+        if (part == CommandPart.AI) {
         SettingsPreferenceGroup(
             title = stringResource(R.string.settings_search_web_ai),
             info = stringResource(R.string.settings_search_web_ai_info)
@@ -184,6 +207,7 @@ fun SettingsSearchWebScreen(navController: NavController, onBack: () -> Unit, vi
                 title = stringResource(R.string.settings_search_web_add_ai),
                 onClick = { addingAi = true }
             )
+        }
         }
     }
 

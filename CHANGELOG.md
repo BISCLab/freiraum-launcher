@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Text search: the strip over the keyboard is in place from the first frame, where the keyboard
+  will end, and fades in together with the field, cards and rail; the keyboard slides up under it
+  instead of the strip pushing in afterwards
+- Text search behavior: Web search and AI app open their settings with a tap on their name in the
+  table, like Favorites; the separate Web & AI row on top is gone. Search engines and AI apps have a
+  page each, with their result card as a preview that stays on top
+
 ## 0.12.2
 
 - Text search behavior laid out anew: Web & AI, then the rail switch in its own section, then the

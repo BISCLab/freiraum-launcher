@@ -229,20 +229,8 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
     val modes by viewModel.searchCategoryModes.collectAsState()
     val railShown by viewModel.searchBarShowCategories.collectAsState()
     val categoryColors by viewModel.categoryColors.collectAsState()
-    val engines by viewModel.searchEngines.collectAsState()
-    val aiApps by viewModel.searchAiApps.collectAsState()
-    val aiChoices = com.bisc.flauncher.ui.home.search.rememberAiChoices(aiApps, viewModel::loadIcon)
     var pickingColorFor by remember { mutableStateOf<SearchCategory?>(null) }
     SettingsSubScreen(title = stringResource(R.string.settings_search_behavior_label), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = androidx.compose.material.icons.Icons.Filled.Public,
-                title = stringResource(R.string.settings_search_web_title),
-                summary = (engines.map { it.name } + aiChoices.map { it.label }).joinToString(", "),
-                onClick = { navController.navigate("settings/search/web") }
-            )
-        }
-
         // The whole rail first: switched off, no category has a place in it.
         SettingsPreferenceGroup(title = stringResource(R.string.settings_search_rail_label)) {
             SettingsPreference(
@@ -276,7 +264,13 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
                         railShown = railShown,
                         onDesign = { pickingColorFor = category },
                         onChange = { viewModel.setSearchCategoryModes(mapOf(category to it)) },
-                        onOpen = if (category == SearchCategory.FAVORITES) ({ navController.navigate("settings/search/favorites") }) else null
+                        // Categories with settings of their own open them with a tap on their name.
+                        onOpen = when (category) {
+                            SearchCategory.FAVORITES -> ({ navController.navigate("settings/search/favorites") })
+                            SearchCategory.WEB -> ({ navController.navigate("settings/search/web") })
+                            SearchCategory.AI -> ({ navController.navigate("settings/search/ai") })
+                            else -> null
+                        }
                     )
                 }
             }

@@ -811,8 +811,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_folder_creator_empty">Wähle unten Apps; Widgets und mehr kannst du gleich danach hinzufügen.</string>
     <string name="settings_category_symbol">Symbol</string>
     <string name="settings_category_color">Farbe</string>
-    <string name="settings_search_web_title">Web &amp; KI</string>
-    <string name="settings_search_web_intro">Suchmaschinen und KI-Apps bekommen in der Textsuche je eine Karte. Die erste startet mit einem Tipp auf die Karte, die anderen liegen direkt darunter zur Auswahl. Tippe auf ein Symbol, um ihm ein eigenes Bild zu geben.</string>
     <string name="settings_search_web_engines">Suchmaschinen</string>
     <string name="settings_search_web_engines_info">Die erste Suchmaschine startet mit einem Tipp auf die Karte und mit Enter. Ziehen ändert die Reihenfolge.</string>
     <string name="settings_search_web_ai">KI-Apps</string>
@@ -853,4 +851,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_legend_search_body">Ihre Ergebnisse erscheinen bei jeder Eingabe.</string>
     <string name="settings_search_legend_rail_body">Ein Platz in der Leiste. Nur Leiste = auf Abruf, Ergebnisse nach einem Tipp dort.</string>
     <string name="settings_search_table_hint">Symbol antippen: Symbol und Farbe ändern. ≡ ziehen: Reihenfolge ändern.</string>
+    <string name="settings_search_web_intro_web">Die Web-Karte öffnet mit einem Tipp die erste Suchmaschine, die anderen liegen direkt darunter in derselben Karte zur Auswahl. Tippe auf ein Symbol, um ihm ein eigenes Bild zu geben.</string>
+    <string name="settings_search_web_intro_ai">Die KI-Karte übergibt die Anfrage mit einem Tipp an die erste App, die anderen liegen direkt darunter in derselben Karte. Tippe auf ein Symbol, um ihm ein eigenes Bild zu geben.</string>
 </resources>

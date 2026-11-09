@@ -98,7 +98,8 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
         "settings/search/page" -> stringResource(R.string.settings_search_page_label)
         "settings/search/keyboard" -> stringResource(R.string.settings_search_keyboard_label)
         "settings/search/behavior" -> stringResource(R.string.settings_search_behavior_label)
-        "settings/search/web" -> stringResource(R.string.settings_search_web_title)
+        "settings/search/web" -> stringResource(R.string.settings_search_web_engines)
+        "settings/search/ai" -> stringResource(R.string.settings_search_web_ai)
         "settings/search/favorites" -> stringResource(R.string.search_section_favorites)
         "settings/pages" -> stringResource(R.string.settings_section_pages)
         "settings/pages/{pageId}" -> {

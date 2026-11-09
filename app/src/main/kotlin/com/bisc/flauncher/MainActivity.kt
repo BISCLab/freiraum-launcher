@@ -283,6 +283,9 @@ class MainActivity : ComponentActivity() {
                         settingsComposable("settings/search/web") {
                             com.bisc.flauncher.ui.settings.SettingsSearchWebScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
+                        settingsComposable("settings/search/ai") {
+                            com.bisc.flauncher.ui.settings.SettingsSearchWebScreen(navController = navController, onBack = { navController.popBackStack() }, part = com.bisc.flauncher.ui.settings.CommandPart.AI)
+                        }
                         settingsComposable("settings/search/behavior") {
                             com.bisc.flauncher.ui.settings.SettingsSearchBehaviorScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
