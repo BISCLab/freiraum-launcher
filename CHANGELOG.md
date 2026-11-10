@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Tablets held sideways: the settings come in two parts. The sections (Appearance, Pages, Apps and
+  elements, System, Extensions) stay on the left, the chosen page is on the right. A page with
+  unsaved changes still asks before a section takes you away
 - Tablets: Home's rows keep to the same centered column as the Dock and the Panel instead of
   stretching across the whole screen
 - Tablets: every settings page keeps to the centered column, also the app list under Apps, the

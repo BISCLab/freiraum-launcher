@@ -92,47 +92,57 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                     )
                 }
             }
-            // Three levels, global to specific: Appearance (looks the same everywhere), Pages (each
-            // page and utility page, plus gestures), Apps & elements (the library of apps, folders,
-            // places, links and action buttons) - then System for everything about fitting into the phone.
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_group_basics)) {
-                SettingsPreference(
-                    icon = Icons.Filled.Palette,
-                    title = stringResource(R.string.settings_design_title),
-                    summary = stringResource(R.string.settings_card_design_subtitle),
-                    onClick = { onNavigate("appearance") }
+            // With the sections on the left (wide tablets) the same list here would only repeat them.
+            if (settingsTwoPane()) {
+                Text(
+                    stringResource(R.string.settings_two_pane_hint),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 4.dp)
                 )
-                SettingsPreference(
-                    icon = Icons.Filled.ViewCarousel,
-                    title = stringResource(R.string.settings_section_pages),
-                    summary = stringResource(R.string.settings_card_pages_subtitle),
-                    onClick = { onNavigate("pages") }
-                )
-                SettingsPreference(
-                    icon = Icons.Filled.Apps,
-                    title = stringResource(R.string.settings_section_elements),
-                    summary = stringResource(R.string.settings_card_elements_subtitle),
-                    onClick = { onNavigate("elements") }
-                )
-                SettingsPreference(
-                    icon = Icons.Filled.PhoneAndroid,
-                    title = stringResource(R.string.settings_system_title),
-                    summary = if (isDefault) {
-                        stringResource(R.string.settings_card_system_subtitle)
-                    } else {
-                        stringResource(R.string.settings_default_launcher_description)
-                    },
-                    onClick = { onNavigate("system") }
-                )
-            }
-            // What can be added to the launcher: designs, wallpaper packs, widgets.
-            SettingsPreferenceGroup {
-                SettingsPreference(
-                    icon = Icons.Filled.Extension,
-                    title = stringResource(R.string.settings_group_extensions),
-                    summary = stringResource(R.string.extensions_entry_summary),
-                    onClick = { onNavigate("extensions") }
-                )
+            } else {
+                // Three levels, global to specific: Appearance (looks the same everywhere), Pages (each
+                // page and utility page, plus gestures), Apps & elements (the library of apps, folders,
+                // places, links and action buttons) - then System for everything about fitting into the phone.
+                SettingsPreferenceGroup(title = stringResource(R.string.settings_group_basics)) {
+                    SettingsPreference(
+                        icon = Icons.Filled.Palette,
+                        title = stringResource(R.string.settings_design_title),
+                        summary = stringResource(R.string.settings_card_design_subtitle),
+                        onClick = { onNavigate("appearance") }
+                    )
+                    SettingsPreference(
+                        icon = Icons.Filled.ViewCarousel,
+                        title = stringResource(R.string.settings_section_pages),
+                        summary = stringResource(R.string.settings_card_pages_subtitle),
+                        onClick = { onNavigate("pages") }
+                    )
+                    SettingsPreference(
+                        icon = Icons.Filled.Apps,
+                        title = stringResource(R.string.settings_section_elements),
+                        summary = stringResource(R.string.settings_card_elements_subtitle),
+                        onClick = { onNavigate("elements") }
+                    )
+                    SettingsPreference(
+                        icon = Icons.Filled.PhoneAndroid,
+                        title = stringResource(R.string.settings_system_title),
+                        summary = if (isDefault) {
+                            stringResource(R.string.settings_card_system_subtitle)
+                        } else {
+                            stringResource(R.string.settings_default_launcher_description)
+                        },
+                        onClick = { onNavigate("system") }
+                    )
+                }
+                // What can be added to the launcher: designs, wallpaper packs, widgets.
+                SettingsPreferenceGroup {
+                    SettingsPreference(
+                        icon = Icons.Filled.Extension,
+                        title = stringResource(R.string.settings_group_extensions),
+                        summary = stringResource(R.string.extensions_entry_summary),
+                        onClick = { onNavigate("extensions") }
+                    )
+                }
             }
         }
         }
@@ -340,6 +350,13 @@ fun SettingsSubScreen(
     var pendingLeave by remember { mutableStateOf<(() -> Unit)?>(null) }
     val guardLeave: (() -> Unit) -> Unit = { leave -> if (onSave != null && dirty) pendingLeave = leave else leave() }
     androidx.activity.compose.BackHandler(enabled = onSave != null && dirty) { pendingLeave = onBack }
+    // The sections on the left (wide tablets) ask through this before they leave the page.
+    val unsaved by androidx.compose.runtime.rememberUpdatedState(onSave != null && dirty)
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        val guard: ((() -> Unit)) -> Unit = { leave -> if (unsaved) pendingLeave = leave else leave() }
+        SettingsLeaveGuard.current = guard
+        onDispose { if (SettingsLeaveGuard.current === guard) SettingsLeaveGuard.current = null }
+    }
 
     Scaffold(
         topBar = {

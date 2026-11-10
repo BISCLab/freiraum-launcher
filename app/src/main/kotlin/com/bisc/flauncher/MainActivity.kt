@@ -1,5 +1,6 @@
 package com.bisc.flauncher
 
+import androidx.compose.foundation.layout.padding
 import kotlinx.coroutines.flow.first
 import android.content.Intent
 import android.os.Bundle
@@ -225,6 +226,8 @@ class MainActivity : ComponentActivity() {
             FLauncherTheme(themePreference = theme, fontPreference = font, accentColor = accentColor) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     val navMotion = if (motionPrefs.settingsSlide) motion else com.bisc.flauncher.ui.MotionLevel.OFF
+                    // On wide tablets the settings' sections stay on the left, over the pages.
+                    androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize()) {
                     NavHost(
                         navController = navController,
                         startDestination = "home",
@@ -666,6 +669,8 @@ class MainActivity : ComponentActivity() {
                             com.bisc.flauncher.ui.settings.SettingsActionButtonDetailScreen(buttonId = buttonId, navController = navController, onBack = { navController.popBackStack() })
                         }
                     }
+                    com.bisc.flauncher.ui.settings.SettingsSideRail(navController)
+                    }
                 }
             }
             }
@@ -678,4 +683,11 @@ private fun androidx.navigation.NavGraphBuilder.settingsComposable(
     route: String,
     arguments: List<androidx.navigation.NamedNavArgument> = emptyList(),
     content: @androidx.compose.runtime.Composable androidx.compose.animation.AnimatedContentScope.(androidx.navigation.NavBackStackEntry) -> Unit
-) = composable(route, arguments) { entry -> com.bisc.flauncher.ui.theme.SettingsThemed { content(entry) } }
+) = composable(route, arguments) { entry ->
+    com.bisc.flauncher.ui.theme.SettingsThemed {
+        // Room for the sections on the left where there are any (wide tablets), none on phones.
+        androidx.compose.foundation.layout.Box(
+            modifier = Modifier.padding(start = com.bisc.flauncher.ui.settings.settingsSideRailWidth())
+        ) { content(entry) }
+    }
+}
