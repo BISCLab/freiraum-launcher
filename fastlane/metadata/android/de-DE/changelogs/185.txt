@@ -1,0 +1,2 @@
+- Textsuche öffnet als eine Bewegung mit der Tastatur: Suchfeld, Karten und Leiste blenden gemeinsam ein und gleiten hoch, ohne Zoom
+- Beim Zuklappen bleibt der Streifen bis ganz unten auf der Tastatur

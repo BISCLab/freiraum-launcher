@@ -1,0 +1,2 @@
+- Text search opens as one motion with the keyboard: field, cards and rail fade in and slide up together, no zoom
+- Closing the keyboard, the strip stays on it all the way down

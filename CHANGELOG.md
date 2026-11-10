@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.12.6
 
 - Text search opens as one motion with the keyboard: it starts when the keyboard starts and runs on
   the keyboard's curve; field, cards (Favorites too) and rail fade in and come up together instead
