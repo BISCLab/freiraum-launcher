@@ -1,5 +1,12 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.material.icons.filled.NewReleases
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.WifiOff
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -49,6 +56,7 @@ private object AboutInfo {
     const val DEVELOPER = "BISC Lab"
     const val SOURCE_URL = "https://github.com/BISCLab/freiraum-launcher"
     const val ISSUES_URL = "https://github.com/BISCLab/freiraum-launcher/issues"
+    const val RELEASES_URL = "https://github.com/BISCLab/freiraum-launcher/releases"
     const val LICENSE_URL = "https://www.gnu.org/licenses/gpl-3.0.html"
 }
 
@@ -109,37 +117,67 @@ fun SettingsAboutScreen(navController: NavController, onBack: () -> Unit) {
     var showThirdParty by remember { mutableStateOf(false) }
 
     SettingsSubScreen(title = stringResource(R.string.about_title), navController = navController, onBack = onBack) {
+        // The launcher itself first: its logo, name, version and what it is, on its own color.
+        val brand = colorResource(R.color.ic_launcher_background)
         Column(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(28.dp))
+                .background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(brand, lerp(brand, androidx.compose.ui.graphics.Color.Black, 0.22f))))
+                .padding(horizontal = 24.dp, vertical = 28.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AppLogo(96.dp)
-            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 8.dp))
+            Image(painterResource(R.drawable.ic_launcher_foreground), contentDescription = null, modifier = Modifier.size(120.dp))
+            Text(
+                stringResource(R.string.app_name),
+                style = MaterialTheme.typography.headlineMedium,
+                color = androidx.compose.ui.graphics.Color.White,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
             Text(
                 stringResource(R.string.about_version, appVersion(context)),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.labelLarge,
+                color = androidx.compose.ui.graphics.Color.White,
+                modifier = Modifier
+                    .padding(top = 10.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.18f))
+                    .padding(horizontal = 12.dp, vertical = 5.dp)
             )
-            Column(
-                modifier = Modifier.padding(top = 12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Image(painterResource(R.drawable.bisc_logo), contentDescription = null, modifier = Modifier.size(width = 24.dp, height = 48.dp))
-                Text(
-                    AboutInfo.DEVELOPER,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = BISC_RED
-                )
-            }
             Text(
                 stringResource(R.string.about_tagline),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyLarge,
+                color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.92f),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(top = 16.dp)
             )
+        }
+
+        // What it stands for, at a glance.
+        Row(modifier = Modifier.fillMaxWidth().height(androidx.compose.foundation.layout.IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            listOf(
+                Icons.Filled.WifiOff to R.string.about_promise_offline,
+                Icons.Filled.VisibilityOff to R.string.about_promise_tracking,
+                Icons.Filled.Block to R.string.about_promise_ads
+            ).forEach { (icon, label) ->
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clip(SettingsCardShape)
+                        .background(MaterialTheme.colorScheme.surfaceContainer)
+                        .padding(horizontal = 8.dp, vertical = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(26.dp))
+                    Text(
+                        stringResource(label),
+                        style = MaterialTheme.typography.labelLarge,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                }
+            }
         }
 
         if (AboutInfo.SOURCE_URL.isNotBlank() || AboutInfo.ISSUES_URL.isNotBlank()) {
@@ -153,6 +191,13 @@ fun SettingsAboutScreen(navController: NavController, onBack: () -> Unit) {
                         trailing = { Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null) }
                     )
                 }
+                SettingsPreference(
+                    icon = Icons.Filled.NewReleases,
+                    title = stringResource(R.string.about_releases),
+                    summary = stringResource(R.string.about_releases_summary),
+                    onClick = { openUrl(context, AboutInfo.RELEASES_URL) },
+                    trailing = { Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null) }
+                )
                 if (AboutInfo.ISSUES_URL.isNotBlank()) {
                     SettingsPreference(
                         icon = Icons.Filled.BugReport,
@@ -187,6 +232,17 @@ fun SettingsAboutScreen(navController: NavController, onBack: () -> Unit) {
                 onClick = null,
                 trailing = null
             )
+        }
+
+        // Who makes it, apart from what it is.
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(stringResource(R.string.about_made_by), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Image(painterResource(R.drawable.bisc_logo), contentDescription = null, modifier = Modifier.size(width = 24.dp, height = 48.dp))
+            Text(AboutInfo.DEVELOPER, style = MaterialTheme.typography.titleSmall, color = BISC_RED)
         }
     }
 

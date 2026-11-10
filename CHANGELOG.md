@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Info page laid out anew: the launcher's logo, name, version and description together on a card in
+  its own blue; No internet, No tracking and No ads as three tiles; a new row What is new; the
+  maker with its logo on its own at the end
 - Tablets held sideways: the settings come in two parts. The sections (Appearance, Pages, Apps and
   elements, System, Extensions) stay on the left, the chosen page is on the right. A page with
   unsaved changes still asks before a section takes you away

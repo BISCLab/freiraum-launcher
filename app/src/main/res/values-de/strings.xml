@@ -545,7 +545,7 @@
     <string name="settings_info_button">Hinweis</string>
     <string name="about_title">Info</string>
     <string name="about_version">Version %1$s</string>
-    <string name="about_tagline">Ein freier, offener Startbildschirm, den du selbst gestaltest. Kein Internetzugriff, kein Tracking, keine Werbung.</string>
+    <string name="about_tagline">Ein freier, offener Startbildschirm, den du selbst gestaltest.</string>
     <string name="about_project_label">Projekt</string>
     <string name="about_source">Quellcode</string>
     <string name="about_issues">Problem melden</string>
@@ -884,4 +884,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     </plurals>
     <string name="extensions_from_outside_note">Von außerhalb geöffnet (Link oder Datei) und schon hinzugefügt. Wende es nur an, wenn du der Quelle traust. Es ändert nur das Aussehen und lässt sich jederzeit wieder löschen.</string>
     <string name="settings_two_pane_hint">Wähle links einen Bereich.</string>
+    <string name="about_promise_offline">Kein Internet</string>
+    <string name="about_promise_tracking">Kein Tracking</string>
+    <string name="about_promise_ads">Keine Werbung</string>
+    <string name="about_made_by">Entwickelt von</string>
+    <string name="about_releases">Was ist neu</string>
+    <string name="about_releases_summary">Alle Versionen und ihre Änderungen</string>
 </resources>
