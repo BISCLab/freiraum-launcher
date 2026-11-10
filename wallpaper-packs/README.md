@@ -5,9 +5,11 @@ every design.
 
 ## Install a pack
 
-1. Download a `.freiraum-wallpapers` file from the
+1. Open the [extensions page](https://bisclab.github.io/freiraum-launcher/#packs) on your phone
+   and download a pack. The files are also on the
    [releases page](https://github.com/BISCLab/freiraum-launcher/releases).
-2. In Freiraum: Settings → Wallpaper packs → Add wallpaper pack, and pick the file.
+2. Tap the downloaded file in the Files app and choose Freiraum. Or in Freiraum: Settings →
+   Extensions → Wallpaper packs → Add wallpaper pack, and pick the file.
 3. Tap the pack to see its pictures, then Apply. It can also set the lock screen.
 
 "Without pictures" gives every page a plain background instead: matte black in dark mode, chalk

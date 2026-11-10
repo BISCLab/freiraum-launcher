@@ -7,9 +7,11 @@ no personal data and no pictures, so it is safe to share.
 
 ## Install a design
 
-1. Download a `.freiraum-design` file from the
-   [releases page](https://github.com/BISCLab/freiraum-launcher/releases).
-2. In Freiraum: Settings → Designs → Add design, and pick the file.
+1. Open the [extensions page](https://bisclab.github.io/freiraum-launcher/#designs) on your phone
+   and tap "Open in Freiraum" on a design. Or download its `.freiraum-design` file there or from
+   the [releases page](https://github.com/BISCLab/freiraum-launcher/releases).
+2. With a file: tap it in the Files app and choose Freiraum. Or in Freiraum: Settings →
+   Extensions → Designs → Add design, and pick the file.
 3. Tap the design to preview it, then Apply. "Back to my own look" returns to how it was before.
 
 Freiraum has no internet access, so designs are always downloaded in the browser.
