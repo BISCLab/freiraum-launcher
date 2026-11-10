@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.13.0
 
 - New: Extensions, one page in the settings for everything that can be added: designs, wallpaper
   packs and widgets, with what is there of each. It replaces the three rows on the first settings

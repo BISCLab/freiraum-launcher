@@ -1,0 +1,4 @@
+- Neu: langer Druck auf eine App öffnet ihr Menü (Shortcuts, Favorit, Anpassen, App-Info, Deinstallieren)
+- Neu: Erweiterungen als eine Seite für Designs, Wallpaper-Packs und Widgets, mit Übersicht im Browser; Designs öffnen direkt von dort
+- Einstellungen aufgeräumt: einheitliche Begriffe, Pfeile, Speichern; Aufbau der Textsuche unter Verhalten
+- Behoben: Hauptseite scrollt, Brotkrumen-Pfeile, Suchcode, ungültige Links

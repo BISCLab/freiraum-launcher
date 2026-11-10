@@ -1,0 +1,4 @@
+- New: a long press on an app opens its menu (shortcuts, favorite, customize, app info, uninstall)
+- New: Extensions, one page for designs, wallpaper packs and widgets, with an overview in the browser; designs open straight from there
+- Settings tidied: one term per thing, arrows, saving; Text search layout under Behavior
+- Fixed: first settings page scrolls, breadcrumb arrows, search code, invalid links
