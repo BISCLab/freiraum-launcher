@@ -133,7 +133,7 @@ fun SettingsWallpaperPacksScreen(navController: NavController, onBack: () -> Uni
                 icon = null,
                 title = stringResource(R.string.packs_find),
                 summary = stringResource(R.string.packs_find_summary),
-                onClick = { openExtensionsPage(context, "#packs") },
+                onClick = { openExtensionsPage(context, "#wallpaper") },
                 trailing = null
             )
             SettingsPreference(

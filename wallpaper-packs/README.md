@@ -1,16 +1,16 @@
-# Freiraum wallpaper packs
+# Freiraum wallpapers
 
-A wallpaper pack brings a background picture for each page of Freiraum Launcher. Packs go with
+A wallpaper brings a background picture for each page of Freiraum Launcher. Wallpapers go with
 every design.
 
-## Install a pack
+## Install a wallpaper
 
-1. Open the [extensions page](https://bisclab.github.io/freiraum-launcher/#packs) on your phone
-   and download a pack. The files are also on the
+1. Open the [extensions page](https://bisclab.github.io/freiraum-launcher/#wallpaper) on your phone
+   and download a wallpaper. The files are also on the
    [releases page](https://github.com/BISCLab/freiraum-launcher/releases).
 2. Tap the downloaded file in the Files app and choose Freiraum. Or in Freiraum: Settings →
-   Extensions → Wallpaper packs → Add wallpaper pack, and pick the file.
-3. Tap the pack to see its pictures, then Apply. It can also set the lock screen.
+   Extensions → Wallpapers → Add wallpaper, and pick the file.
+3. Tap the wallpaper to see its pictures, then Apply. It can also set the lock screen.
 
 "Without pictures" gives every page a plain background instead: matte black in dark mode, chalk
 white in light mode.

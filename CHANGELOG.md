@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Wallpaper packs are simply called Wallpapers everywhere
+- The extensions page in the browser has a new layout: one clearly separated section each for
+  Designs, Wallpapers and Widgets, each with its own short how-to
+
 ## 0.13.0
 
 - New: Extensions, one page in the settings for everything that can be added: designs, wallpaper

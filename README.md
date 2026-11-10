@@ -25,7 +25,7 @@ libraries.
 - **Appearance** – light/dark mode, accent color, corner shapes, icon packs, and fill, border and
   text color for every element
 - **Designs** – ready-made looks with colors, borders and effects, see [designs](designs/README.md)
-- **Wallpaper packs** – a background picture for every page, see [wallpaper packs](wallpaper-packs/README.md)
+- **Wallpapers** – a background picture for every page, see [wallpapers](wallpaper-packs/README.md)
 - **Gestures** – swipe up/down, double tap and long press, each assignable
 - **Backup** – export and import everything as one file
 
@@ -40,7 +40,7 @@ Tablets are supported in beta: it works, but some screens may not look quite rig
 | `READ_CONTACTS` (optional) | Find and pin contacts |
 | Notification access (optional) | Control music playback in the music widget; notification content is not read |
 | `EXPAND_STATUS_BAR` | Gesture that opens the notification shade |
-| `SET_WALLPAPER` | Put a wallpaper pack's picture on the lock screen, only when you tick that box |
+| `SET_WALLPAPER` | Put a wallpaper's picture on the lock screen, only when you tick that box |
 
 ## Download
 

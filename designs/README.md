@@ -2,7 +2,7 @@
 
 A design changes only the look of Freiraum Launcher: colors, borders, corners and effects. Pages,
 apps, folders, notes and backgrounds stay as they are. Backgrounds come with
-[wallpaper packs](../wallpaper-packs/README.md), so any design goes with any pack. A design holds
+[wallpapers](../wallpaper-packs/README.md), so any design goes with any pack. A design holds
 no personal data and no pictures, so it is safe to share.
 
 ## Install a design
