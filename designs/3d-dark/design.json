@@ -1,0 +1,199 @@
+{
+  "format": 1,
+  "id": "3d-dark",
+  "name": "3D Dark",
+  "name_de": "3D Dunkel",
+  "author": "BISC Lab",
+  "version": "1.0",
+  "theme": "DARK",
+  "accent": "#FF5B93FF",
+  "font": "SYSTEM",
+  "cornerRadiusPercent": 100,
+  "widgetCornerRadiusPercent": 70,
+  "box": {
+    "style": "COLOR",
+    "fill": "#FF34373F",
+    "fill2": "#FF1D1F25",
+    "fillMode": "GRADIENT",
+    "direction": "TOP_TO_BOTTOM",
+    "opacity": 1.0,
+    "border": false,
+    "borderWidth": 1.0,
+    "contentColor": "#FFECEEF3"
+  },
+  "widget": {
+    "style": "COLOR",
+    "fill": "#FF34373F",
+    "fill2": "#FF1D1F25",
+    "fillMode": "GRADIENT",
+    "direction": "TOP_TO_BOTTOM",
+    "opacity": 1.0,
+    "border": false,
+    "borderWidth": 1.0,
+    "contentColor": "#FFECEEF3"
+  },
+  "dock": {
+    "style": "COLOR",
+    "fill": "#FF34373F",
+    "fill2": "#FF1D1F25",
+    "fillMode": "GRADIENT",
+    "direction": "TOP_TO_BOTTOM",
+    "opacity": 1.0,
+    "border": false,
+    "borderWidth": 1.0,
+    "contentColor": "#FFECEEF3"
+  },
+  "panel": {
+    "style": "COLOR",
+    "fill": "#FF34373F",
+    "fill2": "#FF1D1F25",
+    "fillMode": "GRADIENT",
+    "direction": "TOP_TO_BOTTOM",
+    "opacity": 1.0,
+    "border": false,
+    "borderWidth": 1.0,
+    "contentColor": "#FFECEEF3"
+  },
+  "corners": {
+    "dock": 100,
+    "panel": 100,
+    "search_button": 100,
+    "alphabet_rail": 100,
+    "category_rail": 100,
+    "search_field": 100,
+    "element_boxes": 60,
+    "folders": 60,
+    "widgets": 70,
+    "search_results": 70
+  },
+  "elements": {
+    "search_field": {
+      "style": "COLOR",
+      "fill": "#FF34373F",
+      "fill2": "#FF1D1F25",
+      "fillMode": "GRADIENT",
+      "direction": "TOP_TO_BOTTOM",
+      "opacity": 1.0,
+      "border": false,
+      "borderWidth": 1.0,
+      "contentColor": "#FFECEEF3"
+    },
+    "search_category_rail": {
+      "style": "COLOR",
+      "fill": "#FF34373F",
+      "fill2": "#FF1D1F25",
+      "fillMode": "GRADIENT",
+      "direction": "TOP_TO_BOTTOM",
+      "opacity": 1.0,
+      "border": false,
+      "borderWidth": 1.0,
+      "contentColor": "#FFECEEF3"
+    },
+    "search_results": {
+      "style": "COLOR",
+      "fill": "#FF34373F",
+      "fill2": "#FF1D1F25",
+      "fillMode": "GRADIENT",
+      "direction": "TOP_TO_BOTTOM",
+      "opacity": 1.0,
+      "border": false,
+      "borderWidth": 1.0,
+      "contentColor": "#FFECEEF3"
+    },
+    "folder_card": {
+      "style": "COLOR",
+      "fill": "#FF34373F",
+      "fill2": "#FF1D1F25",
+      "fillMode": "GRADIENT",
+      "direction": "TOP_TO_BOTTOM",
+      "opacity": 1.0,
+      "border": false,
+      "borderWidth": 1.0,
+      "contentColor": "#FFECEEF3"
+    },
+    "app_list_search_button": {
+      "style": "COLOR",
+      "fill": "#FF34373F",
+      "fill2": "#FF1D1F25",
+      "fillMode": "GRADIENT",
+      "direction": "TOP_TO_BOTTOM",
+      "opacity": 1.0,
+      "border": false,
+      "borderWidth": 1.0,
+      "contentColor": "#FFECEEF3"
+    },
+    "app_list_search_field": {
+      "style": "COLOR",
+      "fill": "#FF34373F",
+      "fill2": "#FF1D1F25",
+      "fillMode": "GRADIENT",
+      "direction": "TOP_TO_BOTTOM",
+      "opacity": 1.0,
+      "border": false,
+      "borderWidth": 1.0,
+      "contentColor": "#FFECEEF3"
+    },
+    "search_alphabet_rail": {
+      "style": "COLOR",
+      "fill": "#FF34373F",
+      "fill2": "#FF1D1F25",
+      "fillMode": "GRADIENT",
+      "direction": "TOP_TO_BOTTOM",
+      "opacity": 1.0,
+      "border": false,
+      "borderWidth": 1.0,
+      "contentColor": "#FFECEEF3"
+    },
+    "search_header_letter": {
+      "style": "COLOR",
+      "fill": "#FF34373F",
+      "fill2": "#FF1D1F25",
+      "fillMode": "GRADIENT",
+      "direction": "TOP_TO_BOTTOM",
+      "opacity": 1.0,
+      "border": false,
+      "borderWidth": 1.0,
+      "contentColor": "#FFECEEF3"
+    },
+    "app_grid_search_bar": {
+      "style": "COLOR",
+      "fill": "#FF34373F",
+      "fill2": "#FF1D1F25",
+      "fillMode": "GRADIENT",
+      "direction": "TOP_TO_BOTTOM",
+      "opacity": 1.0,
+      "border": false,
+      "borderWidth": 1.0,
+      "contentColor": "#FFECEEF3"
+    },
+    "widget_arrow": {
+      "style": "COLOR",
+      "fill": "#FF34373F",
+      "fill2": "#FF1D1F25",
+      "fillMode": "GRADIENT",
+      "direction": "TOP_TO_BOTTOM",
+      "opacity": 1.0,
+      "border": false,
+      "borderWidth": 1.0,
+      "contentColor": "#FFECEEF3"
+    }
+  },
+  "keyboardCapColor": "#FF1D1F25",
+  "effects": {
+    "glowBorder": false,
+    "glowColors": [],
+    "motion": "STILL",
+    "targets": [],
+    "depth": 1.0,
+    "depthTargets": [
+      "dock",
+      "panel",
+      "search",
+      "folders",
+      "cards",
+      "widgets",
+      "buttons",
+      "rail"
+    ]
+  }
+}

@@ -1,7 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.13.3
 
+- New design effect Relief: surfaces stand out from the page with a soft shadow below, a lit edge on
+  top and a slight sheen. A design chooses which parts get it; nothing moves, so it costs no power
+- New designs to download: 3D Light and 3D Dark, built on the relief
 - Popup menus have rounded corners and their entries are separate pieces with a fine gap between
   them, like a group in the settings: the long-press menu of an app, of an entry or widget in a
   folder and of a note, and the menus of the Music and Notes widgets

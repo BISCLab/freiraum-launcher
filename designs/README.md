@@ -23,6 +23,8 @@ Freiraum has no internet access, so designs are always downloaded in the browser
 | Modern Light, Modern Dark | Included in the app: Freiraum's own look, light or dark |
 | [Neon Light](neon-light/design.json) | Light, with glowing borders in green, blue, violet and pink and soft light spots |
 | [Neon Dark](neon-dark/design.json) | The same glow on matte black |
+| [3D Light](3d-light/design.json) | Light surfaces that stand out from the page: a soft shadow below, a lit edge on top |
+| [3D Dark](3d-dark/design.json) | The same relief in dark gray |
 
 ## Make your own
 

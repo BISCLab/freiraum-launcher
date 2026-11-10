@@ -31,7 +31,12 @@ data class DesignEffects(
     val gridSpacingDp: Int = 44,
     val blobs: Boolean = false,
     val blobColors: List<Int> = emptyList(),
-    val blobStrength: Float = 1f
+    val blobStrength: Float = 1f,
+    /** Relief: surfaces stand out from the page with a soft shadow below, a light edge on top and
+     *  a slight sheen, 0 (off) to 1. Still, so it costs nothing while nothing moves. */
+    val depth: Float = 0f,
+    /** Where the relief appears; the same names as [targets]. */
+    val depthTargets: Set<String> = emptySet()
 )
 
 /** A design: only looks, never content and never pictures (those come with wallpaper packs).
@@ -162,7 +167,9 @@ object DesignJson {
         gridSpacingDp = json.optInt("gridSpacing", 44).coerceIn(12, 200),
         blobs = json.optBoolean("blobs"),
         blobColors = colors(json.optJSONArray("blobColors")),
-        blobStrength = json.optDouble("blobStrength", 1.0).toFloat().coerceIn(0f, 1f)
+        blobStrength = json.optDouble("blobStrength", 1.0).toFloat().coerceIn(0f, 1f),
+        depth = json.optDouble("depth", 0.0).toFloat().coerceIn(0f, 1f),
+        depthTargets = json.optJSONArray("depthTargets")?.let { a -> (0 until a.length()).map { a.getString(it) }.toSet() }.orEmpty()
     )
 
     fun effectsJson(e: DesignEffects) = JSONObject().apply {
@@ -180,6 +187,8 @@ object DesignJson {
         put("blobs", e.blobs)
         put("blobColors", JSONArray(e.blobColors.map(::hex)))
         put("blobStrength", e.blobStrength.toDouble())
+        put("depth", e.depth.toDouble())
+        put("depthTargets", JSONArray(e.depthTargets.toList()))
     }
 
     private fun appearance(json: JSONObject) = ElementAppearance(

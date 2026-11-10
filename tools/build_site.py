@@ -65,17 +65,30 @@ def design_preview(d):
     glow = fx.get("glowColors") or []
     ring = f"linear-gradient(120deg,{','.join(css_color(c) for c in glow)})" if fx.get("glowBorder") and glow else None
 
+    depth = float(fx.get("depth", 0))
+    relief = (
+        f";box-shadow:0 {6 * depth:.1f}px {14 * depth:.1f}px rgba(0,0,0,{0.43 * depth:.2f}),"
+        f"inset 0 1.25px 0 rgba(255,255,255,{0.55 * depth:.2f}),inset 0 -1.25px 0 rgba(0,0,0,{0.28 * depth:.2f})"
+    ) if depth > 0 else ""
+
     def surface(part, radius):
         p = d.get(part) or {}
-        fill = css_color(p.get("fill"), float(p.get("opacity", 1))) if p.get("style", "COLOR") != "NONE" else "transparent"
+        opacity = float(p.get("opacity", 1))
+        if p.get("style", "COLOR") == "NONE":
+            fill = "linear-gradient(transparent,transparent)"
+        elif p.get("fillMode") == "GRADIENT":
+            side = "to right," if p.get("direction") == "LEFT_TO_RIGHT" else ""
+            fill = f"linear-gradient({side}{css_color(p.get('fill'), opacity)},{css_color(p.get('fill2'), opacity)})"
+        else:
+            fill = f"linear-gradient({css_color(p.get('fill'), opacity)},{css_color(p.get('fill'), opacity)})"
         text = css_color(p.get("contentColor")) if p.get("contentColor") else ("#e8eaf0" if dark else "#1b1c20")
         if ring:
-            border = f"border:1.5px solid transparent;background:linear-gradient({fill},{fill}) padding-box,{ring} border-box;background-color:{ground}"
+            border = f"border:1.5px solid transparent;background:{fill} padding-box,{ring} border-box;background-color:{ground}"
         elif p.get("border"):
             border = f"border:1.5px solid {css_color(p.get('borderColor')) if p.get('borderColor') else accent};background:{fill}"
         else:
             border = f"background:{fill}"
-        return f"{border};color:{text};border-radius:{radius}px"
+        return f"{border};color:{text};border-radius:{radius}px{relief}"
 
     corner = int(d.get("cornerRadiusPercent", 100)) * 0.28
     widget_corner = int((d.get("corners") or {}).get("widgets", d.get("widgetCornerRadiusPercent", 80))) * 0.2

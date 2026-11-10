@@ -93,12 +93,14 @@ private fun rememberGlowAngle(effects: DesignEffects): State<Float> {
 @Composable
 fun Modifier.designGlow(shape: Shape, target: String): Modifier {
     val effects = LocalDesignEffects.current ?: return this
-    if (!effects.glowBorder || target !in effects.targets) return this
+    val relief = if (effects.depth > 0f && target in effects.depthTargets) designRelief(shape, effects.depth) else Modifier
+    if (!effects.glowBorder || target !in effects.targets) return this.then(relief)
     val (colors, stops) = remember(effects) { sweepColors(effects) }
     val angle = rememberGlowAngle(effects)
     val strength = effects.glowStrength
     val surfaceGlow = effects.surfaceGlow
     return this
+        .then(relief)
         .drawBehind {
             if (strength > 0f) {
                 val outline = shape.createOutline(size, layoutDirection, this)
@@ -122,6 +124,41 @@ fun Modifier.designGlow(shape: Shape, target: String): Modifier {
             drawOutline(outline, brush, style = Stroke(width = 1.5.dp.toPx()))
         }
 }
+
+/**
+ * The relief of a surface of [shape]: a soft shadow that falls below it (only outside the shape, so
+ * a see-through surface stays clean), a light edge on top that turns dark towards the bottom, and
+ * a faint sheen over the upper part. Nothing moves, so it is drawn once and costs nothing after.
+ */
+private fun designRelief(shape: Shape, depth: Float): Modifier = Modifier
+    .drawBehind {
+        val outline = shape.createOutline(size, layoutDirection, this)
+        val path = Path().apply { addOutline(outline) }
+        val paint = androidx.compose.ui.graphics.Paint().apply {
+            asFrameworkPaint().apply {
+                color = android.graphics.Color.TRANSPARENT
+                setShadowLayer(14.dp.toPx() * depth, 0f, 6.dp.toPx() * depth, android.graphics.Color.argb((110 * depth).toInt(), 0, 0, 0))
+            }
+        }
+        clipPath(path, clipOp = androidx.compose.ui.graphics.ClipOp.Difference) {
+            drawContext.canvas.drawOutline(outline, paint)
+        }
+    }
+    .drawWithContent {
+        drawContent()
+        val outline = shape.createOutline(size, layoutDirection, this)
+        clipPath(Path().apply { addOutline(outline) }) {
+            // Sheen: light from above, a little shade at the bottom.
+            drawRect(Brush.verticalGradient(0f to Color.White.copy(alpha = 0.14f * depth), 0.55f to Color.Transparent))
+            drawRect(Brush.verticalGradient(0.6f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.10f * depth)))
+        }
+        // The edge: lit on top, shaded below.
+        drawOutline(
+            outline,
+            Brush.verticalGradient(0f to Color.White.copy(alpha = 0.55f * depth), 0.5f to Color.White.copy(alpha = 0.06f * depth), 1f to Color.Black.copy(alpha = 0.28f * depth)),
+            style = Stroke(width = 1.25.dp.toPx())
+        )
+    }
 
 /** The design's background extras on top of a page background: a fine grid and soft colored
  *  light spots. Static, so it costs nothing while the screen sits still. */
