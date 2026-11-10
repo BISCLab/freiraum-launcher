@@ -133,6 +133,7 @@ nav a{flex:none;text-decoration:none;color:var(--text);border:1px solid var(--li
 .how{background:var(--card);border-radius:24px;padding:18px 20px;margin:12px 0 4px}
 .how h2{margin:0 0 6px;font-size:1.05rem}
 .how ol{margin:0;padding-left:20px;color:var(--soft)}
+.trust{margin:10px 0 0;font-size:.9rem;color:var(--soft)}
 section{padding-top:28px}
 section>h2{font-size:1.25rem;margin:0 0 2px}
 section>p{margin:0 0 14px;color:var(--soft)}
@@ -228,6 +229,7 @@ def build(out):
       <li>{both("Designs: „In Freiraum öffnen“ zeigt die Vorschau gleich im Launcher.", "Designs: “Open in Freiraum” shows the preview right in the launcher.")}</li>
       <li>{both("Dateien: laden, dann in der Dateien-App antippen und Freiraum wählen. Oder im Launcher: Einstellungen → Erweiterungen → hinzufügen.", "Files: download, then tap the file in the Files app and choose Freiraum. Or in the launcher: Settings → Extensions → add.")}</li>
     </ol>
+    <p class="trust">{both("Öffne nur Designs und Packs aus Quellen, denen du traust. Der Launcher zeigt immer zuerst eine Vorschau und wendet nichts von selbst an. Ein Design ändert nur das Aussehen, ein Pack nur die Hintergrundbilder.", "Open only designs and packs from sources you trust. The launcher always shows a preview first and applies nothing by itself. A design changes only the look, a pack only the background pictures.")}</p>
   </div>
 
   <section id="designs">

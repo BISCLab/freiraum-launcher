@@ -11,6 +11,8 @@
 - New: a design opens straight from that page ("Open in Freiraum"), and a downloaded design or
   wallpaper pack file can be opened with Freiraum from a file manager. Either way it is installed
   and its preview shown, ready to apply
+- A design or pack that came in from outside says so in its preview, with a reminder to apply it only
+  from a source you trust
 - New: a long press on an app opens its menu, in the App list, the App grid, the Text search, the
   Dock, the Panel and Element-Boxes: the app's own shortcuts, add to or remove from favorites,
   Customize (name, icon, where it shows), App info and Uninstall. Uninstall hands over to Android,

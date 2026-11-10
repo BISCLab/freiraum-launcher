@@ -110,6 +110,7 @@ fun SettingsWallpaperPacksScreen(navController: NavController, onBack: () -> Uni
     // A pack opened with the launcher from outside: installed, then shown to apply.
     val incoming by com.bisc.flauncher.util.IncomingExtension.pending.collectAsState()
     var showWhenInstalled by remember { mutableStateOf<String?>(null) }
+    var previewFromOutside by remember { mutableStateOf(false) }
     androidx.compose.runtime.LaunchedEffect(incoming) {
         val handed = incoming?.takeIf { it.kind == com.bisc.flauncher.util.IncomingExtension.Kind.PACK } ?: return@LaunchedEffect
         viewModel.import(handed.uri) { name -> importDone(name); showWhenInstalled = name }
@@ -117,7 +118,7 @@ fun SettingsWallpaperPacksScreen(navController: NavController, onBack: () -> Uni
     }
     androidx.compose.runtime.LaunchedEffect(packs, showWhenInstalled) {
         val name = showWhenInstalled ?: return@LaunchedEffect
-        packs.firstOrNull { it.name == name }?.let { previewing = it; showWhenInstalled = null }
+        packs.firstOrNull { it.name == name }?.let { previewing = it; previewFromOutside = true; showWhenInstalled = null }
     }
 
     SettingsSubScreen(title = stringResource(R.string.packs_title), navController = navController, onBack = onBack) {
@@ -169,7 +170,7 @@ fun SettingsWallpaperPacksScreen(navController: NavController, onBack: () -> Uni
                         stringResource(R.string.packs_picture_count, pack.images.size - (if (pack.lock != null) 1 else 0) + pack.extras.size),
                         if (pack.id == activeId) stringResource(R.string.designs_active) else null
                     ).joinToString(" · "),
-                    onClick = { previewing = pack },
+                    onClick = { previewFromOutside = false; previewing = pack },
                     trailing = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             PackThumb(pack.preview, 24.dp)
@@ -221,6 +222,11 @@ fun SettingsWallpaperPacksScreen(navController: NavController, onBack: () -> Uni
                             .forEach { PackThumb(it, 72.dp) }
                     }
                     Text(stringResource(R.string.packs_apply_text), style = MaterialTheme.typography.bodyMedium)
+                    if (previewFromOutside) Text(
+                        stringResource(R.string.extensions_from_outside_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     if (pack.lock != null) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(checked = lockScreen, onCheckedChange = { lockScreen = it })

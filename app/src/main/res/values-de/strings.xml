@@ -882,4 +882,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
         <item quantity="one">%1$d vorhanden</item>
         <item quantity="other">%1$d vorhanden</item>
     </plurals>
+    <string name="extensions_from_outside_note">Von außerhalb geöffnet (Link oder Datei) und schon hinzugefügt. Wende es nur an, wenn du der Quelle traust. Es ändert nur das Aussehen und lässt sich jederzeit wieder löschen.</string>
 </resources>

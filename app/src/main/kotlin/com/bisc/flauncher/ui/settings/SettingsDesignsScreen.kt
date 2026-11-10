@@ -121,6 +121,8 @@ fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, view
     // A design opened with the launcher from outside: installed, then shown to apply.
     val incoming by com.bisc.flauncher.util.IncomingExtension.pending.collectAsState()
     var showWhenInstalled by remember { mutableStateOf<String?>(null) }
+    // Says where it came from while the preview of something handed in from outside is open.
+    var previewFromOutside by remember { mutableStateOf(false) }
     androidx.compose.runtime.LaunchedEffect(incoming) {
         val handed = incoming?.takeIf { it.kind == com.bisc.flauncher.util.IncomingExtension.Kind.DESIGN } ?: return@LaunchedEffect
         viewModel.import(handed.uri) { name -> importDone(name); showWhenInstalled = name }
@@ -128,7 +130,7 @@ fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, view
     }
     androidx.compose.runtime.LaunchedEffect(designs, showWhenInstalled) {
         val name = showWhenInstalled ?: return@LaunchedEffect
-        designs.firstOrNull { !it.bundled && it.name == name }?.let { previewing = it; showWhenInstalled = null }
+        designs.firstOrNull { !it.bundled && it.name == name }?.let { previewing = it; previewFromOutside = true; showWhenInstalled = null }
     }
     val exportName = stringResource(R.string.designs_export_default_name)
     var confirmingDesignExport by remember { mutableStateOf(false) }
@@ -172,7 +174,7 @@ fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, view
                             design.version.takeIf { it.isNotBlank() }?.let { "v$it" },
                             if (design.id == activeId) stringResource(R.string.designs_active) else null
                         ).joinToString(" · "),
-                        onClick = { previewing = design },
+                        onClick = { previewFromOutside = false; previewing = design },
                         trailing = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 DesignSwatch(design)
@@ -258,6 +260,11 @@ fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, view
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     DesignPreview(design, Modifier.fillMaxWidth(0.6f))
+                    if (previewFromOutside) Text(
+                        stringResource(R.string.extensions_from_outside_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             },
             confirmButton = {
