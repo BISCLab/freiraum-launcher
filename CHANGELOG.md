@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Text search opens as one motion with the keyboard: it starts when the keyboard starts and runs on
+  the keyboard's curve; field, cards (Favorites too) and rail fade in and come up together instead
+  of one after another, and the page no longer zooms, so the strip sits exactly on the keyboard
+- Closing the keyboard, the strip stays on it all the way down instead of fading out ahead of it
+
 ## 0.12.5
 
 - Text search keyboard motion planned as one: opening, the results and the rail stand where the
