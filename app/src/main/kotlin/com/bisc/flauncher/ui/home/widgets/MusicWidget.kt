@@ -34,8 +34,6 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -195,9 +193,9 @@ private fun AlbumArt(info: NowPlayingInfo, size: Dp, shape: androidx.compose.ui.
                 Icon(Icons.Filled.MusicNote, contentDescription = stringResource(R.string.widget_music_open_player), modifier = Modifier.size(size / 2))
             }
         }
-        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+        com.bisc.flauncher.ui.home.PieceMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
             info.otherPlayers.forEach { player ->
-                DropdownMenuItem(
+                com.bisc.flauncher.ui.home.PieceMenuItem(
                     text = { Text(player.label.ifBlank { player.packageName }) },
                     onClick = {
                         menuOpen = false
@@ -385,9 +383,9 @@ private fun FullPlayer(info: NowPlayingInfo, viewModel: HomeViewModel, height: D
                     IconButton(onClick = { open = true }, modifier = Modifier.size(48.dp)) {
                         Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.widget_music_more_actions))
                     }
-                    DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+                    com.bisc.flauncher.ui.home.PieceMenu(expanded = open, onDismissRequest = { open = false }) {
                         overflow.forEach { action ->
-                            DropdownMenuItem(
+                            com.bisc.flauncher.ui.home.PieceMenuItem(
                                 text = { Text(action.name) },
                                 onClick = {
                                     open = false

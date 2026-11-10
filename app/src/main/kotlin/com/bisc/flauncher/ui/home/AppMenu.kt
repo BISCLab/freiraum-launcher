@@ -109,22 +109,8 @@ fun rememberAppMenu(component: ComponentName?, label: String): AppMenuHandle? {
                 open.value = true
             },
             Menu = {
-                // No sheet of its own: the entries are separate pieces with a fine gap between them,
-                // the first and last rounded off, like a group in the settings.
-                DropdownMenu(
-                    expanded = open.value,
-                    onDismissRequest = { open.value = false },
-                    shape = MENU_SHAPE,
-                    containerColor = Color.Transparent,
-                    tonalElevation = 0.dp,
-                    shadowElevation = 0.dp
-                ) {
-                    Column(
-                        modifier = Modifier.width(IntrinsicSize.Max).clip(MENU_SHAPE),
-                        verticalArrangement = Arrangement.spacedBy(MENU_GAP)
-                    ) {
-                        AppMenuItems(AppInfo(component, label), host) { open.value = false }
-                    }
+                PieceMenu(expanded = open.value, onDismissRequest = { open.value = false }) {
+                    AppMenuItems(AppInfo(component, label), host) { open.value = false }
                 }
             }
         )
@@ -132,33 +118,11 @@ fun rememberAppMenu(component: ComponentName?, label: String): AppMenuHandle? {
 }
 
 private const val MAX_MENU_SHORTCUTS = 4
-private val MENU_SHAPE = RoundedCornerShape(24.dp)
-private val MENU_GAP = 2.dp
 
-/** One entry of the menu: a piece of its own on the menu's surface color. */
+/** One entry of the app menu: a symbol and a line of text. */
 @Composable
-private fun MenuEntry(text: String, onClick: () -> Unit, leading: @Composable () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .clickable(onClick = onClick)
-            .heightIn(min = 54.dp)
-            .padding(start = 18.dp, end = 24.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(modifier = Modifier.size(24.dp), contentAlignment = Alignment.Center) {
-            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant, content = leading)
-        }
-        Text(
-            text,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            modifier = Modifier.padding(start = 16.dp)
-        )
-    }
-}
+private fun MenuEntry(text: String, onClick: () -> Unit, leading: @Composable () -> Unit) =
+    PieceMenuItem(text = { Text(text, maxLines = 1) }, onClick = onClick, leadingIcon = leading)
 
 @Composable
 private fun AppMenuItems(app: AppInfo, host: AppMenuHost, close: () -> Unit) {

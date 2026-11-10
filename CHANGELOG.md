@@ -2,8 +2,9 @@
 
 ## Unreleased
 
-- The long-press menu of an app has rounded corners and its entries are separate pieces with a fine
-  gap between them, like a group in the settings
+- Popup menus have rounded corners and their entries are separate pieces with a fine gap between
+  them, like a group in the settings: the long-press menu of an app, of an entry or widget in a
+  folder and of a note, and the menus of the Music and Notes widgets
 - Extensions page in the browser: the three shortcuts to Designs, Wallpapers and Widgets sit below
   the blue header as their own row, marked as jumps; the header fits on narrow phones
 

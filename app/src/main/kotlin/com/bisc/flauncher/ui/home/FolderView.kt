@@ -344,9 +344,9 @@ private fun FolderWidgetRow(
             .padding(bottom = 8.dp)
             .watchLongPress(onLongPress)
     ) {
-        androidx.compose.material3.DropdownMenu(expanded = menuExpanded, onDismissRequest = onDismissMenu) {
-            androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.folder_widget_edit)) }, onClick = onEdit)
-            androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.folder_widget_remove)) }, onClick = onRemove)
+        com.bisc.flauncher.ui.home.PieceMenu(expanded = menuExpanded, onDismissRequest = onDismissMenu) {
+            com.bisc.flauncher.ui.home.PieceMenuItem(text = { Text(stringResource(R.string.folder_widget_edit)) }, onClick = onEdit)
+            com.bisc.flauncher.ui.home.PieceMenuItem(text = { Text(stringResource(R.string.folder_widget_remove)) }, onClick = onRemove)
         }
         when (item.type) {
             GridItemType.WIDGET -> when (item.payload) {
@@ -415,13 +415,13 @@ private fun FolderContentCell(
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        androidx.compose.material3.DropdownMenu(expanded = menuExpanded, onDismissRequest = onDismissMenu) {
-            androidx.compose.material3.DropdownMenuItem(
+        com.bisc.flauncher.ui.home.PieceMenu(expanded = menuExpanded, onDismissRequest = onDismissMenu) {
+            com.bisc.flauncher.ui.home.PieceMenuItem(
                 text = { Text(stringResource(R.string.folder_item_move)) },
                 leadingIcon = { Icon(Icons.AutoMirrored.Filled.CompareArrows, contentDescription = null) },
                 onClick = onRequestMove
             )
-            androidx.compose.material3.DropdownMenuItem(
+            com.bisc.flauncher.ui.home.PieceMenuItem(
                 text = { Text(stringResource(R.string.folder_item_remove)) },
                 leadingIcon = { Icon(Icons.Filled.DeleteOutline, contentDescription = null) },
                 onClick = onRequestRemove

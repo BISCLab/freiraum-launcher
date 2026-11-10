@@ -23,8 +23,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -138,9 +136,9 @@ fun NotesWidget(
                             IconButton(onClick = { hiddenMenuOpen = true }, modifier = Modifier.size(32.dp)) {
                                 Icon(Icons.Filled.VisibilityOff, contentDescription = stringResource(R.string.widget_notes_hidden), modifier = Modifier.size(18.dp))
                             }
-                            DropdownMenu(expanded = hiddenMenuOpen, onDismissRequest = { hiddenMenuOpen = false }) {
+                            com.bisc.flauncher.ui.home.PieceMenu(expanded = hiddenMenuOpen, onDismissRequest = { hiddenMenuOpen = false }) {
                                 hiddenNotes.forEach { note ->
-                                    DropdownMenuItem(
+                                    com.bisc.flauncher.ui.home.PieceMenuItem(
                                         text = { Text(stringResource(R.string.widget_notes_show_again, note.title.ifBlank { stringResource(R.string.widget_notes_untitled) })) },
                                         onClick = {
                                             viewModel.saveNote(note.copy(hiddenInWidget = false))
@@ -259,9 +257,9 @@ private fun NoteCell(
         contentAlignment = Alignment.Center
     ) {
         if (note != null) {
-            DropdownMenu(expanded = menuExpanded, onDismissRequest = onDismissMenu) {
-                DropdownMenuItem(text = { Text(stringResource(R.string.folder_item_move)) }, onClick = { onRequestMove(note) })
-                DropdownMenuItem(text = { Text(stringResource(R.string.widget_notes_hide)) }, onClick = { onRequestHide(note) })
+            com.bisc.flauncher.ui.home.PieceMenu(expanded = menuExpanded, onDismissRequest = onDismissMenu) {
+                com.bisc.flauncher.ui.home.PieceMenuItem(text = { Text(stringResource(R.string.folder_item_move)) }, onClick = { onRequestMove(note) })
+                com.bisc.flauncher.ui.home.PieceMenuItem(text = { Text(stringResource(R.string.widget_notes_hide)) }, onClick = { onRequestHide(note) })
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (note.type == NoteType.CHECKLISTE) {
