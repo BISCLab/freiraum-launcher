@@ -459,3 +459,23 @@ private fun RevealSearchCodeCard(enabled: Boolean, onEnabledChange: (Boolean) ->
     }
 }
 
+
+/** One app's page on its own, opened from the app's long-press menu; leaving it goes back there. */
+@Composable
+fun SettingsAppEditRoute(component: String, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+    val apps by viewModel.labeledApps.collectAsState()
+    val overrides by viewModel.appOverrides.collectAsState()
+    androidx.compose.material3.Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {}
+    val app = apps.firstOrNull { it.componentName.flattenToString() == component } ?: return
+    CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalAppIconLoader provides viewModel.iconLoader) {
+        AppOverrideEditSheet(
+            app = app,
+            viewModel = viewModel,
+            override = overrides[component] ?: AppOverride(component),
+            onSave = { draft ->
+                viewModel.saveAppOverride(app.componentName, draft.customLabel, draft.hiddenFromAppList, draft.hiddenFromSearch, draft.revealMode, draft.revealCode, draft.iconShape, draft.iconSizePercent)
+            },
+            onDismiss = onBack
+        )
+    }
+}

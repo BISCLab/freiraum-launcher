@@ -407,8 +407,6 @@ private fun AppTileGrid(
     favoriteIds: Set<String> = emptySet(),
     onToggleFavorite: (AppInfo) -> Unit = {}
 ) {
-    // A long press on an app offers to add it to the favorites, or take it out.
-    var menuFor by remember { mutableStateOf<AppInfo?>(null) }
     val collapsedLimit = APP_GRID_COLUMNS * APP_GRID_COLLAPSED_ROWS
     val shown = if (expanded || apps.size <= collapsedLimit) apps else apps.take(collapsedLimit)
 
@@ -417,6 +415,7 @@ private fun AppTileGrid(
             Row(modifier = Modifier.fillMaxWidth()) {
                 rowApps.forEach { app ->
                     val bitmap = rememberAppIcon(app.componentName, loadIcon)
+                    val menu = com.bisc.flauncher.ui.home.rememberAppMenu(app.componentName, app.label)
                     Column(
                         modifier = Modifier
                             .weight(1f)
@@ -424,18 +423,12 @@ private fun AppTileGrid(
                                 interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
                                 indication = null,
                                 onClick = { onAppClick(app) },
-                                onLongClick = { menuFor = app }
+                                onLongClick = menu?.open
                             )
                             .padding(vertical = 6.dp, horizontal = 3.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        val favorite = app.componentName.flattenToString() in favoriteIds
-                        androidx.compose.material3.DropdownMenu(expanded = menuFor == app, onDismissRequest = { menuFor = null }) {
-                            androidx.compose.material3.DropdownMenuItem(
-                                text = { Text(stringResource(if (favorite) R.string.search_favorite_remove else R.string.search_favorite_add)) },
-                                onClick = { menuFor = null; onToggleFavorite(app) }
-                            )
-                        }
+                        menu?.Menu?.invoke()
                         if (bitmap != null) {
                             Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(48.dp))
                         } else {

@@ -220,6 +220,9 @@ class MainActivity : ComponentActivity() {
                         }
                     ) {
                         composable("home") {
+                            com.bisc.flauncher.ui.home.AppMenuProvider(
+                                onEdit = { component -> navController.navigate("settings/apps/edit/" + android.net.Uri.encode(component.flattenToString())) }
+                            ) {
                             HomeScreen(
                                 onNavigateToSettings = { route ->
                                     // Deeper screens open on top of the settings start page, so back
@@ -229,6 +232,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 homeButtonPressCount = homeButtonPressCount
                             )
+                            }
                         }
                         settingsComposable("settings") {
                             SettingsListScreen(
@@ -514,6 +518,13 @@ class MainActivity : ComponentActivity() {
                         }
                         settingsComposable("settings/gestures") {
                             SettingsGesturesScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        settingsComposable(
+                            "settings/apps/edit/{component}",
+                            arguments = listOf(navArgument("component") { type = NavType.StringType })
+                        ) { backStackEntry ->
+                            val component = backStackEntry.arguments?.getString("component") ?: return@settingsComposable
+                            com.bisc.flauncher.ui.settings.SettingsAppEditRoute(component = component, onBack = { navController.popBackStack() })
                         }
                         settingsComposable("settings/apps") {
                             SettingsAppsScreen(

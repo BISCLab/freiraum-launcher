@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import com.bisc.flauncher.ui.home.rememberAppIcon
 import kotlinx.coroutines.Job
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -392,10 +393,11 @@ private val MAGNIFIER_MAX_STRETCH = 120.dp
 private fun AppBrowseRow(app: AppInfo, loadIcon: (ComponentName) -> ImageBitmap?, handedness: Handedness, edgeInset: Dp, iconSize: Dp, onClick: () -> Unit) {
     val bitmap = rememberAppIcon(app.componentName, loadIcon)
     val isLeft = handedness == Handedness.LEFT
+    val menu = com.bisc.flauncher.ui.home.rememberAppMenu(app.componentName, app.label)
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .noRippleClickable(onClick = onClick)
+            .appClickable(onClick = onClick, onLongClick = menu?.open)
             .padding(
                 start = edgeInset,
                 end = edgeInset,
@@ -406,8 +408,10 @@ private fun AppBrowseRow(app: AppInfo, loadIcon: (ComponentName) -> ImageBitmap?
         verticalAlignment = Alignment.CenterVertically
     ) {
         val icon = @Composable {
-            if (bitmap != null) {
-                Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(iconSize))
+            // The menu opens at the icon.
+            Box {
+                if (bitmap != null) Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(iconSize))
+                menu?.Menu?.invoke()
             }
         }
         val label = @Composable { Text(app.label) }
@@ -418,3 +422,13 @@ private fun AppBrowseRow(app: AppInfo, loadIcon: (ComponentName) -> ImageBitmap?
         }
     }
 }
+
+/** A tap opens the app, a long press its menu (where there is one); no ripple, like the lists. */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+@Composable
+internal fun Modifier.appClickable(onClick: () -> Unit, onLongClick: (() -> Unit)?): Modifier = combinedClickable(
+    interactionSource = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+    indication = null,
+    onClick = onClick,
+    onLongClick = onLongClick
+)

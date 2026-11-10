@@ -253,12 +253,14 @@ private fun AppGridCell(
     onClick: () -> Unit
 ) {
     val bitmap = rememberAppIcon(app.componentName, loadIcon)
+    val menu = com.bisc.flauncher.ui.home.rememberAppMenu(app.componentName, app.label)
     Column(
-        modifier = Modifier.fillMaxWidth().noRippleClickable(onClick = onClick).padding(vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth().appClickable(onClick = onClick, onLongClick = menu?.open).padding(vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(modifier = Modifier.size(iconSize)) {
             if (bitmap != null) Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.fillMaxSize())
+            menu?.Menu?.invoke()
         }
         if (showLabel) {
             Spacer(Modifier.height(8.dp))

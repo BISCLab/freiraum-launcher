@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- New: a long press on an app opens its menu, in the App list, the App grid, the Text search, the
+  Dock, the Panel and Element-Boxes: the app's own shortcuts, add to or remove from favorites,
+  Customize (name, icon, where it shows), App info and Uninstall. Uninstall hands over to Android,
+  which asks before removing anything; for this the launcher now declares the permission to request
+  an uninstall
 - Fixed: the first settings page scrolls, so nothing is cut off on small screens or with large text
 - Fixed: the arrows between the breadcrumbs at the bottom of the settings were invisible
 - Fixed: a search code for a hidden app works regardless of upper and lower case and of a space at

@@ -856,4 +856,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="link_open_failed">Dieser Link ließ sich nicht öffnen</string>
     <string name="link_address_invalid">Keine Adresse, die ein Link öffnen kann</string>
     <string name="settings_manage_apps_reveal_code_note">Groß- und Kleinschreibung spielt keine Rolle. Ohne Code bleibt die App über ihren Namen auffindbar.</string>
+    <string name="app_menu_edit">Anpassen</string>
+    <string name="app_menu_info">App-Info</string>
+    <string name="app_menu_uninstall">Deinstallieren</string>
 </resources>

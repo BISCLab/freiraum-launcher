@@ -708,6 +708,11 @@ class HomeViewModel @Inject constructor(
 
     fun loadShortcutIcon(info: ShortcutInfo) = shortcutRepository.loadIcon(info)
 
+    /** An app's own shortcuts, for its long-press menu. */
+    suspend fun appShortcutsFor(packageName: String): List<ShortcutInfo> = shortcutRepository.shortcutsFor(packageName)
+
+    fun launchAppShortcut(packageName: String, shortcutId: String) = shortcutRepository.launch(packageName, shortcutId)
+
     fun openShortcutAppPicker() {
         _shortcutAppPickerOpen.value = true
     }

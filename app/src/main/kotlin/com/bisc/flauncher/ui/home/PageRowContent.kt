@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -436,15 +437,20 @@ internal fun AppIconCell(
     val label = componentName?.let(resolveLabel).orEmpty()
     // This app's own icon-size override if it has one, otherwise the flat scale passed in.
     val effectiveIconSizeScale = LocalIconSizeResolver.current?.invoke(payload) ?: iconSizeScale
+    // Not while it is being edited in the settings (the tap means something else there).
+    val menu = rememberAppMenu(componentName.takeIf { onClickOverride == null }, label)
 
     Column(
         modifier = Modifier
-            .clickable(enabled = onClickOverride != null || componentName != null) {
-                if (onClickOverride != null) onClickOverride() else componentName?.let { launchApp(context, it) }
-            }
+            .combinedClickable(
+                enabled = onClickOverride != null || componentName != null,
+                onLongClick = menu?.open,
+                onClick = { if (onClickOverride != null) onClickOverride() else componentName?.let { launchApp(context, it) } }
+            )
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        menu?.Menu?.invoke()
         if (bitmap != null) {
             Image(bitmap = bitmap, contentDescription = label, modifier = Modifier.size(56.dp * effectiveIconSizeScale))
         } else {
@@ -790,13 +796,15 @@ fun PillRowEntries(
                             val componentName = remember(entry.payload) { ComponentName.unflattenFromString(entry.payload) }
                             val bitmap = rememberAppIcon(componentName, loadIcon)
                             val label = componentName?.let(resolveLabel).orEmpty()
+                            val menu = rememberAppMenu(componentName, label)
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .background(if (bitmap == null) UNSET_APP_SLOT_COLOR else Color.Transparent)
-                                    .clickable(enabled = componentName != null) { componentName?.let { launchApp(context, it) } },
+                                    .combinedClickable(enabled = componentName != null, onLongClick = menu?.open, onClick = { componentName?.let { launchApp(context, it) } }),
                                 contentAlignment = Alignment.Center
                             ) {
+                                menu?.Menu?.invoke()
                                 if (bitmap != null) Image(bitmap = bitmap, contentDescription = label, modifier = Modifier.size(DockDimens.iconSize))
                                 else Icon(imageVector = unsetAppSlotIcon, contentDescription = null, tint = Color.White)
                             }
