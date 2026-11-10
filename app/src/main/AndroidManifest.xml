@@ -88,6 +88,33 @@
                 <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+            <!-- "Open in Freiraum" on the extensions page: a design small enough to travel inside the
+                 link itself, since the launcher has no internet access to fetch one. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="freiraum" android:host="design" />
+            </intent-filter>
+            <!-- A downloaded design or wallpaper pack opened from a file manager. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:host="*" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern=".*\\.freiraum-design" />
+                <data android:pathPattern=".*\\..*\\.freiraum-design" />
+                <data android:pathPattern=".*\\..*\\..*\\.freiraum-design" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.freiraum-design" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.freiraum-design" />
+                <data android:pathPattern=".*\\.freiraum-wallpapers" />
+                <data android:pathPattern=".*\\..*\\.freiraum-wallpapers" />
+                <data android:pathPattern=".*\\..*\\..*\\.freiraum-wallpapers" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.freiraum-wallpapers" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.freiraum-wallpapers" />
+            </intent-filter>
             <!-- Static app shortcut "Settings". -->
             <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
         </activity>

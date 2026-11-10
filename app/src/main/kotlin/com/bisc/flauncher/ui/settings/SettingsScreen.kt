@@ -124,26 +124,13 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                     onClick = { onNavigate("system") }
                 )
             }
-            // What goes beyond the launcher itself: designs and wallpaper packs to add now, plugins to come.
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_group_extensions)) {
-                SettingsPreference(
-                    icon = Icons.Filled.AutoAwesome,
-                    title = stringResource(R.string.designs_title),
-                    summary = stringResource(R.string.designs_entry_summary),
-                    onClick = { onNavigate("appearance/designs") }
-                )
-                SettingsPreference(
-                    icon = Icons.Filled.Wallpaper,
-                    title = stringResource(R.string.packs_title),
-                    summary = stringResource(R.string.packs_entry_summary),
-                    onClick = { onNavigate("wallpaper_packs") }
-                )
+            // What can be added to the launcher: designs, wallpaper packs, widgets.
+            SettingsPreferenceGroup {
                 SettingsPreference(
                     icon = Icons.Filled.Extension,
-                    title = stringResource(R.string.settings_plugins_title),
-                    summary = stringResource(R.string.settings_plugins_soon),
-                    onClick = null,
-                    enabled = false
+                    title = stringResource(R.string.settings_group_extensions),
+                    summary = stringResource(R.string.extensions_entry_summary),
+                    onClick = { onNavigate("extensions") }
                 )
             }
         }

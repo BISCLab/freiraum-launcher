@@ -108,14 +108,27 @@ fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, view
     var removing by remember { mutableStateOf<Design?>(null) }
     val german = LocalConfiguration.current.locales.get(0).language == "de"
 
+    val importDone: (String?) -> Unit = { name ->
+        Toast.makeText(
+            context,
+            if (name != null) context.getString(R.string.designs_import_done, name) else context.getString(R.string.designs_import_failed),
+            Toast.LENGTH_LONG
+        ).show()
+    }
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) viewModel.import(uri) { name ->
-            Toast.makeText(
-                context,
-                if (name != null) context.getString(R.string.designs_import_done, name) else context.getString(R.string.designs_import_failed),
-                Toast.LENGTH_LONG
-            ).show()
-        }
+        if (uri != null) viewModel.import(uri, importDone)
+    }
+    // A design opened with the launcher from outside: installed, then shown to apply.
+    val incoming by com.bisc.flauncher.util.IncomingExtension.pending.collectAsState()
+    var showWhenInstalled by remember { mutableStateOf<String?>(null) }
+    androidx.compose.runtime.LaunchedEffect(incoming) {
+        val handed = incoming?.takeIf { it.kind == com.bisc.flauncher.util.IncomingExtension.Kind.DESIGN } ?: return@LaunchedEffect
+        viewModel.import(handed.uri) { name -> importDone(name); showWhenInstalled = name }
+        com.bisc.flauncher.util.IncomingExtension.pending.value = null
+    }
+    androidx.compose.runtime.LaunchedEffect(designs, showWhenInstalled) {
+        val name = showWhenInstalled ?: return@LaunchedEffect
+        designs.firstOrNull { !it.bundled && it.name == name }?.let { previewing = it; showWhenInstalled = null }
     }
     val exportName = stringResource(R.string.designs_export_default_name)
     var confirmingDesignExport by remember { mutableStateOf(false) }
@@ -137,7 +150,7 @@ fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, view
                 icon = null,
                 title = stringResource(R.string.designs_find),
                 summary = stringResource(R.string.designs_find_summary),
-                onClick = { runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(DESIGNS_URL))) } },
+                onClick = { openExtensionsPage(context, "#designs") },
                 trailing = null
             )
             SettingsPreference(
@@ -257,7 +270,6 @@ fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, view
     }
 }
 
-private const val DESIGNS_URL = "https://github.com/BISCLab/freiraum-launcher/tree/master/designs"
 
 /** The design's accent and dock color as two small dots. */
 @Composable

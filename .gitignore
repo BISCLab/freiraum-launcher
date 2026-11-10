@@ -16,3 +16,4 @@ local.properties
 keystore.properties
 visuals/*.png
 release/
+_site/

@@ -67,6 +67,17 @@ class MainActivity : ComponentActivity() {
     // Incremented when the system requests the settings screen (app info, launcher shortcut).
     private var openSettingsRequest by mutableIntStateOf(0)
 
+    // A design or wallpaper pack opened with the launcher (a file, or a link from the extensions page).
+    private var incomingIntent: Intent? = null
+    private var incomingRequest by mutableIntStateOf(0)
+
+    private fun handleIncomingIntent(intent: Intent?) {
+        if (com.bisc.flauncher.util.IncomingExtension.isCandidate(intent)) {
+            incomingIntent = intent
+            incomingRequest++
+        }
+    }
+
     private fun handleSettingsIntent(intent: Intent?) {
         if (intent?.action == Intent.ACTION_APPLICATION_PREFERENCES) openSettingsRequest++
     }
@@ -99,6 +110,7 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         if (intent.hasCategory(Intent.CATEGORY_HOME)) homeButtonPressCount++
         handleSettingsIntent(intent)
+        handleIncomingIntent(intent)
     }
 
     // uiMode is declared in configChanges (manifest), so a device dark/light flip lands here
@@ -118,6 +130,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         handleSettingsIntent(intent)
+        // Not again when the activity is only rebuilt with the same intent.
+        if (savedInstanceState == null) handleIncomingIntent(intent)
         setContent {
             val settingsVm: SettingsViewModel = hiltViewModel()
             val theme by settingsVm.theme.collectAsState()
@@ -159,6 +173,22 @@ class MainActivity : ComponentActivity() {
                     val route = navController.currentBackStackEntryFlow.first().destination.route
                     if (route == null || !route.startsWith("settings")) navController.navigate("settings")
                 }
+            }
+            androidx.compose.runtime.LaunchedEffect(incomingRequest) {
+                val incoming = incomingIntent ?: return@LaunchedEffect
+                incomingIntent = null
+                val found = com.bisc.flauncher.util.IncomingExtension.read(this@MainActivity, incoming)
+                if (found == null) {
+                    android.widget.Toast.makeText(this@MainActivity, R.string.incoming_unknown, android.widget.Toast.LENGTH_LONG).show()
+                    return@LaunchedEffect
+                }
+                com.bisc.flauncher.util.IncomingExtension.pending.value = found
+                navController.popBackStack("home", inclusive = false)
+                navController.navigate("settings")
+                navController.navigate("settings/extensions")
+                navController.navigate(
+                    if (found.kind == com.bisc.flauncher.util.IncomingExtension.Kind.DESIGN) "settings/appearance/designs" else "settings/wallpaper_packs"
+                )
             }
             // The Home button leaves the launcher's own settings too, like any other app.
             androidx.compose.runtime.LaunchedEffect(homeButtonPressCount) {
@@ -480,6 +510,12 @@ class MainActivity : ComponentActivity() {
                         }
                         settingsComposable("settings/app_overview/az_index") {
                             com.bisc.flauncher.ui.settings.SettingsAppOverviewAzIndexScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        settingsComposable("settings/extensions") {
+                            com.bisc.flauncher.ui.settings.SettingsExtensionsScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        settingsComposable("settings/extensions/widgets") {
+                            com.bisc.flauncher.ui.settings.SettingsExtensionWidgetsScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         settingsComposable("settings/appearance/designs") {
                             com.bisc.flauncher.ui.settings.SettingsDesignsScreen(navController = navController, onBack = { navController.popBackStack() })

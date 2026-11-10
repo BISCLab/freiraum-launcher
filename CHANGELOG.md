@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- New: Extensions, one page in the settings for everything that can be added: designs, wallpaper
+  packs and widgets, with what is there of each. It replaces the three rows on the first settings
+  page. Widgets lists what is included (Clock, Notes, Music) and shows whether the Weather widget
+  is receiving data
+- New: an extensions page in the browser shows every design and wallpaper pack with a preview.
+  "Find designs" and "Find wallpaper packs" open it instead of a folder on GitHub
+- New: a design opens straight from that page ("Open in Freiraum"), and a downloaded design or
+  wallpaper pack file can be opened with Freiraum from a file manager. Either way it is installed
+  and its preview shown, ready to apply
 - New: a long press on an app opens its menu, in the App list, the App grid, the Text search, the
   Dock, the Panel and Element-Boxes: the app's own shortcuts, add to or remove from favorites,
   Customize (name, icon, where it shows), App info and Uninstall. Uninstall hands over to Android,

@@ -97,14 +97,27 @@ fun SettingsWallpaperPacksScreen(navController: NavController, onBack: () -> Uni
     val german = LocalConfiguration.current.locales.get(0).language == "de"
     val applied = { Toast.makeText(context, R.string.packs_applied, Toast.LENGTH_SHORT).show() }
 
+    val importDone: (String?) -> Unit = { name ->
+        Toast.makeText(
+            context,
+            if (name != null) context.getString(R.string.packs_import_done, name) else context.getString(R.string.packs_import_failed),
+            Toast.LENGTH_LONG
+        ).show()
+    }
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) viewModel.import(uri) { name ->
-            Toast.makeText(
-                context,
-                if (name != null) context.getString(R.string.packs_import_done, name) else context.getString(R.string.packs_import_failed),
-                Toast.LENGTH_LONG
-            ).show()
-        }
+        if (uri != null) viewModel.import(uri, importDone)
+    }
+    // A pack opened with the launcher from outside: installed, then shown to apply.
+    val incoming by com.bisc.flauncher.util.IncomingExtension.pending.collectAsState()
+    var showWhenInstalled by remember { mutableStateOf<String?>(null) }
+    androidx.compose.runtime.LaunchedEffect(incoming) {
+        val handed = incoming?.takeIf { it.kind == com.bisc.flauncher.util.IncomingExtension.Kind.PACK } ?: return@LaunchedEffect
+        viewModel.import(handed.uri) { name -> importDone(name); showWhenInstalled = name }
+        com.bisc.flauncher.util.IncomingExtension.pending.value = null
+    }
+    androidx.compose.runtime.LaunchedEffect(packs, showWhenInstalled) {
+        val name = showWhenInstalled ?: return@LaunchedEffect
+        packs.firstOrNull { it.name == name }?.let { previewing = it; showWhenInstalled = null }
     }
 
     SettingsSubScreen(title = stringResource(R.string.packs_title), navController = navController, onBack = onBack) {
@@ -119,7 +132,7 @@ fun SettingsWallpaperPacksScreen(navController: NavController, onBack: () -> Uni
                 icon = null,
                 title = stringResource(R.string.packs_find),
                 summary = stringResource(R.string.packs_find_summary),
-                onClick = { runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PACKS_URL))) } },
+                onClick = { openExtensionsPage(context, "#packs") },
                 trailing = null
             )
             SettingsPreference(
@@ -226,7 +239,6 @@ fun SettingsWallpaperPacksScreen(navController: NavController, onBack: () -> Uni
     }
 }
 
-private const val PACKS_URL = "https://github.com/BISCLab/freiraum-launcher/tree/master/wallpaper-packs"
 
 /** A small portrait thumbnail of one picture, decoded at a fraction of its size. */
 @Composable

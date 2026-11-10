@@ -641,7 +641,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="designs_entry_summary">Fertiges Aussehen mit Farben, Rahmen, Ecken und Effekten</string>
     <string name="designs_intro">Ein Design ändert nur das Aussehen: Farben, Rahmen, Ecken und Effekte. Deine Seiten, Apps, Ordner und Notizen bleiben, wie sie sind, ebenso deine Hintergründe, die mit Wallpaper-Packs kommen. Freiraum hat keinen Internetzugriff, deshalb lädst du Designs im Browser herunter und fügst sie hier hinzu.</string>
     <string name="designs_find">Designs finden</string>
-    <string name="designs_find_summary">Öffnet die Designs auf GitHub im Browser</string>
+    <string name="designs_find_summary">Öffnet die Designs in der Übersicht im Browser</string>
     <string name="designs_add">Design hinzufügen</string>
     <string name="designs_add_summary">Eine heruntergeladene .freiraum-design-Datei wählen</string>
     <string name="designs_installed">Installiert</string>
@@ -668,8 +668,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="designs_remove_active_text">Dieses Design ist gerade aktiv. Freiraum kehrt zuerst zu deinem eigenen Aussehen zurück und löscht dann das Design.</string>
     <string name="settings_group_basics">Grundeinstellungen</string>
     <string name="settings_group_extensions">Erweiterungen</string>
-    <string name="settings_plugins_title">Plugins</string>
-    <string name="settings_plugins_soon">Bald: weitere Widgets als Erweiterung</string>
     <string name="settings_launcher_theme_label">Launcher</string>
     <string name="settings_display_label">Anzeige</string>
     <string name="settings_settings_theme_label">Einstellungen und Einführung</string>
@@ -687,7 +685,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="packs_entry_summary">Hintergrundbilder für alle Seiten</string>
     <string name="packs_intro">Ein Wallpaper-Pack bringt für jede Seite ein Bild mit: Startseite, App-Liste, Textsuche, App-Raster, weitere für zusätzliche Seiten und eines für den Sperrbildschirm. Packs passen zu jedem Design.</string>
     <string name="packs_find">Wallpaper-Packs finden</string>
-    <string name="packs_find_summary">Öffnet die Sammlung auf GitHub im Browser</string>
+    <string name="packs_find_summary">Öffnet die Packs in der Übersicht im Browser</string>
     <string name="packs_add">Wallpaper-Pack hinzufügen</string>
     <string name="packs_add_summary">Eine heruntergeladene .freiraum-wallpapers-Datei wählen</string>
     <string name="packs_installed">Auswählen</string>
@@ -864,4 +862,24 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_home_appearance_what">Wie die Seite aussieht</string>
     <string name="settings_search_layout_label">Aufbau</string>
     <string name="settings_search_rail_side">Seite der Leiste</string>
+    <string name="incoming_unknown">Das ist weder ein Freiraum-Design noch ein Wallpaper-Pack</string>
+    <string name="extensions_entry_summary">Designs, Wallpaper-Packs und Widgets hinzufügen</string>
+    <string name="extensions_intro">Erweiterungen bringen Neues in den Launcher: ein fertiges Aussehen, Bilder für jede Seite oder Daten für ein Widget. Freiraum hat keinen Internetzugriff. Du suchst sie im Browser aus, und ein Tipp dort öffnet sie hier.</string>
+    <string name="extensions_widgets_title">Widgets</string>
+    <string name="extensions_widgets_what">Uhr, Notizen und Musik sind dabei</string>
+    <string name="extensions_widgets_contents">Wetter braucht eine App, die die Daten bringt</string>
+    <string name="extensions_browse">Alle Erweiterungen ansehen</string>
+    <string name="extensions_browse_summary">Öffnet die Übersicht im Browser</string>
+    <string name="extensions_widgets_intro">Widgets legst du auf einer Seite als Zeile an. Manche zeigen, was schon auf dem Handy ist. Andere brauchen Daten aus dem Internet und bekommen sie von einer eigenen App, damit der Launcher selbst offline bleibt.</string>
+    <string name="extensions_widgets_included">Immer dabei</string>
+    <string name="extensions_widgets_with_source">Mit eigener Datenquelle</string>
+    <string name="extensions_weather_info">Das Wetter-Widget zeigt, was eine Wetter-App an den Launcher schickt, zum Beispiel Breezy Weather mit eingeschalteter Datenweitergabe an Gadgetbridge.</string>
+    <string name="extensions_weather_no_source">Noch keine Daten empfangen</string>
+    <string name="extensions_weather_receiving">Empfängt Daten, zuletzt %1$s</string>
+    <string name="extensions_weather_find">Wetterquellen ansehen</string>
+    <string name="extensions_weather_find_summary">Apps, die das Wetter liefern, und wie man sie einrichtet</string>
+    <plurals name="extensions_available">
+        <item quantity="one">%1$d vorhanden</item>
+        <item quantity="other">%1$d vorhanden</item>
+    </plurals>
 </resources>
