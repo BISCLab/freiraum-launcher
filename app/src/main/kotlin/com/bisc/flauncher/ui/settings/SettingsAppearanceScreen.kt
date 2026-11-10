@@ -48,15 +48,13 @@ fun SettingsAppearanceScreen(
                 icon = null,
                 title = stringResource(R.string.designs_title),
                 summary = stringResource(R.string.designs_entry_summary),
-                onClick = { onNavigate("appearance/designs") },
-                trailing = null
+                onClick = { onNavigate("appearance/designs") }
             )
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.packs_title),
                 summary = stringResource(R.string.packs_entry_summary),
-                onClick = { onNavigate("wallpaper_packs") },
-                trailing = null
+                onClick = { onNavigate("wallpaper_packs") }
             )
         }
         SettingsPreferenceGroup(
@@ -97,15 +95,13 @@ fun SettingsAppearanceScreen(
                 icon = null,
                 title = stringResource(R.string.settings_colors_all),
                 summary = stringResource(R.string.settings_colors_all_summary),
-                onClick = { onNavigate("appearance/colors") },
-                trailing = null
+                onClick = { onNavigate("appearance/colors") }
             )
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_corners_all),
                 summary = stringResource(R.string.settings_corners_all_summary),
-                onClick = { onNavigate("appearance/corners") },
-                trailing = null
+                onClick = { onNavigate("appearance/corners") }
             )
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_background_icons_label)) {
@@ -113,15 +109,13 @@ fun SettingsAppearanceScreen(
                 icon = null,
                 title = stringResource(R.string.settings_section_global_background),
                 summary = stringResource(R.string.settings_card_global_background_subtitle),
-                onClick = { onNavigate("appearance/background") },
-                trailing = null
+                onClick = { onNavigate("appearance/background") }
             )
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_icons_label),
                 summary = stringResource(R.string.settings_icons_summary),
-                onClick = { onNavigate("appearance/icons") },
-                trailing = null
+                onClick = { onNavigate("appearance/icons") }
             )
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_display_label)) {
@@ -129,8 +123,7 @@ fun SettingsAppearanceScreen(
                 icon = null,
                 title = stringResource(R.string.settings_statusbar_label),
                 summary = statusBarSummary(viewModel),
-                onClick = { onNavigate("appearance/statusbar") },
-                trailing = null
+                onClick = { onNavigate("appearance/statusbar") }
             )
             SettingsPreference(
                 icon = null,
@@ -145,8 +138,7 @@ fun SettingsAppearanceScreen(
                 icon = null,
                 title = stringResource(R.string.settings_motion_label),
                 summary = motionSummary(viewModel),
-                onClick = { onNavigate("appearance/animations") },
-                trailing = null
+                onClick = { onNavigate("appearance/animations") }
             )
         }
     }

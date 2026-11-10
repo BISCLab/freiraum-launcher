@@ -7,6 +7,15 @@
   Customize (name, icon, where it shows), App info and Uninstall. Uninstall hands over to Android,
   which asks before removing anything; for this the launcher now declares the permission to request
   an uninstall
+- Settings, one word per thing: Links (no longer also websites and internet addresses), Places (no
+  longer also addresses), rows, and Delete for what is gone afterwards (pages, designs, packs)
+- Settings: a row that opens another page shows an arrow everywhere; rows that open a choice do not
+- Home's settings start with the same two large cards as App list, App grid and Text search
+- A page's look has the same three groups on every page: icon and name, background, status bar. On
+  Home and the pages beside it the background no longer sits on a page of its own
+- Saving is the same within a page: the Text search page applies its text color at once like its
+  other settings, and the music widget's cover switch waits for Save like the rest of its editor
+- Back arrows in the settings have a spoken name for screen readers
 - Fixed: the first settings page scrolls, so nothing is cut off on small screens or with large text
 - Fixed: the arrows between the breadcrumbs at the bottom of the settings were invisible
 - Fixed: a search code for a hidden app works regardless of upper and lower case and of a space at

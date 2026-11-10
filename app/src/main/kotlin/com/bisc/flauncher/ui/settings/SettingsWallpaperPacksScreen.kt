@@ -178,7 +178,7 @@ fun SettingsWallpaperPacksScreen(navController: NavController, onBack: () -> Uni
             confirmButton = {
                 TextButton(onClick = { confirmingPlain = false; viewModel.applyPlain(applied) }) { Text(stringResource(R.string.designs_apply)) }
             },
-            dismissButton = { TextButton(onClick = { confirmingPlain = false }) { Text(stringResource(android.R.string.cancel)) } }
+            dismissButton = { TextButton(onClick = { confirmingPlain = false }) { Text(stringResource(R.string.widget_notes_cancel)) } }
         )
     }
 
@@ -192,7 +192,7 @@ fun SettingsWallpaperPacksScreen(navController: NavController, onBack: () -> Uni
                     Text(stringResource(R.string.designs_remove), color = MaterialTheme.colorScheme.error)
                 }
             },
-            dismissButton = { TextButton(onClick = { removing = null }) { Text(stringResource(android.R.string.cancel)) } }
+            dismissButton = { TextButton(onClick = { removing = null }) { Text(stringResource(R.string.widget_notes_cancel)) } }
         )
     }
 
@@ -221,7 +221,7 @@ fun SettingsWallpaperPacksScreen(navController: NavController, onBack: () -> Uni
                     Text(stringResource(R.string.designs_apply))
                 }
             },
-            dismissButton = { TextButton(onClick = { previewing = null }) { Text(stringResource(android.R.string.cancel)) } }
+            dismissButton = { TextButton(onClick = { previewing = null }) { Text(stringResource(R.string.widget_notes_cancel)) } }
         )
     }
 }

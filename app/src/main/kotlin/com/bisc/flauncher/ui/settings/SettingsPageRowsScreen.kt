@@ -106,8 +106,7 @@ fun SettingsPageRowsScreen(
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_home_appearance_title),
-                onClick = { navController.navigate("settings/pages/$pageId/appearance") },
-                trailing = null
+                onClick = { navController.navigate("settings/pages/$pageId/appearance") }
             )
         }
         run {

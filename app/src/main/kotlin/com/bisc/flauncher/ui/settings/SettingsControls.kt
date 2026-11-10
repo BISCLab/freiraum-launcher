@@ -434,7 +434,7 @@ fun SettingsEditPage(title: String, onDismiss: () -> Unit, onSave: (() -> Unit)?
                         title = { Text(title) },
                         navigationIcon = {
                             androidx.compose.material3.IconButton(onClick = guardedDismiss) {
-                                androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                                androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.settings_back))
                             }
                         }
                     )
@@ -497,7 +497,7 @@ fun SettingsFixedDialog(
                         title = { Text(title) },
                         navigationIcon = {
                             androidx.compose.material3.IconButton(onClick = onDismiss) {
-                                androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                                androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.settings_back))
                             }
                         },
                         actions = actions

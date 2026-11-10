@@ -66,8 +66,7 @@ fun SettingsSystemScreen(
                     if (DefaultLauncherUtil.isDefaultLauncher(context)) R.string.settings_default_launcher_already_set
                     else R.string.settings_default_launcher_description
                 ),
-                onClick = { onNavigate("permissions") },
-                trailing = null
+                onClick = { onNavigate("permissions") }
             )
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_language_label)) {

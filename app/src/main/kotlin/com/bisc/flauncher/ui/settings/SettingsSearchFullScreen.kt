@@ -87,40 +87,34 @@ fun SettingsSearchAppearanceScreen(navController: NavController, onBack: () -> U
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_search_page_label),
-                onClick = { onNavigate("page") },
-                trailing = null
+                onClick = { onNavigate("page") }
             )
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_app_grid_search_field),
-                onClick = { onNavigate(SearchElement.FIELD.route) },
-                trailing = null
+                onClick = { onNavigate(SearchElement.FIELD.route) }
             )
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_search_rail_label),
                 summary = stringResource(if (railShown) (if (railLeft) R.string.settings_search_rail_left else R.string.settings_search_rail_right) else R.string.settings_search_rail_hidden),
-                onClick = { onNavigate(SearchElement.RAIL.route) },
-                trailing = null
+                onClick = { onNavigate(SearchElement.RAIL.route) }
             )
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_search_results_label),
-                onClick = { onNavigate(SearchElement.RESULTS.route) },
-                trailing = null
+                onClick = { onNavigate(SearchElement.RESULTS.route) }
             )
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_search_bubble_label),
                 summary = stringResource(R.string.settings_search_bubble_summary),
-                onClick = { onNavigate(SearchElement.BUBBLE.route) },
-                trailing = null
+                onClick = { onNavigate(SearchElement.BUBBLE.route) }
             )
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_search_keyboard_label),
-                onClick = { onNavigate("keyboard") },
-                trailing = null
+                onClick = { onNavigate("keyboard") }
             )
         }
     }
@@ -130,14 +124,13 @@ fun SettingsSearchAppearanceScreen(navController: NavController, onBack: () -> U
  *  status bar. */
 @Composable
 fun SettingsSearchPageScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val savedAppearance by viewModel.searchAppearance.collectAsState()
-    var searchAppearance by rememberDraft(savedAppearance)
+    val searchAppearance by viewModel.searchAppearance.collectAsState()
     val backgroundOverride by viewModel.searchBackgroundOverride.collectAsState()
     val globalShade by viewModel.searchGlobalShade.collectAsState()
     val globalBackground by viewModel.globalBackground.collectAsState()
     val hideStatusBar by viewModel.searchHideStatusBar.collectAsState()
 
-    SettingsSubScreen(title = stringResource(R.string.settings_search_page_label), navController = navController, onBack = onBack, onSave = { viewModel.setSearchAppearance(searchAppearance) }, dirty = searchAppearance != savedAppearance) {
+    SettingsSubScreen(title = stringResource(R.string.settings_search_page_label), navController = navController, onBack = onBack) {
         UtilityPageIdentityGroup(kind = com.bisc.flauncher.data.model.LauncherPageKind.SEARCH, navController = navController)
         BackgroundOverrideSection(
             override = backgroundOverride,
@@ -154,8 +147,8 @@ fun SettingsSearchPageScreen(navController: NavController, onBack: () -> Unit, v
                 title = stringResource(R.string.settings_element_text_color_label),
                 summary = if (searchAppearance.contentColor == null) stringResource(R.string.settings_element_color_auto_hint) else null,
                 color = searchAppearance.contentColor ?: MaterialTheme.colorScheme.onSurface.toArgb(),
-                onColorChange = { searchAppearance = searchAppearance.copy(contentColor = it) },
-                onReset = if (searchAppearance.contentColor != null) ({ searchAppearance = searchAppearance.copy(contentColor = null) }) else null
+                onColorChange = { viewModel.setSearchAppearance(searchAppearance.copy(contentColor = it)) },
+                onReset = if (searchAppearance.contentColor != null) ({ viewModel.setSearchAppearance(searchAppearance.copy(contentColor = null)) }) else null
             )
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_statusbar_label)) {

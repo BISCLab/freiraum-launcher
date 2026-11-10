@@ -12,8 +12,8 @@
     <string name="folder_move_right">Nach rechts verschieben</string>
 
 
-    <string name="sidebar_websites_empty">Noch keine Websites.</string>
-    <string name="sidebar_website_add">Website hinzufügen</string>
+    <string name="sidebar_websites_empty">Noch keine Links.</string>
+    <string name="sidebar_website_add">Link hinzufügen</string>
     <string name="sidebar_website_label_hint">Name</string>
     <string name="sidebar_website_url_hint">Webadresse</string>
 
@@ -21,7 +21,7 @@
     <string name="sidebar_remove_confirm_message">\u201e%1$s\u201c entfernen?</string>
     <string name="sidebar_remove_confirm_action">Entfernen</string>
     <string name="sidebar_maps_empty">Noch keine gespeicherten Orte.</string>
-    <string name="sidebar_maps_add">Adresse hinzufügen</string>
+    <string name="sidebar_maps_add">Ort hinzufügen</string>
     <string name="sidebar_maps_label_hint">Name</string>
     <string name="sidebar_maps_lat_hint">Breitengrad</string>
     <string name="sidebar_maps_lon_hint">Längengrad</string>
@@ -41,10 +41,10 @@
     <string name="search_section_contacts">Kontakte</string>
     <string name="search_section_settings">Systemeinstellungen</string>
     <string name="search_section_shortcuts">Verknüpfungen</string>
-    <string name="search_section_websites">Websites</string>
-    <string name="search_filter_websites">Websites</string>
+    <string name="search_section_websites">Links</string>
+    <string name="search_filter_websites">Links</string>
     <string name="search_filter_folders">Ordner</string>
-    <string name="settings_search_include_websites">Websites</string>
+    <string name="settings_search_include_websites">Links</string>
     <string name="settings_search_include_folders">Ordner</string>
     <string name="search_filter_apps">Apps</string>
     <string name="search_filter_contacts">Kontakte</string>
@@ -147,16 +147,16 @@
     <string name="settings_captions_label">Beschriftung</string>
 
     <string name="settings_section_elements">Apps &amp; Elemente</string>
-    <string name="settings_card_elements_subtitle">Apps, Ordner, Adressen, Links, Aktionsbuttons</string>
-    <string name="settings_elements_addresses_title">Adressen</string>
-    <string name="settings_elements_addresses_empty">Noch keine Adressen.</string>
-    <string name="settings_elements_add_address">Adresse hinzufügen</string>
+    <string name="settings_card_elements_subtitle">Apps, Ordner, Orte, Links, Aktionsbuttons</string>
+    <string name="settings_elements_addresses_title">Orte</string>
+    <string name="settings_elements_addresses_empty">Noch keine Orte.</string>
+    <string name="settings_elements_add_address">Ort hinzufügen</string>
     <string name="settings_elements_address_hint">Adresse</string>
     <string name="settings_elements_navigation_app_label">Navigations-App</string>
     <string name="settings_elements_app_default">Systemstandard</string>
     <string name="settings_elements_use_default">Standard verwenden</string>
-    <string name="settings_elements_delete_address">Adresse löschen</string>
-    <string name="settings_elements_links_title">Internetadressen</string>
+    <string name="settings_elements_delete_address">Ort löschen</string>
+    <string name="settings_elements_links_title">Links</string>
     <string name="settings_elements_links_empty">Noch keine Links.</string>
     <string name="settings_elements_add_link">Link hinzufügen</string>
     <string name="settings_elements_browser_app_label">Browser</string>
@@ -311,7 +311,7 @@
     <string name="settings_pages_behavior_label">Verhalten</string>
     <string name="settings_pages_add_template_label">Ausgangspunkt</string>
     <string name="settings_pages_add_template_blank">Leere Seite</string>
-    <string name="settings_pages_remove">Seite entfernen</string>
+    <string name="settings_pages_remove">Seite löschen</string>
     <string name="settings_pages_rename">Seite umbenennen</string>
     <string name="settings_pages_rename_hint">Seitenname</string>
     <string name="settings_page_icon_title">Symbol</string>
@@ -383,8 +383,8 @@
     <string name="settings_row_entry_add_app">App hinzufügen</string>
     <string name="settings_row_entry_add_folder">Ordner hinzufügen</string>
     <string name="settings_row_entry_add_shortcut">Verknüpfung hinzufügen</string>
-    <string name="settings_row_entry_add_map_target">Adresse</string>
-    <string name="settings_row_entry_add_website">Website</string>
+    <string name="settings_row_entry_add_map_target">Ort</string>
+    <string name="settings_row_entry_add_website">Link</string>
     <string name="settings_row_entry_add_page_link">Seite verlinken</string>
     <string name="settings_row_entry_add_contact">Kontakt hinzufügen</string>
     <string name="settings_row_entry_add_actionbutton">Aktionsbutton hinzufügen</string>
@@ -638,7 +638,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_motion_settings_slide">Einstellungsseiten gleiten</string>
     <string name="settings_motion_ripples">Wellen bei Tippen und Gesten</string>
     <string name="designs_title">Designs</string>
-    <string name="designs_entry_summary">Fertige Looks mit Farben, Rahmen, Ecken und Effekten</string>
+    <string name="designs_entry_summary">Fertiges Aussehen mit Farben, Rahmen, Ecken und Effekten</string>
     <string name="designs_intro">Ein Design ändert nur das Aussehen: Farben, Rahmen, Ecken und Effekte. Deine Seiten, Apps, Ordner und Notizen bleiben, wie sie sind, ebenso deine Hintergründe, die mit Wallpaper-Packs kommen. Freiraum hat keinen Internetzugriff, deshalb lädst du Designs im Browser herunter und fügst sie hier hinzu.</string>
     <string name="designs_find">Designs finden</string>
     <string name="designs_find_summary">Öffnet die Designs auf GitHub im Browser</string>
@@ -655,7 +655,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="designs_import_done">%1$s hinzugefügt</string>
     <string name="designs_import_failed">Das ist kein gültiges Freiraum-Design</string>
     <string name="designs_apply">Anwenden</string>
-    <string name="designs_remove">Entfernen</string>
+    <string name="designs_remove">Löschen</string>
     <string name="designs_lock_screen_too">Auch den Sperrbildschirm setzen</string>
     <string name="designs_effect_motion">Bewegung des Leuchtens</string>
     <string name="designs_effect_still">Ruhend</string>
@@ -663,9 +663,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="designs_effect_slow">Langsam umlaufend</string>
     <string name="designs_effect_slow_summary">Sieht toll aus, braucht aber etwas mehr Akku</string>
     <string name="settings_motion_all">Animationen</string>
-    <string name="designs_remove_title">%1$s entfernen?</string>
+    <string name="designs_remove_title">%1$s löschen?</string>
     <string name="designs_remove_text">Das Design wird aus Freiraum gelöscht. Du kannst es jederzeit wieder hinzufügen.</string>
-    <string name="designs_remove_active_text">Dieses Design ist gerade aktiv. Freiraum kehrt zuerst zu deinem eigenen Look zurück und löscht dann das Design.</string>
+    <string name="designs_remove_active_text">Dieses Design ist gerade aktiv. Freiraum kehrt zuerst zu deinem eigenen Aussehen zurück und löscht dann das Design.</string>
     <string name="settings_group_basics">Grundeinstellungen</string>
     <string name="settings_group_extensions">Erweiterungen</string>
     <string name="settings_plugins_title">Plugins</string>
@@ -678,7 +678,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_motion_summary_on">An, %1$d von %2$d</string>
     <string name="settings_motion_summary_off">Aus</string>
     <string name="settings_motion_summary_system_off">In den Android-Einstellungen aus</string>
-    <string name="settings_backup_export_warning">Die Sicherung enthält deinen ganzen Launcher: das Aussehen mit Designs, Wallpaper-Packs und Hintergründen und persönliche Daten wie Notizen, Adressen, Kontakte, Links und deine Apps. Bewahre sie nur für dich auf und teile sie nicht. Wenn du nur einen Look teilen willst, speichere ihn als Design.</string>
+    <string name="settings_backup_export_warning">Die Sicherung enthält deinen ganzen Launcher: das Aussehen mit Designs, Wallpaper-Packs und Hintergründen und persönliche Daten wie Notizen, Orte, Kontakte, Links und deine Apps. Bewahre sie nur für dich auf und teile sie nicht. Wenn du nur einen Look teilen willst, speichere ihn als Design.</string>
     <string name="settings_backup_export_understood">Verstanden</string>
     <string name="settings_backup_export_confirm">Exportieren</string>
     <string name="settings_widgets_corner_hint" formatted="false">Je höher, desto runder. Sehr runde Ecken können in den Inhalt am Rand des Widgets schneiden.</string>
@@ -699,7 +699,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="packs_applied">Wallpaper-Pack angewendet</string>
     <string name="packs_import_done">%1$s hinzugefügt</string>
     <string name="packs_import_failed">Das ist kein Wallpaper-Pack</string>
-    <string name="packs_remove_text">Das Pack wird aus Freiraum entfernt. Die Bilder bleiben auf deinen Seiten, bis du andere wählst.</string>
+    <string name="packs_remove_text">Das Pack wird aus Freiraum gelöscht. Die Bilder bleiben auf deinen Seiten, bis du andere wählst.</string>
     <string name="designs_bundled">Mitgeliefert</string>
     <string name="welcome_quick_setup">Schnelleinrichtung</string>
     <string name="welcome_quick_setup_summary">Übernimmt alles Empfohlene. Du kannst später alles in den Einstellungen ändern.</string>
@@ -742,7 +742,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_shape_part_alphabet_rail">A–Z-Leiste</string>
     <string name="welcome_shape_part_search_bar">Suchleisten</string>
     <string name="welcome_shape_part_search_results">Suchergebnisse</string>
-    <string name="settings_ready_look_label">Fertiger Look</string>
+    <string name="settings_ready_look_label">Fertiges Aussehen</string>
     <string name="settings_corners_all">Ecken aller Teile</string>
     <string name="settings_corners_all_summary">Rund, weich oder eckig, für alles oder Teil für Teil</string>
     <string name="settings_corners_intro">Wähle eine Form für alles oder jedes Teil einzeln in der Tabelle. Die kleinen Bildschirme zeigen, welches Teil welches ist.</string>
@@ -789,7 +789,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_statusbar_tile_shown">Sichtbar</string>
     <string name="settings_statusbar_tile_hidden">Ausgeblendet</string>
     <string name="settings_folder_widget_height">Höhe</string>
-    <string name="settings_page_search_description">Ein Feld für alles: Apps, Kontakte, Adressen, Links, Einstellungen und mehr, und was nicht auf dem Handy ist, geht weiter an Suchmaschine, Karten oder KI-App.</string>
+    <string name="settings_page_search_description">Ein Feld für alles: Apps, Kontakte, Orte, Links, Einstellungen und mehr, und was nicht auf dem Handy ist, geht weiter an Suchmaschine, Karten oder KI-App.</string>
     <string name="settings_hub_appearance_what">Wie es aussieht</string>
     <string name="settings_hub_behavior_what">Was es tut</string>
     <string name="settings_hub_search_appearance">Seite, Suchfeld, Kategorienleiste, Ergebnisse, Tastatur</string>
@@ -804,8 +804,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_folder_add_widget">Widget</string>
     <string name="settings_folder_position">Position</string>
     <string name="settings_folder_widget_all_settings">Alle Einstellungen</string>
-    <string name="settings_folder_rows_label">Reihen</string>
-    <string name="settings_folder_rows_info">Wie viele Apps und Elemente in jeder Reihe nebeneinander stehen. Widgets nehmen immer die ganze Breite ein.</string>
+    <string name="settings_folder_rows_label">Zeilen</string>
+    <string name="settings_folder_rows_info">Wie viele Apps und Elemente in jeder Zeile nebeneinander stehen. Widgets nehmen immer die ganze Breite ein.</string>
     <string name="settings_folder_intro">Ordner fassen Apps, Orte, Links und Widgets hinter einem Symbol zusammen. Tippe einen Ordner an, um ihn einzurichten, oder lege einen neuen an.</string>
     <string name="settings_folder_tile_count_widgets">%1$d Elemente, %2$d Widgets</string>
     <string name="settings_folder_creator_empty">Wähle unten Apps; Widgets und mehr kannst du gleich danach hinzufügen.</string>
@@ -859,4 +859,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="app_menu_edit">Anpassen</string>
     <string name="app_menu_info">App-Info</string>
     <string name="app_menu_uninstall">Deinstallieren</string>
+    <string name="settings_back">Zurück</string>
+    <string name="settings_home_layout_what">Was darauf liegt</string>
+    <string name="settings_home_appearance_what">Wie die Seite aussieht</string>
 </resources>

@@ -36,8 +36,7 @@ fun SettingsFolderGlobalScreen(navController: NavController, onBack: () -> Unit,
                 SettingsPreference(
                     icon = Icons.Filled.Visibility,
                     title = stringResource(R.string.settings_folder_visibility_label),
-                    onClick = { onNavigate("visibility") },
-                    trailing = null
+                    onClick = { onNavigate("visibility") }
                 )
             }
         }

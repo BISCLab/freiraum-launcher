@@ -49,33 +49,28 @@ fun SettingsAppOverviewAppearanceHubScreen(navController: NavController, onBack:
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_search_page_label),
-                onClick = { onNavigate("page") },
-                trailing = null
+                onClick = { onNavigate("page") }
             )
             SettingsPreference(
                 icon = null,
                 title = surfaceLabel(R.string.settings_layer_surface_section_letter),
-                onClick = { onNavigate("section_letters") },
-                trailing = null
+                onClick = { onNavigate("section_letters") }
             )
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_app_overview_az_index_label),
-                onClick = { onNavigate("az_index") },
-                trailing = null
+                onClick = { onNavigate("az_index") }
             )
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_app_list_search_button),
-                onClick = { onNavigate("search_button") },
-                trailing = null
+                onClick = { onNavigate("search_button") }
             )
             if (showSearchButton && ownSearch) {
                 SettingsPreference(
                     icon = null,
                     title = stringResource(R.string.settings_app_grid_search_field),
-                    onClick = { onNavigate("search_field") },
-                    trailing = null
+                    onClick = { onNavigate("search_field") }
                 )
             }
         }

@@ -94,7 +94,7 @@ fun SettingsAppsScreen(navController: NavController, onBack: () -> Unit, onNavig
                 title = { Text(stringResource(R.string.settings_section_manage_apps)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.settings_back))
                     }
                 }
             )

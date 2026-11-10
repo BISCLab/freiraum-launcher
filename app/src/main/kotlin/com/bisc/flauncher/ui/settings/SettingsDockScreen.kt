@@ -66,15 +66,13 @@ fun SettingsDockScreen(pageId: Long, navController: NavController, onBack: () ->
                 SettingsPreference(
                     icon = Icons.Filled.GridView,
                     title = stringResource(R.string.settings_dock_elements_title),
-                    onClick = { onNavigate("elements") },
-                    trailing = null
+                    onClick = { onNavigate("elements") }
                 )
                 SettingsPreference(
                     icon = Icons.Filled.Visibility,
                     title = stringResource(R.string.settings_dock_visibility_label),
                     summary = dockVisibilityModeLabel(saved.dockVisibilityMode),
-                    onClick = { onNavigate("visibility") },
-                    trailing = null
+                    onClick = { onNavigate("visibility") }
                 )
             }
         }

@@ -12,8 +12,8 @@
     <string name="folder_move_right">Move right</string>
 
 
-    <string name="sidebar_websites_empty">No websites yet.</string>
-    <string name="sidebar_website_add">Add website</string>
+    <string name="sidebar_websites_empty">No links yet.</string>
+    <string name="sidebar_website_add">Add link</string>
     <string name="sidebar_website_label_hint">Name</string>
     <string name="sidebar_website_url_hint">Web address</string>
 
@@ -21,7 +21,7 @@
     <string name="sidebar_remove_confirm_message">Remove \u201c%1$s\u201d?</string>
     <string name="sidebar_remove_confirm_action">Remove</string>
     <string name="sidebar_maps_empty">No saved places yet.</string>
-    <string name="sidebar_maps_add">Add address</string>
+    <string name="sidebar_maps_add">Add place</string>
     <string name="sidebar_maps_label_hint">Name</string>
     <string name="sidebar_maps_lat_hint">Latitude</string>
     <string name="sidebar_maps_lon_hint">Longitude</string>
@@ -41,10 +41,10 @@
     <string name="search_section_contacts">Contacts</string>
     <string name="search_section_settings">System settings</string>
     <string name="search_section_shortcuts">Shortcuts</string>
-    <string name="search_section_websites">Websites</string>
-    <string name="search_filter_websites">Websites</string>
+    <string name="search_section_websites">Links</string>
+    <string name="search_filter_websites">Links</string>
     <string name="search_filter_folders">Folders</string>
-    <string name="settings_search_include_websites">Websites</string>
+    <string name="settings_search_include_websites">Links</string>
     <string name="settings_search_include_folders">Folders</string>
     <string name="search_filter_apps">Apps</string>
     <string name="search_filter_contacts">Contacts</string>
@@ -146,15 +146,15 @@
     <string name="settings_captions_label">Captions</string>
 
     <string name="settings_section_elements">Apps &amp; elements</string>
-    <string name="settings_card_elements_subtitle">Apps, folders, addresses, links, action buttons</string>
-    <string name="settings_elements_addresses_title">Addresses</string>
-    <string name="settings_elements_addresses_empty">No addresses yet.</string>
-    <string name="settings_elements_add_address">Add address</string>
+    <string name="settings_card_elements_subtitle">Apps, folders, places, links, action buttons</string>
+    <string name="settings_elements_addresses_title">Places</string>
+    <string name="settings_elements_addresses_empty">No places yet.</string>
+    <string name="settings_elements_add_address">Add place</string>
     <string name="settings_elements_address_hint">Address</string>
     <string name="settings_elements_navigation_app_label">Navigation app</string>
     <string name="settings_elements_app_default">System default</string>
     <string name="settings_elements_use_default">Use default</string>
-    <string name="settings_elements_delete_address">Delete address</string>
+    <string name="settings_elements_delete_address">Delete place</string>
     <string name="settings_elements_links_title">Links</string>
     <string name="settings_elements_links_empty">No links yet.</string>
     <string name="settings_elements_add_link">Add link</string>
@@ -310,7 +310,7 @@
     <string name="settings_pages_behavior_label">Behavior</string>
     <string name="settings_pages_add_template_label">Start from</string>
     <string name="settings_pages_add_template_blank">Blank page</string>
-    <string name="settings_pages_remove">Remove page</string>
+    <string name="settings_pages_remove">Delete page</string>
     <string name="settings_pages_rename">Rename page</string>
     <string name="settings_pages_rename_hint">Page name</string>
     <string name="settings_page_icon_title">Icon</string>
@@ -382,8 +382,8 @@
     <string name="settings_row_entry_add_app">Add app</string>
     <string name="settings_row_entry_add_folder">Add folder</string>
     <string name="settings_row_entry_add_shortcut">Add shortcut</string>
-    <string name="settings_row_entry_add_map_target">Address</string>
-    <string name="settings_row_entry_add_website">Website</string>
+    <string name="settings_row_entry_add_map_target">Place</string>
+    <string name="settings_row_entry_add_website">Link</string>
     <string name="settings_row_entry_add_page_link">Link a page</string>
     <string name="settings_row_entry_add_contact">Add contact</string>
     <string name="settings_row_entry_add_actionbutton">Add action button</string>
@@ -655,7 +655,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="designs_import_done">%1$s added</string>
     <string name="designs_import_failed">That is not a valid Freiraum design</string>
     <string name="designs_apply">Apply</string>
-    <string name="designs_remove">Remove</string>
+    <string name="designs_remove">Delete</string>
     <string name="designs_lock_screen_too">Also set the lock screen wallpaper</string>
     <string name="designs_effect_motion">Movement of the glow</string>
     <string name="designs_effect_still">Still</string>
@@ -663,7 +663,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="designs_effect_slow">Slowly running round</string>
     <string name="designs_effect_slow_summary">Looks great, but uses a little more battery</string>
     <string name="settings_motion_all">Animations</string>
-    <string name="designs_remove_title">Remove %1$s?</string>
+    <string name="designs_remove_title">Delete %1$s?</string>
     <string name="designs_remove_text">The design file is deleted from Freiraum. You can add it again any time.</string>
     <string name="designs_remove_active_text">This design is in use. Freiraum goes back to your own look first, then deletes the design.</string>
     <string name="settings_group_basics">Basics</string>
@@ -678,7 +678,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_motion_summary_on">On, %1$d of %2$d</string>
     <string name="settings_motion_summary_off">Off</string>
     <string name="settings_motion_summary_system_off">Off in the Android settings</string>
-    <string name="settings_backup_export_warning">The backup holds your whole launcher: the look with designs, wallpaper packs and backgrounds, and personal data like notes, addresses, contacts, links and your apps. Keep it for yourself and do not share it. To share only a look, save it as a design instead.</string>
+    <string name="settings_backup_export_warning">The backup holds your whole launcher: the look with designs, wallpaper packs and backgrounds, and personal data like notes, places, contacts, links and your apps. Keep it for yourself and do not share it. To share only a look, save it as a design instead.</string>
     <string name="settings_backup_export_understood">Understood</string>
     <string name="settings_backup_export_confirm">Export</string>
     <string name="settings_widgets_corner_hint" formatted="false">The higher, the rounder. Very round corners can cut into the content at the edge of the widget.</string>
@@ -699,7 +699,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="packs_applied">Wallpaper pack applied</string>
     <string name="packs_import_done">%1$s added</string>
     <string name="packs_import_failed">This is not a wallpaper pack</string>
-    <string name="packs_remove_text">The pack is removed from Freiraum. The pictures stay on your pages until you choose others.</string>
+    <string name="packs_remove_text">The pack is deleted from Freiraum. The pictures stay on your pages until you choose others.</string>
     <string name="designs_bundled">Included</string>
     <string name="welcome_quick_setup">Quick setup</string>
     <string name="welcome_quick_setup_summary">Takes everything recommended. You can change all of it later in the settings.</string>
@@ -789,7 +789,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_statusbar_tile_shown">Shown</string>
     <string name="settings_statusbar_tile_hidden">Hidden</string>
     <string name="settings_folder_widget_height">Height</string>
-    <string name="settings_page_search_description">One field for everything: apps, contacts, addresses, links, settings and more, and whatever is not on the phone goes on to your search engine, maps or AI app.</string>
+    <string name="settings_page_search_description">One field for everything: apps, contacts, places, links, settings and more, and whatever is not on the phone goes on to your search engine, maps or AI app.</string>
     <string name="settings_hub_appearance_what">How it looks</string>
     <string name="settings_hub_behavior_what">What it does</string>
     <string name="settings_hub_search_appearance">Page, search field, category rail, results, keyboard</string>
@@ -859,4 +859,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="app_menu_edit">Customize</string>
     <string name="app_menu_info">App info</string>
     <string name="app_menu_uninstall">Uninstall</string>
+    <string name="settings_back">Back</string>
+    <string name="settings_home_layout_what">What is on it</string>
+    <string name="settings_home_appearance_what">How the page looks</string>
 </resources>

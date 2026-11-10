@@ -69,7 +69,7 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                 title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.settings_back))
                     }
                 }
             )
@@ -319,7 +319,7 @@ fun SettingsFixedScreen(title: String, navController: NavController, onBack: () 
                 title = { Text(title) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.settings_back))
                     }
                 }
             )
@@ -358,7 +358,7 @@ fun SettingsSubScreen(
                 title = { Text(title) },
                 navigationIcon = {
                     IconButton(onClick = { guardLeave(onBack) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.settings_back))
                     }
                 }
             )

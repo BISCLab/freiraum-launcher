@@ -218,7 +218,7 @@ fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, view
                     exportLauncher.launch("freiraum-design.freiraum-design")
                 }) { Text(stringResource(R.string.settings_backup_export_confirm)) }
             },
-            dismissButton = { TextButton(onClick = { confirmingDesignExport = false }) { Text(stringResource(android.R.string.cancel)) } }
+            dismissButton = { TextButton(onClick = { confirmingDesignExport = false }) { Text(stringResource(R.string.widget_notes_cancel)) } }
         )
     }
 
@@ -234,7 +234,7 @@ fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, view
                     Text(stringResource(R.string.designs_remove), color = MaterialTheme.colorScheme.error)
                 }
             },
-            dismissButton = { TextButton(onClick = { removing = null }) { Text(stringResource(android.R.string.cancel)) } }
+            dismissButton = { TextButton(onClick = { removing = null }) { Text(stringResource(R.string.widget_notes_cancel)) } }
         )
     }
 
@@ -252,7 +252,7 @@ fun SettingsDesignsScreen(navController: NavController, onBack: () -> Unit, view
                     Text(stringResource(R.string.designs_apply))
                 }
             },
-            dismissButton = { TextButton(onClick = { previewing = null }) { Text(stringResource(android.R.string.cancel)) } }
+            dismissButton = { TextButton(onClick = { previewing = null }) { Text(stringResource(R.string.widget_notes_cancel)) } }
         )
     }
 }

@@ -53,10 +53,10 @@ fun SettingsAppGridAppearanceHubScreen(navController: NavController, onBack: () 
         // Tap a part of the miniature to edit it; the list below stays as the second way in.
         AppGridPreview(onNavigate = onNavigate)
         SettingsPreferenceGroup {
-            SettingsPreference(icon = null, title = stringResource(R.string.settings_search_page_label), onClick = { onNavigate("page") }, trailing = null)
-            SettingsPreference(icon = null, title = stringResource(R.string.settings_app_grid_grid_label), onClick = { onNavigate("grid") }, trailing = null)
+            SettingsPreference(icon = null, title = stringResource(R.string.settings_search_page_label), onClick = { onNavigate("page") })
+            SettingsPreference(icon = null, title = stringResource(R.string.settings_app_grid_grid_label), onClick = { onNavigate("grid") })
             if (position != AppGridBarPosition.NONE) {
-                SettingsPreference(icon = null, title = stringResource(R.string.settings_app_grid_search_field), onClick = { onNavigate("search_field") }, trailing = null)
+                SettingsPreference(icon = null, title = stringResource(R.string.settings_app_grid_search_field), onClick = { onNavigate("search_field") })
             }
         }
     }

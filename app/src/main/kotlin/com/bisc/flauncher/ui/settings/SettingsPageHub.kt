@@ -66,7 +66,7 @@ internal fun AppearanceBehaviorHub(
 }
 
 @Composable
-private fun HubCard(icon: ImageVector, title: String, what: String, contents: String, onClick: () -> Unit) {
+internal fun HubCard(icon: ImageVector, title: String, what: String, contents: String, onClick: () -> Unit) {
     val shape = RoundedCornerShape(24.dp)
     Row(
         modifier = Modifier

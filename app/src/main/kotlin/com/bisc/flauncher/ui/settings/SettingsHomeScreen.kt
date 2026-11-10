@@ -60,20 +60,20 @@ fun SettingsHomeScreenHub(pageId: Long, navController: NavController, onBack: ()
     SettingsSubScreen(title = stringResource(R.string.settings_pages_home), navController = navController, onBack = onBack) {
         // Tap a part of the miniature (background, Panel, a row, the Dock) to edit it.
         PagePreview(pageId = pageId, isHome = true, navController = navController)
-        SettingsPreferenceGroup {
-            SettingsPreference(
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            HubCard(
                 icon = Icons.Filled.Palette,
                 title = stringResource(R.string.settings_home_appearance_title),
-                summary = stringResource(R.string.settings_home_appearance_subtitle),
-                onClick = { onNavigate("appearance") },
-                trailing = null
+                what = stringResource(R.string.settings_home_appearance_what),
+                contents = stringResource(R.string.settings_home_appearance_subtitle),
+                onClick = { onNavigate("appearance") }
             )
-            SettingsPreference(
+            HubCard(
                 icon = Icons.Filled.ViewAgenda,
                 title = stringResource(R.string.settings_home_layout_title),
-                summary = stringResource(R.string.settings_home_layout_subtitle),
-                onClick = { onNavigate("layout") },
-                trailing = null
+                what = stringResource(R.string.settings_home_layout_what),
+                contents = stringResource(R.string.settings_home_layout_subtitle),
+                onClick = { onNavigate("layout") }
             )
         }
     }
@@ -87,11 +87,14 @@ fun SettingsHomeScreenHub(pageId: Long, navController: NavController, onBack: ()
 fun SettingsPageAppearanceScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
     val pageHideStatusBar by remember(pageId) { viewModel.pageHideStatusBar(pageId) }.collectAsState(initial = false)
     val pages by viewModel.pages.collectAsState()
-    var showBackgroundSheet by remember { mutableStateOf(false) }
+    val pageBackgroundOverride by remember(pageId) { viewModel.pageBackgroundOverride(pageId) }.collectAsState(initial = null)
+    val pageGlobalShade by remember(pageId) { viewModel.pageGlobalShade(pageId) }.collectAsState(initial = null)
+    val globalBackground by viewModel.globalBackground.collectAsState()
 
+    // The same three groups as on the App list, App grid and Text search pages.
     SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup {
-            pages.find { it.id == pageId }?.let { page ->
+        pages.find { it.id == pageId }?.let { page ->
+            SettingsPreferenceGroup {
                 PageIdentityRows(
                     page = page,
                     pages = pages,
@@ -99,37 +102,23 @@ fun SettingsPageAppearanceScreen(pageId: Long, navController: NavController, onB
                     onRename = { name -> viewModel.renamePage(pageId, name) }
                 )
             }
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_section_global_background),
-                onClick = { showBackgroundSheet = true },
-                trailing = null
-            )
+        }
+        BackgroundOverrideSection(
+            override = pageBackgroundOverride,
+            global = globalBackground,
+            onUseGlobal = { viewModel.clearPageBackgroundConfig(pageId) },
+            onCustomColor = { viewModel.setPageBackgroundConfig(pageId, it) },
+            imageKey = "page_$pageId",
+            globalShade = pageGlobalShade,
+            onGlobalShadeChange = { viewModel.setPageGlobalShade(pageId, it) },
+            groupTitle = stringResource(R.string.settings_section_global_background)
+        )
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_statusbar_label)) {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_statusbar_hide_page),
                 onClick = { viewModel.setPageHideStatusBar(pageId, !pageHideStatusBar) },
                 trailing = { Switch(checked = pageHideStatusBar, onCheckedChange = { viewModel.setPageHideStatusBar(pageId, it) }) }
-            )
-        }
-    }
-
-    if (showBackgroundSheet) {
-        val pageBackgroundOverride by remember(pageId) { viewModel.pageBackgroundOverride(pageId) }.collectAsState(initial = null)
-        val pageGlobalShade by remember(pageId) { viewModel.pageGlobalShade(pageId) }.collectAsState(initial = null)
-        val globalBackground by viewModel.globalBackground.collectAsState()
-        SettingsEditPage(title = stringResource(R.string.settings_section_global_background), onDismiss = { showBackgroundSheet = false }) {
-            BackgroundOverrideSection(
-                override = pageBackgroundOverride,
-                global = globalBackground,
-                onUseGlobal = { viewModel.clearPageBackgroundConfig(pageId) },
-                onCustomColor = { viewModel.setPageBackgroundConfig(pageId, it) },
-                imageKey = "page_$pageId",
-                globalShade = pageGlobalShade,
-                onGlobalShadeChange = { viewModel.setPageGlobalShade(pageId, it) },
-                // The page's own title already says "Background" - repeating it inside too would
-                // just be redundant clutter, not extra clarity.
-                groupTitle = null
             )
         }
     }
@@ -306,8 +295,7 @@ fun SettingsHomePanelScreen(pageId: Long, navController: NavController, onBack: 
                 SettingsPreference(
                     icon = Icons.Filled.GridView,
                     title = stringResource(R.string.settings_dock_elements_title),
-                    onClick = { onNavigate("elements") },
-                    trailing = null
+                    onClick = { onNavigate("elements") }
                 )
             }
         }

@@ -148,7 +148,18 @@ internal fun WidgetEditor(
     val showsStyleControls = row.type == PageRowType.SYSTEM_WIDGET ||
         (isBuiltIn && row.payload != WidgetKind.CLOCK && row.payload != WidgetKind.SPACER)
 
-    SettingsSubScreen(title = rowLabel(row), navController = navController, onBack = onBack, onSave = { onSave(row) }, dirty = row != savedRow) {
+    val savedCoverRounded by viewModel.musicCoverRounded.collectAsState()
+    var coverRounded by rememberDraft(savedCoverRounded)
+    SettingsSubScreen(
+        title = rowLabel(row),
+        navController = navController,
+        onBack = onBack,
+        onSave = {
+            onSave(row)
+            if (coverRounded != savedCoverRounded) viewModel.setMusicCoverRounded(coverRounded)
+        },
+        dirty = row != savedRow || coverRounded != savedCoverRounded
+    ) {
         WidgetSizeEditor(
             row = row,
             minSpan = minSpan,
@@ -208,7 +219,6 @@ internal fun WidgetEditor(
         }
         if (isBuiltIn && row.payload == WidgetKind.MUSIC) {
             val musicSources by viewModel.musicSources.collectAsState()
-            val coverRounded by viewModel.musicCoverRounded.collectAsState()
             SettingsPreferenceGroup(title = stringResource(R.string.settings_music_sources)) {
                 MusicSourcesRow(sources = musicSources, apps = browsableApps, loadIcon = viewModel::loadIcon, onSave = viewModel::setMusicSources)
             }
@@ -217,8 +227,8 @@ internal fun WidgetEditor(
                     icon = null,
                     title = stringResource(R.string.settings_music_cover_rounded),
                     info = stringResource(R.string.settings_music_cover_rounded_info),
-                    onClick = { viewModel.setMusicCoverRounded(!coverRounded) },
-                    trailing = { Switch(checked = coverRounded, onCheckedChange = viewModel::setMusicCoverRounded) }
+                    onClick = { coverRounded = !coverRounded },
+                    trailing = { Switch(checked = coverRounded, onCheckedChange = { coverRounded = it }) }
                 )
             }
         }
