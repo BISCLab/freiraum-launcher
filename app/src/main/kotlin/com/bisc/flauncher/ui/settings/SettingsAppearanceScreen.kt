@@ -41,6 +41,7 @@ fun SettingsAppearanceScreen(
     var launcherThemePickerOpen by remember { mutableStateOf(false) }
     var settingsThemePickerOpen by remember { mutableStateOf(false) }
     var accentPickerOpen by remember { mutableStateOf(false) }
+    var fontPickerOpen by remember { mutableStateOf(false) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_design_title), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup(title = stringResource(R.string.settings_ready_look_label)) {
@@ -84,11 +85,15 @@ fun SettingsAppearanceScreen(
             // as its own primary color) - that's the preview.
             AccentPalette(selected = accentColor, onSelect = viewModel::setAccentColor, onCustom = { accentPickerOpen = true })
         }
+        // A choice on this overview opens a short list, like the color modes above.
         SettingsPreferenceGroup(title = stringResource(R.string.settings_font_label)) {
-            RadioPreference(stringResource(R.string.settings_font_system), FontPreference.SYSTEM, fontPreference, viewModel::setFontPreference, font = FontPreference.SYSTEM.fontFamily)
-            RadioPreference(stringResource(R.string.settings_font_serif), FontPreference.SERIF, fontPreference, viewModel::setFontPreference, font = FontPreference.SERIF.fontFamily)
-            RadioPreference(stringResource(R.string.settings_font_monospace), FontPreference.MONOSPACE, fontPreference, viewModel::setFontPreference, font = FontPreference.MONOSPACE.fontFamily)
-            RadioPreference(stringResource(R.string.settings_font_rounded), FontPreference.ROUNDED, fontPreference, viewModel::setFontPreference, font = FontPreference.ROUNDED.fontFamily)
+            SettingsPreference(
+                icon = null,
+                title = fontLabel(fontPreference),
+                titleFontFamily = fontPreference.fontFamily ?: androidx.compose.ui.text.font.FontFamily.Default,
+                onClick = { fontPickerOpen = true },
+                trailing = null
+            )
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_parts_label)) {
             SettingsPreference(
@@ -162,6 +167,17 @@ fun SettingsAppearanceScreen(
         )
     }
 
+    if (fontPickerOpen) {
+        ChoiceDialog(
+            title = stringResource(R.string.settings_font_label),
+            options = FontPreference.entries.map { it to fontLabel(it) },
+            selected = fontPreference,
+            onPick = { fontPickerOpen = false; viewModel.setFontPreference(it) },
+            onDismiss = { fontPickerOpen = false },
+            fontOf = { it.fontFamily ?: androidx.compose.ui.text.font.FontFamily.Default }
+        )
+    }
+
     if (accentPickerOpen) {
         var draft by rememberDraft(accentColor)
         SettingsEditPage(title = stringResource(R.string.settings_accent_custom), onDismiss = { accentPickerOpen = false }, onSave = { viewModel.setAccentColor(draft) }, dirty = draft != accentColor) {
@@ -209,5 +225,15 @@ internal fun settingsThemeLabel(mode: SettingsThemeMode): String = stringResourc
         SettingsThemeMode.LIGHT -> R.string.settings_theme_light
         SettingsThemeMode.DARK -> R.string.settings_theme_dark
         SettingsThemeMode.SYSTEM -> R.string.settings_theme_system
+    }
+)
+
+@Composable
+private fun fontLabel(font: FontPreference): String = stringResource(
+    when (font) {
+        FontPreference.SYSTEM -> R.string.settings_font_system
+        FontPreference.SERIF -> R.string.settings_font_serif
+        FontPreference.MONOSPACE -> R.string.settings_font_monospace
+        FontPreference.ROUNDED -> R.string.settings_font_rounded
     }
 )

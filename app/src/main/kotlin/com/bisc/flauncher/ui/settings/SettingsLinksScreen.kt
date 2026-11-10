@@ -35,7 +35,7 @@ fun SettingsLinksScreen(navController: NavController, onBack: () -> Unit, viewMo
     SettingsSubScreen(title = stringResource(R.string.settings_elements_links_title), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_links_title)) {
             if (websites.isEmpty()) {
-                SettingsPreference(icon = null, title = stringResource(R.string.settings_elements_links_empty), onClick = {}, trailing = null)
+                SettingsPreference(icon = null, title = stringResource(R.string.settings_elements_links_empty), onClick = null, trailing = null)
             }
             websites.sortedBy { it.label }.forEach { website ->
                 SettingsPreference(

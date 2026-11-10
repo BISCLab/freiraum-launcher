@@ -1,5 +1,8 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
@@ -542,3 +545,28 @@ fun IconShapePreference(
     )
 }
 
+
+/** A row that picks one of two or three short options right in place. */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun <T> SettingsChoiceRow(title: String, options: List<Pair<T, String>>, selected: T, onSelect: (T) -> Unit, info: String? = null) {
+    SettingsPreference(
+        icon = null,
+        title = title,
+        info = info,
+        onClick = null,
+        trailing = {
+            SingleChoiceSegmentedButtonRow {
+                options.forEachIndexed { index, (value, label) ->
+                    SegmentedButton(
+                        selected = value == selected,
+                        onClick = { onSelect(value) },
+                        shape = SegmentedButtonDefaults.itemShape(index, options.size),
+                        icon = {},
+                        label = { Text(label, maxLines = 1, softWrap = false) }
+                    )
+                }
+            }
+        }
+    )
+}

@@ -16,6 +16,14 @@
 - Saving is the same within a page: the Text search page applies its text color at once like its
   other settings, and the music widget's cover switch waits for Save like the rest of its editor
 - Back arrows in the settings have a spoken name for screen readers
+- Text search settings sorted by one rule: Behavior holds what shows and where, Appearance only how
+  it looks. The search field's position, the keyboard opening by itself, the rail switch and the
+  rail's side sit together under Behavior as Layout; they are gone from the look pages, and the
+  rail switch is there only once. The keyboard page is now the strip over the keyboard alone
+- Choices between two or three short options are made right in their row (search field top or
+  bottom, rail left or right, the App grid's search field); the font opens a short list like the
+  color modes, each font shown in its own typeface
+- Settings rows show a pressed effect; rows that only say something no longer react to a tap
 - Fixed: the first settings page scrolls, so nothing is cut off on small screens or with large text
 - Fixed: the arrows between the breadcrumbs at the bottom of the settings were invisible
 - Fixed: a search code for a hidden app works regardless of upper and lower case and of a space at

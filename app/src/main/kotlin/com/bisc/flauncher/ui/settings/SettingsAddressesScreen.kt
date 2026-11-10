@@ -37,7 +37,7 @@ fun SettingsAddressesScreen(navController: NavController, onBack: () -> Unit, vi
     SettingsSubScreen(title = stringResource(R.string.settings_elements_addresses_title), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_addresses_title)) {
             if (targets.isEmpty()) {
-                SettingsPreference(icon = null, title = stringResource(R.string.settings_elements_addresses_empty), onClick = {}, trailing = null)
+                SettingsPreference(icon = null, title = stringResource(R.string.settings_elements_addresses_empty), onClick = null, trailing = null)
             }
             targets.sortedBy { it.label }.forEach { target ->
                 SettingsPreference(

@@ -216,7 +216,15 @@ fun SettingsSystemScreen(
 
 /** A short list of radio choices that closes on pick. */
 @Composable
-internal fun <T> ChoiceDialog(title: String, options: List<Pair<T, String>>, selected: T, onPick: (T) -> Unit, onDismiss: () -> Unit) {
+internal fun <T> ChoiceDialog(
+    title: String,
+    options: List<Pair<T, String>>,
+    selected: T,
+    onPick: (T) -> Unit,
+    onDismiss: () -> Unit,
+    /** Shows each option in a typeface of its own, for picking a font. */
+    fontOf: ((T) -> androidx.compose.ui.text.font.FontFamily?)? = null
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
@@ -231,7 +239,7 @@ internal fun <T> ChoiceDialog(title: String, options: List<Pair<T, String>>, sel
                         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
                     ) {
                         androidx.compose.material3.RadioButton(selected = value == selected, onClick = { onPick(value) })
-                        Text(label, modifier = Modifier.padding(start = 8.dp))
+                        Text(label, fontFamily = fontOf?.invoke(value), modifier = Modifier.padding(start = 8.dp))
                     }
                 }
             }

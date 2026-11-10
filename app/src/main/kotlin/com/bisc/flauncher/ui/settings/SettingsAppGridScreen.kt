@@ -113,7 +113,7 @@ fun SettingsAppGridGridScreen(navController: NavController, onBack: () -> Unit, 
                     icon = null,
                     title = stringResource(R.string.settings_app_grid_rows),
                     summary = if (rows == 0) stringResource(R.string.settings_app_grid_rows_auto) else rows.toString(),
-                    onClick = {},
+                    onClick = null,
                     trailing = {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             // Below 3 comes "as many as fit".
@@ -138,7 +138,7 @@ fun SettingsAppGridGridScreen(navController: NavController, onBack: () -> Unit, 
             SettingsPreference(
                 icon = null,
                 title = columns.toString(),
-                onClick = {},
+                onClick = null,
                 trailing = {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         IconButton(onClick = { viewModel.setAppGridColumns(columns - 1) }, enabled = columns > 3) {
@@ -216,9 +216,16 @@ fun SettingsAppGridBehaviorScreen(
 
     SettingsSubScreen(title = stringResource(R.string.settings_search_behavior_label), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup(title = stringResource(R.string.settings_app_grid_search_field)) {
-            RadioPreference(stringResource(R.string.settings_app_grid_bar_bottom), AppGridBarPosition.BOTTOM, position, viewModel::setAppGridBarPosition)
-            RadioPreference(stringResource(R.string.settings_app_grid_bar_top), AppGridBarPosition.TOP, position, viewModel::setAppGridBarPosition)
-            RadioPreference(stringResource(R.string.settings_app_grid_bar_none), AppGridBarPosition.NONE, position, viewModel::setAppGridBarPosition)
+            SettingsChoiceRow(
+                title = stringResource(R.string.settings_search_bar_position_label),
+                options = listOf(
+                    AppGridBarPosition.TOP to stringResource(R.string.settings_app_grid_bar_top),
+                    AppGridBarPosition.BOTTOM to stringResource(R.string.settings_app_grid_bar_bottom),
+                    AppGridBarPosition.NONE to stringResource(R.string.settings_app_grid_bar_none)
+                ),
+                selected = position,
+                onSelect = viewModel::setAppGridBarPosition
+            )
         }
         if (position != AppGridBarPosition.NONE) {
             SettingsPreferenceGroup {
@@ -247,7 +254,7 @@ fun SettingsAppGridBehaviorScreen(
             info = stringResource(R.string.settings_app_grid_folders_info)
         ) {
             if (folders.isEmpty()) {
-                SettingsPreference(icon = null, title = stringResource(R.string.settings_app_grid_folders_empty), onClick = {}, trailing = null, enabled = false)
+                SettingsPreference(icon = null, title = stringResource(R.string.settings_app_grid_folders_empty), onClick = null, trailing = null, enabled = false)
             }
             folders.forEach { folder ->
                 val shown = folder.id in folderIds

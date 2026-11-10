@@ -443,7 +443,7 @@
     <string name="settings_folder_creator_selected">%1$d selected</string>
     <string name="settings_search_keyboard_auto_open">Open keyboard automatically</string>
     <string name="settings_search_page_label">Page</string>
-    <string name="settings_search_keyboard_label">Keyboard</string>
+    <string name="settings_search_keyboard_label">Strip over the keyboard</string>
     <string name="settings_search_behavior_label">Behavior</string>
     <string name="settings_search_results_label">Result cards</string>
     <string name="settings_search_keyboard_cap_label">Keyboard extension</string>
@@ -792,8 +792,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_page_search_description">One field for everything: apps, contacts, places, links, settings and more, and whatever is not on the phone goes on to your search engine, maps or AI app.</string>
     <string name="settings_hub_appearance_what">How it looks</string>
     <string name="settings_hub_behavior_what">What it does</string>
-    <string name="settings_hub_search_appearance">Page, search field, category rail, results, keyboard</string>
-    <string name="settings_hub_search_behavior">Search engine, AI app, favorites, categories and their order</string>
+    <string name="settings_hub_search_appearance">Page, search field, category rail, results, strip over the keyboard</string>
+    <string name="settings_hub_search_behavior">Layout, categories and their order, search engines, AI apps, favorites</string>
     <string name="settings_hub_app_list_appearance">Page, letters, A-Z rail, search button, search field</string>
     <string name="settings_hub_app_list_behavior">Edge, what is shown, its own search</string>
     <string name="settings_hub_app_grid_appearance">Page, grid, search field</string>
@@ -862,4 +862,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_back">Back</string>
     <string name="settings_home_layout_what">What is on it</string>
     <string name="settings_home_appearance_what">How the page looks</string>
+    <string name="settings_search_layout_label">Layout</string>
+    <string name="settings_search_rail_side">Side of the rail</string>
 </resources>

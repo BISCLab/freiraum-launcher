@@ -11,6 +11,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -85,7 +86,7 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                         icon = null,
                         title = stringResource(R.string.settings_tablet_beta_title),
                         summary = stringResource(R.string.settings_tablet_beta_summary),
-                        onClick = {},
+                        onClick = null,
                         trailing = null
                     )
                 }
@@ -141,7 +142,7 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                     icon = Icons.Filled.Extension,
                     title = stringResource(R.string.settings_plugins_title),
                     summary = stringResource(R.string.settings_plugins_soon),
-                    onClick = {},
+                    onClick = null,
                     enabled = false
                 )
             }
@@ -215,7 +216,8 @@ fun SettingsPreference(
     icon: ImageVector?,
     title: String,
     summary: String? = null,
-    onClick: () -> Unit,
+    /** Null = a row that only says or holds something (a note, a control at its end). */
+    onClick: (() -> Unit)?,
     titleFontFamily: androidx.compose.ui.text.font.FontFamily? = null,
     leading: (@Composable () -> Unit)? = icon?.let {
         {
@@ -246,7 +248,7 @@ fun SettingsPreference(
                 // without a trailing control line up as equals inside one group.
                 .heightIn(min = 80.dp)
                 .background(MaterialTheme.colorScheme.surfaceContainer)
-                .then(if (enabled) Modifier.noRippleClickable(onClick = onClick) else Modifier)
+                .then(if (enabled && onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

@@ -172,15 +172,6 @@ fun SettingsSearchKeyboardScreen(navController: NavController, onBack: () -> Uni
     val capArrow by viewModel.searchKeyboardCapArrow.collectAsState()
 
     SettingsSubScreen(title = stringResource(R.string.settings_search_keyboard_label), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_keyboard_auto_open),
-                info = stringResource(R.string.settings_search_keyboard_auto_open_summary),
-                onClick = { viewModel.setSearchKeyboardAutoOpen(!keyboardAutoOpen) },
-                trailing = { Switch(checked = keyboardAutoOpen, onCheckedChange = viewModel::setSearchKeyboardAutoOpen) }
-            )
-        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_search_keyboard_cap_label)) {
             SettingsPreference(
                 icon = null,
@@ -222,17 +213,44 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
     val modes by viewModel.searchCategoryModes.collectAsState()
     val railShown by viewModel.searchBarShowCategories.collectAsState()
     val categoryColors by viewModel.categoryColors.collectAsState()
+    val barAtBottom by viewModel.searchBarAtBottom.collectAsState()
+    val keyboardAutoOpen by viewModel.searchKeyboardAutoOpen.collectAsState()
+    val railLeft by viewModel.searchCategoryRailLeft.collectAsState()
     var pickingColorFor by remember { mutableStateOf<SearchCategory?>(null) }
     SettingsSubScreen(title = stringResource(R.string.settings_search_behavior_label), navController = navController, onBack = onBack) {
-        // The whole rail first: switched off, no category has a place in it.
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_search_rail_label)) {
+        // Where things are and what shows; how they look is on the Appearance side.
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_search_layout_label)) {
+            SettingsChoiceRow(
+                title = stringResource(R.string.settings_app_grid_search_field),
+                options = listOf(false to stringResource(R.string.settings_app_grid_bar_top), true to stringResource(R.string.settings_app_grid_bar_bottom)),
+                selected = barAtBottom,
+                onSelect = viewModel::setSearchBarAtBottom,
+                info = stringResource(R.string.settings_search_field_position_info)
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_search_keyboard_auto_open),
+                info = stringResource(R.string.settings_search_keyboard_auto_open_summary),
+                onClick = { viewModel.setSearchKeyboardAutoOpen(!keyboardAutoOpen) },
+                trailing = { Switch(checked = keyboardAutoOpen, onCheckedChange = viewModel::setSearchKeyboardAutoOpen) }
+            )
+            // The whole rail: switched off, no category has a place in it.
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_search_rail_show),
                 summary = stringResource(if (railShown) R.string.settings_search_categories_rail_on else R.string.settings_search_categories_rail_off),
+                info = stringResource(R.string.settings_search_rail_info),
                 onClick = { viewModel.setSearchBarShowCategories(!railShown) },
                 trailing = { Switch(checked = railShown, onCheckedChange = viewModel::setSearchBarShowCategories) }
             )
+            if (railShown) {
+                SettingsChoiceRow(
+                    title = stringResource(R.string.settings_search_rail_side),
+                    options = listOf(true to stringResource(R.string.settings_search_rail_left), false to stringResource(R.string.settings_search_rail_right)),
+                    selected = railLeft,
+                    onSelect = viewModel::setSearchCategoryRailLeft
+                )
+            }
         }
 
         Column {
@@ -577,31 +595,6 @@ fun SettingsSearchElementScreen(
             SearchElement.BUBBLE -> LookSampleKind.BUBBLE
         },
         links = {
-            if (element == SearchElement.FIELD) {
-                SettingsPreferenceGroup(
-                    title = stringResource(R.string.settings_search_bar_position_label),
-                    info = stringResource(R.string.settings_search_field_position_info)
-                ) {
-                    RadioPreference(stringResource(R.string.settings_app_grid_bar_top), false, barAtBottom, viewModel::setSearchBarAtBottom)
-                    RadioPreference(stringResource(R.string.settings_app_grid_bar_bottom), true, barAtBottom, viewModel::setSearchBarAtBottom)
-                }
-            }
-            if (element == SearchElement.RAIL) {
-                val railShown by viewModel.searchBarShowCategories.collectAsState()
-                val railLeft by viewModel.searchCategoryRailLeft.collectAsState()
-                SettingsPreferenceGroup(info = stringResource(R.string.settings_search_rail_info)) {
-                    SettingsPreference(
-                        icon = null,
-                        title = stringResource(R.string.settings_search_rail_show),
-                        onClick = { viewModel.setSearchBarShowCategories(!railShown) },
-                        trailing = { Switch(checked = railShown, onCheckedChange = viewModel::setSearchBarShowCategories) }
-                    )
-                    if (railShown) {
-                        RadioPreference(stringResource(R.string.settings_search_rail_left), true, railLeft, viewModel::setSearchCategoryRailLeft)
-                        RadioPreference(stringResource(R.string.settings_search_rail_right), false, railLeft, viewModel::setSearchCategoryRailLeft)
-                    }
-                }
-            }
             if (element == SearchElement.RESULTS) {
                 SettingsPreferenceGroup {
                     SettingsPreference(

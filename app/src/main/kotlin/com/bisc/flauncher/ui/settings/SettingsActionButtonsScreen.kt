@@ -53,7 +53,7 @@ fun SettingsActionButtonsScreen(navController: NavController, onBack: () -> Unit
     SettingsSubScreen(title = stringResource(R.string.settings_elements_actionbuttons_title), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_actionbuttons_title)) {
             if (buttons.isEmpty()) {
-                SettingsPreference(icon = null, title = stringResource(R.string.settings_elements_actionbuttons_empty), onClick = {}, trailing = null)
+                SettingsPreference(icon = null, title = stringResource(R.string.settings_elements_actionbuttons_empty), onClick = null, trailing = null)
             }
             buttons.sortedBy { it.label }.forEach { button ->
                 SettingsPreference(

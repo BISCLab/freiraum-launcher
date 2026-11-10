@@ -184,7 +184,7 @@ fun SettingsAboutScreen(navController: NavController, onBack: () -> Unit) {
                 icon = Icons.Filled.Lock,
                 title = stringResource(R.string.about_privacy),
                 summary = stringResource(R.string.about_privacy_summary),
-                onClick = {},
+                onClick = null,
                 trailing = null
             )
         }

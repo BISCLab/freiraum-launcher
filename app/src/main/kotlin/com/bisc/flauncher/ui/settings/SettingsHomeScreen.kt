@@ -389,7 +389,7 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
                 SettingsPreference(
                     icon = null,
                     title = stringResource(R.string.settings_panel_row_number, index + 1),
-                    onClick = {},
+                    onClick = null,
                     trailing = {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(cols.toString(), modifier = Modifier.padding(end = 4.dp))

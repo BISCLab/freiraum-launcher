@@ -172,7 +172,7 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
                 SettingsPreference(
                     icon = null,
                     title = stringResource(R.string.settings_panel_row_number, index + 1),
-                    onClick = {},
+                    onClick = null,
                     trailing = {
                         androidx.compose.foundation.layout.Row(
                             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,

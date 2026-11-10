@@ -139,7 +139,7 @@ fun SettingsElementBoxEditScreen(
                 SettingsPreference(
                     icon = null,
                     title = row.columns.toString(),
-                    onClick = {},
+                    onClick = null,
                     trailing = {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             IconButton(

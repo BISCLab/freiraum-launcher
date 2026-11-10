@@ -443,7 +443,7 @@
     <string name="settings_folder_creator_selected">%1$d ausgewählt</string>
     <string name="settings_search_keyboard_auto_open">Tastatur automatisch öffnen</string>
     <string name="settings_search_page_label">Seite</string>
-    <string name="settings_search_keyboard_label">Tastatur</string>
+    <string name="settings_search_keyboard_label">Streifen über der Tastatur</string>
     <string name="settings_search_behavior_label">Verhalten</string>
     <string name="settings_search_results_label">Ergebniskästen</string>
     <string name="settings_search_keyboard_cap_label">Tastatur-Verlängerung</string>
@@ -792,8 +792,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_page_search_description">Ein Feld für alles: Apps, Kontakte, Orte, Links, Einstellungen und mehr, und was nicht auf dem Handy ist, geht weiter an Suchmaschine, Karten oder KI-App.</string>
     <string name="settings_hub_appearance_what">Wie es aussieht</string>
     <string name="settings_hub_behavior_what">Was es tut</string>
-    <string name="settings_hub_search_appearance">Seite, Suchfeld, Kategorienleiste, Ergebnisse, Tastatur</string>
-    <string name="settings_hub_search_behavior">Suchmaschine, KI-App, Favoriten, Kategorien und ihre Reihenfolge</string>
+    <string name="settings_hub_search_appearance">Seite, Suchfeld, Kategorienleiste, Ergebnisse, Streifen über der Tastatur</string>
+    <string name="settings_hub_search_behavior">Aufbau, Kategorien und ihre Reihenfolge, Suchmaschinen, KI-Apps, Favoriten</string>
     <string name="settings_hub_app_list_appearance">Seite, Buchstaben, A–Z-Leiste, Suchbutton, Suchfeld</string>
     <string name="settings_hub_app_list_behavior">Rand, was angezeigt wird, eigene Suche</string>
     <string name="settings_hub_app_grid_appearance">Seite, Raster, Suchfeld</string>
@@ -862,4 +862,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_back">Zurück</string>
     <string name="settings_home_layout_what">Was darauf liegt</string>
     <string name="settings_home_appearance_what">Wie die Seite aussieht</string>
+    <string name="settings_search_layout_label">Aufbau</string>
+    <string name="settings_search_rail_side">Seite der Leiste</string>
 </resources>
