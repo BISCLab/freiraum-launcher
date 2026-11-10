@@ -77,7 +77,7 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
         bottomBar = { SettingsBreadcrumbBar(navController) }
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-        Column(modifier = Modifier.widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(modifier = Modifier.widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             AboutHeaderCard(onClick = { onNavigate("about") })
             if (com.bisc.flauncher.ui.isLargeScreen()) {
                 SettingsPreferenceGroup {

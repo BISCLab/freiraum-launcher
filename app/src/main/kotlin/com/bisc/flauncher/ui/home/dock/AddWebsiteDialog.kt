@@ -30,7 +30,8 @@ fun AddWebsiteDialog(
 ) {
     var label by remember { mutableStateOf("") }
     var url by remember { mutableStateOf("") }
-    val isValid = label.isNotBlank() && url.isNotBlank()
+    val urlValid = com.bisc.flauncher.util.linkAddress(url) != null
+    val isValid = label.isNotBlank() && urlValid
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -51,6 +52,8 @@ fun AddWebsiteDialog(
                     onValueChange = { url = it },
                     label = { Text(stringResource(R.string.sidebar_website_url_hint)) },
                     singleLine = true,
+                    isError = url.isNotBlank() && !urlValid,
+                    supportingText = if (url.isNotBlank() && !urlValid) ({ Text(stringResource(R.string.link_address_invalid)) }) else null,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                 )

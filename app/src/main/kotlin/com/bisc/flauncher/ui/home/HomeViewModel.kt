@@ -545,7 +545,8 @@ class HomeViewModel @Inject constructor(
         }.sortedByDescending { foldForSearch(it.label).startsWith(foldForSearch(query.trim())) }
         val codeMatches = visible.filter { app ->
             val override = overrides[app.componentName.flattenToString()]
-            override?.revealMode == RevealMode.SEARCH_CODE && override.revealCode == query
+            override?.revealMode == RevealMode.SEARCH_CODE && !override.revealCode.isNullOrBlank() &&
+                override.revealCode.trim().equals(query.trim(), ignoreCase = true)
         }
         return (nameMatches + codeMatches).distinctBy { it.componentName }
     }

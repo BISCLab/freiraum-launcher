@@ -853,4 +853,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_table_hint">Symbol antippen: Symbol und Farbe ändern. ≡ ziehen: Reihenfolge ändern.</string>
     <string name="settings_search_web_intro_web">Die Web-Karte öffnet mit einem Tipp die erste Suchmaschine, die anderen liegen direkt darunter in derselben Karte zur Auswahl. Tippe auf ein Symbol, um ihm ein eigenes Bild zu geben.</string>
     <string name="settings_search_web_intro_ai">Die KI-Karte übergibt die Anfrage mit einem Tipp an die erste App, die anderen liegen direkt darunter in derselben Karte. Tippe auf ein Symbol, um ihm ein eigenes Bild zu geben.</string>
+    <string name="link_open_failed">Dieser Link ließ sich nicht öffnen</string>
+    <string name="link_address_invalid">Keine Adresse, die ein Link öffnen kann</string>
+    <string name="settings_manage_apps_reveal_code_note">Groß- und Kleinschreibung spielt keine Rolle. Ohne Code bleibt die App über ihren Namen auffindbar.</string>
 </resources>

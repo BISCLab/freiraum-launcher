@@ -1,6 +1,5 @@
 package com.bisc.flauncher.util
 
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -15,11 +14,9 @@ object ExternalApps {
 fun startView(context: Context, uri: Uri, preferredPackage: String?): Boolean {
     val view = Intent(Intent.ACTION_VIEW, uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     if (preferredPackage != null) {
-        try {
-            context.startActivity(Intent(view).setPackage(preferredPackage))
-            return true
-        } catch (_: ActivityNotFoundException) {
-        }
+        // Anything the chosen app refuses (not installed, not allowed, an address it must not get)
+        // falls through to the device default below.
+        if (runCatching { context.startActivity(Intent(view).setPackage(preferredPackage)) }.isSuccess) return true
     }
     return runCatching { context.startActivity(view) }.isSuccess
 }

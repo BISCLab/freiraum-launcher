@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Fixed: the first settings page scrolls, so nothing is cut off on small screens or with large text
+- Fixed: the arrows between the breadcrumbs at the bottom of the settings were invisible
+- Fixed: a search code for a hidden app works regardless of upper and lower case and of a space at
+  the end; a code left empty no longer makes the app unfindable
+- Fixed: a link with an address that cannot be opened no longer crashes; such addresses are refused
+  when the link is made, and a link that fails to open says so
+- Weather broadcasts are limited to 1 MB unpacked, so another app cannot crash the launcher with one
+
 ## 0.12.6
 
 - Text search opens as one motion with the keyboard: it starts when the keyboard starts and runs on

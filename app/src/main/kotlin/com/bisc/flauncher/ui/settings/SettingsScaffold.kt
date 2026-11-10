@@ -75,7 +75,7 @@ internal fun SettingsBreadcrumbBar(
                     Icons.AutoMirrored.Filled.ArrowForwardIos,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(14.dp).padding(horizontal = 8.dp)
+                    modifier = Modifier.padding(horizontal = 8.dp).size(12.dp)
                 )
             }
         }

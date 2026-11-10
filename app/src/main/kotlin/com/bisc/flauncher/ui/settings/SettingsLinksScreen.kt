@@ -71,12 +71,13 @@ fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBa
     val websites by viewModel.pinnedWebsites.collectAsState()
     val saved = websites.find { it.id == websiteId } ?: return
     var website by rememberDraft(saved)
+    val urlValid = com.bisc.flauncher.util.linkAddress(website.url) != null
     val browsableApps by viewModel.browsableApps.collectAsState()
     var showAppPicker by remember { mutableStateOf(false) }
     var showIconPicker by remember { mutableStateOf(false) }
     var confirmingDelete by remember { mutableStateOf(false) }
 
-    SettingsSubScreen(title = saved.label, navController = navController, onBack = onBack, onSave = { viewModel.updateWebsite(website) }, dirty = website != saved) {
+    SettingsSubScreen(title = saved.label, navController = navController, onBack = onBack, onSave = { viewModel.updateWebsite(website) }, dirty = website != saved && urlValid) {
         SettingsPreferenceGroup {
             OutlinedTextField(
                 value = website.label,
@@ -89,6 +90,8 @@ fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBa
                 value = website.url,
                 onValueChange = { website = website.copy(url = it) },
                 label = { Text(stringResource(R.string.sidebar_website_url_hint)) },
+                isError = !urlValid,
+                supportingText = if (!urlValid) ({ Text(stringResource(R.string.link_address_invalid)) }) else null,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
             )

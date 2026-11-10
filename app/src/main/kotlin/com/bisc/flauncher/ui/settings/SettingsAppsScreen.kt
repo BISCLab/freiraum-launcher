@@ -280,8 +280,9 @@ private fun AppOverrideEditSheetContent(
         customLabel = customLabel,
         hiddenFromAppList = hiddenFromAppList,
         hiddenFromSearch = hiddenFromSearch,
-        revealMode = revealMode,
-        revealCode = revealCode,
+        // A code that is switched on but empty would leave the app unfindable: then it stays findable by name.
+        revealMode = if (revealCode.isBlank()) RevealMode.NONE else revealMode,
+        revealCode = revealCode.trim(),
         iconShape = iconShape,
         iconSizePercent = iconSizePercent
     )
@@ -449,6 +450,7 @@ private fun RevealSearchCodeCard(enabled: Boolean, onEnabledChange: (Boolean) ->
                 value = code,
                 onValueChange = onCodeChange,
                 label = { Text(stringResource(R.string.settings_manage_apps_reveal_code_hint)) },
+                supportingText = { Text(stringResource(R.string.settings_manage_apps_reveal_code_note)) },
                 singleLine = true,
                 shape = SettingsTextFieldShape,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 16.dp)

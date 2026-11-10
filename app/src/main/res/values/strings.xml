@@ -853,4 +853,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_search_table_hint">Tap a symbol to change it and its color, drag ≡ to change the order.</string>
     <string name="settings_search_web_intro_web">The web result opens the first engine with a tap; the others sit right below it in the same card to pick instead. Tap a symbol to give it a picture of your own.</string>
     <string name="settings_search_web_intro_ai">The AI result hands the query to the first app with a tap; the others sit right below it in the same card. Tap a symbol to give it a picture of your own.</string>
+    <string name="link_open_failed">This link could not be opened</string>
+    <string name="link_address_invalid">Not an address a link can open</string>
+    <string name="settings_manage_apps_reveal_code_note">Upper and lower case do not matter. Without a code the app stays findable by its name.</string>
 </resources>
