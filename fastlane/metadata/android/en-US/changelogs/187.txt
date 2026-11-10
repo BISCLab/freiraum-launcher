@@ -1,0 +1,3 @@
+- Wallpaper packs are now simply called Wallpapers everywhere
+- Info page laid out anew
+- Tablets: one centered column for Home and the settings; held sideways, the settings come in two parts with the sections on the left

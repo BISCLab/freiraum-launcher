@@ -1,0 +1,3 @@
+- Wallpaper-Packs heißen jetzt überall einfach Wallpaper
+- Info-Seite neu gestaltet
+- Tablets: eine mittige Spalte für Startseite und Einstellungen; im Querformat Einstellungen in zwei Teilen mit den Bereichen links

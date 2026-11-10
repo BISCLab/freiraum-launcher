@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.13.1
 
 - Info page laid out anew: the launcher's logo, name, version and description together on a card in
   its own blue; No internet, No tracking and No ads as three tiles; a new row What is new; the

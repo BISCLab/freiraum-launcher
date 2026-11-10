@@ -24,8 +24,8 @@ android {
         minSdk = 26
         targetSdk = 35
         // Bump both for every release; F-Droid reads them from here (and expects a matching v<versionName> tag).
-        versionCode = 186
-        versionName = "0.13.0"
+        versionCode = 187
+        versionName = "0.13.1"
 
         ksp {
             arg("room.schemaLocation", "$projectDir/schemas")
