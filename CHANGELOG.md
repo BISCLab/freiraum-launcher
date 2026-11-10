@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.13.2
+
+- Welcome tour brought up to date: a new step shows the widgets (Clock, Notes, Music, and Weather
+  with what it needs); designs and wallpapers to download open the extensions page in the browser
+  instead of GitHub; the settings step mentions Extensions
+
 ## 0.13.1
 
 - Info page laid out anew: the launcher's logo, name, version and description together on a card in

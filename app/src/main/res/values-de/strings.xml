@@ -621,7 +621,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_gestures_title">Gesten</string>
     <string name="welcome_gestures_text">So kommst du überall hin. Tipp eine Geste an, um festzulegen, was sie öffnet. Später geht das jederzeit unter Einstellungen → Seiten → Gesten.</string>
     <string name="welcome_settings_title">Einstellungen</string>
-    <string name="welcome_settings_text">Der Knopf mit den Reglern im Dock öffnet die Einstellungen. Entfernst du ihn, findest du sie in der Textsuche unter Freiraum-Einstellungen oder in der App-Info von Freiraum in Android.</string>
+    <string name="welcome_settings_text">Der Knopf mit den Reglern im Dock öffnet die Einstellungen. Entfernst du ihn, findest du sie in der Textsuche unter Freiraum-Einstellungen oder in der App-Info von Freiraum in Android. Unter Erweiterungen kommen dort später Designs, Wallpaper und Widgets dazu.</string>
     <string name="welcome_permissions_title">Berechtigungen</string>
     <string name="welcome_permissions_text">Alles hier ist freiwillig, und Freiraum hat keinen Internetzugriff. Tippe auf eine Zeile, um es jetzt zu erlauben, oder später in den Einstellungen.</string>
     <string name="welcome_lock_title">Sperrbildschirm</string>
@@ -703,11 +703,11 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_quick_setup_summary">Übernimmt alles Empfohlene. Du kannst später alles in den Einstellungen ändern.</string>
     <string name="welcome_own_setup">Selbst einrichten</string>
     <string name="welcome_design_title">Design wählen</string>
-    <string name="welcome_design_text">Farben, Rahmen und Effekte. Zur Seite wischen für mehr; Neon gibt es zum Herunterladen: im Browser laden, dann hier die Datei wählen.</string>
+    <string name="welcome_design_text">Farben, Rahmen und Effekte. Zur Seite wischen für mehr. Neon gibt es zum Herunterladen: Antippen öffnet die Übersicht im Browser, dort „In Freiraum öffnen“ wählen.</string>
     <string name="welcome_design_neon_light">Neon Hell</string>
     <string name="welcome_design_neon_dark">Neon Dunkel</string>
     <string name="welcome_wallpaper_title">Wallpaper wählen</string>
-    <string name="welcome_wallpaper_text">Bilder für alle Seiten. Weitere gibt es zum Herunterladen: im Browser laden, dann hier die Datei wählen. Oder ganz ohne Bilder.</string>
+    <string name="welcome_wallpaper_text">Bilder für alle Seiten. Weitere gibt es zum Herunterladen: Antippen öffnet die Übersicht im Browser. Datei laden, dann hier wählen. Oder ganz ohne Bilder.</string>
     <string name="welcome_pack_modern_light">Modern Hell</string>
     <string name="welcome_pack_modern_dark">Modern Dunkel</string>
     <string name="welcome_pack_plain">Ohne Bilder</string>
@@ -890,4 +890,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="about_made_by">Entwickelt von</string>
     <string name="about_releases">Was ist neu</string>
     <string name="about_releases_summary">Alle Versionen und ihre Änderungen</string>
+    <string name="welcome_widgets_title">Widgets</string>
+    <string name="welcome_widgets_text">Widgets liegen als Zeile auf einer Seite. Hinzufügen kannst du sie später unter Einstellungen → Seiten, bei der jeweiligen Seite.</string>
+    <string name="welcome_widgets_clock">Zeit, Datum, nächster Wecker</string>
+    <string name="welcome_widgets_notes">Notizen und Listen direkt auf der Seite</string>
+    <string name="welcome_widgets_music">Steuert, was gerade läuft. Braucht den Zugriff auf Benachrichtigungen</string>
+    <string name="welcome_widgets_weather">Braucht eine Wetter-App, die die Daten bringt, denn Freiraum geht nicht ins Internet</string>
 </resources>

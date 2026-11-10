@@ -621,7 +621,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_gestures_title">Gestures</string>
     <string name="welcome_gestures_text">This is how you get everywhere. Tap a gesture to choose what it opens. Later you can change it any time under Settings → Pages → Gestures.</string>
     <string name="welcome_settings_title">Settings</string>
-    <string name="welcome_settings_text">The button with the sliders in the Dock opens the settings. If you remove it, you still find them in Text search under Freiraum settings, or in Android\'s app info for Freiraum.</string>
+    <string name="welcome_settings_text">The button with the sliders in the Dock opens the settings. If you remove it, you still find them in Text search under Freiraum settings, or in the app info for Freiraum in Android. Under Extensions you can add designs, wallpapers and widgets there later.</string>
     <string name="welcome_permissions_title">Permissions</string>
     <string name="welcome_permissions_text">Everything here is optional, and Freiraum has no internet access. Tap a row to allow it now, or later in the settings.</string>
     <string name="welcome_lock_title">Lock screen</string>
@@ -703,11 +703,11 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_quick_setup_summary">Takes everything recommended. You can change all of it later in the settings.</string>
     <string name="welcome_own_setup">Set up myself</string>
     <string name="welcome_design_title">Choose a design</string>
-    <string name="welcome_design_text">Colors, borders and effects. Swipe for more; Neon is a download: get it in the browser, then pick the file here.</string>
+    <string name="welcome_design_text">Colors, borders and effects. Swipe for more. Neon is a download: a tap opens the overview in the browser, choose “Open in Freiraum” there.</string>
     <string name="welcome_design_neon_light">Neon Light</string>
     <string name="welcome_design_neon_dark">Neon Dark</string>
     <string name="welcome_wallpaper_title">Choose a wallpaper</string>
-    <string name="welcome_wallpaper_text">Pictures for every page. More are downloads: get one in the browser, then pick the file here. Or go without pictures.</string>
+    <string name="welcome_wallpaper_text">Pictures for every page. More are downloads: a tap opens the overview in the browser. Get the file, then pick it here. Or go without pictures.</string>
     <string name="welcome_pack_modern_light">Modern Light</string>
     <string name="welcome_pack_modern_dark">Modern Dark</string>
     <string name="welcome_pack_plain">Without pictures</string>
@@ -890,4 +890,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="about_made_by">Made by</string>
     <string name="about_releases">What is new</string>
     <string name="about_releases_summary">All versions and their changes</string>
+    <string name="welcome_widgets_title">Widgets</string>
+    <string name="welcome_widgets_text">Widgets sit on a page as a row. You can add them later under Settings → Pages, at the page in question.</string>
+    <string name="welcome_widgets_clock">Time, date, next alarm</string>
+    <string name="welcome_widgets_notes">Notes and lists right on the page</string>
+    <string name="welcome_widgets_music">Controls what is playing. Needs access to notifications</string>
+    <string name="welcome_widgets_weather">Needs a weather app that brings the data, because Freiraum does not go online</string>
 </resources>

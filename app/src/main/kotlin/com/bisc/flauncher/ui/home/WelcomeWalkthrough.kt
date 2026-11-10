@@ -1,5 +1,9 @@
 package com.bisc.flauncher.ui.home
 
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.runtime.LaunchedEffect
@@ -80,7 +84,7 @@ import com.bisc.flauncher.ui.settings.PermissionGroups
 import com.bisc.flauncher.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
-private enum class WelcomeStep { HELLO, GESTURES, SETTINGS, DESIGN, WALLPAPER, SHAPE, PERMISSIONS, LOCK_SCREEN }
+private enum class WelcomeStep { HELLO, GESTURES, SETTINGS, DESIGN, WALLPAPER, SHAPE, WIDGETS, PERMISSIONS, LOCK_SCREEN }
 
 /** The first-start tour: welcome with a quick setup, the gestures, where the settings are, then
  *  design, wallpaper pack and shape to choose, the permissions, and the lock screen when the pack
@@ -147,6 +151,9 @@ fun WelcomeWalkthrough(
                         }
                         WelcomeStep.SHAPE -> WelcomePage(R.string.welcome_shape_title, R.string.welcome_shape_text, illustrationWeight = 0f) {
                             ShapeChoice(cornersViewModel)
+                        }
+                        WelcomeStep.WIDGETS -> WelcomePage(R.string.welcome_widgets_title, R.string.welcome_widgets_text, illustrationWeight = 0f) {
+                            WidgetsOverview()
                         }
                         WelcomeStep.PERMISSIONS -> WelcomePage(R.string.welcome_permissions_title, R.string.welcome_permissions_text, illustrationWeight = 0f) {
                             Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -290,8 +297,6 @@ private fun LanguageButton() {
     }
 }
 
-private const val RELEASES_URL = "https://github.com/BISCLab/freiraum-launcher/releases/latest"
-
 /** Every design side by side to swipe through: the bundled ones, the downloadable ones with a way
  *  to get them. One is always chosen - Modern in the tour's mode to begin with. */
 @Composable
@@ -315,7 +320,7 @@ private fun DesignChoice(viewModel: DesignsViewModel, onboarding: OnboardingView
             add(Tile(design.displayName(german), design.id == activeId, { viewModel.apply(design) }) { DesignPreview(design, Modifier.fillMaxWidth()) })
         }
         missing.forEach { (_, label) ->
-            add(Tile(stringResource(label), false, { openUrl(context, RELEASES_URL) }) { DownloadPlaceholder() })
+            add(Tile(stringResource(label), false, { com.bisc.flauncher.ui.settings.openExtensionsPage(context, "#designs") }) { DownloadPlaceholder() })
         }
     })
     if (missing.isNotEmpty()) {
@@ -347,7 +352,7 @@ private fun WallpaperChoice(viewModel: WallpaperPacksViewModel, dark: Boolean) {
             })
         }
         missing.forEach { (_, label) ->
-            add(Tile(stringResource(label), false, { openUrl(context, RELEASES_URL) }) { DownloadPlaceholder() })
+            add(Tile(stringResource(label), false, { com.bisc.flauncher.ui.settings.openExtensionsPage(context, "#wallpaper") }) { DownloadPlaceholder() })
         }
         add(Tile(stringResource(R.string.welcome_pack_plain), activeId == WallpaperPackRepository.PLAIN || activeId == null, { viewModel.applyPlain {} }) {
             Box(
@@ -448,8 +453,26 @@ private fun PictureThumb(file: java.io.File?, modifier: Modifier) {
     }
 }
 
-private fun openUrl(context: android.content.Context, url: String) {
-    runCatching { context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))) }
+/** The widgets there are: three that come along, and Weather with the way to an app that brings its data. */
+@Composable
+private fun WidgetsOverview() {
+    val context = LocalContext.current
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        com.bisc.flauncher.ui.settings.SettingsPreferenceGroup {
+            listOf(
+                Triple(Icons.Filled.Schedule, R.string.picker_widget_clock, R.string.welcome_widgets_clock),
+                Triple(Icons.Filled.EditNote, R.string.picker_widget_notes, R.string.welcome_widgets_notes),
+                Triple(Icons.Filled.MusicNote, R.string.picker_widget_music, R.string.welcome_widgets_music),
+                Triple(Icons.Filled.Cloud, R.string.picker_widget_weather, R.string.welcome_widgets_weather)
+            ).forEach { (icon, title, summary) ->
+                com.bisc.flauncher.ui.settings.SettingsPreference(icon = icon, title = stringResource(title), summary = stringResource(summary), onClick = null, trailing = null)
+            }
+        }
+        TextButton(
+            onClick = { com.bisc.flauncher.ui.settings.openExtensionsPage(context, "#widgets") },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) { Text(stringResource(R.string.extensions_weather_find)) }
+    }
 }
 
 /** One step: the picture on top, a title and a short text below it. */
