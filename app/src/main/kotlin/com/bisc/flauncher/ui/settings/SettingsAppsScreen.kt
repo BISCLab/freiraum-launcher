@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import android.content.ComponentName
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -102,7 +104,7 @@ fun SettingsAppsScreen(navController: NavController, onBack: () -> Unit, onNavig
         bottomBar = { SettingsBreadcrumbBar(navController) }
     ) { padding ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxSize().padding(padding).wrapContentWidth(Alignment.CenterHorizontally).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             // Icon pack, shape and size for all apps live under Appearance, but many look for them

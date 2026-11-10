@@ -424,7 +424,6 @@ fun SearchOverlay(
                         arrow = keyboardCapArrow,
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
-                            .widthIn(max = com.bisc.flauncher.ui.MaxContentWidth)
                             .offset {
                                 val cap = KEYBOARD_CAP_HEIGHT.roundToPx()
                                 val ime = imeInsets.getBottom(this)

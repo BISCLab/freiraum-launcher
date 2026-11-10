@@ -1,5 +1,8 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -446,15 +449,18 @@ fun SettingsEditPage(title: String, onDismiss: () -> Unit, onSave: (() -> Unit)?
                     if (onSave != null) SettingsSaveBar(enabled = dirty, onSave = { onSave(); onDismiss() })
                 }
             ) { padding ->
-                Column(
-                    modifier = Modifier
-                        .padding(padding)
-                        .imePadding()
-                        .verticalScroll(rememberScrollState())
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    content = content
-                )
+                androidx.compose.foundation.layout.Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+                    Column(
+                        modifier = Modifier
+                            .widthIn(max = com.bisc.flauncher.ui.MaxContentWidth)
+                            .fillMaxWidth()
+                            .imePadding()
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        content = content
+                    )
+                }
             }
         }
     }
@@ -509,7 +515,7 @@ fun SettingsFixedDialog(
                 bottomBar = bottomBar
             ) { padding ->
                 Column(
-                    modifier = Modifier.padding(padding).fillMaxSize().padding(horizontal = 16.dp),
+                    modifier = Modifier.padding(padding).fillMaxSize().wrapContentWidth(Alignment.CenterHorizontally).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).padding(horizontal = 16.dp),
                     content = content
                 )
             }

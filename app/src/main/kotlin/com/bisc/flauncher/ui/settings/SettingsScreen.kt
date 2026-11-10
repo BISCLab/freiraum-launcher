@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.setValue
@@ -315,7 +316,7 @@ fun SettingsFixedScreen(title: String, navController: NavController, onBack: () 
         },
         bottomBar = { SettingsBreadcrumbBar(navController) }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding).padding(horizontal = 16.dp, vertical = 8.dp), content = content)
+        Column(modifier = Modifier.padding(padding).fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).padding(horizontal = 16.dp, vertical = 8.dp), content = content)
     }
 }
 
@@ -402,7 +403,7 @@ internal fun SettingsSaveBar(enabled: Boolean, onSave: () -> Unit) {
             onClick = onSave,
             enabled = enabled,
             shape = SettingsCardShape,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)
+            modifier = Modifier.align(Alignment.Center).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth - 32.dp).fillMaxWidth().heightIn(min = 52.dp)
         ) {
             Text(stringResource(R.string.settings_save))
         }

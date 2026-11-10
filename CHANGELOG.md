@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Tablets: Home's rows keep to the same centered column as the Dock and the Panel instead of
+  stretching across the whole screen
+- Tablets: every settings page keeps to the centered column, also the app list under Apps, the
+  editor pages that open on top, and the Save button
+- Tablets: the strip over the keyboard is as wide as the keyboard
 - Wallpaper packs are simply called Wallpapers everywhere
 - The extensions page in the browser has a new layout: one clearly separated section each for
   Designs, Wallpapers and Widgets, each with its own short how-to
