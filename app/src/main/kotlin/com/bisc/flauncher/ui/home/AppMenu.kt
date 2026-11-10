@@ -1,5 +1,24 @@
 package com.bisc.flauncher.ui.home
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.Alignment
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -17,8 +36,6 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -92,8 +109,22 @@ fun rememberAppMenu(component: ComponentName?, label: String): AppMenuHandle? {
                 open.value = true
             },
             Menu = {
-                DropdownMenu(expanded = open.value, onDismissRequest = { open.value = false }) {
-                    AppMenuItems(AppInfo(component, label), host) { open.value = false }
+                // No sheet of its own: the entries are separate pieces with a fine gap between them,
+                // the first and last rounded off, like a group in the settings.
+                DropdownMenu(
+                    expanded = open.value,
+                    onDismissRequest = { open.value = false },
+                    shape = MENU_SHAPE,
+                    containerColor = Color.Transparent,
+                    tonalElevation = 0.dp,
+                    shadowElevation = 0.dp
+                ) {
+                    Column(
+                        modifier = Modifier.width(IntrinsicSize.Max).clip(MENU_SHAPE),
+                        verticalArrangement = Arrangement.spacedBy(MENU_GAP)
+                    ) {
+                        AppMenuItems(AppInfo(component, label), host) { open.value = false }
+                    }
                 }
             }
         )
@@ -101,6 +132,33 @@ fun rememberAppMenu(component: ComponentName?, label: String): AppMenuHandle? {
 }
 
 private const val MAX_MENU_SHORTCUTS = 4
+private val MENU_SHAPE = RoundedCornerShape(24.dp)
+private val MENU_GAP = 2.dp
+
+/** One entry of the menu: a piece of its own on the menu's surface color. */
+@Composable
+private fun MenuEntry(text: String, onClick: () -> Unit, leading: @Composable () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .clickable(onClick = onClick)
+            .heightIn(min = 54.dp)
+            .padding(start = 18.dp, end = 24.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(modifier = Modifier.size(24.dp), contentAlignment = Alignment.Center) {
+            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant, content = leading)
+        }
+        Text(
+            text,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            modifier = Modifier.padding(start = 16.dp)
+        )
+    }
+}
 
 @Composable
 private fun AppMenuItems(app: AppInfo, host: AppMenuHost, close: () -> Unit) {
@@ -111,36 +169,29 @@ private fun AppMenuItems(app: AppInfo, host: AppMenuHost, close: () -> Unit) {
     }
     shortcuts.forEach { shortcut ->
         val icon = remember(shortcut.id) { runCatching { host.shortcutIcon(shortcut)?.toBitmap(72, 72)?.asImageBitmap() }.getOrNull() }
-        DropdownMenuItem(
-            text = { Text((shortcut.shortLabel ?: shortcut.longLabel ?: shortcut.id).toString()) },
-            leadingIcon = icon?.let { { Image(bitmap = it, contentDescription = null, modifier = Modifier.size(24.dp)) } },
+        MenuEntry(
+            text = (shortcut.shortLabel ?: shortcut.longLabel ?: shortcut.id).toString(),
             onClick = { close(); host.launchShortcut(packageName, shortcut.id) }
-        )
+        ) { if (icon != null) Image(bitmap = icon, contentDescription = null, modifier = Modifier.size(24.dp)) }
     }
-    if (shortcuts.isNotEmpty()) HorizontalDivider()
+    // A wider gap sets the app's own shortcuts apart from what the launcher offers.
+    if (shortcuts.isNotEmpty()) Spacer(Modifier.height(4.dp))
 
     val favorite = app.componentName.flattenToString() in host.favoriteIds
-    DropdownMenuItem(
-        text = { Text(stringResource(if (favorite) R.string.search_favorite_remove else R.string.search_favorite_add)) },
-        leadingIcon = { Icon(if (favorite) Icons.Filled.Star else Icons.Filled.StarBorder, contentDescription = null) },
+    MenuEntry(
+        text = stringResource(if (favorite) R.string.search_favorite_remove else R.string.search_favorite_add),
         onClick = { close(); host.toggleFavorite(app) }
-    )
-    DropdownMenuItem(
-        text = { Text(stringResource(R.string.app_menu_edit)) },
-        leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
-        onClick = { close(); host.edit(app.componentName) }
-    )
-    DropdownMenuItem(
-        text = { Text(stringResource(R.string.app_menu_info)) },
-        leadingIcon = { Icon(Icons.Outlined.Info, contentDescription = null) },
-        onClick = { close(); openAppInfo(context, packageName) }
-    )
+    ) { Icon(if (favorite) Icons.Filled.Star else Icons.Filled.StarBorder, contentDescription = null) }
+    MenuEntry(text = stringResource(R.string.app_menu_edit), onClick = { close(); host.edit(app.componentName) }) {
+        Icon(Icons.Filled.Edit, contentDescription = null)
+    }
+    MenuEntry(text = stringResource(R.string.app_menu_info), onClick = { close(); openAppInfo(context, packageName) }) {
+        Icon(Icons.Outlined.Info, contentDescription = null)
+    }
     if (remember(packageName) { canUninstall(context, packageName) }) {
-        DropdownMenuItem(
-            text = { Text(stringResource(R.string.app_menu_uninstall)) },
-            leadingIcon = { Icon(Icons.Filled.DeleteOutline, contentDescription = null) },
-            onClick = { close(); requestUninstall(context, packageName) }
-        )
+        MenuEntry(text = stringResource(R.string.app_menu_uninstall), onClick = { close(); requestUninstall(context, packageName) }) {
+            Icon(Icons.Filled.DeleteOutline, contentDescription = null)
+        }
     }
 }
 

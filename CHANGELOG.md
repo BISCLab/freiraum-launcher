@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- The long-press menu of an app has rounded corners and its entries are separate pieces with a fine
+  gap between them, like a group in the settings
+- Extensions page in the browser: the three shortcuts to Designs, Wallpapers and Widgets sit below
+  the blue header as their own row, marked as jumps; the header fits on narrow phones
+
 ## 0.13.2
 
 - Welcome tour brought up to date: a new step shows the widgets (Clock, Notes, Music, and Weather

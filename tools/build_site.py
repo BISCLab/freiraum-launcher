@@ -139,21 +139,27 @@ a{color:inherit}
 .top{background:var(--blue);color:var(--on-blue)}
 .bar{display:flex;align-items:center;gap:12px;padding:16px 0}
 .bar img{width:40px;height:40px;border-radius:11px;border:1px solid rgba(255,255,255,.35)}
-.brand{font-size:1.1rem;font-weight:700}
+.brand{font-size:1.1rem;font-weight:700;white-space:nowrap}
+.top .short{display:none}
 .bar .space{flex:1}
-.top .ghost{background:none;border:1px solid rgba(255,255,255,.55);color:inherit;border-radius:10px;padding:7px 12px;font:inherit;cursor:pointer;text-decoration:none}
-.hero{padding:36px 0 84px}
+.top .ghost{background:none;border:1px solid rgba(255,255,255,.55);color:inherit;border-radius:10px;padding:7px 12px;font:inherit;cursor:pointer;text-decoration:none;white-space:nowrap}
+.hero{padding:36px 0 44px}
 .hero h1{font-size:clamp(2rem,6vw,3.1rem);line-height:1.1;margin:0 0 12px}
 .hero p{margin:0;max-width:34em;font-size:1.08rem;opacity:.92}
 
-.jump{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:-52px}
-.jump a{display:block;text-decoration:none;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
-.jump b{display:block;font-family:"Comfortaa",system-ui,sans-serif;font-size:1.1rem}
-.jump span.what{display:block;color:var(--soft);font-size:.92rem;margin-top:2px}
-.jump em{display:block;font-style:normal;color:var(--blue);font-size:.86rem;margin-top:10px;font-weight:600}
+.jumpto{padding-top:30px}
+.jumpto>p{margin:0 0 10px;font-size:.8rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--soft)}
+.jump{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.jump a{display:flex;align-items:center;gap:14px;text-decoration:none;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.jump .txt{flex:1;min-width:0}
+.jump b{display:block;font-family:"Comfortaa",system-ui,sans-serif;font-size:1.08rem}
+.jump span.what{display:block;color:var(--soft);font-size:.9rem;margin-top:1px}
+.jump em{display:block;font-style:normal;color:var(--blue);font-size:.84rem;margin-top:6px;font-weight:600}
+.jump .go{flex:none;width:34px;height:34px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:1.05rem;line-height:1}
 @media(prefers-color-scheme:dark){.jump em{color:#7aa8ff}}
 
 section{padding:76px 0}
+#designs{padding-top:64px}
 section.band{background:var(--band)}
 .head{display:grid;grid-template-columns:1fr minmax(0,360px);gap:28px;align-items:end;margin-bottom:34px}
 .head h2{font-size:clamp(1.6rem,4.5vw,2.2rem);margin:0 0 8px;padding-left:16px;border-left:5px solid var(--blue);line-height:1.15}
@@ -205,9 +211,11 @@ footer .cols{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px}
 footer p{margin:0 0 8px;max-width:44em}
 footer a{color:var(--text)}
 
+@media(max-width:520px){.top .long{display:none}.top .short{display:inline}.brand{font-size:1rem}}
 @media(max-width:760px){
-  .jump{grid-template-columns:1fr;margin-top:-44px}
-  .hero{padding:26px 0 68px}
+  .jump{grid-template-columns:1fr;gap:8px}
+  .jumpto{padding-top:22px}
+  .hero{padding:22px 0 32px}
   section{padding:56px 0}
   .head{grid-template-columns:1fr;gap:18px;margin-bottom:26px}
   .designs{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 14px}
@@ -283,7 +291,7 @@ def build(out):
       <img src="logo.svg" alt="">
       <span class="brand">Freiraum Launcher</span>
       <span class="space"></span>
-      <a class="ghost" href="{RELEASES}">{both("Launcher laden", "Get the launcher")}</a>
+      <a class="ghost" href="{RELEASES}"><span class="long">{both("Launcher laden", "Get the launcher")}</span><span class="short">{both("Laden", "Get")}</span></a>
       <button class="ghost lang" type="button"><span lang="de">EN</span><span lang="en">DE</span></button>
     </div>
     <div class="hero">
@@ -293,11 +301,12 @@ def build(out):
   </div>
 </div>
 
-<div class="wrap">
+<div class="wrap jumpto">
+  <p>{both("Direkt zu", "Jump to")}</p>
   <nav class="jump">
-    <a href="#designs"><b>Designs</b><span class="what">{both("Farben, Rahmen, Ecken und Effekte", "Colors, borders, corners and effects")}</span><em>{count(len(cards), "Design", "Designs", "design", "designs")}</em></a>
-    <a href="#wallpaper"><b>Wallpaper</b><span class="what">{both("Ein Bild für jede Seite", "A picture for every page")}</span><em>{count(len(packs), "Wallpaper", "Wallpaper", "wallpaper", "wallpapers")}</em></a>
-    <a href="#widgets"><b>Widgets</b><span class="what">{both("Uhr, Notizen, Musik, Wetter", "Clock, Notes, Music, Weather")}</span><em>{both("3 enthalten, 1 mit Quelle", "3 included, 1 with a source")}</em></a>
+    <a href="#designs"><span class="txt"><b>Designs</b><span class="what">{both("Farben, Rahmen, Ecken und Effekte", "Colors, borders, corners and effects")}</span><em>{count(len(cards), "Design", "Designs", "design", "designs")}</em></span><span class="go" aria-hidden="true">&darr;</span></a>
+    <a href="#wallpaper"><span class="txt"><b>Wallpaper</b><span class="what">{both("Ein Bild für jede Seite", "A picture for every page")}</span><em>{count(len(packs), "Wallpaper", "Wallpaper", "wallpaper", "wallpapers")}</em></span><span class="go" aria-hidden="true">&darr;</span></a>
+    <a href="#widgets"><span class="txt"><b>Widgets</b><span class="what">{both("Uhr, Notizen, Musik, Wetter", "Clock, Notes, Music, Weather")}</span><em>{both("3 enthalten, 1 mit Quelle", "3 included, 1 with a source")}</em></span><span class="go" aria-hidden="true">&darr;</span></a>
   </nav>
 </div>
 
