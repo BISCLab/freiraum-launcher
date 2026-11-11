@@ -175,6 +175,8 @@ fun HomeScreen(
     val folderShowLabels by viewModel.folderShowLabels.collectAsState()
     val cornerRadiusPercent by viewModel.cornerRadiusPercent.collectAsState()
     val searchButtonCorner by viewModel.appListSearchButtonCornerPercent.collectAsState()
+    val appListFieldCorner by viewModel.appListFieldCornerPercent.collectAsState()
+    val textSearchFieldCorner by viewModel.searchFieldCornerRadiusPercent.collectAsState()
     val railCorner by viewModel.alphabetRailCornerPercent.collectAsState()
     val appListShowAzIndex by viewModel.appListShowAzIndex.collectAsState()
     val searchHideStatusBar by viewModel.searchHideStatusBar.collectAsState()
@@ -1030,7 +1032,7 @@ fun HomeScreen(
                             }
                         },
                         appearance = appListSearchFieldAppearance ?: automaticRailAppearance(overviewSurfaceDark),
-                        cornerRadiusPercent = cornerRadiusPercent,
+                        cornerRadiusPercent = appListFieldCorner ?: textSearchFieldCorner ?: cornerRadiusPercent,
                         autoOpen = true,
                         modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 16.dp)
                     )
@@ -1448,6 +1450,8 @@ private fun HomeAppGrid(
     val appGridBarPosition by viewModel.appGridBarPosition.collectAsState()
     val appGridBarOpensTextSearch by viewModel.appGridBarOpensTextSearch.collectAsState()
     val appGridKeyboardAutoOpen by viewModel.appGridKeyboardAutoOpen.collectAsState()
+    val appGridFieldCorner by viewModel.appGridFieldCornerPercent.collectAsState()
+    val gridTextSearchFieldCorner by viewModel.searchFieldCornerRadiusPercent.collectAsState()
     val appGridBarAppearance by viewModel.appGridBarAppearance.collectAsState()
     val appGridFoldersAlphabetical by viewModel.appGridFoldersAlphabetical.collectAsState()
     val searchKeyboardCapEnabled by viewModel.searchKeyboardCapEnabled.collectAsState()
@@ -1477,7 +1481,7 @@ private fun HomeAppGrid(
         barOpensTextSearch = appGridBarOpensTextSearch,
         keyboardAutoOpen = appGridKeyboardAutoOpen,
         barAppearance = appGridBarAppearance ?: automaticRailAppearance(gridSurfaceDark),
-        cornerRadiusPercent = cornerRadiusPercent,
+        cornerRadiusPercent = appGridFieldCorner ?: gridTextSearchFieldCorner ?: cornerRadiusPercent,
         keyboardCapColor = if (searchKeyboardCapEnabled) searchKeyboardCapColor else null,
         keyboardCapCornerRadiusPercent = searchKeyboardCapCornerRadiusPercent,
         keyboardCapArrow = searchKeyboardCapArrow,

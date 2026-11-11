@@ -430,7 +430,7 @@ private fun AppTileGrid(
                     ) {
                         menu?.Menu?.invoke()
                         if (bitmap != null) {
-                            Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(48.dp))
+                            Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(48.dp * (com.bisc.flauncher.ui.home.LocalIconSizeResolver.current?.invoke(app.componentName.flattenToString()) ?: 1f)))
                         } else {
                             Spacer(Modifier.size(48.dp))
                         }

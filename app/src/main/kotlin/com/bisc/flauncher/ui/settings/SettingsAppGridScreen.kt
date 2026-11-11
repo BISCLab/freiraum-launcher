@@ -184,13 +184,16 @@ fun SettingsAppGridSearchFieldScreen(
     val surfaceIsDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), pageBackground)
 
     val saved = remember(own) { own ?: automaticRailAppearance(surfaceIsDark) }
+    val corner by viewModel.appGridFieldCornerPercent.collectAsState()
+    val fieldCorner by viewModel.searchFieldCornerRadiusPercent.collectAsState()
+    val defaultCorner by viewModel.defaultCornerRadiusPercent.collectAsState()
     ElementLookScreen(
         title = stringResource(R.string.settings_app_grid_search_field),
         navController = navController,
         onBack = onBack,
         saved = saved,
-        savedCorner = null,
-        onSave = { look, _ -> viewModel.setAppGridBarAppearance(look) },
+        savedCorner = corner ?: fieldCorner ?: defaultCorner,
+        onSave = { look, newCorner -> viewModel.setAppGridBarAppearance(look); newCorner?.let(viewModel::setAppGridFieldCornerPercent) },
         kind = LookSampleKind.FIELD,
         backdropDark = surfaceIsDark,
         custom = own != null,

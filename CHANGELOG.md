@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- The look pages of the App list's search button, A-Z rail and search field and of the App grid's
+  search field have their fine corner setting again; the two search fields have corners of their own
+- Corners of all parts: in the small App list the search button is the round button at the bottom
+  and the field on top counts as a search field; Search fields sets every search field at once
+- An app's own icon size now also counts in the App list and the Text search
+
 ## 0.13.4
 
 - Popup menus dim and blur the screen behind them, so the menu stands out clearly; the gaps between

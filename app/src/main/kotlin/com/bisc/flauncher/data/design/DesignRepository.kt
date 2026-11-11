@@ -183,6 +183,8 @@ class DesignRepository @Inject constructor(
         corners["search_field"]?.let {
             settingsRepository.setSearchFieldCornerRadiusPercent(it)
             settingsRepository.setSearchBarCornerRadiusPercent(it)
+            settingsRepository.setAppListFieldCornerPercent(it)
+            settingsRepository.setAppGridFieldCornerPercent(it)
         }
         corners["search_results"]?.let { settingsRepository.setSearchResultsCornerRadiusPercent(it) }
         // Widgets and element boxes added later look like the ones there now.

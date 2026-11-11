@@ -397,6 +397,9 @@ private fun AppBrowseRow(app: AppInfo, loadIcon: (ComponentName) -> ImageBitmap?
     val bitmap = rememberAppIcon(app.componentName, loadIcon)
     val isLeft = handedness == Handedness.LEFT
     val menu = com.bisc.flauncher.ui.home.rememberAppMenu(app.componentName, app.label)
+    // The app's own size if it has one, otherwise the size for all apps.
+    @Suppress("NAME_SHADOWING")
+    val iconSize = iconSize * (com.bisc.flauncher.ui.home.LocalIconSizeResolver.current?.invoke(app.componentName.flattenToString()) ?: 1f)
     Row(
         modifier = Modifier
             .fillMaxWidth()

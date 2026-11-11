@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -118,6 +120,8 @@ class PartCornersViewModel @Inject constructor(
             shape[ShapePart.SEARCH_BUTTON]?.let { settingsRepository.setAppListSearchButtonCornerPercent(it) }
             shape[ShapePart.ALPHABET_RAIL]?.let { settingsRepository.setAlphabetRailCornerPercent(it) }
             shape[ShapePart.SEARCH_BAR]?.let {
+                settingsRepository.setAppListFieldCornerPercent(it)
+                settingsRepository.setAppGridFieldCornerPercent(it)
                 // The other search fields (App list, App grid) follow the general roundness.
                 settingsRepository.setDefaultCornerRadiusPercent(it)
                 settingsRepository.setSearchBarCornerRadiusPercent(it)
@@ -364,7 +368,7 @@ internal fun MockScreen(
             }
             ShapeScreen.APP_LIST -> {
                 Column(Modifier.fillMaxSize().padding(end = 16.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
-                    Part(ShapePart.SEARCH_BUTTON, Modifier.fillMaxWidth().height(22.dp), stringResource(R.string.welcome_mock_search))
+                    Part(ShapePart.SEARCH_BAR, Modifier.fillMaxWidth().height(22.dp), stringResource(R.string.welcome_mock_search))
                     repeat(7) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                             Box(Modifier.size(12.dp).clip(RoundedCornerShape(4.dp)).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)))
@@ -372,7 +376,10 @@ internal fun MockScreen(
                         }
                     }
                 }
-                Part(ShapePart.ALPHABET_RAIL, Modifier.align(Alignment.CenterEnd).width(12.dp).fillMaxHeight(0.8f)) {
+                Part(ShapePart.SEARCH_BUTTON, Modifier.align(Alignment.BottomEnd).size(26.dp)) {
+                    Icon(androidx.compose.material.icons.Icons.Filled.Search, contentDescription = null, modifier = Modifier.size(12.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                }
+                Part(ShapePart.ALPHABET_RAIL, Modifier.align(Alignment.CenterEnd).width(12.dp).fillMaxHeight(0.72f)) {
                     Text("A\nZ", fontSize = 7.sp, lineHeight = 8.sp, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                 }
             }

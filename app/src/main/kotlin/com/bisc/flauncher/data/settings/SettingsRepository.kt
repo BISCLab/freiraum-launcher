@@ -362,6 +362,20 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[APP_LIST_SEARCH_BUTTON_CORNER_KEY] = percent.coerceIn(0, 100) }
     }
 
+    /** Corners of the App list's own search field; null = like the Text search field. */
+    val appListFieldCornerPercent: Flow<Int?> = dataStore.data.map { it[APP_LIST_FIELD_CORNER_KEY] }
+
+    suspend fun setAppListFieldCornerPercent(percent: Int) {
+        dataStore.edit { it[APP_LIST_FIELD_CORNER_KEY] = percent.coerceIn(0, 100) }
+    }
+
+    /** Corners of the App grid's search field; null = like the Text search field. */
+    val appGridFieldCornerPercent: Flow<Int?> = dataStore.data.map { it[APP_GRID_FIELD_CORNER_KEY] }
+
+    suspend fun setAppGridFieldCornerPercent(percent: Int) {
+        dataStore.edit { it[APP_GRID_FIELD_CORNER_KEY] = percent.coerceIn(0, 100) }
+    }
+
     suspend fun setAlphabetRailCornerPercent(percent: Int) {
         dataStore.edit { it[ALPHABET_RAIL_CORNER_KEY] = percent.coerceIn(0, 100) }
     }
@@ -1218,6 +1232,8 @@ class SettingsRepository @Inject constructor(
         private val ACTIVE_WALLPAPER_PACK_KEY = stringPreferencesKey("active_wallpaper_pack")
         private val APP_LIST_SEARCH_BUTTON_CORNER_KEY = intPreferencesKey("app_list_search_button_corner_percent")
         private val ALPHABET_RAIL_CORNER_KEY = intPreferencesKey("alphabet_rail_corner_percent")
+        private val APP_LIST_FIELD_CORNER_KEY = intPreferencesKey("app_list_field_corner_percent")
+        private val APP_GRID_FIELD_CORNER_KEY = intPreferencesKey("app_grid_field_corner_percent")
         private val DESIGN_EFFECTS_KEY = stringPreferencesKey("design_effects")
         private val ACTIVE_DESIGN_KEY = stringPreferencesKey("active_design")
         private val MOTION_LEVEL_KEY = stringPreferencesKey("motion_level")

@@ -129,18 +129,18 @@ fun SettingsAppOverviewSearchButtonScreen(
     // Keyed on the stored value only: the automatic look is re-derived once the page background
     // has loaded, and that must not wipe what is being edited.
     val saved = remember(own) { own ?: automaticRailAppearance(surfaceIsDark) }
+    val defaultCorner by viewModel.defaultCornerRadiusPercent.collectAsState()
     ElementLookScreen(
         title = stringResource(R.string.settings_app_list_search_button),
         navController = navController,
         onBack = onBack,
         saved = saved,
-        savedCorner = null,
-        onSave = { look, _ -> viewModel.setAppListSearchButtonAppearance(look) },
+        savedCorner = corner ?: defaultCorner,
+        onSave = { look, newCorner -> viewModel.setAppListSearchButtonAppearance(look); newCorner?.let(viewModel::setAppListSearchButtonCornerPercent) },
         kind = LookSampleKind.SEARCH_BUTTON,
         backdropDark = surfaceIsDark,
         custom = own != null,
         onResetLook = viewModel::resetAppListSearchButtonAppearance,
-        previewCorner = corner ?: 100
     )
 }
 
@@ -220,16 +220,16 @@ fun SettingsAppOverviewAzIndexScreen(
     val corner by viewModel.alphabetRailCornerPercent.collectAsState()
     val surfaceIsDark = appListPageDark(homeViewModel)
     val saved = remember(railAppearance) { railAppearance ?: automaticRailAppearance(surfaceIsDark) }
+    val defaultCorner by viewModel.defaultCornerRadiusPercent.collectAsState()
     ElementLookScreen(
         title = stringResource(R.string.settings_app_overview_az_index_label),
         navController = navController,
         onBack = onBack,
         saved = saved,
-        savedCorner = null,
-        onSave = { look, _ -> viewModel.setAppListRailAppearance(look) },
+        savedCorner = corner ?: defaultCorner,
+        onSave = { look, newCorner -> viewModel.setAppListRailAppearance(look); newCorner?.let(viewModel::setAlphabetRailCornerPercent) },
         kind = LookSampleKind.AZ_INDEX,
         backdropDark = surfaceIsDark,
-        previewCorner = corner ?: 100,
         custom = railAppearance != null,
         onResetLook = viewModel::resetAppListRailAppearance
     )
@@ -245,15 +245,18 @@ fun SettingsAppOverviewSearchFieldScreen(
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
     val own by viewModel.appListSearchFieldAppearance.collectAsState()
+    val corner by viewModel.appListFieldCornerPercent.collectAsState()
+    val fieldCorner by viewModel.searchFieldCornerRadiusPercent.collectAsState()
     val surfaceIsDark = appListPageDark(homeViewModel)
     val saved = remember(own) { own ?: automaticRailAppearance(surfaceIsDark) }
+    val defaultCorner by viewModel.defaultCornerRadiusPercent.collectAsState()
     ElementLookScreen(
         title = stringResource(R.string.settings_app_grid_search_field),
         navController = navController,
         onBack = onBack,
         saved = saved,
-        savedCorner = null,
-        onSave = { look, _ -> viewModel.setAppListSearchFieldAppearance(look) },
+        savedCorner = corner ?: fieldCorner ?: defaultCorner,
+        onSave = { look, newCorner -> viewModel.setAppListSearchFieldAppearance(look); newCorner?.let(viewModel::setAppListFieldCornerPercent) },
         kind = LookSampleKind.FIELD,
         backdropDark = surfaceIsDark,
         custom = own != null,
