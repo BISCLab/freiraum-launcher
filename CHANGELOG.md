@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.13.6
 
 - New: an app can be hidden from the App grid on its own, next to App list and Text search
 - Fixed: apps hidden from the App list were also missing from every app choice in the settings

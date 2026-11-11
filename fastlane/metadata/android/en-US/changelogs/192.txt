@@ -1,0 +1,2 @@
+- Apps can now be hidden from the App grid on its own
+- Hidden apps show again in every app choice in the settings (clock, gestures, Dock, folders and so on)

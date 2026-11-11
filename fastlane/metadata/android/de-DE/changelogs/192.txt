@@ -1,0 +1,2 @@
+- Apps lassen sich jetzt auch nur im App-Raster ausblenden
+- Ausgeblendete Apps stehen wieder in allen App-Auswahlen der Einstellungen (Uhr, Gesten, Dock, Ordner usw.)
