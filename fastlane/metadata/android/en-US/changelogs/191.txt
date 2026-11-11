@@ -1,0 +1,3 @@
+- New welcome tour: a blue welcome, Design, Wallpaper and Shape with a phone showing the choice at once
+- Fine corners for every part again, also element boxes, menus, arrows and the strip; own corners for the search fields
+- An app's own icon size counts in the App list, Text search and, smaller only, the Dock

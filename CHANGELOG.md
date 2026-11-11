@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.13.5
 
 - Element-Boxes have their corner setting in their editor again
 - Menus have corners of their own, on their look page under Appearance > Menus

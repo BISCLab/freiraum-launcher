@@ -1,0 +1,3 @@
+- Einführung neu: Begrüßung in Blau, Design, Wallpaper und Form mit einem Handy, das die Wahl sofort zeigt
+- Ecken für jedes Teil wieder fein einstellbar, auch Element-Boxen, Menüs, Pfeiltasten und Streifen; eigene Ecken für die Suchfelder
+- Eigene Symbolgröße wirkt in App-Liste, Textsuche und kleiner auch im Dock
