@@ -161,6 +161,9 @@ fun SettingsElementBoxEditScreen(
             onAppearanceChange = { row = row.withAppearance(it) },
             styleGroupTitle = stringResource(R.string.settings_dock_background_label)
         )
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
+            ExpandablePercentSlider(percent = row.cornerRadiusPercent, onSettled = { row = row.copy(cornerRadiusPercent = it) })
+        }
 
         SettingsPreferenceGroup(title = stringResource(R.string.settings_element_box_entries_label)) {
             if (entries.isEmpty()) {

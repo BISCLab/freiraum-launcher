@@ -442,6 +442,13 @@ class SettingsRepository @Inject constructor(
 
     suspend fun resetMenuAppearance() = resetElementAppearanceFor("app_menu")
 
+    /** Corners of the popup menus; null = slightly rounded (85). */
+    val menuCornerPercent: Flow<Int?> = dataStore.data.map { it[MENU_CORNER_KEY] }
+
+    suspend fun setMenuCornerPercent(percent: Int) {
+        dataStore.edit { it[MENU_CORNER_KEY] = percent.coerceIn(0, 100) }
+    }
+
     suspend fun resetSearchResultsAppearance() = resetElementAppearanceFor(SEARCH_RESULTS_PREFIX)
 
     /** Off by default: the cards keep the same fine side margin as every other element. */
@@ -1233,6 +1240,7 @@ class SettingsRepository @Inject constructor(
         private val APP_LIST_SEARCH_BUTTON_CORNER_KEY = intPreferencesKey("app_list_search_button_corner_percent")
         private val ALPHABET_RAIL_CORNER_KEY = intPreferencesKey("alphabet_rail_corner_percent")
         private val APP_LIST_FIELD_CORNER_KEY = intPreferencesKey("app_list_field_corner_percent")
+        private val MENU_CORNER_KEY = intPreferencesKey("menu_corner_percent")
         private val APP_GRID_FIELD_CORNER_KEY = intPreferencesKey("app_grid_field_corner_percent")
         private val DESIGN_EFFECTS_KEY = stringPreferencesKey("design_effects")
         private val ACTIVE_DESIGN_KEY = stringPreferencesKey("active_design")

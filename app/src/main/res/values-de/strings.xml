@@ -721,7 +721,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_shape_single">Jedes Teil einzeln</string>
     <string name="welcome_shape_part_dock">Dock</string>
     <string name="welcome_shape_part_widgets">Widgets</string>
-    <string name="welcome_shape_part_search_button">Suchbutton</string>
+    <string name="welcome_shape_part_search_button">Suchbutton (App-Liste)</string>
     <string name="welcome_shape_part_folders">Ordner</string>
     <string name="settings_widget_paging_mode_row_info">Wie dieses Widget blättert (Stunden und Tage, Notizen). Das Aussehen der Pfeiltasten gilt für alle Widgets gemeinsam.</string>
     <string name="settings_color_modes_label">Farbmodi</string>
@@ -737,9 +737,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_mock_search">Suche</string>
     <string name="welcome_shape_part_panel">Panel</string>
     <string name="welcome_shape_part_element_boxes">Element-Boxen</string>
-    <string name="welcome_shape_part_alphabet_rail">A–Z-Leiste</string>
-    <string name="welcome_shape_part_search_bar">Suchleisten</string>
-    <string name="welcome_shape_part_search_results">Suchergebnisse</string>
+    <string name="welcome_shape_part_alphabet_rail">A–Z-Leiste (App-Liste)</string>
+    <string name="welcome_shape_part_search_bar">Suchfelder (alle)</string>
+    <string name="welcome_shape_part_search_results">Suchergebnisse (Textsuche)</string>
     <string name="settings_ready_look_label">Fertiges Aussehen</string>
     <string name="settings_corners_all">Ecken aller Teile</string>
     <string name="settings_corners_all_summary">Rund, weich oder eckig, für alles oder Teil für Teil</string>
@@ -901,4 +901,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_design_3d_light">3D Hell</string>
     <string name="welcome_design_3d_dark">3D Dunkel</string>
     <string name="welcome_widgets_weather_note">Das Wetter-Widget ist schon dabei. Seine Daten kommen im Moment von Breezy Weather über die Gadgetbridge-Weitergabe. Weitere Wetterquellen sind in Arbeit.</string>
+    <string name="welcome_shape_part_category_rail">Kategorienleiste (Textsuche)</string>
+    <string name="welcome_shape_part_widget_arrows">Pfeiltasten in Widgets</string>
+    <string name="welcome_shape_part_keyboard_strip">Streifen über der Tastatur</string>
+    <string name="settings_icon_size_dock_note">Im Dock kann ein Symbol kleiner werden, aber nicht größer als sein Platz.</string>
 </resources>

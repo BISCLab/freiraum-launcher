@@ -240,6 +240,7 @@ private fun AppRowsHint(dark: Boolean?) {
 @Composable
 fun SettingsMenuLookScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = androidx.hilt.navigation.compose.hiltViewModel()) {
     val own by viewModel.menuAppearance.collectAsState()
+    val corner by viewModel.menuCornerPercent.collectAsState()
     val automaticFill = MaterialTheme.colorScheme.surfaceContainerHigh.toArgb()
     val saved = remember(own) { own ?: ElementAppearance(fill = com.bisc.flauncher.data.model.ColorFill(color = automaticFill)) }
     ElementLookScreen(
@@ -247,11 +248,10 @@ fun SettingsMenuLookScreen(navController: NavController, onBack: () -> Unit, vie
         navController = navController,
         onBack = onBack,
         saved = saved,
-        savedCorner = null,
-        onSave = { look, _ -> viewModel.setMenuAppearance(look) },
+        savedCorner = corner ?: com.bisc.flauncher.ui.home.DEFAULT_MENU_CORNER,
+        onSave = { look, newCorner -> viewModel.setMenuAppearance(look); newCorner?.let(viewModel::setMenuCornerPercent) },
         kind = LookSampleKind.CARDS,
         allowNone = false,
-        previewCorner = 85,
         custom = own != null,
         onResetLook = viewModel::resetMenuAppearance
     )

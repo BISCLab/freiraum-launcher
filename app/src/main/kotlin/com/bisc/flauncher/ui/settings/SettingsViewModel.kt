@@ -453,6 +453,8 @@ class SettingsViewModel @Inject constructor(
         repository.menuAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
     fun setMenuAppearance(appearance: ElementAppearance) { viewModelScope.launch { repository.setMenuAppearance(appearance) } }
     fun resetMenuAppearance() { viewModelScope.launch { repository.resetMenuAppearance() } }
+    val menuCornerPercent: StateFlow<Int?> = repository.menuCornerPercent.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    fun setMenuCornerPercent(percent: Int) { viewModelScope.launch { repository.setMenuCornerPercent(percent) } }
     val searchResultsAppearance: StateFlow<ElementAppearance?> =
         repository.searchResultsAppearance.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 

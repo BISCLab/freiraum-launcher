@@ -63,7 +63,9 @@ private val NAMED_LOOKS = mapOf(
     ShapePart.ALPHABET_RAIL to "search_alphabet_rail",
     ShapePart.SEARCH_BAR to "search_field",
     ShapePart.SEARCH_RESULTS to "search_results",
-    ShapePart.CATEGORY_RAIL to "search_category_rail"
+    ShapePart.CATEGORY_RAIL to "search_category_rail",
+    ShapePart.WIDGET_ARROWS to "widget_arrow",
+    ShapePart.MENUS to "app_menu"
 )
 
 @HiltViewModel
@@ -247,7 +249,8 @@ fun SettingsColorsScreen(
                     ShapePart.FOLDERS -> LookSampleKind.FOLDER
                     ShapePart.SEARCH_BAR, ShapePart.SEARCH_BUTTON -> LookSampleKind.FIELD
                     ShapePart.ALPHABET_RAIL, ShapePart.CATEGORY_RAIL -> LookSampleKind.RAIL
-                    ShapePart.SEARCH_RESULTS -> LookSampleKind.CARDS
+                    ShapePart.SEARCH_RESULTS, ShapePart.MENUS -> LookSampleKind.CARDS
+                    ShapePart.WIDGET_ARROWS, ShapePart.KEYBOARD_STRIP -> LookSampleKind.FIELD
                 },
                 partDraft,
                 corners[part] ?: 100

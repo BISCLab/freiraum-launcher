@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Element-Boxes have their corner setting in their editor again
+- Menus have corners of their own, on their look page under Appearance > Menus
+- Corners of all parts lists every part with corners, with clear names and where it sits: now also
+  the arrows in widgets, the strip over the keyboard and the menus. Search fields (all) no longer
+  changes the general roundness of everything else
+- Colors of all parts also lists the arrows in widgets and the menus
+- An app's own icon size counts in the Dock too, but only smaller, never bigger than its place; the
+  app page says so
 - Welcome tour built anew: the welcome is a full screen in the launcher's blue with softly drifting
   light, the logo coming in and what Freiraum stands for. The look comes first: Design, Wallpaper
   and Shape share one phone on top that shows the home screen with the choice right away, so every

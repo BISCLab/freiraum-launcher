@@ -347,6 +347,12 @@ private fun AppOverrideEditSheetContent(
                 onSettled = { iconSizePercent = it }
             )
         }
+        Text(
+            stringResource(R.string.settings_icon_size_dock_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 4.dp)
+        )
 
         // Independent per-surface visibility - an app can stay out of the app list while still
         // being searchable, or vice versa; placements on pages, in the dock and in folders are

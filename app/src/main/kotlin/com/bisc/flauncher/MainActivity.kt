@@ -145,6 +145,7 @@ class MainActivity : ComponentActivity() {
             val settingsThemeMode by settingsVm.settingsThemeMode.collectAsState()
             val categoryIcons by settingsVm.categoryIcons.collectAsState()
             val menuAppearance by settingsVm.menuAppearance.collectAsState()
+            val menuCorner by settingsVm.menuCornerPercent.collectAsState()
             val chosenMotion by settingsVm.motionLevel.collectAsState()
             val motionPrefs by settingsVm.motionPrefs.collectAsState()
             val designEffects by settingsVm.designEffects.collectAsState()
@@ -223,7 +224,8 @@ class MainActivity : ComponentActivity() {
                 com.bisc.flauncher.ui.theme.LocalDesignEffects provides designEffects,
                 com.bisc.flauncher.ui.theme.LocalSettingsThemeMode provides settingsThemeMode,
                 com.bisc.flauncher.ui.home.search.LocalCategoryIcons provides categoryIcons,
-                com.bisc.flauncher.ui.home.LocalMenuAppearance provides menuAppearance
+                com.bisc.flauncher.ui.home.LocalMenuAppearance provides menuAppearance,
+                com.bisc.flauncher.ui.home.LocalMenuCornerPercent provides (menuCorner ?: com.bisc.flauncher.ui.home.DEFAULT_MENU_CORNER)
             ) {
             FLauncherTheme(themePreference = theme, fontPreference = font, accentColor = accentColor) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {

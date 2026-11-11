@@ -65,7 +65,7 @@ enum class ShapePreset(val elements: Int, val widgets: Int) {
 
 /** Every part that can get its own corners and colors. */
 enum class ShapePart(val isWidget: Boolean = false) {
-    DOCK, PANEL, WIDGETS(isWidget = true), ELEMENT_BOXES, FOLDERS, SEARCH_BUTTON, ALPHABET_RAIL, SEARCH_BAR, SEARCH_RESULTS, CATEGORY_RAIL;
+    DOCK, PANEL, WIDGETS(isWidget = true), WIDGET_ARROWS, ELEMENT_BOXES, FOLDERS, SEARCH_BAR, SEARCH_BUTTON, ALPHABET_RAIL, SEARCH_RESULTS, CATEGORY_RAIL, KEYBOARD_STRIP, MENUS;
 
     fun percentOf(preset: ShapePreset) = if (isWidget) preset.widgets else preset.elements
 
@@ -102,7 +102,10 @@ class PartCornersViewModel @Inject constructor(
             ShapePart.SEARCH_BAR to (settingsRepository.searchFieldCornerRadiusPercent.first() ?: settingsRepository.searchBarCornerRadiusPercent.first() ?: 100),
             ShapePart.SEARCH_RESULTS to (settingsRepository.searchResultsCornerRadiusPercent.first() ?: general),
             ShapePart.CATEGORY_RAIL to (settingsRepository.searchRailCornerRadiusPercent.first()
-                ?: settingsRepository.alphabetRailCornerPercent.first() ?: general)
+                ?: settingsRepository.alphabetRailCornerPercent.first() ?: general),
+            ShapePart.WIDGET_ARROWS to settingsRepository.widgetPaging.first().cornerRadiusPercent,
+            ShapePart.KEYBOARD_STRIP to settingsRepository.searchKeyboardCapCornerRadiusPercent.first(),
+            ShapePart.MENUS to (settingsRepository.menuCornerPercent.first() ?: com.bisc.flauncher.ui.home.DEFAULT_MENU_CORNER)
         )
     }
 
@@ -120,15 +123,19 @@ class PartCornersViewModel @Inject constructor(
             shape[ShapePart.SEARCH_BUTTON]?.let { settingsRepository.setAppListSearchButtonCornerPercent(it) }
             shape[ShapePart.ALPHABET_RAIL]?.let { settingsRepository.setAlphabetRailCornerPercent(it) }
             shape[ShapePart.SEARCH_BAR]?.let {
+                // Every search field: Text search, App list and App grid.
                 settingsRepository.setAppListFieldCornerPercent(it)
                 settingsRepository.setAppGridFieldCornerPercent(it)
-                // The other search fields (App list, App grid) follow the general roundness.
-                settingsRepository.setDefaultCornerRadiusPercent(it)
                 settingsRepository.setSearchBarCornerRadiusPercent(it)
                 settingsRepository.setSearchFieldCornerRadiusPercent(it)
             }
             shape[ShapePart.SEARCH_RESULTS]?.let { settingsRepository.setSearchResultsCornerRadiusPercent(it) }
             shape[ShapePart.CATEGORY_RAIL]?.let { settingsRepository.setSearchRailCornerRadiusPercent(it) }
+            shape[ShapePart.WIDGET_ARROWS]?.let { corner ->
+                settingsRepository.setWidgetPaging(settingsRepository.widgetPaging.first().copy(cornerRadiusPercent = corner))
+            }
+            shape[ShapePart.KEYBOARD_STRIP]?.let { settingsRepository.setSearchKeyboardCapCornerRadiusPercent(it) }
+            shape[ShapePart.MENUS]?.let { settingsRepository.setMenuCornerPercent(it) }
             pageRowDao.updateAll(pageRowDao.observeAll().first().map { row ->
                 val corner = when (row.type) {
                     PageRowType.SEARCH_BAR -> shape[ShapePart.DOCK]
@@ -295,7 +302,10 @@ internal fun ShapePart.label() = when (this) {
     ShapePart.ALPHABET_RAIL -> R.string.welcome_shape_part_alphabet_rail
     ShapePart.SEARCH_BAR -> R.string.welcome_shape_part_search_bar
     ShapePart.SEARCH_RESULTS -> R.string.welcome_shape_part_search_results
-    ShapePart.CATEGORY_RAIL -> R.string.settings_search_rail_label
+    ShapePart.CATEGORY_RAIL -> R.string.welcome_shape_part_category_rail
+    ShapePart.WIDGET_ARROWS -> R.string.welcome_shape_part_widget_arrows
+    ShapePart.KEYBOARD_STRIP -> R.string.welcome_shape_part_keyboard_strip
+    ShapePart.MENUS -> R.string.settings_menus_title
 }
 
 /** One screen in small with its parts drawn at their corners; the part picked in the table glows

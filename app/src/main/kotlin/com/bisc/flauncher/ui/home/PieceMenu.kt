@@ -53,12 +53,15 @@ import com.bisc.flauncher.ui.home.dock.resolveElementColors
 import com.bisc.flauncher.ui.theme.designGlow
 import kotlin.math.roundToInt
 
-private val PIECE_MENU_SHAPE = RoundedCornerShape(24.dp)
 private val PIECE_MENU_GAP = 3.dp
 private val PIECE_MENU_MARGIN = 12.dp
 
 /** The look of the launcher's menus (Appearance → Menus, or a design); null = the automatic one. */
 val LocalMenuAppearance = compositionLocalOf<ElementAppearance?> { null }
+
+/** Corners of the menus, on the one scale every part uses. */
+const val DEFAULT_MENU_CORNER = 85
+val LocalMenuCornerPercent = compositionLocalOf { DEFAULT_MENU_CORNER }
 
 /**
  * The launcher's popup menu: the screen behind it dims and blurs, and the entries are separate
@@ -76,6 +79,7 @@ fun PieceMenu(expanded: Boolean, onDismissRequest: () -> Unit, content: @Composa
         measurePolicy = { _, _ -> layout(0, 0) {} }
     )
     if (!expanded) return
+    val menuShape = com.bisc.flauncher.ui.theme.PartCornerShape(LocalMenuCornerPercent.current)
 
     Dialog(
         onDismissRequest = onDismissRequest,
@@ -107,10 +111,10 @@ fun PieceMenu(expanded: Boolean, onDismissRequest: () -> Unit, content: @Composa
                             scaleX = scale
                             scaleY = scale
                         }
-                        .designGlow(PIECE_MENU_SHAPE, "menus")
+                        .designGlow(menuShape, "menus")
                         .width(IntrinsicSize.Max)
                         .widthIn(min = 220.dp)
-                        .clip(PIECE_MENU_SHAPE),
+                        .clip(menuShape),
                     verticalArrangement = Arrangement.spacedBy(PIECE_MENU_GAP),
                     content = content
                 )

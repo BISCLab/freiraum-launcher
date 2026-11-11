@@ -805,7 +805,10 @@ fun PillRowEntries(
                                 contentAlignment = Alignment.Center
                             ) {
                                 menu?.Menu?.invoke()
-                                if (bitmap != null) Image(bitmap = bitmap, contentDescription = label, modifier = Modifier.size(DockDimens.iconSize))
+                                // An app's own size, relative to the size for all apps; never past its place.
+                                val resolver = LocalIconSizeResolver.current
+                                val ownScale = resolver?.let { (it(entry.payload) / it("").coerceAtLeast(0.01f)).coerceAtMost(1f) } ?: 1f
+                                if (bitmap != null) Image(bitmap = bitmap, contentDescription = label, modifier = Modifier.size(DockDimens.iconSize * ownScale))
                                 else Icon(imageVector = unsetAppSlotIcon, contentDescription = null, tint = Color.White)
                             }
                         }
