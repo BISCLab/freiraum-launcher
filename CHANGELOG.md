@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Welcome tour built anew: the welcome is a full screen in the launcher's blue with softly drifting
+  light, the logo coming in and what Freiraum stands for. The look comes first: Design, Wallpaper
+  and Shape share one phone on top that shows the home screen with the choice right away, so every
+  tap visibly changes something. The progress is a slim bar of steps
 - The look pages of the App list's search button, A-Z rail and search field and of the App grid's
   search field have their fine corner setting again; the two search fields have corners of their own
 - Corners of all parts: in the small App list the search button is the round button at the bottom

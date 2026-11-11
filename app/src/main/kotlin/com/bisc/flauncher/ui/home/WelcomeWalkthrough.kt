@@ -1,5 +1,14 @@
 package com.bisc.flauncher.ui.home
 
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.material.icons.filled.Cloud
@@ -86,7 +95,7 @@ import com.bisc.flauncher.ui.settings.PermissionGroups
 import com.bisc.flauncher.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
-private enum class WelcomeStep { HELLO, GESTURES, SETTINGS, DESIGN, WALLPAPER, SHAPE, WIDGETS, PERMISSIONS, LOCK_SCREEN }
+private enum class WelcomeStep { HELLO, DESIGN, WALLPAPER, SHAPE, GESTURES, WIDGETS, SETTINGS, PERMISSIONS, LOCK_SCREEN }
 
 /** The first-start tour: welcome with a quick setup, the gestures, where the settings are, then
  *  design, wallpaper pack and shape to choose, the permissions, and the lock screen when the pack
@@ -112,7 +121,20 @@ fun WelcomeWalkthrough(
     val dark = settingsDark(LocalSettingsThemeMode.current, isSystemInDarkTheme())
     var lockAnswered by remember { mutableStateOf(false) }
 
+    // Everything the look steps show in their phone: the design, the wallpaper and the corners in use.
+    val designs by designsViewModel.designs.collectAsState()
+    val activeDesignId by designsViewModel.activeId.collectAsState()
+    val activeDesign = designs.firstOrNull { it.id == activeDesignId }
+    val activePack = packs.firstOrNull { it.id == activePackId }
+    val corners by cornersViewModel.corners.collectAsState()
+    LaunchedEffect(activeDesignId) { cornersViewModel.loadCorners() }
+    val phone: @Composable () -> Unit = {
+        LivePhone(activeDesign, activePack?.images?.get("home") ?: activePack?.preview, dark, corners)
+    }
+
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        val heroShown = (1f - (pagerState.currentPage + pagerState.currentPageOffsetFraction)).coerceIn(0f, 1f)
+        if (heroShown > 0f) HeroBackground(Modifier.fillMaxSize().graphicsLayer { alpha = heroShown })
         Box(modifier = Modifier.fillMaxSize().safeDrawingPadding(), contentAlignment = Alignment.TopCenter) {
             Column(modifier = Modifier.widthIn(max = MaxContentWidth).fillMaxSize()) {
                 val step = steps.getOrElse(pagerState.currentPage) { steps.last() }
@@ -121,6 +143,8 @@ fun WelcomeWalkthrough(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (step == WelcomeStep.HELLO) {
+                        // White on the hero's blue.
+                        MaterialTheme(colorScheme = MaterialTheme.colorScheme.copy(primary = Color.White, onSurface = Color.White)) {
                         TextButton(onClick = { onboarding.setTourDark(!dark) }) {
                             Icon(if (dark) Icons.Filled.LightMode else Icons.Filled.DarkMode, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(6.dp))
@@ -128,6 +152,7 @@ fun WelcomeWalkthrough(
                         }
                         Spacer(Modifier.weight(1f))
                         LanguageButton()
+                        }
                     } else {
                         Spacer(Modifier.weight(1f))
                         TextButton(onClick = onDone) { Text(stringResource(R.string.welcome_skip)) }
@@ -145,13 +170,13 @@ fun WelcomeWalkthrough(
                         WelcomeStep.SETTINGS -> WelcomePage(R.string.welcome_settings_title, R.string.welcome_settings_text) {
                             PhoneFrame { HomePreview(highlightSettings = true) }
                         }
-                        WelcomeStep.DESIGN -> WelcomePage(R.string.welcome_design_title, R.string.welcome_design_text, illustrationWeight = 0f) {
+                        WelcomeStep.DESIGN -> LookPage(R.string.welcome_design_title, R.string.welcome_design_text, phone) {
                             DesignChoice(designsViewModel, onboarding, dark)
                         }
-                        WelcomeStep.WALLPAPER -> WelcomePage(R.string.welcome_wallpaper_title, R.string.welcome_wallpaper_text, illustrationWeight = 0f) {
+                        WelcomeStep.WALLPAPER -> LookPage(R.string.welcome_wallpaper_title, R.string.welcome_wallpaper_text, phone) {
                             WallpaperChoice(packsViewModel, dark)
                         }
-                        WelcomeStep.SHAPE -> WelcomePage(R.string.welcome_shape_title, R.string.welcome_shape_text, illustrationWeight = 0f) {
+                        WelcomeStep.SHAPE -> LookPage(R.string.welcome_shape_title, R.string.welcome_shape_text, phone) {
                             ShapeChoice(cornersViewModel)
                         }
                         WelcomeStep.WIDGETS -> WelcomePage(R.string.welcome_widgets_title, R.string.welcome_widgets_text, illustrationWeight = 0f) {
@@ -206,15 +231,14 @@ fun WelcomeWalkthrough(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.weight(1f)) {
-                        steps.indices.forEach { i ->
-                            val active = i == pagerState.currentPage
-                            Box(
-                                modifier = Modifier
-                                    .size(width = if (active) 20.dp else 8.dp, height = 8.dp)
-                                    .clip(CircleShape)
-                                    .background(if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.weight(1f).padding(end = 20.dp)) {
+                        // The welcome itself is not a step to count.
+                        (1 until steps.size).forEach { i ->
+                            val reached by androidx.compose.animation.animateColorAsState(
+                                if (i <= pagerState.currentPage) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                                label = "step"
                             )
+                            Box(modifier = Modifier.weight(1f).height(5.dp).clip(CircleShape).background(reached))
                         }
                     }
                     if (pagerState.currentPage < steps.lastIndex) {
@@ -233,42 +257,210 @@ fun WelcomeWalkthrough(
 /** Logo, greeting, and the two ways in: everything recommended at once, or step by step. */
 @Composable
 private fun HelloPage(onQuick: () -> Unit, onOwn: () -> Unit) {
+    val appear = remember { androidx.compose.animation.core.Animatable(0f) }
+    LaunchedEffect(Unit) { appear.animateTo(1f, androidx.compose.animation.core.tween(700, easing = com.bisc.flauncher.ui.EmphasizedEasing)) }
+    fun Modifier.rise(delay: Float) = graphicsLayer {
+        val p = ((appear.value - delay) / (1f - delay)).coerceIn(0f, 1f)
+        alpha = p
+        translationY = (1f - p) * 40.dp.toPx()
+    }
     Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 32.dp),
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 28.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Box(
-            modifier = Modifier.size(112.dp).clip(RoundedCornerShape(32.dp)).background(Color(0xFF0758F5)),
+            modifier = Modifier
+                .graphicsLayer {
+                    val s = 0.7f + 0.3f * appear.value
+                    scaleX = s; scaleY = s; alpha = appear.value
+                }
+                .size(132.dp)
+                .clip(RoundedCornerShape(38.dp))
+                .background(Color.White.copy(alpha = 0.16f))
+                .border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(38.dp)),
             contentAlignment = Alignment.Center
         ) {
             Image(painterResource(R.drawable.ic_launcher_foreground), contentDescription = null, modifier = Modifier.fillMaxSize())
         }
-        Spacer(Modifier.height(28.dp))
-        Text(stringResource(R.string.welcome_hello_title), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(32.dp))
+        Text(
+            stringResource(R.string.welcome_hello_title),
+            style = MaterialTheme.typography.headlineLarge,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.rise(0.15f)
+        )
+        Spacer(Modifier.height(12.dp))
         Text(
             stringResource(R.string.welcome_hello_text),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(36.dp))
-        Button(onClick = onQuick, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-            Text(stringResource(R.string.welcome_quick_setup), style = MaterialTheme.typography.titleMedium)
-        }
-        Text(
-            stringResource(R.string.welcome_quick_setup_summary),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color.White.copy(alpha = 0.88f),
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 6.dp, bottom = 16.dp)
+            modifier = Modifier.rise(0.25f)
         )
-        OutlinedButton(onClick = onOwn, modifier = Modifier.fillMaxWidth().height(52.dp)) {
-            Text(stringResource(R.string.welcome_own_setup))
+        Spacer(Modifier.height(22.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.rise(0.35f)) {
+            listOf(
+                Icons.Filled.WifiOff to R.string.about_promise_offline,
+                Icons.Filled.VisibilityOff to R.string.about_promise_tracking,
+                Icons.Filled.Block to R.string.about_promise_ads
+            ).forEach { (icon, label) ->
+                Row(
+                    modifier = Modifier.clip(CircleShape).background(Color.White.copy(alpha = 0.16f)).padding(horizontal = 10.dp, vertical = 7.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                    Spacer(Modifier.width(5.dp))
+                    Text(stringResource(label), style = MaterialTheme.typography.labelMedium, color = Color.White, maxLines = 1)
+                }
+            }
+        }
+        Spacer(Modifier.height(40.dp))
+        Column(modifier = Modifier.rise(0.45f), horizontalAlignment = Alignment.CenterHorizontally) {
+            Button(
+                onClick = onQuick,
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color(0xFF0758F5)),
+                modifier = Modifier.fillMaxWidth().height(58.dp)
+            ) {
+                Text(stringResource(R.string.welcome_quick_setup), style = MaterialTheme.typography.titleMedium)
+            }
+            Text(
+                stringResource(R.string.welcome_quick_setup_summary),
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.8f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 8.dp, bottom = 18.dp)
+            )
+            OutlinedButton(
+                onClick = onOwn,
+                border = androidx.compose.foundation.BorderStroke(1.5.dp, Color.White.copy(alpha = 0.8f)),
+                colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                modifier = Modifier.fillMaxWidth().height(54.dp)
+            ) {
+                Text(stringResource(R.string.welcome_own_setup), style = MaterialTheme.typography.titleSmall)
+            }
         }
     }
 }
+
+/** The launcher's blue, deepening towards the bottom, with soft light drifting slowly over it. */
+@Composable
+private fun HeroBackground(modifier: Modifier) {
+    val drift = androidx.compose.animation.core.rememberInfiniteTransition(label = "hero")
+    val t by drift.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
+            androidx.compose.animation.core.tween(14000, easing = androidx.compose.animation.core.LinearEasing),
+            androidx.compose.animation.core.RepeatMode.Reverse
+        ),
+        label = "drift"
+    )
+    androidx.compose.foundation.Canvas(modifier) {
+        drawRect(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color(0xFF1A6BFF), Color(0xFF0758F5), Color(0xFF0236A8))))
+        listOf(
+            Triple(Offset(0.15f + 0.25f * t, 0.12f), 0.75f, Color(0xFF7FB2FF)),
+            Triple(Offset(0.95f - 0.2f * t, 0.45f + 0.1f * t), 0.65f, Color(0xFF9B7BFF)),
+            Triple(Offset(0.35f + 0.15f * t, 1.0f - 0.08f * t), 0.9f, Color(0xFF00C2E0))
+        ).forEach { (spot, reach, color) ->
+            val center = Offset(size.width * spot.x, size.height * spot.y)
+            val radius = size.width * reach
+            drawCircle(
+                androidx.compose.ui.graphics.Brush.radialGradient(0f to color.copy(alpha = 0.35f), 1f to Color.Transparent, center = center, radius = radius),
+                radius = radius,
+                center = center
+            )
+        }
+    }
+}
+
+/** A look step: the phone with what is chosen on top, live, and the choices below it. */
+@Composable
+private fun LookPage(titleRes: Int, textRes: Int, phone: @Composable () -> Unit, choices: @Composable () -> Unit) {
+    val scroll = rememberScrollState()
+    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(modifier = Modifier.weight(0.9f).fillMaxWidth().padding(top = 4.dp, bottom = 12.dp), contentAlignment = Alignment.Center) { phone() }
+        Text(stringResource(titleRes), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
+        Text(
+            stringResource(textRes),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 6.dp, bottom = 12.dp)
+        )
+        Column(
+            modifier = Modifier.weight(1f).fillMaxWidth().fadeScrollEdges(scroll).verticalScroll(scroll).padding(vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) { choices() }
+    }
+}
+
+/** A phone showing the home screen with the chosen design, wallpaper and corners, as they are now. */
+@Composable
+private fun LivePhone(
+    design: com.bisc.flauncher.data.design.Design?,
+    picture: java.io.File?,
+    dark: Boolean,
+    corners: Map<com.bisc.flauncher.ui.settings.ShapePart, Int>
+) {
+    val designDark = design?.theme?.let { it == com.bisc.flauncher.ui.theme.ThemePreference.DARK } ?: dark
+    val frame = RoundedCornerShape(30.dp)
+    val box = design?.box ?: com.bisc.flauncher.data.model.ElementAppearance()
+    val accent = Color(design?.accent ?: 0xFF0758F5.toInt())
+    fun shape(part: com.bisc.flauncher.ui.settings.ShapePart, fallback: Int) =
+        com.bisc.flauncher.ui.theme.PartCornerShape(corners[part] ?: fallback, full = 16.dp)
+    androidx.compose.animation.Crossfade(targetState = Triple(design, picture, corners), animationSpec = androidx.compose.animation.core.tween(350), label = "phone") { _ ->
+        CompositionLocalProvider(
+            com.bisc.flauncher.ui.theme.LocalDesignEffects provides design?.effects,
+            com.bisc.flauncher.ui.home.LocalSurfaceIsDark provides designDark
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .aspectRatio(0.5f, matchHeightConstraintsFirst = true)
+                    .shadow(20.dp, frame)
+                    .clip(frame)
+                    .background(Color(com.bisc.flauncher.ui.theme.backgroundColorFor(designDark)))
+                    .border(3.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f), frame)
+            ) {
+                if (picture != null) PictureThumb(picture, Modifier.fillMaxSize())
+                com.bisc.flauncher.ui.theme.DesignBackgroundEffects(Modifier.fillMaxSize())
+                Column(modifier = Modifier.fillMaxSize().padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val clockColor = if (designDark || picture != null) Color.White else Color(0xFF16171B)
+                    Text("9:41", fontSize = 30.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Light, color = clockColor, modifier = Modifier.padding(start = 4.dp, top = 6.dp))
+                    com.bisc.flauncher.ui.home.dock.DockPanelSurface(design?.widget ?: box, shape(com.bisc.flauncher.ui.settings.ShapePart.WIDGETS, 80), Modifier.fillMaxWidth().height(58.dp), effectTarget = "widgets") {
+                        Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Box(Modifier.fillMaxWidth(0.7f).height(6.dp).clip(CircleShape).background(androidx.compose.material3.LocalContentColor.current.copy(alpha = 0.55f)))
+                            Box(Modifier.fillMaxWidth(0.45f).height(6.dp).clip(CircleShape).background(androidx.compose.material3.LocalContentColor.current.copy(alpha = 0.3f)))
+                        }
+                    }
+                    com.bisc.flauncher.ui.home.dock.DockPanelSurface(box, shape(com.bisc.flauncher.ui.settings.ShapePart.ELEMENT_BOXES, 50), Modifier.fillMaxWidth().height(44.dp), effectTarget = "widgets") {
+                        Row(Modifier.align(Alignment.Center), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            repeat(4) { i -> Box(Modifier.size(20.dp).clip(RoundedCornerShape(6.dp)).background(accent.copy(alpha = 0.35f + 0.15f * i))) }
+                        }
+                    }
+                    Spacer(Modifier.weight(1f))
+                    com.bisc.flauncher.ui.home.dock.DockPanelSurface(
+                        design?.elements?.get("search_field") ?: box,
+                        shape(com.bisc.flauncher.ui.settings.ShapePart.SEARCH_BAR, 100),
+                        Modifier.fillMaxWidth().height(26.dp),
+                        effectTarget = "search"
+                    ) {
+                        Icon(Icons.Filled.Search, contentDescription = null, modifier = Modifier.align(Alignment.CenterStart).padding(start = 8.dp).size(13.dp))
+                    }
+                    com.bisc.flauncher.ui.home.dock.DockPanelSurface(design?.dock ?: box, shape(com.bisc.flauncher.ui.settings.ShapePart.DOCK, 100), Modifier.fillMaxWidth().height(46.dp), effectTarget = "dock") {
+                        Row(Modifier.align(Alignment.Center), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                            repeat(4) { Box(Modifier.size(22.dp).clip(RoundedCornerShape(7.dp)).background(accent.copy(alpha = 0.85f))) }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 /** The app language behind a flag; "automatic" follows the phone. */
 @Composable
@@ -385,7 +577,8 @@ private fun WallpaperChoice(viewModel: WallpaperPacksViewModel, dark: Boolean) {
 private fun ShapeChoice(viewModel: PartCornersViewModel) {
     val corners by viewModel.corners.collectAsState()
     LaunchedEffect(Unit) { viewModel.loadCorners() }
-    ShapeEditor(corners, onAll = viewModel::applyAll, onPart = viewModel::applyPart)
+    // The phone above shows the result, so no small screens of their own here.
+    ShapeEditor(corners, onAll = viewModel::applyAll, onPart = viewModel::applyPart, showScreens = false)
 }
 
 /** Tiles side by side; exactly three fit, like the page tiles, the rest are a swipe away. */

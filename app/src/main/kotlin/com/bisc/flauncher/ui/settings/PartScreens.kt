@@ -185,10 +185,10 @@ internal enum class ShapeScreen(val label: Int) {
 /** The shape previews, the choice for all and the table; [onAll] and [onPart] decide whether a
  *  change applies at once (welcome tour) or waits for Save (settings). */
 @Composable
-internal fun ShapeEditor(corners: Map<ShapePart, Int>, onAll: (ShapePreset) -> Unit, onPart: (ShapePart, ShapePreset) -> Unit) {
+internal fun ShapeEditor(corners: Map<ShapePart, Int>, onAll: (ShapePreset) -> Unit, onPart: (ShapePart, ShapePreset) -> Unit, showScreens: Boolean = true) {
     var focus by remember { mutableStateOf<ShapePart?>(null) }
     Column(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.fillMaxWidth()) {
-        PartScreensRow(corners, focus)
+        if (showScreens) PartScreensRow(corners, focus)
         val all = ShapePreset.entries.firstOrNull { preset ->
             corners.isNotEmpty() && ShapePart.entries.all { corners[it] == it.percentOf(preset) }
         }
