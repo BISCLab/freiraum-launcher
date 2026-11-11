@@ -4,7 +4,7 @@
   "name": "3D Dark",
   "name_de": "3D Dunkel",
   "author": "BISC Lab",
-  "version": "1.0",
+  "version": "1.1",
   "theme": "DARK",
   "accent": "#FF5B93FF",
   "font": "SYSTEM",
@@ -176,6 +176,17 @@
       "border": false,
       "borderWidth": 1.0,
       "contentColor": "#FFECEEF3"
+    },
+    "app_menu": {
+      "style": "COLOR",
+      "fill": "#FF34373F",
+      "fill2": "#FF1D1F25",
+      "fillMode": "GRADIENT",
+      "direction": "TOP_TO_BOTTOM",
+      "opacity": 1.0,
+      "border": false,
+      "borderWidth": 1.0,
+      "contentColor": "#FFECEEF3"
     }
   },
   "keyboardCapColor": "#FF1D1F25",
@@ -186,14 +197,15 @@
     "targets": [],
     "depth": 1.0,
     "depthTargets": [
-      "dock",
-      "panel",
-      "search",
-      "folders",
-      "cards",
-      "widgets",
       "buttons",
-      "rail"
+      "cards",
+      "dock",
+      "folders",
+      "menus",
+      "panel",
+      "rail",
+      "search",
+      "widgets"
     ]
   }
 }

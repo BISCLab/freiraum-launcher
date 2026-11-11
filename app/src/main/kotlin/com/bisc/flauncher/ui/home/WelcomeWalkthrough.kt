@@ -313,8 +313,13 @@ private fun DesignChoice(viewModel: DesignsViewModel, onboarding: OnboardingView
         }
     }
     // Neon is a download; it shows up as a real tile once added.
-    val missing = listOf("neon-light" to R.string.welcome_design_neon_light, "neon-dark" to R.string.welcome_design_neon_dark)
+    val missing = listOf(
+        "neon-light" to R.string.welcome_design_neon_light, "neon-dark" to R.string.welcome_design_neon_dark,
+        "3d-light" to R.string.welcome_design_3d_light, "3d-dark" to R.string.welcome_design_3d_dark
+    )
         .filter { (id, _) -> designs.none { it.id == id } }
+        // The tour's own mode first.
+        .sortedBy { (id, _) -> id.endsWith("-dark") != dark }
     TileRow(buildList {
         designs.sortedBy { (it.theme == com.bisc.flauncher.ui.theme.ThemePreference.DARK) != dark }.forEach { design ->
             add(Tile(design.displayName(german), design.id == activeId, { viewModel.apply(design) }) { DesignPreview(design, Modifier.fillMaxWidth()) })
@@ -385,7 +390,8 @@ private fun ShapeChoice(viewModel: PartCornersViewModel) {
 @Composable
 private fun TileRow(tiles: List<Tile>) {
     androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val tileWidth = (maxWidth - TILE_GAP * 2) / 3
+        // A bit of the next tile peeks in, so it is clear there is more to the side.
+        val tileWidth = (maxWidth - TILE_GAP * 2) / 2.6f
         Row(
             modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(TILE_GAP)
@@ -468,6 +474,13 @@ private fun WidgetsOverview() {
                 com.bisc.flauncher.ui.settings.SettingsPreference(icon = icon, title = stringResource(title), summary = stringResource(summary), onClick = null, trailing = null)
             }
         }
+        Text(
+            stringResource(R.string.welcome_widgets_weather_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+        )
         TextButton(
             onClick = { com.bisc.flauncher.ui.settings.openExtensionsPage(context, "#widgets") },
             modifier = Modifier.align(Alignment.CenterHorizontally)

@@ -241,6 +241,7 @@ fun SearchCategoryRail(
                     .wrapContentWidth(unbounded = true, align = if (left) Alignment.Start else Alignment.End)
                     .height(BUBBLE_HEIGHT)
                     .shadow(8.dp, CircleShape)
+                    .designGlow(CircleShape, "buttons")
                     .clip(CircleShape)
                     .background(bubbleColors.background, CircleShape, bubbleColors.backgroundAlpha)
                     .then(if (bubbleAppearance.borderEnabled) Modifier.border(bubbleColors.borderWidth, bubbleColors.borderColor, CircleShape) else Modifier)

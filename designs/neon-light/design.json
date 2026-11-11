@@ -4,7 +4,7 @@
   "name": "Neon Light",
   "name_de": "Neon Hell",
   "author": "BISC Lab",
-  "version": "1.8",
+  "version": "1.9",
   "theme": "LIGHT",
   "accent": "#FF1E8FFF",
   "font": "SYSTEM",
@@ -147,6 +147,16 @@
       "borderWidth": 1.0,
       "borderColor": "#FF1E8FFF",
       "contentColor": "#FF3A3F48"
+    },
+    "app_menu": {
+      "style": "COLOR",
+      "fill": "#FFFFFFFF",
+      "fillMode": "SOLID",
+      "opacity": 0.92,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#0F000000",
+      "contentColor": "#FF14161B"
     }
   },
   "keyboardCapColor": "#FFFFFFFF",
@@ -170,7 +180,8 @@
       "cards",
       "widgets",
       "buttons",
-      "rail"
+      "rail",
+      "menus"
     ],
     "grid": false,
     "gridColor": "#0A000000",

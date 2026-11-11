@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- Popup menus dim and blur the screen behind them, so the menu stands out clearly; the gaps between
+  the entries are the same everywhere; the menu opens below the app, or above when there is no room
+- New: Appearance > Menus sets the color of the popup menus; designs can set it too
+- Design effects (glow, relief) also reach the letter circles of the App list, the letter bubble
+  while scrubbing and the name bubble of the category rail, and the menus
+- Neon and 3D designs updated for this (menu look, effects on letters and menus)
+- Welcome tour: 3D Light and 3D Dark among the designs, the next tile peeks in so it is clear the
+  row scrolls, and a note that the Weather widget is included and gets its data from Breezy Weather
+  for now, with more sources in the works
+
 ## 0.13.3
 
 - New design effect Relief: surfaces stand out from the page with a soft shadow below, a lit edge on

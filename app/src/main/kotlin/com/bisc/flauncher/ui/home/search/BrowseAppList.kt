@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.search
 
+import com.bisc.flauncher.ui.theme.designGlow
 import android.content.ComponentName
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -306,6 +307,7 @@ private fun BrowseSectionHeader(letter: Char, appearance: ElementAppearance, han
             Box(
                 modifier = Modifier
                     .size(HEADER_CIRCLE_SIZE)
+                    .then(Modifier.designGlow(CircleShape, "buttons"))
                     .clip(CircleShape)
                     .background(colors.background, alpha = colors.backgroundAlpha)
                     .then(
@@ -377,6 +379,7 @@ private fun ScrubMagnifier(label: String, verticalFraction: Float, pull: Float, 
                     scaleX = grow
                     scaleY = grow
                 }
+                .then(Modifier.designGlow(CircleShape, "buttons"))
                 .clip(CircleShape)
                 .background(bubbleColor.copy(alpha = 0.92f)),
             contentAlignment = Alignment.Center

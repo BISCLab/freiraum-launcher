@@ -703,7 +703,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_quick_setup_summary">Übernimmt alles Empfohlene. Du kannst später alles in den Einstellungen ändern.</string>
     <string name="welcome_own_setup">Selbst einrichten</string>
     <string name="welcome_design_title">Design wählen</string>
-    <string name="welcome_design_text">Farben, Rahmen und Effekte. Zur Seite wischen für mehr. Neon gibt es zum Herunterladen: Antippen öffnet die Übersicht im Browser, dort „In Freiraum öffnen“ wählen.</string>
+    <string name="welcome_design_text">Farben, Rahmen und Effekte. Zur Seite wischen für mehr. Neon und 3D gibt es zum Herunterladen: Antippen öffnet die Übersicht im Browser, dort „In Freiraum öffnen“ wählen.</string>
     <string name="welcome_design_neon_light">Neon Hell</string>
     <string name="welcome_design_neon_dark">Neon Dunkel</string>
     <string name="welcome_wallpaper_title">Wallpaper wählen</string>
@@ -896,4 +896,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_widgets_notes">Notizen und Listen direkt auf der Seite</string>
     <string name="welcome_widgets_music">Steuert, was gerade läuft. Braucht den Zugriff auf Benachrichtigungen</string>
     <string name="welcome_widgets_weather">Braucht eine Wetter-App, die die Daten bringt, denn Freiraum geht nicht ins Internet</string>
+    <string name="settings_menus_title">Menüs</string>
+    <string name="settings_menus_summary">Langes Drücken auf Apps, Ordner-Einträge und Notizen</string>
+    <string name="welcome_design_3d_light">3D Hell</string>
+    <string name="welcome_design_3d_dark">3D Dunkel</string>
+    <string name="welcome_widgets_weather_note">Das Wetter-Widget ist schon dabei. Seine Daten kommen im Moment von Breezy Weather über die Gadgetbridge-Weitergabe. Weitere Wetterquellen sind in Arbeit.</string>
 </resources>

@@ -1,5 +1,8 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -231,4 +234,25 @@ private fun AppRowsHint(dark: Boolean?) {
             }
         }
     }
+}
+
+/** The launcher's popup menus: the long press on an app, on an entry in a folder, on a note. */
+@Composable
+fun SettingsMenuLookScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = androidx.hilt.navigation.compose.hiltViewModel()) {
+    val own by viewModel.menuAppearance.collectAsState()
+    val automaticFill = MaterialTheme.colorScheme.surfaceContainerHigh.toArgb()
+    val saved = remember(own) { own ?: ElementAppearance(fill = com.bisc.flauncher.data.model.ColorFill(color = automaticFill)) }
+    ElementLookScreen(
+        title = stringResource(R.string.settings_menus_title),
+        navController = navController,
+        onBack = onBack,
+        saved = saved,
+        savedCorner = null,
+        onSave = { look, _ -> viewModel.setMenuAppearance(look) },
+        kind = LookSampleKind.CARDS,
+        allowNone = false,
+        previewCorner = 85,
+        custom = own != null,
+        onResetLook = viewModel::resetMenuAppearance
+    )
 }

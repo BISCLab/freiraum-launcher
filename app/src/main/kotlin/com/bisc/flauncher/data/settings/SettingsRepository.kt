@@ -421,6 +421,13 @@ class SettingsRepository @Inject constructor(
 
     suspend fun resetSearchRailBubbleAppearance() = resetElementAppearanceFor("search_rail_bubble")
 
+    /** The look of the launcher's popup menus (long press on an app and the like); null = automatic. */
+    val menuAppearance: Flow<ElementAppearance?> = customElementAppearanceFor("app_menu", ElementAppearance())
+
+    suspend fun setMenuAppearance(appearance: ElementAppearance) = setElementAppearanceFor("app_menu", appearance)
+
+    suspend fun resetMenuAppearance() = resetElementAppearanceFor("app_menu")
+
     suspend fun resetSearchResultsAppearance() = resetElementAppearanceFor(SEARCH_RESULTS_PREFIX)
 
     /** Off by default: the cards keep the same fine side margin as every other element. */

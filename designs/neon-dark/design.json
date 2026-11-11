@@ -4,7 +4,7 @@
   "name": "Neon Dark",
   "name_de": "Neon Dunkel",
   "author": "BISC Lab",
-  "version": "1.6",
+  "version": "1.7",
   "theme": "DARK",
   "accent": "#FF3DA5FF",
   "font": "SYSTEM",
@@ -147,6 +147,16 @@
       "borderWidth": 1.0,
       "borderColor": "#FF3DA5FF",
       "contentColor": "#FFB8BECB"
+    },
+    "app_menu": {
+      "style": "COLOR",
+      "fill": "#FF0B0D12",
+      "fillMode": "SOLID",
+      "opacity": 0.92,
+      "border": true,
+      "borderWidth": 1.0,
+      "borderColor": "#14FFFFFF",
+      "contentColor": "#FFE8EAF0"
     }
   },
   "keyboardCapColor": "#FF14171E",
@@ -170,7 +180,8 @@
       "cards",
       "widgets",
       "buttons",
-      "rail"
+      "rail",
+      "menus"
     ],
     "grid": false,
     "gridColor": "#06FFFFFF",

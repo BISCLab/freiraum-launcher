@@ -4,7 +4,7 @@
   "name": "3D Light",
   "name_de": "3D Hell",
   "author": "BISC Lab",
-  "version": "1.0",
+  "version": "1.1",
   "theme": "LIGHT",
   "accent": "#FF0758F5",
   "font": "SYSTEM",
@@ -176,6 +176,17 @@
       "border": false,
       "borderWidth": 1.0,
       "contentColor": "#FF1B1D22"
+    },
+    "app_menu": {
+      "style": "COLOR",
+      "fill": "#FFFFFFFF",
+      "fill2": "#FFE3E7EF",
+      "fillMode": "GRADIENT",
+      "direction": "TOP_TO_BOTTOM",
+      "opacity": 1.0,
+      "border": false,
+      "borderWidth": 1.0,
+      "contentColor": "#FF1B1D22"
     }
   },
   "keyboardCapColor": "#FFE3E7EF",
@@ -186,14 +197,15 @@
     "targets": [],
     "depth": 0.85,
     "depthTargets": [
-      "dock",
-      "panel",
-      "search",
-      "folders",
-      "cards",
-      "widgets",
       "buttons",
-      "rail"
+      "cards",
+      "dock",
+      "folders",
+      "menus",
+      "panel",
+      "rail",
+      "search",
+      "widgets"
     ]
   }
 }

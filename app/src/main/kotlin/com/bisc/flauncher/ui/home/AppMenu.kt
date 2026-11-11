@@ -138,8 +138,6 @@ private fun AppMenuItems(app: AppInfo, host: AppMenuHost, close: () -> Unit) {
             onClick = { close(); host.launchShortcut(packageName, shortcut.id) }
         ) { if (icon != null) Image(bitmap = icon, contentDescription = null, modifier = Modifier.size(24.dp)) }
     }
-    // A wider gap sets the app's own shortcuts apart from what the launcher offers.
-    if (shortcuts.isNotEmpty()) Spacer(Modifier.height(4.dp))
 
     val favorite = app.componentName.flattenToString() in host.favoriteIds
     MenuEntry(

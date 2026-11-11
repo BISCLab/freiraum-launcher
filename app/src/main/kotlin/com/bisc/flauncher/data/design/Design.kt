@@ -86,7 +86,7 @@ val DESIGN_CORNERS = listOf(
 val DESIGN_ELEMENTS = listOf(
     "search_appearance", "search_field", "search_category_rail", "search_results", "folder_card",
     "app_list_search_button", "app_list_search_field", "search_alphabet_rail", "search_header_letter",
-    "app_grid_search_bar", "widget_arrow", "search_rail_bubble"
+    "app_grid_search_bar", "widget_arrow", "search_rail_bubble", "app_menu"
 )
 
 /** Reads and writes `design.json`. Older files may still name backgrounds and pictures; those are

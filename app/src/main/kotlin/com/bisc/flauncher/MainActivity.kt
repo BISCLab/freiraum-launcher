@@ -144,6 +144,7 @@ class MainActivity : ComponentActivity() {
             val lockPortrait by settingsVm.lockPortrait.collectAsState()
             val settingsThemeMode by settingsVm.settingsThemeMode.collectAsState()
             val categoryIcons by settingsVm.categoryIcons.collectAsState()
+            val menuAppearance by settingsVm.menuAppearance.collectAsState()
             val chosenMotion by settingsVm.motionLevel.collectAsState()
             val motionPrefs by settingsVm.motionPrefs.collectAsState()
             val designEffects by settingsVm.designEffects.collectAsState()
@@ -221,7 +222,8 @@ class MainActivity : ComponentActivity() {
                 com.bisc.flauncher.ui.LocalMotionPrefs provides motionPrefs,
                 com.bisc.flauncher.ui.theme.LocalDesignEffects provides designEffects,
                 com.bisc.flauncher.ui.theme.LocalSettingsThemeMode provides settingsThemeMode,
-                com.bisc.flauncher.ui.home.search.LocalCategoryIcons provides categoryIcons
+                com.bisc.flauncher.ui.home.search.LocalCategoryIcons provides categoryIcons,
+                com.bisc.flauncher.ui.home.LocalMenuAppearance provides menuAppearance
             ) {
             FLauncherTheme(themePreference = theme, fontPreference = font, accentColor = accentColor) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -587,6 +589,9 @@ class MainActivity : ComponentActivity() {
                         }
                         settingsComposable("settings/appearance/colors") {
                             com.bisc.flauncher.ui.settings.SettingsColorsScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        settingsComposable("settings/appearance/menus") {
+                            com.bisc.flauncher.ui.settings.SettingsMenuLookScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         settingsComposable("settings/appearance/corners") {
                             com.bisc.flauncher.ui.settings.SettingsCornersScreen(navController = navController, onBack = { navController.popBackStack() })

@@ -108,6 +108,12 @@ fun SettingsAppearanceScreen(
                 summary = stringResource(R.string.settings_corners_all_summary),
                 onClick = { onNavigate("appearance/corners") }
             )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_menus_title),
+                summary = stringResource(R.string.settings_menus_summary),
+                onClick = { onNavigate("appearance/menus") }
+            )
         }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_background_icons_label)) {
             SettingsPreference(
