@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.home
 
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.EditNote
@@ -387,16 +389,15 @@ private fun ShapeChoice(viewModel: PartCornersViewModel) {
 }
 
 /** Tiles side by side; exactly three fit, like the page tiles, the rest are a swipe away. */
+/** Always three side by side; more go on in the next line. */
 @Composable
 private fun TileRow(tiles: List<Tile>) {
-    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
-        // A bit of the next tile peeks in, so it is clear there is more to the side.
-        val tileWidth = (maxWidth - TILE_GAP * 2) / 2.6f
-        Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(TILE_GAP)
-        ) {
-            tiles.forEach { tile -> ChoiceTile(tile, Modifier.width(tileWidth)) }
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(TILE_GAP * 2)) {
+        tiles.chunked(3).forEach { line ->
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(TILE_GAP)) {
+                line.forEach { tile -> ChoiceTile(tile, Modifier.weight(1f)) }
+                repeat(3 - line.size) { Spacer(Modifier.weight(1f)) }
+            }
         }
     }
 }
@@ -491,6 +492,7 @@ private fun WidgetsOverview() {
 /** One step: the picture on top, a title and a short text below it. */
 @Composable
 private fun WelcomePage(titleRes: Int, textRes: Int, illustrationWeight: Float = 1f, illustration: @Composable () -> Unit) {
+    val scroll = rememberScrollState()
     Column(
         modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -501,7 +503,7 @@ private fun WelcomePage(titleRes: Int, textRes: Int, illustrationWeight: Float =
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .then(if (illustrationWeight > 0f) Modifier else Modifier.weight(1f).verticalScroll(rememberScrollState()))
+                .then(if (illustrationWeight > 0f) Modifier else Modifier.weight(1f).fadeScrollEdges(scroll).verticalScroll(scroll))
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -579,3 +581,25 @@ private fun GesturesPreview(viewModel: SettingsViewModel) {
         com.bisc.flauncher.ui.settings.EditableGesturePhone(viewModel, widthFraction = 1f)
     }
 }
+
+/** Content scrolled out of view fades out at the top and the bottom edge instead of being cut off. */
+private fun Modifier.fadeScrollEdges(scroll: androidx.compose.foundation.ScrollState): Modifier = this
+    .graphicsLayer { compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen }
+    .drawWithContent {
+        drawContent()
+        val edge = 40.dp.toPx()
+        // Only where there is something to scroll to.
+        val top = (scroll.value / edge).coerceIn(0f, 1f)
+        val bottom = ((scroll.maxValue - scroll.value) / edge).coerceIn(0f, 1f)
+        if (top > 0f) drawRect(
+            androidx.compose.ui.graphics.Brush.verticalGradient(0f to Color.Black.copy(alpha = 1f - top), 1f to Color.Black, startY = 0f, endY = edge),
+            size = androidx.compose.ui.geometry.Size(size.width, edge),
+            blendMode = androidx.compose.ui.graphics.BlendMode.DstIn
+        )
+        if (bottom > 0f) drawRect(
+            androidx.compose.ui.graphics.Brush.verticalGradient(0f to Color.Black, 1f to Color.Black.copy(alpha = 1f - bottom), startY = size.height - edge, endY = size.height),
+            topLeft = androidx.compose.ui.geometry.Offset(0f, size.height - edge),
+            size = androidx.compose.ui.geometry.Size(size.width, edge),
+            blendMode = androidx.compose.ui.graphics.BlendMode.DstIn
+        )
+    }

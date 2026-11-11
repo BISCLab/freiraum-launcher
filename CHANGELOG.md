@@ -8,8 +8,8 @@
 - Design effects (glow, relief) also reach the letter circles of the App list, the letter bubble
   while scrubbing and the name bubble of the category rail, and the menus
 - Neon and 3D designs updated for this (menu look, effects on letters and menus)
-- Welcome tour: 3D Light and 3D Dark among the designs, the next tile peeks in so it is clear the
-  row scrolls, and a note that the Weather widget is included and gets its data from Breezy Weather
+- Welcome tour: 3D Light and 3D Dark among the designs; designs and wallpapers always three side
+  by side, more in the next line, and the page fades out at its edges when it scrolls; a note that the Weather widget is included and gets its data from Breezy Weather
   for now, with more sources in the works
 
 ## 0.13.3
