@@ -67,7 +67,7 @@ internal fun EditableGesturePhone(viewModel: SettingsViewModel, widthFraction: F
     val gestureActions by viewModel.gestureActions.collectAsState()
     // Unfiltered - a gesture already bound to an app keeps showing its.
     val labeledApps by viewModel.labeledApps.collectAsState()
-    val browsableApps by viewModel.browsableApps.collectAsState()
+    val browsableApps by viewModel.labeledApps.collectAsState()
     val allPages by viewModel.allPages.collectAsState()
     val homeDockRow by viewModel.homeDockRow.collectAsState()
     val homePanelRow by viewModel.homePanelRow.collectAsState()

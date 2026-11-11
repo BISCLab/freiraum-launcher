@@ -131,7 +131,7 @@ internal fun WidgetEditor(
     viewModel: HomeViewModel
 ) {
     val allPages by viewModel.allPages.collectAsState()
-    val browsableApps by viewModel.browsableApps.collectAsState()
+    val browsableApps by viewModel.labeledApps.collectAsState()
     var row by rememberDraft(savedRow)
     var hostedWidgetView by remember { mutableStateOf<android.view.View?>(null) }
     var confirmingRemove by remember { mutableStateOf(false) }

@@ -651,7 +651,8 @@ class SettingsViewModel @Inject constructor(
         revealMode: RevealMode,
         revealCode: String?,
         iconShape: IconShape?,
-        iconSizePercent: Int?
+        iconSizePercent: Int?,
+        hiddenFromAppGrid: Boolean = false
     ) {
         viewModelScope.launch {
             val effectiveMode = if (!hiddenFromSearch) revealMode else RevealMode.NONE
@@ -666,6 +667,7 @@ class SettingsViewModel @Inject constructor(
                     customLabel = customLabel?.trim()?.takeIf { it.isNotEmpty() },
                     hiddenFromAppList = hiddenFromAppList,
                     hiddenFromSearch = hiddenFromSearch,
+                    hiddenFromAppGrid = hiddenFromAppGrid,
                     revealMode = effectiveMode,
                     revealCode = if (effectiveMode == RevealMode.SEARCH_CODE) revealCode?.takeIf { it.isNotEmpty() } else null
                 )

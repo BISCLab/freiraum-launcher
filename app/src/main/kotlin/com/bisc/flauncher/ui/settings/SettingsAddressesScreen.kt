@@ -74,7 +74,7 @@ fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, on
     val targets by viewModel.savedMapTargets.collectAsState()
     val saved = targets.find { it.id == targetId } ?: return
     var target by rememberDraft(saved)
-    val browsableApps by viewModel.browsableApps.collectAsState()
+    val browsableApps by viewModel.labeledApps.collectAsState()
     var showAppPicker by remember { mutableStateOf(false) }
     var showIconPicker by remember { mutableStateOf(false) }
     var confirmingDelete by remember { mutableStateOf(false) }

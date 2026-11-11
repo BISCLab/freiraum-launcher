@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- New: an app can be hidden from the App grid on its own, next to App list and Text search
+- Fixed: apps hidden from the App list were also missing from every app choice in the settings
+  (clock actions, gestures, Dock, folders, element boxes and the like); there they show again
+
 ## 0.13.5
 
 - Element-Boxes have their corner setting in their editor again

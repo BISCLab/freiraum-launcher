@@ -905,4 +905,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_shape_part_widget_arrows">Arrows in widgets</string>
     <string name="welcome_shape_part_keyboard_strip">Strip over the keyboard</string>
     <string name="settings_icon_size_dock_note">In the Dock an icon can get smaller, but not bigger than its place.</string>
+    <string name="settings_manage_apps_visibility_app_grid_label">App grid</string>
 </resources>

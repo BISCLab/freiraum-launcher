@@ -60,7 +60,7 @@ fun SettingsElementBoxEditScreen(
 ) {
     val rowsByPage by viewModel.rowsByPage.collectAsState()
     val rowEntriesByRow by viewModel.rowEntriesByRow.collectAsState()
-    val browsableApps by viewModel.browsableApps.collectAsState()
+    val browsableApps by viewModel.labeledApps.collectAsState()
     val folders by viewModel.folders.collectAsState()
     val folderItemsByFolder by viewModel.folderItemsByFolder.collectAsState()
     val savedMapTargets by viewModel.savedMapTargets.collectAsState()

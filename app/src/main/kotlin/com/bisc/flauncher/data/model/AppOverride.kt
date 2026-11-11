@@ -16,7 +16,7 @@ enum class RevealMode {
 
 /** Per-app overrides layered on top of the real, installed app. [iconShape] and [iconSizePercent]
  *  null means "inherit the global default" - see SettingsRepository.iconShape/iconSizePercent.
- *  [hiddenFromAppList] and [hiddenFromSearch] are independent - an app can be hidden from one
+ *  [hiddenFromAppList], [hiddenFromAppGrid] and [hiddenFromSearch] are independent - an app can be hidden from one
  *  surface while staying visible on the other (placements on pages, in the dock and in folders
  *  are unaffected by either). */
 @Entity(tableName = "app_overrides")
@@ -25,6 +25,7 @@ data class AppOverride(
     val customLabel: String? = null,
     val hiddenFromAppList: Boolean = false,
     val hiddenFromSearch: Boolean = false,
+    val hiddenFromAppGrid: Boolean = false,
     val revealMode: RevealMode = RevealMode.NONE,
     val revealCode: String? = null,
     val iconPackPackage: String? = null,

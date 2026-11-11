@@ -346,6 +346,12 @@ class HomeViewModel @Inject constructor(
             apps.filter { overrides[it.componentName.flattenToString()]?.hiddenFromAppList != true }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
+    /** The apps the App grid shows: hidden there on their own, apart from the App list. */
+    val gridApps: StateFlow<List<AppInfo>> =
+        combine(labeledApps, appOverrides) { apps, overrides ->
+            apps.filter { overrides[it.componentName.flattenToString()]?.hiddenFromAppGrid != true }
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
     // ---- Dock ----
 
     fun resolveLabel(componentName: ComponentName): String {

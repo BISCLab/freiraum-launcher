@@ -112,7 +112,7 @@ fun SettingsFolderEditScreen(
 
     val itemsByFolder = remember(folderItems) { folderItems.groupBy { it.folderId } }
     val items = itemsByFolder[folderId].orEmpty()
-    val browsableApps by viewModel.browsableApps.collectAsState()
+    val browsableApps by viewModel.labeledApps.collectAsState()
     val savedMapTargets by viewModel.savedMapTargets.collectAsState()
     val pinnedWebsites by viewModel.pinnedWebsites.collectAsState()
     val shortcutAppPickerOpen by viewModel.shortcutAppPickerOpen.collectAsState()

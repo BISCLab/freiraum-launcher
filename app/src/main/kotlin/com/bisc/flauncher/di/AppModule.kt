@@ -149,6 +149,13 @@ private val MIGRATION_62_63 = object : Migration(62, 63) {
 
 // Apps and elements in a folder sit at fixed places now: orderIndex is the cell, counted across the
 // rows. Renumbered here so nothing moves; widgets get their own count, as they sit above the grid.
+/** An app can be hidden from the App grid on its own. */
+private val MIGRATION_64_65 = object : Migration(64, 65) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE app_overrides ADD COLUMN hiddenFromAppGrid INTEGER NOT NULL DEFAULT 0")
+    }
+}
+
 private val MIGRATION_63_64 = object : Migration(63, 64) {
     override fun migrate(db: SupportSQLiteDatabase) {
         val rows = mutableListOf<Triple<Long, Long, String>>()
@@ -180,7 +187,7 @@ object AppModule {
             .addMigrations(
                 MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33,
                 MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36, MIGRATION_36_37, MIGRATION_60_61, MIGRATION_61_62,
-                MIGRATION_62_63, MIGRATION_63_64
+                MIGRATION_62_63, MIGRATION_63_64, MIGRATION_64_65
             )
             // Only a last resort now for jumps with no migration path above (e.g. a much older install
             // skipping several versions at once, or a version older than 27). Every future version bump

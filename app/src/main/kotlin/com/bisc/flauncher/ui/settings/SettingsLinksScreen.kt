@@ -72,7 +72,7 @@ fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBa
     val saved = websites.find { it.id == websiteId } ?: return
     var website by rememberDraft(saved)
     val urlValid = com.bisc.flauncher.util.linkAddress(website.url) != null
-    val browsableApps by viewModel.browsableApps.collectAsState()
+    val browsableApps by viewModel.labeledApps.collectAsState()
     var showAppPicker by remember { mutableStateOf(false) }
     var showIconPicker by remember { mutableStateOf(false) }
     var confirmingDelete by remember { mutableStateOf(false) }

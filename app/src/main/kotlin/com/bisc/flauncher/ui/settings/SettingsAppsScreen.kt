@@ -187,7 +187,7 @@ fun SettingsAppsScreen(navController: NavController, onBack: () -> Unit, onNavig
             viewModel = viewModel,
             override = overrides[app.componentName.flattenToString()] ?: AppOverride(app.componentName.flattenToString()),
             onSave = { draft ->
-                viewModel.saveAppOverride(app.componentName, draft.customLabel, draft.hiddenFromAppList, draft.hiddenFromSearch, draft.revealMode, draft.revealCode, draft.iconShape, draft.iconSizePercent)
+                viewModel.saveAppOverride(app.componentName, draft.customLabel, draft.hiddenFromAppList, draft.hiddenFromSearch, draft.revealMode, draft.revealCode, draft.iconShape, draft.iconSizePercent, draft.hiddenFromAppGrid)
                 editingApp = null
             },
             onDismiss = { editingApp = null }
@@ -271,6 +271,7 @@ private fun AppOverrideEditSheetContent(
     var customLabel by remember(override.componentName) { mutableStateOf(override.customLabel.orEmpty()) }
     var hiddenFromAppList by remember(override.componentName) { mutableStateOf(override.hiddenFromAppList) }
     var hiddenFromSearch by remember(override.componentName) { mutableStateOf(override.hiddenFromSearch) }
+    var hiddenFromAppGrid by remember(override.componentName) { mutableStateOf(override.hiddenFromAppGrid) }
     var revealMode by remember(override.componentName) { mutableStateOf(override.revealMode) }
     var revealCode by remember(override.componentName) { mutableStateOf(override.revealCode.orEmpty()) }
     var iconShape by remember(override.componentName) { mutableStateOf(override.iconShape) }
@@ -282,6 +283,7 @@ private fun AppOverrideEditSheetContent(
         customLabel = customLabel,
         hiddenFromAppList = hiddenFromAppList,
         hiddenFromSearch = hiddenFromSearch,
+        hiddenFromAppGrid = hiddenFromAppGrid,
         // A code that is switched on but empty would leave the app unfindable: then it stays findable by name.
         revealMode = if (revealCode.isBlank()) RevealMode.NONE else revealMode,
         revealCode = revealCode.trim(),
@@ -291,6 +293,7 @@ private fun AppOverrideEditSheetContent(
     val dirty = customLabel != override.customLabel.orEmpty() ||
         hiddenFromAppList != override.hiddenFromAppList ||
         hiddenFromSearch != override.hiddenFromSearch ||
+        hiddenFromAppGrid != override.hiddenFromAppGrid ||
         revealMode != override.revealMode ||
         revealCode != override.revealCode.orEmpty() ||
         iconShape != override.iconShape ||
@@ -368,6 +371,12 @@ private fun AppOverrideEditSheetContent(
                 info = stringResource(R.string.settings_manage_apps_visibility_app_list_description),
                 onClick = { hiddenFromAppList = !hiddenFromAppList },
                 trailing = { Switch(checked = !hiddenFromAppList, onCheckedChange = { hiddenFromAppList = !it }) }
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_manage_apps_visibility_app_grid_label),
+                onClick = { hiddenFromAppGrid = !hiddenFromAppGrid },
+                trailing = { Switch(checked = !hiddenFromAppGrid, onCheckedChange = { hiddenFromAppGrid = !it }) }
             )
             SettingsPreference(
                 icon = null,
@@ -481,7 +490,7 @@ fun SettingsAppEditRoute(component: String, onBack: () -> Unit, viewModel: Setti
             viewModel = viewModel,
             override = overrides[component] ?: AppOverride(component),
             onSave = { draft ->
-                viewModel.saveAppOverride(app.componentName, draft.customLabel, draft.hiddenFromAppList, draft.hiddenFromSearch, draft.revealMode, draft.revealCode, draft.iconShape, draft.iconSizePercent)
+                viewModel.saveAppOverride(app.componentName, draft.customLabel, draft.hiddenFromAppList, draft.hiddenFromSearch, draft.revealMode, draft.revealCode, draft.iconShape, draft.iconSizePercent, draft.hiddenFromAppGrid)
             },
             onDismiss = onBack
         )

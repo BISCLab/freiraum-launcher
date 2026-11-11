@@ -1061,12 +1061,13 @@ fun HomeScreen(
     ) {
         val gridSurfaceDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), appGridBackground)
         val gridFolders = remember(folders, appGridFolderIds) { appGridFolderIds.mapNotNull { id -> folders.find { it.id == id } } }
-        val gridApps = remember(browsableApps, gridFolders, folderItemsByFolder, appGridHideFolderApps) {
-            if (!appGridHideFolderApps) browsableApps
+        val gridAppsAll by viewModel.gridApps.collectAsState()
+        val gridApps = remember(gridAppsAll, gridFolders, folderItemsByFolder, appGridHideFolderApps) {
+            if (!appGridHideFolderApps) gridAppsAll
             else {
                 val inFolders = gridFolders.flatMap { folderItemsByFolder[it.id].orEmpty() }
                     .filter { it.type == GridItemType.APP }.map { it.payload }.toSet()
-                browsableApps.filter { it.componentName.flattenToString() !in inFolders }
+                gridAppsAll.filter { it.componentName.flattenToString() !in inFolders }
             }
         }
         Box(
@@ -1164,7 +1165,7 @@ fun HomeScreen(
 
     if (showFolderCreator) {
         FolderCreatorSheet(
-            apps = browsableApps,
+            apps = viewModel.labeledApps.collectAsState().value,
             loadIcon = viewModel::loadIcon,
             onCreate = { name, apps ->
                 viewModel.createStandaloneFolder(name, apps)
@@ -1176,7 +1177,7 @@ fun HomeScreen(
 
     if (shortcutAppPickerOpen) {
         ShortcutSourceAppSheet(
-            apps = browsableApps,
+            apps = viewModel.labeledApps.collectAsState().value,
             loadIcon = viewModel::loadIcon,
             onAppSelected = viewModel::selectShortcutSourceApp,
             onDismiss = viewModel::dismissShortcutAppPicker

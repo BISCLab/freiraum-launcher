@@ -46,7 +46,7 @@ import com.bisc.flauncher.ui.home.FolderIcon
 fun SettingsFolderScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val folders by viewModel.folders.collectAsState()
     val folderItems by viewModel.folderItems.collectAsState()
-    val browsableApps by viewModel.browsableApps.collectAsState()
+    val browsableApps by viewModel.labeledApps.collectAsState()
     var showCreateDialog by remember { mutableStateOf(false) }
     val itemsByFolder = remember(folderItems) { folderItems.groupBy { it.folderId } }
     // Folders inside other folders show inside those, not here among the top level.

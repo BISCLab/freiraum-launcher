@@ -73,7 +73,7 @@ fun SettingsSearchWebScreen(navController: NavController, onBack: () -> Unit, pa
     val engines by viewModel.searchEngines.collectAsState()
     val aiApps by viewModel.searchAiApps.collectAsState()
     val categoryColors by viewModel.categoryColors.collectAsState()
-    val installedApps by viewModel.browsableApps.collectAsState()
+    val installedApps by viewModel.labeledApps.collectAsState()
     val engineChoices = rememberEngineChoices(engines)
     val aiChoices = rememberAiChoices(aiApps, viewModel::loadIcon)
     val iconPacks by viewModel.iconPacks.collectAsState()
