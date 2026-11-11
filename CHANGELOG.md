@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.13.4
 
 - Popup menus dim and blur the screen behind them, so the menu stands out clearly; the gaps between
   the entries are the same everywhere; the menu opens below the app, or above when there is no room

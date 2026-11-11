@@ -1,0 +1,3 @@
+- Menus dim and blur the screen behind them, even gaps; color under Appearance > Menus
+- Design effects also on letters and menus; Neon and 3D updated
+- Welcome tour: 3D designs, always three tiles side by side, a note on weather

@@ -1,0 +1,3 @@
+- Menüs dunkeln und verwischen den Hintergrund, gleichmäßige Abstände; Farbe unter Aussehen → Menüs
+- Effekte der Designs auch auf Buchstaben und Menüs; Neon und 3D aktualisiert
+- Einführung: 3D-Designs, immer drei Kacheln nebeneinander, Hinweis zum Wetter
