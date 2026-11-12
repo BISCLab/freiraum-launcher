@@ -13,6 +13,11 @@
 - Backups are encrypted: exporting asks for a password (at least 8 characters, typed twice) and
   locks the file with it (AES-256-GCM, key from the password with PBKDF2). Importing a locked
   backup asks for the password and says so if it is wrong; older unlocked backups still import
+- Element-Box, Dock and Panel are edited live, like a folder: the element sits on top in its own
+  look and corners and stays in sight. Tap an element there to pick it, then move it, open its
+  own settings or remove it in the bar below; a + adds something right there. The Element-Box
+  shows its look changes at once, before saving. The rows of the Dock and the Panel are set with
+  the same little boxes as in folders
 
 ## 0.13.8
 

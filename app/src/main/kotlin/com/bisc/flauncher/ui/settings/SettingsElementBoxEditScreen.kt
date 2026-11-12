@@ -70,6 +70,8 @@ fun SettingsElementBoxEditScreen(
     val shortcutAppPickerOpen by viewModel.shortcutAppPickerOpen.collectAsState()
     val shortcutPickerForApp by viewModel.shortcutPickerForApp.collectAsState()
     val availableShortcuts by viewModel.availableShortcuts.collectAsState()
+    val pinnedContacts by viewModel.pinnedContacts.collectAsState()
+    val actionButtons by viewModel.actionButtons.collectAsState()
 
     val savedRow = rowsByPage[pageId]?.find { it.id == rowId }
     // Only auto-navigate back once we've definitely seen this row exist and then watched it
@@ -104,7 +106,69 @@ fun SettingsElementBoxEditScreen(
     // The home page's own dock row is permanent.
     val canRemoveRow = row.type != PageRowType.SEARCH_BAR || pages.find { it.id == pageId }?.isHome != true
 
-    SettingsSubScreen(title = stringResource(R.string.settings_element_box_edit_title), navController = navController, onBack = onBack, onSave = { viewModel.saveRow(row) }, dirty = row != savedRow) {
+    val (picked, pick) = rememberPickedEntry(entries)
+    val ordered = remember(entries) { entries.sortedBy { it.orderIndex } }
+    val look = row.appearance()
+    SettingsSubScreen(
+        title = stringResource(R.string.settings_element_box_edit_title),
+        navController = navController,
+        onBack = onBack,
+        onSave = { viewModel.saveRow(row) },
+        dirty = row != savedRow,
+        // The box as it looks, live with the draft below, and always in sight.
+        header = {
+            androidx.compose.foundation.layout.Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                RowLiveStage(look, row.cornerRadiusPercent) {
+                    com.bisc.flauncher.ui.home.GridEntries(
+                        entries = ordered,
+                        columns = if (isPillLayout) (ordered.size + 1).coerceIn(1, 6) else row.columns,
+                        folders = folders,
+                        folderItemsByFolder = folderItemsByFolder,
+                        savedMapTargets = savedMapTargets,
+                        pinnedWebsites = pinnedWebsites,
+                        pages = allPages,
+                        loadIcon = viewModel::loadIcon,
+                        loadPackIcon = viewModel::loadPackIcon,
+                        resolveLabel = viewModel::resolveLabel,
+                        onFolderClick = {},
+                        onShortcutClick = {},
+                        onOpenPageLink = { _, _ -> },
+                        pinnedContacts = pinnedContacts,
+                        loadContactPhoto = viewModel::loadContactPhoto,
+                        onContactClick = {},
+                        actionButtons = actionButtons,
+                        onActionButtonClick = {},
+                        showLabels = row.showLabels && !isPillLayout,
+                        labelColor = com.bisc.flauncher.ui.home.dock.resolveElementColors(look).contentColor,
+                        totalSlots = ordered.size + 1,
+                        onAddEmptySlot = { pick(null); addingElement = true },
+                        onEditEntry = { entry -> pick(entry) },
+                        selectedEntryId = picked?.id
+                    )
+                }
+                picked?.let { entry ->
+                    val index = ordered.indexOfFirst { it.id == entry.id }
+                    RowEntrySelectionBar(
+                        title = com.bisc.flauncher.ui.home.entryLabel(entry, folders, savedMapTargets, pinnedWebsites, allPages, pinnedContacts, viewModel::resolveLabel, actionButtons),
+                        canMoveBack = index > 0,
+                        canMoveOn = index in 0 until ordered.lastIndex,
+                        onMove = { delta -> viewModel.moveRowEntry(entry, delta, ordered, fixedSlots = false, slotCount = ordered.size) },
+                        onOpenSettings = entrySettingsRoute(entry)?.let { route -> { navController.navigate(route) } },
+                        onRemove = { viewModel.removeRowEntry(entry); pick(null) },
+                        onClose = { pick(null) }
+                    )
+                }
+            }
+        }
+    ) {
+        if (picked == null) {
+            Text(
+                stringResource(R.string.settings_live_editor_hint),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+        }
         if (isDock) {
             val visibilityMode = row.dockVisibilityMode
             SettingsPreferenceGroup(title = stringResource(R.string.settings_dock_visibility_label)) {
@@ -164,35 +228,6 @@ fun SettingsElementBoxEditScreen(
         )
         SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
             ExpandablePercentSlider(percent = row.cornerRadiusPercent, onSettled = { row = row.copy(cornerRadiusPercent = it) })
-        }
-
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_element_box_entries_label)) {
-            if (entries.isEmpty()) {
-                Text(
-                    stringResource(R.string.settings_element_box_empty),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(16.dp)
-                )
-            } else {
-                ReorderableList(items = entries, key = { it.id }, onReorder = viewModel::reorderRowEntries) { entry ->
-                    RowEntryRow(
-                        entry = entry,
-                        folders = folders,
-                        folderItemsByFolder = folderItemsByFolder,
-                        savedMapTargets = savedMapTargets,
-                        pinnedWebsites = pinnedWebsites,
-                        pages = allPages,
-                        loadIcon = viewModel::loadIcon,
-                        resolveLabel = viewModel::resolveLabel,
-                        onRemove = { viewModel.removeRowEntry(entry) }
-                    )
-                }
-            }
-        }
-
-        SettingsPreferenceGroup {
-            SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_add_element_title), onClick = { addingElement = true }, trailing = null)
         }
 
         if (canRemoveRow) {

@@ -678,6 +678,13 @@ class PageContentRepository @Inject constructor(
         entryDao.delete(entry)
     }
 
+    /** Puts [entry] into [slot] of a row with fixed slots; whatever sat there takes its old place. */
+    suspend fun moveEntryToSlot(entry: RowEntry, slot: Int, rowEntries: List<RowEntry>) {
+        if (slot == entry.orderIndex) return
+        rowEntries.firstOrNull { it.id != entry.id && it.orderIndex == slot }?.let { entryDao.update(it.copy(orderIndex = entry.orderIndex)) }
+        entryDao.update(entry.copy(orderIndex = slot))
+    }
+
     suspend fun reorderEntries(orderedEntries: List<RowEntry>) {
         orderedEntries.forEachIndexed { index, entry ->
             if (entry.orderIndex != index) entryDao.update(entry.copy(orderIndex = index))

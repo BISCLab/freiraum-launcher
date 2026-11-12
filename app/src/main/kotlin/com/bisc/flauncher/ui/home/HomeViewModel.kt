@@ -1229,6 +1229,24 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /** Moves [entry] one step by [delta]: in a row with fixed slots (Dock, Panel) to the next slot,
+     *  swapping with what is there; otherwise one place along the order. */
+    fun moveRowEntry(entry: RowEntry, delta: Int, rowEntries: List<RowEntry>, fixedSlots: Boolean, slotCount: Int) {
+        viewModelScope.launch {
+            if (fixedSlots) {
+                val to = (entry.orderIndex + delta).coerceIn(0, (slotCount - 1).coerceAtLeast(0))
+                pageContentRepository.moveEntryToSlot(entry, to, rowEntries)
+            } else {
+                val ordered = rowEntries.sortedBy { it.orderIndex }.toMutableList()
+                val from = ordered.indexOfFirst { it.id == entry.id }
+                val to = (from + delta).coerceIn(0, ordered.lastIndex)
+                if (from < 0 || from == to) return@launch
+                ordered.add(to, ordered.removeAt(from))
+                pageContentRepository.reorderEntries(ordered)
+            }
+        }
+    }
+
     fun reorderRowEntries(orderedEntries: List<RowEntry>) {
         viewModelScope.launch { pageContentRepository.reorderEntries(orderedEntries) }
     }

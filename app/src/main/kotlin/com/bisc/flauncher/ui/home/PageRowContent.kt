@@ -294,7 +294,9 @@ fun GridEntries(
     rowGap: androidx.compose.ui.unit.Dp = 0.dp,
     // Dock/Panel: each entry sits in the slot its orderIndex names, so removing one leaves a gap
     // instead of shifting the rest along. Otherwise entries simply fill the slots in order.
-    fixedSlots: Boolean = false
+    fixedSlots: Boolean = false,
+    // Settings-only: the entry picked in a live editor, outlined in the accent.
+    selectedEntryId: Long? = null
 ) {
     @Composable
     fun Cell(entry: RowEntry?, slotIndex: Int) {
@@ -303,6 +305,10 @@ fun GridEntries(
             return
         }
         val editOverride = onEditEntry?.let { cb -> { cb(entry) } }
+        val picked = selectedEntryId != null && entry.id == selectedEntryId
+        Box(
+            modifier = if (picked) Modifier.border(2.dp, androidx.compose.material3.MaterialTheme.colorScheme.primary, RoundedCornerShape(14.dp)) else Modifier
+        ) {
         when (entry.type) {
             GridItemType.APP -> AppIconCell(payload = entry.payload, loadIcon = loadIcon, resolveLabel = resolveLabel, showLabel = showLabels, labelColor = labelColor, iconSizeScale = iconSizeScale, onClickOverride = editOverride)
             GridItemType.FOLDER -> {
@@ -351,6 +357,7 @@ fun GridEntries(
                 )
             }
             GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Unit
+        }
         }
     }
 

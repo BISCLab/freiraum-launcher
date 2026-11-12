@@ -979,4 +979,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_backup_password_mismatch">Die Passwörter sind nicht gleich</string>
     <string name="settings_backup_password_wrong">Falsches Passwort oder beschädigte Datei</string>
     <string name="settings_backup_password_show">Passwort zeigen</string>
+    <string name="settings_live_editor_hint">Tippe oben auf ein Element, um es zu verschieben, einzustellen oder zu entfernen. Ein + fügt an dieser Stelle etwas hinzu.</string>
 </resources>

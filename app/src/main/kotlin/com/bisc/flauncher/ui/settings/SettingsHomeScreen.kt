@@ -367,7 +367,6 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
     var showActionButtonPicker by remember { mutableStateOf(false) }
     var pendingShortcut by remember { mutableStateOf(false) }
-    var pendingRemoval by remember { mutableStateOf<RowEntry?>(null) }
 
     val panelWidgets by viewModel.panelWidgets.collectAsState()
     val panelFolderId by androidx.compose.runtime.produceState<Long?>(null) { value = viewModel.panelWidgetFolderId() }
@@ -376,7 +375,66 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
     var sizingSpan by remember { androidx.compose.runtime.mutableIntStateOf(1) }
     val systemWidgetPickerFor by viewModel.systemWidgetPickerOpenForFolder.collectAsState()
 
-    SettingsSubScreen(title = stringResource(R.string.settings_panel_content_title), navController = navController, onBack = onBack) {
+    val (picked, pick) = rememberPickedEntry(entries)
+    val slotCount = rowShape.sum()
+    val look = row.appearance()
+    SettingsSubScreen(
+        title = stringResource(R.string.settings_panel_content_title),
+        navController = navController,
+        onBack = onBack,
+        header = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                RowLiveStage(look, row.cornerRadiusPercent) {
+                    com.bisc.flauncher.ui.home.GridEntries(
+                        entries = entries,
+                        columns = 1,
+                        rowColumns = rowShape,
+                        fixedSlots = true,
+                        folders = folders,
+                        folderItemsByFolder = folderItemsByFolder,
+                        savedMapTargets = savedMapTargets,
+                        pinnedWebsites = pinnedWebsites,
+                        pages = allPages,
+                        loadIcon = viewModel::loadIcon,
+                        loadPackIcon = viewModel::loadPackIcon,
+                        resolveLabel = viewModel::resolveLabel,
+                        onFolderClick = {},
+                        onShortcutClick = {},
+                        onOpenPageLink = { _, _ -> },
+                        pinnedContacts = pinnedContacts,
+                        loadContactPhoto = viewModel::loadContactPhoto,
+                        onContactClick = {},
+                        actionButtons = actionButtons,
+                        onActionButtonClick = {},
+                        showLabels = row.showLabels,
+                        labelColor = com.bisc.flauncher.ui.home.dock.resolveElementColors(look).contentColor,
+                        onAddEmptySlot = { slot -> pick(null); viewModel.reserveRowSlot(row.id, slot); showAddChooser = true },
+                        onEditEntry = { entry -> pick(entry) },
+                        selectedEntryId = picked?.id
+                    )
+                }
+                picked?.let { entry ->
+                    RowEntrySelectionBar(
+                        title = com.bisc.flauncher.ui.home.entryLabel(entry, folders, savedMapTargets, pinnedWebsites, allPages, pinnedContacts, viewModel::resolveLabel, actionButtons),
+                        canMoveBack = entry.orderIndex > 0,
+                        canMoveOn = entry.orderIndex < slotCount - 1,
+                        onMove = { delta -> viewModel.moveRowEntry(entry, delta, entries, fixedSlots = true, slotCount = slotCount) },
+                        onOpenSettings = entrySettingsRoute(entry)?.let { route -> { navController.navigate(route) } },
+                        onRemove = { viewModel.removeRowEntry(entry); pick(null) },
+                        onClose = { pick(null) }
+                    )
+                }
+            }
+        }
+    ) {
+        if (picked == null) {
+            Text(
+                stringResource(R.string.settings_live_editor_hint),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+        }
         // Widgets sit on top of the Panel, its elements below them; the Panel scrolls when it is full.
         SettingsPreferenceGroup(title = stringResource(R.string.settings_panel_widgets_label), info = stringResource(R.string.settings_panel_widgets_info)) {
             val rowCount = rowShape.size
@@ -408,67 +466,8 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
                 trailing = null
             )
         }
-        SettingsPreferenceGroup {
-            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                com.bisc.flauncher.ui.home.GridEntries(
-                    entries = entries,
-                    columns = 1,
-                    rowColumns = rowShape,
-                    fixedSlots = true,
-                    folders = folders,
-                    folderItemsByFolder = folderItemsByFolder,
-                    savedMapTargets = savedMapTargets,
-                    pinnedWebsites = pinnedWebsites,
-                    pages = allPages,
-                    loadIcon = viewModel::loadIcon,
-                    loadPackIcon = viewModel::loadPackIcon,
-                    resolveLabel = viewModel::resolveLabel,
-                    onFolderClick = {},
-                    onShortcutClick = {},
-                    onOpenPageLink = { _, _ -> },
-                    pinnedContacts = pinnedContacts,
-                    loadContactPhoto = viewModel::loadContactPhoto,
-                    onContactClick = {},
-                    actionButtons = actionButtons,
-                    onActionButtonClick = {},
-                    showLabels = row.showLabels,
-                    labelColor = row.appearance().contentColor?.let { androidx.compose.ui.graphics.Color(it) } ?: androidx.compose.ui.graphics.Color.White,
-                    onAddEmptySlot = { slot -> viewModel.reserveRowSlot(row.id, slot); showAddChooser = true },
-                    onEditEntry = { entry -> pendingRemoval = entry }
-                )
-            }
-        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_panel_rows_label)) {
-            rowShape.forEachIndexed { index, cols ->
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_panel_row_number, index + 1),
-                    onClick = null,
-                    trailing = {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(cols.toString(), modifier = Modifier.padding(end = 4.dp))
-                            androidx.compose.material3.IconButton(
-                                onClick = { viewModel.setPanelRowColumns(row, rowShape.toMutableList().apply { this[index] = cols - 1 }) },
-                                enabled = cols > 1
-                            ) { Icon(androidx.compose.material.icons.Icons.Filled.Remove, contentDescription = null) }
-                            androidx.compose.material3.IconButton(
-                                onClick = { viewModel.setPanelRowColumns(row, rowShape.toMutableList().apply { this[index] = cols + 1 }) },
-                                enabled = cols < 5
-                            ) { Icon(androidx.compose.material.icons.Icons.Filled.Add, contentDescription = null) }
-                            androidx.compose.material3.IconButton(
-                                onClick = { viewModel.setPanelRowColumns(row, rowShape.filterIndexed { i, _ -> i != index }) },
-                                enabled = rowShape.size > 1
-                            ) { Icon(androidx.compose.material.icons.Icons.Filled.Close, contentDescription = null) }
-                        }
-                    }
-                )
-            }
-            SettingsPreference(
-                icon = androidx.compose.material.icons.Icons.Filled.Add,
-                title = stringResource(R.string.settings_panel_add_row),
-                onClick = { viewModel.setPanelRowColumns(row, rowShape + 4) },
-                trailing = null
-            )
+            FolderRowsEditor(rowShape = rowShape, maxColumns = 5) { viewModel.setPanelRowColumns(row, it) }
         }
         CaptionsSection(
             showLabels = row.showLabels,
@@ -509,15 +508,6 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
             providers = providers,
             onProviderSelected = { provider -> viewModel.startAddSystemWidgetToFolder(targetFolderId, provider) },
             onDismiss = viewModel::dismissSystemWidgetPicker
-        )
-    }
-
-    pendingRemoval?.let { entry ->
-        EntryActionsDialog(
-            label = com.bisc.flauncher.ui.home.entryLabel(entry, folders, savedMapTargets, pinnedWebsites, allPages, pinnedContacts, viewModel::resolveLabel, actionButtons),
-            onOpenSettings = entrySettingsRoute(entry)?.let { route -> { pendingRemoval = null; navController.navigate(route) } },
-            onRemove = { viewModel.removeRowEntry(entry); pendingRemoval = null },
-            onDismiss = { pendingRemoval = null }
         )
     }
 

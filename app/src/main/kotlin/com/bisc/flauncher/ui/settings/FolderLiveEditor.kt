@@ -332,7 +332,7 @@ internal fun FolderAddButtons(onAddContent: () -> Unit, onAddWidget: () -> Unit)
 
 /** The rows of a folder: each as a line of small boxes, as many as fit side by side, with - and +. */
 @Composable
-internal fun FolderRowsEditor(rowShape: List<Int>, maxColumns: Int, onChange: (List<Int>) -> Unit) {
+internal fun FolderRowsEditor(rowShape: List<Int>, maxColumns: Int, maxRows: Int = Int.MAX_VALUE, newRowColumns: Int = 4, onChange: (List<Int>) -> Unit) {
     val scheme = MaterialTheme.colorScheme
     Column(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         rowShape.forEachIndexed { index, cols ->
@@ -349,7 +349,7 @@ internal fun FolderRowsEditor(rowShape: List<Int>, maxColumns: Int, onChange: (L
                 }
             }
         }
-        TextButton(onClick = { onChange(rowShape + 4) }) {
+        if (rowShape.size < maxRows) TextButton(onClick = { onChange(rowShape + newRowColumns.coerceAtMost(maxColumns)) }) {
             Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
             Text(stringResource(R.string.settings_panel_add_row))
