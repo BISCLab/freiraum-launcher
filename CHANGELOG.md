@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.13.7
 
 - Choice windows (language, font, color modes, browser and maps app, what a gesture does) are built
   anew: a rounded window with a clear title, each option a piece of its own with a fine gap, the

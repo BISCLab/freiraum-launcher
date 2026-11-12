@@ -222,7 +222,7 @@ fun FolderView(
                 gridRows.forEachIndexed { rowIndex, row ->
                     widgetsByRow[rowIndex].forEach { WidgetFor(it) }
                     // Rows with nothing in them are not shown; their widgets still are.
-                    if (row.any { it != null }) { rowIndex, row ->
+                    if (row.any { it != null }) {
                     key("grid_$rowIndex") {
                         Row(modifier = Modifier.fillMaxWidth()) {
                             repeat(row.size) { slot ->

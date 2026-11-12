@@ -929,7 +929,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_element_links">Links</string>
     <string name="welcome_element_contacts">Kontakte</string>
     <string name="welcome_element_actions">Aktionsbuttons</string>
-    <string name="welcome_elements_where">Elemente legst du ins Dock, ins Panel, in Element-Boxen auf deinen Seiten und in Ordner. Einrichten kannst du sie unter Einstellungen → Apps & Elemente.</string>
+    <string name="welcome_elements_where">Elemente legst du ins Dock, ins Panel, in Element-Boxen auf deinen Seiten und in Ordner. Einrichten kannst du sie unter Einstellungen → Apps &amp; Elemente.</string>
     <plurals name="settings_hub_elements_count">
         <item quantity="one">%1$d Element</item>
         <item quantity="other">%1$d Elemente</item>

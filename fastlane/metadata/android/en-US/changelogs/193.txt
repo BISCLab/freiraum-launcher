@@ -1,0 +1,4 @@
+- Settings anew: tiles, quick access, start pages for Dock and Panel, nicer choice windows
+- Widgets in the Panel; widgets between the rows in the Panel and folders
+- New pages start empty; Dock and Panel per page; page preview at real proportions
+- Put a folder into the Dock or Panel at once; add elements as tiles, including a new folder

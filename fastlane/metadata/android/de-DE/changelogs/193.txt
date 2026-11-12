@@ -1,0 +1,4 @@
+- Einstellungen neu: Kacheln, Schnellzugriff, Dock und Panel mit eigenen Startseiten, schönere Auswahlfenster
+- Panel mit Widgets; Widgets zwischen den Zeilen in Panel und Ordnern
+- Neue Seiten starten leer; Dock und Panel pro Seite abschaltbar; Vorschau in echten Proportionen
+- Ordner direkt ins Dock oder Panel legen; Elemente als Kacheln hinzufügen, auch neuer Ordner
