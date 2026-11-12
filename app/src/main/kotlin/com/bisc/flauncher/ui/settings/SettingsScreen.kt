@@ -1,5 +1,11 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Widgets
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Gesture
@@ -9,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -67,15 +75,44 @@ import com.bisc.flauncher.util.DefaultLauncherUtil
 fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
     val context = LocalContext.current
     val isDefault = DefaultLauncherUtil.isDefaultLauncher(context)
+    val home: com.bisc.flauncher.ui.home.HomeViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+    val designsViewModel: DesignsViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+    val packsViewModel: WallpaperPacksViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+    val allPages by home.allPages.collectAsState()
+    val designs by designsViewModel.designs.collectAsState()
+    val packs by packsViewModel.packs.collectAsState()
+    val homeId = allPages.firstOrNull { it.isHome }?.id
+    var searching by rememberSaveable { mutableStateOf(false) }
+    var query by rememberSaveable { mutableStateOf("") }
+    val openTarget: (String) -> Unit = { route ->
+        if (homeId != null || com.bisc.flauncher.data.model.LauncherSettingsTarget.HOME !in route) {
+            navController.navigate(route.replace(com.bisc.flauncher.data.model.LauncherSettingsTarget.HOME, homeId.toString()))
+        }
+    }
+    androidx.activity.compose.BackHandler(enabled = searching) { searching = false; query = "" }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 windowInsets = settingsTopBarInsets(),
-                title = { Text(stringResource(R.string.settings_title)) },
+                title = {
+                    if (searching) SettingsSearchField(query = query, onQueryChange = { query = it })
+                    else Text(stringResource(R.string.settings_title))
+                },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { if (searching) { searching = false; query = "" } else onBack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.settings_back))
+                    }
+                },
+                actions = {
+                    if (!searching) {
+                        IconButton(onClick = { searching = true }) {
+                            Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.settings_search_settings_hint))
+                        }
+                    } else if (query.isNotEmpty()) {
+                        IconButton(onClick = { query = "" }) {
+                            Icon(androidx.compose.material.icons.Icons.Filled.Close, contentDescription = null)
+                        }
                     }
                 }
             )
@@ -83,7 +120,9 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
         bottomBar = { SettingsBreadcrumbBar(navController) }
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-        Column(modifier = Modifier.widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        if (searching) {
+            SettingsSearchResults(query = query, onOpen = openTarget)
+        } else Column(modifier = Modifier.widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             AboutHeaderCard(onClick = { onNavigate("about") })
             if (com.bisc.flauncher.ui.isLargeScreen()) {
                 SettingsPreferenceGroup {
@@ -121,31 +160,159 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                         ) { onNavigate("system") }
                     )
                 )
-                // What people come looking for most, one tap away.
+                // What can be added to the launcher, each straight to its own page.
                 SettingsTileGrid(
-                    title = stringResource(R.string.settings_quick_label),
+                    title = stringResource(R.string.settings_group_extensions),
                     columns = 3,
                     tiles = listOf(
-                        SettingsTile(Icons.Filled.AutoAwesome, stringResource(R.string.designs_title)) { onNavigate("appearance/designs") },
-                        SettingsTile(Icons.Filled.Wallpaper, stringResource(R.string.packs_title)) { onNavigate("wallpaper_packs") },
-                        SettingsTile(Icons.Filled.Interests, stringResource(R.string.settings_icons_label)) { onNavigate("appearance/icons") },
-                        SettingsTile(Icons.Filled.Gesture, stringResource(R.string.settings_section_gestures)) { onNavigate("gestures") },
-                        SettingsTile(Icons.Filled.Search, stringResource(R.string.settings_section_search_full)) { onNavigate("search") },
-                        SettingsTile(Icons.Filled.Folder, stringResource(R.string.settings_section_folder)) { onNavigate("folder") }
+                        SettingsTile(Icons.Filled.AutoAwesome, stringResource(R.string.designs_title),
+                            badge = androidx.compose.ui.res.pluralStringResource(R.plurals.extensions_available, designs.size, designs.size)) { onNavigate("appearance/designs") },
+                        SettingsTile(Icons.Filled.Wallpaper, stringResource(R.string.packs_title),
+                            badge = androidx.compose.ui.res.pluralStringResource(R.plurals.extensions_available, packs.size, packs.size)) { onNavigate("wallpaper_packs") },
+                        SettingsTile(androidx.compose.material.icons.Icons.Filled.Widgets, stringResource(R.string.extensions_widgets_title)) { onNavigate("extensions/widgets") }
                     )
                 )
-                // What can be added to the launcher: designs, wallpaper packs, widgets.
+                // What people come looking for most, one tap away; below, the three pages of their own.
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    SettingsTileGrid(
+                        title = stringResource(R.string.settings_quick_label),
+                        columns = 3,
+                        tiles = listOfNotNull(
+                            SettingsTile(androidx.compose.material.icons.Icons.Filled.Home, stringResource(R.string.settings_pages_home)) {
+                                homeId?.let { navController.navigate("settings/pages/$it/home") }
+                            },
+                            SettingsTile(Icons.Filled.Interests, stringResource(R.string.settings_icons_label)) { onNavigate("appearance/icons") },
+                            SettingsTile(Icons.Filled.Gesture, stringResource(R.string.settings_section_gestures)) { onNavigate("gestures") }
+                        )
+                    )
+                    SettingsTileGrid(
+                        columns = 3,
+                        tiles = listOf(
+                            SettingsTile(androidx.compose.material.icons.Icons.AutoMirrored.Filled.List, stringResource(R.string.welcome_screen_app_list)) { onNavigate("app_overview") },
+                            SettingsTile(Icons.Filled.Search, stringResource(R.string.settings_section_search_full)) { onNavigate("search") },
+                            SettingsTile(androidx.compose.material.icons.Icons.Filled.GridView, stringResource(R.string.settings_pages_app_grid)) { onNavigate("app_grid") }
+                        )
+                    )
+                }
+                // Everything there is, on the page in the browser.
                 SettingsPreferenceGroup {
                     SettingsPreference(
                         icon = Icons.Filled.Extension,
-                        title = stringResource(R.string.settings_group_extensions),
-                        summary = stringResource(R.string.extensions_entry_summary),
-                        onClick = { onNavigate("extensions") }
+                        title = stringResource(R.string.extensions_browse),
+                        summary = stringResource(R.string.extensions_browse_summary),
+                        onClick = { openExtensionsPage(context) },
+                        trailing = { Icon(androidx.compose.material.icons.Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null) }
                     )
                 }
             }
         }
         }
+    }
+}
+
+/** The search field in the settings' top bar, focused as soon as it shows. */
+@Composable
+private fun SettingsSearchField(query: String, onQueryChange: (String) -> Unit) {
+    val focus = remember { androidx.compose.ui.focus.FocusRequester() }
+    androidx.compose.runtime.LaunchedEffect(Unit) { focus.requestFocus() }
+    androidx.compose.foundation.text.BasicTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        singleLine = true,
+        textStyle = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+        cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
+        modifier = Modifier.fillMaxWidth().focusRequester(focus),
+        decorationBox = { field ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(50))
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+                Box(modifier = Modifier.padding(start = 12.dp).weight(1f)) {
+                    if (query.isEmpty()) Text(stringResource(R.string.settings_search_settings_hint), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    field()
+                }
+            }
+        }
+    )
+}
+
+/** Matches of the settings search, found like in the text search: by name and by what is on a page. */
+@Composable
+private fun SettingsSearchResults(query: String, onOpen: (String) -> Unit) {
+    val context = LocalContext.current
+    val results = remember(query) {
+        if (query.isBlank()) emptyList()
+        else com.bisc.flauncher.data.model.LauncherSettingsTargets.all.filter {
+            com.bisc.flauncher.util.matchesLabelOrKeywords(context.getString(it.labelRes), it.keywords, query)
+        }
+    }
+    Column(
+        modifier = Modifier.widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().imePadding().verticalScroll(rememberScrollState()).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        when {
+            query.isBlank() -> Text(
+                stringResource(R.string.settings_search_settings_empty),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+            results.isEmpty() -> Text(
+                stringResource(R.string.settings_search_settings_none, query),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+            else -> SettingsPreferenceGroup {
+                results.forEach { target ->
+                    SettingsPreference(
+                        icon = settingsAreaIcon(target.route),
+                        title = stringResource(target.labelRes),
+                        summary = settingsAreaLabel(target.route),
+                        onClick = { onOpen(target.route) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** The area a settings route belongs to, shown under a search match. */
+@Composable
+private fun settingsAreaLabel(route: String): String? {
+    val part = route.removePrefix("settings/").substringBefore('/')
+    return when (part) {
+        "appearance" -> if (route.startsWith("settings/appearance/designs")) stringResource(R.string.settings_group_extensions) else stringResource(R.string.settings_design_title)
+        "wallpaper_packs", "extensions" -> stringResource(R.string.settings_group_extensions)
+        "pages", "gestures" -> stringResource(R.string.settings_section_pages)
+        "search" -> stringResource(R.string.settings_section_search_full)
+        "app_overview" -> stringResource(R.string.welcome_screen_app_list)
+        "app_grid" -> stringResource(R.string.settings_pages_app_grid)
+        "folder", "elements", "apps" -> stringResource(R.string.settings_section_elements)
+        "system", "permissions", "about" -> stringResource(R.string.settings_system_title)
+        else -> null
+    }
+}
+
+private fun settingsAreaIcon(route: String): ImageVector {
+    val part = route.removePrefix("settings/").substringBefore('/')
+    return when (part) {
+        "appearance" -> if (route.startsWith("settings/appearance/designs")) Icons.Filled.AutoAwesome else Icons.Filled.Palette
+        "wallpaper_packs" -> Icons.Filled.Wallpaper
+        "extensions" -> Icons.Filled.Extension
+        "pages" -> Icons.Filled.ViewCarousel
+        "gestures" -> Icons.Filled.Gesture
+        "search" -> Icons.Filled.Search
+        "app_overview" -> androidx.compose.material.icons.Icons.AutoMirrored.Filled.List
+        "app_grid" -> androidx.compose.material.icons.Icons.Filled.GridView
+        "folder" -> Icons.Filled.Folder
+        "elements", "apps" -> Icons.Filled.Apps
+        else -> Icons.Filled.PhoneAndroid
     }
 }
 

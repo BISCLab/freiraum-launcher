@@ -1,5 +1,10 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.FontDownload
+import androidx.compose.material.icons.filled.SortByAlpha
+import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -43,37 +48,19 @@ fun SettingsAppOverviewAppearanceHubScreen(navController: NavController, onBack:
     val showSearchButton by viewModel.appListShowSearchButton.collectAsState()
     val ownSearch by viewModel.appListOwnSearch.collectAsState()
     SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
-        // Tap a part of the miniature to edit it; the list below stays as the second way in.
+        // Tap a part of the miniature to edit it; the tiles below are the second way in.
         AppListPreview(onNavigate = onNavigate)
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_page_label),
-                onClick = { onNavigate("page") }
+        SettingsTileGrid(
+            title = stringResource(R.string.settings_parts_label),
+            columns = 3,
+            tiles = listOfNotNull(
+                SettingsTile(androidx.compose.material.icons.Icons.Filled.Wallpaper, stringResource(R.string.settings_search_page_label)) { onNavigate("page") },
+                SettingsTile(androidx.compose.material.icons.Icons.Filled.SortByAlpha, surfaceLabel(R.string.settings_layer_surface_section_letter)) { onNavigate("section_letters") },
+                SettingsTile(androidx.compose.material.icons.Icons.Filled.FontDownload, stringResource(R.string.settings_app_overview_az_index_label)) { onNavigate("az_index") },
+                SettingsTile(androidx.compose.material.icons.Icons.Filled.Search, stringResource(R.string.settings_app_list_search_button)) { onNavigate("search_button") },
+                if (showSearchButton && ownSearch) SettingsTile(androidx.compose.material.icons.Icons.Filled.TextFields, stringResource(R.string.settings_app_grid_search_field)) { onNavigate("search_field") } else null
             )
-            SettingsPreference(
-                icon = null,
-                title = surfaceLabel(R.string.settings_layer_surface_section_letter),
-                onClick = { onNavigate("section_letters") }
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_app_overview_az_index_label),
-                onClick = { onNavigate("az_index") }
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_app_list_search_button),
-                onClick = { onNavigate("search_button") }
-            )
-            if (showSearchButton && ownSearch) {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_app_grid_search_field),
-                    onClick = { onNavigate("search_field") }
-                )
-            }
-        }
+        )
     }
 }
 

@@ -1,5 +1,10 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material.icons.filled.Animation
+import androidx.compose.material.icons.filled.StayCurrentPortrait
+import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.Interests
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MoreVert
@@ -59,25 +64,20 @@ fun SettingsAppearanceScreen(
                 SettingsTile(Icons.Filled.Wallpaper, stringResource(R.string.packs_title), stringResource(R.string.packs_entry_summary)) { onNavigate("wallpaper_packs") }
             )
         )
-        SettingsPreferenceGroup(
-            title = stringResource(R.string.settings_color_modes_label),
-            info = stringResource(R.string.settings_color_modes_info)
-        ) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_launcher_theme_label),
-                summary = themeLabel(theme),
-                onClick = { launcherThemePickerOpen = true },
-                trailing = null
+        // Each choice opens a short list; the tile shows what is picked.
+        SettingsTileGrid(
+            title = stringResource(R.string.settings_color_modes_font_label),
+            info = stringResource(R.string.settings_color_modes_info),
+            columns = 3,
+            tiles = listOf(
+                SettingsTile(androidx.compose.material.icons.Icons.Filled.Contrast, stringResource(R.string.settings_launcher_theme_label),
+                    badge = themeLabel(theme)) { launcherThemePickerOpen = true },
+                SettingsTile(androidx.compose.material.icons.Icons.Filled.Settings, stringResource(R.string.settings_settings_theme_label),
+                    badge = settingsThemeLabel(settingsThemeMode)) { settingsThemePickerOpen = true },
+                SettingsTile(androidx.compose.material.icons.Icons.Filled.TextFields, stringResource(R.string.settings_font_label),
+                    badge = fontLabel(fontPreference)) { fontPickerOpen = true }
             )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_settings_theme_label),
-                summary = settingsThemeLabel(settingsThemeMode),
-                onClick = { settingsThemePickerOpen = true },
-                trailing = null
-            )
-        }
+        )
         SettingsPreferenceGroup(
             title = stringResource(R.string.settings_accent_label),
             info = stringResource(R.string.settings_accent_global_info)
@@ -85,16 +85,6 @@ fun SettingsAppearanceScreen(
             // Tapping a swatch recolors this very screen at once (the settings UI uses the accent
             // as its own primary color) - that's the preview.
             AccentPalette(selected = accentColor, onSelect = viewModel::setAccentColor, onCustom = { accentPickerOpen = true })
-        }
-        // A choice on this overview opens a short list, like the color modes above.
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_font_label)) {
-            SettingsPreference(
-                icon = null,
-                title = fontLabel(fontPreference),
-                titleFontFamily = fontPreference.fontFamily ?: androidx.compose.ui.text.font.FontFamily.Default,
-                onClick = { fontPickerOpen = true },
-                trailing = null
-            )
         }
         SettingsTileGrid(
             title = stringResource(R.string.settings_parts_label),
@@ -112,27 +102,22 @@ fun SettingsAppearanceScreen(
                 SettingsTile(Icons.Filled.Interests, stringResource(R.string.settings_icons_label), stringResource(R.string.settings_icons_summary)) { onNavigate("appearance/icons") }
             )
         )
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_display_label)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_statusbar_label),
-                summary = statusBarSummary(viewModel),
-                onClick = { onNavigate("appearance/statusbar") }
+        SettingsTileGrid(
+            title = stringResource(R.string.settings_display_motion_label),
+            tiles = listOf(
+                SettingsTile(androidx.compose.material.icons.Icons.Filled.StayCurrentPortrait, stringResource(R.string.settings_statusbar_label),
+                    badge = statusBarSummary(viewModel)) { onNavigate("appearance/statusbar") },
+                SettingsTile(androidx.compose.material.icons.Icons.Filled.Animation, stringResource(R.string.settings_motion_label),
+                    badge = motionSummary(viewModel)) { onNavigate("appearance/animations") }
             )
+        )
+        SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_lock_portrait),
                 summary = stringResource(R.string.settings_lock_portrait_summary),
                 onClick = { viewModel.setLockPortrait(!lockPortrait) },
                 trailing = { Switch(checked = lockPortrait, onCheckedChange = viewModel::setLockPortrait) }
-            )
-        }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_motion_group_label)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_motion_label),
-                summary = motionSummary(viewModel),
-                onClick = { onNavigate("appearance/animations") }
             )
         }
     }

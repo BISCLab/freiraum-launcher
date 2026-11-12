@@ -6,6 +6,15 @@
   every step, instead of being uncovered first and getting its shadow at the end (3D designs)
 - Text search behavior: a category name too long for its line fades out softly at the edge instead
   of being cut off hard; it still slides sideways to be read in full
+- Settings start page: below the four areas, Extensions now has three tiles of its own (Designs,
+  Wallpapers, Widgets, each with how many there are) that lead straight to them. Quick access
+  shows Home screen, Icons and Gestures, and below them the three pages App list, Text search and
+  App grid. The link to every extension in the browser sits at the bottom
+- Settings search: the magnifier at the top of the settings searches every settings page by name
+  and by what is on it, like the text search does
+- More pages use tiles: Text search, App list and App grid (Appearance and Behavior, then their
+  parts under the preview), Home screen, Panel and Dock, and in Appearance the color modes, the
+  font, the status bar and the animations
 
 ## 0.13.7
 

@@ -595,9 +595,9 @@ class SettingsTile(
 
 /** Overview pages: big tiles side by side instead of a long list, all of a line equally tall. */
 @Composable
-fun SettingsTileGrid(tiles: List<SettingsTile>, columns: Int = 2, title: String? = null) {
+fun SettingsTileGrid(tiles: List<SettingsTile>, columns: Int = 2, title: String? = null, info: String? = null) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        if (title != null) SettingsGroupLabel(title)
+        if (title != null) SettingsGroupLabel(title, info = info)
         tiles.chunked(columns).forEach { line ->
             Row(modifier = Modifier.fillMaxWidth().height(androidx.compose.foundation.layout.IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 line.forEach { tile ->

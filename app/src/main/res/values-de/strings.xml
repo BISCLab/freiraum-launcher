@@ -967,4 +967,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_app_overview_behavior_label_search">App-Liste: Verhalten</string>
     <string name="settings_app_grid_behavior_label_search">App-Raster: Verhalten</string>
     <string name="settings_gesture_action_title">Was soll passieren?</string>
+    <string name="settings_search_settings_hint">Einstellungen durchsuchen</string>
+    <string name="settings_search_settings_empty">Tippe ein, was du suchst, zum Beispiel Dock, Schrift oder Wischen.</string>
+    <string name="settings_search_settings_none">Nichts gefunden für „%1$s“</string>
+    <string name="settings_display_motion_label">Anzeige und Bewegung</string>
+    <string name="settings_color_modes_font_label">Farbmodus und Schrift</string>
 </resources>

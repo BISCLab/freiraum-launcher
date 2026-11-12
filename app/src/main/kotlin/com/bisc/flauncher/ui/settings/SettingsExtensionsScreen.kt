@@ -58,29 +58,16 @@ fun SettingsExtensionsScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 4.dp)
         )
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            HubCard(
-                icon = Icons.Filled.AutoAwesome,
-                title = stringResource(R.string.designs_title),
-                what = pluralStringResource(R.plurals.extensions_available, designs.size, designs.size),
-                contents = stringResource(R.string.designs_entry_summary),
-                onClick = { navController.navigate("settings/appearance/designs") }
+        SettingsTileGrid(
+            columns = 3,
+            tiles = listOf(
+                SettingsTile(Icons.Filled.AutoAwesome, stringResource(R.string.designs_title),
+                    badge = pluralStringResource(R.plurals.extensions_available, designs.size, designs.size)) { navController.navigate("settings/appearance/designs") },
+                SettingsTile(Icons.Filled.Wallpaper, stringResource(R.string.packs_title),
+                    badge = pluralStringResource(R.plurals.extensions_available, packs.size, packs.size)) { navController.navigate("settings/wallpaper_packs") },
+                SettingsTile(Icons.Filled.Widgets, stringResource(R.string.extensions_widgets_title)) { navController.navigate("settings/extensions/widgets") }
             )
-            HubCard(
-                icon = Icons.Filled.Wallpaper,
-                title = stringResource(R.string.packs_title),
-                what = pluralStringResource(R.plurals.extensions_available, packs.size, packs.size),
-                contents = stringResource(R.string.packs_entry_summary),
-                onClick = { navController.navigate("settings/wallpaper_packs") }
-            )
-            HubCard(
-                icon = Icons.Filled.Widgets,
-                title = stringResource(R.string.extensions_widgets_title),
-                what = stringResource(R.string.extensions_widgets_what),
-                contents = stringResource(R.string.extensions_widgets_contents),
-                onClick = { navController.navigate("settings/extensions/widgets") }
-            )
-        }
+        )
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,

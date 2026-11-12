@@ -1,5 +1,9 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material.icons.filled.Keyboard
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.filled.ViewAgenda
+import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.asImageBitmap
@@ -85,42 +89,21 @@ fun SettingsSearchAppearanceScreen(navController: NavController, onBack: () -> U
     val railShown by viewModel.searchBarShowCategories.collectAsState()
     val railLeft by viewModel.searchCategoryRailLeft.collectAsState()
     SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
-        // Tap a part of the miniature to edit it; the list below stays as the second way in.
+        // Tap a part of the miniature to edit it; the tiles below are the second way in.
         SearchPreview(onNavigate = onNavigate)
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_page_label),
-                onClick = { onNavigate("page") }
+        SettingsTileGrid(
+            title = stringResource(R.string.settings_parts_label),
+            columns = 3,
+            tiles = listOf(
+                SettingsTile(Icons.Filled.Wallpaper, stringResource(R.string.settings_search_page_label)) { onNavigate("page") },
+                SettingsTile(Icons.Filled.Search, stringResource(R.string.settings_app_grid_search_field)) { onNavigate(SearchElement.FIELD.route) },
+                SettingsTile(Icons.AutoMirrored.Filled.ViewSidebar, stringResource(R.string.settings_search_rail_label),
+                    badge = stringResource(if (railShown) (if (railLeft) R.string.settings_search_rail_left else R.string.settings_search_rail_right) else R.string.settings_search_rail_hidden)) { onNavigate(SearchElement.RAIL.route) },
+                SettingsTile(Icons.Filled.ViewAgenda, stringResource(R.string.settings_search_results_label)) { onNavigate(SearchElement.RESULTS.route) },
+                SettingsTile(Icons.AutoMirrored.Filled.Chat, stringResource(R.string.settings_search_bubble_label)) { onNavigate(SearchElement.BUBBLE.route) },
+                SettingsTile(Icons.Filled.Keyboard, stringResource(R.string.settings_search_keyboard_label)) { onNavigate("keyboard") }
             )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_app_grid_search_field),
-                onClick = { onNavigate(SearchElement.FIELD.route) }
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_rail_label),
-                summary = stringResource(if (railShown) (if (railLeft) R.string.settings_search_rail_left else R.string.settings_search_rail_right) else R.string.settings_search_rail_hidden),
-                onClick = { onNavigate(SearchElement.RAIL.route) }
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_results_label),
-                onClick = { onNavigate(SearchElement.RESULTS.route) }
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_bubble_label),
-                summary = stringResource(R.string.settings_search_bubble_summary),
-                onClick = { onNavigate(SearchElement.BUBBLE.route) }
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_keyboard_label),
-                onClick = { onNavigate("keyboard") }
-            )
-        }
+        )
     }
 }
 

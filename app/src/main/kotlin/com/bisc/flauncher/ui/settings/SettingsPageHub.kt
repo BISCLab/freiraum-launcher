@@ -46,22 +46,12 @@ internal fun AppearanceBehaviorHub(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 4.dp)
         )
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            HubCard(
-                icon = Icons.Filled.Palette,
-                title = stringResource(R.string.settings_home_appearance_title),
-                what = stringResource(R.string.settings_hub_appearance_what),
-                contents = appearanceContents,
-                onClick = { onNavigate("appearance") }
+        SettingsTileGrid(
+            tiles = listOf(
+                SettingsTile(Icons.Filled.Palette, stringResource(R.string.settings_home_appearance_title), appearanceContents) { onNavigate("appearance") },
+                SettingsTile(Icons.Filled.Tune, stringResource(R.string.settings_search_behavior_label), behaviorContents) { onNavigate("behavior") }
             )
-            HubCard(
-                icon = Icons.Filled.Tune,
-                title = stringResource(R.string.settings_search_behavior_label),
-                what = stringResource(R.string.settings_hub_behavior_what),
-                contents = behaviorContents,
-                onClick = { onNavigate("behavior") }
-            )
-        }
+        )
     }
 }
 

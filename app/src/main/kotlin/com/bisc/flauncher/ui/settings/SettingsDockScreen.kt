@@ -66,29 +66,16 @@ fun SettingsDockScreen(pageId: Long, navController: NavController, onBack: () ->
     val count = entriesByRow[row.id].orEmpty().size
     SettingsSubScreen(title = stringResource(R.string.settings_home_dock_label), navController = navController, onBack = onBack) {
         LookSample(LookSampleKind.DOCK, row.appearance(), row.cornerRadiusPercent)
-        androidx.compose.foundation.layout.Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)) {
-            HubCard(
-                icon = Icons.Filled.GridView,
-                title = stringResource(R.string.settings_dock_elements_title),
-                what = stringResource(R.string.settings_hub_elements_what),
-                contents = androidx.compose.ui.res.pluralStringResource(R.plurals.settings_hub_elements_count, count, count),
-                onClick = { onNavigate("elements") }
+        SettingsTileGrid(
+            columns = 3,
+            tiles = listOf(
+                SettingsTile(Icons.Filled.GridView, stringResource(R.string.settings_dock_elements_title),
+                    badge = androidx.compose.ui.res.pluralStringResource(R.plurals.settings_hub_elements_count, count, count)) { onNavigate("elements") },
+                SettingsTile(Icons.Filled.Visibility, stringResource(R.string.settings_dock_visibility_label),
+                    badge = dockVisibilityModeLabel(row.dockVisibilityMode)) { onNavigate("visibility") },
+                SettingsTile(Icons.Filled.Palette, stringResource(R.string.settings_home_appearance_title)) { onNavigate("look") }
             )
-            HubCard(
-                icon = Icons.Filled.Visibility,
-                title = stringResource(R.string.settings_dock_visibility_label),
-                what = stringResource(R.string.settings_hub_visibility_what),
-                contents = dockVisibilityModeLabel(row.dockVisibilityMode),
-                onClick = { onNavigate("visibility") }
-            )
-            HubCard(
-                icon = Icons.Filled.Palette,
-                title = stringResource(R.string.settings_home_appearance_title),
-                what = stringResource(R.string.settings_hub_appearance_what),
-                contents = stringResource(R.string.settings_hub_bar_look_contents),
-                onClick = { onNavigate("look") }
-            )
-        }
+        )
     }
 }
 

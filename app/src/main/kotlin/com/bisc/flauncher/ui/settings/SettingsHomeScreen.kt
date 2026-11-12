@@ -62,22 +62,12 @@ fun SettingsHomeScreenHub(pageId: Long, navController: NavController, onBack: ()
     SettingsSubScreen(title = stringResource(R.string.settings_pages_home), navController = navController, onBack = onBack) {
         // Tap a part of the miniature (background, Panel, a row, the Dock) to edit it.
         PagePreview(pageId = pageId, isHome = true, navController = navController)
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            HubCard(
-                icon = Icons.Filled.Palette,
-                title = stringResource(R.string.settings_home_appearance_title),
-                what = stringResource(R.string.settings_home_appearance_what),
-                contents = stringResource(R.string.settings_home_appearance_subtitle),
-                onClick = { onNavigate("appearance") }
+        SettingsTileGrid(
+            tiles = listOf(
+                SettingsTile(Icons.Filled.Palette, stringResource(R.string.settings_home_appearance_title), stringResource(R.string.settings_home_appearance_subtitle)) { onNavigate("appearance") },
+                SettingsTile(Icons.Filled.ViewAgenda, stringResource(R.string.settings_home_layout_title), stringResource(R.string.settings_home_layout_subtitle)) { onNavigate("layout") }
             )
-            HubCard(
-                icon = Icons.Filled.ViewAgenda,
-                title = stringResource(R.string.settings_home_layout_title),
-                what = stringResource(R.string.settings_home_layout_what),
-                contents = stringResource(R.string.settings_home_layout_subtitle),
-                onClick = { onNavigate("layout") }
-            )
-        }
+        )
     }
 }
 
@@ -297,23 +287,18 @@ fun SettingsHomePanelScreen(pageId: Long, navController: NavController, onBack: 
     val count = entriesByRow[row.id].orEmpty().size
     SettingsSubScreen(title = stringResource(R.string.settings_home_panel_label), navController = navController, onBack = onBack) {
         LookSample(LookSampleKind.PANEL, row.appearance(), row.cornerRadiusPercent)
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            HubCard(
-                icon = Icons.Filled.GridView,
-                title = stringResource(R.string.settings_panel_content_title),
-                what = stringResource(R.string.settings_hub_panel_content_what),
-                contents = androidx.compose.ui.res.pluralStringResource(R.plurals.settings_hub_elements_count, count, count) + " · " +
-                    androidx.compose.ui.res.pluralStringResource(R.plurals.settings_hub_widgets_count, widgets.size, widgets.size),
-                onClick = { onNavigate("elements") }
+        SettingsTileGrid(
+            tiles = listOf(
+                SettingsTile(
+                    Icons.Filled.GridView,
+                    stringResource(R.string.settings_panel_content_title),
+                    stringResource(R.string.settings_hub_panel_content_what),
+                    badge = androidx.compose.ui.res.pluralStringResource(R.plurals.settings_hub_elements_count, count, count) + " · " +
+                        androidx.compose.ui.res.pluralStringResource(R.plurals.settings_hub_widgets_count, widgets.size, widgets.size)
+                ) { onNavigate("elements") },
+                SettingsTile(Icons.Filled.Palette, stringResource(R.string.settings_home_appearance_title), stringResource(R.string.settings_hub_bar_look_contents)) { onNavigate("look") }
             )
-            HubCard(
-                icon = Icons.Filled.Palette,
-                title = stringResource(R.string.settings_home_appearance_title),
-                what = stringResource(R.string.settings_hub_appearance_what),
-                contents = stringResource(R.string.settings_hub_bar_look_contents),
-                onClick = { onNavigate("look") }
-            )
-        }
+        )
     }
 }
 
