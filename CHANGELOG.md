@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.14.0
 
 - Settings tiles never break a word: a name too long for its tile gets a little smaller instead
 - Tiles laid out anew: every tile of a group has the same size, and symbol and name sit at the same height in all of them. Small tiles (three in a line) show only symbol, name and a short fact and are equally tall on every page.

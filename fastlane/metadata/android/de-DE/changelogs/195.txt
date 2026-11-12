@@ -1,0 +1,7 @@
+• Verschlüsselte Sicherung mit Passwort
+• Live-Editor für Element-Box, Dock und Panel
+• Apps aus Arbeitsprofil und privatem Bereich in der App-Liste
+• Suche findet auch mitten im Wort und verzeiht Tippfehler
+• Benachrichtigungspunkte an App-Symbolen
+• Kacheln in den Einstellungen sauber ausgerichtet, ohne Wortumbrüche
+• Icon-Vorschau zeigt Form und Icon-Paket richtig

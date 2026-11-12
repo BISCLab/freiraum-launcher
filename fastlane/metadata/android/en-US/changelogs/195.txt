@@ -1,0 +1,7 @@
+• Encrypted backups with a password
+• Live editor for Element-Box, Dock and Panel
+• Work profile and private space apps in the App list
+• Search finds matches inside words and forgives typos
+• Notification dots on app icons
+• Settings tiles evenly aligned, no broken words
+• Icon preview shows shape and icon pack correctly
