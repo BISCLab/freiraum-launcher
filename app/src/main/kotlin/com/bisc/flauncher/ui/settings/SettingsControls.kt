@@ -208,7 +208,7 @@ fun <T> RadioPreference(
         titleFontFamily = font,
         enabled = enabled,
         onClick = { onSelect(value) },
-        trailing = { RadioButton(selected = value == selected, onClick = { onSelect(value) }, enabled = enabled) }
+        trailing = { SelectedMark(value == selected) }
     )
 }
 
@@ -245,7 +245,7 @@ fun FillModePreference(
                     }
             )
         },
-        trailing = { RadioButton(selected = value == selected, onClick = { onSelect(value) }) }
+        trailing = { SelectedMark(value == selected) }
     )
 }
 
@@ -553,7 +553,7 @@ fun IconShapePreference(
                     .background(MaterialTheme.colorScheme.primary, shape)
             )
         },
-        trailing = { RadioButton(selected = value == selected, onClick = { onSelect(value) }) }
+        trailing = { SelectedMark(value == selected) }
     )
 }
 
@@ -635,5 +635,24 @@ fun SettingsTileGrid(tiles: List<SettingsTile>, columns: Int = 2, title: String?
                 repeat(columns - line.size) { Spacer(Modifier.weight(1f)) }
             }
         }
+    }
+}
+
+/** The mark of a choice: a filled circle with a check when chosen, an empty ring when not. Same as
+ *  in the choice windows (see ChoicePanel). */
+@Composable
+fun SelectedMark(selected: Boolean) {
+    val shape = androidx.compose.foundation.shape.CircleShape
+    Box(
+        modifier = Modifier
+            .size(28.dp)
+            .clip(shape)
+            .then(
+                if (selected) Modifier.background(MaterialTheme.colorScheme.primary)
+                else Modifier.border(2.dp, MaterialTheme.colorScheme.outline, shape)
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        if (selected) Icon(androidx.compose.material.icons.Icons.Filled.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(18.dp))
     }
 }

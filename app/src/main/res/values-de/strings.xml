@@ -966,4 +966,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_first_ok">Verstanden</string>
     <string name="settings_app_overview_behavior_label_search">App-Liste: Verhalten</string>
     <string name="settings_app_grid_behavior_label_search">App-Raster: Verhalten</string>
+    <string name="settings_gesture_action_title">Was soll passieren?</string>
 </resources>

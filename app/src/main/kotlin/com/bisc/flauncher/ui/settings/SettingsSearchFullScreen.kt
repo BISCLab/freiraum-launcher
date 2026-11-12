@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.core.graphics.drawable.toBitmap
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -707,26 +709,24 @@ internal fun AppPickerDialog(
     onClear: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            LazyColumn(modifier = Modifier.heightIn(max = 420.dp)) {
-                items(apps, key = { it.packageName }) { app ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth().clickable { onPick(app.packageName) }.padding(vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(selected = app.packageName == selectedPackage, onClick = { onPick(app.packageName) })
-                        Text(app.label, modifier = Modifier.padding(start = 8.dp))
+    val context = androidx.compose.ui.platform.LocalContext.current
+    ChoicePanel(
+        title = title,
+        options = apps.map { app ->
+            ChoiceOption(
+                label = app.label,
+                selected = app.packageName == selectedPackage,
+                onClick = { onPick(app.packageName) },
+                leading = {
+                    val icon = androidx.compose.runtime.remember(app.packageName) {
+                        runCatching { context.packageManager.getApplicationIcon(app.packageName).toBitmap(96, 96).asImageBitmap() }.getOrNull()
                     }
+                    if (icon != null) androidx.compose.foundation.Image(icon, contentDescription = null, modifier = Modifier.size(32.dp))
                 }
-            }
+            )
         },
-        confirmButton = {
-            if (selectedPackage != null) TextButton(onClick = onClear) { Text(clearLabel) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.widget_notes_cancel)) } }
+        onDismiss = onDismiss,
+        footer = if (selectedPackage != null) ({ ChoicePanelAction(clearLabel, onClear) }) else null
     )
 }
 

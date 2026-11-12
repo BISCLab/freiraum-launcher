@@ -178,13 +178,11 @@ internal fun GestureActionTypeSheet(
     onSelected: (GestureActionType) -> Unit,
     onDismiss: () -> Unit
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(modifier = Modifier.padding(vertical = 8.dp)) {
-            types.forEach { type ->
-                RadioPreference(gestureActionTypeLabel(type), type, current, onSelected)
-            }
-        }
-    }
+    ChoicePanel(
+        title = stringResource(R.string.settings_gesture_action_title),
+        options = types.map { type -> ChoiceOption(label = gestureActionTypeLabel(type), selected = type == current, onClick = { onSelected(type) }) },
+        onDismiss = onDismiss
+    )
 }
 
 internal fun gestureIcon(gesture: HomeGesture) = when (gesture) {

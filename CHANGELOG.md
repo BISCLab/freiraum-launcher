@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Choice windows (language, font, color modes, browser and maps app, what a gesture does) are built
+  anew: a rounded window with a clear title, each option a piece of its own with a fine gap, the
+  chosen one tinted with a check mark; apps show their icons. They open with a short fade
+- Choices on the settings pages show the same check mark instead of a plain radio button
 - Folders and Element-Boxes add their elements with the same tiles as the Dock and the Panel
 - The settings search finds every page now, also the strip over the keyboard, Text search behavior,
   the App list's search button and A-Z rail, the App grid's grid, the menus, all folders and the

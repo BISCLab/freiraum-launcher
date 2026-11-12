@@ -224,25 +224,11 @@ internal fun <T> ChoiceDialog(
     /** Shows each option in a typeface of its own, for picking a font. */
     fontOf: ((T) -> androidx.compose.ui.text.font.FontFamily?)? = null
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            androidx.compose.foundation.layout.Column {
-                options.forEach { (value, label) ->
-                    androidx.compose.foundation.layout.Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onPick(value) }
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                    ) {
-                        androidx.compose.material3.RadioButton(selected = value == selected, onClick = { onPick(value) })
-                        Text(label, fontFamily = fontOf?.invoke(value), modifier = Modifier.padding(start = 8.dp))
-                    }
-                }
-            }
+    ChoicePanel(
+        title = title,
+        options = options.map { (value, label) ->
+            ChoiceOption(label = label, selected = value == selected, onClick = { onPick(value) }, fontFamily = fontOf?.invoke(value))
         },
-        confirmButton = {}
+        onDismiss = onDismiss
     )
 }
