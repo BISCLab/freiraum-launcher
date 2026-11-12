@@ -1,0 +1,5 @@
+• Settings: Extensions (Designs, Wallpapers, Widgets) as tiles of their own, Quick access with Home screen and the App list, Text search and App grid pages
+• Search the settings with the magnifier at the top
+• More pages as tiles: Text search, App list, App grid, Home screen, Panel, Dock, Appearance, System, About
+• Panel and Dock open in one motion with their shadow (3D)
+• Long names fade out softly

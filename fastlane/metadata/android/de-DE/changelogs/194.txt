@@ -1,0 +1,5 @@
+• Einstellungen: Erweiterungen (Designs, Wallpaper, Widgets) als eigene Kacheln, Schnell zu mit Startbildschirm und den Seiten App-Liste, Textsuche, App-Raster
+• Suche in den Einstellungen über die Lupe oben
+• Mehr Seiten als Kacheln: Textsuche, App-Liste, App-Raster, Startbildschirm, Panel, Dock, Aussehen, System, Über
+• Panel und Dock öffnen sich in einem Zug mit Schatten (3D)
+• Lange Namen laufen weich aus

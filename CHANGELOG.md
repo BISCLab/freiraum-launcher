@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.13.8
 
 - Panel and Dock open in one smooth motion: the card itself grows, with its shadow and edges at
   every step, instead of being uncovered first and getting its shadow at the end (3D designs)
