@@ -63,8 +63,16 @@ class InstalledAppsRepository @Inject constructor(
             .toList()
     }
 
-    fun rawLabelFor(componentName: ComponentName): String =
-        runCatching {
+    fun rawLabelFor(componentName: ComponentName): String {
+        com.bisc.flauncher.util.ProfileComponents.userOf(context, componentName)?.let { user ->
+            return runCatching {
+                context.getSystemService(android.content.pm.LauncherApps::class.java)
+                    .resolveActivity(Intent(Intent.ACTION_MAIN).setComponent(com.bisc.flauncher.util.ProfileComponents.real(componentName)), user)
+                    ?.label?.toString()
+            }.getOrNull().orEmpty()
+        }
+        return runCatching {
             context.packageManager.getActivityInfo(componentName, 0).loadLabel(context.packageManager).toString()
         }.getOrDefault("")
+    }
 }

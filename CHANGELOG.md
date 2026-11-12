@@ -5,6 +5,11 @@
 - A single folder's look page works like every look page: the folder in small stays on top while
   the settings below scroll, with its real corners, and its state with the way back to the look of
   all folders right under it
+- Work profile and private space everywhere: their apps (with the profile's badge) are in the text
+  search, the App grid and every app list for adding, and can be put on pages, into the Dock, the
+  Panel and folders, or onto a gesture, like any app. They always start in their profile; while
+  the profile is paused or locked, a tap asks to switch it on. Their long-press menu opens App info
+  in their profile; their own name, icon and size can be set like for any app
 
 ## 0.14.0
 

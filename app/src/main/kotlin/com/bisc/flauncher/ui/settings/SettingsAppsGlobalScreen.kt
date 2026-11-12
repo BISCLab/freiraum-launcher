@@ -59,7 +59,8 @@ fun SettingsAppsGlobalScreen(navController: NavController, onBack: () -> Unit, v
     // Well-known apps first, so the samples look familiar.
     val samples = remember(apps) {
         val preferred = listOf("com.android.chrome", "com.google.android.dialer", "com.google.android.apps.messaging", "com.google.android.GoogleCamera", "com.google.android.apps.maps", "com.android.settings")
-        (apps.filter { it.componentName.packageName in preferred } + apps.sortedBy { it.label.lowercase() }).distinct().take(5)
+        val own = apps.filter { !com.bisc.flauncher.util.ProfileComponents.isProfile(it.componentName) }
+        (own.filter { it.componentName.packageName in preferred } + own.sortedBy { it.label.lowercase() }).distinct().take(5)
     }
 
     SettingsSubScreen(title = stringResource(R.string.settings_icons_label), navController = navController, onBack = onBack) {

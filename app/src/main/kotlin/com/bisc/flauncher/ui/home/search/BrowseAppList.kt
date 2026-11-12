@@ -202,7 +202,7 @@ fun BrowseAppList(
                     }
                 }
             }
-            if (profiles != null) profileSectionItems(profileSections, profileQuery, profiles, handedness, edgeInset, iconSize)
+            if (profiles != null) profileSectionItems(profileSections, profileQuery, profiles, loadIcon, onAppClick, handedness, edgeInset, iconSize)
         }
 
         if (showAzIndex && allApps.isNotEmpty()) {
@@ -399,7 +399,7 @@ private fun ScrubMagnifier(label: String, verticalFraction: Float, pull: Float, 
 private val MAGNIFIER_MAX_STRETCH = 120.dp
 
 @Composable
-private fun AppBrowseRow(app: AppInfo, loadIcon: (ComponentName) -> ImageBitmap?, handedness: Handedness, edgeInset: Dp, iconSize: Dp, onClick: () -> Unit) {
+internal fun AppBrowseRow(app: AppInfo, loadIcon: (ComponentName) -> ImageBitmap?, handedness: Handedness, edgeInset: Dp, iconSize: Dp, onClick: () -> Unit) {
     val bitmap = rememberAppIcon(app.componentName, loadIcon)
     val isLeft = handedness == Handedness.LEFT
     val menu = com.bisc.flauncher.ui.home.rememberAppMenu(app.componentName, app.label)

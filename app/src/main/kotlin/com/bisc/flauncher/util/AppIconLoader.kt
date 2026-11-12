@@ -117,6 +117,10 @@ class AppIconLoader @Inject constructor(
 
     fun load(componentName: ComponentName): ImageBitmap? {
         cache.get(componentName)?.let { return it }
+        if (ProfileComponents.isProfile(componentName)) {
+            val own = overrides[componentName.flattenToString()]?.let { loadPackIcon(it.first, it.second) }
+            return (own ?: loadProfileIcon(componentName))?.also { cache.put(componentName, it) }
+        }
         val override = overrides[componentName.flattenToString()]
         val bitmap = if (override != null) {
             loadPackIcon(override.first, override.second)
@@ -169,6 +173,25 @@ class AppIconLoader @Inject constructor(
     fun clearCache() {
         cache.evictAll()
         revision++
+    }
+
+    /** An app of another profile: its own icon (or the icon pack's) in the shape, with the
+     *  profile's badge on it as the system draws it. */
+    private fun loadProfileIcon(marked: ComponentName): ImageBitmap? {
+        val user = ProfileComponents.userOf(context, marked) ?: return null
+        val real = ProfileComponents.real(marked)
+        val launcherApps = context.getSystemService(android.content.pm.LauncherApps::class.java)
+        val base: Bitmap = loadIconPackDrawable(real)?.toBitmap(width = ICON_SIZE_PX, height = ICON_SIZE_PX) ?: run {
+            val info = runCatching {
+                launcherApps.resolveActivity(android.content.Intent(android.content.Intent.ACTION_MAIN).setComponent(real), user)
+            }.getOrNull() ?: return null
+            val shape = shapeOverrides[marked.flattenToString()] ?: globalShape
+            renderMasked(info.getIcon(0), shape)
+        }
+        val badged = runCatching {
+            context.packageManager.getUserBadgedIcon(android.graphics.drawable.BitmapDrawable(context.resources, base), user)
+        }.getOrNull() ?: return base.asImageBitmap()
+        return badged.toBitmap(width = ICON_SIZE_PX, height = ICON_SIZE_PX).asImageBitmap()
     }
 
     private fun renderMasked(drawable: Drawable, shape: IconShape): Bitmap {

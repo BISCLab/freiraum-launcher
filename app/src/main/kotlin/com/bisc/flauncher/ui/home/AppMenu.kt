@@ -128,8 +128,11 @@ private fun MenuEntry(text: String, onClick: () -> Unit, leading: @Composable ()
 private fun AppMenuItems(app: AppInfo, host: AppMenuHost, close: () -> Unit) {
     val context = LocalContext.current
     val packageName = app.componentName.packageName
+    // An app of the work profile or the private space: its App info opens in its profile, and
+    // removing it happens there. Its shortcuts belong to its profile, so none are offered here.
+    val profile = com.bisc.flauncher.util.ProfileComponents.isProfile(app.componentName)
     val shortcuts by produceState(emptyList<ShortcutInfo>(), packageName) {
-        value = host.shortcutsFor(packageName).filter { it.isEnabled }.take(MAX_MENU_SHORTCUTS)
+        value = if (profile) emptyList() else host.shortcutsFor(packageName).filter { it.isEnabled }.take(MAX_MENU_SHORTCUTS)
     }
     shortcuts.forEach { shortcut ->
         val icon = remember(shortcut.id) { runCatching { host.shortcutIcon(shortcut)?.toBitmap(72, 72)?.asImageBitmap() }.getOrNull() }
@@ -147,21 +150,27 @@ private fun AppMenuItems(app: AppInfo, host: AppMenuHost, close: () -> Unit) {
     MenuEntry(text = stringResource(R.string.app_menu_edit), onClick = { close(); host.edit(app.componentName) }) {
         Icon(Icons.Filled.Edit, contentDescription = null)
     }
-    MenuEntry(text = stringResource(R.string.app_menu_info), onClick = { close(); openAppInfo(context, packageName) }) {
+    MenuEntry(text = stringResource(R.string.app_menu_info), onClick = { close(); openAppInfo(context, app.componentName) }) {
         Icon(Icons.Outlined.Info, contentDescription = null)
     }
-    if (remember(packageName) { canUninstall(context, packageName) }) {
+    if (!profile && remember(packageName) { canUninstall(context, packageName) }) {
         MenuEntry(text = stringResource(R.string.app_menu_uninstall), onClick = { close(); requestUninstall(context, packageName) }) {
             Icon(Icons.Filled.DeleteOutline, contentDescription = null)
         }
     }
 }
 
-private fun openAppInfo(context: Context, packageName: String) {
+private fun openAppInfo(context: Context, component: ComponentName) {
     runCatching {
-        context.startActivity(
-            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        )
+        val user = com.bisc.flauncher.util.ProfileComponents.userOf(context, component)
+        if (user != null) {
+            context.getSystemService(android.content.pm.LauncherApps::class.java)
+                .startAppDetailsActivity(com.bisc.flauncher.util.ProfileComponents.real(component), user, null, null)
+        } else {
+            context.startActivity(
+                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${component.packageName}")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
+        }
     }
 }
 

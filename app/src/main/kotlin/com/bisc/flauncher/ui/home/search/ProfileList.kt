@@ -31,7 +31,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bisc.flauncher.R
-import com.bisc.flauncher.data.repository.ProfileApp
 import com.bisc.flauncher.data.repository.ProfileKind
 import com.bisc.flauncher.data.repository.ProfileSection
 import com.bisc.flauncher.data.settings.Handedness
@@ -43,22 +42,23 @@ import kotlinx.coroutines.withContext
 /** What the app list needs to show the work profile and the private space. */
 class ProfileListHost(
     val sections: StateFlow<List<ProfileSection>>,
-    val icon: (ProfileApp) -> ImageBitmap?,
-    val launch: (ProfileApp) -> Unit,
     val setLocked: (android.os.UserHandle, Boolean) -> Unit
 )
 
 @Composable
 fun rememberProfileListHost(viewModel: HomeViewModel): ProfileListHost = remember(viewModel) {
-    ProfileListHost(viewModel.profileSections, viewModel::profileIcon, { app -> viewModel.launchProfileApp(app); viewModel.closeAppList() }, viewModel::setProfileLocked)
+    ProfileListHost(viewModel.profileSections, viewModel::setProfileLocked)
 }
 
 /** Each profile after the own apps: a header with its name and the switch to pause or lock it,
- *  then its apps, or a note while it is off. While searching, only matching apps. */
+ *  then its apps like every other app (badged icon, menu, dot), or a note while it is off. While
+ *  searching, only matching apps. */
 internal fun LazyListScope.profileSectionItems(
     sections: List<ProfileSection>,
     query: String,
     host: ProfileListHost,
+    loadIcon: (android.content.ComponentName) -> ImageBitmap?,
+    onAppClick: (com.bisc.flauncher.data.model.AppInfo) -> Unit,
     handedness: Handedness,
     edgeInset: Dp,
     iconSize: Dp
@@ -70,8 +70,8 @@ internal fun LazyListScope.profileSectionItems(
         item(key = "profile-${section.kind}-${section.user.hashCode()}") {
             ProfileHeader(section, host, edgeInset)
         }
-        items(apps, key = { "profile-app-${section.user.hashCode()}-${it.componentName.flattenToShortString()}" }) { app ->
-            ProfileAppRow(app, host, handedness, edgeInset, iconSize)
+        items(apps, key = { "profile-app-" + it.componentName.flattenToString() }) { app ->
+            AppBrowseRow(app, loadIcon, handedness, edgeInset, iconSize) { onAppClick(app) }
         }
     }
 }
@@ -120,23 +120,5 @@ private fun ProfileHeader(section: ProfileSection, host: ProfileListHost, edgeIn
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
-    }
-}
-
-@Composable
-private fun ProfileAppRow(app: ProfileApp, host: ProfileListHost, handedness: Handedness, edgeInset: Dp, iconSize: Dp) {
-    val icon by produceState<ImageBitmap?>(null, app) { value = withContext(Dispatchers.Default) { host.icon(app) } }
-    val isLeft = handedness == Handedness.LEFT
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .appClickable(onClick = { host.launch(app) }, onLongClick = null)
-            .padding(start = edgeInset, end = edgeInset, top = 10.dp, bottom = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp, if (isLeft) Alignment.End else Alignment.Start),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        val image = @Composable { Box(Modifier.size(iconSize)) { icon?.let { Image(it, contentDescription = null, modifier = Modifier.size(iconSize)) } } }
-        val label = @Composable { Text(app.label) }
-        if (isLeft) { label(); image() } else { image(); label() }
     }
 }

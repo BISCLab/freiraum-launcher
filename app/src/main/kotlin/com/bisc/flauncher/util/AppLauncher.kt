@@ -5,6 +5,17 @@ import android.content.Context
 import android.content.Intent
 
 fun launchApp(context: Context, componentName: ComponentName) {
+    // An app of the work profile or the private space starts in its profile; while that profile is
+    // paused or locked, the system is asked to switch it on (it may ask for the screen lock).
+    ProfileComponents.userOf(context, componentName)?.let { user ->
+        val userManager = context.getSystemService(android.os.UserManager::class.java)
+        runCatching {
+            if (userManager.isQuietModeEnabled(user)) userManager.requestQuietModeEnabled(false, user)
+            else context.getSystemService(android.content.pm.LauncherApps::class.java)
+                .startMainActivity(ProfileComponents.real(componentName), user, null, launchZoomOptions(context))
+        }
+        return
+    }
     // ACTION_MAIN + CATEGORY_LAUNCHER, not just a bare component, matches what
     // PackageManager.getLaunchIntentForPackage() (what "Open" in App info uses) sends. Some apps'
     // launch activities check for this and silently do nothing for a component-only Intent.

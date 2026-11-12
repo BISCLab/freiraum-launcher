@@ -111,10 +111,6 @@ class HomeViewModel @Inject constructor(
     val profileSections: StateFlow<List<com.bisc.flauncher.data.repository.ProfileSection>> =
         profileAppsRepository.sections().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    fun profileIcon(app: com.bisc.flauncher.data.repository.ProfileApp): ImageBitmap? = profileAppsRepository.icon(app)
-
-    fun launchProfileApp(app: com.bisc.flauncher.data.repository.ProfileApp) = profileAppsRepository.launch(app)
-
     fun setProfileLocked(user: android.os.UserHandle, locked: Boolean) = profileAppsRepository.setLocked(user, locked)
 
     // ---- Display settings ----
@@ -352,9 +348,13 @@ class HomeViewModel @Inject constructor(
             .map { list -> list.associateBy { it.componentName } }
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
+    /** Apps of the work profile and the private space, marked with their profile. */
+    private val profileApps: StateFlow<List<AppInfo>> =
+        profileAppsRepository.apps().stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
     val labeledApps: StateFlow<List<AppInfo>> =
-        combine(_installedApps, appOverrides) { apps, overrides ->
-            apps.map { app ->
+        combine(_installedApps, profileApps, appOverrides) { own, profiles, overrides ->
+            (own + profiles).map { app ->
                 val custom = overrides[app.componentName.flattenToString()]?.customLabel
                 if (custom.isNullOrBlank()) app else app.copy(label = custom)
             }.sortedBy { it.label.lowercase() }
@@ -362,7 +362,8 @@ class HomeViewModel @Inject constructor(
 
     val browsableApps: StateFlow<List<AppInfo>> =
         combine(labeledApps, appOverrides) { apps, overrides ->
-            apps.filter { overrides[it.componentName.flattenToString()]?.hiddenFromAppList != true }
+            // Apps of other profiles have their own sections at the end of the App list.
+            apps.filter { overrides[it.componentName.flattenToString()]?.hiddenFromAppList != true && !com.bisc.flauncher.util.ProfileComponents.isProfile(it.componentName) }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     /** The apps the App grid shows: hidden there on their own, apart from the App list. */
@@ -464,7 +465,7 @@ class HomeViewModel @Inject constructor(
 
     val appQueryResults: StateFlow<List<AppInfo>> =
         combine(_appQuery, labeledApps, appOverrides) { query, apps, overrides ->
-            if (query.isBlank()) emptyList() else matchApps(query, apps, overrides)
+            if (query.isBlank()) emptyList() else matchApps(query, apps, overrides).filter { !com.bisc.flauncher.util.ProfileComponents.isProfile(it.componentName) }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val appOverviewPageId: StateFlow<Long?> =

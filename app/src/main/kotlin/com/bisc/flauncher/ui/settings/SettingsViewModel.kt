@@ -55,6 +55,7 @@ class SettingsViewModel @Inject constructor(
     private val repository: SettingsRepository,
     private val iconPackRepository: IconPackRepository,
     private val installedAppsRepository: InstalledAppsRepository,
+    private val profileAppsRepository: com.bisc.flauncher.data.repository.ProfileAppsRepository,
     private val appIconLoader: AppIconLoader,
     private val appOverrideRepository: AppOverrideRepository,
     private val shortcutRepository: ShortcutRepository,
@@ -641,9 +642,13 @@ class SettingsViewModel @Inject constructor(
             .map { list -> list.associateBy { it.componentName } }
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
+    /** Apps of the work profile and the private space, marked with their profile. */
+    private val profileApps: StateFlow<List<AppInfo>> =
+        profileAppsRepository.apps().stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
     val labeledApps: StateFlow<List<AppInfo>> =
-        combine(_installedApps, appOverrides) { apps, overrides ->
-            apps.map { app ->
+        combine(_installedApps, profileApps, appOverrides) { own, profiles, overrides ->
+            (own + profiles).map { app ->
                 val custom = overrides[app.componentName.flattenToString()]?.customLabel
                 if (custom.isNullOrBlank()) app else app.copy(label = custom)
             }.sortedBy { it.label.lowercase() }
@@ -651,7 +656,8 @@ class SettingsViewModel @Inject constructor(
 
     val browsableApps: StateFlow<List<AppInfo>> =
         combine(labeledApps, appOverrides) { apps, overrides ->
-            apps.filter { overrides[it.componentName.flattenToString()]?.hiddenFromAppList != true }
+            // Apps of other profiles have their own sections at the end of the App list.
+            apps.filter { overrides[it.componentName.flattenToString()]?.hiddenFromAppList != true && !com.bisc.flauncher.util.ProfileComponents.isProfile(it.componentName) }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     fun resolveLabel(componentName: ComponentName): String {
