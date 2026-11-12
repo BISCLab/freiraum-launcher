@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- A single folder's look page works like every look page: the folder in small stays on top while
+  the settings below scroll, with its real corners, and its state with the way back to the look of
+  all folders right under it
+
 ## 0.14.0
 
 - Settings tiles never break a word: a name too long for its tile gets a little smaller instead

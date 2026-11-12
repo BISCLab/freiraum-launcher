@@ -417,7 +417,15 @@ private fun autoBorderSeed(appearance: ElementAppearance): Int = autoTextSeed(ap
  *  edits a draft: a Save bar commits it and closes, and leaving while [dirty] asks first. */
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsEditPage(title: String, onDismiss: () -> Unit, onSave: (() -> Unit)? = null, dirty: Boolean = false, content: @Composable ColumnScope.() -> Unit) {
+fun SettingsEditPage(
+    title: String,
+    onDismiss: () -> Unit,
+    onSave: (() -> Unit)? = null,
+    dirty: Boolean = false,
+    /** Stays on top while the content below scrolls, e.g. a live preview of what is edited. */
+    header: (@Composable () -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit
+) {
     var confirmLeave by remember { mutableStateOf(false) }
     val guardedDismiss = { if (onSave != null && dirty) confirmLeave = true else onDismiss() }
     if (confirmLeave) {
@@ -459,16 +467,21 @@ fun SettingsEditPage(title: String, onDismiss: () -> Unit, onSave: (() -> Unit)?
                 }
             ) { padding ->
                 androidx.compose.foundation.layout.Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-                    Column(
-                        modifier = Modifier
-                            .widthIn(max = com.bisc.flauncher.ui.MaxContentWidth)
-                            .fillMaxWidth()
-                            .imePadding()
-                            .verticalScroll(rememberScrollState())
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        content = content
-                    )
+                    Column(modifier = Modifier.widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth()) {
+                        if (header != null) {
+                            androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp)) { header() }
+                        }
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .imePadding()
+                                .verticalScroll(rememberScrollState())
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            content = content
+                        )
+                    }
                 }
             }
         }

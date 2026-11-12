@@ -325,6 +325,7 @@ fun SettingsFolderEditScreen(
         val border = if (folder?.borderOverrideEnabled == true) folder.borderAppearance() else globalCardAppearance
         val saved = content.copy(borderEnabled = border.borderEnabled, borderColor = border.borderColor, borderWidth = border.borderWidth)
         var draft by rememberDraft(saved)
+        val folderCorner by viewModel.folderCornerPercent.collectAsState()
         SettingsEditPage(
             title = stringResource(R.string.settings_home_appearance_title),
             onDismiss = { appearanceOpen = false },
@@ -334,27 +335,31 @@ fun SettingsFolderEditScreen(
                 if (fillChanged) viewModel.setFolderAppearance(folderId, draft)
                 if (borderChanged) viewModel.setFolderBorderAppearance(folderId, draft)
             },
-            dirty = draft != saved
-        ) {
-            LookSample(LookSampleKind.FOLDER, draft, 100)
-            // Its state right under the preview, like on every look page; the way back is beside it.
-            val own = folder?.appearanceOverrideEnabled == true || folder?.borderOverrideEnabled == true
-            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    stringResource(if (own) R.string.settings_look_custom else R.string.settings_folder_look_like_all),
-                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                    color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f)
-                )
-                if (own) AutoResetChip(
-                    onClick = {
-                        viewModel.setFolderAppearanceOverrideEnabled(folderId, false)
-                        viewModel.setFolderBorderOverrideEnabled(folderId, false)
-                        appearanceOpen = false
-                    },
-                    label = stringResource(R.string.settings_folder_look_reset)
-                )
+            dirty = draft != saved,
+            // Like every look page: the folder in small stays in sight, with its state right under it.
+            header = {
+                androidx.compose.foundation.layout.Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    LookSample(LookSampleKind.FOLDER, draft, folderCorner)
+                    val own = folder?.appearanceOverrideEnabled == true || folder?.borderOverrideEnabled == true
+                    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            stringResource(if (own) R.string.settings_look_custom else R.string.settings_folder_look_like_all),
+                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                            color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (own) AutoResetChip(
+                            onClick = {
+                                viewModel.setFolderAppearanceOverrideEnabled(folderId, false)
+                                viewModel.setFolderBorderOverrideEnabled(folderId, false)
+                                appearanceOpen = false
+                            },
+                            label = stringResource(R.string.settings_folder_look_reset)
+                        )
+                    }
+                }
             }
+        ) {
             ElementAppearanceSection(appearance = draft, onAppearanceChange = { draft = it }, styleGroupTitle = stringResource(R.string.settings_element_fill_label))
         }
     }
