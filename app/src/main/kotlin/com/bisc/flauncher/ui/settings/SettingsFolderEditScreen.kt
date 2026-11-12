@@ -408,15 +408,14 @@ fun SettingsFolderEditScreen(
     }
 
     if (showAddChooser) {
-        ModalBottomSheet(onDismissRequest = { showAddChooser = false }) {
-            SettingsPreferenceGroup {
-                SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_row_entry_add_app), onClick = { showAddChooser = false; showAppPicker = true }, trailing = null)
-                SettingsPreference(icon = Icons.Filled.CreateNewFolder, title = stringResource(R.string.settings_row_entry_add_folder), onClick = { showAddChooser = false; showFolderPicker = true }, trailing = null)
-                SettingsPreference(icon = Icons.AutoMirrored.Filled.Shortcut, title = stringResource(R.string.settings_row_entry_add_shortcut), onClick = { showAddChooser = false; viewModel.openFolderShortcutAppPicker(folderId) }, trailing = null)
-                SettingsPreference(icon = Icons.Filled.Place, title = stringResource(R.string.settings_row_entry_add_map_target), onClick = { showAddChooser = false; showMapTargetPicker = true }, trailing = null)
-                SettingsPreference(icon = Icons.Filled.Language, title = stringResource(R.string.settings_row_entry_add_website), onClick = { showAddChooser = false; showWebsitePicker = true }, trailing = null)
-            }
-        }
+        AddElementChooserSheet(
+            onAddAppClick = { showAddChooser = false; showAppPicker = true },
+            onAddFolderClick = { showAddChooser = false; showFolderPicker = true },
+            onAddShortcutClick = { showAddChooser = false; viewModel.openFolderShortcutAppPicker(folderId) },
+            onAddMapTargetClick = { showAddChooser = false; showMapTargetPicker = true },
+            onAddWebsiteClick = { showAddChooser = false; showWebsitePicker = true },
+            onDismiss = { showAddChooser = false }
+        )
     }
 
     if (showWidgetKindPicker) {

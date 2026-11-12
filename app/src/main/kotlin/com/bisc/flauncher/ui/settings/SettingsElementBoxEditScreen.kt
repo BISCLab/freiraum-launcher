@@ -86,6 +86,7 @@ fun SettingsElementBoxEditScreen(
     val entries = rowEntriesByRow[row.id].orEmpty()
 
     var showAppPicker by remember { mutableStateOf(false) }
+    var addingElement by remember { mutableStateOf(false) }
     var showFolderCreator by remember { mutableStateOf(false) }
     var showPagePicker by remember { mutableStateOf(false) }
     var showMapTargetPicker by remember { mutableStateOf(false) }
@@ -191,17 +192,7 @@ fun SettingsElementBoxEditScreen(
         }
 
         SettingsPreferenceGroup {
-            SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_row_entry_add_app), onClick = { showAppPicker = true }, trailing = null)
-            SettingsPreference(icon = Icons.Filled.CreateNewFolder, title = stringResource(R.string.settings_row_entry_add_folder), onClick = { showFolderCreator = true }, trailing = null)
-            SettingsPreference(
-                icon = Icons.AutoMirrored.Filled.Shortcut,
-                title = stringResource(R.string.settings_row_entry_add_shortcut),
-                onClick = { pendingShortcut = true; viewModel.openShortcutAppPicker() },
-                trailing = null
-            )
-            SettingsPreference(icon = Icons.Filled.Place, title = stringResource(R.string.settings_row_entry_add_map_target), onClick = { showMapTargetPicker = true }, trailing = null)
-            SettingsPreference(icon = Icons.Filled.Language, title = stringResource(R.string.settings_row_entry_add_website), onClick = { showWebsitePicker = true }, trailing = null)
-            SettingsPreference(icon = Icons.Filled.ViewCarousel, title = stringResource(R.string.settings_row_entry_add_page_link), onClick = { showPagePicker = true }, trailing = null)
+            SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_add_element_title), onClick = { addingElement = true }, trailing = null)
         }
 
         if (canRemoveRow) {
@@ -219,6 +210,17 @@ fun SettingsElementBoxEditScreen(
         )
     }
 
+    if (addingElement) {
+        AddElementChooserSheet(
+            onAddAppClick = { addingElement = false; showAppPicker = true },
+            onAddFolderClick = { addingElement = false; showFolderCreator = true },
+            onAddShortcutClick = { addingElement = false; pendingShortcut = true; viewModel.openShortcutAppPicker() },
+            onAddMapTargetClick = { addingElement = false; showMapTargetPicker = true },
+            onAddWebsiteClick = { addingElement = false; showWebsitePicker = true },
+            onAddPageLinkClick = { addingElement = false; showPagePicker = true },
+            onDismiss = { addingElement = false }
+        )
+    }
     if (showAppPicker) {
         ShortcutSourceAppSheet(
             apps = browsableApps,

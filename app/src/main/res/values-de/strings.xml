@@ -891,7 +891,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="about_releases">Was ist neu</string>
     <string name="about_releases_summary">Alle Versionen und ihre Änderungen</string>
     <string name="welcome_widgets_title">Widgets</string>
-    <string name="welcome_widgets_text">Widgets liegen als Zeile auf einer Seite. Hinzufügen kannst du sie später unter Einstellungen → Seiten, bei der jeweiligen Seite.</string>
+    <string name="welcome_widgets_text">Widgets liegen als Zeile auf einer Seite, im Panel oder in einem Ordner. Hinzufügen kannst du sie später unter Einstellungen → Seiten, bei der jeweiligen Seite, beim Panel oder im Ordner.</string>
     <string name="welcome_widgets_clock">Zeit, Datum, nächster Wecker</string>
     <string name="welcome_widgets_notes">Notizen und Listen direkt auf der Seite</string>
     <string name="welcome_widgets_music">Steuert, was gerade läuft. Braucht den Zugriff auf Benachrichtigungen</string>
@@ -964,4 +964,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_first_title">So funktioniert die Tabelle</string>
     <string name="settings_search_first_text">Jede Zeile ist eine Art von Ergebnis. „Suche“ heißt: kommt bei jeder Eingabe. „Leiste“ heißt: hat einen Platz in der Leiste neben den Ergebnissen. Ziehen am Griff ändert die Reihenfolge, ein Tipp auf den Namen öffnet weitere Einstellungen.</string>
     <string name="settings_search_first_ok">Verstanden</string>
+    <string name="settings_app_overview_behavior_label_search">App-Liste: Verhalten</string>
+    <string name="settings_app_grid_behavior_label_search">App-Raster: Verhalten</string>
 </resources>

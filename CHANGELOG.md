@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Folders and Element-Boxes add their elements with the same tiles as the Dock and the Panel
+- The settings search finds every page now, also the strip over the keyboard, Text search behavior,
+  the App list's search button and A-Z rail, the App grid's grid, the menus, all folders and the
+  arrows in widgets
+- The "?" tips in the settings are on until switched off, so explanations are there from the start
+- The app page opened from an app's menu has its name in the breadcrumbs
+- Welcome tour: widgets can sit on a page, in the Panel or in a folder
 - A page's rows are moved right in its small picture: tap a row to pick it, then move it up or down
   or open it; the list that repeated the picture is gone
 - Tapping an element in the Dock's or Panel's content offers its own settings (app, folder, place,

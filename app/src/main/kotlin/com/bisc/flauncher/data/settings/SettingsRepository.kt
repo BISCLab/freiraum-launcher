@@ -103,7 +103,7 @@ class SettingsRepository @Inject constructor(
     val searchHideStatusBar: Flow<Boolean> = dataStore.data.map { it[SEARCH_HIDE_STATUS_BAR_KEY] ?: true }
 
     /** Whether settings show their "?" tip buttons. Off by default. */
-    val showSettingsTips: Flow<Boolean> = dataStore.data.map { it[SHOW_SETTINGS_TIPS_KEY] ?: false }
+    val showSettingsTips: Flow<Boolean> = dataStore.data.map { it[SHOW_SETTINGS_TIPS_KEY] ?: true }
 
     suspend fun setShowSettingsTips(show: Boolean) {
         dataStore.edit { it[SHOW_SETTINGS_TIPS_KEY] = show }
