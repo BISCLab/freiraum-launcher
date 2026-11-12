@@ -912,4 +912,30 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_panel_widgets_label">Widgets</string>
     <string name="settings_panel_add_widget">Widget hinzufügen</string>
     <string name="settings_panel_widgets_info">Widgets stehen oben im Panel, die Elemente darunter. Ist das Panel voll, lässt es sich scrollen.</string>
+    <string name="settings_hub_elements_what">Was darin liegt: Apps, Ordner, Links und mehr</string>
+    <string name="settings_hub_visibility_what">Wann es sich zeigt</string>
+    <string name="settings_hub_bar_look_contents">Fläche, Schrift, Deckkraft, Rahmen, Ecken</string>
+    <string name="settings_panel_content_title">Inhalt</string>
+    <string name="settings_hub_panel_content_what">Widgets oben, darunter Apps, Ordner, Links und mehr</string>
+    <string name="settings_folder_place_label">Liegt im</string>
+    <string name="settings_folder_in_dock">Dock</string>
+    <string name="settings_folder_in_panel">Panel</string>
+    <string name="settings_folder_content_label">Inhalt</string>
+    <string name="welcome_elements_title">Elemente</string>
+    <string name="welcome_elements_text">Alles, was du antippen kannst, ist ein Element. Du richtest es einmal ein und legst es dann überall hin.</string>
+    <string name="welcome_element_apps">Apps</string>
+    <string name="welcome_element_folders">Ordner</string>
+    <string name="welcome_element_places">Orte</string>
+    <string name="welcome_element_links">Links</string>
+    <string name="welcome_element_contacts">Kontakte</string>
+    <string name="welcome_element_actions">Aktionsbuttons</string>
+    <string name="welcome_elements_where">Elemente legst du ins Dock, ins Panel, in Element-Boxen auf deinen Seiten und in Ordner. Einrichten kannst du sie unter Einstellungen → Apps & Elemente.</string>
+    <plurals name="settings_hub_elements_count">
+        <item quantity="one">%1$d Element</item>
+        <item quantity="other">%1$d Elemente</item>
+    </plurals>
+    <plurals name="settings_hub_widgets_count">
+        <item quantity="one">%1$d Widget</item>
+        <item quantity="other">%1$d Widgets</item>
+    </plurals>
 </resources>

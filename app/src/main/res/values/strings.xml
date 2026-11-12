@@ -912,4 +912,30 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_panel_widgets_label">Widgets</string>
     <string name="settings_panel_add_widget">Add widget</string>
     <string name="settings_panel_widgets_info">Widgets sit at the top of the Panel, the elements below them. When the Panel is full, it scrolls.</string>
+    <string name="settings_hub_elements_what">What is in it: apps, folders, links and more</string>
+    <string name="settings_hub_visibility_what">When it shows</string>
+    <string name="settings_hub_bar_look_contents">Fill, text, opacity, border, corners</string>
+    <string name="settings_panel_content_title">Content</string>
+    <string name="settings_hub_panel_content_what">Widgets on top, below them apps, folders, links and more</string>
+    <string name="settings_folder_place_label">Sits in</string>
+    <string name="settings_folder_in_dock">Dock</string>
+    <string name="settings_folder_in_panel">Panel</string>
+    <string name="settings_folder_content_label">Content</string>
+    <string name="welcome_elements_title">Elements</string>
+    <string name="welcome_elements_text">Everything you can tap is an element. You set it up once and then place it anywhere.</string>
+    <string name="welcome_element_apps">Apps</string>
+    <string name="welcome_element_folders">Folders</string>
+    <string name="welcome_element_places">Places</string>
+    <string name="welcome_element_links">Links</string>
+    <string name="welcome_element_contacts">Contacts</string>
+    <string name="welcome_element_actions">Action buttons</string>
+    <string name="welcome_elements_where">You place elements in the Dock, the Panel, in Element-Boxes on your pages and in folders. Set them up under Settings > Apps and elements.</string>
+    <plurals name="settings_hub_elements_count">
+        <item quantity="one">%1$d element</item>
+        <item quantity="other">%1$d elements</item>
+    </plurals>
+    <plurals name="settings_hub_widgets_count">
+        <item quantity="one">%1$d widget</item>
+        <item quantity="other">%1$d widgets</item>
+    </plurals>
 </resources>

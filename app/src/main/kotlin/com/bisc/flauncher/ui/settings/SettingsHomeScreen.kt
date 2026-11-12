@@ -281,6 +281,35 @@ fun SettingsHomeLayoutScreen(
  *  matching the Dock bookend's own split. */
 @Composable
 fun SettingsHomePanelScreen(pageId: Long, navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+    val row = rememberPanelRow(pageId, viewModel) ?: return
+    val entriesByRow by viewModel.rowEntriesByRow.collectAsState()
+    val widgets by viewModel.panelWidgets.collectAsState()
+    val count = entriesByRow[row.id].orEmpty().size
+    SettingsSubScreen(title = stringResource(R.string.settings_home_panel_label), navController = navController, onBack = onBack) {
+        LookSample(LookSampleKind.PANEL, row.appearance(), row.cornerRadiusPercent)
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            HubCard(
+                icon = Icons.Filled.GridView,
+                title = stringResource(R.string.settings_panel_content_title),
+                what = stringResource(R.string.settings_hub_panel_content_what),
+                contents = androidx.compose.ui.res.pluralStringResource(R.plurals.settings_hub_elements_count, count, count) + " · " +
+                    androidx.compose.ui.res.pluralStringResource(R.plurals.settings_hub_widgets_count, widgets.size, widgets.size),
+                onClick = { onNavigate("elements") }
+            )
+            HubCard(
+                icon = Icons.Filled.Palette,
+                title = stringResource(R.string.settings_home_appearance_title),
+                what = stringResource(R.string.settings_hub_appearance_what),
+                contents = stringResource(R.string.settings_hub_bar_look_contents),
+                onClick = { onNavigate("look") }
+            )
+        }
+    }
+}
+
+/** The Panel's look: fill, text, opacity, border and corners. */
+@Composable
+fun SettingsHomePanelLookScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
     val saved = rememberPanelRow(pageId, viewModel) ?: return
     ElementLookScreen(
         title = stringResource(R.string.settings_home_panel_label),
@@ -289,16 +318,7 @@ fun SettingsHomePanelScreen(pageId: Long, navController: NavController, onBack: 
         saved = saved.appearance(),
         savedCorner = saved.cornerRadiusPercent,
         onSave = { look, corner -> viewModel.saveRow(saved.withAppearance(look).copy(cornerRadiusPercent = corner ?: saved.cornerRadiusPercent)) },
-        kind = LookSampleKind.PANEL,
-        links = {
-            SettingsPreferenceGroup {
-                SettingsPreference(
-                    icon = Icons.Filled.GridView,
-                    title = stringResource(R.string.settings_dock_elements_title),
-                    onClick = { onNavigate("elements") }
-                )
-            }
-        }
+        kind = LookSampleKind.PANEL
     )
 }
 
@@ -360,7 +380,7 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
     var sizingSpan by remember { androidx.compose.runtime.mutableIntStateOf(1) }
     val systemWidgetPickerFor by viewModel.systemWidgetPickerOpenForFolder.collectAsState()
 
-    SettingsSubScreen(title = stringResource(R.string.settings_dock_elements_title), navController = navController, onBack = onBack) {
+    SettingsSubScreen(title = stringResource(R.string.settings_panel_content_title), navController = navController, onBack = onBack) {
         // Widgets sit on top of the Panel, its elements below them; the Panel scrolls when it is full.
         SettingsPreferenceGroup(title = stringResource(R.string.settings_panel_widgets_label), info = stringResource(R.string.settings_panel_widgets_info)) {
             panelWidgets.forEach { item ->

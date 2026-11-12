@@ -415,6 +415,13 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         settingsComposable(
+                            "settings/pages/{pageId}/home/panel/look",
+                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@settingsComposable
+                            com.bisc.flauncher.ui.settings.SettingsHomePanelLookScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        settingsComposable(
                             "settings/pages/{pageId}/home/panel/elements",
                             arguments = listOf(navArgument("pageId") { type = NavType.LongType })
                         ) { backStackEntry ->
@@ -432,6 +439,13 @@ class MainActivity : ComponentActivity() {
                                 onBack = { navController.popBackStack() },
                                 onNavigate = { sub -> navController.navigate("settings/pages/$pageId/home/layout/dock/$sub") }
                             )
+                        }
+                        settingsComposable(
+                            "settings/pages/{pageId}/home/layout/dock/look",
+                            arguments = listOf(navArgument("pageId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val pageId = backStackEntry.arguments?.getLong("pageId") ?: return@settingsComposable
+                            com.bisc.flauncher.ui.settings.SettingsDockLookScreen(pageId = pageId, navController = navController, onBack = { navController.popBackStack() })
                         }
                         settingsComposable(
                             "settings/pages/{pageId}/home/layout/dock/visibility",

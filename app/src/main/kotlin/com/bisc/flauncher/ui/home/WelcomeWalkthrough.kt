@@ -1,5 +1,10 @@
 package com.bisc.flauncher.ui.home
 
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.unit.sp
@@ -95,7 +100,7 @@ import com.bisc.flauncher.ui.settings.PermissionGroups
 import com.bisc.flauncher.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
-private enum class WelcomeStep { HELLO, DESIGN, WALLPAPER, SHAPE, GESTURES, WIDGETS, SETTINGS, PERMISSIONS, LOCK_SCREEN }
+private enum class WelcomeStep { HELLO, DESIGN, WALLPAPER, SHAPE, ELEMENTS, GESTURES, WIDGETS, SETTINGS, PERMISSIONS, LOCK_SCREEN }
 
 /** The first-start tour: welcome with a quick setup, the gestures, where the settings are, then
  *  design, wallpaper pack and shape to choose, the permissions, and the lock screen when the pack
@@ -178,6 +183,9 @@ fun WelcomeWalkthrough(
                         }
                         WelcomeStep.SHAPE -> LookPage(R.string.welcome_shape_title, R.string.welcome_shape_text, phone) {
                             ShapeChoice(cornersViewModel)
+                        }
+                        WelcomeStep.ELEMENTS -> WelcomePage(R.string.welcome_elements_title, R.string.welcome_elements_text, illustrationWeight = 0f) {
+                            ElementsOverview()
                         }
                         WelcomeStep.WIDGETS -> WelcomePage(R.string.welcome_widgets_title, R.string.welcome_widgets_text, illustrationWeight = 0f) {
                             WidgetsOverview()
@@ -679,6 +687,49 @@ private fun WidgetsOverview() {
             onClick = { com.bisc.flauncher.ui.settings.openExtensionsPage(context, "#widgets") },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) { Text(stringResource(R.string.extensions_weather_find)) }
+    }
+}
+
+/** What an element can be, and where elements go. */
+@Composable
+private fun ElementsOverview() {
+    val kinds = listOf(
+        Icons.Filled.Apps to R.string.welcome_element_apps,
+        Icons.Filled.Folder to R.string.welcome_element_folders,
+        Icons.Filled.Place to R.string.welcome_element_places,
+        Icons.Filled.Language to R.string.welcome_element_links,
+        Icons.Filled.Person to R.string.welcome_element_contacts,
+        Icons.Filled.Bolt to R.string.welcome_element_actions
+    )
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        kinds.chunked(3).forEach { line ->
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                line.forEach { (icon, label) ->
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                            .padding(vertical = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.size(44.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
+                            contentAlignment = Alignment.Center
+                        ) { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary) }
+                        Text(stringResource(label), style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center)
+                    }
+                }
+            }
+        }
+        Text(
+            stringResource(R.string.welcome_elements_where),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(top = 6.dp)
+        )
     }
 }
 

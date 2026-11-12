@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Dock and Panel settings start with their look in small and large cards: what is in it comes first
+  (with how many elements and widgets), then when the Dock shows, then the look. Elements are no
+  longer hidden under the look
+- A folder says right under its name whether it sits in the Dock and in the Panel, and a switch puts
+  it there or takes it out; its content has a heading of its own
+- Welcome tour: a new step explains elements (apps, folders, places, links, contacts, action
+  buttons) and where they go
 - New: the Panel can hold widgets, like a folder: clock, weather, music, notes or an Android widget,
   on top of its elements. The Panel grows with them and scrolls when it is full. Add and edit them
   under Home > Layout > Panel > Elements

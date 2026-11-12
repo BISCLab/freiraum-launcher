@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -52,6 +53,40 @@ import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 /** The Dock: how it looks, with a live preview, and the way to its visibility and elements. */
 @Composable
 fun SettingsDockScreen(pageId: Long, navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+    val row = rememberDockRow(pageId, viewModel) ?: return
+    val entriesByRow by viewModel.rowEntriesByRow.collectAsState()
+    val count = entriesByRow[row.id].orEmpty().size
+    SettingsSubScreen(title = stringResource(R.string.settings_home_dock_label), navController = navController, onBack = onBack) {
+        LookSample(LookSampleKind.DOCK, row.appearance(), row.cornerRadiusPercent)
+        androidx.compose.foundation.layout.Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)) {
+            HubCard(
+                icon = Icons.Filled.GridView,
+                title = stringResource(R.string.settings_dock_elements_title),
+                what = stringResource(R.string.settings_hub_elements_what),
+                contents = androidx.compose.ui.res.pluralStringResource(R.plurals.settings_hub_elements_count, count, count),
+                onClick = { onNavigate("elements") }
+            )
+            HubCard(
+                icon = Icons.Filled.Visibility,
+                title = stringResource(R.string.settings_dock_visibility_label),
+                what = stringResource(R.string.settings_hub_visibility_what),
+                contents = dockVisibilityModeLabel(row.dockVisibilityMode),
+                onClick = { onNavigate("visibility") }
+            )
+            HubCard(
+                icon = Icons.Filled.Palette,
+                title = stringResource(R.string.settings_home_appearance_title),
+                what = stringResource(R.string.settings_hub_appearance_what),
+                contents = stringResource(R.string.settings_hub_bar_look_contents),
+                onClick = { onNavigate("look") }
+            )
+        }
+    }
+}
+
+/** The Dock's look: fill, text, opacity, border and corners. */
+@Composable
+fun SettingsDockLookScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
     val saved = rememberDockRow(pageId, viewModel) ?: return
     ElementLookScreen(
         title = stringResource(R.string.settings_home_dock_label),
@@ -60,22 +95,7 @@ fun SettingsDockScreen(pageId: Long, navController: NavController, onBack: () ->
         saved = saved.appearance(),
         savedCorner = saved.cornerRadiusPercent,
         onSave = { look, corner -> viewModel.saveRow(saved.withAppearance(look).copy(cornerRadiusPercent = corner ?: saved.cornerRadiusPercent)) },
-        kind = LookSampleKind.DOCK,
-        links = {
-            SettingsPreferenceGroup {
-                SettingsPreference(
-                    icon = Icons.Filled.GridView,
-                    title = stringResource(R.string.settings_dock_elements_title),
-                    onClick = { onNavigate("elements") }
-                )
-                SettingsPreference(
-                    icon = Icons.Filled.Visibility,
-                    title = stringResource(R.string.settings_dock_visibility_label),
-                    summary = dockVisibilityModeLabel(saved.dockVisibilityMode),
-                    onClick = { onNavigate("visibility") }
-                )
-            }
-        }
+        kind = LookSampleKind.DOCK
     )
 }
 
