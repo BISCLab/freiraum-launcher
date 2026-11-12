@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
@@ -215,6 +216,18 @@ internal fun WidgetEditor(
                         onClick = { navController.navigate("settings/appearance/widget_paging") }
                     )
                 }
+            }
+        }
+        if (isBuiltIn && row.payload == WidgetKind.WEATHER) {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_weather_source_label)) {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.extensions_weather_find),
+                    summary = stringResource(R.string.extensions_weather_find_summary),
+                    onClick = { openExtensionsPage(context, "#widgets") },
+                    trailing = { Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null) }
+                )
             }
         }
         if (isBuiltIn && row.payload == WidgetKind.MUSIC) {

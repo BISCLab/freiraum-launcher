@@ -954,4 +954,14 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_elements_places_short">Addresses for map apps</string>
     <string name="settings_elements_links_short">Web pages to tap</string>
     <string name="settings_elements_actions_short">Buttons for pages, Panel, Dock</string>
+    <string name="settings_row_open">Open</string>
+    <string name="settings_rows_pick_hint">Tap a row in the picture above to move it or open it.</string>
+    <string name="settings_entry_actions_text">Open its own settings, or take it out of here.</string>
+    <string name="settings_entry_open_settings">Settings</string>
+    <string name="settings_weather_source_label">Data source</string>
+    <string name="settings_background_for_all">Background for all pages</string>
+    <string name="settings_background_for_all_summary">Counts wherever a page has none of its own</string>
+    <string name="settings_search_first_title">How the table works</string>
+    <string name="settings_search_first_text">Each line is a kind of result. Search means it comes with every query. Rail means it has a place in the rail beside the results. Drag the handle to change the order, tap a name for more settings.</string>
+    <string name="settings_search_first_ok">Got it</string>
 </resources>

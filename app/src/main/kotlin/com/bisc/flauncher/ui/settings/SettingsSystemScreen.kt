@@ -58,25 +58,24 @@ fun SettingsSystemScreen(
     ) { uri -> if (uri != null) pendingImport = uri }
 
     SettingsSubScreen(title = stringResource(R.string.settings_system_title), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_section_permissions),
-                summary = stringResource(
-                    if (DefaultLauncherUtil.isDefaultLauncher(context)) R.string.settings_default_launcher_already_set
-                    else R.string.settings_default_launcher_description
-                ),
-                onClick = { onNavigate("permissions") }
+        SettingsTileGrid(
+            tiles = listOf(
+                SettingsTile(
+                    androidx.compose.material.icons.Icons.Filled.Security,
+                    stringResource(R.string.settings_section_permissions),
+                    stringResource(
+                        if (DefaultLauncherUtil.isDefaultLauncher(context)) R.string.settings_default_launcher_already_set
+                        else R.string.settings_default_launcher_description
+                    )
+                ) { onNavigate("permissions") },
+                SettingsTile(
+                    androidx.compose.material.icons.Icons.Filled.Translate,
+                    stringResource(R.string.settings_language_label),
+                    badge = languages.firstOrNull { it.first == language }?.second ?: languages.first().second
+                ) { languagePickerOpen = true }
             )
-        }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_language_label)) {
-            SettingsPreference(
-                icon = null,
-                title = languages.firstOrNull { it.first == language }?.second ?: languages.first().second,
-                onClick = { languagePickerOpen = true },
-                trailing = null
-            )
-        }
+        )
+
         SettingsPreferenceGroup(
             title = stringResource(R.string.settings_standard_apps_label),
             info = stringResource(R.string.settings_search_open_with_info)

@@ -142,6 +142,14 @@ fun SettingsSearchPageScreen(navController: NavController, onBack: () -> Unit, v
             onGlobalShadeChange = viewModel::setSearchGlobalShade,
             groupTitle = stringResource(R.string.settings_section_global_background)
         )
+        SettingsPreferenceGroup {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_background_for_all),
+                summary = stringResource(R.string.settings_background_for_all_summary),
+                onClick = { navController.navigate("settings/appearance/background") }
+            )
+        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_element_text_color_label)) {
             ColorPickerRow(
                 title = stringResource(R.string.settings_element_text_color_label),
@@ -218,6 +226,25 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
     val railLeft by viewModel.searchCategoryRailLeft.collectAsState()
     var pickingColorFor by remember { mutableStateOf<SearchCategory?>(null) }
     SettingsSubScreen(title = stringResource(R.string.settings_search_behavior_label), navController = navController, onBack = onBack) {
+        // The first time: what the table below does, until it is understood.
+        val hints = remember { context.getSharedPreferences("settings_hints", android.content.Context.MODE_PRIVATE) }
+        var tableUnderstood by remember { mutableStateOf(hints.getBoolean("search_table", false)) }
+        if (!tableUnderstood) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(SettingsCardShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(stringResource(R.string.settings_search_first_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text(stringResource(R.string.settings_search_first_text), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                androidx.compose.material3.FilledTonalButton(onClick = { tableUnderstood = true; hints.edit().putBoolean("search_table", true).apply() }, modifier = Modifier.align(Alignment.End)) {
+                    Text(stringResource(R.string.settings_search_first_ok))
+                }
+            }
+        }
         // Where things are and what shows; how they look is on the Appearance side.
         SettingsPreferenceGroup(title = stringResource(R.string.settings_search_layout_label)) {
             SettingsChoiceRow(

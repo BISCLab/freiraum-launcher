@@ -954,4 +954,14 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_elements_places_short">Adressen für Karten-Apps</string>
     <string name="settings_elements_links_short">Webseiten zum Antippen</string>
     <string name="settings_elements_actions_short">Knöpfe für Seiten, Panel, Dock</string>
+    <string name="settings_row_open">Öffnen</string>
+    <string name="settings_rows_pick_hint">Tippe eine Zeile im Bild oben an, um sie zu verschieben oder zu öffnen.</string>
+    <string name="settings_entry_actions_text">Seine Einstellungen öffnen oder es hier entfernen.</string>
+    <string name="settings_entry_open_settings">Einstellungen</string>
+    <string name="settings_weather_source_label">Datenquelle</string>
+    <string name="settings_background_for_all">Hintergrund für alle Seiten</string>
+    <string name="settings_background_for_all_summary">Gilt überall, wo eine Seite keinen eigenen hat</string>
+    <string name="settings_search_first_title">So funktioniert die Tabelle</string>
+    <string name="settings_search_first_text">Jede Zeile ist eine Art von Ergebnis. „Suche“ heißt: kommt bei jeder Eingabe. „Leiste“ heißt: hat einen Platz in der Leiste neben den Ergebnissen. Ziehen am Griff ändert die Reihenfolge, ein Tipp auf den Namen öffnet weitere Einstellungen.</string>
+    <string name="settings_search_first_ok">Verstanden</string>
 </resources>

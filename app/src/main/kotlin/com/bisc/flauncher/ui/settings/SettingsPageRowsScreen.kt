@@ -1,5 +1,8 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.ui.draw.clip
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -99,7 +102,52 @@ fun SettingsPageRowsScreen(
 
     SettingsSubScreen(title = pageTitle, navController = navController, onBack = onBack) {
         // Tap a part of the miniature to edit it; the list below stays as the second way in.
-        PagePreview(pageId = pageId, isHome = false, navController = navController, viewModel = viewModel)
+        var selectedRowId by remember { mutableStateOf<Long?>(null) }
+        PagePreview(
+            pageId = pageId,
+            isHome = false,
+            navController = navController,
+            viewModel = viewModel,
+            selectedRowId = selectedRowId,
+            onRowTap = { selectedRowId = if (selectedRowId == it.id) null else it.id }
+        )
+        // The picked row: move it up or down right here, or open it.
+        val picked = rows.find { it.id == selectedRowId }
+        if (picked != null) {
+            val at = rows.indexOf(picked)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(SettingsCardShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Icon(rowIcon(picked), contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text(rowLabel(picked), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.weight(1f).padding(start = 8.dp))
+                androidx.compose.material3.IconButton(onClick = { viewModel.reorderRows(rows.toMutableList().apply { add(at - 1, removeAt(at)) }) }, enabled = at > 0) {
+                    Icon(Icons.Filled.KeyboardArrowUp, contentDescription = stringResource(R.string.settings_move_up), tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                }
+                androidx.compose.material3.IconButton(onClick = { viewModel.reorderRows(rows.toMutableList().apply { add(at + 1, removeAt(at)) }) }, enabled = at < rows.lastIndex) {
+                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.settings_move_down), tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                }
+                androidx.compose.material3.FilledTonalButton(onClick = {
+                    selectedRowId = null
+                    when (picked.type) {
+                        PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET -> onOpenRow(picked.id)
+                        else -> navController.navigate("settings/pages/$pageId/rows/${picked.id}/elementbox")
+                    }
+                }) { Text(stringResource(R.string.settings_row_open)) }
+            }
+        } else if (rows.isNotEmpty()) {
+            Text(
+                stringResource(R.string.settings_rows_pick_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+        }
         // Icon, name, background and status bar all live in the page's own Appearance screen, same
         // split as Home's own hub.
         SettingsPreferenceGroup {
@@ -135,27 +183,6 @@ fun SettingsPageRowsScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(16.dp)
                     )
-                } else {
-                    ReorderableList(
-                        items = rows,
-                        key = { it.id },
-                        onReorder = { reordered -> viewModel.reorderRows(reordered) }
-                    ) { row ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth().clickable {
-                                when (row.type) {
-                                    PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET -> onOpenRow(row.id)
-                                    PageRowType.ELEMENT_BOX, PageRowType.SEARCH_BAR -> navController.navigate("settings/pages/$pageId/rows/${row.id}/elementbox")
-                                    PageRowType.PANEL -> Unit
-                                }
-                            },
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Icon(imageVector = rowIcon(row), contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                            Text(rowLabel(row), style = MaterialTheme.typography.titleMedium)
-                        }
-                    }
                 }
             }
             SettingsPreferenceGroup {

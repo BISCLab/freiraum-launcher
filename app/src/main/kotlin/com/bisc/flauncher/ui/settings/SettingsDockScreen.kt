@@ -242,9 +242,10 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
     }
 
     pendingRemoval?.let { entry ->
-        ConfirmRemoveDialog(
+        EntryActionsDialog(
             label = com.bisc.flauncher.ui.home.entryLabel(entry, folders, savedMapTargets, pinnedWebsites, allPages, pinnedContacts, viewModel::resolveLabel, actionButtons),
-            onConfirm = { viewModel.removeRowEntry(entry); pendingRemoval = null },
+            onOpenSettings = entrySettingsRoute(entry)?.let { route -> { pendingRemoval = null; navController.navigate(route) } },
+            onRemove = { viewModel.removeRowEntry(entry); pendingRemoval = null },
             onDismiss = { pendingRemoval = null }
         )
     }
@@ -452,3 +453,30 @@ internal fun NewFolderNameDialog(onCreate: (String) -> Unit, onDismiss: () -> Un
     )
 }
 
+
+/** Where an element placed in a row is set up, or null for kinds with nothing of their own to set. */
+internal fun entrySettingsRoute(entry: com.bisc.flauncher.data.model.RowEntry): String? = when (entry.type) {
+    com.bisc.flauncher.data.model.GridItemType.APP -> "settings/apps/edit/" + android.net.Uri.encode(entry.payload)
+    com.bisc.flauncher.data.model.GridItemType.FOLDER -> "settings/folder/${entry.payload}"
+    com.bisc.flauncher.data.model.GridItemType.MAP_TARGET -> "settings/elements/addresses/${entry.payload}"
+    com.bisc.flauncher.data.model.GridItemType.WEBSITE -> "settings/elements/links/${entry.payload}"
+    com.bisc.flauncher.data.model.GridItemType.ACTION_BUTTON -> "settings/elements/actionbuttons/${entry.payload}"
+    else -> null
+}
+
+/** A tapped element of the Dock or Panel: its own settings, or out of here. */
+@Composable
+internal fun EntryActionsDialog(label: String, onOpenSettings: (() -> Unit)?, onRemove: () -> Unit, onDismiss: () -> Unit) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(label) },
+        text = { Text(stringResource(R.string.settings_entry_actions_text)) },
+        confirmButton = {
+            Row {
+                androidx.compose.material3.TextButton(onClick = onRemove) { Text(stringResource(R.string.folder_item_remove)) }
+                if (onOpenSettings != null) androidx.compose.material3.TextButton(onClick = onOpenSettings) { Text(stringResource(R.string.settings_entry_open_settings)) }
+            }
+        },
+        dismissButton = { androidx.compose.material3.TextButton(onClick = onDismiss) { Text(stringResource(R.string.widget_notes_cancel)) } }
+    )
+}

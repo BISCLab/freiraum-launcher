@@ -74,7 +74,16 @@ private val ICON = 56.dp
  *  app icons, the widget's own symbol, an Android widget's app icon and name. Tapping a part opens
  *  that part's own settings. */
 @Composable
-fun PagePreview(pageId: Long, isHome: Boolean, navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
+fun PagePreview(
+    pageId: Long,
+    isHome: Boolean,
+    navController: NavController,
+    viewModel: HomeViewModel = hiltViewModel(),
+    /** The row picked in the small page, drawn with an accent edge. */
+    selectedRowId: Long? = null,
+    /** A tap on a row picks it instead of opening it; null = it opens. */
+    onRowTap: ((PageRow) -> Unit)? = null
+) {
     val rowsByPage by viewModel.rowsByPage.collectAsState()
     val entriesByRow by viewModel.rowEntriesByRow.collectAsState()
     val background by remember(pageId) { viewModel.pageBackgroundConfig(pageId) }.collectAsState(initial = BackgroundConfig())
@@ -134,8 +143,8 @@ fun PagePreview(pageId: Long, isHome: Boolean, navController: NavController, vie
                     verticalArrangement = Arrangement.spacedBy(PageRowDimens.rowSpacing * scale)
                 ) {
                     contentRows.forEach { row ->
-                        MiniRow(row, entriesByRow[row.id].orEmpty(), surfaceDark, scale, unit, viewModel) {
-                            when (row.type) {
+                        MiniRow(row, entriesByRow[row.id].orEmpty(), surfaceDark, scale, unit, viewModel, picked = row.id == selectedRowId) {
+                            if (onRowTap != null) onRowTap(row) else when (row.type) {
                                 PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET -> navController.navigate("$base/rows/${row.id}")
                                 else -> navController.navigate("$base/rows/${row.id}/elementbox")
                             }
@@ -156,7 +165,7 @@ private fun miniRadius(percent: Int): Dp = MINI_ROW_RADIUS * (percent.coerceIn(0
 /** One row in small at its real height: an element box with its real icons in its columns, a
  *  widget with its own symbol, an Android widget with its app's icon and name. */
 @Composable
-private fun MiniRow(row: PageRow, entries: List<RowEntry>, surfaceDark: Boolean, scale: Float, unit: Dp, viewModel: HomeViewModel, onClick: () -> Unit) {
+private fun MiniRow(row: PageRow, entries: List<RowEntry>, surfaceDark: Boolean, scale: Float, unit: Dp, viewModel: HomeViewModel, picked: Boolean = false, onClick: () -> Unit) {
     val appearance = row.appearance()
     val colors = resolveElementColors(appearance, surfaceDark)
     val shape: Shape = RoundedCornerShape(miniRadius(row.cornerRadiusPercent))
@@ -177,6 +186,7 @@ private fun MiniRow(row: PageRow, entries: List<RowEntry>, surfaceDark: Boolean,
             .clip(shape)
             .background(colors.background, alpha = colors.backgroundAlpha)
             .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth / 2, colors.borderColor, shape) else Modifier)
+            .then(if (picked) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape) else Modifier)
             .clickable(onClick = onClick)
             .padding(4.dp),
         contentAlignment = Alignment.Center

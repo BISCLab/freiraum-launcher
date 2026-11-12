@@ -84,6 +84,14 @@ fun SettingsAppGridPageScreen(navController: NavController, onBack: () -> Unit, 
             onGlobalShadeChange = { viewModel.setPageGlobalShade(id, it) },
             groupTitle = stringResource(R.string.settings_section_global_background)
         )
+        SettingsPreferenceGroup {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_background_for_all),
+                summary = stringResource(R.string.settings_background_for_all_summary),
+                onClick = { navController.navigate("settings/appearance/background") }
+            )
+        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_statusbar_label)) {
             SettingsPreference(
                 icon = null,

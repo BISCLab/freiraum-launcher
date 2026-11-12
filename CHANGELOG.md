@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- A page's rows are moved right in its small picture: tap a row to pick it, then move it up or down
+  or open it; the list that repeated the picture is gone
+- Tapping an element in the Dock's or Panel's content offers its own settings (app, folder, place,
+  link, action button) besides taking it out
+- System starts with Permissions and Language as tiles
+- The Weather widget's settings lead to its data sources; every page's background leads to the
+  background for all pages
+- Text search behavior explains its table the first time, in a card that goes away once understood
+- Dock and Panel are reached through one start page each, wherever they are opened from
 - Settings start with four big tiles for the areas, each saying what is inside, and a Quick access
   row of six tiles: Designs, Wallpapers, Icons, Gestures, Text search, Folders
 - Apps and elements is a page of tiles that say how many of each there are, with a line on what

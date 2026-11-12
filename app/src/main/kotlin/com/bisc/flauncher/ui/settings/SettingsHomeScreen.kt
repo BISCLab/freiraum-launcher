@@ -115,6 +115,14 @@ fun SettingsPageAppearanceScreen(pageId: Long, navController: NavController, onB
             onGlobalShadeChange = { viewModel.setPageGlobalShade(pageId, it) },
             groupTitle = stringResource(R.string.settings_section_global_background)
         )
+        SettingsPreferenceGroup {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_background_for_all),
+                summary = stringResource(R.string.settings_background_for_all_summary),
+                onClick = { navController.navigate("settings/appearance/background") }
+            )
+        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_statusbar_label)) {
             SettingsPreference(
                 icon = null,
@@ -520,9 +528,10 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
     }
 
     pendingRemoval?.let { entry ->
-        ConfirmRemoveDialog(
+        EntryActionsDialog(
             label = com.bisc.flauncher.ui.home.entryLabel(entry, folders, savedMapTargets, pinnedWebsites, allPages, pinnedContacts, viewModel::resolveLabel, actionButtons),
-            onConfirm = { viewModel.removeRowEntry(entry); pendingRemoval = null },
+            onOpenSettings = entrySettingsRoute(entry)?.let { route -> { pendingRemoval = null; navController.navigate(route) } },
+            onRemove = { viewModel.removeRowEntry(entry); pendingRemoval = null },
             onDismiss = { pendingRemoval = null }
         )
     }
