@@ -670,7 +670,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_group_extensions">Extensions</string>
     <string name="settings_launcher_theme_label">Launcher</string>
     <string name="settings_display_label">Display</string>
-    <string name="settings_settings_theme_label">Settings and welcome tour</string>
+    <string name="settings_settings_theme_label">Settings</string>
     <string name="settings_settings_theme_launcher">Like the launcher</string>
     <string name="settings_statusbar_summary">Hidden on %1$d of %2$d</string>
     <string name="settings_motion_summary_on">On, %1$d of %2$d</string>
@@ -725,7 +725,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_shape_part_folders">Folders</string>
     <string name="settings_widget_paging_mode_row_info">How this widget turns its pages (hours and days, notes). The look of the buttons is shared by all widgets.</string>
     <string name="settings_color_modes_label">Color modes</string>
-    <string name="settings_color_modes_info">Launcher: the home screen, its pages, widgets and folders. Settings and welcome tour: only these screens, so they can be light while the launcher is dark, or the other way round.</string>
+    <string name="settings_color_modes_info">Launcher: the home screen, its pages, widgets and folders. Settings: only the settings and the welcome tour, so they can be light while the launcher is dark, or the other way round.</string>
     <string name="settings_background_icons_label">Background and icons</string>
     <string name="settings_motion_group_label">Motion</string>
     <string name="welcome_wallpaper_own_hint">You can pick your own pictures any time later: Settings → Appearance → Background, or in the settings of each page.</string>

@@ -1,5 +1,9 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.AlertDialog
@@ -78,25 +82,16 @@ fun SettingsSystemScreen(
             )
         )
 
-        SettingsPreferenceGroup(
+        SettingsTileGrid(
             title = stringResource(R.string.settings_standard_apps_label),
-            info = stringResource(R.string.settings_search_open_with_info)
-        ) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_browser_title),
-                summary = appLabel(browserPackage),
-                onClick = { browserPickerOpen = true },
-                trailing = null
+            info = stringResource(R.string.settings_search_open_with_info),
+            tiles = listOf(
+                SettingsTile(androidx.compose.material.icons.Icons.Filled.Public, stringResource(R.string.settings_search_browser_title),
+                    badge = appLabel(browserPackage)) { browserPickerOpen = true },
+                SettingsTile(androidx.compose.material.icons.Icons.Filled.Map, stringResource(R.string.settings_search_maps_title),
+                    badge = appLabel(mapsPackage)) { mapsPickerOpen = true }
             )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_maps_title),
-                summary = appLabel(mapsPackage),
-                onClick = { mapsPickerOpen = true },
-                trailing = null
-            )
-        }
+        )
         // Turns every "?" tip button across the settings on or off (see LocalShowSettingsTips).
         SettingsPreferenceGroup(title = stringResource(R.string.settings_tips_label)) {
             SettingsPreference(
@@ -106,23 +101,16 @@ fun SettingsSystemScreen(
                 trailing = { Switch(checked = showSettingsTips, onCheckedChange = viewModel::setShowSettingsTips) }
             )
         }
-        SettingsPreferenceGroup(
+        SettingsTileGrid(
             title = stringResource(R.string.settings_backup_label),
-            info = stringResource(R.string.settings_backup_info)
-        ) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_backup_export),
-                onClick = { confirmingExport = true },
-                trailing = null
+            info = stringResource(R.string.settings_backup_info),
+            tiles = listOf(
+                SettingsTile(androidx.compose.material.icons.Icons.Filled.Download, stringResource(R.string.settings_backup_export)) { confirmingExport = true },
+                SettingsTile(androidx.compose.material.icons.Icons.Filled.Restore, stringResource(R.string.settings_backup_import)) {
+                    importLauncher.launch(arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream"))
+                }
             )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_backup_import),
-                onClick = { importLauncher.launch(arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream")) },
-                trailing = null
-            )
-        }
+        )
     }
 
     if (browserPickerOpen) {

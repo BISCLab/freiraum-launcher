@@ -670,7 +670,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_group_extensions">Erweiterungen</string>
     <string name="settings_launcher_theme_label">Launcher</string>
     <string name="settings_display_label">Anzeige</string>
-    <string name="settings_settings_theme_label">Einstellungen und Einführung</string>
+    <string name="settings_settings_theme_label">Einstellungen</string>
     <string name="settings_settings_theme_launcher">Wie der Launcher</string>
     <string name="settings_statusbar_summary">Ausgeblendet auf %1$d von %2$d</string>
     <string name="settings_motion_summary_on">An, %1$d von %2$d</string>
@@ -725,7 +725,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_shape_part_folders">Ordner</string>
     <string name="settings_widget_paging_mode_row_info">Wie dieses Widget blättert (Stunden und Tage, Notizen). Das Aussehen der Pfeiltasten gilt für alle Widgets gemeinsam.</string>
     <string name="settings_color_modes_label">Farbmodi</string>
-    <string name="settings_color_modes_info">Launcher: der Startbildschirm mit seinen Seiten, Widgets und Ordnern. Einstellungen und Einführung: nur diese Bildschirme, so können sie hell sein, während der Launcher dunkel ist, oder umgekehrt.</string>
+    <string name="settings_color_modes_info">Launcher: der Startbildschirm mit seinen Seiten, Widgets und Ordnern. Einstellungen: nur die Einstellungen und die Einführung, so können sie hell sein, während der Launcher dunkel ist, oder umgekehrt.</string>
     <string name="settings_background_icons_label">Hintergrund und Icons</string>
     <string name="settings_motion_group_label">Bewegung</string>
     <string name="welcome_wallpaper_own_hint">Eigene Bilder kannst du jederzeit später wählen: Einstellungen → Aussehen → Hintergrund, oder in den Einstellungen jeder Seite.</string>

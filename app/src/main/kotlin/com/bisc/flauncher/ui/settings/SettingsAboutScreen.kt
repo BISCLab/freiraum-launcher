@@ -180,51 +180,25 @@ fun SettingsAboutScreen(navController: NavController, onBack: () -> Unit) {
             }
         }
 
-        if (AboutInfo.SOURCE_URL.isNotBlank() || AboutInfo.ISSUES_URL.isNotBlank()) {
-            SettingsPreferenceGroup(title = stringResource(R.string.about_project_label)) {
-                if (AboutInfo.SOURCE_URL.isNotBlank()) {
-                    SettingsPreference(
-                        icon = Icons.Filled.Code,
-                        title = stringResource(R.string.about_source),
-                        summary = AboutInfo.SOURCE_URL.removePrefix("https://"),
-                        onClick = { openUrl(context, AboutInfo.SOURCE_URL) },
-                        trailing = { Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null) }
-                    )
-                }
-                SettingsPreference(
-                    icon = Icons.Filled.NewReleases,
-                    title = stringResource(R.string.about_releases),
-                    summary = stringResource(R.string.about_releases_summary),
-                    onClick = { openUrl(context, AboutInfo.RELEASES_URL) },
-                    trailing = { Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null) }
-                )
-                if (AboutInfo.ISSUES_URL.isNotBlank()) {
-                    SettingsPreference(
-                        icon = Icons.Filled.BugReport,
-                        title = stringResource(R.string.about_issues),
-                        summary = stringResource(R.string.about_issues_summary),
-                        onClick = { openUrl(context, AboutInfo.ISSUES_URL) },
-                        trailing = { Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null) }
-                    )
-                }
-            }
-        }
+        // Each opens in the browser.
+        SettingsTileGrid(
+            title = stringResource(R.string.about_project_label),
+            columns = 3,
+            tiles = listOfNotNull(
+                if (AboutInfo.SOURCE_URL.isNotBlank()) SettingsTile(Icons.Filled.Code, stringResource(R.string.about_source)) { openUrl(context, AboutInfo.SOURCE_URL) } else null,
+                SettingsTile(Icons.Filled.NewReleases, stringResource(R.string.about_releases)) { openUrl(context, AboutInfo.RELEASES_URL) },
+                if (AboutInfo.ISSUES_URL.isNotBlank()) SettingsTile(Icons.Filled.BugReport, stringResource(R.string.about_issues)) { openUrl(context, AboutInfo.ISSUES_URL) } else null
+            )
+        )
 
-        SettingsPreferenceGroup(title = stringResource(R.string.about_legal_label)) {
-            SettingsPreference(
-                icon = Icons.Filled.Gavel,
-                title = stringResource(R.string.about_license),
-                summary = stringResource(R.string.about_license_summary),
-                onClick = { showLicense = true },
-                trailing = null
+        SettingsTileGrid(
+            title = stringResource(R.string.about_legal_label),
+            tiles = listOf(
+                SettingsTile(Icons.Filled.Gavel, stringResource(R.string.about_license), stringResource(R.string.about_license_summary)) { showLicense = true },
+                SettingsTile(Icons.Filled.Description, stringResource(R.string.about_third_party), stringResource(R.string.about_third_party_summary)) { showThirdParty = true }
             )
-            SettingsPreference(
-                icon = Icons.Filled.Description,
-                title = stringResource(R.string.about_third_party),
-                summary = stringResource(R.string.about_third_party_summary),
-                onClick = { showThirdParty = true },
-                trailing = null
-            )
+        )
+        SettingsPreferenceGroup {
             SettingsPreference(
                 icon = Icons.Filled.Lock,
                 title = stringResource(R.string.about_privacy),

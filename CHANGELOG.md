@@ -15,6 +15,11 @@
 - More pages use tiles: Text search, App list and App grid (Appearance and Behavior, then their
   parts under the preview), Home screen, Panel and Dock, and in Appearance the color modes, the
   font, the status bar and the animations
+- Also as tiles: in System the browser and maps app (each shows the chosen app) and backup
+  (save, restore); in Apps and elements Apps and Folders side by side with Places, Links and
+  Action buttons in a line below; in About the project links and the license texts
+- The color mode for the settings is just called "Settings"; it still applies to the welcome tour
+  too, as its tip says
 
 ## 0.13.7
 
