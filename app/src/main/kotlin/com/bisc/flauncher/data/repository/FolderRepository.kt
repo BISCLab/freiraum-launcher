@@ -188,10 +188,19 @@ class FolderRepository @Inject constructor(
 
     /** Puts [orderedItems] (all of one folder) in this order: widgets one after another, apps and
      *  elements into the places they had between them, so empty cells stay where they are. */
+    /** Writes widgets moved to other places (see moveWidgetStep). */
+    suspend fun saveItems(items: List<FolderItem>) {
+        if (items.isNotEmpty()) folderItemDao.updateAll(items)
+    }
+
     suspend fun reorderItems(orderedItems: List<FolderItem>) {
         val (widgets, icons) = orderedItems.partition { it.isWidgetItem() }
-        widgets.forEachIndexed { index, item ->
-            if (item.orderIndex != index) folderItemDao.update(item.copy(orderIndex = index))
+        // Each widget keeps the row it sits above; only the order among those there changes.
+        widgets.groupBy { it.orderIndex / com.bisc.flauncher.ui.home.WIDGET_ROW_STEP }.forEach { (row, group) ->
+            group.forEachIndexed { index, item ->
+                val place = row * com.bisc.flauncher.ui.home.WIDGET_ROW_STEP + index
+                if (item.orderIndex != place) folderItemDao.update(item.copy(orderIndex = place))
+            }
         }
         val slots = icons.map { it.orderIndex }.sorted()
         icons.forEachIndexed { index, item ->

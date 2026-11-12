@@ -1371,6 +1371,18 @@ class HomeViewModel @Inject constructor(
 
     fun reserveFolderSlot(folderId: Long, slot: Int?) = folderRepository.reserveSlot(folderId, slot)
 
+    fun saveFolderItems(items: List<FolderItem>) {
+        viewModelScope.launch { folderRepository.saveItems(items) }
+    }
+
+    fun createFolderInRowAndOpen(pageRowId: Long, name: String, onCreated: (Long) -> Unit) {
+        viewModelScope.launch {
+            val folderId = folderRepository.createFolder(name)
+            pageContentRepository.addFolderEntry(pageRowId, folderId, orderIndex = takeRowSlot(pageRowId))
+            onCreated(folderId)
+        }
+    }
+
     fun reorderFolderItems(orderedItems: List<FolderItem>) {
         viewModelScope.launch { folderRepository.reorderItems(orderedItems) }
     }

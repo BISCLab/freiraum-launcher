@@ -1,5 +1,13 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.ui.draw.clip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -145,6 +153,7 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
     val rowShape = row.dockRows()
 
     var showAddChooser by remember { mutableStateOf(false) }
+    var namingNewFolder by remember { mutableStateOf(false) }
     var showAppPicker by remember { mutableStateOf(false) }
     var showFolderPicker by remember { mutableStateOf(false) }
     var showPagePicker by remember { mutableStateOf(false) }
@@ -250,7 +259,17 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
             onAddPageLinkClick = { showAddChooser = false; showPagePicker = true },
             onAddContactClick = { showAddChooser = false; viewModel.openContactPicker() },
             onAddActionButtonClick = { showAddChooser = false; showActionButtonPicker = true },
+            onCreateFolderClick = { showAddChooser = false; namingNewFolder = true },
             onDismiss = { showAddChooser = false }
+        )
+    }
+    if (namingNewFolder) {
+        NewFolderNameDialog(
+            onCreate = { name ->
+                namingNewFolder = false
+                viewModel.createFolderInRowAndOpen(row.id, name) { id -> navController.navigate("settings/folder/$id") }
+            },
+            onDismiss = { namingNewFolder = false }
         )
     }
     if (showActionButtonPicker) {
@@ -357,21 +376,79 @@ internal fun AddElementChooserSheet(
     onAddShortcutClick: () -> Unit,
     onAddMapTargetClick: () -> Unit,
     onAddWebsiteClick: () -> Unit,
-    onAddPageLinkClick: () -> Unit,
-    onAddContactClick: () -> Unit,
-    onAddActionButtonClick: () -> Unit,
+    onAddPageLinkClick: (() -> Unit)? = null,
+    onAddContactClick: (() -> Unit)? = null,
+    onAddActionButtonClick: (() -> Unit)? = null,
+    /** A new, empty folder made right here; null where that does not fit. */
+    onCreateFolderClick: (() -> Unit)? = null,
     onDismiss: () -> Unit
 ) {
+    val tiles = listOfNotNull(
+        Triple(Icons.Filled.Apps, R.string.settings_row_entry_add_app, onAddAppClick),
+        onCreateFolderClick?.let { Triple(Icons.Filled.CreateNewFolder, R.string.settings_row_entry_new_folder, it) },
+        Triple(Icons.Filled.Folder, R.string.settings_row_entry_add_folder, onAddFolderClick),
+        Triple(Icons.AutoMirrored.Filled.Shortcut, R.string.settings_row_entry_add_shortcut, onAddShortcutClick),
+        Triple(Icons.Filled.Place, R.string.settings_row_entry_add_map_target, onAddMapTargetClick),
+        Triple(Icons.Filled.Language, R.string.settings_row_entry_add_website, onAddWebsiteClick),
+        onAddPageLinkClick?.let { Triple(Icons.Filled.ViewCarousel, R.string.settings_row_entry_add_page_link, it) },
+        onAddContactClick?.let { Triple(Icons.Filled.Person, R.string.settings_row_entry_add_contact, it) },
+        onAddActionButtonClick?.let { Triple(Icons.Filled.Bolt, R.string.settings_row_entry_add_actionbutton, it) }
+    )
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        SettingsPreferenceGroup {
-            SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_row_entry_add_app), onClick = onAddAppClick, trailing = null)
-            SettingsPreference(icon = Icons.Filled.CreateNewFolder, title = stringResource(R.string.settings_row_entry_add_folder), onClick = onAddFolderClick, trailing = null)
-            SettingsPreference(icon = Icons.AutoMirrored.Filled.Shortcut, title = stringResource(R.string.settings_row_entry_add_shortcut), onClick = onAddShortcutClick, trailing = null)
-            SettingsPreference(icon = Icons.Filled.Place, title = stringResource(R.string.settings_row_entry_add_map_target), onClick = onAddMapTargetClick, trailing = null)
-            SettingsPreference(icon = Icons.Filled.Language, title = stringResource(R.string.settings_row_entry_add_website), onClick = onAddWebsiteClick, trailing = null)
-            SettingsPreference(icon = Icons.Filled.ViewCarousel, title = stringResource(R.string.settings_row_entry_add_page_link), onClick = onAddPageLinkClick, trailing = null)
-            SettingsPreference(icon = Icons.Filled.Person, title = stringResource(R.string.settings_row_entry_add_contact), onClick = onAddContactClick, trailing = null)
-            SettingsPreference(icon = Icons.Filled.Bolt, title = stringResource(R.string.settings_row_entry_add_actionbutton), onClick = onAddActionButtonClick, trailing = null)
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(stringResource(R.string.settings_add_element_title), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 4.dp, bottom = 6.dp))
+            tiles.chunked(3).forEach { line ->
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    line.forEach { (icon, label, onClick) ->
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(SettingsCardShape)
+                                .background(MaterialTheme.colorScheme.surfaceContainer)
+                                .clickable(onClick = onClick)
+                                .padding(vertical = 18.dp, horizontal = 6.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            androidx.compose.foundation.layout.Box(
+                                modifier = Modifier.size(44.dp).clip(androidx.compose.foundation.shape.CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
+                                contentAlignment = Alignment.Center
+                            ) { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary) }
+                            Text(
+                                stringResource(label),
+                                style = MaterialTheme.typography.labelLarge,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                maxLines = 2
+                            )
+                        }
+                    }
+                    repeat(3 - line.size) { androidx.compose.foundation.layout.Spacer(Modifier.weight(1f)) }
+                }
+            }
         }
     }
 }
+
+/** Asks for the name of a new folder. */
+@Composable
+internal fun NewFolderNameDialog(onCreate: (String) -> Unit, onDismiss: () -> Unit) {
+    var name by remember { mutableStateOf("") }
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_row_entry_new_folder)) },
+        text = {
+            androidx.compose.material3.OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text(stringResource(R.string.settings_folder_name_label)) },
+                singleLine = true
+            )
+        },
+        confirmButton = { androidx.compose.material3.TextButton(onClick = { onCreate(name.trim()) }, enabled = name.isNotBlank()) { Text(stringResource(R.string.settings_save)) } },
+        dismissButton = { androidx.compose.material3.TextButton(onClick = onDismiss) { Text(stringResource(R.string.widget_notes_cancel)) } }
+    )
+}
+

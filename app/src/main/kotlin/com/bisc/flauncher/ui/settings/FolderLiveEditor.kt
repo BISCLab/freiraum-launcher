@@ -108,7 +108,8 @@ internal fun FolderLivePreview(
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            widgets.forEach { widget ->
+            @Composable
+            fun WidgetTile(widget: FolderItem) {
                 val picked = widget.id == selectedId
                 val height = PageRowDimens.spanHeight(PageRowDimens.rowUnitHeight, widget.spanY) * LIVE_SCALE
                 Row(
@@ -140,7 +141,10 @@ internal fun FolderLivePreview(
                 rows += List(widths.getOrElse(rows.size) { widths.last() }.coerceAtLeast(1)) { null }
             }
             var cellIndex = 0
-            rows.forEach { line ->
+            val realRows = com.bisc.flauncher.ui.home.folderSlotRows(gridItems, rowShape, keepEmptyRows = true).size
+            val widgetsByRow = com.bisc.flauncher.ui.home.widgetsAbove(widgets, realRows)
+            rows.forEachIndexed { rowIndex, line ->
+                if (rowIndex < realRows) widgetsByRow[rowIndex].forEach { WidgetTile(it) }
                 Row(modifier = Modifier.fillMaxWidth()) {
                     line.forEach { item ->
                         val slot = cellIndex++
@@ -186,6 +190,7 @@ internal fun FolderLivePreview(
                     }
                 }
             }
+            widgetsByRow[realRows].forEach { WidgetTile(it) }
         }
     }
 }

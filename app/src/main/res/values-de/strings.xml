@@ -911,7 +911,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_page_shows_panel">Panel auf dieser Seite</string>
     <string name="settings_panel_widgets_label">Widgets</string>
     <string name="settings_panel_add_widget">Widget hinzufügen</string>
-    <string name="settings_panel_widgets_info">Widgets stehen oben im Panel, die Elemente darunter. Ist das Panel voll, lässt es sich scrollen.</string>
+    <string name="settings_panel_widgets_info">Widgets lassen sich zwischen die Zeilen setzen, mit den Pfeilen. Ist das Panel voll, lässt es sich scrollen, nur nicht, solange der Finger auf einem Widget liegt.</string>
     <string name="settings_hub_elements_what">Was darin liegt: Apps, Ordner, Links und mehr</string>
     <string name="settings_hub_visibility_what">Wann es sich zeigt</string>
     <string name="settings_hub_bar_look_contents">Fläche, Schrift, Deckkraft, Rahmen, Ecken</string>
@@ -938,4 +938,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
         <item quantity="one">%1$d Widget</item>
         <item quantity="other">%1$d Widgets</item>
     </plurals>
+    <string name="settings_widget_place_bottom">Unter allen Zeilen</string>
+    <string name="settings_widget_place_above_row">Über Zeile %1$d</string>
+    <string name="settings_move_up">Nach oben</string>
+    <string name="settings_move_down">Nach unten</string>
+    <string name="settings_add_element_title">Hinzufügen</string>
 </resources>

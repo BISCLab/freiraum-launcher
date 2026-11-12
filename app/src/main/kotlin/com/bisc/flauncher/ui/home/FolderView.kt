@@ -177,7 +177,8 @@ fun FolderView(
         WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
     )
     val (widgetItems, gridItems) = items.partition { it.type == GridItemType.WIDGET || it.type == GridItemType.SYSTEM_WIDGET }
-    val gridRows = folderSlotRows(gridItems, folder.rows(), keepEmptyRows = false)
+    val gridRows = folderSlotRows(gridItems, folder.rows(), keepEmptyRows = true)
+    val widgetsByRow = widgetsAbove(widgetItems, gridRows.size)
     val movingItem = gridItems.find { it.id == movingItemId }
     // Moves step by step through the cells, empty ones too.
     fun moveBy(delta: Int) {
@@ -204,7 +205,8 @@ fun FolderView(
                 .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {}
         ) {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                for (widgetItem in widgetItems) {
+                @Composable
+                fun WidgetFor(widgetItem: FolderItem) {
                     key("widget_${widgetItem.id}") {
                         FolderWidgetRow(
                             item = widgetItem,
@@ -218,6 +220,9 @@ fun FolderView(
                     }
                 }
                 gridRows.forEachIndexed { rowIndex, row ->
+                    widgetsByRow[rowIndex].forEach { WidgetFor(it) }
+                    // Rows with nothing in them are not shown; their widgets still are.
+                    if (row.any { it != null }) { rowIndex, row ->
                     key("grid_$rowIndex") {
                         Row(modifier = Modifier.fillMaxWidth()) {
                             repeat(row.size) { slot ->
@@ -251,6 +256,8 @@ fun FolderView(
                         }
                     }
                 }
+                }
+                widgetsByRow[gridRows.size].forEach { WidgetFor(it) }
 
                 if (movingItem != null) {
                     Row(
@@ -488,14 +495,68 @@ private fun GridLabel(text: String) {
     Text(text, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelSmall)
 }
 
-/** The Panel's widgets, above its elements, drawn like the widgets in a folder. */
+/** Some of the Panel's widgets, drawn like the widgets in a folder. [onTouch] tells the Panel when a
+ *  finger is on one, so it does not scroll away under the widget's own lists. */
 @Composable
-fun PanelWidgets(items: List<FolderItem>, onExecuteAction: (com.bisc.flauncher.data.model.GestureAction) -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+fun PanelWidgets(items: List<FolderItem>, onExecuteAction: (com.bisc.flauncher.data.model.GestureAction) -> Unit, onTouch: (Boolean) -> Unit = {}) {
+    if (items.isEmpty()) return
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items.forEach { item ->
             androidx.compose.runtime.key(item.id) {
-                FolderWidgetRow(item = item, onExecuteAction = onExecuteAction, menuExpanded = false, onLongPress = {}, onDismissMenu = {}, onEdit = {}, onRemove = {})
+                Box(Modifier.holdsGestures(onTouch)) {
+                    FolderWidgetRow(item = item, onExecuteAction = onExecuteAction, menuExpanded = false, onLongPress = {}, onDismissMenu = {}, onEdit = {}, onRemove = {})
+                }
             }
         }
+    }
+}
+
+/** A widget in a folder or the Panel sits above one of its rows of apps: orderIndex / [WIDGET_ROW_STEP]
+ *  is that row (past the last row = below all of them), the rest its order among the widgets there. */
+const val WIDGET_ROW_STEP = 1000
+
+fun FolderItem.widgetRow(): Int = orderIndex / WIDGET_ROW_STEP
+
+/** The widgets above each of [rowCount] rows, and last those below all of them. */
+fun widgetsAbove(widgets: List<FolderItem>, rowCount: Int): List<List<FolderItem>> =
+    (0..rowCount).map { row -> widgets.filter { minOf(it.widgetRow(), rowCount) == row }.sortedWith(compareBy({ it.orderIndex }, { it.id })) }
+
+/** [item] one step up (-1) or down (1): past its neighbour widget, or past a row of apps. Returns
+ *  every widget with its new place; nothing when it cannot go further. */
+fun moveWidgetStep(widgets: List<FolderItem>, item: FolderItem, delta: Int, rowCount: Int): List<FolderItem> {
+    val groups = widgetsAbove(widgets, rowCount).map { it.toMutableList() }
+    val row = groups.indexOfFirst { group -> group.any { it.id == item.id } }
+    if (row < 0) return emptyList()
+    val at = groups[row].indexOfFirst { it.id == item.id }
+    val moving = groups[row][at]
+    if (delta < 0) {
+        when {
+            at > 0 -> { groups[row].removeAt(at); groups[row].add(at - 1, moving) }
+            row > 0 -> { groups[row].removeAt(at); groups[row - 1].add(moving) }
+            else -> return emptyList()
+        }
+    } else {
+        when {
+            at < groups[row].lastIndex -> { groups[row].removeAt(at); groups[row].add(at + 1, moving) }
+            row < rowCount -> { groups[row].removeAt(at); groups[row + 1].add(0, moving) }
+            else -> return emptyList()
+        }
+    }
+    return groups.flatMapIndexed { r, group -> group.mapIndexed { i, w -> w.copy(orderIndex = r * WIDGET_ROW_STEP + i) } }
+}
+
+fun canMoveWidget(widgets: List<FolderItem>, item: FolderItem, delta: Int, rowCount: Int): Boolean =
+    moveWidgetStep(widgets, item, delta, rowCount).isNotEmpty()
+
+/** While a finger is on a widget, the surface around it must not scroll: the widget's own lists get
+ *  the gesture. [onTouch] says when a finger comes down on it and when it lifts. */
+fun Modifier.holdsGestures(onTouch: (Boolean) -> Unit): Modifier = pointerInput(Unit) {
+    awaitEachGesture {
+        awaitFirstDown(requireUnconsumed = false, pass = androidx.compose.ui.input.pointer.PointerEventPass.Initial)
+        onTouch(true)
+        do {
+            val event = awaitPointerEvent(androidx.compose.ui.input.pointer.PointerEventPass.Initial)
+        } while (event.changes.any { it.pressed })
+        onTouch(false)
     }
 }

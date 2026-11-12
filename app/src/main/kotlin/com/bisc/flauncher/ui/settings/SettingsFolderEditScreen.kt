@@ -242,6 +242,7 @@ fun SettingsFolderEditScreen(
             val siblings = if (isWidget) widgetItems else iconItems
             val position = siblings.indexOfFirst { it.id == selected.id }
             val cellCount = com.bisc.flauncher.ui.home.folderSlotRows(iconItems, rowShape, keepEmptyRows = true).sumOf { it.size } + rowShape.ifEmpty { listOf(4) }.last()
+            val widgetRowCount = com.bisc.flauncher.ui.home.folderSlotRows(iconItems, rowShape, keepEmptyRows = true).size
             val isBuiltIn = selected.type == GridItemType.WIDGET
             val minSpan = if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.minSpan(selected.payload) else 1
             val maxSpan = if (isWidget) maxOf(
@@ -263,12 +264,11 @@ fun SettingsFolderEditScreen(
                 canShrink = selected.spanY > minSpan,
                 onSpan = { viewModel.updateFolderItem(selected.copy(spanY = it)) },
                 // Widgets swap with their neighbour; apps and elements step through the cells, empty ones too.
-                canMoveBack = if (isWidget) position > 0 else selected.orderIndex > 0,
-                canMoveOn = if (isWidget) position in 0 until siblings.lastIndex else selected.orderIndex < cellCount - 1,
+                canMoveBack = if (isWidget) com.bisc.flauncher.ui.home.canMoveWidget(widgetItems, selected, -1, widgetRowCount) else selected.orderIndex > 0,
+                canMoveOn = if (isWidget) com.bisc.flauncher.ui.home.canMoveWidget(widgetItems, selected, 1, widgetRowCount) else selected.orderIndex < cellCount - 1,
                 onMove = { delta ->
                     if (isWidget) {
-                        val reordered = siblings.toMutableList().apply { add(position + delta, removeAt(position)) }
-                        homeViewModel.reorderFolderItems(reordered + iconItems)
+                        homeViewModel.saveFolderItems(com.bisc.flauncher.ui.home.moveWidgetStep(widgetItems, selected, delta, widgetRowCount))
                     } else {
                         viewModel.moveFolderItemToSlot(selected, selected.orderIndex + delta)
                     }

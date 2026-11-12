@@ -9,9 +9,14 @@
   it there or takes it out; its content has a heading of its own
 - Welcome tour: a new step explains elements (apps, folders, places, links, contacts, action
   buttons) and where they go
-- New: the Panel can hold widgets, like a folder: clock, weather, music, notes or an Android widget,
-  on top of its elements. The Panel grows with them and scrolls when it is full. Add and edit them
-  under Home > Layout > Panel > Elements
+- New: the Panel can hold widgets, looking like the ones in a folder: clock, weather, music, notes or
+  an Android widget. The Panel grows with them and scrolls when it is full; while a finger is on a
+  widget the Panel holds still, so lists inside the widget scroll on their own. Add and edit them
+  under Home > Layout > Panel > Content
+- Widgets in a folder and in the Panel can sit between the rows of apps, not only on top: the arrows
+  move a widget past its neighbours and past whole rows
+- Adding an element to the Dock or the Panel shows tiles instead of a list, with New folder among
+  them: it asks for a name and opens the new folder right away to fill it
 - A new page beside Home starts empty instead of with copies of Home's widgets; it takes Home's
   background, and Home's Dock and Panel come along
 - Every page beside Home can leave out the Dock or the Panel on its own (its settings, Dock and Panel)

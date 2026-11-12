@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -362,6 +364,7 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
     val rowShape = row.panelRows()
 
     var showAddChooser by remember { mutableStateOf(false) }
+    var namingNewFolder by remember { mutableStateOf(false) }
     var showAppPicker by remember { mutableStateOf(false) }
     var showFolderPicker by remember { mutableStateOf(false) }
     var showPagePicker by remember { mutableStateOf(false) }
@@ -383,11 +386,26 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
     SettingsSubScreen(title = stringResource(R.string.settings_panel_content_title), navController = navController, onBack = onBack) {
         // Widgets sit on top of the Panel, its elements below them; the Panel scrolls when it is full.
         SettingsPreferenceGroup(title = stringResource(R.string.settings_panel_widgets_label), info = stringResource(R.string.settings_panel_widgets_info)) {
-            panelWidgets.forEach { item ->
+            val rowCount = rowShape.size
+            com.bisc.flauncher.ui.home.widgetsAbove(panelWidgets, rowCount).flatten().forEach { item ->
+                val place = minOf(item.orderIndex / com.bisc.flauncher.ui.home.WIDGET_ROW_STEP, rowCount)
                 SettingsPreference(
                     icon = if (item.type == com.bisc.flauncher.data.model.GridItemType.SYSTEM_WIDGET) androidx.compose.material.icons.Icons.Filled.GridView else widgetKindIcon(item.payload),
                     title = if (item.type == com.bisc.flauncher.data.model.GridItemType.SYSTEM_WIDGET) stringResource(R.string.picker_widget_more) else widgetKindLabel(item.payload),
-                    onClick = { panelFolderId?.let { navController.navigate("settings/folder/$it/widget/${item.id}") } }
+                    summary = if (place >= rowCount) stringResource(R.string.settings_widget_place_bottom) else stringResource(R.string.settings_widget_place_above_row, place + 1),
+                    onClick = { panelFolderId?.let { navController.navigate("settings/folder/$it/widget/${item.id}") } },
+                    trailing = {
+                        Row {
+                            androidx.compose.material3.IconButton(
+                                onClick = { viewModel.saveFolderItems(com.bisc.flauncher.ui.home.moveWidgetStep(panelWidgets, item, -1, rowCount)) },
+                                enabled = com.bisc.flauncher.ui.home.canMoveWidget(panelWidgets, item, -1, rowCount)
+                            ) { Icon(androidx.compose.material.icons.Icons.Filled.KeyboardArrowUp, contentDescription = stringResource(R.string.settings_move_up)) }
+                            androidx.compose.material3.IconButton(
+                                onClick = { viewModel.saveFolderItems(com.bisc.flauncher.ui.home.moveWidgetStep(panelWidgets, item, 1, rowCount)) },
+                                enabled = com.bisc.flauncher.ui.home.canMoveWidget(panelWidgets, item, 1, rowCount)
+                            ) { Icon(androidx.compose.material.icons.Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.settings_move_down)) }
+                        }
+                    }
                 )
             }
             SettingsPreference(
@@ -519,7 +537,17 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
             onAddPageLinkClick = { showAddChooser = false; showPagePicker = true },
             onAddContactClick = { showAddChooser = false; viewModel.openContactPicker() },
             onAddActionButtonClick = { showAddChooser = false; showActionButtonPicker = true },
+            onCreateFolderClick = { showAddChooser = false; namingNewFolder = true },
             onDismiss = { showAddChooser = false }
+        )
+    }
+    if (namingNewFolder) {
+        NewFolderNameDialog(
+            onCreate = { name ->
+                namingNewFolder = false
+                viewModel.createFolderInRowAndOpen(row.id, name) { id -> navController.navigate("settings/folder/$id") }
+            },
+            onDismiss = { namingNewFolder = false }
         )
     }
     if (showActionButtonPicker) {

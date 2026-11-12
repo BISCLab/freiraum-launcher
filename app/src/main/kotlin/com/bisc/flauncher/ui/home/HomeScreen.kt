@@ -885,52 +885,61 @@ fun HomeScreen(
                             }
                         )
                 ) {
+                    // A finger on a widget belongs to the widget: the Panel holds still meanwhile.
+                    var panelHeld by remember { mutableStateOf(false) }
                     androidx.compose.foundation.lazy.LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(top = maxOf(cachedStatusBarInset, cachedCutoutInset))
-                            .padding(16.dp)
+                            .padding(16.dp),
+                        userScrollEnabled = !panelHeld
                     ) {
-                        if (panelWidgets.isNotEmpty()) item {
-                            PanelWidgets(panelWidgets, onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) })
-                        }
                         item {
                             homePanelRow?.let { row ->
                                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                GridEntries(
-                                    entries = rowEntriesByRow[row.id].orEmpty(),
-                                    columns = 1,
-                                    rowColumns = panelRowShape,
-                                    fixedSlots = true,
-                                    folders = folders,
-                                    folderItemsByFolder = folderItemsByFolder,
-                                    savedMapTargets = savedMapTargets,
-                                    pinnedWebsites = pinnedWebsites,
-                                    pages = allPages,
-                                    loadIcon = viewModel::loadIcon,
-                                    loadPackIcon = viewModel::loadPackIcon,
-                                    resolveLabel = resolveLabel,
-                                    onFolderClick = { folderId -> viewModel.openFolder(folderId) },
-                                    onShortcutClick = viewModel::launchFolderShortcut,
-                                    onOpenPageLink = onOpenPageLink,
-                                    pinnedContacts = pinnedContacts,
-                                    loadContactPhoto = viewModel::loadContactPhoto,
-                                    onContactClick = { contactId ->
-                                        pinnedContacts.find { it.contactId == contactId }?.let { contact ->
-                                            com.bisc.flauncher.util.openContact(
-                                                context,
-                                                com.bisc.flauncher.data.model.ContactInfo(contact.contactId, contact.lookupKey, contact.displayName, contact.photoUri)
-                                            )
-                                        }
-                                    },
-                                    actionButtons = actionButtons,
-                                    onActionButtonClick = onActionButtonClick,
-                                    showLabels = row.showLabels,
-                                    labelColor = row.appearance().contentColor?.let { Color(it) } ?: Color.White,
-                                    iconSizeScale = iconSizeScale
-                                    // Live panel is display-only now - adding/removing entries only
-                                    // happens in Settings > Home screen > Layout > Panel > Elements.
-                                )
+                                // Row by row, each with the widgets that sit above it.
+                                val panelEntries = rowEntriesByRow[row.id].orEmpty()
+                                val widgetsByRow = widgetsAbove(panelWidgets, panelRowShape.size)
+                                var from = 0
+                                panelRowShape.forEachIndexed { rowIndex, cols ->
+                                PanelWidgets(widgetsByRow[rowIndex], onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) }, onTouch = { panelHeld = it })
+                                    GridEntries(
+                                        entries = panelEntries.filter { it.orderIndex in from until from + cols }.map { it.copy(orderIndex = it.orderIndex - from) },
+                                        columns = 1,
+                                        rowColumns = listOf(cols),
+                                        fixedSlots = true,
+                                        folders = folders,
+                                        folderItemsByFolder = folderItemsByFolder,
+                                        savedMapTargets = savedMapTargets,
+                                        pinnedWebsites = pinnedWebsites,
+                                        pages = allPages,
+                                        loadIcon = viewModel::loadIcon,
+                                        loadPackIcon = viewModel::loadPackIcon,
+                                        resolveLabel = resolveLabel,
+                                        onFolderClick = { folderId -> viewModel.openFolder(folderId) },
+                                        onShortcutClick = viewModel::launchFolderShortcut,
+                                        onOpenPageLink = onOpenPageLink,
+                                        pinnedContacts = pinnedContacts,
+                                        loadContactPhoto = viewModel::loadContactPhoto,
+                                        onContactClick = { contactId ->
+                                            pinnedContacts.find { it.contactId == contactId }?.let { contact ->
+                                                com.bisc.flauncher.util.openContact(
+                                                    context,
+                                                    com.bisc.flauncher.data.model.ContactInfo(contact.contactId, contact.lookupKey, contact.displayName, contact.photoUri)
+                                                )
+                                            }
+                                        },
+                                        actionButtons = actionButtons,
+                                        onActionButtonClick = onActionButtonClick,
+                                        showLabels = row.showLabels,
+                                        labelColor = row.appearance().contentColor?.let { Color(it) } ?: Color.White,
+                                        iconSizeScale = iconSizeScale
+                                        // Live panel is display-only now - adding/removing entries only
+                                        // happens in Settings > Home screen > Layout > Panel > Elements.
+                                    )
+                                from += cols
+                                }
+                                PanelWidgets(widgetsByRow[panelRowShape.size], onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) }, onTouch = { panelHeld = it })
                                 }
                             }
                         }
