@@ -647,12 +647,7 @@ fun SettingsTileGrid(tiles: List<SettingsTile>, columns: Int = 2, title: String?
             // shared small height, so small tiles match from page to page.
             val tallest = measurables.maxOfOrNull { it.maxIntrinsicHeight(width) } ?: 0
             val height = if (small) maxOf(tallest, SMALL_TILE_HEIGHT.roundToPx()) else tallest
-            // A big tile left alone in the last line takes the whole width instead of half of it.
-            val lone = !small && measurables.size % columns == 1 && measurables.size > 1
-            val placeables = measurables.mapIndexed { i, m ->
-                val w = if (lone && i == measurables.lastIndex) constraints.maxWidth else width
-                m.measure(androidx.compose.ui.unit.Constraints.fixed(w, height))
-            }
+            val placeables = measurables.map { it.measure(androidx.compose.ui.unit.Constraints.fixed(width, height)) }
             val rows = (placeables.size + columns - 1) / columns
             layout(constraints.maxWidth, (rows * height + (rows - 1).coerceAtLeast(0) * gap).coerceAtLeast(0)) {
                 placeables.forEachIndexed { i, p -> p.place((i % columns) * (width + gap), (i / columns) * (height + gap)) }

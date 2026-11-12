@@ -972,4 +972,11 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_settings_none">Nichts gefunden für „%1$s“</string>
     <string name="settings_display_motion_label">Anzeige und Bewegung</string>
     <string name="settings_color_modes_font_label">Farbmodus und Schrift</string>
+    <string name="settings_backup_export_locked_info">Die Sicherung enthält deinen ganzen Launcher mit persönlichen Daten wie Notizen, Orten, Kontakten und Links. Sie wird mit deinem Passwort verschlüsselt. Ohne das Passwort lässt sie sich nicht öffnen, auch nicht von uns. Merk es dir gut.</string>
+    <string name="settings_backup_password">Passwort</string>
+    <string name="settings_backup_password_repeat">Passwort wiederholen</string>
+    <string name="settings_backup_password_short">Mindestens %1$d Zeichen</string>
+    <string name="settings_backup_password_mismatch">Die Passwörter sind nicht gleich</string>
+    <string name="settings_backup_password_wrong">Falsches Passwort oder beschädigte Datei</string>
+    <string name="settings_backup_password_show">Passwort zeigen</string>
 </resources>

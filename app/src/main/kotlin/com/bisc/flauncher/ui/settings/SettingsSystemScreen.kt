@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Map
@@ -46,22 +48,34 @@ fun SettingsSystemScreen(
         runCatching { context.packageManager.getApplicationLabel(context.packageManager.getApplicationInfo(it, 0)).toString() }.getOrNull()
     } ?: defaultAppLabel
     var pendingImport by remember { mutableStateOf<android.net.Uri?>(null) }
+    // Whether the picked file is locked with a password; null while that is being checked.
+    var importLocked by remember { mutableStateOf<Boolean?>(null) }
     var confirmingExport by remember { mutableStateOf(false) }
+    // Held only from the password dialog until the file is chosen.
+    var exportPassword by remember { mutableStateOf<CharArray?>(null) }
     val showSettingsTips by viewModel.showSettingsTips.collectAsState()
     var language by remember { mutableStateOf(com.bisc.flauncher.util.AppLanguage.current(context)) }
     // Only the chosen language shows; the full list opens on tap, so it stays short as more come.
     val languages = listOf("" to stringResource(R.string.settings_language_system), "en" to "English", "de" to "Deutsch")
     var languagePickerOpen by remember { mutableStateOf(false) }
     val exportLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/zip")
+        androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/octet-stream")
     ) { uri ->
-        if (uri != null) viewModel.exportBackup(uri) { ok ->
+        val password = exportPassword
+        exportPassword = null
+        if (uri != null && password != null) viewModel.exportBackup(uri, password) { ok ->
             android.widget.Toast.makeText(context, if (ok) R.string.settings_backup_export_done else R.string.settings_backup_export_failed, android.widget.Toast.LENGTH_LONG).show()
-        }
+        } else password?.fill(' ')
     }
     val importLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
-    ) { uri -> if (uri != null) pendingImport = uri }
+    ) { uri ->
+        if (uri != null) {
+            importLocked = null
+            pendingImport = uri
+            viewModel.isBackupLocked(uri) { importLocked = it }
+        }
+    }
 
     SettingsSubScreen(title = stringResource(R.string.settings_system_title), navController = navController, onBack = onBack) {
         SettingsTileGrid(
@@ -150,29 +164,32 @@ fun SettingsSystemScreen(
         )
     }
     if (confirmingExport) {
-        var understood by remember { mutableStateOf(false) }
+        var password by remember { mutableStateOf("") }
+        var repeat by remember { mutableStateOf("") }
+        val valid = password.length >= MIN_BACKUP_PASSWORD && password == repeat
         AlertDialog(
             onDismissRequest = { confirmingExport = false },
             title = { Text(stringResource(R.string.settings_backup_export)) },
             text = {
-                androidx.compose.foundation.layout.Column {
-                    Text(stringResource(R.string.settings_backup_export_warning))
-                    androidx.compose.foundation.layout.Row(
-                        modifier = Modifier
-                            .padding(top = 12.dp)
-                            .clickable { understood = !understood },
-                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                    ) {
-                        androidx.compose.material3.Checkbox(checked = understood, onCheckedChange = { understood = it })
-                        Text(stringResource(R.string.settings_backup_export_understood))
-                    }
+                androidx.compose.foundation.layout.Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)) {
+                    Text(stringResource(R.string.settings_backup_export_locked_info))
+                    BackupPasswordField(password, { password = it }, stringResource(R.string.settings_backup_password))
+                    BackupPasswordField(
+                        repeat, { repeat = it }, stringResource(R.string.settings_backup_password_repeat),
+                        error = when {
+                            password.isNotEmpty() && password.length < MIN_BACKUP_PASSWORD -> stringResource(R.string.settings_backup_password_short, MIN_BACKUP_PASSWORD)
+                            repeat.isNotEmpty() && repeat != password -> stringResource(R.string.settings_backup_password_mismatch)
+                            else -> null
+                        }
+                    )
                 }
             },
             confirmButton = {
-                TextButton(enabled = understood, onClick = {
+                TextButton(enabled = valid, onClick = {
                     confirmingExport = false
+                    exportPassword = password.toCharArray()
                     val stamp = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
-                    exportLauncher.launch("freiraum-backup-$stamp.zip")
+                    exportLauncher.launch("freiraum-backup-$stamp.freiraum-backup")
                 }) { Text(stringResource(R.string.settings_backup_export_confirm)) }
             },
             dismissButton = { TextButton(onClick = { confirmingExport = false }) { Text(stringResource(R.string.widget_notes_cancel)) } }
@@ -180,27 +197,74 @@ fun SettingsSystemScreen(
     }
 
     pendingImport?.let { uri ->
+        var password by remember(uri) { mutableStateOf("") }
+        var wrong by remember(uri) { mutableStateOf(false) }
+        val locked = importLocked
         AlertDialog(
             onDismissRequest = { pendingImport = null },
             title = { Text(stringResource(R.string.settings_backup_import_confirm_title)) },
-            text = { Text(stringResource(R.string.settings_backup_import_confirm_message)) },
+            text = {
+                androidx.compose.foundation.layout.Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)) {
+                    Text(stringResource(R.string.settings_backup_import_confirm_message))
+                    if (locked == true) {
+                        BackupPasswordField(
+                            password, { password = it; wrong = false }, stringResource(R.string.settings_backup_password),
+                            error = if (wrong) stringResource(R.string.settings_backup_password_wrong) else null
+                        )
+                    }
+                }
+            },
             confirmButton = {
-                TextButton(onClick = {
-                    pendingImport = null
-                    viewModel.importBackup(uri) { result ->
-                        val message = when (result) {
-                            com.bisc.flauncher.data.backup.BackupManager.ImportResult.READY -> R.string.settings_backup_import_restarting
-                            com.bisc.flauncher.data.backup.BackupManager.ImportResult.NOT_A_BACKUP -> R.string.settings_backup_import_invalid
-                            com.bisc.flauncher.data.backup.BackupManager.ImportResult.TOO_NEW -> R.string.settings_backup_import_too_new
-                            com.bisc.flauncher.data.backup.BackupManager.ImportResult.FAILED -> R.string.settings_backup_import_failed
+                TextButton(enabled = locked == false || (locked == true && password.isNotEmpty()), onClick = {
+                    viewModel.importBackup(uri, if (locked == true) password.toCharArray() else null) { result ->
+                        if (result == com.bisc.flauncher.data.backup.BackupManager.ImportResult.WRONG_PASSWORD) {
+                            wrong = true
+                        } else {
+                            pendingImport = null
+                            val message = when (result) {
+                                com.bisc.flauncher.data.backup.BackupManager.ImportResult.READY -> R.string.settings_backup_import_restarting
+                                com.bisc.flauncher.data.backup.BackupManager.ImportResult.NOT_A_BACKUP -> R.string.settings_backup_import_invalid
+                                com.bisc.flauncher.data.backup.BackupManager.ImportResult.TOO_NEW -> R.string.settings_backup_import_too_new
+                                else -> R.string.settings_backup_import_failed
+                            }
+                            android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_LONG).show()
                         }
-                        android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_LONG).show()
                     }
                 }) { Text(stringResource(R.string.settings_backup_import)) }
             },
             dismissButton = { TextButton(onClick = { pendingImport = null }) { Text(stringResource(R.string.widget_notes_cancel)) } }
         )
     }
+}
+
+private const val MIN_BACKUP_PASSWORD = 8
+
+/** A password field with a button to show what was typed; never learned by the keyboard. */
+@Composable
+private fun BackupPasswordField(value: String, onChange: (String) -> Unit, label: String, error: String? = null) {
+    var visible by remember { mutableStateOf(false) }
+    androidx.compose.material3.OutlinedTextField(
+        value = value,
+        onValueChange = onChange,
+        label = { Text(label) },
+        singleLine = true,
+        isError = error != null,
+        supportingText = error?.let { { Text(it) } },
+        visualTransformation = if (visible) androidx.compose.ui.text.input.VisualTransformation.None else androidx.compose.ui.text.input.PasswordVisualTransformation(),
+        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+            keyboardType = androidx.compose.ui.text.input.KeyboardType.Password,
+            autoCorrectEnabled = false
+        ),
+        trailingIcon = {
+            androidx.compose.material3.IconButton(onClick = { visible = !visible }) {
+                androidx.compose.material3.Icon(
+                    if (visible) androidx.compose.material.icons.Icons.Filled.VisibilityOff else androidx.compose.material.icons.Icons.Filled.Visibility,
+                    contentDescription = stringResource(R.string.settings_backup_password_show)
+                )
+            }
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
 }
 
 /** A short list of radio choices that closes on pick. */

@@ -24,9 +24,22 @@ class BackupManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val database: FLauncherDatabase
 ) {
-    enum class ImportResult { READY, NOT_A_BACKUP, TOO_NEW, FAILED }
+    enum class ImportResult { READY, NOT_A_BACKUP, TOO_NEW, FAILED, WRONG_PASSWORD }
 
-    suspend fun export(uri: Uri): Boolean = withContext(Dispatchers.IO) {
+    /** Whether the file at [uri] is a backup locked with a password. */
+    suspend fun isLocked(uri: Uri): Boolean = withContext(Dispatchers.IO) {
+        runCatching {
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                val header = ByteArray(BackupCrypto.HEADER_PEEK)
+                var read = 0
+                while (read < header.size) { val n = input.read(header, read, header.size - read); if (n < 0) break; read += n }
+                BackupCrypto.isLocked(header.copyOf(read))
+            } ?: false
+        }.getOrDefault(false)
+    }
+
+    /** Writes the backup to [uri], locked with [password]. */
+    suspend fun export(uri: Uri, password: CharArray): Boolean = withContext(Dispatchers.IO) {
         runCatching {
             val db = database.openHelper.writableDatabase
             db.query("PRAGMA wal_checkpoint(TRUNCATE)").use { it.moveToFirst() }
@@ -37,7 +50,7 @@ class BackupManager @Inject constructor(
                 .put("app", context.packageName)
                 .toString()
 
-            context.contentResolver.openOutputStream(uri, "w")!!.buffered().use { out ->
+            BackupCrypto.lock(context.contentResolver.openOutputStream(uri, "w")!!.buffered(), password).buffered().use { out ->
                 ZipOutputStream(out).use { zip ->
                     zip.put(MANIFEST, manifest.toByteArray())
                     zip.putFile(DB_ENTRY, databaseFile(context))
@@ -54,13 +67,20 @@ class BackupManager @Inject constructor(
         }.isSuccess
     }
 
-    suspend fun stageImport(uri: Uri): ImportResult = withContext(Dispatchers.IO) {
+    /** [password] opens a locked backup; older unlocked ones open without. */
+    suspend fun stageImport(uri: Uri, password: CharArray? = null): ImportResult = withContext(Dispatchers.IO) {
         val staging = stagingDir(context)
         staging.deleteRecursively()
         staging.mkdirs()
         try {
             var manifest: JSONObject? = null
-            context.contentResolver.openInputStream(uri)?.buffered()?.use { input ->
+            context.contentResolver.openInputStream(uri)?.buffered()?.use { raw ->
+                raw.mark(BackupCrypto.HEADER_PEEK)
+                val header = ByteArray(BackupCrypto.HEADER_PEEK).also { raw.read(it) }
+                raw.reset()
+                val locked = BackupCrypto.isLocked(header)
+                if (locked && password == null) return@withContext ImportResult.WRONG_PASSWORD
+                val input = if (locked) BackupCrypto.unlock(raw, password!!).buffered() else raw
                 ZipInputStream(input).use { zip ->
                     var entry: ZipEntry? = zip.nextEntry
                     while (entry != null) {
@@ -81,6 +101,8 @@ class BackupManager @Inject constructor(
                         }
                         entry = zip.nextEntry
                     }
+                    // A locked file must run to its last chunk; a cut-off one fails here.
+                    if (locked) { val sink = ByteArray(8192); while (input.read(sink) >= 0) Unit }
                 }
             } ?: return@withContext ImportResult.FAILED
 
@@ -98,6 +120,9 @@ class BackupManager @Inject constructor(
             }
             File(staging, READY).writeText("1")
             ImportResult.READY
+        } catch (e: BackupCrypto.WrongPasswordException) {
+            staging.deleteRecursively()
+            ImportResult.WRONG_PASSWORD
         } catch (e: Exception) {
             staging.deleteRecursively()
             ImportResult.FAILED

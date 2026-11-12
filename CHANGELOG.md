@@ -3,13 +3,16 @@
 ## Unreleased
 
 - Settings tiles never break a word: a name too long for its tile gets a little smaller instead
-- Tiles laid out anew: every tile of a group has the same size, and symbol and name sit at the same height in all of them. Small tiles (three in a line) show only symbol, name and a short fact and are equally tall on every page. A big tile left alone in the last line spans the whole width
+- Tiles laid out anew: every tile of a group has the same size, and symbol and name sit at the same height in all of them. Small tiles (three in a line) show only symbol, name and a short fact and are equally tall on every page.
 - Apps and elements: back to five tiles of one size, two by two
 - The browser link left the settings start page; Extensions has its own tiles now
 - The App list is called App list everywhere, no more App overview on some pages
 - App list, Text search and App grid show their page in miniature on their first settings page, like the Home screen; a tap on a part opens it
 - Icons: the shape tiles and the preview row draw the icons exactly as the launcher does, so the
   rounded square shows as a rounded square, and they follow the chosen icon pack
+- Backups are encrypted: exporting asks for a password (at least 8 characters, typed twice) and
+  locks the file with it (AES-256-GCM, key from the password with PBKDF2). Importing a locked
+  backup asks for the password and says so if it is wrong; older unlocked backups still import
 
 ## 0.13.8
 

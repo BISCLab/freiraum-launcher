@@ -66,13 +66,22 @@ class SettingsViewModel @Inject constructor(
     private val actionButtonRepository: com.bisc.flauncher.data.repository.ActionButtonRepository,
     private val backupManager: com.bisc.flauncher.data.backup.BackupManager
 ) : ViewModel() {
-    fun exportBackup(uri: android.net.Uri, onResult: (Boolean) -> Unit) {
-        viewModelScope.launch { onResult(backupManager.export(uri)) }
+    fun exportBackup(uri: android.net.Uri, password: CharArray, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val ok = backupManager.export(uri, password)
+            password.fill(' ')
+            onResult(ok)
+        }
     }
 
-    fun importBackup(uri: android.net.Uri, onResult: (com.bisc.flauncher.data.backup.BackupManager.ImportResult) -> Unit) {
+    fun isBackupLocked(uri: android.net.Uri, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch { onResult(backupManager.isLocked(uri)) }
+    }
+
+    fun importBackup(uri: android.net.Uri, password: CharArray?, onResult: (com.bisc.flauncher.data.backup.BackupManager.ImportResult) -> Unit) {
         viewModelScope.launch {
-            val result = backupManager.stageImport(uri)
+            val result = backupManager.stageImport(uri, password)
+            password?.fill(' ')
             onResult(result)
             if (result == com.bisc.flauncher.data.backup.BackupManager.ImportResult.READY) {
                 kotlinx.coroutines.delay(900)
