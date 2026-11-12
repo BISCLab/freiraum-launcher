@@ -310,7 +310,7 @@ internal fun rowLabel(row: PageRow): String = when (row.type) {
     PageRowType.PANEL -> stringResource(R.string.settings_home_panel_label)
 }
 
-private fun widgetKindIcon(kind: String): ImageVector = when (kind) {
+internal fun widgetKindIcon(kind: String): ImageVector = when (kind) {
     WidgetKind.CLOCK -> Icons.Filled.Schedule
     WidgetKind.MUSIC -> Icons.Filled.MusicNote
     WidgetKind.WEATHER -> Icons.Filled.Cloud
@@ -346,7 +346,7 @@ internal fun clockTimeFormatLabel(format: String): String = when (format) {
 }
 
 @Composable
-private fun widgetKindLabel(kind: String): String = when (kind) {
+internal fun widgetKindLabel(kind: String): String = when (kind) {
     WidgetKind.CLOCK -> stringResource(R.string.picker_widget_clock)
     WidgetKind.MUSIC -> stringResource(R.string.picker_widget_music)
     WidgetKind.WEATHER -> stringResource(R.string.picker_widget_weather)

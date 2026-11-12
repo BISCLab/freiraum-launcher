@@ -595,6 +595,19 @@ class HomeViewModel @Inject constructor(
 
     // ---- Content data: folders, notes, places, websites, shortcuts ----
 
+    /** The Panel's widgets, top to bottom. */
+    val panelWidgets: StateFlow<List<com.bisc.flauncher.data.model.FolderItem>> =
+        combine(settingsRepository.panelWidgetFolderId, folderRepository.folderItems) { id, items ->
+            if (id == null) emptyList()
+            else items.filter { it.folderId == id && (it.type == GridItemType.WIDGET || it.type == GridItemType.SYSTEM_WIDGET) }.sortedBy { it.orderIndex }
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    suspend fun panelWidgetFolderId(): Long = folderRepository.panelWidgetFolderId()
+
+    fun addPanelWidget(kind: String, spanY: Int) {
+        viewModelScope.launch { folderRepository.addWidgetToFolder(folderRepository.panelWidgetFolderId(), kind, spanY) }
+    }
+
     val folders: StateFlow<List<Folder>> =
         folderRepository.folders.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 

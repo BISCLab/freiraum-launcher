@@ -328,7 +328,7 @@ private fun Modifier.watchLongPress(onLongPress: () -> Unit): Modifier = pointer
 
 /** A widget in a folder; a long press opens Edit and Remove. */
 @Composable
-private fun FolderWidgetRow(
+internal fun FolderWidgetRow(
     item: FolderItem,
     onExecuteAction: (com.bisc.flauncher.data.model.GestureAction) -> Unit,
     menuExpanded: Boolean,
@@ -486,4 +486,16 @@ private fun FolderContentCell(
 @Composable
 private fun GridLabel(text: String) {
     Text(text, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelSmall)
+}
+
+/** The Panel's widgets, above its elements, drawn like the widgets in a folder. */
+@Composable
+fun PanelWidgets(items: List<FolderItem>, onExecuteAction: (com.bisc.flauncher.data.model.GestureAction) -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        items.forEach { item ->
+            androidx.compose.runtime.key(item.id) {
+                FolderWidgetRow(item = item, onExecuteAction = onExecuteAction, menuExpanded = false, onLongPress = {}, onDismissMenu = {}, onEdit = {}, onRemove = {})
+            }
+        }
+    }
 }

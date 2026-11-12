@@ -909,4 +909,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_page_dock_panel_label">Dock und Panel</string>
     <string name="settings_page_shows_dock">Dock auf dieser Seite</string>
     <string name="settings_page_shows_panel">Panel auf dieser Seite</string>
+    <string name="settings_panel_widgets_label">Widgets</string>
+    <string name="settings_panel_add_widget">Widget hinzufügen</string>
+    <string name="settings_panel_widgets_info">Widgets stehen oben im Panel, die Elemente darunter. Ist das Panel voll, lässt es sich scrollen.</string>
 </resources>

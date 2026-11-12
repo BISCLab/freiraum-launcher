@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- New: the Panel can hold widgets, like a folder: clock, weather, music, notes or an Android widget,
+  on top of its elements. The Panel grows with them and scrolls when it is full. Add and edit them
+  under Home > Layout > Panel > Elements
 - A new page beside Home starts empty instead of with copies of Home's widgets; it takes Home's
   background, and Home's Dock and Panel come along
 - Every page beside Home can leave out the Dock or the Panel on its own (its settings, Dock and Panel)

@@ -773,6 +773,11 @@ class SettingsRepository @Inject constructor(
 
     // ---- Status bar ----
 
+    /** The folder that holds the Panel's widgets (built like a folder's), null until the first one. */
+    val panelWidgetFolderId: Flow<Long?> = dataStore.data.map { it[PANEL_WIDGET_FOLDER_KEY] }
+
+    suspend fun setPanelWidgetFolderId(id: Long) = dataStore.edit { it[PANEL_WIDGET_FOLDER_KEY] = id }
+
     /** Pages that leave out Home's Dock, and pages that leave out its Panel. */
     val pagesWithoutDock: Flow<Set<Long>> = dataStore.data.map { p -> p[PAGES_WITHOUT_DOCK_KEY].orEmpty().mapNotNull { it.toLongOrNull() }.toSet() }
     val pagesWithoutPanel: Flow<Set<Long>> = dataStore.data.map { p -> p[PAGES_WITHOUT_PANEL_KEY].orEmpty().mapNotNull { it.toLongOrNull() }.toSet() }
@@ -1256,6 +1261,7 @@ class SettingsRepository @Inject constructor(
         private val APP_LIST_FIELD_CORNER_KEY = intPreferencesKey("app_list_field_corner_percent")
         private val MENU_CORNER_KEY = intPreferencesKey("menu_corner_percent")
         private val PAGES_WITHOUT_DOCK_KEY = stringSetPreferencesKey("pages_without_dock")
+        private val PANEL_WIDGET_FOLDER_KEY = androidx.datastore.preferences.core.longPreferencesKey("panel_widget_folder_id")
         private val PAGES_WITHOUT_PANEL_KEY = stringSetPreferencesKey("pages_without_panel")
         private val APP_GRID_FIELD_CORNER_KEY = intPreferencesKey("app_grid_field_corner_percent")
         private val DESIGN_EFFECTS_KEY = stringPreferencesKey("design_effects")

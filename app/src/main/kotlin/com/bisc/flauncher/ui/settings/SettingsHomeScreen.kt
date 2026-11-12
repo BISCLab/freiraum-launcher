@@ -353,7 +353,30 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
     var pendingShortcut by remember { mutableStateOf(false) }
     var pendingRemoval by remember { mutableStateOf<RowEntry?>(null) }
 
+    val panelWidgets by viewModel.panelWidgets.collectAsState()
+    val panelFolderId by androidx.compose.runtime.produceState<Long?>(null) { value = viewModel.panelWidgetFolderId() }
+    var choosingWidget by remember { mutableStateOf(false) }
+    var sizingWidget by remember { mutableStateOf<String?>(null) }
+    var sizingSpan by remember { androidx.compose.runtime.mutableIntStateOf(1) }
+    val systemWidgetPickerFor by viewModel.systemWidgetPickerOpenForFolder.collectAsState()
+
     SettingsSubScreen(title = stringResource(R.string.settings_dock_elements_title), navController = navController, onBack = onBack) {
+        // Widgets sit on top of the Panel, its elements below them; the Panel scrolls when it is full.
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_panel_widgets_label), info = stringResource(R.string.settings_panel_widgets_info)) {
+            panelWidgets.forEach { item ->
+                SettingsPreference(
+                    icon = if (item.type == com.bisc.flauncher.data.model.GridItemType.SYSTEM_WIDGET) androidx.compose.material.icons.Icons.Filled.GridView else widgetKindIcon(item.payload),
+                    title = if (item.type == com.bisc.flauncher.data.model.GridItemType.SYSTEM_WIDGET) stringResource(R.string.picker_widget_more) else widgetKindLabel(item.payload),
+                    onClick = { panelFolderId?.let { navController.navigate("settings/folder/$it/widget/${item.id}") } }
+                )
+            }
+            SettingsPreference(
+                icon = androidx.compose.material.icons.Icons.Filled.Add,
+                title = stringResource(R.string.settings_panel_add_widget),
+                onClick = { choosingWidget = true },
+                trailing = null
+            )
+        }
         SettingsPreferenceGroup {
             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 com.bisc.flauncher.ui.home.GridEntries(
@@ -421,6 +444,40 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
             onShowLabelsChange = { viewModel.setRowShowLabels(row, it) },
             appearance = row.appearance(),
             onAppearanceChange = { viewModel.setRowAppearance(row, it) }
+        )
+    }
+
+    if (choosingWidget) {
+        FolderWidgetKindSheet(
+            onKindSelected = { kind ->
+                choosingWidget = false
+                sizingSpan = com.bisc.flauncher.data.model.WidgetKind.defaultSpan(kind)
+                sizingWidget = kind
+            },
+            onMoreSelected = {
+                choosingWidget = false
+                panelFolderId?.let(viewModel::openSystemWidgetPickerForFolder)
+            },
+            onDismiss = { choosingWidget = false }
+        )
+    }
+    sizingWidget?.let { kind ->
+        FolderWidgetSizeSheet(
+            row = newWidgetPreviewRow(0, kind, sizingSpan),
+            spanY = sizingSpan,
+            minSpan = com.bisc.flauncher.data.model.WidgetKind.minSpan(kind),
+            maxSpan = com.bisc.flauncher.data.model.WidgetKind.maxSpan(kind),
+            onSpanChange = { sizingSpan = it },
+            onSave = { viewModel.addPanelWidget(kind, sizingSpan); sizingWidget = null },
+            onDismiss = { sizingWidget = null }
+        )
+    }
+    systemWidgetPickerFor?.let { targetFolderId ->
+        val providers = remember(targetFolderId) { viewModel.installedSystemWidgetProviders() }
+        com.bisc.flauncher.ui.home.SystemWidgetPickerSheet(
+            providers = providers,
+            onProviderSelected = { provider -> viewModel.startAddSystemWidgetToFolder(targetFolderId, provider) },
+            onDismiss = viewModel::dismissSystemWidgetPicker
         )
     }
 

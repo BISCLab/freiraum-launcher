@@ -549,7 +549,7 @@ fun SettingsFolderEditScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FolderWidgetKindSheet(onKindSelected: (String) -> Unit, onMoreSelected: () -> Unit, onDismiss: () -> Unit) {
+internal fun FolderWidgetKindSheet(onKindSelected: (String) -> Unit, onMoreSelected: () -> Unit, onDismiss: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         androidx.compose.foundation.layout.Column(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -588,7 +588,7 @@ private fun FolderWidgetKindSheet(onKindSelected: (String) -> Unit, onMoreSelect
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FolderWidgetSizeSheet(
+internal fun FolderWidgetSizeSheet(
     row: com.bisc.flauncher.data.model.PageRow,
     spanY: Int,
     minSpan: Int,

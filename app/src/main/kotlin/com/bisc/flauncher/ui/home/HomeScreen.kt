@@ -859,7 +859,9 @@ fun HomeScreen(
             // A fixed shape the user picked up front (one column count per row), not an estimate
             // from content - predictable size that doesn't jump around as entries are added/removed,
             // same idea as the dock's own fixed pillMaxEntries width.
-            val panelHeight = (96.dp * panelRowShape.size + 64.dp).coerceIn(140.dp, maxHeight)
+            val panelWidgets by viewModel.panelWidgets.collectAsState()
+            val panelWidgetsHeight = panelWidgets.fold(0.dp) { sum, item -> sum + PageRowDimens.spanHeight(PageRowDimens.rowUnitHeight, item.spanY) + 8.dp }
+            val panelHeight = (96.dp * panelRowShape.size + 64.dp + panelWidgetsHeight).coerceIn(140.dp, maxHeight)
             val panelAppearance = homePanelRow?.appearance() ?: com.bisc.flauncher.data.model.ElementAppearance(borderEnabled = true)
             val panelBorderColor = resolveElementColors(panelAppearance).borderColor
 
@@ -889,6 +891,9 @@ fun HomeScreen(
                             .padding(top = maxOf(cachedStatusBarInset, cachedCutoutInset))
                             .padding(16.dp)
                     ) {
+                        if (panelWidgets.isNotEmpty()) item {
+                            PanelWidgets(panelWidgets, onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) })
+                        }
                         item {
                             homePanelRow?.let { row ->
                                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

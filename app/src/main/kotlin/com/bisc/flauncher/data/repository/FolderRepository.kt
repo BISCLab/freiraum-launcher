@@ -28,7 +28,18 @@ class FolderRepository @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val widgetHostManager: com.bisc.flauncher.util.SystemWidgetHostManager
 ) {
-    val folders: Flow<List<Folder>> = folderDao.observeAll()
+    /** Every folder but the one that holds the Panel's widgets. */
+    val folders: Flow<List<Folder>> = kotlinx.coroutines.flow.combine(folderDao.observeAll(), settingsRepository.panelWidgetFolderId) { all, panelId ->
+        if (panelId == null) all else all.filter { it.id != panelId }
+    }
+
+    /** The folder holding the Panel's widgets, made on first use. */
+    suspend fun panelWidgetFolderId(): Long {
+        settingsRepository.panelWidgetFolderId.first()?.let { id -> if (folderDao.get(id) != null) return id }
+        val id = folderDao.insert(Folder(name = "Panel"))
+        settingsRepository.setPanelWidgetFolderId(id)
+        return id
+    }
     val folderItems: Flow<List<FolderItem>> = folderItemDao.observeAll()
 
     suspend fun createFolder(name: String): Long = folderDao.insert(Folder(name = name))
