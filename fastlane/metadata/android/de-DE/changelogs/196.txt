@@ -1,0 +1,3 @@
+• Apps aus Arbeitsprofil und privatem Bereich überall: Textsuche, App-Raster, auf Seiten, im Dock, im Panel und in Ordnern, mit Abzeichen und Start im richtigen Profil
+• Seitenvorschau in den Einstellungen mit den echten Maßen des Bildschirms
+• Aussehen eines einzelnen Ordners mit fester Vorschau oben

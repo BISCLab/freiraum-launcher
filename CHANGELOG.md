@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.14.1
 
 - A single folder's look page works like every look page: the folder in small stays on top while
   the settings below scroll, with its real corners, and its state with the way back to the look of

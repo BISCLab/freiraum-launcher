@@ -1,0 +1,3 @@
+• Work profile and private space apps everywhere: text search, App grid, pages, Dock, Panel and folders, with their badge and starting in their profile
+• Page preview in the settings with the screen's real measures
+• A single folder's look page keeps its preview on top
