@@ -139,6 +139,22 @@ class AppIconLoader @Inject constructor(
         return resolved
     }
 
+    /** An app's icon exactly as the launcher draws it with [shape] and [iconPack] (null = the apps'
+     *  own icons), without touching the cache - for the settings' previews of a choice. */
+    fun render(componentName: ComponentName, shape: IconShape, iconPack: String?): ImageBitmap? {
+        if (iconPack != null) {
+            val name = runCatching {
+                IconPackAppFilterParser.parse(context, iconPack).let { mappings ->
+                    mappings.firstOrNull { it.first == componentName.flattenToString() || it.first == componentName.flattenToShortString() }?.second
+                        ?: mappings.firstOrNull { it.first.startsWith(componentName.packageName + "/") }?.second
+                }
+            }.getOrNull()
+            name?.let { loadPackIcon(iconPack, it) }?.let { return it }
+        }
+        val drawable = runCatching { context.packageManager.getActivityIcon(componentName) }.getOrNull() ?: return null
+        return renderMasked(drawable, shape).asImageBitmap()
+    }
+
     suspend fun warm(components: List<ComponentName>) = coroutineScope {
         components.chunked(WARM_CHUNK).map { chunk ->
             async(Dispatchers.Default) {

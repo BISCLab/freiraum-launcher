@@ -72,7 +72,9 @@ fun SettingsAppsGlobalScreen(navController: NavController, onBack: () -> Unit, v
                 ).forEach { (shape, label) ->
                     ShapeTile(
                         label = stringResource(label),
-                        shape = if (shape == IconShape.CIRCLE) CircleShape else RoundedCornerShape(26),
+                        shape = shape,
+                        iconPack = activeIconPack,
+                        viewModel = viewModel,
                         sample = samples.firstOrNull(),
                         selected = iconShape == shape,
                         onClick = { viewModel.setIconShape(shape) },
@@ -113,7 +115,7 @@ fun SettingsAppsGlobalScreen(navController: NavController, onBack: () -> Unit, v
 @Composable
 private fun IconsPreview(samples: List<AppInfo>, sizePercent: Int, shape: IconShape, pack: String?, viewModel: SettingsViewModel) {
     val icons by produceState<List<ImageBitmap?>>(emptyList(), samples, shape, pack) {
-        value = withContext(Dispatchers.IO) { samples.map { runCatching { viewModel.loadIcon(it.componentName) }.getOrNull() } }
+        value = withContext(Dispatchers.IO) { samples.map { runCatching { viewModel.iconLoader.render(it.componentName, shape, pack) }.getOrNull() } }
     }
     Box(
         modifier = Modifier
@@ -154,12 +156,15 @@ private fun rememberSystemIcon(component: ComponentName?): ImageBitmap? {
     }
 }
 
-/** One shape as a picture: a sample icon cut to it. */
+/** One shape as a picture: a sample icon drawn the way the launcher draws it with that shape and
+ *  the chosen icon pack. */
 @Composable
-private fun ShapeTile(label: String, shape: Shape, sample: AppInfo?, selected: Boolean, onClick: () -> Unit, modifier: Modifier) {
-    val icon = rememberSystemIcon(sample?.componentName)
+private fun ShapeTile(label: String, shape: IconShape, iconPack: String?, viewModel: SettingsViewModel, sample: AppInfo?, selected: Boolean, onClick: () -> Unit, modifier: Modifier) {
+    val icon by produceState<ImageBitmap?>(null, sample?.componentName, shape, iconPack) {
+        value = sample?.let { app -> withContext(Dispatchers.IO) { runCatching { viewModel.iconLoader.render(app.componentName, shape, iconPack) }.getOrNull() } }
+    }
     SelectableCard(selected, onClick, modifier) {
-        Box(Modifier.size(56.dp).clip(shape).background(MaterialTheme.colorScheme.surfaceContainerHighest), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(56.dp), contentAlignment = Alignment.Center) {
             icon?.let { Image(it, contentDescription = null, modifier = Modifier.size(56.dp)) }
         }
         Text(label, style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp))

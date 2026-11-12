@@ -8,6 +8,8 @@
 - The browser link left the settings start page; Extensions has its own tiles now
 - The App list is called App list everywhere, no more App overview on some pages
 - App list, Text search and App grid show their page in miniature on their first settings page, like the Home screen; a tap on a part opens it
+- Icons: the shape tiles and the preview row draw the icons exactly as the launcher does, so the
+  rounded square shows as a rounded square, and they follow the chosen icon pack
 
 ## 0.13.8
 
