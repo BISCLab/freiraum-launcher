@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.search
 
+import com.bisc.flauncher.ui.home.notificationDot
 import androidx.compose.foundation.layout.widthIn
 import android.content.ComponentName
 import androidx.compose.foundation.layout.Arrangement
@@ -258,7 +259,7 @@ private fun AppGridCell(
         modifier = Modifier.fillMaxWidth().appClickable(onClick = onClick, onLongClick = menu?.open).padding(vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(modifier = Modifier.size(iconSize)) {
+        Box(modifier = Modifier.size(iconSize).notificationDot(app.componentName.packageName)) {
             if (bitmap != null) Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.fillMaxSize())
             menu?.Menu?.invoke()
         }

@@ -439,7 +439,7 @@ private fun FolderContentCell(
                 val componentName = remember(item.payload) { ComponentName.unflattenFromString(item.payload) }
                 val bitmap = rememberAppIcon(componentName, loadIcon)
                 val label = componentName?.let(resolveLabel).orEmpty()
-                if (bitmap != null) Image(bitmap = bitmap, contentDescription = label, modifier = Modifier.size(56.dp))
+                if (bitmap != null) Image(bitmap = bitmap, contentDescription = label, modifier = Modifier.size(56.dp).notificationDot(componentName?.packageName))
                 if (showLabel) {
                     Spacer(Modifier.height(6.dp))
                     GridLabel(label)

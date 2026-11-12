@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -83,6 +84,8 @@ fun SettingsAppsGlobalScreen(navController: NavController, onBack: () -> Unit, v
                 }
             }
         }
+
+        NotificationDotsGroup(viewModel)
 
         SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_size_label)) {
             ExpandableIconSizeSlider(percent = iconSizePercent, onSettled = viewModel::setIconSizePercent)
@@ -218,4 +221,31 @@ private fun SelectableCard(selected: Boolean, onClick: () -> Unit, modifier: Mod
             .padding(vertical = 14.dp, horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) { content() }
+}
+
+/** The dots on app icons: on or off, and the way to notification access while it is missing. */
+@Composable
+private fun NotificationDotsGroup(viewModel: SettingsViewModel) {
+    val context = LocalContext.current
+    val on by viewModel.showNotificationDots.collectAsState()
+    var tick by androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(0) }
+    // Checked again whenever the page comes back, e.g. after granting access in the system.
+    androidx.lifecycle.compose.LifecycleResumeEffect(Unit) { tick++; onPauseOrDispose { } }
+    val access = tick.let { androidx.core.app.NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName) }
+    SettingsPreferenceGroup(title = stringResource(R.string.settings_dots_label), info = stringResource(R.string.settings_dots_info)) {
+        SettingsPreference(
+            icon = null,
+            title = stringResource(R.string.settings_dots_show),
+            summary = if (on && !access) stringResource(R.string.settings_dots_no_access) else null,
+            onClick = { viewModel.setShowNotificationDots(!on) },
+            trailing = { androidx.compose.material3.Switch(checked = on, onCheckedChange = viewModel::setShowNotificationDots) }
+        )
+        if (on && !access) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_dots_grant),
+                onClick = { com.bisc.flauncher.util.openNotificationAccessSettings(context) }
+            )
+        }
+    }
 }

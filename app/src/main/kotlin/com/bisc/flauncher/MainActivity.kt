@@ -58,6 +58,7 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var widgetHostManager: SystemWidgetHostManager
 
     @Inject lateinit var appIconLoader: com.bisc.flauncher.util.AppIconLoader
+    @Inject lateinit var notificationDots: com.bisc.flauncher.data.repository.NotificationDotsRepository
 
     @Inject lateinit var themeRepository: com.bisc.flauncher.data.repository.ThemeRepository
 
@@ -141,6 +142,8 @@ class MainActivity : ComponentActivity() {
             val globalIconShape by settingsVm.iconShape.collectAsState()
             val appOverridesForIconSize by settingsVm.appOverrides.collectAsState()
             val showSettingsTips by settingsVm.showSettingsTips.collectAsState()
+            val dotsOn by settingsVm.showNotificationDots.collectAsState()
+            val dotPackages by notificationDots.packages.collectAsState()
             val lockPortrait by settingsVm.lockPortrait.collectAsState()
             val settingsThemeMode by settingsVm.settingsThemeMode.collectAsState()
             val categoryIcons by settingsVm.categoryIcons.collectAsState()
@@ -219,6 +222,7 @@ class MainActivity : ComponentActivity() {
                 com.bisc.flauncher.ui.home.LocalIconSizeResolver provides iconSizeResolver,
                 com.bisc.flauncher.ui.home.LocalIconShape provides globalIconShape,
                 com.bisc.flauncher.ui.settings.LocalShowSettingsTips provides showSettingsTips,
+                com.bisc.flauncher.ui.home.LocalNotificationDots provides (if (dotsOn) dotPackages else emptySet()),
                 com.bisc.flauncher.ui.LocalMotion provides motion,
                 com.bisc.flauncher.ui.LocalMotionPrefs provides motionPrefs,
                 com.bisc.flauncher.ui.theme.LocalDesignEffects provides designEffects,

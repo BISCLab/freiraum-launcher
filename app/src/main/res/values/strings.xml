@@ -203,7 +203,7 @@
     <string name="settings_permissions_contacts">Contacts</string>
     <string name="settings_permissions_contacts_purpose">Searching and pinning contacts.</string>
     <string name="settings_permissions_notifications">Notification access</string>
-    <string name="settings_permissions_notifications_purpose">Current playback in the music widget.</string>
+    <string name="settings_permissions_notifications_purpose">Now playing in the music widget, and dots on app icons.</string>
     <string name="settings_default_launcher_description">Set Freiraum as the default launcher.</string>
     <string name="settings_default_launcher_already_set">Freiraum is the default launcher.</string>
 
@@ -988,4 +988,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="profile_unlock">Unlock</string>
     <string name="profile_paused">Paused. Turn the profile on to see its apps.</string>
     <string name="profile_locked">Locked. Unlock the space to see its apps.</string>
+    <string name="settings_dots_label">Notification dots</string>
+    <string name="settings_dots_info">A small dot in your accent color shows on an app icon while the app has a notification. Freiraum only sees which app has one, never what it says. Ongoing ones such as music do not count.</string>
+    <string name="settings_dots_show">Dots on app icons</string>
+    <string name="settings_dots_no_access">Needs access to notifications</string>
+    <string name="settings_dots_grant">Allow access</string>
 </resources>

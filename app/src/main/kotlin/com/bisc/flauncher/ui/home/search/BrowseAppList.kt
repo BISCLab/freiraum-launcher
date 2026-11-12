@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.search
 
+import com.bisc.flauncher.ui.home.notificationDot
 import androidx.compose.runtime.collectAsState
 import com.bisc.flauncher.ui.theme.designGlow
 import android.content.ComponentName
@@ -421,7 +422,7 @@ private fun AppBrowseRow(app: AppInfo, loadIcon: (ComponentName) -> ImageBitmap?
         val icon = @Composable {
             // The menu opens at the icon.
             Box {
-                if (bitmap != null) Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(iconSize))
+                if (bitmap != null) Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(iconSize).notificationDot(app.componentName.packageName))
                 menu?.Menu?.invoke()
             }
         }

@@ -459,7 +459,7 @@ internal fun AppIconCell(
     ) {
         menu?.Menu?.invoke()
         if (bitmap != null) {
-            Image(bitmap = bitmap, contentDescription = label, modifier = Modifier.size(56.dp * effectiveIconSizeScale))
+            Image(bitmap = bitmap, contentDescription = label, modifier = Modifier.size(56.dp * effectiveIconSizeScale).notificationDot(componentName?.packageName))
         } else {
             Spacer(
                 modifier = Modifier
@@ -807,6 +807,7 @@ fun PillRowEntries(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
+                                    .notificationDot(componentName?.packageName)
                                     .background(if (bitmap == null) UNSET_APP_SLOT_COLOR else Color.Transparent)
                                     .combinedClickable(enabled = componentName != null, onLongClick = menu?.open, onClick = { componentName?.let { launchApp(context, it) } }),
                                 contentAlignment = Alignment.Center

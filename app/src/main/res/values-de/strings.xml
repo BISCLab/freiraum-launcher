@@ -204,7 +204,7 @@
     <string name="settings_permissions_contacts">Kontakte</string>
     <string name="settings_permissions_contacts_purpose">Kontakte suchen und anheften.</string>
     <string name="settings_permissions_notifications">Benachrichtigungszugriff</string>
-    <string name="settings_permissions_notifications_purpose">Aktuelle Wiedergabe im Musik-Widget.</string>
+    <string name="settings_permissions_notifications_purpose">Aktuelle Wiedergabe im Musik-Widget und Punkte an App-Symbolen.</string>
     <string name="settings_default_launcher_description">Freiraum als Standard-Launcher festlegen.</string>
     <string name="settings_default_launcher_already_set">Freiraum ist der Standard-Launcher.</string>
 
@@ -988,4 +988,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="profile_unlock">Entsperren</string>
     <string name="profile_paused">Pausiert. Schalte das Profil ein, um seine Apps zu sehen.</string>
     <string name="profile_locked">Gesperrt. Entsperre den Bereich, um seine Apps zu sehen.</string>
+    <string name="settings_dots_label">Benachrichtigungspunkte</string>
+    <string name="settings_dots_info">Ein kleiner Punkt in deiner Akzentfarbe zeigt an einem App-Symbol, dass die App eine Benachrichtigung hat. Freiraum sieht dafür nur, welche App etwas meldet, nie den Inhalt. Laufende Meldungen wie Musik zählen nicht.</string>
+    <string name="settings_dots_show">Punkte an App-Symbolen</string>
+    <string name="settings_dots_no_access">Braucht den Zugriff auf Benachrichtigungen</string>
+    <string name="settings_dots_grant">Zugriff erlauben</string>
 </resources>

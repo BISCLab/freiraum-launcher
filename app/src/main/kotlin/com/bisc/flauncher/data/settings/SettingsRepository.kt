@@ -105,6 +105,13 @@ class SettingsRepository @Inject constructor(
     /** Whether settings show their "?" tip buttons. Off by default. */
     val showSettingsTips: Flow<Boolean> = dataStore.data.map { it[SHOW_SETTINGS_TIPS_KEY] ?: true }
 
+    /** Whether app icons show a dot while the app has a notification. */
+    val showNotificationDots: Flow<Boolean> = dataStore.data.map { it[SHOW_NOTIFICATION_DOTS_KEY] ?: true }
+
+    suspend fun setShowNotificationDots(show: Boolean) {
+        dataStore.edit { it[SHOW_NOTIFICATION_DOTS_KEY] = show }
+    }
+
     suspend fun setShowSettingsTips(show: Boolean) {
         dataStore.edit { it[SHOW_SETTINGS_TIPS_KEY] = show }
     }
@@ -1273,6 +1280,7 @@ class SettingsRepository @Inject constructor(
         private val WIDGET_ARROW_CORNER_KEY = intPreferencesKey("widget_arrow_corner")
         private const val WIDGET_ARROW_PREFIX = "widget_arrow"
         private val SHOW_SETTINGS_TIPS_KEY = booleanPreferencesKey("show_settings_tips")
+        private val SHOW_NOTIFICATION_DOTS_KEY = booleanPreferencesKey("show_notification_dots")
         private val CAROUSEL_ENDLESS_KEY = booleanPreferencesKey("carousel_endless")
         private val MUSIC_SOURCES_KEY = stringSetPreferencesKey("music_sources")
         private val MUSIC_COVER_ROUNDED_KEY = booleanPreferencesKey("music_cover_rounded")

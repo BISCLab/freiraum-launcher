@@ -20,7 +20,7 @@ object LauncherSettingsTargets {
         LauncherSettingsTarget(R.string.settings_section_global_background, "settings/appearance/background",
             listOf("hintergrundbild", "abdunkeln", "wallpaper", "background")),
         LauncherSettingsTarget(R.string.settings_icons_label, "settings/appearance/icons",
-            listOf("icons", "symbole", "icon pack", "symbolgröße", "icon size")),
+            listOf("icons", "symbole", "icon pack", "symbolgröße", "icon size", "benachrichtigungspunkte", "punkte", "notification dots", "badges")),
         LauncherSettingsTarget(R.string.settings_section_pages, "settings/pages",
             listOf("karussell", "endlos", "startseite", "zusatzseite", "carousel", "endless", "home screen")),
         LauncherSettingsTarget(R.string.settings_home_layout_title, "settings/pages/${LauncherSettingsTarget.HOME}/home/layout",

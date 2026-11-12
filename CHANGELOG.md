@@ -26,6 +26,10 @@
   finds Instagram), and from four letters on a small typo is forgiven ("chorme" finds Chrome).
   Matches at the start of a word still come first. Numbers stay exact. This works in every
   category, in the App list and App grid search and in the settings search
+- Notification dots: an app with a notification gets a small dot in the accent color on its icon,
+  on the pages, in the Dock and Panel, in folders, the App list and the App grid. Ongoing ones such
+  as music do not count, and only which app has one is seen, never what it says. Switched on and
+  off under Appearance > Icons, which also leads to the notification access if it is missing
 
 ## 0.13.8
 

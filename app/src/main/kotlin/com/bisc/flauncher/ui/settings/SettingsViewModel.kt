@@ -377,6 +377,13 @@ class SettingsViewModel @Inject constructor(
     val searchKeyboardAutoOpen: StateFlow<Boolean> =
         repository.searchKeyboardAutoOpen.stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
+    val showNotificationDots: StateFlow<Boolean> =
+        repository.showNotificationDots.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    fun setShowNotificationDots(show: Boolean) {
+        viewModelScope.launch { repository.setShowNotificationDots(show) }
+    }
+
     val showSettingsTips: StateFlow<Boolean> =
         repository.showSettingsTips.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
