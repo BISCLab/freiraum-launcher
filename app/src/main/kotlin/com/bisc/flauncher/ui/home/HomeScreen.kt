@@ -12,6 +12,8 @@ import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -711,16 +713,23 @@ fun HomeScreen(
             val dockHeight = DockDimens.height(homeDockRow)
             androidx.compose.animation.AnimatedVisibility(
                 visible = dockExpanded,
-                enter = fadeIn(tween(160)) + androidx.compose.animation.expandVertically(tween(200), expandFrom = Alignment.Bottom),
-                exit = fadeOut(tween(140)) + androidx.compose.animation.shrinkVertically(tween(180), shrinkTowards = Alignment.Bottom),
+                enter = fadeIn(tween(160)),
+                exit = fadeOut(tween(140)),
                 modifier = Modifier.align(Alignment.BottomCenter).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().height(dockHeight + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
             ) {
+                val dockReveal by transition.animateFloat(
+                    transitionSpec = { tween(if (targetState == androidx.compose.animation.EnterExitState.Visible) 200 else 180) },
+                    label = "dockReveal"
+                ) { if (it == androidx.compose.animation.EnterExitState.Visible) 1f else 0f }
                 DockPanelSurface(
                     appearance = dockAppearance.copy(borderEnabled = false),
                     shape = dockShape,
                     effectTarget = "dock",
+                    reveal = { dockReveal },
+                    revealFromBottom = true,
                     modifier = Modifier
                         .fillMaxSize()
+                        .wrapContentHeight(Alignment.Bottom)
                         .then(
                             if (dockAppearance.borderEnabled) {
                                 Modifier.freeEdgeBorder(1.dp, dockBorderColor, dockCornerRadius, FreeEdge.TOP)
@@ -867,16 +876,23 @@ fun HomeScreen(
 
             AnimatedVisibility(
                 visible = isPanelOpen && !folderOpen && homePanelRow?.enabled != false && currentPageId !in withoutDockPanel.second,
-                enter = expandVertically(animationSpec = tween(160), expandFrom = Alignment.Top) + fadeIn(tween(100)),
-                exit = shrinkVertically(animationSpec = tween(200), shrinkTowards = Alignment.Top) + fadeOut(tween(150)),
+                enter = fadeIn(tween(100)),
+                exit = fadeOut(tween(150)),
                 modifier = Modifier.align(Alignment.TopCenter).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().height(panelHeight)
             ) {
+                // The card itself grows instead of being uncovered, so its shadow comes along.
+                val panelReveal by transition.animateFloat(
+                    transitionSpec = { tween(if (targetState == androidx.compose.animation.EnterExitState.Visible) 160 else 200) },
+                    label = "panelReveal"
+                ) { if (it == androidx.compose.animation.EnterExitState.Visible) 1f else 0f }
                 DockPanelSurface(
                     appearance = panelAppearance.copy(borderEnabled = false),
                     shape = panelShape,
                     effectTarget = "panel",
+                    reveal = { panelReveal },
                     modifier = Modifier
                         .fillMaxSize()
+                        .wrapContentHeight(Alignment.Top)
                         .then(
                             if (panelAppearance.borderEnabled) {
                                 Modifier.freeEdgeBorder(1.dp, panelBorderColor, panelCornerRadius, FreeEdge.BOTTOM)
