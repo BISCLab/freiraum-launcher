@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.compose.material.icons.filled.Close
@@ -473,8 +475,26 @@ private fun CategoryModeRow(
                 .padding(start = 10.dp, end = 4.dp, top = 2.dp, bottom = 2.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // One line; a longer name slides sideways to be read in full.
-                androidx.compose.foundation.layout.Box(Modifier.weight(1f, fill = false).horizontalScroll(androidx.compose.foundation.rememberScrollState())) {
+                // One line; a longer name fades out at the edge and slides sideways to be read in full.
+                val nameScroll = androidx.compose.foundation.rememberScrollState()
+                androidx.compose.foundation.layout.Box(
+                    Modifier
+                        .weight(1f, fill = false)
+                        .graphicsLayer { compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen }
+                        .drawWithContent {
+                            drawContent()
+                            val fade = 28.dp.toPx().coerceAtMost(size.width / 3f)
+                            if (nameScroll.canScrollForward) drawRect(
+                                androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color.Black, Color.Transparent), startX = size.width - fade, endX = size.width),
+                                blendMode = androidx.compose.ui.graphics.BlendMode.DstIn
+                            )
+                            if (nameScroll.canScrollBackward) drawRect(
+                                androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color.Transparent, Color.Black), startX = 0f, endX = fade),
+                                blendMode = androidx.compose.ui.graphics.BlendMode.DstIn
+                            )
+                        }
+                        .horizontalScroll(nameScroll)
+                ) {
                     Text(
                         stringResource(category.settingsLabelRes),
                         style = MaterialTheme.typography.bodyLarge,

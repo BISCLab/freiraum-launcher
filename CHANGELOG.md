@@ -4,6 +4,8 @@
 
 - Panel and Dock open in one smooth motion: the card itself grows, with its shadow and edges at
   every step, instead of being uncovered first and getting its shadow at the end (3D designs)
+- Text search behavior: a category name too long for its line fades out softly at the edge instead
+  of being cut off hard; it still slides sideways to be read in full
 
 ## 0.13.7
 
