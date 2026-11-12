@@ -10,6 +10,10 @@
   Panel and folders, or onto a gesture, like any app. They always start in their profile; while
   the profile is paused or locked, a tap asks to switch it on. Their long-press menu opens App info
   in their profile; their own name, icon and size can be set like for any app
+- The small page in the settings now uses the phone's exact measures: rows start below the real
+  status bar, the Dock has its real height with the navigation bar under it, and the Panel's edge
+  lies over the page instead of pushing it down. A full page now reaches down to one row gap above
+  the Dock there too, like on the home screen
 
 ## 0.14.0
 
