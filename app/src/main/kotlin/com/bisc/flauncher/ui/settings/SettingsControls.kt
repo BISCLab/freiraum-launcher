@@ -1,5 +1,11 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -575,4 +581,59 @@ fun <T> SettingsChoiceRow(title: String, options: List<Pair<T, String>>, selecte
             }
         }
     )
+}
+
+/** One tile of a [SettingsTileGrid]. [badge] is a short fact in the accent color (a count, the choice). */
+class SettingsTile(
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val title: String,
+    val summary: String? = null,
+    val badge: String? = null,
+    val onClick: () -> Unit
+)
+
+/** Overview pages: big tiles side by side instead of a long list, all of a line equally tall. */
+@Composable
+fun SettingsTileGrid(tiles: List<SettingsTile>, columns: Int = 2, title: String? = null) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        if (title != null) SettingsGroupLabel(title)
+        tiles.chunked(columns).forEach { line ->
+            Row(modifier = Modifier.fillMaxWidth().height(androidx.compose.foundation.layout.IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                line.forEach { tile ->
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clip(SettingsCardShape)
+                            .background(MaterialTheme.colorScheme.surfaceContainer)
+                            .clickable(onClick = tile.onClick)
+                            .padding(horizontal = 14.dp, vertical = if (columns >= 3) 14.dp else 16.dp),
+                        horizontalAlignment = if (columns >= 3) Alignment.CenterHorizontally else Alignment.Start,
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.size(if (columns >= 3) 40.dp else 44.dp).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
+                            contentAlignment = Alignment.Center
+                        ) { Icon(tile.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp)) }
+                        Text(
+                            tile.title,
+                            style = if (columns >= 3) MaterialTheme.typography.labelLarge else MaterialTheme.typography.titleMedium,
+                            textAlign = if (columns >= 3) androidx.compose.ui.text.style.TextAlign.Center else null,
+                            maxLines = 2,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                        tile.summary?.let {
+                            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 3,
+                                textAlign = if (columns >= 3) androidx.compose.ui.text.style.TextAlign.Center else null)
+                        }
+                        tile.badge?.let {
+                            Text(it, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary, maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                        }
+                    }
+                }
+                repeat(columns - line.size) { Spacer(Modifier.weight(1f)) }
+            }
+        }
+    }
 }

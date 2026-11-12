@@ -1,5 +1,13 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material.icons.filled.Interests
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.RoundedCorner
+import androidx.compose.material.icons.filled.FormatColorFill
+import androidx.compose.material.icons.filled.Wallpaper
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Switch
@@ -44,20 +52,13 @@ fun SettingsAppearanceScreen(
     var fontPickerOpen by remember { mutableStateOf(false) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_design_title), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_ready_look_label)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.designs_title),
-                summary = stringResource(R.string.designs_entry_summary),
-                onClick = { onNavigate("appearance/designs") }
+        SettingsTileGrid(
+            title = stringResource(R.string.settings_ready_look_label),
+            tiles = listOf(
+                SettingsTile(Icons.Filled.AutoAwesome, stringResource(R.string.designs_title), stringResource(R.string.designs_entry_summary)) { onNavigate("appearance/designs") },
+                SettingsTile(Icons.Filled.Wallpaper, stringResource(R.string.packs_title), stringResource(R.string.packs_entry_summary)) { onNavigate("wallpaper_packs") }
             )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.packs_title),
-                summary = stringResource(R.string.packs_entry_summary),
-                onClick = { onNavigate("wallpaper_packs") }
-            )
-        }
+        )
         SettingsPreferenceGroup(
             title = stringResource(R.string.settings_color_modes_label),
             info = stringResource(R.string.settings_color_modes_info)
@@ -95,40 +96,22 @@ fun SettingsAppearanceScreen(
                 trailing = null
             )
         }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_parts_label)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_colors_all),
-                summary = stringResource(R.string.settings_colors_all_summary),
-                onClick = { onNavigate("appearance/colors") }
+        SettingsTileGrid(
+            title = stringResource(R.string.settings_parts_label),
+            columns = 3,
+            tiles = listOf(
+                SettingsTile(Icons.Filled.FormatColorFill, stringResource(R.string.settings_colors_all)) { onNavigate("appearance/colors") },
+                SettingsTile(Icons.Filled.RoundedCorner, stringResource(R.string.settings_corners_all)) { onNavigate("appearance/corners") },
+                SettingsTile(Icons.Filled.MoreVert, stringResource(R.string.settings_menus_title)) { onNavigate("appearance/menus") }
             )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_corners_all),
-                summary = stringResource(R.string.settings_corners_all_summary),
-                onClick = { onNavigate("appearance/corners") }
+        )
+        SettingsTileGrid(
+            title = stringResource(R.string.settings_background_icons_label),
+            tiles = listOf(
+                SettingsTile(Icons.Filled.Image, stringResource(R.string.settings_section_global_background), stringResource(R.string.settings_card_global_background_subtitle)) { onNavigate("appearance/background") },
+                SettingsTile(Icons.Filled.Interests, stringResource(R.string.settings_icons_label), stringResource(R.string.settings_icons_summary)) { onNavigate("appearance/icons") }
             )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_menus_title),
-                summary = stringResource(R.string.settings_menus_summary),
-                onClick = { onNavigate("appearance/menus") }
-            )
-        }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_icons_label)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_section_global_background),
-                summary = stringResource(R.string.settings_card_global_background_subtitle),
-                onClick = { onNavigate("appearance/background") }
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_icons_label),
-                summary = stringResource(R.string.settings_icons_summary),
-                onClick = { onNavigate("appearance/icons") }
-            )
-        }
+        )
         SettingsPreferenceGroup(title = stringResource(R.string.settings_display_label)) {
             SettingsPreference(
                 icon = null,

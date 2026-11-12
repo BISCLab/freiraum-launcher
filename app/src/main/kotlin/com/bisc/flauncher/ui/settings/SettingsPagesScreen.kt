@@ -96,6 +96,14 @@ fun SettingsPagesScreen(
 
     var pickingTemplateForDirection by remember { mutableStateOf<PageDirection?>(null) }
 
+    // A new page is made right away and opened, empty, to fill.
+    fun addPage(direction: PageDirection) {
+        coroutineScope.launch {
+            val newId = viewModel.addPageInDirection(direction)
+            onOpenPage(LauncherPage(id = newId, orderIndex = 0, kind = LauncherPageKind.ROWS))
+        }
+    }
+
     SettingsSubScreen(title = stringResource(R.string.settings_section_pages), navController = navController, onBack = onBack) {
         SettingsGroupLabel(stringResource(R.string.settings_pages_carousel_label))
         // Icon and name live in each page's own Appearance screen (see PageIdentityRows), removal at
@@ -105,8 +113,8 @@ fun SettingsPagesScreen(
             gestureFor = ::gestureForPage,
             onTileClick = onOpenPage,
             onReorder = viewModel::reorderRowsPages,
-            onAddLeft = { pickingTemplateForDirection = PageDirection.LEFT },
-            onAddRight = { pickingTemplateForDirection = PageDirection.RIGHT }
+            onAddLeft = { addPage(PageDirection.LEFT) },
+            onAddRight = { addPage(PageDirection.RIGHT) }
         )
         SettingsPreferenceGroup {
             SettingsPreference(

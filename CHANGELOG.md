@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Settings start with four big tiles for the areas, each saying what is inside, and a Quick access
+  row of six tiles: Designs, Wallpapers, Icons, Gestures, Text search, Folders
+- Apps and elements is a page of tiles that say how many of each there are, with a line on what
+  elements are for
+- Appearance shows ready looks, all parts and background and icons as tiles instead of rows
+- Adding a page with + makes it at once and opens it, without a choice in between that only ever had
+  one option
 - Dock and Panel settings start with their look in small and large cards: what is in it comes first
   (with how many elements and widgets), then when the Dock shows, then the look. Elements are no
   longer hidden under the look

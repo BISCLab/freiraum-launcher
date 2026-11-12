@@ -1,5 +1,9 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Gesture
+import androidx.compose.material.icons.filled.Interests
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.widthIn
@@ -104,36 +108,32 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                 // Three levels, global to specific: Appearance (looks the same everywhere), Pages (each
                 // page and utility page, plus gestures), Apps & elements (the library of apps, folders,
                 // places, links and action buttons) - then System for everything about fitting into the phone.
-                SettingsPreferenceGroup(title = stringResource(R.string.settings_group_basics)) {
-                    SettingsPreference(
-                        icon = Icons.Filled.Palette,
-                        title = stringResource(R.string.settings_design_title),
-                        summary = stringResource(R.string.settings_card_design_subtitle),
-                        onClick = { onNavigate("appearance") }
+                SettingsTileGrid(
+                    title = stringResource(R.string.settings_group_basics),
+                    tiles = listOf(
+                        SettingsTile(Icons.Filled.Palette, stringResource(R.string.settings_design_title), stringResource(R.string.settings_card_design_short)) { onNavigate("appearance") },
+                        SettingsTile(Icons.Filled.ViewCarousel, stringResource(R.string.settings_section_pages), stringResource(R.string.settings_card_pages_short)) { onNavigate("pages") },
+                        SettingsTile(Icons.Filled.Apps, stringResource(R.string.settings_section_elements), stringResource(R.string.settings_card_elements_short)) { onNavigate("elements") },
+                        SettingsTile(
+                            Icons.Filled.PhoneAndroid,
+                            stringResource(R.string.settings_system_title),
+                            stringResource(if (isDefault) R.string.settings_card_system_short else R.string.settings_default_launcher_description)
+                        ) { onNavigate("system") }
                     )
-                    SettingsPreference(
-                        icon = Icons.Filled.ViewCarousel,
-                        title = stringResource(R.string.settings_section_pages),
-                        summary = stringResource(R.string.settings_card_pages_subtitle),
-                        onClick = { onNavigate("pages") }
+                )
+                // What people come looking for most, one tap away.
+                SettingsTileGrid(
+                    title = stringResource(R.string.settings_quick_label),
+                    columns = 3,
+                    tiles = listOf(
+                        SettingsTile(Icons.Filled.AutoAwesome, stringResource(R.string.designs_title)) { onNavigate("appearance/designs") },
+                        SettingsTile(Icons.Filled.Wallpaper, stringResource(R.string.packs_title)) { onNavigate("wallpaper_packs") },
+                        SettingsTile(Icons.Filled.Interests, stringResource(R.string.settings_icons_label)) { onNavigate("appearance/icons") },
+                        SettingsTile(Icons.Filled.Gesture, stringResource(R.string.settings_section_gestures)) { onNavigate("gestures") },
+                        SettingsTile(Icons.Filled.Search, stringResource(R.string.settings_section_search_full)) { onNavigate("search") },
+                        SettingsTile(Icons.Filled.Folder, stringResource(R.string.settings_section_folder)) { onNavigate("folder") }
                     )
-                    SettingsPreference(
-                        icon = Icons.Filled.Apps,
-                        title = stringResource(R.string.settings_section_elements),
-                        summary = stringResource(R.string.settings_card_elements_subtitle),
-                        onClick = { onNavigate("elements") }
-                    )
-                    SettingsPreference(
-                        icon = Icons.Filled.PhoneAndroid,
-                        title = stringResource(R.string.settings_system_title),
-                        summary = if (isDefault) {
-                            stringResource(R.string.settings_card_system_subtitle)
-                        } else {
-                            stringResource(R.string.settings_default_launcher_description)
-                        },
-                        onClick = { onNavigate("system") }
-                    )
-                }
+                )
                 // What can be added to the launcher: designs, wallpaper packs, widgets.
                 SettingsPreferenceGroup {
                     SettingsPreference(

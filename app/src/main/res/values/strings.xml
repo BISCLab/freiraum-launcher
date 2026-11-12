@@ -943,4 +943,15 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_move_up">Move up</string>
     <string name="settings_move_down">Move down</string>
     <string name="settings_add_element_title">Add</string>
+    <string name="settings_quick_label">Quick access</string>
+    <string name="settings_card_design_short">Designs, colors, font, corners, icons</string>
+    <string name="settings_card_pages_short">Home, further pages, search, gestures</string>
+    <string name="settings_card_elements_short">Apps, folders, places, links, actions</string>
+    <string name="settings_card_system_short">Permissions, language, backup</string>
+    <string name="settings_elements_intro">You set up elements here once and then place them anywhere: in the Dock, the Panel, Element-Boxes and folders.</string>
+    <string name="settings_elements_apps_short">Name, icon, where they show</string>
+    <string name="settings_elements_folders_short">Make and fill</string>
+    <string name="settings_elements_places_short">Addresses for map apps</string>
+    <string name="settings_elements_links_short">Web pages to tap</string>
+    <string name="settings_elements_actions_short">Buttons for pages, Panel, Dock</string>
 </resources>
