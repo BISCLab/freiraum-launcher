@@ -595,27 +595,29 @@ class SettingsTile(
     val onClick: () -> Unit
 )
 
-/** Overview pages: big tiles side by side instead of a long list, all of a line equally tall. */
+/**
+ * Overview pages: big tiles side by side instead of a long list. Every tile of a grid has the same
+ * size, and symbol and name sit at the same height in all of them. Small tiles (three or more in a
+ * line) show symbol, name and at most a short badge, never a summary, and are equally tall on
+ * every page.
+ */
 @Composable
 fun SettingsTileGrid(tiles: List<SettingsTile>, columns: Int = 2, title: String? = null, info: String? = null) {
+    val small = columns >= 3
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (title != null) SettingsGroupLabel(title, info = info)
-        tiles.chunked(columns).forEach { line ->
-            Row(modifier = Modifier.fillMaxWidth().height(androidx.compose.foundation.layout.IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                line.forEach { tile ->
-                    val small = columns >= 3
+        androidx.compose.ui.layout.Layout(
+            modifier = Modifier.fillMaxWidth(),
+            content = {
+                tiles.forEach { tile ->
                     Column(
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            // Small tiles are all equally tall, wherever they are, badge or not.
-                            .then(if (small) Modifier.heightIn(min = SMALL_TILE_HEIGHT) else Modifier)
                             .clip(SettingsCardShape)
                             .background(MaterialTheme.colorScheme.surfaceContainer)
                             .clickable(onClick = tile.onClick)
                             .padding(horizontal = if (small) 10.dp else 14.dp, vertical = if (small) 14.dp else 16.dp),
                         horizontalAlignment = if (small) Alignment.CenterHorizontally else Alignment.Start,
-                        verticalArrangement = if (small) Arrangement.spacedBy(6.dp, Alignment.CenterVertically) else Arrangement.spacedBy(6.dp)
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Box(
                             modifier = Modifier.size(if (small) 40.dp else 44.dp).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
@@ -627,17 +629,33 @@ fun SettingsTileGrid(tiles: List<SettingsTile>, columns: Int = 2, title: String?
                             textAlign = if (small) androidx.compose.ui.text.style.TextAlign.Center else null,
                             modifier = Modifier.padding(top = 4.dp)
                         )
-                        tile.summary?.let {
-                            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 3,
-                                textAlign = if (columns >= 3) androidx.compose.ui.text.style.TextAlign.Center else null)
+                        if (!small) tile.summary?.let {
+                            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 3)
                         }
                         tile.badge?.let {
                             Text(it, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary, maxLines = 1,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                textAlign = if (small) androidx.compose.ui.text.style.TextAlign.Center else null)
                         }
                     }
                 }
-                repeat(columns - line.size) { Spacer(Modifier.weight(1f)) }
+            }
+        ) { measurables, constraints ->
+            val gap = 10.dp.roundToPx()
+            val width = ((constraints.maxWidth - gap * (columns - 1)) / columns).coerceAtLeast(0)
+            // One height for the whole grid: the tallest tile's, and for small tiles never below the
+            // shared small height, so small tiles match from page to page.
+            val tallest = measurables.maxOfOrNull { it.maxIntrinsicHeight(width) } ?: 0
+            val height = if (small) maxOf(tallest, SMALL_TILE_HEIGHT.roundToPx()) else tallest
+            // A big tile left alone in the last line takes the whole width instead of half of it.
+            val lone = !small && measurables.size % columns == 1 && measurables.size > 1
+            val placeables = measurables.mapIndexed { i, m ->
+                val w = if (lone && i == measurables.lastIndex) constraints.maxWidth else width
+                m.measure(androidx.compose.ui.unit.Constraints.fixed(w, height))
+            }
+            val rows = (placeables.size + columns - 1) / columns
+            layout(constraints.maxWidth, (rows * height + (rows - 1).coerceAtLeast(0) * gap).coerceAtLeast(0)) {
+                placeables.forEachIndexed { i, p -> p.place((i % columns) * (width + gap), (i / columns) * (height + gap)) }
             }
         }
     }

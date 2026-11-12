@@ -37,16 +37,10 @@ fun SettingsElementsScreen(navController: NavController, onBack: () -> Unit, vie
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 4.dp)
         )
-        // The two big ones side by side, the three smaller kinds in a line below.
         SettingsTileGrid(
             tiles = listOf(
                 SettingsTile(Icons.Filled.Apps, stringResource(R.string.settings_section_manage_apps), stringResource(R.string.settings_elements_apps_short), apps.size.toString()) { navController.navigate("settings/apps") },
-                SettingsTile(androidx.compose.material.icons.Icons.Filled.Folder, stringResource(R.string.settings_section_folder), stringResource(R.string.settings_elements_folders_short), folders.size.toString()) { navController.navigate("settings/folder") }
-            )
-        )
-        SettingsTileGrid(
-            columns = 3,
-            tiles = listOf(
+                SettingsTile(androidx.compose.material.icons.Icons.Filled.Folder, stringResource(R.string.settings_section_folder), stringResource(R.string.settings_elements_folders_short), folders.size.toString()) { navController.navigate("settings/folder") },
                 SettingsTile(Icons.Filled.Place, stringResource(R.string.settings_elements_addresses_title), stringResource(R.string.settings_elements_places_short), places.size.toString()) { navController.navigate("settings/elements/addresses") },
                 SettingsTile(Icons.Filled.Language, stringResource(R.string.settings_elements_links_title), stringResource(R.string.settings_elements_links_short), links.size.toString()) { navController.navigate("settings/elements/links") },
                 SettingsTile(Icons.Filled.Bolt, stringResource(R.string.settings_elements_actionbuttons_title), stringResource(R.string.settings_elements_actions_short), buttons.size.toString()) { navController.navigate("settings/elements/actionbuttons") }
