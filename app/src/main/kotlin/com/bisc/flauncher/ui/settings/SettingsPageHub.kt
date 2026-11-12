@@ -37,9 +37,12 @@ internal fun AppearanceBehaviorHub(
     behaviorContents: String,
     navController: NavController,
     onBack: () -> Unit,
-    onNavigate: (String) -> Unit
+    onNavigate: (String) -> Unit,
+    /** The page in miniature; a tap on a part opens it. */
+    preview: (@Composable () -> Unit)? = null
 ) {
     SettingsSubScreen(title = title, navController = navController, onBack = onBack) {
+        preview?.invoke()
         Text(
             intro,
             style = MaterialTheme.typography.bodyMedium,

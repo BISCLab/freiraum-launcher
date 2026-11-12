@@ -79,7 +79,8 @@ fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, o
         behaviorContents = stringResource(R.string.settings_hub_search_behavior),
         navController = navController,
         onBack = onBack,
-        onNavigate = onNavigate
+        onNavigate = onNavigate,
+        preview = { SearchPreview(onNavigate = onNavigate) }
     )
 }
 

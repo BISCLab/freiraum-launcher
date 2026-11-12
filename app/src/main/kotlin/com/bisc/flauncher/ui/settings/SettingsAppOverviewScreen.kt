@@ -38,7 +38,8 @@ fun SettingsAppOverviewScreen(navController: NavController, onBack: () -> Unit, 
         behaviorContents = stringResource(R.string.settings_hub_app_list_behavior),
         navController = navController,
         onBack = onBack,
-        onNavigate = onNavigate
+        onNavigate = onNavigate,
+        preview = { AppListPreview(onNavigate = onNavigate) }
     )
 }
 

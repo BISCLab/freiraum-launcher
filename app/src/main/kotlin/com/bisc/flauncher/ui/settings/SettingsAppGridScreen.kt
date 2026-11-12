@@ -45,7 +45,8 @@ fun SettingsAppGridScreen(navController: NavController, onBack: () -> Unit, onNa
         behaviorContents = stringResource(R.string.settings_hub_app_grid_behavior),
         navController = navController,
         onBack = onBack,
-        onNavigate = onNavigate
+        onNavigate = onNavigate,
+        preview = { AppGridPreview(onNavigate = onNavigate) }
     )
 }
 

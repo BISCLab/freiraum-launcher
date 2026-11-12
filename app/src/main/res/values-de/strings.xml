@@ -280,7 +280,7 @@
     <string name="settings_gesture_action_quick_settings">Schnelleinstellungen öffnen</string>
 
     <string name="settings_section_pages">Seiten</string>
-    <string name="settings_section_app_overview">App-Übersicht</string>
+    <string name="settings_section_app_overview">App-Liste</string>
     <string name="settings_card_pages_subtitle">Widgets, Element-Boxen, Hintergründe</string>
     <string name="settings_pages_home">Startbildschirm</string>
     <string name="settings_home_appearance_title">Aussehen</string>
@@ -290,7 +290,7 @@
     <string name="settings_home_panel_label">Panel</string>
     <string name="settings_home_dock_label">Dock</string>
     <string name="settings_dock_elements_title">Elemente</string>
-    <string name="settings_pages_app_overview">App-Übersicht</string>
+    <string name="settings_pages_app_overview">App-Liste</string>
     <string name="settings_pages_search">Textsuche</string>
     <string name="settings_pages_page">Seite %1$d</string>
     <string name="settings_pages_add">Seite hinzufügen</string>
@@ -422,8 +422,8 @@
     <string name="settings_backup_import_too_new">Sicherung stammt aus einer neueren Freiraum-Version</string>
     <string name="settings_backup_import_failed">Datei konnte nicht gelesen werden</string>
     <string name="settings_statusbar_hide_all">Überall ausblenden</string>
-    <string name="settings_statusbar_hide_all_summary">Schaltet die Statusleiste auf jeder Seite, der Schnellübersicht, der Textsuche und in Ordnern aus. Danach kann sie pro Bildschirm einzeln wieder eingeschaltet werden. Wischen vom oberen Rand zeigt sie immer kurzzeitig an.</string>
-    <string name="settings_statusbar_confirm_hide_message">Dadurch wird die Statusleiste auf jeder Seite, der Schnellübersicht, der Textsuche und in Ordnern auf einmal ausgeblendet — unabhängig davon, wie jede einzeln aktuell eingestellt ist.</string>
+    <string name="settings_statusbar_hide_all_summary">Schaltet die Statusleiste auf jeder Seite, der App-Liste, der Textsuche und in Ordnern aus. Danach kann sie pro Bildschirm einzeln wieder eingeschaltet werden. Wischen vom oberen Rand zeigt sie immer kurzzeitig an.</string>
+    <string name="settings_statusbar_confirm_hide_message">Dadurch wird die Statusleiste auf jeder Seite, der App-Liste, der Textsuche und in Ordnern auf einmal ausgeblendet — unabhängig davon, wie jede einzeln aktuell eingestellt ist.</string>
     <string name="settings_corner_radius_value">%1$d%%</string>
     <string name="settings_statusbar_hide_page">Statusleiste ausblenden</string>
     <string name="settings_folder_hide_status_bar">Statusleiste in Ordnern ausblenden</string>
@@ -435,7 +435,7 @@
     <string name="settings_folder_creator_create">Erstellen</string>
     <string name="settings_section_search_full">Textsuche</string>
     <string name="settings_app_list_search_button">Suchbutton</string>
-    <string name="settings_app_list_search_button_summary">Schwebender Suchbutton in der App-Übersicht an der Position des Dock-Buttons.</string>
+    <string name="settings_app_list_search_button_summary">Schwebender Suchbutton in der App-Liste an der Position des Dock-Buttons.</string>
     <string name="settings_app_icon_label">Symbol</string>
     <string name="settings_app_icon_default">Standard</string>
     <string name="settings_app_icon_reset">Standardsymbol verwenden</string>
