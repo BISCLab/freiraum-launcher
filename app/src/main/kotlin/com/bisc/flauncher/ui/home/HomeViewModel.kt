@@ -571,7 +571,12 @@ class HomeViewModel @Inject constructor(
         val nameMatches = visible.filter { app ->
             overrides[app.componentName.flattenToString()]?.revealMode != RevealMode.SEARCH_CODE &&
                 matchesAllWordStarts(app.label, query)
-        }.sortedByDescending { foldForSearch(it.label).startsWith(foldForSearch(query.trim())) }
+        }.sortedWith(
+            // Matches at a word start first, then inside a word, then with a typo; within each, the
+            // ones whose name starts with the query.
+            compareByDescending<AppInfo> { com.bisc.flauncher.util.searchScore(it.label, query) }
+                .thenByDescending { foldForSearch(it.label).startsWith(foldForSearch(query.trim())) }
+        )
         val codeMatches = visible.filter { app ->
             val override = overrides[app.componentName.flattenToString()]
             override?.revealMode == RevealMode.SEARCH_CODE && !override.revealCode.isNullOrBlank() &&

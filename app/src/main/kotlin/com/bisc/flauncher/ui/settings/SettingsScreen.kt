@@ -239,7 +239,7 @@ private fun SettingsSearchResults(query: String, onOpen: (String) -> Unit) {
         if (query.isBlank()) emptyList()
         else com.bisc.flauncher.data.model.LauncherSettingsTargets.all.filter {
             com.bisc.flauncher.util.matchesLabelOrKeywords(context.getString(it.labelRes), it.keywords, query)
-        }
+        }.sortedByDescending { com.bisc.flauncher.util.labelOrKeywordsScore(context.getString(it.labelRes), it.keywords, query) }
     }
     Column(
         modifier = Modifier.widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().imePadding().verticalScroll(rememberScrollState()).padding(16.dp),

@@ -22,6 +22,10 @@
   own heading with its badge, and start in their profile. The heading pauses or turns on the work
   profile and locks or unlocks the private space; while it is off, a note says so. While searching
   the App list, matching apps of these profiles show too
+- Text search finds more: a word of three letters or more is also found inside a word ("gram"
+  finds Instagram), and from four letters on a small typo is forgiven ("chorme" finds Chrome).
+  Matches at the start of a word still come first. Numbers stay exact. This works in every
+  category, in the App list and App grid search and in the settings search
 
 ## 0.13.8
 

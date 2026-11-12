@@ -166,7 +166,7 @@ fun SearchOverlay(
         if (query.isBlank() || SearchCategory.LAUNCHER_SETTINGS !in activeCategories) emptyList()
         else com.bisc.flauncher.data.model.LauncherSettingsTargets.all.filter {
             matchesLabelOrKeywords(context.getString(it.labelRes), it.keywords, query)
-        }
+        }.sortedByDescending { com.bisc.flauncher.util.labelOrKeywordsScore(context.getString(it.labelRes), it.keywords, query) }
     }
 
     // The page has no fill of its own over its background - [appearance] only contributes the text
