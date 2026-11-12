@@ -194,16 +194,6 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                         )
                     )
                 }
-                // Everything there is, on the page in the browser.
-                SettingsPreferenceGroup {
-                    SettingsPreference(
-                        icon = Icons.Filled.Extension,
-                        title = stringResource(R.string.extensions_browse),
-                        summary = stringResource(R.string.extensions_browse_summary),
-                        onClick = { openExtensionsPage(context) },
-                        trailing = { Icon(androidx.compose.material.icons.Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null) }
-                    )
-                }
             }
         }
         }

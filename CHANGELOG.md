@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Settings tiles never break a word: a name too long for its tile gets a little smaller instead
+- The small tiles are all equally tall, with or without a count under the name
+- The browser link left the settings start page; Extensions has its own tiles now
+
 ## 0.13.8
 
 - Panel and Dock open in one smooth motion: the card itself grows, with its shadow and edges at

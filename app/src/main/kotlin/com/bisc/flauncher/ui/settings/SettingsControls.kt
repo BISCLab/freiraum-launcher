@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.clickable
@@ -601,26 +603,28 @@ fun SettingsTileGrid(tiles: List<SettingsTile>, columns: Int = 2, title: String?
         tiles.chunked(columns).forEach { line ->
             Row(modifier = Modifier.fillMaxWidth().height(androidx.compose.foundation.layout.IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 line.forEach { tile ->
+                    val small = columns >= 3
                     Column(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight()
+                            // Small tiles are all equally tall, wherever they are, badge or not.
+                            .then(if (small) Modifier.heightIn(min = SMALL_TILE_HEIGHT) else Modifier)
                             .clip(SettingsCardShape)
                             .background(MaterialTheme.colorScheme.surfaceContainer)
                             .clickable(onClick = tile.onClick)
-                            .padding(horizontal = 14.dp, vertical = if (columns >= 3) 14.dp else 16.dp),
-                        horizontalAlignment = if (columns >= 3) Alignment.CenterHorizontally else Alignment.Start,
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                            .padding(horizontal = if (small) 10.dp else 14.dp, vertical = if (small) 14.dp else 16.dp),
+                        horizontalAlignment = if (small) Alignment.CenterHorizontally else Alignment.Start,
+                        verticalArrangement = if (small) Arrangement.spacedBy(6.dp, Alignment.CenterVertically) else Arrangement.spacedBy(6.dp)
                     ) {
                         Box(
-                            modifier = Modifier.size(if (columns >= 3) 40.dp else 44.dp).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
+                            modifier = Modifier.size(if (small) 40.dp else 44.dp).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
                             contentAlignment = Alignment.Center
                         ) { Icon(tile.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp)) }
-                        Text(
+                        WholeWordsText(
                             tile.title,
-                            style = if (columns >= 3) MaterialTheme.typography.labelLarge else MaterialTheme.typography.titleMedium,
-                            textAlign = if (columns >= 3) androidx.compose.ui.text.style.TextAlign.Center else null,
-                            maxLines = 2,
+                            style = if (small) MaterialTheme.typography.labelLarge else MaterialTheme.typography.titleMedium,
+                            textAlign = if (small) androidx.compose.ui.text.style.TextAlign.Center else null,
                             modifier = Modifier.padding(top = 4.dp)
                         )
                         tile.summary?.let {
@@ -637,6 +641,41 @@ fun SettingsTileGrid(tiles: List<SettingsTile>, columns: Int = 2, title: String?
             }
         }
     }
+}
+
+private val SMALL_TILE_HEIGHT = 124.dp
+
+/**
+ * A tile's name: at most two lines, and never broken inside a word. When a word is too long for the
+ * width ("Startbildschirm" in a small tile), the text gets a little smaller until it fits.
+ */
+@Composable
+private fun WholeWordsText(
+    text: String,
+    style: androidx.compose.ui.text.TextStyle,
+    textAlign: androidx.compose.ui.text.style.TextAlign?,
+    modifier: Modifier = Modifier
+) {
+    // Shrinks step by step after each layout that broke a word, and only shows once it fits.
+    var scale by remember(text, style) { androidx.compose.runtime.mutableFloatStateOf(1f) }
+    var ready by remember(text, style) { mutableStateOf(false) }
+    val scaled = if (scale == 1f) style else style.copy(fontSize = style.fontSize * scale, lineHeight = style.fontSize * scale * 1.25f)
+    Text(
+        text,
+        style = scaled,
+        textAlign = textAlign,
+        maxLines = 2,
+        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+        modifier = modifier.drawWithContent { if (ready) drawContent() },
+        onTextLayout = { layout ->
+            val brokenWord = (0 until layout.lineCount - 1).any { line ->
+                val end = layout.getLineEnd(line)
+                end in 1 until text.length && !text[end - 1].isWhitespace() && !text[end].isWhitespace() && text[end - 1] != '-'
+            }
+            // Down to about two thirds of the size; past that it would not read well anyway.
+            if ((brokenWord || layout.hasVisualOverflow) && scale > 0.66f) scale *= 0.94f else ready = true
+        }
+    )
 }
 
 /** The mark of a choice: a filled circle with a check when chosen, an empty ring when not. Same as
