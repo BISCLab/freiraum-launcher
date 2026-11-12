@@ -215,6 +215,7 @@ fun HomeScreen(
     val onAppOverviewPage = appListOpen
     val overviewSurfaceDark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), appOverviewBackground)
     val currentPageId = pages.getOrNull(realIndex(pagerState.currentPage))?.id ?: -1L
+    val withoutDockPanel by viewModel.pagesWithoutDockPanel.collectAsState()
     val currentPageHideStatusBar by remember(currentPageId) { viewModel.pageHideStatusBar(currentPageId) }
         .collectAsState(initial = false)
     // Its own page-scoped flag, independent of text search's.
@@ -561,14 +562,14 @@ fun HomeScreen(
                                     onDoubleTap = { ripple(RippleKind.DOUBLE_TAP); viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.DOUBLE_TAP, context, openPageById, openSettingsFromGesture) },
                                     onTap = { ripple(RippleKind.TAP) },
                                     onSwipeUp = {
-                                        if (dockVisibilityMode == com.bisc.flauncher.data.model.DockVisibilityMode.MANUAL && homeDockRow?.enabled == true) {
+                                        if (dockVisibilityMode == com.bisc.flauncher.data.model.DockVisibilityMode.MANUAL && homeDockRow?.enabled == true && currentPageId !in withoutDockPanel.first) {
                                             dockExpanded = true
                                         } else {
                                             viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.SWIPE_UP, context, openPageById, openSettingsFromGesture)
                                         }
                                     },
                                     onSwipeDown = {
-                                        if (homePanelRow?.enabled == true) {
+                                        if (homePanelRow?.enabled == true && currentPageId !in withoutDockPanel.second) {
                                             viewModel.openOverview()
                                         } else {
                                             viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.SWIPE_DOWN, context, openPageById, openSettingsFromGesture)
@@ -591,7 +592,7 @@ fun HomeScreen(
                         // Home's Dock floats over every page, flush to the screen's bottom edge: content
                         // reserves its exact height (1 or 2 rows, captions) plus the nav bar inset, and
                         // keeps the same gap above it as between its own rows.
-                        val shownDock = homeDockRow?.takeIf { it.enabled }
+                        val shownDock = homeDockRow?.takeIf { it.enabled && page.id !in withoutDockPanel.first }
                         val reservedForDock = shownDock?.let { DockDimens.height(it) + PageRowDimens.rowSpacing }?.plus(
                             WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                         )
@@ -684,7 +685,7 @@ fun HomeScreen(
         // (see detectHomeGestures above) is the only way to open it, never a visible notch. Placed
         // before the search/app-list overlays below so those naturally cover it when open;
         // folderHideDock keeps the existing "hide the dock while a folder is open" behavior.
-        if (homeDockRow != null && homeDockRow.enabled && !(folderOpen && folderHideDock)) {
+        if (homeDockRow != null && homeDockRow.enabled && currentPageId !in withoutDockPanel.first && !(folderOpen && folderHideDock)) {
             // Tapping the open background collapses the dock, same as tapping outside any modal - 
             // only live while there's actually something to collapse back to.
             if (dockExpanded && dockCanCollapse) {
@@ -819,7 +820,7 @@ fun HomeScreen(
         // the real home screen (and its wallpaper) visible but dimmed underneath, like a standard modal
         // backdrop, instead of painting over the entire screen with a flat color.
         AnimatedVisibility(
-            visible = isPanelOpen && !folderOpen && homePanelRow?.enabled != false,
+            visible = isPanelOpen && !folderOpen && homePanelRow?.enabled != false && currentPageId !in withoutDockPanel.second,
             enter = fadeIn(tween(120)),
             exit = fadeOut(tween(160)),
             modifier = Modifier.fillMaxSize()
@@ -863,7 +864,7 @@ fun HomeScreen(
             val panelBorderColor = resolveElementColors(panelAppearance).borderColor
 
             AnimatedVisibility(
-                visible = isPanelOpen && !folderOpen && homePanelRow?.enabled != false,
+                visible = isPanelOpen && !folderOpen && homePanelRow?.enabled != false && currentPageId !in withoutDockPanel.second,
                 enter = expandVertically(animationSpec = tween(160), expandFrom = Alignment.Top) + fadeIn(tween(100)),
                 exit = shrinkVertically(animationSpec = tween(200), shrinkTowards = Alignment.Top) + fadeOut(tween(150)),
                 modifier = Modifier.align(Alignment.TopCenter).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().height(panelHeight)

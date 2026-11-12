@@ -109,6 +109,23 @@ fun SettingsPageRowsScreen(
                 onClick = { navController.navigate("settings/pages/$pageId/appearance") }
             )
         }
+
+        // Home's Dock and Panel come along to every page; each can be left out here.
+        val withoutDockPanel by viewModel.pagesWithoutDockPanel.collectAsState()
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_page_dock_panel_label)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_page_shows_dock),
+                onClick = { viewModel.setPageShowsDock(pageId, pageId in withoutDockPanel.first) },
+                trailing = { androidx.compose.material3.Switch(checked = pageId !in withoutDockPanel.first, onCheckedChange = { viewModel.setPageShowsDock(pageId, it) }) }
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_page_shows_panel),
+                onClick = { viewModel.setPageShowsPanel(pageId, pageId in withoutDockPanel.second) },
+                trailing = { androidx.compose.material3.Switch(checked = pageId !in withoutDockPanel.second, onCheckedChange = { viewModel.setPageShowsPanel(pageId, it) }) }
+            )
+        }
         run {
             SettingsPreferenceGroup {
                 if (rows.isEmpty()) {

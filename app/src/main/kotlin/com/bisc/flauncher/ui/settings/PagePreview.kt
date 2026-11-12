@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.asPaddingValues
 import android.content.ComponentName
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -84,16 +86,29 @@ fun PagePreview(pageId: Long, isHome: Boolean, navController: NavController, vie
     val dock = homeRows.find { it.type == PageRowType.SEARCH_BAR }
     val panel = homeRows.find { it.type == PageRowType.PANEL }
     val contentRows = rows.filter { it.enabled && it.type != PageRowType.SEARCH_BAR && it.type != PageRowType.PANEL }
+    val withoutDockPanel by viewModel.pagesWithoutDockPanel.collectAsState()
+    val unitCounts by viewModel.rowUnitCounts.collectAsState()
     val surfaceDark = rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), background)
     val phoneShape = RoundedCornerShape(24.dp)
     val base = "settings/pages/$pageId"
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    // The whole screen, bars included, as the page is laid out on it.
+    val density = LocalDensity.current
+    val rootView = androidx.compose.ui.platform.LocalView.current.rootView
+    val screenHeight = with(density) { rootView.height.toDp() }.takeIf { it > 0.dp } ?: LocalConfiguration.current.screenHeightDp.dp
+    val screenWidth = with(density) { rootView.width.toDp() }.takeIf { it > 0.dp } ?: LocalConfiguration.current.screenWidthDp.dp
+    val shownDock = dock?.takeIf { it.enabled && pageId !in withoutDockPanel.first }
+    val shownPanel = panel?.takeIf { pageId !in withoutDockPanel.second }
+    // Rows stretch to fill the page like on the phone (see HomeScreen): from below the status bar
+    // down to one row gap above the Dock.
+    val navBar = androidx.compose.foundation.layout.WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val bottomReserve = shownDock?.let { com.bisc.flauncher.ui.home.dock.DockDimens.height(it) + PageRowDimens.rowSpacing + navBar } ?: (navBar + 16.dp)
+    val unit = PageRowDimens.stretchedUnit(screenHeight - STATUS_BAR - 16.dp - bottomReserve, unitCounts[pageId] ?: 0)
 
     Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth(0.6f)
-                .aspectRatio(0.5f)
+                .aspectRatio((screenWidth / screenHeight).coerceIn(0.4f, 0.75f))
                 .clip(phoneShape)
                 .border(3.dp, MaterialTheme.colorScheme.outline, phoneShape)
         ) {
@@ -108,9 +123,9 @@ fun PagePreview(pageId: Long, isHome: Boolean, navController: NavController, vie
             )
 
             Column(modifier = Modifier.fillMaxSize()) {
-                if (panel != null && panel.enabled) {
+                if (shownPanel != null && shownPanel.enabled) {
                     // The Panel lives above the page, pulled down on demand - shown as its edge.
-                    MiniPanelEdge(panel, surfaceDark, onClick = if (isHome) ({ navController.navigate("$base/home/panel") }) else null)
+                    MiniPanelEdge(shownPanel, surfaceDark, onClick = if (isHome) ({ navController.navigate("$base/home/panel") }) else null)
                 } else {
                     Spacer(modifier = Modifier.height(STATUS_BAR * scale))
                 }
@@ -119,7 +134,7 @@ fun PagePreview(pageId: Long, isHome: Boolean, navController: NavController, vie
                     verticalArrangement = Arrangement.spacedBy(PageRowDimens.rowSpacing * scale)
                 ) {
                     contentRows.forEach { row ->
-                        MiniRow(row, entriesByRow[row.id].orEmpty(), surfaceDark, scale, viewModel) {
+                        MiniRow(row, entriesByRow[row.id].orEmpty(), surfaceDark, scale, unit, viewModel) {
                             when (row.type) {
                                 PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET -> navController.navigate("$base/rows/${row.id}")
                                 else -> navController.navigate("$base/rows/${row.id}/elementbox")
@@ -128,8 +143,8 @@ fun PagePreview(pageId: Long, isHome: Boolean, navController: NavController, vie
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                if (dock != null && dock.enabled) {
-                    MiniDock(dock, entriesByRow[dock.id].orEmpty(), surfaceDark, scale, viewModel, onClick = if (isHome) ({ navController.navigate("$base/home/layout/dock") }) else null)
+                if (shownDock != null) {
+                    MiniDock(shownDock, entriesByRow[dock.id].orEmpty(), surfaceDark, scale, viewModel, onClick = if (isHome) ({ navController.navigate("$base/home/layout/dock") }) else null)
                 }
             }
         }
@@ -141,12 +156,11 @@ private fun miniRadius(percent: Int): Dp = MINI_ROW_RADIUS * (percent.coerceIn(0
 /** One row in small at its real height: an element box with its real icons in its columns, a
  *  widget with its own symbol, an Android widget with its app's icon and name. */
 @Composable
-private fun MiniRow(row: PageRow, entries: List<RowEntry>, surfaceDark: Boolean, scale: Float, viewModel: HomeViewModel, onClick: () -> Unit) {
+private fun MiniRow(row: PageRow, entries: List<RowEntry>, surfaceDark: Boolean, scale: Float, unit: Dp, viewModel: HomeViewModel, onClick: () -> Unit) {
     val appearance = row.appearance()
     val colors = resolveElementColors(appearance, surfaceDark)
     val shape: Shape = RoundedCornerShape(miniRadius(row.cornerRadiusPercent))
     val side = if (row.edgeToEdge) 0.dp else MINI_SIDE_MARGIN
-    val unit = PageRowDimens.rowUnitHeight
     val density = LocalDensity.current
     val realHeight = when (row.type) {
         PageRowType.ELEMENT_BOX -> {

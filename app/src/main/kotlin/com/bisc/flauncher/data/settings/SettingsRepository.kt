@@ -773,6 +773,20 @@ class SettingsRepository @Inject constructor(
 
     // ---- Status bar ----
 
+    /** Pages that leave out Home's Dock, and pages that leave out its Panel. */
+    val pagesWithoutDock: Flow<Set<Long>> = dataStore.data.map { p -> p[PAGES_WITHOUT_DOCK_KEY].orEmpty().mapNotNull { it.toLongOrNull() }.toSet() }
+    val pagesWithoutPanel: Flow<Set<Long>> = dataStore.data.map { p -> p[PAGES_WITHOUT_PANEL_KEY].orEmpty().mapNotNull { it.toLongOrNull() }.toSet() }
+
+    suspend fun setPageShowsDock(pageId: Long, shows: Boolean) = dataStore.edit { p ->
+        val now = p[PAGES_WITHOUT_DOCK_KEY].orEmpty()
+        p[PAGES_WITHOUT_DOCK_KEY] = if (shows) now - pageId.toString() else now + pageId.toString()
+    }
+
+    suspend fun setPageShowsPanel(pageId: Long, shows: Boolean) = dataStore.edit { p ->
+        val now = p[PAGES_WITHOUT_PANEL_KEY].orEmpty()
+        p[PAGES_WITHOUT_PANEL_KEY] = if (shows) now - pageId.toString() else now + pageId.toString()
+    }
+
     fun pageHideStatusBar(pageId: Long): Flow<Boolean> = dataStore.data.map { it[pageHideStatusBarKey(pageId)] ?: false }
 
     suspend fun setPageHideStatusBar(pageId: Long, hide: Boolean) {
@@ -1241,6 +1255,8 @@ class SettingsRepository @Inject constructor(
         private val ALPHABET_RAIL_CORNER_KEY = intPreferencesKey("alphabet_rail_corner_percent")
         private val APP_LIST_FIELD_CORNER_KEY = intPreferencesKey("app_list_field_corner_percent")
         private val MENU_CORNER_KEY = intPreferencesKey("menu_corner_percent")
+        private val PAGES_WITHOUT_DOCK_KEY = stringSetPreferencesKey("pages_without_dock")
+        private val PAGES_WITHOUT_PANEL_KEY = stringSetPreferencesKey("pages_without_panel")
         private val APP_GRID_FIELD_CORNER_KEY = intPreferencesKey("app_grid_field_corner_percent")
         private val DESIGN_EFFECTS_KEY = stringPreferencesKey("design_effects")
         private val ACTIVE_DESIGN_KEY = stringPreferencesKey("active_design")

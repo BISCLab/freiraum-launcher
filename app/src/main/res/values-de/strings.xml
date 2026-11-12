@@ -906,4 +906,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_shape_part_keyboard_strip">Streifen über der Tastatur</string>
     <string name="settings_icon_size_dock_note">Im Dock kann ein Symbol kleiner werden, aber nicht größer als sein Platz.</string>
     <string name="settings_manage_apps_visibility_app_grid_label">App-Raster</string>
+    <string name="settings_page_dock_panel_label">Dock und Panel</string>
+    <string name="settings_page_shows_dock">Dock auf dieser Seite</string>
+    <string name="settings_page_shows_panel">Panel auf dieser Seite</string>
 </resources>

@@ -138,6 +138,13 @@ class HomeViewModel @Inject constructor(
 
     fun pageHideStatusBar(pageId: Long): Flow<Boolean> = settingsRepository.pageHideStatusBar(pageId)
 
+    /** The pages without Home's Dock (first) and without its Panel (second). */
+    val pagesWithoutDockPanel: StateFlow<Pair<Set<Long>, Set<Long>>> =
+        combine(settingsRepository.pagesWithoutDock, settingsRepository.pagesWithoutPanel) { dock, panel -> dock to panel }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptySet<Long>() to emptySet())
+    fun setPageShowsDock(pageId: Long, shows: Boolean) { viewModelScope.launch { settingsRepository.setPageShowsDock(pageId, shows) } }
+    fun setPageShowsPanel(pageId: Long, shows: Boolean) { viewModelScope.launch { settingsRepository.setPageShowsPanel(pageId, shows) } }
+
     fun setPageHideStatusBar(pageId: Long, hide: Boolean) {
         viewModelScope.launch { settingsRepository.setPageHideStatusBar(pageId, hide) }
     }

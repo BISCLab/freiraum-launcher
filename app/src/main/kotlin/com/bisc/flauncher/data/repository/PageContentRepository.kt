@@ -265,10 +265,8 @@ class PageContentRepository @Inject constructor(
      * after, each keeping its own prior relative order among themselves. Avoids a collision-prone
      * localized index shift - page counts are small, a full stable re-sort is cheap and simple.
      */
-    // New pages start as an independent copy of Home's current *structure* - same row types,
-    // order, appearance and background - not of its actual content (pinned apps/folders stay on
-    // Home). The Dock and Panel aren't copied: they're Home's and show on every page anyway. Once
-    // created, the new page is fully independent - editing it never touches Home back.
+    // New pages start empty, with Home's background. The Dock and the Panel are Home's and show on
+    // every page; each page can leave them out on its own (see SettingsRepository.pagesWithoutDock).
     suspend fun addPageInDirection(direction: PageDirection): Long {
         val all = pageDao.getAllOnce()
         val rowsOnly = all.filter { it.kind == LauncherPageKind.ROWS }
@@ -282,9 +280,6 @@ class PageContentRepository @Inject constructor(
         val newPage = pageDao.getById(newId) ?: return newId
 
         if (homePage != null) {
-            rowDao.getForPage(homePage.id)
-                .filter { it.type != PageRowType.SEARCH_BAR && it.type != PageRowType.PANEL }
-                .forEach { row -> rowDao.insert(row.copy(id = 0, pageId = newId)) }
             settingsRepository.pageBackgroundOverride(homePage.id).first()?.let { override ->
                 settingsRepository.setPageBackgroundConfig(newId, override)
             }

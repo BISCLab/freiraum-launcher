@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- A new page beside Home starts empty instead of with copies of Home's widgets; it takes Home's
+  background, and Home's Dock and Panel come along
+- Every page beside Home can leave out the Dock or the Panel on its own (its settings, Dock and Panel)
+- The page in small in the settings has the phone's real proportions, and its rows are stretched like
+  on the phone, so a full page no longer looks as if a row were free
+
 ## 0.13.6
 
 - New: an app can be hidden from the App grid on its own, next to App list and Text search
