@@ -980,4 +980,12 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_backup_password_wrong">Wrong password or damaged file</string>
     <string name="settings_backup_password_show">Show password</string>
     <string name="settings_live_editor_hint">Tap an element above to move it, set it up or remove it. A + adds something right there.</string>
+    <string name="profile_work">Work</string>
+    <string name="profile_private">Private</string>
+    <string name="profile_pause">Pause</string>
+    <string name="profile_resume">Turn on</string>
+    <string name="profile_lock">Lock</string>
+    <string name="profile_unlock">Unlock</string>
+    <string name="profile_paused">Paused. Turn the profile on to see its apps.</string>
+    <string name="profile_locked">Locked. Unlock the space to see its apps.</string>
 </resources>

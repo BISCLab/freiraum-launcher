@@ -33,6 +33,10 @@ fun AppOverviewContent(
     loadIcon: (ComponentName) -> ImageBitmap?,
     onAppClick: (AppInfo) -> Unit,
     showSearchButton: Boolean = false,
+    /** Work profile and private space, listed after the own apps. */
+    profiles: ProfileListHost? = null,
+    /** While searching: only the profiles' apps that match. */
+    profileQuery: String = "",
     modifier: Modifier = Modifier
 ) {
     val grouping = remember(allApps) { BrowseGrouping.from(allApps) }
@@ -62,7 +66,9 @@ fun AppOverviewContent(
                 handedness = handedness,
                 accentColor = accentColor,
                 edgeInset = AppOverviewDimens.horizontalMargin,
-                cornerRadiusPercent = cornerRadiusPercent
+                cornerRadiusPercent = cornerRadiusPercent,
+                profiles = profiles,
+                profileQuery = profileQuery
             )
         }
     }

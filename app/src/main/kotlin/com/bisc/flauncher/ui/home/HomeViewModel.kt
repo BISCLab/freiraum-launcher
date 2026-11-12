@@ -103,8 +103,20 @@ class HomeViewModel @Inject constructor(
     private val nowPlayingRepository: NowPlayingRepository,
     private val widgetHostManager: SystemWidgetHostManager,
     private val appIconLoader: AppIconLoader,
-    private val contactPhotoLoader: ContactPhotoLoader
+    private val contactPhotoLoader: ContactPhotoLoader,
+    private val profileAppsRepository: com.bisc.flauncher.data.repository.ProfileAppsRepository
 ) : ViewModel() {
+    // ---- Work profile and private space ----
+
+    val profileSections: StateFlow<List<com.bisc.flauncher.data.repository.ProfileSection>> =
+        profileAppsRepository.sections().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun profileIcon(app: com.bisc.flauncher.data.repository.ProfileApp): ImageBitmap? = profileAppsRepository.icon(app)
+
+    fun launchProfileApp(app: com.bisc.flauncher.data.repository.ProfileApp) = profileAppsRepository.launch(app)
+
+    fun setProfileLocked(user: android.os.UserHandle, locked: Boolean) = profileAppsRepository.setLocked(user, locked)
+
     // ---- Display settings ----
 
     fun loadIcon(componentName: ComponentName): ImageBitmap? = appIconLoader.load(componentName)

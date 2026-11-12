@@ -18,6 +18,10 @@
   own settings or remove it in the bar below; a + adds something right there. The Element-Box
   shows its look changes at once, before saving. The rows of the Dock and the Panel are set with
   the same little boxes as in folders
+- Work profile and private space: their apps show in the App list after your own, each under its
+  own heading with its badge, and start in their profile. The heading pauses or turns on the work
+  profile and locks or unlocks the private space; while it is off, a note says so. While searching
+  the App list, matching apps of these profiles show too
 
 ## 0.13.8
 

@@ -1041,6 +1041,8 @@ fun HomeScreen(
                         launchApp(context, app.componentName)
                         viewModel.closeAppList()
                     },
+                    profiles = com.bisc.flauncher.ui.home.search.rememberProfileListHost(viewModel),
+                    profileQuery = if (appListSearching) appQuery else "",
                     // With a hidden status bar only the display cutout inset remains.
                     modifier = Modifier
                         .weight(1f)

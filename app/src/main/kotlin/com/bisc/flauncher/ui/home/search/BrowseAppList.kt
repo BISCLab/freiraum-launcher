@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.search
 
+import androidx.compose.runtime.collectAsState
 import com.bisc.flauncher.ui.theme.designGlow
 import android.content.ComponentName
 import androidx.compose.animation.AnimatedVisibility
@@ -130,9 +131,12 @@ fun BrowseAppList(
     accentColor: Int,
     edgeInset: Dp = AppOverviewDimens.horizontalMargin,
     iconSize: Dp = APP_ICON_SIZE,
-    cornerRadiusPercent: Int = com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT
+    cornerRadiusPercent: Int = com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT,
+    profiles: ProfileListHost? = null,
+    profileQuery: String = ""
 ) {
     val scrub = remember { BrowseScrubState() }
+    val profileSections = profiles?.sections?.collectAsState()?.value.orEmpty()
     val haptic = LocalHapticFeedback.current
 
     val highlight = remember { mutableStateOf(IntRange.EMPTY) }
@@ -197,6 +201,7 @@ fun BrowseAppList(
                     }
                 }
             }
+            if (profiles != null) profileSectionItems(profileSections, profileQuery, profiles, handedness, edgeInset, iconSize)
         }
 
         if (showAzIndex && allApps.isNotEmpty()) {

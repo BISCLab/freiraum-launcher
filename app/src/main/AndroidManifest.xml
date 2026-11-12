@@ -50,6 +50,8 @@
     <!-- "Uninstall" in an app's long-press menu: lets the launcher ask Android to remove an app.
          Android itself still asks the user to confirm each time. -->
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+    <!-- Lets the default launcher list the private space (Android 15). -->
+    <uses-permission android:name="android.permission.ACCESS_HIDDEN_PROFILES" />
 
     <!-- Expands notifications and quick settings for gesture actions. -->
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
