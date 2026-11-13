@@ -18,6 +18,11 @@
   are placed from the Dock and the Panel themselves
 - Dock and Panel editor: the icons are sized to fit the preview, so all slots show and nothing is
   cut off. The bar under a picked element has light buttons, Settings and a red Remove
+- Quick access moved from the settings start page into the settings search: a field under the
+  header (or the magnifier) opens it, with the search on top and Quick access below. It shows six
+  of the overview pages that are otherwise several steps away (Home screen, Dock, Panel, Folders,
+  Gestures, Icons first), and adapts: the pages you open most move to the front, recent visits
+  counting more than old ones
 
 ## 0.14.1
 

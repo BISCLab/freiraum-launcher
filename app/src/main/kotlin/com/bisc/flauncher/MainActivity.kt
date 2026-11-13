@@ -174,6 +174,14 @@ class MainActivity : ComponentActivity() {
                 }
             }
             val navController = rememberNavController()
+            // Counts visits of the settings' overview pages for the quick access in the settings search.
+            androidx.compose.runtime.DisposableEffect(navController) {
+                val listener = androidx.navigation.NavController.OnDestinationChangedListener { _, destination, _ ->
+                    com.bisc.flauncher.ui.settings.SettingsQuickAccess.recordVisit(this@MainActivity, destination.route)
+                }
+                navController.addOnDestinationChangedListener(listener)
+                onDispose { navController.removeOnDestinationChangedListener(listener) }
+            }
             androidx.compose.runtime.LaunchedEffect(openSettingsRequest) {
                 if (openSettingsRequest > 0) {
                     val route = navController.currentBackStackEntryFlow.first().destination.route

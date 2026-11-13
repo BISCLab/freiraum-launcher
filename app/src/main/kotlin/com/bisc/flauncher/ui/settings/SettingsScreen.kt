@@ -124,6 +124,24 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
             SettingsSearchResults(query = query, onOpen = openTarget)
         } else Column(modifier = Modifier.widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             AboutHeaderCard(onClick = { onNavigate("about") })
+            // The way into the search and the quick access, as a field to tap.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(50))
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    .clickable { searching = true }
+                    .padding(horizontal = 18.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(22.dp))
+                Text(
+                    stringResource(R.string.settings_search_settings_entry),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 14.dp)
+                )
+            }
             if (com.bisc.flauncher.ui.isLargeScreen()) {
                 SettingsPreferenceGroup {
                     SettingsPreference(
@@ -172,28 +190,6 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                         SettingsTile(androidx.compose.material.icons.Icons.Filled.Widgets, stringResource(R.string.extensions_widgets_title)) { onNavigate("extensions/widgets") }
                     )
                 )
-                // What people come looking for most, one tap away; below, the three pages of their own.
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    SettingsTileGrid(
-                        title = stringResource(R.string.settings_quick_label),
-                        columns = 3,
-                        tiles = listOfNotNull(
-                            SettingsTile(androidx.compose.material.icons.Icons.Filled.Home, stringResource(R.string.settings_pages_home)) {
-                                homeId?.let { navController.navigate("settings/pages/$it/home") }
-                            },
-                            SettingsTile(Icons.Filled.Interests, stringResource(R.string.settings_icons_label)) { onNavigate("appearance/icons") },
-                            SettingsTile(Icons.Filled.Gesture, stringResource(R.string.settings_section_gestures)) { onNavigate("gestures") }
-                        )
-                    )
-                    SettingsTileGrid(
-                        columns = 3,
-                        tiles = listOf(
-                            SettingsTile(androidx.compose.material.icons.Icons.AutoMirrored.Filled.List, stringResource(R.string.welcome_screen_app_list)) { onNavigate("app_overview") },
-                            SettingsTile(Icons.Filled.Search, stringResource(R.string.settings_section_search_full)) { onNavigate("search") },
-                            SettingsTile(androidx.compose.material.icons.Icons.Filled.GridView, stringResource(R.string.settings_pages_app_grid)) { onNavigate("app_grid") }
-                        )
-                    )
-                }
             }
         }
         }
@@ -246,12 +242,8 @@ private fun SettingsSearchResults(query: String, onOpen: (String) -> Unit) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         when {
-            query.isBlank() -> Text(
-                stringResource(R.string.settings_search_settings_empty),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 4.dp)
-            )
+            // Nothing typed yet: the pages most likely wanted, one tap away.
+            query.isBlank() -> SettingsQuickAccessGrid(onOpen = onOpen)
             results.isEmpty() -> Text(
                 stringResource(R.string.settings_search_settings_none, query),
                 style = MaterialTheme.typography.bodyMedium,
