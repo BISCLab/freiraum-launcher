@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.border
 import androidx.compose.material.icons.filled.Animation
 import androidx.compose.material.icons.filled.StayCurrentPortrait
 import androidx.compose.material.icons.filled.TextFields
@@ -82,9 +84,13 @@ fun SettingsAppearanceScreen(
             title = stringResource(R.string.settings_accent_label),
             info = stringResource(R.string.settings_accent_global_info)
         ) {
-            // Tapping a swatch recolors this very screen at once (the settings UI uses the accent
-            // as its own primary color) - that's the preview.
-            AccentPalette(selected = accentColor, onSelect = viewModel::setAccentColor, onCustom = { accentPickerOpen = true })
+            // The settings keep their area colors; the accent is for the launcher's own parts. The
+            // frame around the swatches shows the chosen one at once.
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier.border(3.dp, androidx.compose.ui.graphics.Color(accentColor), SettingsCardShape)
+            ) {
+                AccentPalette(selected = accentColor, onSelect = viewModel::setAccentColor, onCustom = { accentPickerOpen = true })
+            }
         }
         SettingsTileGrid(
             title = stringResource(R.string.settings_parts_label),

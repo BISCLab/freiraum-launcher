@@ -44,6 +44,14 @@
 - Icons settings are fast: an icon pack is read once and kept, previews made once are reused, the
   preview shows the current icons at once instead of starting empty, and switching to another
   icon pack takes effect right away (its list is stored afterwards)
+- Settings get area colors for orientation: Appearance violet, Pages blue, Apps and elements green,
+  System slate, Extensions orange. Each page shows its area's color in titles, switches, checks
+  and frames, and behind its symbols; the start page and the search show every tile in the color
+  of where it leads, and the breadcrumbs mark each step with a dot of its color. Symbols are black
+  or white for contrast. The colors are chosen to stay readable in light and dark, and an area is
+  never told by color alone
+- The accent color no longer tints the settings; it is for the launcher's own parts. While picking
+  it, a frame in the chosen color shows it at once
 
 ## 0.14.1
 

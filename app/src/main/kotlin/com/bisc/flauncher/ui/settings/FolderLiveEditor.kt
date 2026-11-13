@@ -227,7 +227,7 @@ internal fun FolderItemIcon(
                     else -> Icons.Filled.Apps
                 },
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(size * 0.55f)
             )
         }

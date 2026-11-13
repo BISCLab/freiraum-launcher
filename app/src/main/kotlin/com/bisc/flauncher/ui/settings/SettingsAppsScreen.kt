@@ -370,13 +370,13 @@ private fun AppOverrideEditSheetContent(
             toggles = true,
             choices = listOf(
                 PictureChoice(stringResource(R.string.settings_manage_apps_visibility_app_list_label), !hiddenFromAppList, { hiddenFromAppList = !hiddenFromAppList }, dimWhenOff = true) {
-                    Icon(Icons.AutoMirrored.Filled.List, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
+                    Icon(Icons.AutoMirrored.Filled.List, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(32.dp))
                 },
                 PictureChoice(stringResource(R.string.settings_manage_apps_visibility_app_grid_label), !hiddenFromAppGrid, { hiddenFromAppGrid = !hiddenFromAppGrid }, dimWhenOff = true) {
-                    Icon(Icons.Filled.GridView, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
+                    Icon(Icons.Filled.GridView, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(32.dp))
                 },
                 PictureChoice(stringResource(R.string.settings_manage_apps_visibility_search_label), !hiddenFromSearch, { hiddenFromSearch = !hiddenFromSearch }, dimWhenOff = true) {
-                    Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
+                    Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(32.dp))
                 }
             )
         )

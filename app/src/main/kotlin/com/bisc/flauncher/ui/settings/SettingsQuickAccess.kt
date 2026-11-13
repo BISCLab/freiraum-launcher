@@ -102,7 +102,7 @@ internal fun SettingsQuickAccessGrid(onOpen: (String) -> Unit) {
         columns = 3,
         tiles = shown.map { i ->
             val target = QUICK_TARGETS[i]
-            SettingsTile(target.icon, stringResource(target.labelRes)) { onOpen(target.route) }
+            SettingsTile(target.icon, stringResource(target.labelRes), area = com.bisc.flauncher.ui.theme.settingsAreaFor(target.pattern)) { onOpen(target.route) }
         }
     )
 }

@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.ui.theme.current
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Row
@@ -57,6 +59,12 @@ internal fun SettingsBreadcrumbBar(
         crumbs.forEachIndexed { index, entry ->
             val isLast = index == crumbs.lastIndex
             val label = settingsCrumbLabel(entry)
+            val area = com.bisc.flauncher.ui.theme.settingsAreaFor(entry.destination.route)
+            if (area != com.bisc.flauncher.ui.theme.SettingsArea.NEUTRAL) {
+                androidx.compose.foundation.layout.Box(
+                    Modifier.padding(end = 6.dp).size(8.dp).clip(androidx.compose.foundation.shape.CircleShape).background(area.current())
+                )
+            }
             Text(
                 label,
                 style = MaterialTheme.typography.titleSmall,

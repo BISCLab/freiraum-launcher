@@ -352,7 +352,7 @@ private fun CategoryLegend(railShown: Boolean) {
                     androidx.compose.foundation.layout.Box(
                         modifier = Modifier.size(28.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
                         contentAlignment = Alignment.Center
-                    ) { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp)) }
+                    ) { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(16.dp)) }
                     Text(
                         stringResource(texts.first),
                         style = MaterialTheme.typography.labelLarge,

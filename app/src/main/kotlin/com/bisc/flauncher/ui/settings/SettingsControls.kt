@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.ui.theme.current
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.ui.draw.alpha
@@ -612,6 +613,8 @@ class SettingsTile(
     val title: String,
     val summary: String? = null,
     val badge: String? = null,
+    /** The area the tile leads to, for its color; null = the area of the page it is on. */
+    val area: com.bisc.flauncher.ui.theme.SettingsArea? = null,
     val onClick: () -> Unit
 )
 
@@ -639,10 +642,7 @@ fun SettingsTileGrid(tiles: List<SettingsTile>, columns: Int = 2, title: String?
                         horizontalAlignment = if (small) Alignment.CenterHorizontally else Alignment.Start,
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        Box(
-                            modifier = Modifier.size(if (small) 40.dp else 44.dp).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
-                            contentAlignment = Alignment.Center
-                        ) { Icon(tile.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp)) }
+                        AreaSymbol(tile.icon, tile.area, if (small) 40.dp else 44.dp)
                         WholeWordsText(
                             tile.title,
                             style = if (small) MaterialTheme.typography.labelLarge else MaterialTheme.typography.titleMedium,
@@ -808,3 +808,15 @@ fun PictureChoiceGrid(choices: List<PictureChoice>, title: String? = null, info:
 /** Says "on" or "off" to screen readers, next to the role the tile already has. */
 private fun Modifier.androidxSemanticsState(state: String): Modifier =
     this.semantics { stateDescription = state }
+
+/** A symbol in black or white on a circle tinted in its area's color - the same everywhere in the
+ *  settings, so the symbol keeps its contrast and the color tells the area. */
+@Composable
+fun AreaSymbol(icon: androidx.compose.ui.graphics.vector.ImageVector, area: com.bisc.flauncher.ui.theme.SettingsArea? = null, size: androidx.compose.ui.unit.Dp = 40.dp) {
+    val color = area?.current() ?: MaterialTheme.colorScheme.primary
+    val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    Box(
+        modifier = Modifier.size(size).clip(RoundedCornerShape(size * 0.35f)).background(color.copy(alpha = if (dark) 0.30f else 0.20f)),
+        contentAlignment = Alignment.Center
+    ) { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(size * 0.55f)) }
+}

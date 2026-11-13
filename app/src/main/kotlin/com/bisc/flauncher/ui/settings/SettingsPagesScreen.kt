@@ -479,7 +479,7 @@ private fun PageTile(
                         Icon(
                             gestureIcon(gesture),
                             contentDescription = gestureLabel(gesture),
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(18.dp)
                         )
                     }

@@ -721,9 +721,11 @@ private fun androidx.navigation.NavGraphBuilder.settingsComposable(
     content: @androidx.compose.runtime.Composable androidx.compose.animation.AnimatedContentScope.(androidx.navigation.NavBackStackEntry) -> Unit
 ) = composable(route, arguments) { entry ->
     com.bisc.flauncher.ui.theme.SettingsThemed {
-        // Room for the sections on the left where there are any (wide tablets), none on phones.
-        androidx.compose.foundation.layout.Box(
-            modifier = Modifier.padding(start = com.bisc.flauncher.ui.settings.settingsSideRailWidth())
-        ) { content(entry) }
+        com.bisc.flauncher.ui.theme.SettingsAreaTheme(com.bisc.flauncher.ui.theme.settingsAreaFor(route)) {
+            // Room for the sections on the left where there are any (wide tablets), none on phones.
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier.padding(start = com.bisc.flauncher.ui.settings.settingsSideRailWidth())
+            ) { content(entry) }
+        }
     }
 }

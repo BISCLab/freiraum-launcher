@@ -145,13 +145,14 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                 SettingsTileGrid(
                     title = stringResource(R.string.settings_group_basics),
                     tiles = listOf(
-                        SettingsTile(Icons.Filled.Palette, stringResource(R.string.settings_design_title), stringResource(R.string.settings_card_design_short)) { onNavigate("appearance") },
-                        SettingsTile(Icons.Filled.ViewCarousel, stringResource(R.string.settings_section_pages), stringResource(R.string.settings_card_pages_short)) { onNavigate("pages") },
-                        SettingsTile(Icons.Filled.Apps, stringResource(R.string.settings_section_elements), stringResource(R.string.settings_card_elements_short)) { onNavigate("elements") },
+                        SettingsTile(Icons.Filled.Palette, stringResource(R.string.settings_design_title), stringResource(R.string.settings_card_design_short), area = com.bisc.flauncher.ui.theme.SettingsArea.APPEARANCE) { onNavigate("appearance") },
+                        SettingsTile(Icons.Filled.ViewCarousel, stringResource(R.string.settings_section_pages), stringResource(R.string.settings_card_pages_short), area = com.bisc.flauncher.ui.theme.SettingsArea.PAGES) { onNavigate("pages") },
+                        SettingsTile(Icons.Filled.Apps, stringResource(R.string.settings_section_elements), stringResource(R.string.settings_card_elements_short), area = com.bisc.flauncher.ui.theme.SettingsArea.ELEMENTS) { onNavigate("elements") },
                         SettingsTile(
                             Icons.Filled.PhoneAndroid,
                             stringResource(R.string.settings_system_title),
-                            stringResource(if (isDefault) R.string.settings_card_system_short else R.string.settings_default_launcher_description)
+                            stringResource(if (isDefault) R.string.settings_card_system_short else R.string.settings_default_launcher_description),
+                            area = com.bisc.flauncher.ui.theme.SettingsArea.SYSTEM
                         ) { onNavigate("system") }
                     )
                 )
@@ -161,10 +162,10 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                     columns = 3,
                     tiles = listOf(
                         SettingsTile(Icons.Filled.AutoAwesome, stringResource(R.string.designs_title),
-                            badge = androidx.compose.ui.res.pluralStringResource(R.plurals.extensions_available, designs.size, designs.size)) { onNavigate("appearance/designs") },
+                            badge = androidx.compose.ui.res.pluralStringResource(R.plurals.extensions_available, designs.size, designs.size), area = com.bisc.flauncher.ui.theme.SettingsArea.EXTENSIONS) { onNavigate("appearance/designs") },
                         SettingsTile(Icons.Filled.Wallpaper, stringResource(R.string.packs_title),
-                            badge = androidx.compose.ui.res.pluralStringResource(R.plurals.extensions_available, packs.size, packs.size)) { onNavigate("wallpaper_packs") },
-                        SettingsTile(androidx.compose.material.icons.Icons.Filled.Widgets, stringResource(R.string.extensions_widgets_title)) { onNavigate("extensions/widgets") }
+                            badge = androidx.compose.ui.res.pluralStringResource(R.plurals.extensions_available, packs.size, packs.size), area = com.bisc.flauncher.ui.theme.SettingsArea.EXTENSIONS) { onNavigate("wallpaper_packs") },
+                        SettingsTile(androidx.compose.material.icons.Icons.Filled.Widgets, stringResource(R.string.extensions_widgets_title), area = com.bisc.flauncher.ui.theme.SettingsArea.EXTENSIONS) { onNavigate("extensions/widgets") }
                     )
                 )
             }
@@ -282,7 +283,8 @@ private fun SettingsSearchResults(query: String, onOpen: (String) -> Unit) {
             else -> SettingsPreferenceGroup {
                 results.forEach { target ->
                     SettingsPreference(
-                        icon = settingsAreaIcon(target.route),
+                        icon = null,
+                        leading = { AreaSymbol(settingsAreaIcon(target.route), com.bisc.flauncher.ui.theme.settingsAreaFor(target.route), 36.dp) },
                         title = stringResource(target.labelRes),
                         summary = settingsAreaLabel(target.route),
                         onClick = { onOpen(target.route) }
@@ -400,7 +402,7 @@ fun SettingsPreference(
             Icon(
                 it,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(24.dp)
             )
         }

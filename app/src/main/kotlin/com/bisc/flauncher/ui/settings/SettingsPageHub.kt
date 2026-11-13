@@ -71,10 +71,7 @@ internal fun HubCard(icon: ImageVector, title: String, what: String, contents: S
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Box(
-            modifier = Modifier.size(48.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
-            contentAlignment = Alignment.Center
-        ) { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary) }
+        AreaSymbol(icon, size = 48.dp)
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
             Text(what, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
