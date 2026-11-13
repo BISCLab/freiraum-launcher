@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- The logo on the settings' start page changes its shape faster and much more freely: square,
+  rounded, round, flower, star, squircle, hexagon, cookie, clover, blob and triangle, melting from
+  one into the next about every second and a half, for how freely the launcher can be changed
+
 ## 0.14.3
 
 - Quick access in the settings search shows nine flatter tiles, all above the keyboard, with the

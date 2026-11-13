@@ -111,42 +111,96 @@ fun AboutHeaderCard(onClick: () -> Unit) {
 }
 
 /**
- * The logo slowly changing its shape: square, rounded, round and back, the shapes the launcher's
- * own icons can take. Only the outline moves (drawn by the graphics layer, nothing is laid out
- * again), and only while this page is open. With motion off it stays square.
+ * The logo turning from one shape into the next - square, rounded, round, flower, star, cookie,
+ * clover, blob and more - for how freely the launcher changes. Every shape is an outline of the
+ * same number of points around the middle, so any two melt into each other point by point. Only
+ * the outline moves (drawn by the graphics layer, nothing is laid out again), and only while this
+ * page is open. With motion off, or its own switch off, it stays square.
  */
 @Composable
 private fun ShapeShiftingLogo(size: Dp) {
     val still = com.bisc.flauncher.ui.LocalMotion.current == com.bisc.flauncher.ui.MotionLevel.OFF || !com.bisc.flauncher.ui.LocalMotionPrefs.current.logoShape
-    val corner = if (still) null else androidx.compose.animation.core.rememberInfiniteTransition(label = "logoShape").animateFloat(
+    val shapes = remember { LOGO_SHAPES.map { outline(it) } }
+    val progress = if (still) null else androidx.compose.animation.core.rememberInfiniteTransition(label = "logoShape").animateFloat(
         initialValue = 0f,
-        targetValue = 0f,
+        targetValue = shapes.size.toFloat(),
         animationSpec = androidx.compose.animation.core.infiniteRepeatable(
-            androidx.compose.animation.core.keyframes {
-                durationMillis = 12_000
-                0f at 0
-                0f at 2_000
-                30f at 3_200 using com.bisc.flauncher.ui.EmphasizedEasing
-                30f at 5_200
-                50f at 6_400 using com.bisc.flauncher.ui.EmphasizedEasing
-                50f at 8_400
-                30f at 9_600 using com.bisc.flauncher.ui.EmphasizedEasing
-                30f at 10_800
-                0f at 12_000 using com.bisc.flauncher.ui.EmphasizedEasing
-            }
+            androidx.compose.animation.core.tween(shapes.size * LOGO_STEP_MS, easing = androidx.compose.animation.core.LinearEasing)
         ),
-        label = "logoCorner"
+        label = "logoMorph"
     )
     Box(
         modifier = Modifier
             .size(size)
             .graphicsLayer {
-                shape = RoundedCornerShape(percent = (corner?.value ?: 0f).toInt())
+                val value = progress?.value ?: 0f
+                val index = value.toInt() % shapes.size
+                // Each step: a short rest in the shape, then the change to the next one.
+                val within = value - value.toInt()
+                val rest = LOGO_REST_MS.toFloat() / LOGO_STEP_MS
+                val t = if (within <= rest) 0f else com.bisc.flauncher.ui.EmphasizedEasing.transform((within - rest) / (1f - rest))
+                shape = MorphShape(shapes[index], shapes[(index + 1) % shapes.size], t)
                 clip = true
             }
             .background(colorResource(R.color.ic_launcher_background))
     ) {
         Image(painterResource(R.drawable.ic_launcher_foreground), contentDescription = null, modifier = Modifier.fillMaxSize())
+    }
+}
+
+private const val LOGO_STEP_MS = 1_500
+private const val LOGO_REST_MS = 600
+private const val OUTLINE_POINTS = 96
+
+/** Distance from the middle at an angle (0 to 2 pi), for one shape. */
+private val LOGO_SHAPES: List<(Double) -> Double> = listOf(
+    { a -> 1.0 / maxOf(kotlin.math.abs(kotlin.math.cos(a)), kotlin.math.abs(kotlin.math.sin(a))) },          // square
+    { a -> superellipse(a, 4.0) },                                                                             // rounded square
+    { _ -> 1.0 },                                                                                              // circle
+    { a -> 0.80 + 0.20 * kotlin.math.cos(6 * a) },                                                             // flower
+    { a -> 0.55 + 0.45 * Math.pow((kotlin.math.cos(5 * (a + Math.PI / 2)) + 1) / 2, 1.6) },                    // star
+    { a -> superellipse(a, 2.6) },                                                                             // squircle
+    { a -> polygon(a, 6) },                                                                                    // hexagon
+    { a -> 0.90 + 0.10 * kotlin.math.cos(12 * a) },                                                            // cookie
+    { a -> 0.62 + 0.38 * kotlin.math.abs(kotlin.math.cos(2 * a)) },                                            // clover
+    { a -> 0.84 + 0.09 * kotlin.math.sin(3 * a) + 0.07 * kotlin.math.cos(5 * a + 1) },                         // blob
+    { a -> polygon(a + Math.PI / 2, 3) }                                                                       // triangle
+)
+
+private fun superellipse(a: Double, p: Double): Double =
+    Math.pow(Math.pow(kotlin.math.abs(kotlin.math.cos(a)), p) + Math.pow(kotlin.math.abs(kotlin.math.sin(a)), p), -1.0 / p)
+
+/** A regular polygon with [n] corners, one corner pointing right. */
+private fun polygon(a: Double, n: Int): Double {
+    val sector = 2 * Math.PI / n
+    val local = ((a % sector) + sector) % sector - sector / 2
+    return kotlin.math.cos(Math.PI / n) / kotlin.math.cos(local)
+}
+
+/** A shape's outline as distances at evenly spread angles, scaled so it just fills its box. */
+private fun outline(r: (Double) -> Double): FloatArray {
+    val raw = DoubleArray(OUTLINE_POINTS) { r(2 * Math.PI * it / OUTLINE_POINTS) }
+    val xs = raw.indices.map { raw[it] * kotlin.math.cos(2 * Math.PI * it / OUTLINE_POINTS) }
+    val ys = raw.indices.map { raw[it] * kotlin.math.sin(2 * Math.PI * it / OUTLINE_POINTS) }
+    val reach = maxOf(xs.max(), -xs.min(), ys.max(), -ys.min())
+    return FloatArray(OUTLINE_POINTS) { (raw[it] / reach).toFloat() }
+}
+
+/** Partway ([t]) from one outline to the next, point by point. */
+private class MorphShape(private val from: FloatArray, private val to: FloatArray, private val t: Float) : androidx.compose.ui.graphics.Shape {
+    override fun createOutline(size: androidx.compose.ui.geometry.Size, layoutDirection: androidx.compose.ui.unit.LayoutDirection, density: androidx.compose.ui.unit.Density): androidx.compose.ui.graphics.Outline {
+        val cx = size.width / 2f
+        val cy = size.height / 2f
+        val path = androidx.compose.ui.graphics.Path()
+        for (i in from.indices) {
+            val r = from[i] + (to[i] - from[i]) * t
+            val angle = 2.0 * Math.PI * i / from.size
+            val x = cx + (r * cx * kotlin.math.cos(angle)).toFloat()
+            val y = cy + (r * cy * kotlin.math.sin(angle)).toFloat()
+            if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+        }
+        path.close()
+        return androidx.compose.ui.graphics.Outline.Generic(path)
     }
 }
 
