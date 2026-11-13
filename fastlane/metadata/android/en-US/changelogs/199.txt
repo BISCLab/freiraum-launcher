@@ -1,0 +1,2 @@
+• The logo on the settings' start page melts through eleven shapes: square, circle, flower, star, hexagon, cookie, clover and more
+• Settings start page without a back arrow; the back gesture leads home

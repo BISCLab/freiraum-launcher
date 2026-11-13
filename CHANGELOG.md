@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.14.4
 
 - The logo on the settings' start page changes its shape faster and much more freely: square,
   rounded, round, flower, star, squircle, hexagon, cookie, clover, blob and triangle, melting from
