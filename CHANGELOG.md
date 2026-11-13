@@ -5,6 +5,8 @@
 - The logo on the settings' start page changes its shape faster and much more freely: square,
   rounded, round, flower, star, squircle, hexagon, cookie, clover, blob and triangle, melting from
   one into the next about every second and a half, for how freely the launcher can be changed
+- The settings' start page has no back arrow any more; its title sits at the left, and the back
+  gesture still leads home
 
 ## 0.14.3
 

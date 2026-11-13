@@ -86,12 +86,8 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
         topBar = {
             TopAppBar(
                 windowInsets = settingsTopBarInsets(),
+                // The first page: no arrow, the back gesture leads home.
                 title = { Text(stringResource(R.string.settings_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.settings_back))
-                    }
-                },
                 actions = { SettingsSearchAction(navController) }
             )
         },
