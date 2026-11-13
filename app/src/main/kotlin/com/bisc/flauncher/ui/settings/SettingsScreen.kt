@@ -81,7 +81,6 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
     val allPages by home.allPages.collectAsState()
     val designs by designsViewModel.designs.collectAsState()
     val packs by packsViewModel.packs.collectAsState()
-    val openSearch = { navController.navigate(SETTINGS_FIND_ROUTE) }
 
     Scaffold(
         topBar = {
@@ -101,24 +100,6 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
         Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         Column(modifier = Modifier.widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             AboutHeaderCard(onClick = { onNavigate("about") })
-            // The way into the search and the quick access, as a field to tap.
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(50))
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .clickable(onClick = openSearch)
-                    .padding(horizontal = 18.dp, vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(22.dp))
-                Text(
-                    stringResource(R.string.settings_search_settings_entry),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 14.dp)
-                )
-            }
             if (com.bisc.flauncher.ui.isLargeScreen()) {
                 SettingsPreferenceGroup {
                     SettingsPreference(

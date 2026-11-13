@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.ui.graphics.lerp
@@ -79,29 +81,72 @@ fun AppLogo(size: Dp) {
 private fun appVersion(context: Context): String =
     runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull().orEmpty()
 
-/** Top of the settings start page: logo, name and version, opening the About screen. */
+/** Top of the settings start page, as its heading: the logo in the middle, name and version below
+ *  it, all centered. A tap opens the About screen. */
 @Composable
 fun AboutHeaderCard(onClick: () -> Unit) {
     val context = LocalContext.current
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(SettingsCardShape)
-            .background(MaterialTheme.colorScheme.surfaceContainer)
             .clickable(onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AppLogo(48.dp)
-        Column(modifier = Modifier.weight(1f)) {
-            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleMedium)
-            Text(
-                stringResource(R.string.about_version, appVersion(context)),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        ShapeShiftingLogo(76.dp)
+        Text(
+            stringResource(R.string.app_name),
+            style = MaterialTheme.typography.titleLarge,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier.padding(top = 14.dp)
+        )
+        Text(
+            stringResource(R.string.about_version, appVersion(context)),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+    }
+}
+
+/**
+ * The logo slowly changing its shape: square, rounded, round and back, the shapes the launcher's
+ * own icons can take. Only the outline moves (drawn by the graphics layer, nothing is laid out
+ * again), and only while this page is open. With motion off it stays square.
+ */
+@Composable
+private fun ShapeShiftingLogo(size: Dp) {
+    val still = com.bisc.flauncher.ui.LocalMotion.current == com.bisc.flauncher.ui.MotionLevel.OFF
+    val corner = if (still) null else androidx.compose.animation.core.rememberInfiniteTransition(label = "logoShape").animateFloat(
+        initialValue = 0f,
+        targetValue = 0f,
+        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
+            androidx.compose.animation.core.keyframes {
+                durationMillis = 12_000
+                0f at 0
+                0f at 2_000
+                30f at 3_200 using com.bisc.flauncher.ui.EmphasizedEasing
+                30f at 5_200
+                50f at 6_400 using com.bisc.flauncher.ui.EmphasizedEasing
+                50f at 8_400
+                30f at 9_600 using com.bisc.flauncher.ui.EmphasizedEasing
+                30f at 10_800
+                0f at 12_000 using com.bisc.flauncher.ui.EmphasizedEasing
+            }
+        ),
+        label = "logoCorner"
+    )
+    Box(
+        modifier = Modifier
+            .size(size)
+            .graphicsLayer {
+                shape = RoundedCornerShape(percent = (corner?.value ?: 0f).toInt())
+                clip = true
+            }
+            .background(colorResource(R.color.ic_launcher_background))
+    ) {
+        Image(painterResource(R.drawable.ic_launcher_foreground), contentDescription = null, modifier = Modifier.fillMaxSize())
     }
 }
 

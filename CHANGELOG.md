@@ -7,6 +7,10 @@
   next from the page it was opened on: first what goes with that page (after Folders the Dock,
   the Panel and the Home screen; after Designs the wallpapers, colors and corners), then the pages
   furthest away by taps, then those opened often. Nothing leaves the phone
+- Settings start page: the search field is gone again, the magnifier at the top is the way into the
+  search. The heading is centered: the logo in the middle, slowly changing its shape between
+  square, rounded and round, with the name and version under it. With motion off the logo stays
+  square; the animation only runs while that page is open
 
 ## 0.14.2
 
