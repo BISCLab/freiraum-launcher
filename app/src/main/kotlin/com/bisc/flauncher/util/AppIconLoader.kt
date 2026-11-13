@@ -143,20 +143,45 @@ class AppIconLoader @Inject constructor(
         return resolved
     }
 
+    /** One icon pack's appfilter, read once: by exact component, and by package as a fallback. */
+    private class PackIndex(val exact: Map<String, String>, val byPackage: Map<String, String>)
+
+    private val packIndexes = java.util.concurrent.ConcurrentHashMap<String, PackIndex>()
+    private val renderCache = LruCache<Triple<ComponentName, IconShape, String?>, ImageBitmap>(96)
+
+    private fun packIndex(pack: String): PackIndex = packIndexes.computeIfAbsent(pack) {
+        val mappings = runCatching { IconPackAppFilterParser.parse(context, pack) }.getOrDefault(emptyList())
+        val byPackage = HashMap<String, String>()
+        mappings.forEach { (key, drawable) -> byPackage.putIfAbsent(key.substringBefore('/'), drawable) }
+        PackIndex(mappings.toMap(), byPackage)
+    }
+
+    /** Every component [pack] has an icon for, read once and kept. */
+    fun packMappings(pack: String): Map<String, String> = packIndex(pack).exact
+
+    /** The drawable [pack] has for [componentName], if any; the pack is read only the first time. */
+    fun packDrawableFor(pack: String, componentName: ComponentName): String? {
+        val index = packIndex(pack)
+        return index.exact[componentName.flattenToString()] ?: index.exact[componentName.flattenToShortString()]
+            ?: index.byPackage[componentName.packageName]
+    }
+
+    /** A rendering made before, without any work; null if there is none yet. */
+    fun peekRender(componentName: ComponentName, shape: IconShape, iconPack: String?): ImageBitmap? =
+        renderCache.get(Triple(componentName, shape, iconPack))
+
     /** An app's icon exactly as the launcher draws it with [shape] and [iconPack] (null = the apps'
-     *  own icons), without touching the cache - for the settings' previews of a choice. */
+     *  own icons), for the settings' previews of a choice. Kept, so showing it again is instant. */
     fun render(componentName: ComponentName, shape: IconShape, iconPack: String?): ImageBitmap? {
-        if (iconPack != null) {
-            val name = runCatching {
-                IconPackAppFilterParser.parse(context, iconPack).let { mappings ->
-                    mappings.firstOrNull { it.first == componentName.flattenToString() || it.first == componentName.flattenToShortString() }?.second
-                        ?: mappings.firstOrNull { it.first.startsWith(componentName.packageName + "/") }?.second
-                }
-            }.getOrNull()
-            name?.let { loadPackIcon(iconPack, it) }?.let { return it }
+        val key = Triple(componentName, shape, iconPack)
+        renderCache.get(key)?.let { return it }
+        val fromPack = iconPack?.let { pack -> packDrawableFor(pack, componentName)?.let { loadPackIcon(pack, it) } }
+        val result = fromPack ?: run {
+            val drawable = runCatching { context.packageManager.getActivityIcon(componentName) }.getOrNull() ?: return null
+            renderMasked(drawable, shape).asImageBitmap()
         }
-        val drawable = runCatching { context.packageManager.getActivityIcon(componentName) }.getOrNull() ?: return null
-        return renderMasked(drawable, shape).asImageBitmap()
+        renderCache.put(key, result)
+        return result
     }
 
     suspend fun warm(components: List<ComponentName>) = coroutineScope {

@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.async
 import android.content.ComponentName
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -118,8 +120,15 @@ fun SettingsAppsGlobalScreen(navController: NavController, onBack: () -> Unit, v
 /** Real apps as they look on the home screen right now: shape, size and pack. */
 @Composable
 private fun IconsPreview(samples: List<AppInfo>, sizePercent: Int, shape: IconShape, pack: String?, viewModel: SettingsViewModel) {
-    val icons by produceState<List<ImageBitmap?>>(emptyList(), samples, shape, pack) {
-        value = withContext(Dispatchers.IO) { samples.map { runCatching { viewModel.iconLoader.render(it.componentName, shape, pack) }.getOrNull() } }
+    // Instantly what is known (this choice rendered before, or the icon as it is now), then the
+    // exact rendering, all icons at once.
+    val icons by produceState(
+        samples.map { viewModel.iconLoader.peekRender(it.componentName, shape, pack) ?: viewModel.iconLoader.peek(it.componentName) },
+        samples, shape, pack
+    ) {
+        value = withContext(Dispatchers.Default) {
+            samples.map { app -> async { runCatching { viewModel.iconLoader.render(app.componentName, shape, pack) }.getOrNull() } }.awaitAll()
+        }
     }
     Box(
         modifier = Modifier
@@ -164,8 +173,8 @@ private fun rememberSystemIcon(component: ComponentName?): ImageBitmap? {
  *  the chosen icon pack. */
 @Composable
 private fun ShapeTile(label: String, shape: IconShape, iconPack: String?, viewModel: SettingsViewModel, sample: AppInfo?, selected: Boolean, onClick: () -> Unit, modifier: Modifier) {
-    val icon by produceState<ImageBitmap?>(null, sample?.componentName, shape, iconPack) {
-        value = sample?.let { app -> withContext(Dispatchers.IO) { runCatching { viewModel.iconLoader.render(app.componentName, shape, iconPack) }.getOrNull() } }
+    val icon by produceState(sample?.let { viewModel.iconLoader.peekRender(it.componentName, shape, iconPack) }, sample?.componentName, shape, iconPack) {
+        value = sample?.let { app -> withContext(Dispatchers.Default) { runCatching { viewModel.iconLoader.render(app.componentName, shape, iconPack) }.getOrNull() } }
     }
     SelectableCard(selected, onClick, modifier) {
         Box(Modifier.size(56.dp), contentAlignment = Alignment.Center) {
@@ -182,14 +191,8 @@ private fun PackCard(pack: IconPackInfo?, samples: List<AppInfo>, selected: Bool
     val ownIcons = samples.map { rememberSystemIcon(it.componentName) }
     val packIcons by produceState<List<ImageBitmap?>?>(null, pack?.packageName, samples) {
         val pkg = pack?.packageName ?: return@produceState
-        value = withContext(Dispatchers.IO) {
-            val mappings = runCatching { com.bisc.flauncher.util.IconPackAppFilterParser.parse(context, pkg) }.getOrDefault(emptyList())
-            samples.map { app ->
-                val exact = app.componentName.flattenToString()
-                val drawable = mappings.firstOrNull { it.first == exact || it.first == app.componentName.flattenToShortString() }?.second
-                    ?: mappings.firstOrNull { it.first.startsWith(app.componentName.packageName + "/") }?.second
-                drawable?.let { runCatching { viewModel.loadPackIcon(pkg, it) }.getOrNull() }
-            }
+        value = withContext(Dispatchers.Default) {
+            samples.map { app -> viewModel.iconLoader.packDrawableFor(pkg, app.componentName)?.let { runCatching { viewModel.loadPackIcon(pkg, it) }.getOrNull() } }
         }
     }
     SelectableCard(selected, onClick, modifier) {

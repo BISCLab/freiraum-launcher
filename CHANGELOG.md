@@ -41,6 +41,9 @@
   instead of switches whose meaning was unclear. The search code has its own row, only while the
   app is in the text search. Screen readers hear these tiles as choices and switches with their
   state
+- Icons settings are fast: an icon pack is read once and kept, previews made once are reused, the
+  preview shows the current icons at once instead of starting empty, and switching to another
+  icon pack takes effect right away (its list is stored afterwards)
 
 ## 0.14.1
 

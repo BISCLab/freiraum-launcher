@@ -79,7 +79,12 @@ class IconPackRepository @Inject constructor(
             return@withContext
         }
 
-        val parsed = IconPackAppFilterParser.parse(context, packageName)
+        // Switch first (the pack is usually read already, by the settings' previews), then keep its
+        // list for the next start - writing thousands of rows does not hold the switch up.
+        val parsed = appIconLoader.packMappings(packageName)
+        activeIconPackState.update(packageName, parsed)
+        settingsRepository.setActiveIconPack(packageName)
+        appIconLoader.clearCache()
         mappingDao.clearForPack(packageName)
         if (parsed.isNotEmpty()) {
             mappingDao.insertAll(
@@ -88,9 +93,6 @@ class IconPackRepository @Inject constructor(
                 }
             )
         }
-        activeIconPackState.update(packageName, parsed.toMap())
-        settingsRepository.setActiveIconPack(packageName)
-        appIconLoader.clearCache()
     }
 
     private companion object {
