@@ -19,6 +19,8 @@
   has its symbol, shown in the breadcrumbs where the area begins, for those who tell colors apart
   badly
 - The parts of a page under its preview stand four in a line where there are four (App list)
+- App list: letting go of the Aâ€“Z rail, the letter bubble fades out where it was, with its letter,
+  instead of sliding empty to the top
 
 ## 0.14.2
 

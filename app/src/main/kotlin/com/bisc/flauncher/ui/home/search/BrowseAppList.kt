@@ -258,6 +258,8 @@ class BrowseScrubState {
 
     fun update(active: Boolean, label: String, fraction: Float, pull: Float = 0f) {
         if (this.active != active) this.active = active
+        // Let go: the bubble fades out where it was, with its letter, instead of sliding empty to the top.
+        if (!active) return
         if (this.label != label) this.label = label
         if (this.fraction != fraction) this.fraction = fraction
         if (this.pull != pull) this.pull = pull
