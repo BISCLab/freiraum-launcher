@@ -744,6 +744,7 @@ fun SettingsSearchFavoritesScreen(navController: NavController, onBack: () -> Un
     val favorites by viewModel.searchFavorites.collectAsState()
     val favoritesMode by viewModel.searchFavoritesMode.collectAsState()
     val labeledApps by viewModel.labeledApps.collectAsState()
+    val overrides by viewModel.appOverrides.collectAsState()
     var pickerOpen by remember { mutableStateOf(false) }
     SettingsSubScreen(title = stringResource(R.string.search_section_favorites), navController = navController, onBack = onBack) {
         SettingsPreferenceGroup(info = stringResource(R.string.settings_search_favorites_info)) {
@@ -769,7 +770,10 @@ fun SettingsSearchFavoritesScreen(navController: NavController, onBack: () -> Un
             title = { Text(stringResource(R.string.settings_search_favorites_pick)) },
             text = {
                 LazyColumn(modifier = Modifier.heightIn(max = 420.dp)) {
-                    val apps = labeledApps.sortedBy { it.label.lowercase() }
+                    // Only apps the text search shows can be favorites.
+                    val apps = labeledApps.filter { app ->
+                        overrides[app.componentName.flattenToString()]?.let { it.hiddenFromSearch || it.revealMode == com.bisc.flauncher.data.model.RevealMode.SEARCH_CODE } != true
+                    }.sortedBy { it.label.lowercase() }
                     items(apps, key = { it.componentName.flattenToString() }) { app ->
                         val id = app.componentName.flattenToString()
                         val on = id in picked

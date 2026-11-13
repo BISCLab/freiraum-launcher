@@ -1,5 +1,8 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import android.content.ComponentName
@@ -322,26 +325,28 @@ private fun AppOverrideEditSheetContent(
             )
         }
 
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_shape_label)) {
-            RadioPreference(
-                label = stringResource(R.string.settings_element_color_auto_hint),
-                value = null,
-                selected = iconShape,
-                onSelect = { iconShape = it }
-            )
-            IconShapePreference(
-                stringResource(R.string.settings_icon_shape_rounded_square),
-                IconShape.ROUNDED_SQUARE,
-                iconShape,
-                { iconShape = it }
-            )
-            IconShapePreference(
-                stringResource(R.string.settings_icon_shape_circle),
-                IconShape.CIRCLE,
-                iconShape,
-                { iconShape = it }
-            )
+        // The shape as three tiles, each with this app's own icon drawn in it as the launcher does.
+        val globalShape by viewModel.iconShape.collectAsState()
+        val activePack by viewModel.activeIconPack.collectAsState()
+        val ownIcon = override.iconPackDrawable != null
+        val ownPreview = com.bisc.flauncher.ui.home.rememberAppIcon(app.componentName, viewModel::loadIcon)
+        @Composable
+        fun ShapePicture(shape: IconShape) {
+            val bitmap by androidx.compose.runtime.produceState<androidx.compose.ui.graphics.ImageBitmap?>(null, shape, activePack, ownIcon) {
+                value = if (ownIcon) null else kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    runCatching { viewModel.iconLoader.render(app.componentName, shape, activePack) }.getOrNull()
+                }
+            }
+            (if (ownIcon) ownPreview else bitmap)?.let { Image(it, contentDescription = null, modifier = Modifier.fillMaxSize(0.62f)) }
         }
+        PictureChoiceGrid(
+            title = stringResource(R.string.settings_icon_shape_label),
+            choices = listOf(
+                PictureChoice(stringResource(R.string.settings_app_shape_like_all), iconShape == null, { iconShape = null }) { ShapePicture(globalShape) },
+                PictureChoice(stringResource(R.string.settings_icon_shape_rounded_square), iconShape == IconShape.ROUNDED_SQUARE, { iconShape = IconShape.ROUNDED_SQUARE }) { ShapePicture(IconShape.ROUNDED_SQUARE) },
+                PictureChoice(stringResource(R.string.settings_icon_shape_circle), iconShape == IconShape.CIRCLE, { iconShape = IconShape.CIRCLE }) { ShapePicture(IconShape.CIRCLE) }
+            )
+        )
 
         SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_size_label)) {
             ExpandableOptionalIconSizeSlider(
@@ -357,45 +362,41 @@ private fun AppOverrideEditSheetContent(
             modifier = Modifier.padding(horizontal = 4.dp)
         )
 
-        // Independent per-surface visibility - an app can stay out of the app list while still
-        // being searchable, or vice versa; placements on pages, in the dock and in folders are
-        // unaffected either way. Once other page types exist, a "Pages" row belongs in this same
-        // group alongside App list/Text search. Reveal-with-search-code only makes sense once Text
-        // search is ON - if the app is already out of Text search entirely, there's no code that
-        // could bypass that - so its own settings button only shows then; turning it on *replaces*
-        // name matching rather than adding to it, the app then only turns up for the exact code.
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_manage_apps_visibility_label)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_manage_apps_visibility_app_list_label),
-                info = stringResource(R.string.settings_manage_apps_visibility_app_list_description),
-                onClick = { hiddenFromAppList = !hiddenFromAppList },
-                trailing = { Switch(checked = !hiddenFromAppList, onCheckedChange = { hiddenFromAppList = !it }) }
+        // Where the app shows, each place on its own: on (accent edge, check) or hidden (dimmed,
+        // crossed-out eye). Places on pages, in the Dock and in folders stay either way.
+        PictureChoiceGrid(
+            title = stringResource(R.string.settings_app_visible_in),
+            info = stringResource(R.string.settings_manage_apps_visibility_app_list_description),
+            toggles = true,
+            choices = listOf(
+                PictureChoice(stringResource(R.string.settings_manage_apps_visibility_app_list_label), !hiddenFromAppList, { hiddenFromAppList = !hiddenFromAppList }, dimWhenOff = true) {
+                    Icon(Icons.AutoMirrored.Filled.List, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
+                },
+                PictureChoice(stringResource(R.string.settings_manage_apps_visibility_app_grid_label), !hiddenFromAppGrid, { hiddenFromAppGrid = !hiddenFromAppGrid }, dimWhenOff = true) {
+                    Icon(Icons.Filled.GridView, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
+                },
+                PictureChoice(stringResource(R.string.settings_manage_apps_visibility_search_label), !hiddenFromSearch, { hiddenFromSearch = !hiddenFromSearch }, dimWhenOff = true) {
+                    Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
+                }
             )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_manage_apps_visibility_app_grid_label),
-                onClick = { hiddenFromAppGrid = !hiddenFromAppGrid },
-                trailing = { Switch(checked = !hiddenFromAppGrid, onCheckedChange = { hiddenFromAppGrid = !it }) }
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_manage_apps_visibility_search_label),
-                info = stringResource(R.string.settings_manage_apps_visibility_search_description),
-                onClick = { hiddenFromSearch = !hiddenFromSearch },
-                trailing = { Switch(checked = !hiddenFromSearch, onCheckedChange = { hiddenFromSearch = !it }) },
-                extra = if (!hiddenFromSearch) {
-                    {
-                        IconButton(onClick = { revealSettingsOpen = true }, modifier = Modifier.size(32.dp)) {
-                            Icon(
-                                Icons.Filled.Tune,
-                                contentDescription = stringResource(R.string.settings_more_settings_button),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-                } else null
+        )
+        // Only while the text search shows it: found only by a code instead of its name. Hidden
+        // from the search, it is not a favorite either.
+        if (!hiddenFromSearch) {
+            SettingsPreferenceGroup {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_manage_apps_reveal_search_code),
+                    summary = stringResource(if (revealMode == RevealMode.SEARCH_CODE && revealCode.isNotBlank()) R.string.settings_choice_on else R.string.settings_choice_off),
+                    onClick = { revealSettingsOpen = true }
+                )
+            }
+        } else {
+            Text(
+                stringResource(R.string.settings_app_hidden_search_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp)
             )
         }
 

@@ -1,5 +1,12 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.ui.draw.alpha
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material.icons.filled.Check
@@ -722,3 +729,82 @@ fun SelectedMark(selected: Boolean) {
         if (selected) Icon(androidx.compose.material.icons.Icons.Filled.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(18.dp))
     }
 }
+
+/** One tile of a [PictureChoiceGrid]: a picture of what it means, its name, and whether it is on. */
+class PictureChoice(
+    val label: String,
+    val selected: Boolean,
+    val onClick: () -> Unit,
+    /** Off shows dimmed with a crossed-out eye instead of an empty frame (for things shown or hidden). */
+    val dimWhenOff: Boolean = false,
+    val picture: @Composable androidx.compose.foundation.layout.BoxScope.() -> Unit
+)
+
+/**
+ * Choices as equal tiles with a picture each, three to a line: the one that is on with an accent
+ * edge and a check, its name in the accent. [toggles] = each tile switches on its own (a switch for
+ * screen readers); otherwise one of them is picked (a radio button for screen readers).
+ */
+@Composable
+fun PictureChoiceGrid(choices: List<PictureChoice>, title: String? = null, info: String? = null, toggles: Boolean = false, pictureAspect: Float = 1f) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        if (title != null) SettingsGroupLabel(title, info = info)
+        com.bisc.flauncher.ui.EqualGrid(count = choices.size, columns = 3) { index ->
+            val choice = choices[index]
+            val frame = RoundedCornerShape(18.dp)
+            val stateText = stringResource(if (choice.selected) R.string.settings_choice_on else R.string.settings_choice_off)
+            Column(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .then(
+                        if (toggles) Modifier.toggleable(value = choice.selected, role = androidx.compose.ui.semantics.Role.Switch, onValueChange = { choice.onClick() })
+                        else Modifier.selectable(selected = choice.selected, role = androidx.compose.ui.semantics.Role.RadioButton, onClick = choice.onClick)
+                    )
+                    .androidxSemanticsState(stateText),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(pictureAspect)
+                        .clip(frame)
+                        .background(MaterialTheme.colorScheme.surfaceContainer)
+                        .border(
+                            if (choice.selected) 3.dp else 1.dp,
+                            if (choice.selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                            frame
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().alpha(if (!choice.selected && choice.dimWhenOff) 0.35f else 1f),
+                        contentAlignment = Alignment.Center,
+                        content = choice.picture
+                    )
+                    if (choice.selected) {
+                        Box(modifier = Modifier.align(Alignment.TopEnd).padding(6.dp)) { SelectedMark(true) }
+                    } else if (choice.dimWhenOff) {
+                        Icon(
+                            androidx.compose.material.icons.Icons.Filled.VisibilityOff,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.align(Alignment.TopEnd).padding(8.dp).size(22.dp)
+                        )
+                    }
+                }
+                Text(
+                    choice.label,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (choice.selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    maxLines = 2,
+                    modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
+                )
+            }
+        }
+    }
+}
+
+/** Says "on" or "off" to screen readers, next to the role the tile already has. */
+private fun Modifier.androidxSemanticsState(state: String): Modifier =
+    this.semantics { stateDescription = state }

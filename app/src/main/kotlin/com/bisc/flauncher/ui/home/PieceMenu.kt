@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home
 
+import androidx.compose.ui.draw.alpha
 import android.os.Build
 import android.view.WindowManager
 import androidx.compose.animation.core.Animatable
@@ -136,7 +137,7 @@ fun PieceMenu(expanded: Boolean, onDismissRequest: () -> Unit, content: @Composa
 
 /** One entry of a [PieceMenu]. */
 @Composable
-fun PieceMenuItem(text: @Composable () -> Unit, onClick: () -> Unit, leadingIcon: (@Composable () -> Unit)? = null) {
+fun PieceMenuItem(text: @Composable () -> Unit, onClick: () -> Unit, leadingIcon: (@Composable () -> Unit)? = null, enabled: Boolean = true) {
     val own = LocalMenuAppearance.current
     val colors = own?.let { resolveElementColors(it) }
     Row(
@@ -146,7 +147,8 @@ fun PieceMenuItem(text: @Composable () -> Unit, onClick: () -> Unit, leadingIcon
                 if (colors != null) Modifier.background(colors.background, alpha = colors.backgroundAlpha.coerceAtLeast(0.85f))
                 else Modifier.background(MaterialTheme.colorScheme.surfaceContainerHigh)
             )
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled, onClick = onClick)
+            .alpha(if (enabled) 1f else 0.4f)
             .heightIn(min = 54.dp)
             .padding(start = 18.dp, end = 24.dp),
         verticalAlignment = Alignment.CenterVertically

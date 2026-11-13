@@ -535,8 +535,10 @@ class HomeViewModel @Inject constructor(
 
     /** The favorites the search shows: picked ones first, then (depending on the mode) the most opened. */
     val searchFavoriteApps: StateFlow<List<AppInfo>> =
-        combine(settingsRepository.searchFavorites, settingsRepository.appLaunchCounts, settingsRepository.searchFavoritesMode, labeledApps) { picked, counts, mode, apps ->
-            val byId = apps.associateBy { it.componentName.flattenToString() }
+        combine(settingsRepository.searchFavorites, settingsRepository.appLaunchCounts, settingsRepository.searchFavoritesMode, labeledApps, appOverrides) { picked, counts, mode, apps, overrides ->
+            // Favorites are part of the text search: an app switched off there, or only found by its
+            // code, never shows among them.
+            val byId = apps.filter { notInSearch(it.componentName.flattenToString(), overrides) != true }.associateBy { it.componentName.flattenToString() }
             val manual = if (mode == com.bisc.flauncher.data.model.SearchFavoritesMode.AUTO) emptyList() else picked.mapNotNull { byId[it] }
             val auto = if (mode == com.bisc.flauncher.data.model.SearchFavoritesMode.MANUAL) emptyList()
                 else counts.entries.sortedByDescending { it.value }.mapNotNull { byId[it.key] }
@@ -548,8 +550,19 @@ class HomeViewModel @Inject constructor(
     }
 
     fun recordAppLaunch(component: android.content.ComponentName) {
-        viewModelScope.launch { settingsRepository.recordAppLaunch(component.flattenToString()) }
+        val id = component.flattenToString()
+        if (notInSearch(id, appOverrides.value) == true) return
+        viewModelScope.launch { settingsRepository.recordAppLaunch(id) }
     }
+
+    private fun notInSearch(id: String, overrides: Map<String, AppOverride>): Boolean? = overrides[id]?.let {
+        it.hiddenFromSearch || it.revealMode == RevealMode.SEARCH_CODE
+    }
+
+    /** Apps the text search leaves out; their menu offers no favorite. */
+    val notInSearchIds: StateFlow<Set<String>> =
+        appOverrides.map { map -> map.filterValues { it.hiddenFromSearch || it.revealMode == RevealMode.SEARCH_CODE }.keys }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
 
     val appListHeaderLetterAppearance: StateFlow<ElementAppearance> =
         settingsRepository.appListHeaderLetterAppearance.stateIn(

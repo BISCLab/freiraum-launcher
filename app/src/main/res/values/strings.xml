@@ -1010,4 +1010,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_add_kind_page">Page</string>
     <string name="settings_add_kind_contact">Contact</string>
     <string name="settings_add_kind_action">Action button</string>
+    <string name="settings_choice_on">on</string>
+    <string name="settings_choice_off">off</string>
+    <string name="settings_app_shape_like_all">Like all apps</string>
+    <string name="settings_app_visible_in">Shown in</string>
+    <string name="settings_app_hidden_search_note">Not in the text search: then the app is no favorite either and is not counted there.</string>
 </resources>

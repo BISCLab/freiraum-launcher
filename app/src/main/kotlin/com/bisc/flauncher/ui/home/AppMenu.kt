@@ -63,6 +63,8 @@ import com.bisc.flauncher.data.model.AppInfo
  *  shown elsewhere (settings previews) have no menu. */
 class AppMenuHost(
     val favoriteIds: Set<String>,
+    /** Apps the text search leaves out: no favorites, as favorites are part of the search. */
+    val notInSearchIds: Set<String>,
     val toggleFavorite: (AppInfo) -> Unit,
     val shortcutsFor: suspend (String) -> List<ShortcutInfo>,
     val shortcutIcon: (ShortcutInfo) -> Drawable?,
@@ -77,10 +79,12 @@ val LocalAppMenuHost = compositionLocalOf<AppMenuHost?> { null }
 @Composable
 fun AppMenuProvider(onEdit: (ComponentName) -> Unit, viewModel: HomeViewModel = hiltViewModel(), content: @Composable () -> Unit) {
     val favoriteIds by viewModel.searchFavoriteIds.collectAsState()
+    val notInSearchIds by viewModel.notInSearchIds.collectAsState()
     val currentOnEdit by androidx.compose.runtime.rememberUpdatedState(onEdit)
-    val host = remember(favoriteIds) {
+    val host = remember(favoriteIds, notInSearchIds) {
         AppMenuHost(
             favoriteIds = favoriteIds,
+            notInSearchIds = notInSearchIds,
             toggleFavorite = viewModel::toggleSearchFavorite,
             shortcutsFor = viewModel::appShortcutsFor,
             shortcutIcon = viewModel::loadShortcutIcon,
@@ -143,10 +147,13 @@ private fun AppMenuItems(app: AppInfo, host: AppMenuHost, close: () -> Unit) {
     }
 
     val favorite = app.componentName.flattenToString() in host.favoriteIds
-    MenuEntry(
-        text = stringResource(if (favorite) R.string.search_favorite_remove else R.string.search_favorite_add),
-        onClick = { close(); host.toggleFavorite(app) }
-    ) { Icon(if (favorite) Icons.Filled.Star else Icons.Filled.StarBorder, contentDescription = null) }
+    val searchable = app.componentName.flattenToString() !in host.notInSearchIds
+    PieceMenuItem(
+        text = { Text(stringResource(if (favorite) R.string.search_favorite_remove else R.string.search_favorite_add), maxLines = 1) },
+        onClick = { close(); host.toggleFavorite(app) },
+        leadingIcon = { Icon(if (favorite) Icons.Filled.Star else Icons.Filled.StarBorder, contentDescription = null) },
+        enabled = searchable
+    )
     MenuEntry(text = stringResource(R.string.app_menu_edit), onClick = { close(); host.edit(app.componentName) }) {
         Icon(Icons.Filled.Edit, contentDescription = null)
     }

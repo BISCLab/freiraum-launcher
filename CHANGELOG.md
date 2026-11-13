@@ -32,6 +32,15 @@
   there and in the folder choice; new folders are made under Folders, here an existing one is put
   in place
 - The elements overview in the welcome tour has tiles of one size too
+- Fixed: an app switched off for the text search still showed among the search favorites. Such an
+  app (or one only found by its code) is now no favorite, is not counted for the favorites, cannot
+  be picked as one, and its long-press menu shows "Add to favorites" greyed out
+- Editing an app: the icon shape is three tiles (Like all apps, Rounded square, Circle), each with
+  the app's own icon drawn as the launcher does; where it shows is three tiles (App list, App grid,
+  Text search), shown with an accent edge and a check, hidden dimmed with a crossed-out eye,
+  instead of switches whose meaning was unclear. The search code has its own row, only while the
+  app is in the text search. Screen readers hear these tiles as choices and switches with their
+  state
 
 ## 0.14.1
 
