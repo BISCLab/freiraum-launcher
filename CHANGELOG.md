@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.14.2
 
 - Background settings laid out anew, on every page's look (Home and other pages, App list, App
   grid, Text search): three equal small phones to choose from, Like all pages, Own image and Own

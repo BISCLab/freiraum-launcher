@@ -1,0 +1,7 @@
+• Settings in area colors, search with quick access from every page
+• Background and app editing as picture tiles
+• Add window with tiles of one size
+• Folders stay when taken out of the Dock or Panel
+• Icon previews and pack switching without the wait
+• Apps hidden from search are no favorites
+• Better screen reader support, stronger hint text

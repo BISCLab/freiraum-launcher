@@ -1,0 +1,7 @@
+• Einstellungen in Bereichsfarben, Suche mit „Schnell zu“ von jeder Seite
+• Hintergrund und App bearbeiten als Bildkacheln
+• Hinzufügen-Fenster mit gleich großen Kacheln
+• Ordner bleiben beim Entfernen aus Dock und Panel erhalten
+• Icon-Vorschau und Paketwechsel ohne Wartezeit
+• Ausgeblendete Apps sind keine Favoriten mehr
+• Bessere Unterstützung für Bildschirmleser, kräftigere Hinweistexte
