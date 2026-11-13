@@ -144,26 +144,16 @@ internal fun RowEntryRow(
     }
 }
 
-/** Selection of an existing folder, or creation of a new one, for a row. */
+/** Selection of an existing folder for a row; new folders are made under Folders. */
 @Composable
 fun FolderPickerDialog(
     folders: List<Folder>,
     folderItemsByFolder: Map<Long, List<FolderItem>>,
     loadIcon: (ComponentName) -> ImageBitmap?,
     onPick: (Folder) -> Unit,
-    onCreate: (name: String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var creating by remember { mutableStateOf(false) }
     SettingsFixedDialog(title = stringResource(R.string.settings_row_entry_add_folder), onDismiss = onDismiss) {
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = Icons.Filled.CreateNewFolder,
-                title = stringResource(R.string.settings_row_entry_new_folder),
-                onClick = { creating = true },
-                trailing = null
-            )
-        }
         if (folders.isEmpty()) {
             Text(
                 stringResource(R.string.settings_row_entry_no_folders),
@@ -187,29 +177,6 @@ fun FolderPickerDialog(
                 }
             }
         }
-    }
-    if (creating) {
-        var name by remember { mutableStateOf("") }
-        AlertDialog(
-            onDismissRequest = { creating = false },
-            title = { Text(stringResource(R.string.settings_row_entry_new_folder)) },
-            text = {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.settings_folder_creator_name_hint)) },
-                    singleLine = true,
-                    shape = SettingsTextFieldShape,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            confirmButton = {
-                TextButton(enabled = name.isNotBlank(), onClick = { creating = false; onCreate(name.trim()) }) {
-                    Text(stringResource(R.string.settings_folder_creator_create))
-                }
-            },
-            dismissButton = { TextButton(onClick = { creating = false }) { Text(stringResource(R.string.widget_notes_cancel)) } }
-        )
     }
 }
 

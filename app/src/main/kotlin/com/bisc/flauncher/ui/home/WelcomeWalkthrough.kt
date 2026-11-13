@@ -702,12 +702,11 @@ private fun ElementsOverview() {
         Icons.Filled.Bolt to R.string.welcome_element_actions
     )
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        kinds.chunked(3).forEach { line ->
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                line.forEach { (icon, label) ->
+        // All of one size, whether a name takes one line or two.
+        com.bisc.flauncher.ui.EqualGrid(count = kinds.size, columns = 3) { index ->
+                kinds[index].let { (icon, label) ->
                     Column(
                         modifier = Modifier
-                            .weight(1f)
                             .clip(RoundedCornerShape(20.dp))
                             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                             .padding(vertical = 16.dp),
@@ -721,7 +720,6 @@ private fun ElementsOverview() {
                         Text(stringResource(label), style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center)
                     }
                 }
-            }
         }
         Text(
             stringResource(R.string.welcome_elements_where),

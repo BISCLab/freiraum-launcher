@@ -274,7 +274,6 @@ fun SettingsElementBoxEditScreen(
             folderItemsByFolder = folderItemsByFolder,
             loadIcon = viewModel::loadIcon,
             onPick = { folder -> viewModel.addExistingFolderToRow(row.id, folder.id); showFolderCreator = false },
-            onCreate = { name -> viewModel.createFolderInRow(row.id, name); showFolderCreator = false },
             onDismiss = { showFolderCreator = false }
         )
     }

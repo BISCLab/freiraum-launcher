@@ -350,7 +350,6 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
     val rowShape = row.panelRows()
 
     var showAddChooser by remember { mutableStateOf(false) }
-    var namingNewFolder by remember { mutableStateOf(false) }
     var showAppPicker by remember { mutableStateOf(false) }
     var showFolderPicker by remember { mutableStateOf(false) }
     var showPagePicker by remember { mutableStateOf(false) }
@@ -515,17 +514,7 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
             onAddPageLinkClick = { showAddChooser = false; showPagePicker = true },
             onAddContactClick = { showAddChooser = false; viewModel.openContactPicker() },
             onAddActionButtonClick = { showAddChooser = false; showActionButtonPicker = true },
-            onCreateFolderClick = { showAddChooser = false; namingNewFolder = true },
             onDismiss = { showAddChooser = false }
-        )
-    }
-    if (namingNewFolder) {
-        NewFolderNameDialog(
-            onCreate = { name ->
-                namingNewFolder = false
-                viewModel.createFolderInRowAndOpen(row.id, name) { id -> navController.navigate("settings/folder/$id") }
-            },
-            onDismiss = { namingNewFolder = false }
         )
     }
     if (showActionButtonPicker) {
@@ -552,7 +541,6 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
             folderItemsByFolder = folderItemsByFolder,
             loadIcon = viewModel::loadIcon,
             onPick = { folder -> viewModel.addExistingFolderToRow(row.id, folder.id); showFolderPicker = false },
-            onCreate = { name -> viewModel.createFolderInRow(row.id, name); showFolderPicker = false },
             onDismiss = { showFolderPicker = false }
         )
     }

@@ -140,7 +140,6 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
     val rowShape = row.dockRows()
 
     var showAddChooser by remember { mutableStateOf(false) }
-    var namingNewFolder by remember { mutableStateOf(false) }
     var showAppPicker by remember { mutableStateOf(false) }
     var showFolderPicker by remember { mutableStateOf(false) }
     var showPagePicker by remember { mutableStateOf(false) }
@@ -241,17 +240,7 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
             onAddPageLinkClick = { showAddChooser = false; showPagePicker = true },
             onAddContactClick = { showAddChooser = false; viewModel.openContactPicker() },
             onAddActionButtonClick = { showAddChooser = false; showActionButtonPicker = true },
-            onCreateFolderClick = { showAddChooser = false; namingNewFolder = true },
             onDismiss = { showAddChooser = false }
-        )
-    }
-    if (namingNewFolder) {
-        NewFolderNameDialog(
-            onCreate = { name ->
-                namingNewFolder = false
-                viewModel.createFolderInRowAndOpen(row.id, name) { id -> navController.navigate("settings/folder/$id") }
-            },
-            onDismiss = { namingNewFolder = false }
         )
     }
     if (showActionButtonPicker) {
@@ -278,7 +267,6 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
             folderItemsByFolder = folderItemsByFolder,
             loadIcon = viewModel::loadIcon,
             onPick = { folder -> viewModel.addExistingFolderToRow(row.id, folder.id); showFolderPicker = false },
-            onCreate = { name -> viewModel.createFolderInRow(row.id, name); showFolderPicker = false },
             onDismiss = { showFolderPicker = false }
         )
     }
@@ -361,55 +349,24 @@ internal fun AddElementChooserSheet(
     onAddPageLinkClick: (() -> Unit)? = null,
     onAddContactClick: (() -> Unit)? = null,
     onAddActionButtonClick: (() -> Unit)? = null,
-    /** A new, empty folder made right here; null where that does not fit. */
-    onCreateFolderClick: (() -> Unit)? = null,
     onDismiss: () -> Unit
 ) {
+    // Every kind in a tile of the same size, named in a word: the title already says "Add".
+    // New folders are made under Folders; here an existing one is put in place.
     val tiles = listOfNotNull(
-        Triple(Icons.Filled.Apps, R.string.settings_row_entry_add_app, onAddAppClick),
-        onCreateFolderClick?.let { Triple(Icons.Filled.CreateNewFolder, R.string.settings_row_entry_new_folder, it) },
-        Triple(Icons.Filled.Folder, R.string.settings_row_entry_add_folder, onAddFolderClick),
-        Triple(Icons.AutoMirrored.Filled.Shortcut, R.string.settings_row_entry_add_shortcut, onAddShortcutClick),
-        Triple(Icons.Filled.Place, R.string.settings_row_entry_add_map_target, onAddMapTargetClick),
-        Triple(Icons.Filled.Language, R.string.settings_row_entry_add_website, onAddWebsiteClick),
-        onAddPageLinkClick?.let { Triple(Icons.Filled.ViewCarousel, R.string.settings_row_entry_add_page_link, it) },
-        onAddContactClick?.let { Triple(Icons.Filled.Person, R.string.settings_row_entry_add_contact, it) },
-        onAddActionButtonClick?.let { Triple(Icons.Filled.Bolt, R.string.settings_row_entry_add_actionbutton, it) }
+        SettingsTile(Icons.Filled.Apps, stringResource(R.string.settings_add_kind_app), onClick = onAddAppClick),
+        SettingsTile(Icons.Filled.Folder, stringResource(R.string.settings_add_kind_folder), onClick = onAddFolderClick),
+        SettingsTile(Icons.AutoMirrored.Filled.Shortcut, stringResource(R.string.settings_add_kind_shortcut), onClick = onAddShortcutClick),
+        SettingsTile(Icons.Filled.Place, stringResource(R.string.settings_add_kind_place), onClick = onAddMapTargetClick),
+        SettingsTile(Icons.Filled.Language, stringResource(R.string.settings_add_kind_link), onClick = onAddWebsiteClick),
+        onAddPageLinkClick?.let { SettingsTile(Icons.Filled.ViewCarousel, stringResource(R.string.settings_add_kind_page), onClick = it) },
+        onAddContactClick?.let { SettingsTile(Icons.Filled.Person, stringResource(R.string.settings_add_kind_contact), onClick = it) },
+        onAddActionButtonClick?.let { SettingsTile(Icons.Filled.Bolt, stringResource(R.string.settings_add_kind_action), onClick = it) }
     )
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Text(stringResource(R.string.settings_add_element_title), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 4.dp, bottom = 6.dp))
-            tiles.chunked(3).forEach { line ->
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    line.forEach { (icon, label, onClick) ->
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(SettingsCardShape)
-                                .background(MaterialTheme.colorScheme.surfaceContainer)
-                                .clickable(onClick = onClick)
-                                .padding(vertical = 18.dp, horizontal = 6.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            androidx.compose.foundation.layout.Box(
-                                modifier = Modifier.size(44.dp).clip(androidx.compose.foundation.shape.CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
-                                contentAlignment = Alignment.Center
-                            ) { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary) }
-                            Text(
-                                stringResource(label),
-                                style = MaterialTheme.typography.labelLarge,
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                                maxLines = 2
-                            )
-                        }
-                    }
-                    repeat(3 - line.size) { androidx.compose.foundation.layout.Spacer(Modifier.weight(1f)) }
-                }
-            }
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
+            Text(stringResource(R.string.settings_add_element_title), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 4.dp, bottom = 14.dp))
+            SettingsTileGrid(tiles = tiles, columns = 3)
         }
     }
 }

@@ -27,6 +27,11 @@
   the top (pages with a draft to save leave it out), and from the field on the start page
 - Folders: "Global folder settings" is now "Template for all folders", and says how many folders
   follow it ("2 of 3 follow it"); a folder with its own fill or border does not
+- The Add window of Dock, Panel, folders and Element-Boxes: every tile of the same size, each named
+  in a word (App, Folder, Shortcut, Place, Link, Page, Contact, Action button). "New folder" is gone
+  there and in the folder choice; new folders are made under Folders, here an existing one is put
+  in place
+- The elements overview in the welcome tour has tiles of one size too
 
 ## 0.14.1
 

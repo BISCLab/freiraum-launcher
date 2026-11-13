@@ -471,7 +471,6 @@ fun SettingsFolderEditScreen(
             folderItemsByFolder = itemsByFolder,
             loadIcon = viewModel::loadIcon,
             onPick = { picked -> viewModel.addExistingFolderToFolder(folderId, picked.id); showFolderPicker = false },
-            onCreate = { name -> viewModel.createFolderInFolder(folderId, name); showFolderPicker = false },
             onDismiss = { showFolderPicker = false }
         )
     }

@@ -1002,4 +1002,12 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_settings_entry">Suchen oder schnell zu einer Seite</string>
     <string name="settings_find_crumb">Suche</string>
     <string name="settings_folder_template_following">Gilt für jeden Ordner ohne eigenen Look · %1$d von %2$d folgen ihr</string>
+    <string name="settings_add_kind_app">App</string>
+    <string name="settings_add_kind_folder">Ordner</string>
+    <string name="settings_add_kind_shortcut">Verknüpfung</string>
+    <string name="settings_add_kind_place">Ort</string>
+    <string name="settings_add_kind_link">Link</string>
+    <string name="settings_add_kind_page">Seite</string>
+    <string name="settings_add_kind_contact">Kontakt</string>
+    <string name="settings_add_kind_action">Aktionsbutton</string>
 </resources>
