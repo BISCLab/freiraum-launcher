@@ -1015,4 +1015,14 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_app_shape_like_all">Wie alle Apps</string>
     <string name="settings_app_visible_in">Zu sehen in</string>
     <string name="settings_app_hidden_search_note">Nicht in der Textsuche: Die App ist dann auch kein Favorit und wird dort nicht mitgezählt.</string>
+    <string name="a11y_less">Weniger</string>
+    <string name="a11y_more">Mehr</string>
+    <string name="a11y_clear_input">Eingabe löschen</string>
+    <string name="a11y_remove">Entfernen</string>
+    <string name="a11y_edit">Bearbeiten</string>
+    <string name="a11y_move_back">Eine Stelle nach vorn</string>
+    <string name="a11y_move_on">Eine Stelle nach hinten</string>
+    <string name="a11y_add_here">Hier etwas hinzufügen</string>
+    <string name="a11y_category_in_results">%1$s: in den Ergebnissen</string>
+    <string name="a11y_category_in_rail">%1$s: in der Leiste</string>
 </resources>

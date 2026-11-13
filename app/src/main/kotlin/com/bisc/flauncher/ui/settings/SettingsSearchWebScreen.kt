@@ -436,12 +436,12 @@ private fun ChoiceRow(choice: CommandChoice?, subtitle: String, accent: Boolean,
         }
         onEdit?.let {
             IconButton(onClick = it, modifier = Modifier.size(36.dp)) {
-                Icon(Icons.Filled.Edit, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+                Icon(Icons.Filled.Edit, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.a11y_edit), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
             }
         }
         onRemove?.let {
             IconButton(onClick = it, modifier = Modifier.size(36.dp)) {
-                Icon(Icons.Filled.Close, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+                Icon(Icons.Filled.Close, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.a11y_remove), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
             }
         }
     }

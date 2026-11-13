@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import android.content.ComponentName
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -309,12 +311,24 @@ internal fun FolderSelectionBar(
 
 @Composable
 private fun StepButton(icon: ImageVector, enabled: Boolean, onClick: () -> Unit) {
+    // Said aloud by what it does, from its symbol.
+    val label = stringResource(
+        when (icon) {
+            Icons.Filled.Remove -> R.string.a11y_less
+            Icons.Filled.Add -> R.string.a11y_more
+            Icons.Filled.KeyboardArrowUp -> R.string.settings_move_up
+            Icons.Filled.KeyboardArrowDown -> R.string.settings_move_down
+            Icons.AutoMirrored.Filled.ArrowBack -> R.string.a11y_move_back
+            else -> R.string.a11y_move_on
+        }
+    )
     Box(
         modifier = Modifier
-            .size(40.dp)
+            .size(48.dp)
             .clip(CircleShape)
             .background(if (enabled) MaterialTheme.colorScheme.surfaceContainerHighest else Color.Transparent)
-            .clickable(enabled = enabled, onClick = onClick),
+            .clickable(enabled = enabled, onClickLabel = label, role = androidx.compose.ui.semantics.Role.Button, onClick = onClick)
+            .androidx_semantics_label(label),
         contentAlignment = Alignment.Center
     ) {
         Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (enabled) 1f else 0.3f), modifier = Modifier.size(20.dp))
@@ -353,7 +367,7 @@ internal fun FolderRowsEditor(rowShape: List<Int>, maxColumns: Int, maxRows: Int
                 StepButton(Icons.Filled.Remove, cols > 1) { onChange(rowShape.toMutableList().apply { this[index] = cols - 1 }) }
                 StepButton(Icons.Filled.Add, cols < maxColumns) { onChange(rowShape.toMutableList().apply { this[index] = cols + 1 }) }
                 IconButton(onClick = { onChange(rowShape.filterIndexed { i, _ -> i != index }) }, enabled = rowShape.size > 1, modifier = Modifier.size(36.dp)) {
-                    Icon(Icons.Filled.Delete, contentDescription = null, tint = scheme.onSurfaceVariant.copy(alpha = if (rowShape.size > 1) 1f else 0.3f), modifier = Modifier.size(18.dp))
+                    Icon(Icons.Filled.Delete, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.a11y_remove), tint = scheme.onSurfaceVariant.copy(alpha = if (rowShape.size > 1) 1f else 0.3f), modifier = Modifier.size(18.dp))
                 }
             }
         }
@@ -364,3 +378,6 @@ internal fun FolderRowsEditor(rowShape: List<Int>, maxColumns: Int, maxRows: Int
         }
     }
 }
+
+private fun Modifier.androidx_semantics_label(label: String): Modifier =
+    this.then(Modifier.semantics { contentDescription = label })

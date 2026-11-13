@@ -212,7 +212,7 @@ fun SettingsFindScreen(navController: NavController, onBack: () -> Unit) {
                 actions = {
                     if (query.isNotEmpty()) {
                         IconButton(onClick = { query = "" }) {
-                            Icon(androidx.compose.material.icons.Icons.Filled.Close, contentDescription = null)
+                            Icon(androidx.compose.material.icons.Icons.Filled.Close, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.a11y_clear_input))
                         }
                     }
                 }

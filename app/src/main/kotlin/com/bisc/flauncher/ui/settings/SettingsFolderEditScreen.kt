@@ -722,7 +722,7 @@ fun ColumnScope.IconPackPickerContent(
         leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
         trailingIcon = {
             if (query.isNotEmpty()) {
-                IconButton(onClick = { query = "" }) { Icon(Icons.Filled.Clear, contentDescription = null) }
+                IconButton(onClick = { query = "" }) { Icon(Icons.Filled.Clear, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.a11y_clear_input)) }
             }
         },
         singleLine = true,

@@ -1,5 +1,8 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.ViewAgenda
@@ -422,7 +425,7 @@ private fun CategoryModeRow(
         mode.search && inRail -> R.string.settings_search_mode_always to color
         mode.search -> R.string.settings_search_mode_results to MaterialTheme.colorScheme.onSurfaceVariant
         inRail -> R.string.settings_search_mode_demand to MaterialTheme.colorScheme.onSurfaceVariant
-        else -> R.string.settings_search_mode_off to MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+        else -> R.string.settings_search_mode_off to MaterialTheme.colorScheme.onSurfaceVariant
     }
     val off = !mode.search && !inRail
     val line = MaterialTheme.colorScheme.outlineVariant
@@ -489,13 +492,14 @@ private fun CategoryModeRow(
             }
             Text(stringResource(status), style = MaterialTheme.typography.labelSmall, color = statusColor, maxLines = 2)
         }
-        ModeToggle(Icons.Filled.Search, on = mode.search, enabled = true, color = color) { onChange(mode.copy(search = it)) }
-        ModeToggle(Icons.AutoMirrored.Filled.ViewSidebar, on = mode.rail, enabled = railShown, color = color) { onChange(mode.copy(rail = it)) }
+        val name = stringResource(category.settingsLabelRes)
+        ModeToggle(Icons.Filled.Search, on = mode.search, enabled = true, color = color, label = stringResource(R.string.a11y_category_in_results, name)) { onChange(mode.copy(search = it)) }
+        ModeToggle(Icons.AutoMirrored.Filled.ViewSidebar, on = mode.rail, enabled = railShown, color = color, label = stringResource(R.string.a11y_category_in_rail, name)) { onChange(mode.copy(rail = it)) }
     }
 }
 
 @Composable
-private fun ModeToggle(icon: androidx.compose.ui.graphics.vector.ImageVector, on: Boolean, enabled: Boolean, color: Color, onToggle: (Boolean) -> Unit) {
+private fun ModeToggle(icon: androidx.compose.ui.graphics.vector.ImageVector, on: Boolean, enabled: Boolean, color: Color, label: String, onToggle: (Boolean) -> Unit) {
     androidx.compose.foundation.layout.Box(modifier = Modifier.width(MODE_COLUMN), contentAlignment = Alignment.Center) {
         val shown = on && enabled
         androidx.compose.foundation.layout.Box(
@@ -504,7 +508,9 @@ private fun ModeToggle(icon: androidx.compose.ui.graphics.vector.ImageVector, on
                 .clip(CircleShape)
                 .background(if (shown) color.copy(alpha = 0.2f) else Color.Transparent)
                 .then(if (shown) Modifier else Modifier.border(1.5.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape))
-                .clickable(enabled = enabled) { onToggle(!on) }
+                // A switch for screen readers, named by its category and column.
+                .toggleable(value = on, enabled = enabled, role = androidx.compose.ui.semantics.Role.Switch, onValueChange = onToggle)
+                .semantics { contentDescription = label }
                 .alpha(if (enabled) 1f else 0.4f),
             contentAlignment = Alignment.Center
         ) {

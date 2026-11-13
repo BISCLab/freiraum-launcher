@@ -125,10 +125,10 @@ fun SettingsAppGridGridScreen(navController: NavController, onBack: () -> Unit, 
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             // Below 3 comes "as many as fit".
                             IconButton(onClick = { viewModel.setAppGridRows(if (rows <= 3) 0 else rows - 1) }, enabled = rows != 0) {
-                                Icon(Icons.Filled.Remove, contentDescription = null)
+                                Icon(Icons.Filled.Remove, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.a11y_less))
                             }
                             IconButton(onClick = { viewModel.setAppGridRows(if (rows == 0) 3 else rows + 1) }, enabled = rows < 8) {
-                                Icon(Icons.Filled.Add, contentDescription = null)
+                                Icon(Icons.Filled.Add, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.a11y_more))
                             }
                         }
                     }
@@ -149,10 +149,10 @@ fun SettingsAppGridGridScreen(navController: NavController, onBack: () -> Unit, 
                 trailing = {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         IconButton(onClick = { viewModel.setAppGridColumns(columns - 1) }, enabled = columns > 3) {
-                            Icon(Icons.Filled.Remove, contentDescription = null)
+                            Icon(Icons.Filled.Remove, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.a11y_less))
                         }
                         IconButton(onClick = { viewModel.setAppGridColumns(columns + 1) }, enabled = columns < 6) {
-                            Icon(Icons.Filled.Add, contentDescription = null)
+                            Icon(Icons.Filled.Add, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.a11y_more))
                         }
                     }
                 }

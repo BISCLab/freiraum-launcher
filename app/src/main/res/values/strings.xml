@@ -1015,4 +1015,14 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_app_shape_like_all">Like all apps</string>
     <string name="settings_app_visible_in">Shown in</string>
     <string name="settings_app_hidden_search_note">Not in the text search: then the app is no favorite either and is not counted there.</string>
+    <string name="a11y_less">Less</string>
+    <string name="a11y_more">More</string>
+    <string name="a11y_clear_input">Clear input</string>
+    <string name="a11y_remove">Remove</string>
+    <string name="a11y_edit">Edit</string>
+    <string name="a11y_move_back">One place back</string>
+    <string name="a11y_move_on">One place on</string>
+    <string name="a11y_add_here">Add something here</string>
+    <string name="a11y_category_in_results">%1$s: in the results</string>
+    <string name="a11y_category_in_rail">%1$s: in the rail</string>
 </resources>

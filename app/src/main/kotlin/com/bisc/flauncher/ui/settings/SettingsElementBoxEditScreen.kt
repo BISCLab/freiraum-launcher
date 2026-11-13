@@ -210,11 +210,11 @@ fun SettingsElementBoxEditScreen(
                             IconButton(
                                 onClick = { row = row.copy(columns = row.columns - 1) },
                                 enabled = row.columns > GridConstants.MIN_ELEMENT_BOX_COLUMNS
-                            ) { Icon(Icons.Filled.Remove, contentDescription = null) }
+                            ) { Icon(Icons.Filled.Remove, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.a11y_less)) }
                             IconButton(
                                 onClick = { row = row.copy(columns = row.columns + 1) },
                                 enabled = row.columns < GridConstants.MAX_ELEMENT_BOX_COLUMNS
-                            ) { Icon(Icons.Filled.Add, contentDescription = null) }
+                            ) { Icon(Icons.Filled.Add, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.a11y_more)) }
                         }
                     }
                 )

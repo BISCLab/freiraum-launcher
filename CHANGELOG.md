@@ -52,6 +52,12 @@
   never told by color alone
 - The accent color no longer tints the settings; it is for the launcher's own parts. While picking
   it, a frame in the chosen color shows it at once
+- Better for screen readers: every button that shows only a symbol says what it does (Less, More,
+  Clear input, Remove, Edit, move one place), an empty slot says "Add something here", and the
+  switches in the text search's category table are switches with their category and state. The
+  step buttons in the editors are 48 dp, big enough to hit easily
+- Hints and second lines in the settings are a little darker (lighter in dark mode), so small
+  text reads better, also in bright light
 
 ## 0.14.1
 

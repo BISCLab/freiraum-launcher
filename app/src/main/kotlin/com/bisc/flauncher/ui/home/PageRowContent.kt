@@ -434,7 +434,7 @@ private fun EmptyGridSlotCell(onClick: () -> Unit, iconSizeScale: Float = 1f) {
                 .background(UNSET_APP_SLOT_COLOR),
             contentAlignment = Alignment.Center
         ) {
-            Icon(imageVector = unsetAppSlotIcon, contentDescription = null, tint = Color.White)
+            Icon(imageVector = unsetAppSlotIcon, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.a11y_add_here), tint = Color.White)
         }
     }
 }

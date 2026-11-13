@@ -99,7 +99,7 @@ private fun MusicSourcesPicker(
             leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
             trailingIcon = {
                 if (query.isNotEmpty()) {
-                    IconButton(onClick = { query = "" }) { Icon(Icons.Filled.Close, contentDescription = null) }
+                    IconButton(onClick = { query = "" }) { Icon(Icons.Filled.Close, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.a11y_clear_input)) }
                 }
             },
             singleLine = true,

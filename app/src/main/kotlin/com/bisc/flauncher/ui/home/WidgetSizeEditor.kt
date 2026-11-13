@@ -95,7 +95,7 @@ fun WidgetSizeEditor(
         ) {
             // The +/- buttons are the reliable way to resize; the handle is for quick, coarse dragging.
             IconButton(onClick = { onSpanChange((row.spanY - 1).coerceIn(minSpan, maxSpan)) }, enabled = row.spanY > minSpan) {
-                Icon(Icons.Filled.Remove, contentDescription = null)
+                Icon(Icons.Filled.Remove, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.a11y_less))
             }
             Text(
                 pluralStringResource(R.plurals.settings_widget_size_rows, row.spanY, row.spanY),
@@ -103,7 +103,7 @@ fun WidgetSizeEditor(
                 modifier = Modifier.padding(horizontal = 4.dp)
             )
             IconButton(onClick = { onSpanChange((row.spanY + 1).coerceIn(minSpan, maxSpan)) }, enabled = row.spanY < maxSpan) {
-                Icon(Icons.Filled.Add, contentDescription = null)
+                Icon(Icons.Filled.Add, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.a11y_more))
             }
             Box(
                 modifier = Modifier.padding(start = 12.dp).size(72.dp, 40.dp),

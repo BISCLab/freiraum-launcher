@@ -62,6 +62,9 @@ fun SettingsAreaTheme(area: SettingsArea, content: @Composable () -> Unit) {
             tertiary = c, onTertiary = on,
             primaryContainer = container, onPrimaryContainer = scheme.onSurface,
             secondaryContainer = container, onSecondaryContainer = scheme.onSurface,
+            // Hints and second lines a little stronger than the system's grey, so small text reads
+            // well for everyone, also in bright light.
+            onSurfaceVariant = androidx.compose.ui.graphics.lerp(scheme.onSurfaceVariant, scheme.onSurface, 0.35f),
             surfaceTint = c
         ),
         typography = MaterialTheme.typography
