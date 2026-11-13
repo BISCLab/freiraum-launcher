@@ -993,4 +993,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_dots_show">Punkte an App-Symbolen</string>
     <string name="settings_dots_no_access">Braucht den Zugriff auf Benachrichtigungen</string>
     <string name="settings_dots_grant">Zugriff erlauben</string>
+    <string name="settings_background_like_all">Wie alle Seiten</string>
+    <string name="settings_background_own_color">Eigene Farbe</string>
+    <string name="settings_background_for_all_edit">Hintergrund für alle Seiten ändern</string>
+    <string name="settings_background_change_color">Farbe ändern</string>
 </resources>

@@ -128,16 +128,9 @@ fun SettingsSearchPageScreen(navController: NavController, onBack: () -> Unit, v
             imageKey = com.bisc.flauncher.data.settings.SettingsRepository.SEARCH_BACKGROUND_KEY,
             globalShade = globalShade,
             onGlobalShadeChange = viewModel::setSearchGlobalShade,
-            groupTitle = stringResource(R.string.settings_section_global_background)
+            groupTitle = stringResource(R.string.settings_section_global_background),
+            onEditGlobal = { navController.navigate("settings/appearance/background") }
         )
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_background_for_all),
-                summary = stringResource(R.string.settings_background_for_all_summary),
-                onClick = { navController.navigate("settings/appearance/background") }
-            )
-        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_element_text_color_label)) {
             ColorPickerRow(
                 title = stringResource(R.string.settings_element_text_color_label),

@@ -161,16 +161,9 @@ fun SettingsAppOverviewPageScreen(navController: NavController, onBack: () -> Un
             imageKey = "page_$id",
             globalShade = globalShade,
             onGlobalShadeChange = { viewModel.setPageGlobalShade(id, it) },
-            groupTitle = stringResource(R.string.settings_section_global_background)
+            groupTitle = stringResource(R.string.settings_section_global_background),
+            onEditGlobal = { navController.navigate("settings/appearance/background") }
         )
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_background_for_all),
-                summary = stringResource(R.string.settings_background_for_all_summary),
-                onClick = { navController.navigate("settings/appearance/background") }
-            )
-        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_statusbar_label)) {
             SettingsPreference(
                 icon = null,

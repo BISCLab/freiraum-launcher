@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.aspectRatio
 import android.net.Uri
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
@@ -50,14 +52,82 @@ import com.bisc.flauncher.util.BackgroundImageStore
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-/** Editor for the single global background shared by every surface: image, color, darken/lighten shade. */
+/** One way to fill a screen, as a small phone with its real look. */
+private class BackgroundChoice(
+    val label: String,
+    val selected: Boolean,
+    val onClick: () -> Unit,
+    val preview: @Composable androidx.compose.foundation.layout.BoxScope.() -> Unit
+)
+
+/**
+ * The choices side by side as equal small phones, three to a line (an empty place keeps the size
+ * when there are two): each shows what it would look like, the chosen one with an accent edge and a
+ * check, its name in the accent.
+ */
+@Composable
+private fun BackgroundChoiceRow(title: String?, choices: List<BackgroundChoice>) {
+    Column {
+        if (title != null) SettingsGroupLabel(title)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            choices.forEach { choice ->
+                val shape = RoundedCornerShape(16.dp)
+                Column(
+                    modifier = Modifier.weight(1f).clip(RoundedCornerShape(18.dp)).clickable(onClick = choice.onClick),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(0.56f)
+                            .clip(shape)
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                            .border(
+                                if (choice.selected) 3.dp else 1.dp,
+                                if (choice.selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                                shape
+                            )
+                    ) {
+                        choice.preview(this)
+                        if (choice.selected) {
+                            Box(modifier = Modifier.align(Alignment.TopEnd).padding(6.dp)) { SelectedMark(true) }
+                        }
+                    }
+                    Text(
+                        choice.label,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = if (choice.selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                    )
+                }
+            }
+            repeat(3 - choices.size) { androidx.compose.foundation.layout.Spacer(Modifier.weight(1f)) }
+        }
+    }
+}
+
+@Composable
+private fun ImagePreview(path: String?) {
+    if (path != null) {
+        val bitmap = rememberBackgroundBitmap(path)
+        if (bitmap != null) Image(bitmap, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+    } else {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Icon(Icons.Filled.Add, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+/** Editor for the single background shared by every surface: an image or a color, then what fits
+ *  the choice - the image to change, or the color - and how much it is darkened or lightened. */
 @Composable
 fun BackgroundConfigSection(
     imageKey: String,
     config: BackgroundConfig,
     onConfigChange: (BackgroundConfig) -> Unit
 ) {
-    var colorExpanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
@@ -68,102 +138,34 @@ fun BackgroundConfigSection(
             }
         }
     }
-    val launchImagePicker = {
-        pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-    }
-    val customImagePath = config.imagePath
-    val imageSelected = config.source == BackgroundSource.IMAGE
+    val launchImagePicker = { pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
+    val imagePath = config.imagePath
+    val usesImage = config.source == BackgroundSource.IMAGE && imagePath != null
 
-    SettingsPreferenceGroup(title = surfaceLabel(R.string.settings_layer_surface_screen)) {
-        SettingsPreference(
-            icon = null,
-            title = stringResource(R.string.settings_background_source_custom_image),
-            leading = customImagePath?.let { path ->
-                {
-                    val bitmap = rememberBackgroundBitmap(path)
-                    Box(
-                        modifier = Modifier
-                            .size(width = 24.dp, height = 36.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
-                    ) {
-                        if (bitmap != null) Image(bitmap, null, contentScale = ContentScale.Crop, modifier = Modifier.matchParentSize())
-                    }
-                }
-            },
-            onClick = launchImagePicker,
-            trailing = {
-                RadioButton(
-                    selected = imageSelected && customImagePath != null,
-                    onClick = launchImagePicker
-                )
-            }
-        )
-        SettingsPreference(
-            icon = null,
-            title = stringResource(R.string.settings_background_source_color),
-            leading = {
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .background(config.fill.asBrush())
-                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                )
-            },
-            onClick = {
+    BackgroundChoiceRow(
+        title = null,
+        choices = listOf(
+            BackgroundChoice(stringResource(R.string.settings_background_source_custom_image), usesImage, {
+                if (imagePath != null) onConfigChange(config.withImage(imagePath)) else launchImagePicker()
+            }) { ImagePreview(imagePath) },
+            BackgroundChoice(stringResource(R.string.settings_background_own_color), !usesImage, {
                 if (config.source != BackgroundSource.COLOR) onConfigChange(config.copy(source = BackgroundSource.COLOR))
-                colorExpanded = !colorExpanded
-            },
-            trailing = {
-                RadioButton(
-                    selected = config.source == BackgroundSource.COLOR,
-                    onClick = {
-                        if (config.source != BackgroundSource.COLOR) onConfigChange(config.copy(source = BackgroundSource.COLOR))
-                        colorExpanded = true
-                    }
-                )
-            }
+            }) { Box(Modifier.fillMaxSize().background(config.fill.asBrush())) }
         )
-        if (colorExpanded && config.source == BackgroundSource.COLOR) {
+    )
+
+    SettingsPreferenceGroup {
+        if (usesImage) {
+            SettingsPreference(icon = null, title = stringResource(R.string.settings_background_change_image), onClick = launchImagePicker)
+        } else {
             ColorFillPickerContent(
                 fill = config.fill,
                 onFillChange = { fill -> onConfigChange(config.copy(fill = fill)) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
             )
-        }
-    }
-
-    SettingsPreferenceGroup(title = stringResource(R.string.settings_background_source_custom_image)) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // A large, bordered/checkmarked preview card - feedback that a pick actually worked,
-            // instead of just the tiny 24x36 thumbnail in the row above.
-            val customSelected = imageSelected && customImagePath != null
-            WallpaperCard(
-                selected = customSelected,
-                label = stringResource(R.string.settings_background_source_custom_image),
-                onClick = {
-                    if (customImagePath != null && !customSelected) onConfigChange(config.withImage(customImagePath))
-                    else launchImagePicker()
-                }
-            ) {
-                if (customImagePath != null) {
-                    val bitmap = rememberBackgroundBitmap(customImagePath)
-                    if (bitmap != null) Image(bitmap, null, contentScale = ContentScale.Crop, modifier = Modifier.matchParentSize())
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Filled.Add, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
-            }
         }
     }
 
@@ -173,14 +175,13 @@ fun BackgroundConfigSection(
             onSettled = { onConfigChange(config.copy(shade = it / 100f)) }
         )
     }
-
 }
 
 /**
- * Editor for one surface's background: the shared global background (optionally darkened/lightened
- * just for this surface), its own image, or its own color - laid out like [BackgroundConfigSection].
- * Selecting "Color" opens its own window directly, same as every other color picker in the app,
- * with that color's Darken/Lighten inside it; the global and image options show theirs inline.
+ * Editor for one screen's background, three ways side by side: like all pages (the shared one),
+ * an own image, an own color. Below, only what fits the choice: for the shared one how much it is
+ * darkened here and the way to change it for all pages; for an own image the image and its shade;
+ * for an own color the color, in its own window like every color.
  */
 @Composable
 fun BackgroundOverrideSection(
@@ -193,12 +194,9 @@ fun BackgroundOverrideSection(
     /** This surface's own shade over the global background; null = the global one's own. */
     globalShade: Float?,
     onGlobalShadeChange: (Float) -> Unit,
-    // Null for callers whose own page is already titled "Background" (Home's own Appearance screen,
-    // for one) - repeating the title right underneath would just be redundant there. Defaults to
-    // "Screen" for every other caller (a page's row editor, a folder, etc.) where this section sits
-    // alongside other content on a differently-titled screen and the caption is the only thing
-    // saying what it's for.
-    groupTitle: String? = surfaceLabel(R.string.settings_layer_surface_screen)
+    groupTitle: String? = surfaceLabel(R.string.settings_layer_surface_screen),
+    /** Opens the background for all pages; null where there is no way there. */
+    onEditGlobal: (() -> Unit)? = null
 ) {
     val usesGlobal = override == null
     val current = override ?: BackgroundConfig(source = BackgroundSource.COLOR)
@@ -218,108 +216,61 @@ fun BackgroundOverrideSection(
         }
     }
     val launchImagePicker = { pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
-    // Re-selecting keeps an already-picked image; only the first time (or via the big preview card
-    // below) opens the system picker.
+    // Picking it again keeps an image picked before; only the first time opens the system picker.
     val selectOwnImage = {
         if (ownImagePath != null) onCustomColor(current.withImage(ownImagePath)) else launchImagePicker()
     }
 
-    SettingsPreferenceGroup(title = groupTitle) {
-        SettingsPreference(
-            icon = null,
-            title = stringResource(R.string.settings_background_use_global),
-            summary = stringResource(R.string.settings_background_use_global_summary),
-            leading = {
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .background(if (global.source == BackgroundSource.COLOR) global.fill.asBrush() else androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.surfaceVariant))
-                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                ) {
-                    if (global.source == BackgroundSource.IMAGE) {
-                        val bitmap = rememberBackgroundBitmap(global.imagePath)
-                        if (bitmap != null) Image(bitmap, null, contentScale = ContentScale.Crop, modifier = Modifier.matchParentSize())
-                    }
-                }
+    BackgroundChoiceRow(
+        title = groupTitle,
+        choices = listOf(
+            BackgroundChoice(stringResource(R.string.settings_background_like_all), usesGlobal, onUseGlobal) {
+                com.bisc.flauncher.ui.home.dock.BackgroundFill(global, Modifier.fillMaxSize())
             },
-            onClick = onUseGlobal,
-            trailing = { RadioButton(selected = usesGlobal, onClick = onUseGlobal) }
+            BackgroundChoice(stringResource(R.string.settings_background_source_custom_image), usesOwnImage, selectOwnImage) { ImagePreview(ownImagePath) },
+            BackgroundChoice(stringResource(R.string.settings_background_own_color), !usesGlobal && !usesOwnImage, {
+                if (usesGlobal || usesOwnImage) onCustomColor(current.copy(source = BackgroundSource.COLOR)) else colorEditorOpen = true
+            }) { Box(Modifier.fillMaxSize().background(current.fill.asBrush())) }
         )
-        SettingsPreference(
-            icon = null,
-            title = stringResource(R.string.settings_background_source_custom_image),
-            leading = {
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                ) {
-                    if (ownImagePath != null) {
-                        val bitmap = rememberBackgroundBitmap(ownImagePath)
-                        if (bitmap != null) Image(bitmap, null, contentScale = ContentScale.Crop, modifier = Modifier.matchParentSize())
-                    }
-                }
-            },
-            onClick = selectOwnImage,
-            trailing = { RadioButton(selected = usesOwnImage, onClick = selectOwnImage) }
-        )
-        SettingsPreference(
-            icon = null,
-            title = stringResource(R.string.settings_background_source_color),
-            leading = {
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .background(current.fill.asBrush())
-                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+    )
+
+    SettingsPreferenceGroup {
+        when {
+            usesGlobal -> {
+                ExpandableShadePercentSlider(
+                    percent = ((globalShade ?: global.shade) * 100).roundToInt(),
+                    onSettled = { onGlobalShadeChange(it / 100f) }
                 )
-            },
-            onClick = openColorEditor,
-            trailing = { RadioButton(selected = !usesGlobal && !usesOwnImage, onClick = openColorEditor) }
-        )
-    }
-
-    if (usesGlobal) {
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_shade_label)) {
-            ExpandableShadePercentSlider(
-                percent = ((globalShade ?: global.shade) * 100).roundToInt(),
-                onSettled = { onGlobalShadeChange(it / 100f) }
-            )
-        }
-    }
-
-    if (usesOwnImage) {
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_source_custom_image)) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Tapping the big preview picks a different image.
-                WallpaperCard(
-                    selected = true,
-                    label = stringResource(R.string.settings_background_change_image),
-                    onClick = launchImagePicker
-                ) {
-                    val bitmap = rememberBackgroundBitmap(ownImagePath)
-                    if (bitmap != null) Image(bitmap, null, contentScale = ContentScale.Crop, modifier = Modifier.matchParentSize())
+                if (onEditGlobal != null) {
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(R.string.settings_background_for_all_edit),
+                        summary = stringResource(R.string.settings_background_for_all_summary),
+                        onClick = onEditGlobal
+                    )
                 }
             }
-        }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_shade_label)) {
-            ExpandableShadePercentSlider(
-                percent = (current.shade * 100).roundToInt(),
-                onSettled = { onCustomColor(current.copy(shade = it / 100f)) }
+            usesOwnImage -> {
+                SettingsPreference(icon = null, title = stringResource(R.string.settings_background_change_image), onClick = launchImagePicker)
+                ExpandableShadePercentSlider(
+                    percent = (current.shade * 100).roundToInt(),
+                    onSettled = { onCustomColor(current.copy(shade = it / 100f)) }
+                )
+            }
+            else -> SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_background_change_color),
+                leading = {
+                    Box(Modifier.size(24.dp).clip(CircleShape).background(current.fill.asBrush()).border(1.dp, MaterialTheme.colorScheme.outline, CircleShape))
+                },
+                onClick = openColorEditor
             )
         }
     }
 
     if (colorEditorOpen) {
         var draft by rememberDraft(current)
-        SettingsEditPage(title = stringResource(R.string.settings_background_source_color), onDismiss = { colorEditorOpen = false }, onSave = { onCustomColor(draft) }, dirty = draft != current) {
+        SettingsEditPage(title = stringResource(R.string.settings_background_own_color), onDismiss = { colorEditorOpen = false }, onSave = { onCustomColor(draft) }, dirty = draft != current) {
             ColorFillPickerContent(
                 fill = draft.fill,
                 onFillChange = { fill -> draft = draft.copy(fill = fill) },

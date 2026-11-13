@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Background settings laid out anew, on every page's look (Home and other pages, App list, App
+  grid, Text search): three equal small phones to choose from, Like all pages, Own image and Own
+  color, each showing how it looks, the chosen one with an accent edge and a check. Below, only
+  what fits the choice: for Like all pages how much it is darkened here and the way to change the
+  background for all pages (no longer a separate row of its own), for an own image the image and
+  its shade, for an own color the color. The background for all pages uses the same picture
+  choice for image and color
+
 ## 0.14.1
 
 - A single folder's look page works like every look page: the folder in small stays on top while
