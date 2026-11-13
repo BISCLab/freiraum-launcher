@@ -1,0 +1,6 @@
+• Quick access in the search: nine tiles, fitting the current page
+• Settings start page with a centered heading and an animated logo
+• Area colors further apart, each area with its own symbol
+• Parts of a page four in a line
+• Picture tiles: frames no longer cut off
+• A–Z rail: the letter bubble fades out in place

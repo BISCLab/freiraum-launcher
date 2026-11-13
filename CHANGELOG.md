@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.14.3
 
 - Quick access in the settings search shows nine flatter tiles, all above the keyboard, with the
   settings' start page first when the search was opened deeper in. It offers what most likely comes

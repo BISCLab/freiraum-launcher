@@ -1,0 +1,6 @@
+• „Schnell zu“ in der Suche: neun Kacheln, passend zur aktuellen Seite
+• Einstellungs-Startseite mit mittiger Überschrift und animiertem Logo
+• Bereichsfarben deutlicher getrennt, mit eigenem Symbol je Bereich
+• Teile einer Seite zu viert in einer Reihe
+• Bildkacheln: Rahmen nicht mehr angeschnitten
+• A–Z-Leiste: Buchstabenblase blendet am Platz aus
