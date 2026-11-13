@@ -118,7 +118,7 @@ fun SettingsElementBoxEditScreen(
         // The box as it looks, live with the draft below, and always in sight.
         header = {
             androidx.compose.foundation.layout.Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                RowLiveStage(look, row.cornerRadiusPercent) {
+                RowLiveStage(look, row.cornerRadiusPercent) { _ ->
                     com.bisc.flauncher.ui.home.GridEntries(
                         entries = ordered,
                         columns = if (isPillLayout) (ordered.size + 1).coerceIn(1, 6) else row.columns,

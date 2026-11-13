@@ -185,29 +185,6 @@ fun SettingsFolderEditScreen(
             )
         }
 
-        // Where the folder sits: the Dock and the Panel are where most go, one tap away.
-        val homeRowsByPage by homeViewModel.rowsByPage.collectAsState()
-        val homePages by homeViewModel.pages.collectAsState()
-        val entriesByRow by homeViewModel.rowEntriesByRow.collectAsState()
-        val homeRows = homeRowsByPage[homePages.find { it.isHome }?.id].orEmpty()
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_folder_place_label)) {
-            listOf(
-                homeRows.find { it.type == com.bisc.flauncher.data.model.PageRowType.SEARCH_BAR } to R.string.settings_folder_in_dock,
-                homeRows.find { it.type == com.bisc.flauncher.data.model.PageRowType.PANEL } to R.string.settings_folder_in_panel
-            ).forEach { (row, label) ->
-                if (row != null) {
-                    val entry = entriesByRow[row.id].orEmpty().find { it.type == GridItemType.FOLDER && it.payload == folderId.toString() }
-                    val toggle = { if (entry != null) homeViewModel.removeRowEntry(entry) else homeViewModel.addExistingFolderToRow(row.id, folderId) }
-                    SettingsPreference(
-                        icon = null,
-                        title = stringResource(label),
-                        onClick = toggle,
-                        trailing = { androidx.compose.material3.Switch(checked = entry != null, onCheckedChange = { toggle() }) }
-                    )
-                }
-            }
-        }
-
         // The folder itself, live: tap a part to work on it, the empty tile adds something.
         SettingsGroupLabel(stringResource(R.string.settings_folder_content_label))
         FolderLivePreview(

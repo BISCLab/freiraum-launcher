@@ -161,8 +161,9 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
         // The Dock stays in sight while its settings below scroll.
         header = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                RowLiveStage(look, row.cornerRadiusPercent) {
+                RowLiveStage(look, row.cornerRadiusPercent) { fit ->
                     com.bisc.flauncher.ui.home.GridEntries(
+                        iconSizeScale = fit(rowShape.maxOrNull() ?: 5),
                         entries = entries,
                         columns = 1,
                         rowColumns = rowShape,

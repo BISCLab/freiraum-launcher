@@ -377,8 +377,9 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
         onBack = onBack,
         header = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                RowLiveStage(look, row.cornerRadiusPercent) {
+                RowLiveStage(look, row.cornerRadiusPercent) { fit ->
                     com.bisc.flauncher.ui.home.GridEntries(
+                        iconSizeScale = fit(rowShape.maxOrNull() ?: 5),
                         entries = entries,
                         columns = 1,
                         rowColumns = rowShape,

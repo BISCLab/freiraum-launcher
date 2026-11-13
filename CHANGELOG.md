@@ -9,6 +9,15 @@
   background for all pages (no longer a separate row of its own), for an own image the image and
   its shade, for an own color the color. The background for all pages uses the same picture
   choice for image and color
+- Fixed: taking a folder out of the Dock, the Panel or an Element-Box deleted the whole folder.
+  Now it only leaves that place and stays under Folders with everything in it
+- Fixed: something added to the Dock or the Panel without picking a slot could land behind the
+  last slot, out of sight. It now takes the first free slot, and entries that already sat out of
+  sight show up again in a free slot
+- The folder page no longer has the switches to put a folder into the Dock or the Panel; folders
+  are placed from the Dock and the Panel themselves
+- Dock and Panel editor: the icons are sized to fit the preview, so all slots show and nothing is
+  cut off. The bar under a picked element has light buttons, Settings and a red Remove
 
 ## 0.14.1
 

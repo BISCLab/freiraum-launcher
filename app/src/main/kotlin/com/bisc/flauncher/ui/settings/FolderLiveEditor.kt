@@ -284,16 +284,24 @@ internal fun FolderSelectionBar(
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
             if (onOpenSettings != null) {
-                FilledTonalButton(onClick = onOpenSettings, modifier = Modifier.weight(1f)) {
+                androidx.compose.material3.Button(
+                    onClick = onOpenSettings,
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = scheme.surfaceContainerHighest, contentColor = scheme.onSurface),
+                    modifier = Modifier.weight(1f)
+                ) {
                     Icon(Icons.Filled.Tune, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text(stringResource(R.string.settings_folder_widget_all_settings), maxLines = 1)
+                    Text(stringResource(R.string.settings_entry_settings), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
-            FilledTonalButton(onClick = onRemove, modifier = Modifier.weight(1f)) {
-                Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(18.dp), tint = scheme.error)
+            androidx.compose.material3.Button(
+                onClick = onRemove,
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = scheme.errorContainer, contentColor = scheme.onErrorContainer),
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
-                Text(stringResource(R.string.folder_widget_remove), color = scheme.error, maxLines = 1)
+                Text(stringResource(R.string.folder_widget_remove), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     }

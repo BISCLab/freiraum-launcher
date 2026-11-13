@@ -29,7 +29,7 @@ import com.bisc.flauncher.ui.home.dock.DockPanelSurface
  * corners on a soft backdrop, like the live folder. [content] is the element's entries.
  */
 @Composable
-internal fun RowLiveStage(appearance: ElementAppearance, cornerPercent: Int, content: @Composable ColumnScope.() -> Unit) {
+internal fun RowLiveStage(appearance: ElementAppearance, cornerPercent: Int, content: @Composable ColumnScope.(fit: (Int) -> Float) -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -43,7 +43,16 @@ internal fun RowLiveStage(appearance: ElementAppearance, cornerPercent: Int, con
             shape = com.bisc.flauncher.ui.theme.PartCornerShape(cornerPercent),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(8.dp), content = content)
+            androidx.compose.foundation.layout.BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                // How much smaller the cells have to be so [columns] of them fit side by side here:
+                // the stage is narrower than the screen, the Dock's and Panel's cells keep their size.
+                val width = maxWidth
+                val fit = { columns: Int ->
+                    val cols = columns.coerceAtLeast(1)
+                    ((width - 12.dp - 16.dp * (cols - 1)) / (64.dp * cols)).coerceIn(0.4f, 1f)
+                }
+                Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { content(fit) }
+            }
         }
     }
 }

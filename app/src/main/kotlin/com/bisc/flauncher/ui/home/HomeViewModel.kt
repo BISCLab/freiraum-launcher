@@ -1238,13 +1238,10 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /** Takes [entry] out of its row. A folder only leaves that place: it stays under Folders with
+     *  everything in it, and can be put somewhere else again. */
     fun removeRowEntry(entry: RowEntry) {
-        viewModelScope.launch {
-            pageContentRepository.removeEntry(entry)
-            if (entry.type == GridItemType.FOLDER) {
-                entry.payload.toLongOrNull()?.let { folderRepository.deleteFolderById(it) }
-            }
-        }
+        viewModelScope.launch { pageContentRepository.removeEntry(entry) }
     }
 
     /** Moves [entry] one step by [delta]: in a row with fixed slots (Dock, Panel) to the next slot,

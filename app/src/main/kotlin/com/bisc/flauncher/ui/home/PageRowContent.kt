@@ -362,7 +362,18 @@ fun GridEntries(
     }
 
     if (rowColumns != null) {
-        val bySlot = if (fixedSlots) entries.associateBy { it.orderIndex } else null
+        val bySlot = if (fixedSlots) {
+            // Each entry in its slot; one whose slot is beyond the rows or already taken goes into
+            // the first free slot instead of out of sight.
+            val capacity = rowColumns.sumOf { it.coerceAtLeast(1) }
+            val placed = mutableMapOf<Int, RowEntry>()
+            val stray = mutableListOf<RowEntry>()
+            entries.sortedBy { it.orderIndex }.forEach { e ->
+                if (e.orderIndex in 0 until capacity && e.orderIndex !in placed) placed[e.orderIndex] = e else stray += e
+            }
+            stray.forEach { e -> (0 until capacity).firstOrNull { it !in placed }?.let { placed[it] = e } }
+            placed
+        } else null
         fun entryAt(slot: Int): RowEntry? = bySlot?.get(slot) ?: if (bySlot == null) entries.getOrNull(slot) else null
         var consumed = 0
         val cellWidth = 64.dp * iconSizeScale

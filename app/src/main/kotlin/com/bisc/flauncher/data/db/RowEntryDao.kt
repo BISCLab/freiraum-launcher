@@ -19,6 +19,9 @@ interface RowEntryDao {
     @Query("SELECT COUNT(*) FROM row_entries WHERE pageRowId = :pageRowId")
     suspend fun countForRow(pageRowId: Long): Int
 
+    @Query("SELECT orderIndex FROM row_entries WHERE pageRowId = :pageRowId")
+    suspend fun orderIndexes(pageRowId: Long): List<Int>
+
     @Insert
     suspend fun insert(entry: RowEntry): Long
 

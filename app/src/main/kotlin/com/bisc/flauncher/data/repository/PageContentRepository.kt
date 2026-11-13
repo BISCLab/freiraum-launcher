@@ -589,22 +589,31 @@ class PageContentRepository @Inject constructor(
         rowDao.getById(pageRowId)?.let { rebalancePageOverflow(it.pageId) }
     }
 
+    /** Where a new entry goes without a slot of its own: in the Dock and the Panel (fixed slots)
+     *  the first empty slot, so it never lands out of sight behind the last one; elsewhere the end. */
+    private suspend fun firstFreeSlot(pageRowId: Long): Int {
+        val type = rowDao.getById(pageRowId)?.type
+        if (type != PageRowType.SEARCH_BAR && type != PageRowType.PANEL) return (entryDao.maxOrderIndex(pageRowId) ?: -1) + 1
+        val taken = entryDao.orderIndexes(pageRowId).toHashSet()
+        return generateSequence(0) { it + 1 }.first { it !in taken }
+    }
+
     suspend fun addAppEntry(pageRowId: Long, componentName: String, orderIndex: Int? = null): Long {
-        val next = orderIndex ?: ((entryDao.maxOrderIndex(pageRowId) ?: -1) + 1)
+        val next = orderIndex ?: firstFreeSlot(pageRowId)
         val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.APP, payload = componentName))
         rebalanceForRow(pageRowId)
         return id
     }
 
     suspend fun addFolderEntry(pageRowId: Long, folderId: Long, orderIndex: Int? = null): Long {
-        val next = orderIndex ?: ((entryDao.maxOrderIndex(pageRowId) ?: -1) + 1)
+        val next = orderIndex ?: firstFreeSlot(pageRowId)
         val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.FOLDER, payload = folderId.toString()))
         rebalanceForRow(pageRowId)
         return id
     }
 
     suspend fun addShortcutEntry(pageRowId: Long, packageName: String, shortcutId: String, label: String, orderIndex: Int? = null): Long {
-        val next = orderIndex ?: ((entryDao.maxOrderIndex(pageRowId) ?: -1) + 1)
+        val next = orderIndex ?: firstFreeSlot(pageRowId)
         val id = entryDao.insert(
             RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.SHORTCUT, payload = "$packageName|$shortcutId|$label")
         )
@@ -613,21 +622,21 @@ class PageContentRepository @Inject constructor(
     }
 
     suspend fun addMapTargetEntry(pageRowId: Long, targetId: Long, orderIndex: Int? = null): Long {
-        val next = orderIndex ?: ((entryDao.maxOrderIndex(pageRowId) ?: -1) + 1)
+        val next = orderIndex ?: firstFreeSlot(pageRowId)
         val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.MAP_TARGET, payload = targetId.toString()))
         rebalanceForRow(pageRowId)
         return id
     }
 
     suspend fun addWebsiteEntry(pageRowId: Long, websiteId: Long, orderIndex: Int? = null): Long {
-        val next = orderIndex ?: ((entryDao.maxOrderIndex(pageRowId) ?: -1) + 1)
+        val next = orderIndex ?: firstFreeSlot(pageRowId)
         val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.WEBSITE, payload = websiteId.toString()))
         rebalanceForRow(pageRowId)
         return id
     }
 
     suspend fun addPageLinkEntry(pageRowId: Long, pageId: Long, orderIndex: Int? = null): Long {
-        val next = orderIndex ?: ((entryDao.maxOrderIndex(pageRowId) ?: -1) + 1)
+        val next = orderIndex ?: firstFreeSlot(pageRowId)
         val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.PAGE, payload = pageId.toString()))
         rebalanceForRow(pageRowId)
         return id
@@ -637,14 +646,14 @@ class PageContentRepository @Inject constructor(
      *  HomeViewModel.addContactEntryToRow) ensures that pin exists first, same as this row just
      *  referencing an existing folder/website/map target by id. */
     suspend fun addContactEntry(pageRowId: Long, contactId: Long, orderIndex: Int? = null): Long {
-        val next = orderIndex ?: ((entryDao.maxOrderIndex(pageRowId) ?: -1) + 1)
+        val next = orderIndex ?: firstFreeSlot(pageRowId)
         val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.CONTACT, payload = contactId.toString()))
         rebalanceForRow(pageRowId)
         return id
     }
 
     suspend fun addActionButtonEntry(pageRowId: Long, actionButtonId: Long, orderIndex: Int? = null): Long {
-        val next = orderIndex ?: ((entryDao.maxOrderIndex(pageRowId) ?: -1) + 1)
+        val next = orderIndex ?: firstFreeSlot(pageRowId)
         val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.ACTION_BUTTON, payload = actionButtonId.toString()))
         rebalanceForRow(pageRowId)
         return id

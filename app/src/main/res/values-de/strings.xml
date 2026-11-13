@@ -997,4 +997,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_background_own_color">Eigene Farbe</string>
     <string name="settings_background_for_all_edit">Hintergrund für alle Seiten ändern</string>
     <string name="settings_background_change_color">Farbe ändern</string>
+    <string name="settings_entry_settings">Einstellungen</string>
 </resources>
