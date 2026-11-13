@@ -65,7 +65,12 @@ fun SettingsFolderScreen(navController: NavController, onBack: () -> Unit, viewM
             SettingsPreference(
                 icon = Icons.Filled.Palette,
                 title = stringResource(R.string.settings_folder_global_label),
-                summary = stringResource(R.string.settings_folder_global_subtitle),
+                // How many folders follow it: a folder with a fill or border of its own does not.
+                summary = stringResource(
+                    R.string.settings_folder_template_following,
+                    folders.count { !it.appearanceOverrideEnabled && !it.borderOverrideEnabled },
+                    folders.size
+                ),
                 onClick = { navController.navigate("settings/folder/global") }
             )
         }

@@ -290,6 +290,9 @@ class MainActivity : ComponentActivity() {
                                 onNavigate = { route -> navController.navigate("settings/$route") }
                             )
                         }
+                        settingsComposable(com.bisc.flauncher.ui.settings.SETTINGS_FIND_ROUTE) {
+                            com.bisc.flauncher.ui.settings.SettingsFindScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
                         settingsComposable("settings/appearance") {
                             SettingsAppearanceScreen(
                                 navController = navController,

@@ -222,7 +222,7 @@
     <string name="settings_section_folder">Folder</string>
     <string name="settings_card_folder_subtitle">Display options and folder list</string>
 <string name="settings_folder_title">Folder</string>
-    <string name="settings_folder_global_label">Global folder settings</string>
+    <string name="settings_folder_global_label">Template for all folders</string>
     <string name="settings_folder_global_subtitle">Appearance, border and visibility shared by every folder</string>
     <string name="settings_folder_visibility_label">Visibility</string>
     <string name="settings_folder_create">Create folder</string>
@@ -1000,4 +1000,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_entry_settings">Settings</string>
     <string name="settings_quick_info">The pages that are otherwise several steps away. What you open often moves to the front, recent visits counting more.</string>
     <string name="settings_search_settings_entry">Search, or jump to a page</string>
+    <string name="settings_find_crumb">Search</string>
+    <string name="settings_folder_template_following">Applies to every folder without a look of its own · %1$d of %2$d follow it</string>
 </resources>

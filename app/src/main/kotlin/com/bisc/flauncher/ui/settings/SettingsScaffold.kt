@@ -86,6 +86,7 @@ internal fun SettingsBreadcrumbBar(
 private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
     return when (entry.destination.route) {
         "settings" -> stringResource(R.string.settings_title)
+        "settings/find" -> stringResource(R.string.settings_find_crumb)
         "settings/appearance" -> stringResource(R.string.settings_design_title)
         "settings/extensions" -> stringResource(R.string.settings_group_extensions)
         "settings/appearance/menus" -> stringResource(R.string.settings_menus_title)

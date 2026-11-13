@@ -234,7 +234,7 @@
     <string name="settings_section_folder">Ordner</string>
     <string name="settings_card_folder_subtitle">Anzeigeoptionen und Ordnerliste</string>
     <string name="settings_folder_title">Ordner</string>
-    <string name="settings_folder_global_label">Globale Ordner-Einstellungen</string>
+    <string name="settings_folder_global_label">Vorlage für alle Ordner</string>
     <string name="settings_folder_global_subtitle">Aussehen, Rahmen und Sichtbarkeit für alle Ordner</string>
     <string name="settings_folder_visibility_label">Sichtbarkeit</string>
     <string name="settings_folder_create">Ordner erstellen</string>
@@ -1000,4 +1000,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_entry_settings">Einstellungen</string>
     <string name="settings_quick_info">Hier stehen die Seiten, die sonst mehrere Schritte entfernt sind. Was du oft öffnest, rückt nach vorn, neuere Besuche zählen dabei mehr.</string>
     <string name="settings_search_settings_entry">Suchen oder schnell zu einer Seite</string>
+    <string name="settings_find_crumb">Suche</string>
+    <string name="settings_folder_template_following">Gilt für jeden Ordner ohne eigenen Look · %1$d von %2$d folgen ihr</string>
 </resources>

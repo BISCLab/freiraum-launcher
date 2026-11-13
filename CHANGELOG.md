@@ -23,6 +23,10 @@
   of the overview pages that are otherwise several steps away (Home screen, Dock, Panel, Folders,
   Gestures, Icons first), and adapts: the pages you open most move to the front, recent visits
   counting more than old ones
+- The settings search is a page of its own, reached from every settings page by the magnifier at
+  the top (pages with a draft to save leave it out), and from the field on the start page
+- Folders: "Global folder settings" is now "Template for all folders", and says how many folders
+  follow it ("2 of 3 follow it"); a folder with its own fill or border does not
 
 ## 0.14.1
 

@@ -81,48 +81,25 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
     val allPages by home.allPages.collectAsState()
     val designs by designsViewModel.designs.collectAsState()
     val packs by packsViewModel.packs.collectAsState()
-    val homeId = allPages.firstOrNull { it.isHome }?.id
-    var searching by rememberSaveable { mutableStateOf(false) }
-    var query by rememberSaveable { mutableStateOf("") }
-    val openTarget: (String) -> Unit = { route ->
-        if (homeId != null || com.bisc.flauncher.data.model.LauncherSettingsTarget.HOME !in route) {
-            navController.navigate(route.replace(com.bisc.flauncher.data.model.LauncherSettingsTarget.HOME, homeId.toString()))
-        }
-    }
-    androidx.activity.compose.BackHandler(enabled = searching) { searching = false; query = "" }
+    val openSearch = { navController.navigate(SETTINGS_FIND_ROUTE) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 windowInsets = settingsTopBarInsets(),
-                title = {
-                    if (searching) SettingsSearchField(query = query, onQueryChange = { query = it })
-                    else Text(stringResource(R.string.settings_title))
-                },
+                title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
-                    IconButton(onClick = { if (searching) { searching = false; query = "" } else onBack() }) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.settings_back))
                     }
                 },
-                actions = {
-                    if (!searching) {
-                        IconButton(onClick = { searching = true }) {
-                            Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.settings_search_settings_hint))
-                        }
-                    } else if (query.isNotEmpty()) {
-                        IconButton(onClick = { query = "" }) {
-                            Icon(androidx.compose.material.icons.Icons.Filled.Close, contentDescription = null)
-                        }
-                    }
-                }
+                actions = { SettingsSearchAction(navController) }
             )
         },
         bottomBar = { SettingsBreadcrumbBar(navController) }
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-        if (searching) {
-            SettingsSearchResults(query = query, onOpen = openTarget)
-        } else Column(modifier = Modifier.widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(modifier = Modifier.widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             AboutHeaderCard(onClick = { onNavigate("about") })
             // The way into the search and the quick access, as a field to tap.
             Row(
@@ -130,7 +107,7 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                     .fillMaxWidth()
                     .clip(androidx.compose.foundation.shape.RoundedCornerShape(50))
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .clickable { searching = true }
+                    .clickable(onClick = openSearch)
                     .padding(horizontal = 18.dp, vertical = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -192,6 +169,58 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                 )
             }
         }
+        }
+    }
+}
+
+/** The route of the settings search; reached from every settings page by its magnifier. */
+const val SETTINGS_FIND_ROUTE = "settings/find"
+
+/** The magnifier in a settings page's top bar: opens the settings search with its quick access. */
+@Composable
+fun SettingsSearchAction(navController: NavController) {
+    IconButton(onClick = { navController.navigate(SETTINGS_FIND_ROUTE) { launchSingleTop = true } }) {
+        Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.settings_search_settings_hint))
+    }
+}
+
+/** The settings search: the field on top, below it the matches, or while nothing is typed the
+ *  quick access to the pages most likely wanted. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsFindScreen(navController: NavController, onBack: () -> Unit) {
+    val home: com.bisc.flauncher.ui.home.HomeViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+    val allPages by home.allPages.collectAsState()
+    val homeId = allPages.firstOrNull { it.isHome }?.id
+    var query by rememberSaveable { mutableStateOf("") }
+    val openTarget: (String) -> Unit = { route ->
+        if (homeId != null || com.bisc.flauncher.data.model.LauncherSettingsTarget.HOME !in route) {
+            navController.navigate(route.replace(com.bisc.flauncher.data.model.LauncherSettingsTarget.HOME, homeId.toString()))
+        }
+    }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                windowInsets = settingsTopBarInsets(),
+                title = { SettingsSearchField(query = query, onQueryChange = { query = it }) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_back))
+                    }
+                },
+                actions = {
+                    if (query.isNotEmpty()) {
+                        IconButton(onClick = { query = "" }) {
+                            Icon(androidx.compose.material.icons.Icons.Filled.Close, contentDescription = null)
+                        }
+                    }
+                }
+            )
+        },
+        bottomBar = { SettingsBreadcrumbBar(navController) }
+    ) { padding ->
+        Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+            SettingsSearchResults(query = query, onOpen = openTarget)
         }
     }
 }
@@ -516,7 +545,8 @@ fun SettingsSubScreen(
                     IconButton(onClick = { guardLeave(onBack) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.settings_back))
                     }
-                }
+                },
+                actions = { if (onSave == null) SettingsSearchAction(navController) }
             )
         },
         bottomBar = {
