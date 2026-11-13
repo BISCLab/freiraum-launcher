@@ -38,4 +38,8 @@ object ProfileComponents {
 
     fun serialOf(context: Context, user: UserHandle): Long =
         context.getSystemService(UserManager::class.java).getSerialNumberForUser(user)
+
+    /** Only the apps of the own profile - where something of theirs (their shortcuts) is meant. */
+    fun ownOnly(apps: List<com.bisc.flauncher.data.model.AppInfo>): List<com.bisc.flauncher.data.model.AppInfo> =
+        apps.filter { !isProfile(it.componentName) }
 }

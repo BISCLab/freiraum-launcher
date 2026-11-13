@@ -146,7 +146,7 @@ internal fun EditableGesturePhone(viewModel: SettingsViewModel, widthFraction: F
 
     if (shortcutAppPickerOpen) {
         ShortcutSourceAppSheet(
-            apps = browsableApps,
+            apps = com.bisc.flauncher.util.ProfileComponents.ownOnly(browsableApps),
             loadIcon = viewModel::loadIcon,
             onAppSelected = viewModel::selectShortcutSourceApp,
             onDismiss = viewModel::dismissShortcutAppPicker

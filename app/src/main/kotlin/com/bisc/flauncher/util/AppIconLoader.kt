@@ -1,5 +1,6 @@
 package com.bisc.flauncher.util
 
+import androidx.compose.ui.graphics.asAndroidBitmap
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
@@ -175,6 +176,9 @@ class AppIconLoader @Inject constructor(
     fun render(componentName: ComponentName, shape: IconShape, iconPack: String?): ImageBitmap? {
         val key = Triple(componentName, shape, iconPack)
         renderCache.get(key)?.let { return it }
+        if (ProfileComponents.isProfile(componentName)) {
+            return loadProfileIcon(componentName, shape, iconPack, forPreview = true)?.also { renderCache.put(key, it) }
+        }
         val fromPack = iconPack?.let { pack -> packDrawableFor(pack, componentName)?.let { loadPackIcon(pack, it) } }
         val result = fromPack ?: run {
             val drawable = runCatching { context.packageManager.getActivityIcon(componentName) }.getOrNull() ?: return null
@@ -202,16 +206,18 @@ class AppIconLoader @Inject constructor(
 
     /** An app of another profile: its own icon (or the icon pack's) in the shape, with the
      *  profile's badge on it as the system draws it. */
-    private fun loadProfileIcon(marked: ComponentName): ImageBitmap? {
+    /** [shape] and [pack] for a preview of a choice; by default the ones in use. */
+    private fun loadProfileIcon(marked: ComponentName, shape: IconShape? = null, pack: String? = activeIconPackState.activePackage, forPreview: Boolean = false): ImageBitmap? {
         val user = ProfileComponents.userOf(context, marked) ?: return null
         val real = ProfileComponents.real(marked)
         val launcherApps = context.getSystemService(android.content.pm.LauncherApps::class.java)
-        val base: Bitmap = loadIconPackDrawable(real)?.toBitmap(width = ICON_SIZE_PX, height = ICON_SIZE_PX) ?: run {
+        val fromPack = if (forPreview) pack?.let { p -> packDrawableFor(p, real)?.let { loadPackIcon(p, it)?.asAndroidBitmap() } }
+            else loadIconPackDrawable(real)?.toBitmap(width = ICON_SIZE_PX, height = ICON_SIZE_PX)
+        val base: Bitmap = fromPack ?: run {
             val info = runCatching {
                 launcherApps.resolveActivity(android.content.Intent(android.content.Intent.ACTION_MAIN).setComponent(real), user)
             }.getOrNull() ?: return null
-            val shape = shapeOverrides[marked.flattenToString()] ?: globalShape
-            renderMasked(info.getIcon(0), shape)
+            renderMasked(info.getIcon(0), shape ?: shapeOverrides[marked.flattenToString()] ?: globalShape)
         }
         val badged = runCatching {
             context.packageManager.getUserBadgedIcon(android.graphics.drawable.BitmapDrawable(context.resources, base), user)

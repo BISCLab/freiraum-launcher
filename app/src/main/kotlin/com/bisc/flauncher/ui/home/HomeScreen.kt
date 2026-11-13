@@ -1210,7 +1210,7 @@ fun HomeScreen(
 
     if (shortcutAppPickerOpen) {
         ShortcutSourceAppSheet(
-            apps = viewModel.labeledApps.collectAsState().value,
+            apps = com.bisc.flauncher.util.ProfileComponents.ownOnly(viewModel.labeledApps.collectAsState().value),
             loadIcon = viewModel::loadIcon,
             onAppSelected = viewModel::selectShortcutSourceApp,
             onDismiss = viewModel::dismissShortcutAppPicker

@@ -58,6 +58,9 @@
   step buttons in the editors are 48 dp, big enough to hit easily
 - Hints and second lines in the settings are a little darker (lighter in dark mode), so small
   text reads better, also in bright light
+- Fixed: editing an app of the work profile or private space showed empty shape tiles
+- Choosing an app for its shortcuts only offers apps of the own profile, as the shortcuts of an app
+  in another profile cannot be reached from here
 
 ## 0.14.1
 
