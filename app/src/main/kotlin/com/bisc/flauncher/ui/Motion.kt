@@ -27,7 +27,9 @@ data class MotionPrefs(
     val pageDepth: Boolean = true,
     val backGesture: Boolean = true,
     val settingsSlide: Boolean = true,
-    val gestureRipples: Boolean = true
+    val gestureRipples: Boolean = true,
+    /** The logo on the settings' start page changing its shape. */
+    val logoShape: Boolean = true
 )
 
 val LocalMotionPrefs = staticCompositionLocalOf { MotionPrefs() }

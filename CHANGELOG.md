@@ -11,6 +11,9 @@
   search. The heading is centered: the logo in the middle, slowly changing its shape between
   square, rounded and round, with the name and version under it. With motion off the logo stays
   square; the animation only runs while that page is open
+- The picture tiles (background, icon shape, where an app shows) draw their frame on top of the
+  picture, so a color or image no longer cuts into it at the rounded corners
+- Animations has its own switch for the logo changing its shape on the settings' start page
 
 ## 0.14.2
 

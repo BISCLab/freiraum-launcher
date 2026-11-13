@@ -82,13 +82,16 @@ private fun BackgroundChoiceRow(title: String?, choices: List<BackgroundChoice>)
                             .aspectRatio(0.56f)
                             .clip(shape)
                             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                            .border(
+                    ) {
+                        choice.preview(this)
+                        // The frame on top of the picture, so the picture never covers it in the corners.
+                        Box(
+                            Modifier.matchParentSize().border(
                                 if (choice.selected) 3.dp else 1.dp,
                                 if (choice.selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
                                 shape
                             )
-                    ) {
-                        choice.preview(this)
+                        )
                         if (choice.selected) {
                             Box(modifier = Modifier.align(Alignment.TopEnd).padding(6.dp)) { SelectedMark(true) }
                         }

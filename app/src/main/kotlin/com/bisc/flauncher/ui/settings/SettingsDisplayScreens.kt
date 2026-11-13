@@ -74,7 +74,7 @@ internal fun motionSummary(viewModel: SettingsViewModel): String {
     val context = LocalContext.current
     if (systemAnimationsOff(context)) return stringResource(R.string.settings_motion_summary_system_off)
     if (level == MotionLevel.OFF) return stringResource(R.string.settings_motion_summary_off)
-    val each = listOf(prefs.appZoom, prefs.overlayZoom, prefs.folderZoom, prefs.pageDepth, prefs.backGesture, prefs.settingsSlide, prefs.gestureRipples)
+    val each = listOf(prefs.appZoom, prefs.overlayZoom, prefs.folderZoom, prefs.pageDepth, prefs.backGesture, prefs.settingsSlide, prefs.gestureRipples, prefs.logoShape)
     return stringResource(R.string.settings_motion_summary_on, each.count { it }, each.size)
 }
 
@@ -177,6 +177,7 @@ fun SettingsAnimationsScreen(navController: NavController, onBack: () -> Unit, v
             SlimSwitchRow(stringResource(R.string.settings_motion_page_depth), prefs.pageDepth, on) { set(prefs.copy(pageDepth = it)) }
             SlimSwitchRow(stringResource(R.string.settings_motion_back_gesture), prefs.backGesture, on) { set(prefs.copy(backGesture = it)) }
             SlimSwitchRow(stringResource(R.string.settings_motion_settings_slide), prefs.settingsSlide, on) { set(prefs.copy(settingsSlide = it)) }
+            SlimSwitchRow(stringResource(R.string.settings_motion_logo_shape), prefs.logoShape, on) { set(prefs.copy(logoShape = it)) }
             SlimSwitchRow(stringResource(R.string.settings_motion_ripples), prefs.gestureRipples, on) { set(prefs.copy(gestureRipples = it)) }
         }
         SettingsPreferenceGroup(

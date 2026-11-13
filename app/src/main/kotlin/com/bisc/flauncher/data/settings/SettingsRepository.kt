@@ -166,6 +166,7 @@ class SettingsRepository @Inject constructor(
             pageDepth = prefs[booleanPreferencesKey("motion_page_depth")] ?: true,
             backGesture = prefs[booleanPreferencesKey("motion_back_gesture")] ?: true,
             settingsSlide = prefs[booleanPreferencesKey("motion_settings_slide")] ?: true,
+            logoShape = prefs[booleanPreferencesKey("motion_logo_shape")] ?: true,
             gestureRipples = prefs[booleanPreferencesKey("motion_gesture_ripples")] ?: true
         )
     }
@@ -178,6 +179,7 @@ class SettingsRepository @Inject constructor(
             it[booleanPreferencesKey("motion_page_depth")] = p.pageDepth
             it[booleanPreferencesKey("motion_back_gesture")] = p.backGesture
             it[booleanPreferencesKey("motion_settings_slide")] = p.settingsSlide
+            it[booleanPreferencesKey("motion_logo_shape")] = p.logoShape
             it[booleanPreferencesKey("motion_gesture_ripples")] = p.gestureRipples
         }
     }

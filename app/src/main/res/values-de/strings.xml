@@ -1029,4 +1029,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
         <item quantity="one">Gilt für jeden Ordner ohne eigenen Look · %1$d von %2$d folgt ihr</item>
         <item quantity="other">Gilt für jeden Ordner ohne eigenen Look · %1$d von %2$d folgen ihr</item>
     </plurals>
+    <string name="settings_motion_logo_shape">Logo in den Einstellungen wechselt die Form</string>
 </resources>

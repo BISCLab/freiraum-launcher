@@ -117,7 +117,7 @@ fun AboutHeaderCard(onClick: () -> Unit) {
  */
 @Composable
 private fun ShapeShiftingLogo(size: Dp) {
-    val still = com.bisc.flauncher.ui.LocalMotion.current == com.bisc.flauncher.ui.MotionLevel.OFF
+    val still = com.bisc.flauncher.ui.LocalMotion.current == com.bisc.flauncher.ui.MotionLevel.OFF || !com.bisc.flauncher.ui.LocalMotionPrefs.current.logoShape
     val corner = if (still) null else androidx.compose.animation.core.rememberInfiniteTransition(label = "logoShape").animateFloat(
         initialValue = 0f,
         targetValue = 0f,
