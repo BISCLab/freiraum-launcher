@@ -1,5 +1,10 @@
 package com.bisc.flauncher.ui.theme
 
+import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.PhoneAndroid
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.ViewCarousel
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -15,14 +20,16 @@ import androidx.compose.ui.graphics.luminance
  * well on the settings' light and dark background (contrast of at least 4.5 to 1), and an area is
  * never told by its color alone: it always has its name and symbol too.
  */
-enum class SettingsArea(private val light: Long, private val dark: Long) {
-    APPEARANCE(0xFF7B3FE4, 0xFFC3A6FF),
-    PAGES(0xFF1A66D9, 0xFF8AB4F8),
-    ELEMENTS(0xFF1B7F3B, 0xFF81C995),
-    SYSTEM(0xFF546474, 0xFFAEBBC9),
-    EXTENSIONS(0xFFB45309, 0xFFF4A261),
+enum class SettingsArea(private val light: Long, private val dark: Long, val icon: androidx.compose.ui.graphics.vector.ImageVector?) {
+    // Spread wide over the color wheel, so no two are mistaken for each other; each with its symbol
+    // too, for those who tell colors apart badly.
+    APPEARANCE(0xFFC2185B, 0xFFF48FB1, androidx.compose.material.icons.Icons.Filled.Palette),
+    PAGES(0xFF1565C0, 0xFF90CAF9, androidx.compose.material.icons.Icons.Filled.ViewCarousel),
+    ELEMENTS(0xFF2E7D32, 0xFFA5D6A7, androidx.compose.material.icons.Icons.Filled.Apps),
+    SYSTEM(0xFF546E7A, 0xFFB0BEC5, androidx.compose.material.icons.Icons.Filled.PhoneAndroid),
+    EXTENSIONS(0xFFB84A00, 0xFFFFB74D, androidx.compose.material.icons.Icons.Filled.Extension),
     /** The start page and the search: no area of their own. */
-    NEUTRAL(0xFF3C4A57, 0xFFC4CED8);
+    NEUTRAL(0xFF3C4A57, 0xFFC4CED8, null);
 
     fun color(dark: Boolean): Color = Color(if (dark) this.dark else light)
 }

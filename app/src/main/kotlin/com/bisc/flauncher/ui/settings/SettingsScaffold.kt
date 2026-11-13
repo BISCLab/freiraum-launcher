@@ -60,10 +60,10 @@ internal fun SettingsBreadcrumbBar(
             val isLast = index == crumbs.lastIndex
             val label = settingsCrumbLabel(entry)
             val area = com.bisc.flauncher.ui.theme.settingsAreaFor(entry.destination.route)
-            if (area != com.bisc.flauncher.ui.theme.SettingsArea.NEUTRAL) {
-                androidx.compose.foundation.layout.Box(
-                    Modifier.padding(end = 6.dp).size(8.dp).clip(androidx.compose.foundation.shape.CircleShape).background(area.current())
-                )
+            val previousArea = crumbs.getOrNull(index - 1)?.let { com.bisc.flauncher.ui.theme.settingsAreaFor(it.destination.route) }
+            // Where an area begins: its symbol in its color.
+            if (area != com.bisc.flauncher.ui.theme.SettingsArea.NEUTRAL && area != previousArea) {
+                area.icon?.let { Icon(it, contentDescription = null, tint = area.current(), modifier = Modifier.padding(end = 6.dp).size(16.dp)) }
             }
             Text(
                 label,

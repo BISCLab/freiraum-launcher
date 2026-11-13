@@ -14,6 +14,11 @@
 - The picture tiles (background, icon shape, where an app shows) draw their frame on top of the
   picture, so a color or image no longer cuts into it at the rounded corners
 - Animations has its own switch for the logo changing its shape on the settings' start page
+- Area colors spread wider over the color wheel so none are mistaken for each other: Appearance
+  magenta, Pages blue, Apps and elements green, System slate, Extensions orange. Each area also
+  has its symbol, shown in the breadcrumbs where the area begins, for those who tell colors apart
+  badly
+- The parts of a page under its preview stand four in a line where there are four (App list)
 
 ## 0.14.2
 

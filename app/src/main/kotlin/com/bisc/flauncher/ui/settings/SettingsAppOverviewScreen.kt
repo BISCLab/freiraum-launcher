@@ -51,16 +51,18 @@ fun SettingsAppOverviewAppearanceHubScreen(navController: NavController, onBack:
     SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
         // Tap a part of the miniature to edit it; the tiles below are the second way in.
         AppListPreview(onNavigate = onNavigate)
-        SettingsTileGrid(
-            title = stringResource(R.string.settings_parts_label),
-            columns = 3,
-            tiles = listOfNotNull(
+        val partTiles = listOfNotNull(
                 SettingsTile(androidx.compose.material.icons.Icons.Filled.Wallpaper, stringResource(R.string.settings_search_page_label)) { onNavigate("page") },
-                SettingsTile(androidx.compose.material.icons.Icons.Filled.SortByAlpha, surfaceLabel(R.string.settings_layer_surface_section_letter)) { onNavigate("section_letters") },
+                SettingsTile(androidx.compose.material.icons.Icons.Filled.SortByAlpha, stringResource(R.string.settings_part_letters_short)) { onNavigate("section_letters") },
                 SettingsTile(androidx.compose.material.icons.Icons.Filled.FontDownload, stringResource(R.string.settings_app_overview_az_index_label)) { onNavigate("az_index") },
                 SettingsTile(androidx.compose.material.icons.Icons.Filled.Search, stringResource(R.string.settings_app_list_search_button)) { onNavigate("search_button") },
                 if (showSearchButton && ownSearch) SettingsTile(androidx.compose.material.icons.Icons.Filled.TextFields, stringResource(R.string.settings_app_grid_search_field)) { onNavigate("search_field") } else null
             )
+        SettingsTileGrid(
+            title = stringResource(R.string.settings_parts_label),
+            tiles = partTiles,
+            // Four in one line where there are four, else three.
+            columns = if (partTiles.size == 4) 4 else 3
         )
     }
 }

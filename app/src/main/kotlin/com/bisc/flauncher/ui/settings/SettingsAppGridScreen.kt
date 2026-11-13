@@ -56,14 +56,16 @@ fun SettingsAppGridAppearanceHubScreen(navController: NavController, onBack: () 
     SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
         // Tap a part of the miniature to edit it; the tiles below are the second way in.
         AppGridPreview(onNavigate = onNavigate)
-        SettingsTileGrid(
-            title = stringResource(R.string.settings_parts_label),
-            columns = 3,
-            tiles = listOfNotNull(
+        val partTiles = listOfNotNull(
                 SettingsTile(androidx.compose.material.icons.Icons.Filled.Wallpaper, stringResource(R.string.settings_search_page_label)) { onNavigate("page") },
                 SettingsTile(androidx.compose.material.icons.Icons.Filled.GridView, stringResource(R.string.settings_app_grid_grid_label)) { onNavigate("grid") },
                 if (position != AppGridBarPosition.NONE) SettingsTile(androidx.compose.material.icons.Icons.Filled.Search, stringResource(R.string.settings_app_grid_search_field)) { onNavigate("search_field") } else null
             )
+        SettingsTileGrid(
+            title = stringResource(R.string.settings_parts_label),
+            tiles = partTiles,
+            // Four in one line where there are four, else three.
+            columns = if (partTiles.size == 4) 4 else 3
         )
     }
 }

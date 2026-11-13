@@ -1030,4 +1030,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
         <item quantity="other">Applies to every folder without a look of its own · %1$d of %2$d follow it</item>
     </plurals>
     <string name="settings_motion_logo_shape">Logo in the settings changes its shape</string>
+    <string name="settings_part_letters_short">Letters</string>
 </resources>

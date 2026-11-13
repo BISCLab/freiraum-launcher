@@ -95,10 +95,7 @@ fun SettingsSearchAppearanceScreen(navController: NavController, onBack: () -> U
     SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
         // Tap a part of the miniature to edit it; the tiles below are the second way in.
         SearchPreview(onNavigate = onNavigate)
-        SettingsTileGrid(
-            title = stringResource(R.string.settings_parts_label),
-            columns = 3,
-            tiles = listOf(
+        val partTiles = listOf(
                 SettingsTile(Icons.Filled.Wallpaper, stringResource(R.string.settings_search_page_label)) { onNavigate("page") },
                 SettingsTile(Icons.Filled.Search, stringResource(R.string.settings_app_grid_search_field)) { onNavigate(SearchElement.FIELD.route) },
                 SettingsTile(Icons.AutoMirrored.Filled.ViewSidebar, stringResource(R.string.settings_search_rail_label),
@@ -107,6 +104,11 @@ fun SettingsSearchAppearanceScreen(navController: NavController, onBack: () -> U
                 SettingsTile(Icons.AutoMirrored.Filled.Chat, stringResource(R.string.settings_search_bubble_label)) { onNavigate(SearchElement.BUBBLE.route) },
                 SettingsTile(Icons.Filled.Keyboard, stringResource(R.string.settings_search_keyboard_label)) { onNavigate("keyboard") }
             )
+        SettingsTileGrid(
+            title = stringResource(R.string.settings_parts_label),
+            tiles = partTiles,
+            // Four in one line where there are four, else three.
+            columns = if (partTiles.size == 4) 4 else 3
         )
     }
 }
