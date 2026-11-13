@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Quick access in the settings search shows nine flatter tiles, all above the keyboard, with the
+  settings' start page first when the search was opened deeper in. It offers what most likely comes
+  next from the page it was opened on: first what goes with that page (after Folders the Dock,
+  the Panel and the Home screen; after Designs the wallpapers, colors and corners), then the pages
+  furthest away by taps, then those opened often. Nothing leaves the phone
+
 ## 0.14.2
 
 - Background settings laid out anew, on every page's look (Home and other pages, App list, App

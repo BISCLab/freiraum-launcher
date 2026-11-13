@@ -194,8 +194,12 @@ fun SettingsFindScreen(navController: NavController, onBack: () -> Unit) {
     val allPages by home.allPages.collectAsState()
     val homeId = allPages.firstOrNull { it.isHome }?.id
     var query by rememberSaveable { mutableStateOf("") }
+    // The page the search was opened on, for what to offer first.
+    val fromRoute = remember { navController.previousBackStackEntry?.destination?.route }
     val openTarget: (String) -> Unit = { route ->
-        if (homeId != null || com.bisc.flauncher.data.model.LauncherSettingsTarget.HOME !in route) {
+        if (route == "settings") {
+            navController.popBackStack("settings", inclusive = false)
+        } else if (homeId != null || com.bisc.flauncher.data.model.LauncherSettingsTarget.HOME !in route) {
             navController.navigate(route.replace(com.bisc.flauncher.data.model.LauncherSettingsTarget.HOME, homeId.toString()))
         }
     }
@@ -221,7 +225,7 @@ fun SettingsFindScreen(navController: NavController, onBack: () -> Unit) {
         bottomBar = { SettingsBreadcrumbBar(navController) }
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-            SettingsSearchResults(query = query, onOpen = openTarget)
+            SettingsSearchResults(query = query, fromRoute = fromRoute, onOpen = openTarget)
         }
     }
 }
@@ -259,7 +263,7 @@ private fun SettingsSearchField(query: String, onQueryChange: (String) -> Unit) 
 
 /** Matches of the settings search, found like in the text search: by name and by what is on a page. */
 @Composable
-private fun SettingsSearchResults(query: String, onOpen: (String) -> Unit) {
+private fun SettingsSearchResults(query: String, fromRoute: String?, onOpen: (String) -> Unit) {
     val context = LocalContext.current
     val results = remember(query) {
         if (query.isBlank()) emptyList()
@@ -273,7 +277,7 @@ private fun SettingsSearchResults(query: String, onOpen: (String) -> Unit) {
     ) {
         when {
             // Nothing typed yet: the pages most likely wanted, one tap away.
-            query.isBlank() -> SettingsQuickAccessGrid(onOpen = onOpen)
+            query.isBlank() -> SettingsQuickAccessGrid(fromRoute = fromRoute, onOpen = onOpen)
             results.isEmpty() -> Text(
                 stringResource(R.string.settings_search_settings_none, query),
                 style = MaterialTheme.typography.bodyMedium,

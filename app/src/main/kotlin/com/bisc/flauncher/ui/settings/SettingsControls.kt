@@ -625,7 +625,7 @@ class SettingsTile(
  * every page.
  */
 @Composable
-fun SettingsTileGrid(tiles: List<SettingsTile>, columns: Int = 2, title: String? = null, info: String? = null) {
+fun SettingsTileGrid(tiles: List<SettingsTile>, columns: Int = 2, title: String? = null, info: String? = null, compact: Boolean = false) {
     val small = columns >= 3
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (title != null) SettingsGroupLabel(title, info = info)
@@ -638,7 +638,7 @@ fun SettingsTileGrid(tiles: List<SettingsTile>, columns: Int = 2, title: String?
                             .clip(SettingsCardShape)
                             .background(MaterialTheme.colorScheme.surfaceContainer)
                             .clickable(onClick = tile.onClick)
-                            .padding(horizontal = if (small) 10.dp else 14.dp, vertical = if (small) 14.dp else 16.dp),
+                            .padding(horizontal = if (small) 10.dp else 14.dp, vertical = if (compact) 10.dp else if (small) 14.dp else 16.dp),
                         horizontalAlignment = if (small) Alignment.CenterHorizontally else Alignment.Start,
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
@@ -666,7 +666,7 @@ fun SettingsTileGrid(tiles: List<SettingsTile>, columns: Int = 2, title: String?
             // One height for the whole grid: the tallest tile's, and for small tiles never below the
             // shared small height, so small tiles match from page to page.
             val tallest = measurables.maxOfOrNull { it.maxIntrinsicHeight(width) } ?: 0
-            val height = if (small) maxOf(tallest, SMALL_TILE_HEIGHT.roundToPx()) else tallest
+            val height = if (small) maxOf(tallest, (if (compact) COMPACT_TILE_HEIGHT else SMALL_TILE_HEIGHT).roundToPx()) else tallest
             val placeables = measurables.map { it.measure(androidx.compose.ui.unit.Constraints.fixed(width, height)) }
             val rows = (placeables.size + columns - 1) / columns
             layout(constraints.maxWidth, (rows * height + (rows - 1).coerceAtLeast(0) * gap).coerceAtLeast(0)) {
@@ -677,6 +677,8 @@ fun SettingsTileGrid(tiles: List<SettingsTile>, columns: Int = 2, title: String?
 }
 
 private val SMALL_TILE_HEIGHT = 124.dp
+/** Tiles that only have a name (the quick access): no room kept for a short fact. */
+private val COMPACT_TILE_HEIGHT = 96.dp
 
 /**
  * A tile's name: at most two lines, and never broken inside a word. When a word is too long for the

@@ -995,7 +995,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_background_for_all_edit">Hintergrund für alle Seiten ändern</string>
     <string name="settings_background_change_color">Farbe ändern</string>
     <string name="settings_entry_settings">Einstellungen</string>
-    <string name="settings_quick_info">Hier stehen die Seiten, die sonst mehrere Schritte entfernt sind. Was du oft öffnest, rückt nach vorn, neuere Besuche zählen dabei mehr.</string>
+    <string name="settings_quick_info">Hier stehen die Seiten, die du von hier aus wahrscheinlich als Nächstes brauchst: was zur aktuellen Seite gehört (nach Ordner etwa Dock und Panel), dann die weit entfernten, dann was du oft öffnest. Alles bleibt auf dem Handy.</string>
     <string name="settings_search_settings_entry">Suchen oder schnell zu einer Seite</string>
     <string name="settings_find_crumb">Suche</string>
     <string name="settings_add_kind_app">App</string>
