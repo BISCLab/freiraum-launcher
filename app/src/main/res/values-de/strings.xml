@@ -238,7 +238,6 @@
     <string name="settings_folder_global_subtitle">Aussehen, Rahmen und Sichtbarkeit für alle Ordner</string>
     <string name="settings_folder_visibility_label">Sichtbarkeit</string>
     <string name="settings_folder_create">Ordner erstellen</string>
-    <string name="settings_folder_items_count">%1$d Elemente</string>
     <string name="settings_folder_edit_title">Ordner bearbeiten</string>
     <string name="settings_folder_name_label">Name</string>
     <string name="settings_folder_delete">Ordner löschen</string>
@@ -692,7 +691,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="packs_plain">Ohne Bilder</string>
     <string name="packs_plain_summary">Mattes Schwarz oder Kreideweiß</string>
     <string name="packs_plain_text">Alle Seiten bekommen den schlichten Hintergrund des Farbmodus: mattes Schwarz im dunklen, Kreideweiß im hellen Modus. Eigene Bilder auf den Seiten werden ersetzt.</string>
-    <string name="packs_picture_count">%1$d Bilder</string>
     <string name="packs_apply_text">Die Bilder kommen auf Startseite, App-Liste, Textsuche und App-Raster, die übrigen der Reihe nach auf deine weiteren Seiten. Selbst gesetzte Bilder werden ersetzt.</string>
     <string name="packs_applied">Wallpaper angewendet</string>
     <string name="packs_import_done">%1$s hinzugefügt</string>
@@ -805,7 +803,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_folder_rows_label">Zeilen</string>
     <string name="settings_folder_rows_info">Wie viele Apps und Elemente in jeder Zeile nebeneinander stehen. Widgets nehmen immer die ganze Breite ein.</string>
     <string name="settings_folder_intro">Ordner fassen Apps, Orte, Links und Widgets hinter einem Symbol zusammen. Tippe einen Ordner an, um ihn einzurichten, oder lege einen neuen an.</string>
-    <string name="settings_folder_tile_count_widgets">%1$d Elemente, %2$d Widgets</string>
     <string name="settings_folder_creator_empty">Wähle unten Apps; Widgets und mehr kannst du gleich danach hinzufügen.</string>
     <string name="settings_category_symbol">Symbol</string>
     <string name="settings_category_color">Farbe</string>
@@ -1001,7 +998,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_quick_info">Hier stehen die Seiten, die sonst mehrere Schritte entfernt sind. Was du oft öffnest, rückt nach vorn, neuere Besuche zählen dabei mehr.</string>
     <string name="settings_search_settings_entry">Suchen oder schnell zu einer Seite</string>
     <string name="settings_find_crumb">Suche</string>
-    <string name="settings_folder_template_following">Gilt für jeden Ordner ohne eigenen Look · %1$d von %2$d folgen ihr</string>
     <string name="settings_add_kind_app">App</string>
     <string name="settings_add_kind_folder">Ordner</string>
     <string name="settings_add_kind_shortcut">Verknüpfung</string>
@@ -1025,4 +1021,12 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="a11y_add_here">Hier etwas hinzufügen</string>
     <string name="a11y_category_in_results">%1$s: in den Ergebnissen</string>
     <string name="a11y_category_in_rail">%1$s: in der Leiste</string>
+    <plurals name="packs_picture_count">
+        <item quantity="one">%1$d Bild</item>
+        <item quantity="other">%1$d Bilder</item>
+    </plurals>
+    <plurals name="settings_folder_template_following">
+        <item quantity="one">Gilt für jeden Ordner ohne eigenen Look · %1$d von %2$d folgt ihr</item>
+        <item quantity="other">Gilt für jeden Ordner ohne eigenen Look · %1$d von %2$d folgen ihr</item>
+    </plurals>
 </resources>

@@ -61,6 +61,8 @@
 - Fixed: editing an app of the work profile or private space showed empty shape tiles
 - Choosing an app for its shortcuts only offers apps of the own profile, as the shortcuts of an app
   in another profile cannot be reached from here
+- Counts read right in the singular too, in English and German: "1 picture" / "1 Bild", "1 element",
+  "1 of 3 follows it" / "1 von 3 folgt ihr"
 
 ## 0.14.1
 

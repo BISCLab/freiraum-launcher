@@ -66,11 +66,10 @@ fun SettingsFolderScreen(navController: NavController, onBack: () -> Unit, viewM
                 icon = Icons.Filled.Palette,
                 title = stringResource(R.string.settings_folder_global_label),
                 // How many folders follow it: a folder with a fill or border of its own does not.
-                summary = stringResource(
-                    R.string.settings_folder_template_following,
-                    folders.count { !it.appearanceOverrideEnabled && !it.borderOverrideEnabled },
-                    folders.size
-                ),
+                summary = run {
+                    val following = folders.count { !it.appearanceOverrideEnabled && !it.borderOverrideEnabled }
+                    androidx.compose.ui.res.pluralStringResource(R.plurals.settings_folder_template_following, following, following, folders.size)
+                },
                 onClick = { navController.navigate("settings/folder/global") }
             )
         }
@@ -130,7 +129,8 @@ private fun FolderTile(folder: Folder, items: List<FolderItem>, viewModel: Setti
         Spacer(Modifier.height(10.dp))
         Text(folder.name, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
         Text(
-            if (widgets > 0) stringResource(R.string.settings_folder_tile_count_widgets, others, widgets) else stringResource(R.string.settings_folder_items_count, others),
+            androidx.compose.ui.res.pluralStringResource(R.plurals.settings_hub_elements_count, others, others) +
+                if (widgets > 0) ", " + androidx.compose.ui.res.pluralStringResource(R.plurals.settings_hub_widgets_count, widgets, widgets) else "",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,

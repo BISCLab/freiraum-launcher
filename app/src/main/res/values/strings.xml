@@ -226,7 +226,6 @@
     <string name="settings_folder_global_subtitle">Appearance, border and visibility shared by every folder</string>
     <string name="settings_folder_visibility_label">Visibility</string>
     <string name="settings_folder_create">Create folder</string>
-    <string name="settings_folder_items_count">%1$d items</string>
     <string name="settings_folder_edit_title">Edit folder</string>
     <string name="settings_folder_name_label">Name</string>
     <string name="settings_folder_delete">Delete folder</string>
@@ -692,7 +691,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="packs_plain">Without pictures</string>
     <string name="packs_plain_summary">Matte black or chalk white</string>
     <string name="packs_plain_text">Every page gets the plain background of the color mode: matte black in dark mode, chalk white in light mode. Your own pictures on the pages are replaced.</string>
-    <string name="packs_picture_count">%1$d pictures</string>
     <string name="packs_apply_text">The pictures go onto Home, App list, Text search and App grid, the rest onto your further pages in their order. Pictures you set yourself are replaced.</string>
     <string name="packs_applied">Wallpaper applied</string>
     <string name="packs_import_done">%1$s added</string>
@@ -805,7 +803,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_folder_rows_label">Rows</string>
     <string name="settings_folder_rows_info">How many apps and elements sit side by side in each row. Widgets always take the whole width.</string>
     <string name="settings_folder_intro">Folders gather apps, places, links and widgets behind one icon. Tap a folder to arrange it, or make a new one.</string>
-    <string name="settings_folder_tile_count_widgets">%1$d items, %2$d widgets</string>
     <string name="settings_folder_creator_empty">Pick apps below; you can add widgets and more right after.</string>
     <string name="settings_category_symbol">Symbol</string>
     <string name="settings_category_color">Color</string>
@@ -1001,7 +998,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_quick_info">The pages that are otherwise several steps away. What you open often moves to the front, recent visits counting more.</string>
     <string name="settings_search_settings_entry">Search, or jump to a page</string>
     <string name="settings_find_crumb">Search</string>
-    <string name="settings_folder_template_following">Applies to every folder without a look of its own · %1$d of %2$d follow it</string>
     <string name="settings_add_kind_app">App</string>
     <string name="settings_add_kind_folder">Folder</string>
     <string name="settings_add_kind_shortcut">Shortcut</string>
@@ -1025,4 +1021,12 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="a11y_add_here">Add something here</string>
     <string name="a11y_category_in_results">%1$s: in the results</string>
     <string name="a11y_category_in_rail">%1$s: in the rail</string>
+    <plurals name="packs_picture_count">
+        <item quantity="one">%1$d picture</item>
+        <item quantity="other">%1$d pictures</item>
+    </plurals>
+    <plurals name="settings_folder_template_following">
+        <item quantity="one">Applies to every folder without a look of its own · %1$d of %2$d follows it</item>
+        <item quantity="other">Applies to every folder without a look of its own · %1$d of %2$d follow it</item>
+    </plurals>
 </resources>

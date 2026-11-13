@@ -167,7 +167,7 @@ fun SettingsWallpaperPacksScreen(navController: NavController, onBack: () -> Uni
                     title = pack.displayName(german),
                     summary = listOfNotNull(
                         pack.dark?.let { stringResource(if (it) R.string.settings_theme_dark else R.string.settings_theme_light) },
-                        stringResource(R.string.packs_picture_count, pack.images.size - (if (pack.lock != null) 1 else 0) + pack.extras.size),
+                        (pack.images.size - (if (pack.lock != null) 1 else 0) + pack.extras.size).let { n -> androidx.compose.ui.res.pluralStringResource(R.plurals.packs_picture_count, n, n) },
                         if (pack.id == activeId) stringResource(R.string.designs_active) else null
                     ).joinToString(" · "),
                     onClick = { previewFromOutside = false; previewing = pack },
