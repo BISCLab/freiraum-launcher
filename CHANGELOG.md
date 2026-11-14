@@ -9,6 +9,7 @@
 - Page preview in the settings always shows the page in portrait
 - Widget size opens in full, so the Save button is never below the screen edge
 - Page preview on tablets shows rows and Dock as narrow and centered as on the real page
+- Tablet: the App list uses the whole width, with up to four apps side by side; each letter stands beside its first line, and the A-Z rail and search button sit at the screen edge
 
 ## 0.14.5
 

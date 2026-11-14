@@ -61,7 +61,8 @@ internal fun LazyListScope.profileSectionItems(
     onAppClick: (com.bisc.flauncher.data.model.AppInfo) -> Unit,
     handedness: Handedness,
     edgeInset: Dp,
-    iconSize: Dp
+    iconSize: Dp,
+    columns: Int = 1
 ) {
     sections.forEach { section ->
         val apps = if (query.isBlank()) section.apps else section.apps.filter { com.bisc.flauncher.util.matchesAllWordStarts(it.label, query) }
@@ -70,8 +71,10 @@ internal fun LazyListScope.profileSectionItems(
         item(key = "profile-${section.kind}-${section.user.hashCode()}") {
             ProfileHeader(section, host, edgeInset)
         }
-        items(apps, key = { "profile-app-" + it.componentName.flattenToString() }) { app ->
+        if (columns <= 1) items(apps, key = { "profile-app-" + it.componentName.flattenToString() }) { app ->
             AppBrowseRow(app, loadIcon, handedness, edgeInset, iconSize) { onAppClick(app) }
+        } else items(apps.chunked(columns), key = { "profile-line-" + it.first().componentName.flattenToString() }) { line ->
+            AppBrowseLine(line, columns, loadIcon, handedness, edgeInset, iconSize, onAppClick, letterAppearance = com.bisc.flauncher.data.model.ElementAppearance())
         }
     }
 }

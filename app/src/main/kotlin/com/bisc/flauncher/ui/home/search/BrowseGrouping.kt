@@ -6,6 +6,8 @@ import com.bisc.flauncher.data.model.AppInfo
 sealed class BrowseItem {
     data class Header(val letter: Char) : BrowseItem()
     data class Row(val app: AppInfo) : BrowseItem()
+    /** Several apps side by side, on wide screens; the first line of a letter carries it. */
+    data class Line(val letter: Char?, val apps: List<AppInfo>) : BrowseItem()
 }
 
 class BrowseGrouping private constructor(
@@ -24,7 +26,14 @@ class BrowseGrouping private constructor(
     }
 
     companion object {
-        fun from(apps: List<AppInfo>): BrowseGrouping {
+        fun from(apps: List<AppInfo>, columns: Int = 1): BrowseGrouping {
+            // Wide screens: the letter stands beside its first line instead of above it.
+            fun MutableList<BrowseItem>.addSection(letter: Char, list: List<AppInfo>) {
+                if (columns <= 1) {
+                    add(BrowseItem.Header(letter))
+                    list.forEach { add(BrowseItem.Row(it)) }
+                } else list.chunked(columns).forEachIndexed { i, line -> add(BrowseItem.Line(if (i == 0) letter else null, line)) }
+            }
             val byLetter = linkedMapOf<Char, MutableList<AppInfo>>()
             val other = mutableListOf<AppInfo>()
             for (app in apps) {
@@ -36,13 +45,11 @@ class BrowseGrouping private constructor(
             val headerIndex = mutableMapOf<Char, Int>()
             for ((letter, letterApps) in byLetter) {
                 headerIndex[letter] = items.size
-                items += BrowseItem.Header(letter)
-                letterApps.forEach { items += BrowseItem.Row(it) }
+                items.addSection(letter, letterApps)
             }
             if (other.isNotEmpty()) {
                 headerIndex['#'] = items.size
-                items += BrowseItem.Header('#')
-                other.forEach { items += BrowseItem.Row(it) }
+                items.addSection('#', other)
             }
             return BrowseGrouping(byLetter.keys.toList(), other.isNotEmpty(), items, headerIndex)
         }

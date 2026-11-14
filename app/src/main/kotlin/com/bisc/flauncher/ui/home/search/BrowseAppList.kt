@@ -110,6 +110,13 @@ internal fun Modifier.fadeListTop(height: Dp, strength: () -> Float): Modifier =
 
 internal val TOP_FADE_HEIGHT = 56.dp
 
+/** How wide one app should at least be in the list; phones keep one column. */
+private val BROWSE_COLUMN_MIN_WIDTH = 280.dp
+
+/** Apps side by side on wide screens, as many as fit next to the A-Z rail (at most 4). */
+internal fun browseColumns(width: Dp, withRail: Boolean): Int =
+    ((width - if (withRail) INDEX_TOUCH_WIDTH else 0.dp) / BROWSE_COLUMN_MIN_WIDTH).toInt().coerceIn(1, 4)
+
 /** Gap above a letter header - also part of the first header's distance from the top. */
 private val HEADER_TOP_PADDING = 22.dp
 
@@ -134,7 +141,8 @@ fun BrowseAppList(
     iconSize: Dp = APP_ICON_SIZE,
     cornerRadiusPercent: Int = com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT,
     profiles: ProfileListHost? = null,
-    profileQuery: String = ""
+    profileQuery: String = "",
+    columns: Int = 1
 ) {
     val scrub = remember { BrowseScrubState() }
     val profileSections = profiles?.sections?.collectAsState()?.value.orEmpty()
@@ -150,7 +158,7 @@ fun BrowseAppList(
     val scrollJob = remember { arrayOfNulls<Job>(1) }
 
     fun sectionRange(start: Int): IntRange {
-        val next = (start + 1 until grouping.items.size).firstOrNull { grouping.items[it] is BrowseItem.Header }
+        val next = (start + 1 until grouping.items.size).firstOrNull { grouping.items[it].let { item -> item is BrowseItem.Header || (item is BrowseItem.Line && item.letter != null) } }
         return start until (next ?: grouping.items.size)
     }
 
@@ -177,8 +185,14 @@ fun BrowseAppList(
             derivedStateOf { listState.canScrollForward }
         }
         val topFadePx = with(LocalDensity.current) { TOP_FADE_HEIGHT.toPx() }
+        // With several columns the last one keeps clear of the A-Z rail.
+        val railRoom = if (columns > 1 && showAzIndex) INDEX_TOUCH_WIDTH - edgeInset else 0.dp
         val listModifier = Modifier
             .fillMaxSize()
+            .padding(
+                start = if (handedness == Handedness.LEFT) railRoom else 0.dp,
+                end = if (handedness == Handedness.LEFT) 0.dp else railRoom
+            )
             .padding(bottom = bottomGap)
             .then(if (canScrollFurther) Modifier.fadeBackgroundToBottom(fadeStart, fadeEnd) else Modifier)
             .fadeListTop(TOP_FADE_HEIGHT) {
@@ -193,16 +207,17 @@ fun BrowseAppList(
             itemsIndexed(
                 items = grouping.items,
                 key = { _, item -> browseItemKey(item) },
-                contentType = { _, item -> item is BrowseItem.Header }
+                contentType = { _, item -> item::class }
             ) { index, item ->
                 Box(modifier = Modifier.graphicsLayer { alpha = if (index in highlight.value) 1f else othersAlpha.value }) {
                     when (item) {
                         is BrowseItem.Header -> BrowseSectionHeader(item.letter, headerLetterAppearance, handedness, edgeInset)
                         is BrowseItem.Row -> AppBrowseRow(item.app, loadIcon, handedness, edgeInset, iconSize) { onAppClick(item.app) }
+                        is BrowseItem.Line -> AppBrowseLine(item.apps, columns, loadIcon, handedness, edgeInset, iconSize, onAppClick, item.letter, headerLetterAppearance, index == 0)
                     }
                 }
             }
-            if (profiles != null) profileSectionItems(profileSections, profileQuery, profiles, loadIcon, onAppClick, handedness, edgeInset, iconSize)
+            if (profiles != null) profileSectionItems(profileSections, profileQuery, profiles, loadIcon, onAppClick, handedness, edgeInset, iconSize, columns)
         }
 
         if (showAzIndex && allApps.isNotEmpty()) {
@@ -281,6 +296,43 @@ private fun ScrubOverlay(scrub: BrowseScrubState, listHeight: Dp, handedness: Ha
 private fun browseItemKey(item: BrowseItem): String = when (item) {
     is BrowseItem.Header -> "header_${item.letter}"
     is BrowseItem.Row -> "app_" + item.app.componentName.flattenToString()
+    is BrowseItem.Line -> "line_" + item.apps.first().componentName.flattenToString()
+}
+
+/** Apps side by side in equal columns; a short last line keeps its cells the same width. On the
+ *  rail's far side a gutter holds the letter of the section's first line. */
+@Composable
+internal fun AppBrowseLine(
+    apps: List<AppInfo>,
+    columns: Int,
+    loadIcon: (ComponentName) -> ImageBitmap?,
+    handedness: Handedness,
+    edgeInset: Dp,
+    iconSize: Dp,
+    onAppClick: (AppInfo) -> Unit,
+    letter: Char? = null,
+    letterAppearance: ElementAppearance? = null,
+    first: Boolean = false
+) {
+    val isLeft = handedness == Handedness.LEFT
+    val gutter = @Composable {
+        Box(modifier = Modifier.width(edgeInset + HEADER_CIRCLE_SIZE).height(iconSize + 20.dp), contentAlignment = if (isLeft) Alignment.CenterStart else Alignment.CenterEnd) {
+            if (letter != null && letterAppearance != null) LetterCircle(letter, letterAppearance)
+        }
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = if (letter != null && !first) 12.dp else 0.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (letterAppearance != null && !isLeft) gutter()
+        val cells: List<AppInfo?> = if (isLeft) List(columns - apps.size) { null } + apps else apps + List(columns - apps.size) { null }
+        cells.forEach { app ->
+            Box(modifier = Modifier.weight(1f)) {
+                if (app != null) AppBrowseRow(app, loadIcon, handedness, edgeInset, iconSize) { onAppClick(app) }
+            }
+        }
+        if (letterAppearance != null && isLeft) gutter()
+    }
 }
 
 private const val SCRUB_OTHERS_ALPHA = 0.06f
@@ -290,13 +342,28 @@ private val APP_ICON_SIZE = 56.dp
 private val HEADER_CIRCLE_SIZE = 32.dp
 
 @Composable
-private fun BrowseSectionHeader(letter: Char, appearance: ElementAppearance, handedness: Handedness, edgeInset: Dp) {
-    val isLeft = handedness == Handedness.LEFT
+private fun LetterCircle(letter: Char, appearance: ElementAppearance) {
     val colors = resolveElementColors(appearance)
     val listContent = LocalContentColor.current
     val ownFill = appearance.fillMode == ElementFillMode.COLOR
     val letterTextColor = if (ownFill) colors.contentColor else listContent
     val letterBorderColor = if (ownFill || appearance.borderColor != null) colors.borderColor else listContent.copy(alpha = 0.3f)
+    Box(
+        modifier = Modifier
+            .size(HEADER_CIRCLE_SIZE)
+            .then(Modifier.designGlow(CircleShape, "buttons"))
+            .clip(CircleShape)
+            .background(colors.background, alpha = colors.backgroundAlpha)
+            .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth, letterBorderColor, CircleShape) else Modifier),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(letter.toString(), style = MaterialTheme.typography.titleMedium, color = letterTextColor)
+    }
+}
+
+@Composable
+private fun BrowseSectionHeader(letter: Char, appearance: ElementAppearance, handedness: Handedness, edgeInset: Dp) {
+    val isLeft = handedness == Handedness.LEFT
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -311,21 +378,7 @@ private fun BrowseSectionHeader(letter: Char, appearance: ElementAppearance, han
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val circle = @Composable {
-            Box(
-                modifier = Modifier
-                    .size(HEADER_CIRCLE_SIZE)
-                    .then(Modifier.designGlow(CircleShape, "buttons"))
-                    .clip(CircleShape)
-                    .background(colors.background, alpha = colors.backgroundAlpha)
-                    .then(
-                        if (appearance.borderEnabled) Modifier.border(colors.borderWidth, letterBorderColor, CircleShape) else Modifier
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(letter.toString(), style = MaterialTheme.typography.titleMedium, color = letterTextColor)
-            }
-        }
+        val circle = @Composable { LetterCircle(letter, appearance) }
         if (isLeft) {
             Box(modifier = Modifier.weight(1f))
             circle()

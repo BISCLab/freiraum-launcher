@@ -39,7 +39,6 @@ fun AppOverviewContent(
     profileQuery: String = "",
     modifier: Modifier = Modifier
 ) {
-    val grouping = remember(allApps) { BrowseGrouping.from(allApps) }
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -52,8 +51,11 @@ fun AppOverviewContent(
     ).contentColor
 
     CompositionLocalProvider(LocalRailAppearance provides railAppearance, LocalContentColor provides surfaceTextColor) {
-        Box(modifier = modifier.fillMaxSize()) {
+        androidx.compose.foundation.layout.BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+            val columns = browseColumns(maxWidth, showAzIndex)
+            val grouping = remember(allApps, columns) { BrowseGrouping.from(allApps, columns) }
             BrowseAppList(
+                columns = columns,
                 allApps = allApps,
                 grouping = grouping,
                 showAzIndex = showAzIndex,

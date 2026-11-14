@@ -1027,7 +1027,6 @@ fun HomeScreen(
               Column(
                   modifier = Modifier
                       .align(Alignment.TopCenter)
-                      .widthIn(max = com.bisc.flauncher.ui.MaxContentWidth)
                       .fillMaxSize()
                       .then(if (appListSearching) Modifier.windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars)) else Modifier)
               ) {
@@ -1073,14 +1072,14 @@ fun HomeScreen(
                         appearance = appListSearchFieldAppearance ?: automaticRailAppearance(overviewSurfaceDark),
                         cornerRadiusPercent = appListFieldCorner ?: textSearchFieldCorner ?: cornerRadiusPercent,
                         autoOpen = true,
-                        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 16.dp)
+                        modifier = Modifier.align(Alignment.CenterHorizontally).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 16.dp)
                     )
                     if (searchKeyboardCapEnabled) {
                         com.bisc.flauncher.ui.home.search.KeyboardCap(searchKeyboardCapColor, searchKeyboardCapCornerRadiusPercent, searchKeyboardCapArrow)
                     }
                 }
               }
-                if (appListShowSearchButton && !appListSearching) Box(modifier = Modifier.align(Alignment.TopCenter).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxSize()) {
+                if (appListShowSearchButton && !appListSearching) Box(modifier = Modifier.fillMaxSize()) {
                     com.bisc.flauncher.ui.home.search.AppOverviewSearchButton(
                         onClick = { if (appListOwnSearch) appListSearching = true else viewModel.openSearch() },
                         handedness = appOverviewHandedness,
