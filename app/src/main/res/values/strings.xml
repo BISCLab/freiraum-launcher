@@ -1031,4 +1031,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     </plurals>
     <string name="settings_motion_logo_shape">Logo in the settings changes its shape</string>
     <string name="settings_part_letters_short">Letters</string>
+    <string name="settings_corner_own_value">Own value</string>
 </resources>

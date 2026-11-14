@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.layout.width
 import com.bisc.flauncher.ui.theme.current
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.foundation.layout.aspectRatio
@@ -153,12 +154,66 @@ internal fun ExpandableSlider(
 /** 0-100 percent case, e.g. corner roundness. */
 @Composable
 fun ExpandablePercentSlider(percent: Int, onSettled: (Int) -> Unit, max: Int = 100) {
-    ExpandableSlider(
-        value = percent.coerceAtMost(max).toFloat(),
-        onSettled = { onSettled(it.roundToInt()) },
-        valueRange = 0f..max.toFloat(),
-        valueLabel = { stringResource(R.string.settings_corner_radius_value, it.roundToInt()) }
-    )
+    CornerPercentPicker(percent = percent.coerceAtMost(max), onChange = onSettled, max = max)
+}
+
+/**
+ * Corners picked at a glance: five presets as tiles, each showing a small square with that
+ * rounding, and a field for an own value. Every change takes effect at once, so the preview above
+ * follows right away.
+ */
+@Composable
+fun CornerPercentPicker(percent: Int, onChange: (Int) -> Unit, max: Int = 100) {
+    val presets = listOf(0, 25, 50, 75, 100).filter { it <= max }
+    var text by remember(percent) { mutableStateOf(percent.toString()) }
+    Column(
+        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            presets.forEach { value ->
+                val picked = value == percent
+                val frame = RoundedCornerShape(14.dp)
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(frame)
+                        .background(if (picked) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh)
+                        .border(if (picked) 2.dp else 0.dp, if (picked) MaterialTheme.colorScheme.primary else androidx.compose.ui.graphics.Color.Transparent, frame)
+                        .selectable(selected = picked, role = androidx.compose.ui.semantics.Role.RadioButton) { onChange(value) }
+                        .padding(vertical = 10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    // A square of 28 dp shows the rounding exactly as on the shared scale.
+                    Box(
+                        Modifier
+                            .size(28.dp)
+                            .clip(com.bisc.flauncher.ui.theme.PartCornerShape(value))
+                            .border(2.dp, if (picked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, com.bisc.flauncher.ui.theme.PartCornerShape(value))
+                    )
+                    Text(stringResource(R.string.settings_corner_radius_value, value), style = MaterialTheme.typography.labelMedium,
+                        color = if (picked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)
+                }
+            }
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.settings_corner_own_value), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+            androidx.compose.material3.OutlinedTextField(
+                value = text,
+                onValueChange = { input ->
+                    val digits = input.filter { it.isDigit() }.take(3)
+                    text = digits
+                    digits.toIntOrNull()?.coerceIn(0, max)?.let { if (it != percent) onChange(it) }
+                },
+                singleLine = true,
+                suffix = { Text("%") },
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                shape = SettingsTextFieldShape,
+                modifier = Modifier.width(110.dp)
+            )
+        }
+    }
 }
 
 /** -100..100 signed percent case, e.g. background darken/lighten shade. */

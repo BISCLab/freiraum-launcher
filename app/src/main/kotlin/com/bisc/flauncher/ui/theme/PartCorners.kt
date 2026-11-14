@@ -25,3 +25,7 @@ data class PartCornerShape(val percent: Int, val full: Dp = FULL_CORNER_RADIUS) 
 
 /** The radius [percent] stands for on a part whose shorter side is [shortSide]. */
 fun partCornerRadius(percent: Int, shortSide: Dp): Dp = minOf(FULL_CORNER_RADIUS * (percent.coerceIn(0, 100) / 100f), shortSide / 2)
+
+/** A button's corners: at 100 % it is fully round, whatever its size; below, the shared scale. */
+fun buttonCornerShape(percent: Int): Shape =
+    if (percent >= 100) androidx.compose.foundation.shape.CircleShape else PartCornerShape(percent)

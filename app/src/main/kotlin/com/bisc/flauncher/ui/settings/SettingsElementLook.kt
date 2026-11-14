@@ -188,7 +188,7 @@ internal fun LookSample(kind: LookSampleKind, look: ElementAppearance, cornerPer
             }
             LookSampleKind.SEARCH_BUTTON -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(28.dp)) {
                 AppRowsHint(backdropDark)
-                Surface(Modifier.size(56.dp), com.bisc.flauncher.ui.theme.PartCornerShape(cornerPercent), "buttons") {
+                Surface(Modifier.size(com.bisc.flauncher.ui.home.search.AppOverviewDimens.buttonSize), com.bisc.flauncher.ui.theme.buttonCornerShape(cornerPercent), "buttons") {
                     Icon(Icons.Filled.Search, contentDescription = null, tint = ink)
                 }
             }

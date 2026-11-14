@@ -7,6 +7,9 @@
 - With its animation off, the logo on the settings' start page stands still as a circle
 - Picture tiles: the thin frame of the tiles not chosen is whole in the corners too; it lies outside
   the tile's rounded clip now
+- The App list's search button is fully round at 100 %, and its preview has its real size
+- Corners are picked with five presets (0, 25, 50, 75, 100 %), each showing its rounding, and a
+  field for an own value, instead of a slider; every change shows in the preview at once
 
 ## 0.14.4
 
