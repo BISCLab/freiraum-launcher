@@ -766,19 +766,17 @@ fun PictureChoiceGrid(choices: List<PictureChoice>, title: String? = null, info:
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(pictureAspect)
-                        .clip(frame)
-                        .background(MaterialTheme.colorScheme.surfaceContainer),
+                    modifier = Modifier.fillMaxWidth().aspectRatio(pictureAspect),
                     contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize().alpha(if (!choice.selected && choice.dimWhenOff) 0.35f else 1f),
-                        contentAlignment = Alignment.Center,
-                        content = choice.picture
-                    )
-                    // The frame on top, so nothing in the picture covers it in the corners.
+                    Box(modifier = Modifier.fillMaxSize().clip(frame).background(MaterialTheme.colorScheme.surfaceContainer)) {
+                        Box(
+                            modifier = Modifier.fillMaxSize().alpha(if (!choice.selected && choice.dimWhenOff) 0.35f else 1f),
+                            contentAlignment = Alignment.Center,
+                            content = choice.picture
+                        )
+                    }
+                    // The frame on top and outside the clip, so its corners stay whole.
                     Box(
                         Modifier.matchParentSize().border(
                             if (choice.selected) 3.dp else 1.dp,

@@ -76,15 +76,12 @@ private fun BackgroundChoiceRow(title: String?, choices: List<BackgroundChoice>)
                     modifier = Modifier.weight(1f).clip(RoundedCornerShape(18.dp)).clickable(onClick = choice.onClick),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(0.56f)
-                            .clip(shape)
-                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    ) {
-                        choice.preview(this)
-                        // The frame on top of the picture, so the picture never covers it in the corners.
+                    Box(modifier = Modifier.fillMaxWidth().aspectRatio(0.56f)) {
+                        Box(
+                            modifier = Modifier.fillMaxSize().clip(shape).background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                            content = { choice.preview(this) }
+                        )
+                        // The frame on top and outside the clip, so its corners stay whole.
                         Box(
                             Modifier.matchParentSize().border(
                                 if (choice.selected) 3.dp else 1.dp,

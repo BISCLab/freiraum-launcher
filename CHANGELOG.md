@@ -5,6 +5,8 @@
 - Status bar settings as a list of switches, like the animations: "Hide everywhere" on top, then one
   switch per page, the text search and folders; on means hidden there
 - With its animation off, the logo on the settings' start page stands still as a circle
+- Picture tiles: the thin frame of the tiles not chosen is whole in the corners too; it lies outside
+  the tile's rounded clip now
 
 ## 0.14.4
 
