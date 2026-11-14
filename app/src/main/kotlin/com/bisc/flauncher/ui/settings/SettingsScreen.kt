@@ -97,17 +97,6 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
         Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         Column(modifier = Modifier.widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             AboutHeaderCard(onClick = { onNavigate("about") })
-            if (com.bisc.flauncher.ui.isLargeScreen()) {
-                SettingsPreferenceGroup {
-                    SettingsPreference(
-                        icon = null,
-                        title = stringResource(R.string.settings_tablet_beta_title),
-                        summary = stringResource(R.string.settings_tablet_beta_summary),
-                        onClick = null,
-                        trailing = null
-                    )
-                }
-            }
             // With the sections on the left (wide tablets) the same list here would only repeat them.
             if (!settingsTwoPane()) {
                 // Three levels, global to specific: Appearance (looks the same everywhere), Pages (each

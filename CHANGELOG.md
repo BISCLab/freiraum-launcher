@@ -15,6 +15,7 @@
 - Tablet: in wide landscape the text search shows its cards two side by side, so more fits above the keyboard
 - Page preview: empty space shows as a dashed outline, so it is no longer taken for a widget
 - Editors with nothing unsaved show "All saved" with a check instead of a greyed-out Save button, so a new folder no longer looks as if it still had to be saved
+- Tablets are no longer marked as beta in the settings
 
 ## 0.14.5
 
