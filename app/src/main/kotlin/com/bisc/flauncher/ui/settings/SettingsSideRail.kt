@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
 import com.bisc.flauncher.ui.theme.SettingsThemed
+import com.bisc.flauncher.ui.theme.current
 
 /** Tablets held sideways (and other screens that wide) show the settings in two parts: the main
  *  sections stay on the left, the chosen page is on the right. */
@@ -66,17 +67,18 @@ internal object SettingsLeaveGuard {
     var current by mutableStateOf<(((() -> Unit)) -> Unit)?>(null)
 }
 
-private class SideSection(val route: String, val icon: ImageVector, val label: Int, val owns: List<String>)
+private class SideSection(val route: String, val icon: ImageVector, val label: Int, val owns: List<String>, val area: com.bisc.flauncher.ui.theme.SettingsArea)
 
 private val SECTIONS = listOf(
-    SideSection("settings/appearance", Icons.Filled.Palette, R.string.settings_design_title, listOf("settings/appearance")),
+    SideSection("settings/appearance", Icons.Filled.Palette, R.string.settings_design_title, listOf("settings/appearance"), com.bisc.flauncher.ui.theme.SettingsArea.APPEARANCE),
     SideSection(
         "settings/pages", Icons.Filled.ViewCarousel, R.string.settings_section_pages,
-        listOf("settings/pages", "settings/search", "settings/app_overview", "settings/app_grid", "settings/gestures")
+        listOf("settings/pages", "settings/search", "settings/app_overview", "settings/app_grid", "settings/gestures"),
+        com.bisc.flauncher.ui.theme.SettingsArea.PAGES
     ),
-    SideSection("settings/elements", Icons.Filled.Apps, R.string.settings_section_elements, listOf("settings/elements", "settings/apps", "settings/folder")),
-    SideSection("settings/system", Icons.Filled.PhoneAndroid, R.string.settings_system_title, listOf("settings/system", "settings/permissions")),
-    SideSection("settings/extensions", Icons.Filled.Extension, R.string.settings_group_extensions, listOf("settings/extensions", "settings/wallpaper_packs"))
+    SideSection("settings/elements", Icons.Filled.Apps, R.string.settings_section_elements, listOf("settings/elements", "settings/apps", "settings/folder"), com.bisc.flauncher.ui.theme.SettingsArea.ELEMENTS),
+    SideSection("settings/system", Icons.Filled.PhoneAndroid, R.string.settings_system_title, listOf("settings/system", "settings/permissions"), com.bisc.flauncher.ui.theme.SettingsArea.SYSTEM),
+    SideSection("settings/extensions", Icons.Filled.Extension, R.string.settings_group_extensions, listOf("settings/extensions", "settings/wallpaper_packs"), com.bisc.flauncher.ui.theme.SettingsArea.EXTENSIONS)
 )
 
 /** The sections on the left, drawn once over the settings pages so it stays put while they change. */
@@ -121,31 +123,27 @@ fun SettingsSideRail(navController: NavController) {
                 }
                 SECTIONS.forEach { section ->
                     val isSelected = section == selected
+                    val areaColor = section.area.current()
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(16.dp))
-                            .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f) else androidx.compose.ui.graphics.Color.Transparent)
+                            .background(if (isSelected) areaColor.copy(alpha = 0.18f) else androidx.compose.ui.graphics.Color.Transparent)
                             .clickable {
                                 leave {
                                     navController.popBackStack("settings", inclusive = false)
                                     navController.navigate(section.route)
                                 }
                             }
-                            .padding(horizontal = 14.dp, vertical = 16.dp),
+                            .padding(horizontal = 10.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            section.icon,
-                            contentDescription = null,
-                            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        AreaSymbol(section.icon, section.area)
                         Text(
                             stringResource(section.label),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                            modifier = Modifier.padding(start = 16.dp)
+                            modifier = Modifier.padding(start = 14.dp)
                         )
                     }
                 }

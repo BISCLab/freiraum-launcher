@@ -265,6 +265,11 @@ internal fun RemovePageGroup(label: String, onRemove: () -> Unit) {
 /** Width:height of a real phone screen, not an icon swatch - this is what makes a carousel tile
  *  read as "a screen" instead of just another app-icon-sized button. */
 private const val SCREEN_ASPECT_RATIO = 0.47f
+
+/** Low screens (tablets held sideways): a page tile stays at most 40 % of the screen height tall. */
+@Composable
+private fun carouselTileMaxWidth(): androidx.compose.ui.unit.Dp =
+    (androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp * 0.4f * SCREEN_ASPECT_RATIO).dp
 private val CAROUSEL_OUTER_PADDING = 16.dp
 private val CAROUSEL_SPACING = 12.dp
 /** How far the carousel scrolls per frame while a dragged page is held at its edge. */
@@ -301,7 +306,7 @@ private fun PagesCarousel(
     // extra pages yet) fill the available width with no sliver of a 4th peeking in - a real
     // aspect-ratio page preview instead of a small icon-sized square.
     androidx.compose.foundation.layout.BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val tileWidth = (maxWidth - CAROUSEL_OUTER_PADDING * 2 - CAROUSEL_SPACING * 2) / 3
+        val tileWidth = minOf((maxWidth - CAROUSEL_OUTER_PADDING * 2 - CAROUSEL_SPACING * 2) / 3, carouselTileMaxWidth())
         val stepPx = with(androidx.compose.ui.platform.LocalDensity.current) { (tileWidth + CAROUSEL_SPACING).toPx() }
 
         // Swaps the dragged page with a neighbor once it's been dragged past half a tile.
@@ -357,7 +362,7 @@ private fun PagesCarousel(
         LazyRow(
             state = listState,
             modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(CAROUSEL_SPACING),
+            horizontalArrangement = Arrangement.spacedBy(CAROUSEL_SPACING, Alignment.CenterHorizontally),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = CAROUSEL_OUTER_PADDING)
         ) {
             item { GhostTile(width = tileWidth, onClick = onAddLeft) }
@@ -417,10 +422,10 @@ private fun UtilityPagesRow(
     onTileClick: (LauncherPage) -> Unit
 ) {
     androidx.compose.foundation.layout.BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val tileWidth = (maxWidth - CAROUSEL_OUTER_PADDING * 2 - CAROUSEL_SPACING * 2) / 3
+        val tileWidth = minOf((maxWidth - CAROUSEL_OUTER_PADDING * 2 - CAROUSEL_SPACING * 2) / 3, carouselTileMaxWidth())
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = CAROUSEL_OUTER_PADDING, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(CAROUSEL_SPACING)
+            horizontalArrangement = Arrangement.spacedBy(CAROUSEL_SPACING, Alignment.CenterHorizontally)
         ) {
             pages.forEach { page ->
                 PageTile(

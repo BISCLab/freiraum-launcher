@@ -880,7 +880,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
         <item quantity="other">%1$d available</item>
     </plurals>
     <string name="extensions_from_outside_note">Opened from outside (a link or a file) and already added. Apply it only if you trust where it came from. It changes only the look and can be deleted again at any time.</string>
-    <string name="settings_two_pane_hint">Pick a section on the left.</string>
     <string name="about_promise_offline">No internet</string>
     <string name="about_promise_tracking">No tracking</string>
     <string name="about_promise_ads">No ads</string>

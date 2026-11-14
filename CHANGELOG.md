@@ -10,6 +10,8 @@
 - Widget size opens in full, so the Save button is never below the screen edge
 - Page preview on tablets shows rows and Dock as narrow and centered as on the real page
 - Tablet: the App list uses the whole width, with up to four apps side by side; each letter stands beside its first line, and the A-Z rail and search button sit at the screen edge
+- Tablet: the sections on the left of the settings carry their area colors, and the start page shows the extensions instead of a hint
+- Tablet: the page tiles in Pages stay small enough on a low screen to leave room for the rest
 
 ## 0.14.5
 

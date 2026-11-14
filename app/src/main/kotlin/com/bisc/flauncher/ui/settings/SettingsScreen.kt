@@ -108,14 +108,7 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                 }
             }
             // With the sections on the left (wide tablets) the same list here would only repeat them.
-            if (settingsTwoPane()) {
-                Text(
-                    stringResource(R.string.settings_two_pane_hint),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 4.dp)
-                )
-            } else {
+            if (!settingsTwoPane()) {
                 // Three levels, global to specific: Appearance (looks the same everywhere), Pages (each
                 // page and utility page, plus gestures), Apps & elements (the library of apps, folders,
                 // places, links and action buttons) - then System for everything about fitting into the phone.
@@ -133,7 +126,8 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                         ) { onNavigate("system") }
                     )
                 )
-                // What can be added to the launcher, each straight to its own page.
+            }
+            // What can be added to the launcher, each straight to its own page.
                 SettingsTileGrid(
                     title = stringResource(R.string.settings_group_extensions),
                     columns = 3,
@@ -145,7 +139,6 @@ fun SettingsListScreen(navController: NavController, onBack: () -> Unit, onNavig
                         SettingsTile(androidx.compose.material.icons.Icons.Filled.Widgets, stringResource(R.string.extensions_widgets_title), area = com.bisc.flauncher.ui.theme.SettingsArea.EXTENSIONS) { onNavigate("extensions/widgets") }
                     )
                 )
-            }
         }
         }
     }
