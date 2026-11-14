@@ -13,6 +13,7 @@
 - Tablet: the sections on the left of the settings carry their area colors, and the start page shows the extensions instead of a hint
 - Tablet: the page tiles in Pages stay small enough on a low screen to leave room for the rest
 - Tablet: in wide landscape the text search shows its cards two side by side, so more fits above the keyboard
+- Page preview: empty space shows as a dashed outline, so it is no longer taken for a widget
 
 ## 0.14.5
 

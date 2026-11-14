@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.HorizontalRule
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.Icon
@@ -38,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asImageBitmap
@@ -194,14 +196,30 @@ private fun MiniRow(row: PageRow, entries: List<RowEntry>, surfaceDark: Boolean,
         PageRowType.SYSTEM_WIDGET -> row.heightPx?.takeIf { it > 0 }?.let { with(density) { it.toDp() } } ?: PageRowDimens.spanHeight(unit, row.spanY.coerceAtLeast(1))
         else -> PageRowDimens.spanHeight(unit, row.spanY.coerceAtLeast(1))
     }
+    // Empty space is invisible on the page: here only a dashed outline, so it is not taken for a widget.
+    val isSpacer = row.type == PageRowType.WIDGET && row.payload == WidgetKind.SPACER
+    val outline = MaterialTheme.colorScheme.outline
     Box(
         modifier = Modifier
             .padding(horizontal = side)
             .fillMaxWidth()
             .height(realHeight * scale)
             .clip(shape)
-            .background(colors.background, alpha = colors.backgroundAlpha)
-            .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth / 2, colors.borderColor, shape) else Modifier)
+            .then(
+                if (isSpacer) Modifier.drawBehind {
+                    val stroke = 1.5.dp.toPx()
+                    drawRoundRect(
+                        color = outline,
+                        topLeft = androidx.compose.ui.geometry.Offset(stroke / 2, stroke / 2),
+                        size = androidx.compose.ui.geometry.Size(size.width - stroke, size.height - stroke),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(miniRadius(row.cornerRadiusPercent).toPx()),
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = stroke, pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 4.dp.toPx())))
+                    )
+                }
+                else Modifier
+                    .background(colors.background, alpha = colors.backgroundAlpha)
+                    .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth / 2, colors.borderColor, shape) else Modifier)
+            )
             .then(if (picked) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape) else Modifier)
             .clickable(onClick = onClick)
             .padding(4.dp),
@@ -242,7 +260,7 @@ private fun MiniIcons(entries: List<RowEntry>, columns: Int, ink: Color, scale: 
 @Composable
 private fun MiniOwnWidget(kind: String, ink: Color) {
     when (kind) {
-        WidgetKind.SPACER -> Unit
+        WidgetKind.SPACER -> Icon(Icons.Filled.HorizontalRule, contentDescription = null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(18.dp))
         WidgetKind.CLOCK -> Text("12:30", color = ink, style = MaterialTheme.typography.titleMedium)
         else -> Icon(
             when (kind) {
