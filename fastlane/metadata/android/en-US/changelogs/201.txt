@@ -1,0 +1,10 @@
+Tablets are now supported:
+- Landscape: pages in two columns, text search cards two side by side
+- App list with up to four columns, A-Z rail at the edge
+- Settings: side rail in area colors
+- Page room always counted for portrait
+Also:
+- Widget size: Save always in view, free rows shown
+- Full page: a question instead of failing silently
+- More exact preview, empty space dashed
+- "All saved" instead of a greyed-out button

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.15.0
 
 - Tablet: how many rows fit on a page is always counted for portrait, so turning the tablet no longer changes it
 - Tablet: in wide landscape the page shows its rows in two columns

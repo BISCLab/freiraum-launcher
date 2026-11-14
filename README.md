@@ -31,7 +31,7 @@ libraries.
 
 Languages: English, German.
 
-Tablets are supported in beta: it works, but some screens may not look quite right yet.
+Tablets are supported: held sideways, pages, the App list and the search use the extra width.
 
 ## Permissions
 

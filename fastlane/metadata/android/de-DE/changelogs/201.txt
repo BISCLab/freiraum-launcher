@@ -1,0 +1,10 @@
+Tablets offiziell unterstützt:
+- Querformat: Seiten in zwei Spalten, Textsuche mit zwei Kartenspalten
+- App-Liste mit bis zu vier Spalten, A-Z-Leiste am Rand
+- Einstellungen: Seitenleiste in Bereichsfarben
+- Seiten-Platz immer fürs Hochformat gerechnet
+Außerdem:
+- Widget-Größe: Speichern immer sichtbar, freie Zeilen angezeigt
+- Volle Seite: Frage statt stillem Abbruch
+- Vorschau genauer, Leerraum gestrichelt
+- "Alles gespeichert" statt grauem Knopf
