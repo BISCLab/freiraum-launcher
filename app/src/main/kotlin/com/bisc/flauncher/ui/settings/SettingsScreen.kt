@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Gesture
 import androidx.compose.material.icons.filled.Interests
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -571,13 +572,29 @@ internal fun SettingsSaveBar(enabled: Boolean, onSave: () -> Unit) {
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
             .padding(horizontal = 16.dp, vertical = 10.dp)
     ) {
-        androidx.compose.material3.Button(
-            onClick = onSave,
-            enabled = enabled,
-            shape = SettingsCardShape,
-            modifier = Modifier.align(Alignment.Center).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth - 32.dp).fillMaxWidth().heightIn(min = 52.dp)
-        ) {
-            Text(stringResource(R.string.settings_save))
+        val barModifier = Modifier.align(Alignment.Center).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth - 32.dp).fillMaxWidth().heightIn(min = 52.dp)
+        if (enabled) {
+            androidx.compose.material3.Button(onClick = onSave, shape = SettingsCardShape, modifier = barModifier) {
+                Text(stringResource(R.string.settings_save))
+            }
+        } else {
+            // Nothing changed: everything is already stored, not a button waiting for something.
+            Row(
+                modifier = barModifier
+                    .clip(SettingsCardShape)
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(androidx.compose.material.icons.Icons.Filled.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(20.dp))
+                Text(
+                    stringResource(R.string.settings_all_saved),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
         }
     }
 }

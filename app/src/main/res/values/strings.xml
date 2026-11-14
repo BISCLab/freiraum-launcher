@@ -399,6 +399,7 @@
     <string name="settings_tips_label">Tips</string>
     <string name="settings_tips_show">Show tips</string>
     <string name="settings_save">Save</string>
+    <string name="settings_all_saved">All saved</string>
     <string name="settings_unsaved_title">Unsaved changes</string>
     <string name="settings_unsaved_message">Save your changes before leaving?</string>
     <string name="settings_unsaved_discard">Discard</string>

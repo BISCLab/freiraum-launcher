@@ -400,6 +400,7 @@
     <string name="settings_tips_label">Tipps</string>
     <string name="settings_tips_show">Tipps anzeigen</string>
     <string name="settings_save">Speichern</string>
+    <string name="settings_all_saved">Alles gespeichert</string>
     <string name="settings_unsaved_title">Nicht gespeicherte Änderungen</string>
     <string name="settings_unsaved_message">Möchtest du deine Änderungen vor dem Verlassen speichern?</string>
     <string name="settings_unsaved_discard">Verwerfen</string>
