@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Accessibility mode (Settings > System): every element solid with a strong border and text in black or white, app icons a quarter larger, a darker backdrop instead of blur behind folders; findable in the settings search
+- Tablet: the text search uses the whole width again with one card per line instead of two side by side; the apps card fits more apps per row on a wide screen
 
 ## 0.15.0
 

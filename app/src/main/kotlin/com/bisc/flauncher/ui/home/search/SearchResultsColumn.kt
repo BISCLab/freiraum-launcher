@@ -62,6 +62,8 @@ import androidx.compose.ui.res.stringResource
 
 private const val APP_GRID_COLUMNS = 4
 private const val APP_GRID_COLLAPSED_ROWS = 2
+private const val APP_GRID_MAX_COLUMNS = 10
+private val APP_TILE_MIN_WIDTH = 96.dp
 private const val SECTION_COLLAPSED_LIMIT = 3
 /** Between the cards, and between the field and the first card. */
 internal val SEARCH_CARD_GAP = 10.dp
@@ -183,9 +185,7 @@ fun SearchResultsColumn(
         val canScrollFurther by remember { derivedStateOf { listState.canScrollForward } }
         val topFadePx = with(LocalDensity.current) { TOP_FADE_HEIGHT.toPx() }
         // Fine side margin (or edge to edge); the gap to the input bar equals the gap between cards.
-        val columns = if (maxWidth >= SEARCH_TWO_COLUMN_WIDTH) 2 else 1
-        // The rail jumps to the line a card is in.
-        androidx.compose.runtime.LaunchedEffect(cards, columns) { onCardsChange(cards.mapValues { it.value / columns }) }
+        androidx.compose.runtime.LaunchedEffect(cards) { onCardsChange(cards) }
         val cardList = CardList().apply {
             if (calculatorResult != null) {
                 add(null) {
@@ -313,31 +313,17 @@ fun SearchResultsColumn(
             ),
             verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(CARD_GAP)
         ) {
-            if (columns == 1) cardList.entries.forEach { (key, content) -> item(key = key) { content() } }
-            else cardList.entries.chunked(columns).forEach { line ->
-                item(key = line.map { it.first }.toString()) {
-                    androidx.compose.foundation.layout.Row(
-                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(CARD_GAP),
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        line.forEach { (_, content) -> Box(modifier = Modifier.weight(1f)) { content() } }
-                        repeat(columns - line.size) { androidx.compose.foundation.layout.Spacer(Modifier.weight(1f)) }
-                    }
-                }
-            }
+            cardList.entries.forEach { (key, content) -> item(key = key) { content() } }
         }
     }
     }
 }
 
-/** The cards in their order, each with its list key; laid out one or two per line. */
+/** The cards in their order, each with its list key. */
 private class CardList {
     val entries = mutableListOf<Pair<Any?, @Composable () -> Unit>>()
     fun add(key: Any?, content: @Composable () -> Unit) { entries += key to content }
 }
-
-/** From this width on the cards stand two side by side (tablets held sideways). */
-private val SEARCH_TWO_COLUMN_WIDTH = 840.dp
 
 /** One category's section as its own card: title + up to [SECTION_COLLAPSED_LIMIT] rows + a "More" toggle. */
 private fun <T> CardList.sectionCard(
@@ -434,11 +420,14 @@ private fun AppTileGrid(
     favoriteIds: Set<String> = emptySet(),
     onToggleFavorite: (AppInfo) -> Unit = {}
 ) {
-    val collapsedLimit = APP_GRID_COLUMNS * APP_GRID_COLLAPSED_ROWS
+    // Four on a phone; a wide card (tablet) fits more side by side.
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+    val columns = (maxWidth / APP_TILE_MIN_WIDTH).toInt().coerceIn(APP_GRID_COLUMNS, APP_GRID_MAX_COLUMNS)
+    val collapsedLimit = columns * APP_GRID_COLLAPSED_ROWS
     val shown = if (expanded || apps.size <= collapsedLimit) apps else apps.take(collapsedLimit)
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
-        shown.chunked(APP_GRID_COLUMNS).forEach { rowApps ->
+        shown.chunked(columns).forEach { rowApps ->
             Row(modifier = Modifier.fillMaxWidth()) {
                 rowApps.forEach { app ->
                     val bitmap = rememberAppIcon(app.componentName, loadIcon)
@@ -471,7 +460,7 @@ private fun AppTileGrid(
                         )
                     }
                 }
-                repeat(APP_GRID_COLUMNS - rowApps.size) { Spacer(Modifier.weight(1f)) }
+                repeat(columns - rowApps.size) { Spacer(Modifier.weight(1f)) }
             }
         }
         if (apps.size > collapsedLimit) {
@@ -483,6 +472,7 @@ private fun AppTileGrid(
                 )
             }
         }
+    }
     }
 }
 
