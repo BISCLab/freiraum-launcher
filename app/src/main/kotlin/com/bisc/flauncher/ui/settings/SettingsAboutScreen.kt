@@ -115,7 +115,7 @@ fun AboutHeaderCard(onClick: () -> Unit) {
  * clover, blob and more - for how freely the launcher changes. Every shape is an outline of the
  * same number of points around the middle, so any two melt into each other point by point. Only
  * the outline moves (drawn by the graphics layer, nothing is laid out again), and only while this
- * page is open. With motion off, or its own switch off, it stays square.
+ * page is open. With motion off, or its own switch off, it stays round.
  */
 @Composable
 private fun ShapeShiftingLogo(size: Dp) {
@@ -133,7 +133,13 @@ private fun ShapeShiftingLogo(size: Dp) {
         modifier = Modifier
             .size(size)
             .graphicsLayer {
-                val value = progress?.value ?: 0f
+                // Standing still, the logo is round.
+                if (progress == null) {
+                    shape = androidx.compose.foundation.shape.CircleShape
+                    clip = true
+                    return@graphicsLayer
+                }
+                val value = progress.value
                 val index = value.toInt() % shapes.size
                 // Each step: a short rest in the shape, then the change to the next one.
                 val within = value - value.toInt()
