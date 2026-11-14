@@ -237,7 +237,9 @@ fun SettingsPageRowsScreen(
     }
 
     sizingKind?.let { kind ->
+        val freeUnits by androidx.compose.runtime.produceState<Int?>(null, pageId) { value = viewModel.freeRowUnits(pageId) }
         WidgetSizeSheet(
+            freeUnits = freeUnits,
             row = newWidgetPreviewRow(pageId, kind, sizingSpan),
             spanY = sizingSpan,
             minSpan = WidgetKind.minSpan(kind),
@@ -304,20 +306,48 @@ internal fun WidgetSizeSheet(
     maxSpan: Int,
     onSpanChange: (Int) -> Unit,
     onSave: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    /** Row units still free on the page; null = not known. */
+    freeUnits: Int? = null
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(
-            modifier = Modifier.fillMaxWidth().heightIn(max = 640.dp).verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Text(stringResource(R.string.settings_rows_size_title), style = MaterialTheme.typography.titleLarge)
-            WidgetSizeEditor(row = row.copy(spanY = spanY), minSpan = minSpan, maxSpan = maxSpan, onSpanChange = onSpanChange)
-            TextButton(onClick = onSave, modifier = Modifier.fillMaxWidth()) {
+        // The preview scrolls; the room left and Save stay in view below it, however tall it is.
+        Column(modifier = Modifier.fillMaxWidth().heightIn(max = 640.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(stringResource(R.string.settings_rows_size_title), style = MaterialTheme.typography.titleLarge)
+                WidgetSizeEditor(row = row.copy(spanY = spanY), minSpan = minSpan, maxSpan = maxSpan, onSpanChange = onSpanChange)
+            }
+            if (freeUnits != null) {
+                val fits = spanY <= freeUnits
+                Text(
+                    if (fits) androidx.compose.ui.res.pluralStringResource(R.plurals.settings_page_room_left, freeUnits, freeUnits)
+                    else stringResource(R.string.settings_page_room_too_small, freeUnits),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (fits) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error
+                )
+            }
+            androidx.compose.material3.Button(onClick = onSave, shape = SettingsCardShape, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
                 Text(stringResource(R.string.settings_rows_save))
             }
         }
     }
+}
+
+/** Asks when something does not fit on its page any more: a new page for it, or not. */
+@Composable
+internal fun PageFullDialog(viewModel: com.bisc.flauncher.ui.home.HomeViewModel) {
+    val pending by viewModel.pendingOverflowAdd.collectAsState()
+    if (pending == null) return
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = viewModel::cancelPendingOverflowAdd,
+        title = { Text(stringResource(R.string.settings_page_full_title)) },
+        text = { Text(stringResource(R.string.settings_page_full_message)) },
+        confirmButton = { TextButton(onClick = viewModel::confirmPendingOverflowAdd) { Text(stringResource(R.string.settings_page_full_confirm)) } },
+        dismissButton = { TextButton(onClick = viewModel::cancelPendingOverflowAdd) { Text(stringResource(R.string.widget_notes_cancel)) } }
+    )
 }
 
 internal fun rowIcon(row: PageRow): ImageVector = when (row.type) {

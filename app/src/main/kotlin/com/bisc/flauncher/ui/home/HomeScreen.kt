@@ -623,11 +623,13 @@ fun HomeScreen(
                         } else {
                             null
                         }
+                        // A wide screen held sideways: the page in two columns side by side.
+                        val twoColumns = androidx.compose.ui.platform.LocalConfiguration.current.let { it.screenWidthDp >= 840 && it.screenWidthDp > it.screenHeightDp }
                         val contentModifier = Modifier
                             // On tablets the rows keep to the same centered column as the Dock and the Panel.
                             .fillMaxWidth()
                             .wrapContentWidth(Alignment.CenterHorizontally)
-                            .widthIn(max = com.bisc.flauncher.ui.MaxContentWidth)
+                            .widthIn(max = if (twoColumns) com.bisc.flauncher.ui.MaxContentWidth * 2 else com.bisc.flauncher.ui.MaxContentWidth)
                             .padding(top = animatedTopInset)
                             .padding(top = 16.dp)
                             .then(
@@ -639,7 +641,9 @@ fun HomeScreen(
                         val bottomReserve = reservedForDock
                             ?: (WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 16.dp)
                         val rowUnitHeight = with(LocalDensity.current) {
-                            PageRowDimens.stretchedUnit(pagerHeightPx.toDp() - animatedTopInset - 16.dp - bottomReserve, rowUnitCounts[page.id] ?: 0)
+                            val viewport = pagerHeightPx.toDp() - animatedTopInset - 16.dp - bottomReserve
+                            if (twoColumns) PageRowDimens.twoColumnUnit(viewport, rowUnitCounts[page.id] ?: 0)
+                            else PageRowDimens.stretchedUnit(viewport, rowUnitCounts[page.id] ?: 0)
                         }
                         CompositionLocalProvider(
                             LocalSurfaceIsDark provides pageSurfaceIsDark,
@@ -669,6 +673,8 @@ fun HomeScreen(
                                 onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) },
                                 iconShape = iconShape,
                                 iconSizeScale = iconSizeScale,
+                                columns = if (twoColumns) 2 else 1,
+                                unitsPerColumn = ((rowUnitCounts[page.id] ?: 0) + 1) / 2,
                                 modifier = contentModifier.graphicsLayer { alpha = pageContentAlpha }
                             ) }
                     }

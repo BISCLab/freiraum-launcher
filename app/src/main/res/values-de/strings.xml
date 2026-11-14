@@ -1032,4 +1032,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_motion_logo_shape">Logo in den Einstellungen wechselt die Form</string>
     <string name="settings_part_letters_short">Buchstaben</string>
     <string name="settings_corner_own_value">Eigener Wert</string>
+    <string name="settings_page_room_too_small">Passt nicht mehr auf diese Seite: hier sind nur noch %1$d Zeilen frei. Beim Speichern kannst du eine neue Seite dafür anlegen.</string>
+    <plurals name="settings_page_room_left">
+        <item quantity="one">Auf dieser Seite ist noch %1$d Zeile frei.</item>
+        <item quantity="other">Auf dieser Seite sind noch %1$d Zeilen frei.</item>
+    </plurals>
 </resources>

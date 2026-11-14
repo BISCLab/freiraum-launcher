@@ -244,7 +244,9 @@ fun SettingsHomeLayoutScreen(
     }
 
     sizingKind?.let { kind ->
+        val freeUnits by androidx.compose.runtime.produceState<Int?>(null, pageId) { value = viewModel.freeRowUnits(pageId) }
         WidgetSizeSheet(
+            freeUnits = freeUnits,
             row = newWidgetPreviewRow(pageId, kind, sizingSpan),
             spanY = sizingSpan,
             minSpan = WidgetKind.minSpan(kind),
@@ -257,6 +259,8 @@ fun SettingsHomeLayoutScreen(
             onDismiss = { sizingKind = null }
         )
     }
+
+    PageFullDialog(viewModel)
 
     systemWidgetPickerOpenForPage?.let { targetPageId ->
         val providers = remember(targetPageId) { viewModel.installedSystemWidgetProviders() }

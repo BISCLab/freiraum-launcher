@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Tablet: how many rows fit on a page is always counted for portrait, so turning the tablet no longer changes it
+- Tablet: in wide landscape the page shows its rows in two columns
+- Widget size: the Save button stays in view and the sheet shows how many rows are still free on the page
+- Home: adding to a full page now asks what to do instead of failing silently
+- Page preview in the settings always shows the page in portrait
+
 ## 0.14.5
 
 - Status bar settings as a list of switches, like the animations: "Hide everywhere" on top, then one

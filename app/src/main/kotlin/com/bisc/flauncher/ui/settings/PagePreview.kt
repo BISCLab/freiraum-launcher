@@ -105,8 +105,12 @@ fun PagePreview(
     // The whole screen, bars included, as the page is laid out on it.
     val density = LocalDensity.current
     val rootView = androidx.compose.ui.platform.LocalView.current.rootView
-    val screenHeight = with(density) { rootView.height.toDp() }.takeIf { it > 0.dp } ?: LocalConfiguration.current.screenHeightDp.dp
-    val screenWidth = with(density) { rootView.width.toDp() }.takeIf { it > 0.dp } ?: LocalConfiguration.current.screenWidthDp.dp
+    // Held upright, like the page is counted (see PageGrid): the same page whichever way the device
+    // is turned while the settings are open.
+    val rawHeight = with(density) { rootView.height.toDp() }.takeIf { it > 0.dp } ?: LocalConfiguration.current.screenHeightDp.dp
+    val rawWidth = with(density) { rootView.width.toDp() }.takeIf { it > 0.dp } ?: LocalConfiguration.current.screenWidthDp.dp
+    val screenHeight = maxOf(rawHeight, rawWidth)
+    val screenWidth = minOf(rawHeight, rawWidth)
     val shownDock = dock?.takeIf { it.enabled && pageId !in withoutDockPanel.first }
     val shownPanel = panel?.takeIf { pageId !in withoutDockPanel.second }
     // Rows stretch to fill the page like on the phone (see HomeScreen): from below the status bar

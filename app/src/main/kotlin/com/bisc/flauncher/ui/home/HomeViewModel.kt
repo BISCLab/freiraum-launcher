@@ -1041,6 +1041,9 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /** How many row units are still free on [pageId], for the size choice of a new widget. */
+    suspend fun freeRowUnits(pageId: Long): Int = pageContentRepository.freeRowUnits(pageId)
+
     fun addElementBox(pageId: Long) {
         val candidate = PageRow(pageId = pageId, orderIndex = 0, type = PageRowType.ELEMENT_BOX, columns = GridConstants.DEFAULT_ELEMENT_BOX_COLUMNS)
         viewModelScope.launch {

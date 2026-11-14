@@ -489,15 +489,28 @@ class PageContentRepository @Inject constructor(
         return SystemInsets(systemInsetPx("status_bar_height"), 0, systemInsetPx("navigation_bar_height"))
     }
 
-    /** The full window height (the launcher draws edge to edge, under both system bars). */
+    /** The window's height held upright (the launcher draws edge to edge, under both system bars).
+     *  A page is always counted for portrait, whichever way the device is turned right now, so turning
+     *  it never moves rows to other pages; in landscape a wide screen shows the page in two columns. */
     private fun windowHeightPx(): Int {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
             runCatching {
                 val wm = context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager
-                return wm.currentWindowMetrics.bounds.height()
+                val bounds = wm.currentWindowMetrics.bounds
+                return maxOf(bounds.width(), bounds.height())
             }
         }
-        return context.resources.displayMetrics.heightPixels
+        val metrics = context.resources.displayMetrics
+        return maxOf(metrics.widthPixels, metrics.heightPixels)
+    }
+
+    /** How many row units are still free on [pageId]. */
+    suspend fun freeRowUnits(pageId: Long): Int {
+        val grid = pageGrid(pageId)
+        val used = rowDao.getForPage(pageId)
+            .filter { it.type != PageRowType.SEARCH_BAR && it.type != PageRowType.PANEL }
+            .sumOf { unitsOf(it, grid.unit) }
+        return (grid.unitCount - used).coerceAtLeast(0)
     }
 
     /** How many row units fit on each carousel page - HomeScreen and the widget editor stretch the

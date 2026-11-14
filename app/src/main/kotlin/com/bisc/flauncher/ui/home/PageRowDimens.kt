@@ -28,6 +28,12 @@ object PageRowDimens {
         if (count <= 0 || viewport <= 0.dp) rowUnitHeight
         else ((viewport + rowSpacing) / count - rowSpacing).coerceIn(rowUnitHeight, rowUnitHeight * 1.3f)
 
+    /** A wide screen held sideways shows a page in two columns: the unit then fits half the page's
+     *  units (rounded up) into the height, a little smaller than usual where it has to. */
+    fun twoColumnUnit(viewport: Dp, count: Int): Dp =
+        if (count <= 0 || viewport <= 0.dp) rowUnitHeight
+        else ((viewport + rowSpacing) / ((count + 1) / 2) - rowSpacing).coerceIn(rowUnitHeight * 0.6f, rowUnitHeight * 1.3f)
+
     /** How many row units a row of natural height [height] takes once rounded up to the grid. */
     fun unitsFor(height: Dp, unit: Dp): Int =
         kotlin.math.ceil((height + rowSpacing) / (unit + rowSpacing)).toInt().coerceAtLeast(1)
