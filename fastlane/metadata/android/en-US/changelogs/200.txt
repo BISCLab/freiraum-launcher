@@ -1,0 +1,6 @@
+• Corners with five presets and an own value instead of a slider
+• App list search button fully round at 100 %
+• Status bar settings as a switch list
+• Text search in 3D designs opens without flicker
+• Picture tiles with clean frames in the corners
+• Logo round without its animation

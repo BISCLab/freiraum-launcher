@@ -1,0 +1,6 @@
+• Ecken mit fünf Vorgaben und eigenem Wert statt Schieberegler
+• Suchbutton der App-Liste bei 100 % ganz rund
+• Statusleiste als Schalterliste
+• Textsuche im 3D-Design ohne Flackern beim Öffnen
+• Bildkacheln mit sauberen Rahmen in den Ecken
+• Logo ohne Animation rund
