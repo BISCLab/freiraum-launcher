@@ -1,0 +1,9 @@
+New: accessibility mode (Settings > System > Accessibility)
+- Every element solid with a strong border
+- Text and symbols in black or white
+- App icons a quarter larger
+- Darker backdrop instead of blur behind folders
+- No charging bubbles over text
+Tablet:
+- Text search uses the whole width, one card per line
+- More apps per row in the apps card

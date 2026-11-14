@@ -1,0 +1,9 @@
+Neu: Barrierefreiheitsmodus (Einstellungen > System > Bedienungshilfen)
+- Alle Elemente deckend mit kräftigem Rahmen
+- Schrift und Symbole in Schwarz oder Weiß
+- App-Symbole ein Viertel größer
+- Abdunkeln statt Unschärfe hinter Ordnern
+- Keine Lade-Blasen über dem Text
+Tablet:
+- Textsuche über die ganze Breite, eine Karte pro Zeile
+- Mehr Apps pro Reihe in der Apps-Karte
