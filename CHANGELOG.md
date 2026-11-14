@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Status bar settings as a list of switches, like the animations: "Hide everywhere" on top, then one
+  switch per page, the text search and folders; on means hidden there
+
 ## 0.14.4
 
 - The logo on the settings' start page changes its shape faster and much more freely: square,

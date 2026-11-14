@@ -90,16 +90,7 @@ fun SettingsStatusBarScreen(navController: NavController, onBack: () -> Unit, vi
     val setEverywhere = { hide: Boolean -> if (hide) confirmingHide = true else viewModel.setStatusBarHiddenEverywhere(false) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_statusbar_label), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup(info = stringResource(R.string.settings_statusbar_hide_all_summary)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_statusbar_hide_all),
-                onClick = { setEverywhere(!everywhere) },
-                trailing = { Switch(checked = everywhere, onCheckedChange = setEverywhere) }
-            )
-        }
-        // Every place as a small screen: with the bar on top while it shows, without while hidden.
-        // Tap one to switch it.
+        // Like the animations: the switch for all, then one per place. On means hidden.
         val places = statusBarPages(allPages).map { page ->
             val hidden = if (page.kind == LauncherPageKind.SEARCH) searchHidden
                 else remember(page.id) { viewModel.pageHideStatusBar(page.id) }.collectAsState(initial = false).value
@@ -107,15 +98,14 @@ fun SettingsStatusBarScreen(navController: NavController, onBack: () -> Unit, vi
                 if (page.kind == LauncherPageKind.SEARCH) viewModel.setSearchHideStatusBar(hide) else viewModel.setPageHideStatusBar(page.id, hide)
             }
         } + Triple(stringResource(R.string.settings_section_folder), folderHidden, viewModel::setFolderHideStatusBar)
-        androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
-            val tileWidth = (maxWidth - 20.dp) / 3
-            androidx.compose.foundation.layout.Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(14.dp)) {
-                places.chunked(3).forEach { row ->
-                    Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(10.dp)) {
-                        row.forEach { (label, hidden, set) -> StatusBarTile(label, hidden, tileWidth) { set(!hidden) } }
-                    }
-                }
-            }
+        SettingsPreferenceGroup(info = stringResource(R.string.settings_statusbar_hide_all_summary)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_statusbar_hide_all),
+                onClick = { setEverywhere(!everywhere) },
+                trailing = { Switch(checked = everywhere, onCheckedChange = setEverywhere) }
+            )
+            places.forEach { (label, hidden, set) -> SlimSwitchRow(label, hidden, true) { set(it) } }
         }
     }
 
@@ -221,45 +211,3 @@ internal fun SlimSwitchRow(label: String, checked: Boolean, enabled: Boolean, on
     }
 }
 
-/** One place in small: the status bar on top while it shows, an empty top edge while it's hidden. */
-@Composable
-private fun StatusBarTile(label: String, hidden: Boolean, width: androidx.compose.ui.unit.Dp, onToggle: () -> Unit) {
-    val frame = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
-    val ink = MaterialTheme.colorScheme.onSurface
-    androidx.compose.foundation.layout.Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(width).noRippleClickable(onClick = onToggle)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(0.62f)
-                .clip(frame)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                .border(if (hidden) 1.dp else 2.dp, if (hidden) MaterialTheme.colorScheme.outlineVariant else MaterialTheme.colorScheme.primary, frame)
-        ) {
-            if (!hidden) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().height(16.dp).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)).padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("12:30", fontSize = 8.sp, color = ink)
-                    androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
-                    repeat(3) { Box(Modifier.padding(start = 2.dp).size(5.dp).clip(androidx.compose.foundation.shape.CircleShape).background(ink.copy(alpha = 0.6f))) }
-                }
-            }
-            androidx.compose.material3.Icon(
-                if (hidden) androidx.compose.material.icons.Icons.Filled.VisibilityOff else androidx.compose.material.icons.Icons.Filled.Visibility,
-                contentDescription = null,
-                tint = if (hidden) ink.copy(alpha = 0.4f) else MaterialTheme.colorScheme.primary,
-                modifier = Modifier.align(Alignment.Center).size(22.dp)
-            )
-        }
-        Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1, modifier = Modifier.padding(top = 6.dp))
-        Text(
-            stringResource(if (hidden) R.string.settings_statusbar_tile_hidden else R.string.settings_statusbar_tile_shown),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
