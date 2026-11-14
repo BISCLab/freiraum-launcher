@@ -106,7 +106,7 @@ internal fun FolderLivePreview(
                 .fillMaxWidth()
                 .clip(shape)
                 .background(colors.background, alpha = colors.backgroundAlpha.coerceAtLeast(0.25f))
-                .then(if (look.borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)
+                .then(if (colors.showBorder) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {

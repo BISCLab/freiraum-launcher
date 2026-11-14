@@ -109,7 +109,7 @@ fun SearchInputBar(
                 .designGlow(fieldShape, "search")
                 .clip(fieldShape)
                 .background(fieldColors.background, alpha = fieldColors.backgroundAlpha)
-                .then(if (ownAppearance.borderEnabled) Modifier.border(fieldColors.borderWidth, fieldColors.borderColor, fieldShape) else Modifier)
+                .then(if (fieldColors.showBorder) Modifier.border(fieldColors.borderWidth, fieldColors.borderColor, fieldShape) else Modifier)
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)

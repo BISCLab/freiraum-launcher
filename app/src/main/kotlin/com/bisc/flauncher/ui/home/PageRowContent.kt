@@ -742,7 +742,7 @@ fun PillRow(
                     else Modifier
                 )
                 .then(
-                    if (row.appearance().borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor, barShape) else Modifier
+                    if (colors.showBorder) Modifier.border(colors.borderWidth, colors.borderColor, barShape) else Modifier
                 )
         ) {
             PillRowEntries(

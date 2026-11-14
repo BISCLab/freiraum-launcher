@@ -354,7 +354,7 @@ private fun LetterCircle(letter: Char, appearance: ElementAppearance) {
             .then(Modifier.designGlow(CircleShape, "buttons"))
             .clip(CircleShape)
             .background(colors.background, alpha = colors.backgroundAlpha)
-            .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth, letterBorderColor, CircleShape) else Modifier),
+            .then(if (colors.showBorder) Modifier.border(colors.borderWidth, letterBorderColor, CircleShape) else Modifier),
         contentAlignment = Alignment.Center
     ) {
         Text(letter.toString(), style = MaterialTheme.typography.titleMedium, color = letterTextColor)

@@ -112,6 +112,13 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[SHOW_NOTIFICATION_DOTS_KEY] = show }
     }
 
+    /** The accessibility mode: solid elements with strong borders, larger icons, no blur. */
+    val accessibilityMode: Flow<Boolean> = dataStore.data.map { it[ACCESSIBILITY_MODE_KEY] ?: false }
+
+    suspend fun setAccessibilityMode(on: Boolean) {
+        dataStore.edit { it[ACCESSIBILITY_MODE_KEY] = on }
+    }
+
     suspend fun setShowSettingsTips(show: Boolean) {
         dataStore.edit { it[SHOW_SETTINGS_TIPS_KEY] = show }
     }
@@ -1282,6 +1289,7 @@ class SettingsRepository @Inject constructor(
         private val WIDGET_ARROW_CORNER_KEY = intPreferencesKey("widget_arrow_corner")
         private const val WIDGET_ARROW_PREFIX = "widget_arrow"
         private val SHOW_SETTINGS_TIPS_KEY = booleanPreferencesKey("show_settings_tips")
+        private val ACCESSIBILITY_MODE_KEY = booleanPreferencesKey("accessibility_mode")
         private val SHOW_NOTIFICATION_DOTS_KEY = booleanPreferencesKey("show_notification_dots")
         private val CAROUSEL_ENDLESS_KEY = booleanPreferencesKey("carousel_endless")
         private val MUSIC_SOURCES_KEY = stringSetPreferencesKey("music_sources")

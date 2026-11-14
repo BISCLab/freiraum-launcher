@@ -218,7 +218,7 @@ private fun MiniRow(row: PageRow, entries: List<RowEntry>, surfaceDark: Boolean,
                 }
                 else Modifier
                     .background(colors.background, alpha = colors.backgroundAlpha)
-                    .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth / 2, colors.borderColor, shape) else Modifier)
+                    .then(if (colors.showBorder) Modifier.border(colors.borderWidth / 2, colors.borderColor, shape) else Modifier)
             )
             .then(if (picked) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape) else Modifier)
             .clickable(onClick = onClick)

@@ -430,7 +430,8 @@ fun HomeScreen(
 
     // Whether *any* level of the folder stack is open.
     val blurRadius by animateDpAsState(
-        targetValue = if (folderOpen && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) 20.dp else 0.dp,
+        // The accessibility mode darkens instead of blurring.
+        targetValue = if (folderOpen && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !com.bisc.flauncher.ui.AccessibilityMode.on) 20.dp else 0.dp,
         // Same pace as the folder itself growing and shrinking.
         animationSpec = tween(if (folderOpen) 300 else 260, easing = com.bisc.flauncher.ui.EmphasizedEasing),
         label = "folderBackdropBlur"
@@ -442,7 +443,7 @@ fun HomeScreen(
         label = "pageContentAlpha"
     )
     val scrimAlpha by animateFloatAsState(
-        targetValue = if (folderOpen) 0.45f else 0f,
+        targetValue = if (!folderOpen) 0f else if (com.bisc.flauncher.ui.AccessibilityMode.on) 0.75f else 0.45f,
         // Same pace as the folder itself growing and shrinking.
         animationSpec = tween(if (folderOpen) 300 else 260, easing = com.bisc.flauncher.ui.EmphasizedEasing),
         label = "folderBackdropScrim"
@@ -737,7 +738,7 @@ fun HomeScreen(
                         .fillMaxSize()
                         .wrapContentHeight(Alignment.Bottom)
                         .then(
-                            if (dockAppearance.borderEnabled) {
+                            if (dockAppearance.borderEnabled || com.bisc.flauncher.ui.AccessibilityMode.on) {
                                 Modifier.freeEdgeBorder(1.dp, dockBorderColor, dockCornerRadius, FreeEdge.TOP)
                             } else {
                                 Modifier
@@ -900,7 +901,7 @@ fun HomeScreen(
                         .fillMaxSize()
                         .wrapContentHeight(Alignment.Top)
                         .then(
-                            if (panelAppearance.borderEnabled) {
+                            if (panelAppearance.borderEnabled || com.bisc.flauncher.ui.AccessibilityMode.on) {
                                 Modifier.freeEdgeBorder(1.dp, panelBorderColor, panelCornerRadius, FreeEdge.BOTTOM)
                             } else {
                                 Modifier

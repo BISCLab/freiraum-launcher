@@ -54,6 +54,7 @@ fun SettingsSystemScreen(
     // Held only from the password dialog until the file is chosen.
     var exportPassword by remember { mutableStateOf<CharArray?>(null) }
     val showSettingsTips by viewModel.showSettingsTips.collectAsState()
+    val accessibilityMode by viewModel.accessibilityMode.collectAsState()
     var language by remember { mutableStateOf(com.bisc.flauncher.util.AppLanguage.current(context)) }
     // Only the chosen language shows; the full list opens on tap, so it stays short as more come.
     val languages = listOf("" to stringResource(R.string.settings_language_system), "en" to "English", "de" to "Deutsch")
@@ -96,6 +97,16 @@ fun SettingsSystemScreen(
             )
         )
 
+        // Changes how everything looks, so it stands near the top where it is found.
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_accessibility_label)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_accessibility_mode),
+                summary = stringResource(R.string.settings_accessibility_mode_summary),
+                onClick = { viewModel.setAccessibilityMode(!accessibilityMode) },
+                trailing = { Switch(checked = accessibilityMode, onCheckedChange = viewModel::setAccessibilityMode) }
+            )
+        }
         SettingsTileGrid(
             title = stringResource(R.string.settings_standard_apps_label),
             info = stringResource(R.string.settings_search_open_with_info),

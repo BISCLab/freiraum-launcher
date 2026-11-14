@@ -69,7 +69,7 @@ fun AppSearchField(
             .then(Modifier.designGlow(shape, "search"))
             .clip(shape)
             .background(colors.background, alpha = colors.backgroundAlpha)
-            .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)
+            .then(if (colors.showBorder) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)
             .then(if (onOpenTextSearch != null) Modifier.clickable(onClick = onOpenTextSearch) else Modifier),
         contentAlignment = Alignment.CenterStart
     ) {

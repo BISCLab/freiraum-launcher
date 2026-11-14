@@ -158,7 +158,7 @@ fun SearchCategoryRail(
                 .designGlow(shape, "rail")
                 // No clipping: the magnified symbols may reach out of the rail.
                 .background(colors.background, shape, colors.backgroundAlpha)
-                .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)
+                .then(if (colors.showBorder) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)
                 .pointerInput(categories) {
                     fun at(y: Float) = categories[((y / size.height) * categories.size).toInt().coerceIn(0, categories.lastIndex)]
                     awaitEachGesture {
@@ -244,7 +244,7 @@ fun SearchCategoryRail(
                     .designGlow(CircleShape, "buttons")
                     .clip(CircleShape)
                     .background(bubbleColors.background, CircleShape, bubbleColors.backgroundAlpha)
-                    .then(if (bubbleAppearance.borderEnabled) Modifier.border(bubbleColors.borderWidth, bubbleColors.borderColor, CircleShape) else Modifier)
+                    .then(if (bubbleColors.showBorder) Modifier.border(bubbleColors.borderWidth, bubbleColors.borderColor, CircleShape) else Modifier)
                     .padding(start = 8.dp, end = 18.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {

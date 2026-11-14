@@ -142,6 +142,8 @@ class MainActivity : ComponentActivity() {
             val globalIconShape by settingsVm.iconShape.collectAsState()
             val appOverridesForIconSize by settingsVm.appOverrides.collectAsState()
             val showSettingsTips by settingsVm.showSettingsTips.collectAsState()
+            val accessibilityMode by settingsVm.accessibilityMode.collectAsState()
+            androidx.compose.runtime.SideEffect { com.bisc.flauncher.ui.AccessibilityMode.on = accessibilityMode }
             val dotsOn by settingsVm.showNotificationDots.collectAsState()
             val dotPackages by notificationDots.packages.collectAsState()
             val lockPortrait by settingsVm.lockPortrait.collectAsState()
@@ -167,10 +169,11 @@ class MainActivity : ComponentActivity() {
             val accentColor by settingsVm.accentColor.collectAsState()
             // New lambda identity whenever either input changes, so LocalIconSizeResolver consumers
             // (AppIconCell) recompose - a StateFlow's plain .value read wouldn't do that on its own.
-            val iconSizeResolver = androidx.compose.runtime.remember(globalIconSizePercent, appOverridesForIconSize) {
+            val iconSizeResolver = androidx.compose.runtime.remember(globalIconSizePercent, appOverridesForIconSize, accessibilityMode) {
+                val boost = if (accessibilityMode) com.bisc.flauncher.ui.AccessibilityMode.ICON_SCALE else 1f
                 { componentName: String ->
                     val percent = appOverridesForIconSize[componentName]?.iconSizePercent ?: globalIconSizePercent
-                    percent / 100f
+                    percent / 100f * boost
                 }
             }
             val navController = rememberNavController()

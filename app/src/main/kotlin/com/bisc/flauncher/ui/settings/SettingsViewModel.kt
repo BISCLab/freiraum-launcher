@@ -392,6 +392,13 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setShowSettingsTips(show) }
     }
 
+    val accessibilityMode: StateFlow<Boolean> =
+        repository.accessibilityMode.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun setAccessibilityMode(on: Boolean) {
+        viewModelScope.launch { repository.setAccessibilityMode(on) }
+    }
+
     val widgetPaging: StateFlow<com.bisc.flauncher.data.model.WidgetPaging> =
         repository.widgetPaging.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.data.model.WidgetPaging())
 

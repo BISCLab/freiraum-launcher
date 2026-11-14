@@ -400,6 +400,9 @@
     <string name="settings_tips_show">Show tips</string>
     <string name="settings_save">Save</string>
     <string name="settings_all_saved">All saved</string>
+    <string name="settings_accessibility_label">Accessibility</string>
+    <string name="settings_accessibility_mode">Accessibility mode</string>
+    <string name="settings_accessibility_mode_summary">Every element solid with a strong border and text in black or white, larger app icons, no blur behind folders. Text grows with the font size set in Android.</string>
     <string name="settings_unsaved_title">Unsaved changes</string>
     <string name="settings_unsaved_message">Save your changes before leaving?</string>
     <string name="settings_unsaved_discard">Discard</string>

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Accessibility mode (Settings > System): every element solid with a strong border and text in black or white, app icons a quarter larger, a darker backdrop instead of blur behind folders; findable in the settings search
+
 ## 0.15.0
 
 - Tablet: how many rows fit on a page is always counted for portrait, so turning the tablet no longer changes it

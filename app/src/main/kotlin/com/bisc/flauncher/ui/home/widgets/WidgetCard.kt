@@ -41,7 +41,7 @@ fun WidgetCard(
                 .then(Modifier.designGlow(shape, "widgets"))
                 .clip(shape)
                 .background(colors.background, alpha = colors.backgroundAlpha)
-                .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)
+                .then(if (colors.showBorder) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)
                 .padding(contentPadding),
             verticalArrangement = verticalArrangement,
             content = content

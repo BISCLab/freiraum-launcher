@@ -56,7 +56,7 @@ fun automaticRailAppearance(surfaceIsDark: Boolean): ElementAppearance =
 /** Rail colors resolved from a custom appearance. */
 fun customRailColors(appearance: ElementAppearance, surfaceIsDark: Boolean): RailColors {
     val c = resolveElementColors(appearance, surfaceIsDark)
-    return RailColors(c.background, c.backgroundAlpha, c.borderColor, c.borderWidth, appearance.borderEnabled, c.contentColor)
+    return RailColors(c.background, c.backgroundAlpha, c.borderColor, c.borderWidth, c.showBorder, c.contentColor)
 }
 
 internal fun ColorFill.averageLuminance(): Float = when (mode) {

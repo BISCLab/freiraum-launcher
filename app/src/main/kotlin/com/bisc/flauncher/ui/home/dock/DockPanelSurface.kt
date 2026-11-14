@@ -37,7 +37,7 @@ fun DockPanelSurface(
                 .then(if (effectTarget != null) Modifier.designGlow(shape, effectTarget) else Modifier)
                 .clip(shape)
                 .background(colors.background, alpha = colors.backgroundAlpha)
-                .then(if (appearance.borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)
+                .then(if (colors.showBorder) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)
                 .then(
                     if (reveal == null) Modifier else Modifier.layout { measurable, constraints ->
                         val full = measurable.measure(constraints.copy(minHeight = constraints.maxHeight))
