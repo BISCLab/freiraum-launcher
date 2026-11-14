@@ -376,6 +376,8 @@ private fun ResultCard(appearance: ElementAppearance, order: Int = 0, dimmed: Bo
         effectTarget = "cards",
         modifier = Modifier.fillMaxWidth().graphicsLayer {
             val p = arrival(order)
+            // Fades without a layer of its own, so a 3D shadow below the card shows from the start.
+            compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.ModulateAlpha
             this.alpha = alpha * p
             translationY = (1f - p) * rise
         }

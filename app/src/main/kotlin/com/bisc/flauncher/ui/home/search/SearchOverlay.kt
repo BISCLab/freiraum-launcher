@@ -278,6 +278,8 @@ fun SearchOverlay(
                     SearchInputBar(
                         modifier = Modifier.graphicsLayer {
                             val p = stage(0f, 1f)
+                            // Fades in without a layer of its own, so a 3D shadow outside the bar is there from the start.
+                            compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.ModulateAlpha
                             alpha = p
                             translationY = (1f - p) * with(density) { ARRIVAL_RISE.toPx() }
                         },
@@ -395,6 +397,7 @@ fun SearchOverlay(
                                 .padding(horizontal = com.bisc.flauncher.ui.home.dock.DockDimens.horizontalMargin)
                                 .graphicsLayer {
                                     val p = stage(0f, 1f)
+                                    compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.ModulateAlpha
                                     alpha = p
                                     translationY = (1f - p) * with(density) { ARRIVAL_RISE.toPx() }
                                 }
