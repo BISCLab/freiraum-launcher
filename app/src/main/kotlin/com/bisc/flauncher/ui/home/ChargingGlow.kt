@@ -87,7 +87,8 @@ fun ChargingGlow(enabled: Boolean, color: Color = Color(com.bisc.flauncher.ui.th
         }
     }
 
-    if (enabled && charging && resumed) {
+    // Not in the accessibility mode: the bubbles would run over text.
+    if (enabled && charging && resumed && !com.bisc.flauncher.ui.AccessibilityMode.on) {
         val bubbles = remember { makeBubbles() }
         val transition = rememberInfiniteTransition(label = "chargingBubbles")
         val time = transition.animateFloat(

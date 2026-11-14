@@ -104,6 +104,8 @@ fun SearchCategoryRail(
     val darkRail = colors.contentColor.luminance() > 0.5f
     fun colorOf(category: SearchCategory): Color {
         val base = categoryColors[category]?.let { Color(it) } ?: category.defaultColor
+        // Accessibility mode: the same hue, pulled far toward the rail's contrast color.
+        if (com.bisc.flauncher.ui.AccessibilityMode.on) return androidx.compose.ui.graphics.lerp(base, if (darkRail) Color.White else Color.Black, 0.5f)
         return if (darkRail) androidx.compose.ui.graphics.lerp(base, Color.White, 0.35f) else base
     }
     var scrubbing by remember { mutableStateOf<SearchCategory?>(null) }
