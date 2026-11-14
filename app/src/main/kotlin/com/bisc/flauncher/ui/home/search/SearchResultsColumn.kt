@@ -169,7 +169,6 @@ fun SearchResultsColumn(
             index += count
         }
     }
-    androidx.compose.runtime.LaunchedEffect(cards) { onCardsChange(cards) }
     // Scrolling by hand ends the focus on one category.
     androidx.compose.runtime.LaunchedEffect(listState) {
         listState.interactionSource.interactions.collect { if (it is androidx.compose.foundation.interaction.DragInteraction.Start) onClearFocus() }
@@ -184,28 +183,19 @@ fun SearchResultsColumn(
         val canScrollFurther by remember { derivedStateOf { listState.canScrollForward } }
         val topFadePx = with(LocalDensity.current) { TOP_FADE_HEIGHT.toPx() }
         // Fine side margin (or edge to edge); the gap to the input bar equals the gap between cards.
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .fillMaxSize()
-                .then(if (canScrollFurther) Modifier.fadeBackgroundToBottom(fadeStart, 1f) else Modifier)
-                .fadeListTop(TOP_FADE_HEIGHT) {
-                    if (listState.firstVisibleItemIndex > 0) 1f else (listState.firstVisibleItemScrollOffset / topFadePx).coerceIn(0f, 1f)
-                },
-            contentPadding = PaddingValues(
-                start = sideMargin, end = sideMargin, top = CARD_GAP, bottom = CARD_GAP
-            ),
-            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(CARD_GAP)
-        ) {
+        val columns = if (maxWidth >= SEARCH_TWO_COLUMN_WIDTH) 2 else 1
+        // The rail jumps to the line a card is in.
+        androidx.compose.runtime.LaunchedEffect(cards, columns) { onCardsChange(cards.mapValues { it.value / columns }) }
+        val cardList = CardList().apply {
             if (calculatorResult != null) {
-                item {
+                add(null) {
                     ResultCard(cardAppearance, order = 0, dimmed = focus != null, onUndim = onClearFocus) {
                         CalculatorResultRow(expression = query, result = calculatorResult, onClick = { onCalculatorResultClick(calculatorResult) })
                     }
                 }
             }
             if (converterResult != null) {
-                item {
+                add(null) {
                     ResultCard(cardAppearance, order = if (calculatorResult != null) 1 else 0, dimmed = focus != null, onUndim = onClearFocus) {
                         CalculatorResultRow(expression = query, result = converterResult, onClick = {})
                     }
@@ -215,7 +205,7 @@ fun SearchResultsColumn(
             order.forEach { category ->
                 when (category) {
                     SearchCategory.FAVORITES -> if (favoriteApps.isNotEmpty()) {
-                        item(key = category.name) {
+                        add(category.name) {
                             ResultCard(cardAppearance, order = cards[category] ?: 0, dimmed = dimmed(category), onUndim = onClearFocus) {
                                 SectionTitle(stringResource(R.string.search_section_favorites), categoryColor(category))
                                 AppTileGrid(
@@ -231,7 +221,7 @@ fun SearchResultsColumn(
                         }
                     }
                     SearchCategory.APPS -> if (shownAppResults.isNotEmpty()) {
-                        item(key = category.name) {
+                        add(category.name) {
                             ResultCard(cardAppearance, order = cards[category] ?: 0, dimmed = dimmed(category), onUndim = onClearFocus) {
                                 SectionTitle(stringResource(R.string.search_section_apps), categoryColor(category))
                                 AppTileGrid(
@@ -273,7 +263,7 @@ fun SearchResultsColumn(
                             )
                         }
                         if (showMaps) {
-                            item(key = "maps_command") {
+                            add("maps_command") {
                                 ResultCard(cardAppearance, order = cards[category] ?: 0, dimmed = dimmed(category), onUndim = onClearFocus) {
                                     CommandRow(icon = Icons.Filled.Place, color = categoryColor(category), text = stringResource(R.string.search_command_maps, query), prominent = false, onClick = onMapsCommand)
                                 }
@@ -292,7 +282,7 @@ fun SearchResultsColumn(
                         ResultRow(leading = { Icon(category.shownIcon(), contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = stringResource(target.labelRes), onClick = { onLauncherSettingsClick(target) })
                     }
                     SearchCategory.WEB -> if (showWeb) {
-                        item(key = category.name) {
+                        add(category.name) {
                             ResultCard(cardAppearance, order = cards[category] ?: 0, dimmed = dimmed(category), onUndim = onClearFocus) {
                                 val withEngine = stringResource(R.string.search_command_web_with)
                                 CommandChoicesContent(webChoices, text = { withEngine.format(query, it.label) }, tint = categoryColor(category), prominent = !hasDirectResults, onRun = onWebCommand)
@@ -300,7 +290,7 @@ fun SearchResultsColumn(
                         }
                     }
                     SearchCategory.AI -> if (showAi) {
-                        item(key = category.name) {
+                        add(category.name) {
                             ResultCard(cardAppearance, order = cards[category] ?: 0, dimmed = dimmed(category), onUndim = onClearFocus) {
                                 val askApp = stringResource(R.string.search_command_ai)
                                 CommandChoicesContent(aiChoices, text = { askApp.format(it.label, query) }, tint = categoryColor(category), prominent = !hasDirectResults && !showWeb, onRun = onAiCommand)
@@ -310,12 +300,47 @@ fun SearchResultsColumn(
                 }
             }
         }
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize()
+                .then(if (canScrollFurther) Modifier.fadeBackgroundToBottom(fadeStart, 1f) else Modifier)
+                .fadeListTop(TOP_FADE_HEIGHT) {
+                    if (listState.firstVisibleItemIndex > 0) 1f else (listState.firstVisibleItemScrollOffset / topFadePx).coerceIn(0f, 1f)
+                },
+            contentPadding = PaddingValues(
+                start = sideMargin, end = sideMargin, top = CARD_GAP, bottom = CARD_GAP
+            ),
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(CARD_GAP)
+        ) {
+            if (columns == 1) cardList.entries.forEach { (key, content) -> item(key = key) { content() } }
+            else cardList.entries.chunked(columns).forEach { line ->
+                item(key = line.map { it.first }.toString()) {
+                    androidx.compose.foundation.layout.Row(
+                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(CARD_GAP),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        line.forEach { (_, content) -> Box(modifier = Modifier.weight(1f)) { content() } }
+                        repeat(columns - line.size) { androidx.compose.foundation.layout.Spacer(Modifier.weight(1f)) }
+                    }
+                }
+            }
+        }
     }
     }
 }
 
+/** The cards in their order, each with its list key; laid out one or two per line. */
+private class CardList {
+    val entries = mutableListOf<Pair<Any?, @Composable () -> Unit>>()
+    fun add(key: Any?, content: @Composable () -> Unit) { entries += key to content }
+}
+
+/** From this width on the cards stand two side by side (tablets held sideways). */
+private val SEARCH_TWO_COLUMN_WIDTH = 840.dp
+
 /** One category's section as its own card: title + up to [SECTION_COLLAPSED_LIMIT] rows + a "More" toggle. */
-private fun <T> androidx.compose.foundation.lazy.LazyListScope.sectionCard(
+private fun <T> CardList.sectionCard(
     order: Int,
     dimmed: Boolean,
     onUndim: () -> Unit,
@@ -328,7 +353,7 @@ private fun <T> androidx.compose.foundation.lazy.LazyListScope.sectionCard(
     row: @Composable (T) -> Unit
 ) {
     if (results.isEmpty()) return
-    item(key = category.name) {
+    add(category.name) {
         ResultCard(cardAppearance, order = order, dimmed = dimmed, onUndim = onUndim) {
             SectionTitle(stringResource(category.sectionTitleRes), color)
             val shown = if (expanded || results.size <= SECTION_COLLAPSED_LIMIT) results else results.take(SECTION_COLLAPSED_LIMIT)

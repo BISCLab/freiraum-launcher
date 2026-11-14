@@ -303,7 +303,8 @@ fun SearchOverlay(
                 Column(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
-                        .widthIn(max = com.bisc.flauncher.ui.MaxContentWidth)
+                        // Wide screens: room for two columns of cards.
+                        .widthIn(max = if (androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp >= 900) com.bisc.flauncher.ui.MaxContentWidth * 2 else com.bisc.flauncher.ui.MaxContentWidth)
                         .fillMaxSize()
                         // With the bar on top the area does not shrink with the keyboard: the results and the rail
                         // end where it will end (see KeyboardRoom), so nothing moves while it rises.

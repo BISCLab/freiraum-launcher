@@ -12,6 +12,7 @@
 - Tablet: the App list uses the whole width, with up to four apps side by side; each letter stands beside its first line, and the A-Z rail and search button sit at the screen edge
 - Tablet: the sections on the left of the settings carry their area colors, and the start page shows the extensions instead of a hint
 - Tablet: the page tiles in Pages stay small enough on a low screen to leave room for the rest
+- Tablet: in wide landscape the text search shows its cards two side by side, so more fits above the keyboard
 
 ## 0.14.5
 
