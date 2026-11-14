@@ -7,6 +7,8 @@
 - Widget size: the Save button stays in view and the sheet shows how many rows are still free on the page
 - Home: adding to a full page now asks what to do instead of failing silently
 - Page preview in the settings always shows the page in portrait
+- Widget size opens in full, so the Save button is never below the screen edge
+- Page preview on tablets shows rows and Dock as narrow and centered as on the real page
 
 ## 0.14.5
 

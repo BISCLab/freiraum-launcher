@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -144,9 +145,11 @@ fun PagePreview(
                 }
             )
 
-            Column(modifier = Modifier.fillMaxSize()) {
+            // On wide screens rows and Dock are as narrow and centered as on the real page.
+            val contentWidth = com.bisc.flauncher.ui.MaxContentWidth * scale
+            Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Column(
-                    modifier = Modifier.padding(top = (topInset + 16.dp) * scale),
+                    modifier = Modifier.widthIn(max = contentWidth).padding(top = (topInset + 16.dp) * scale),
                     verticalArrangement = Arrangement.spacedBy(PageRowDimens.rowSpacing * scale)
                 ) {
                     contentRows.forEach { row ->
@@ -160,7 +163,7 @@ fun PagePreview(
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 if (shownDock != null && dockHeight != null) {
-                    MiniDock(shownDock, entriesByRow[dock.id].orEmpty(), surfaceDark, scale, dockHeight * scale, viewModel, onClick = if (isHome) ({ navController.navigate("$base/home/layout/dock") }) else null)
+                    MiniDock(shownDock, entriesByRow[dock.id].orEmpty(), surfaceDark, scale, dockHeight * scale, viewModel, contentWidth, onClick = if (isHome) ({ navController.navigate("$base/home/layout/dock") }) else null)
                 }
             }
             // The Panel lies over the page, pulled down on demand; shown as its edge, taking no room.
@@ -292,13 +295,14 @@ private fun MiniPanelEdge(panel: PageRow, surfaceDark: Boolean, onClick: (() -> 
 
 /** The Dock with its real icons. */
 @Composable
-private fun MiniDock(dock: PageRow, entries: List<RowEntry>, surfaceDark: Boolean, scale: Float, height: Dp, viewModel: HomeViewModel, onClick: (() -> Unit)?) {
+private fun MiniDock(dock: PageRow, entries: List<RowEntry>, surfaceDark: Boolean, scale: Float, height: Dp, viewModel: HomeViewModel, maxWidth: Dp, onClick: (() -> Unit)?) {
     val appearance = dock.appearance()
     val colors = resolveElementColors(appearance, surfaceDark)
     val radius = miniRadius(dock.cornerRadiusPercent)
     val shape = RoundedCornerShape(topStart = radius, topEnd = radius)
     Box(
         modifier = Modifier
+            .widthIn(max = maxWidth)
             .fillMaxWidth()
             // Its real height, the navigation bar under it included.
             .height(height)

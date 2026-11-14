@@ -310,9 +310,12 @@ internal fun WidgetSizeSheet(
     /** Row units still free on the page; null = not known. */
     freeUnits: Int? = null
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    // Opened in full at once: half open on a tall screen, Save would lie below the edge.
+    val sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val maxHeight = (androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp * 0.85f).dp
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         // The preview scrolls; the room left and Save stay in view below it, however tall it is.
-        Column(modifier = Modifier.fillMaxWidth().heightIn(max = 640.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().heightIn(max = minOf(640.dp, maxHeight)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(
                 modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
