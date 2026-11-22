@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.home.widgets
 
+import com.bisc.flauncher.ui.touchTarget
+import com.bisc.flauncher.ui.softened
 import android.media.session.PlaybackState
 import android.os.SystemClock
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -119,10 +121,10 @@ fun MusicWidget(
                     .clickable { com.bisc.flauncher.util.openNotificationAccessSettings(context) },
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.AutoMirrored.Filled.QueueMusic, contentDescription = null, tint = LocalContentColor.current.copy(alpha = 0.6f))
+                Icon(Icons.AutoMirrored.Filled.QueueMusic, contentDescription = null, tint = LocalContentColor.current.softened(0.6f))
                 Text(
                     stringResource(R.string.widget_music_enable_access),
-                    color = LocalContentColor.current.copy(alpha = 0.6f),
+                    color = LocalContentColor.current.softened(0.6f),
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
@@ -268,8 +270,8 @@ private fun ProgressRow(info: NowPlayingInfo, position: Long, viewModel: HomeVie
             if (seekable) drawCircle(color = ink, radius = thumb, center = androidx.compose.ui.geometry.Offset(filledEnd, y))
         }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(formatTime(shownMillis), style = MaterialTheme.typography.labelMedium, color = ink.copy(alpha = 0.7f))
-            Text(formatTime(info.durationMs), style = MaterialTheme.typography.labelMedium, color = ink.copy(alpha = 0.7f))
+            Text(formatTime(shownMillis), style = MaterialTheme.typography.labelMedium, color = ink.softened(0.7f))
+            Text(formatTime(info.durationMs), style = MaterialTheme.typography.labelMedium, color = ink.softened(0.7f))
         }
     }
 }
@@ -295,7 +297,7 @@ private fun PlayPauseButton(info: NowPlayingInfo, viewModel: HomeViewModel, size
 
 @Composable
 private fun CustomActionIcon(action: com.bisc.flauncher.data.model.NowPlayingCustomAction, onClick: () -> Unit) {
-    IconButton(onClick = onClick, modifier = Modifier.size(40.dp)) {
+    IconButton(onClick = onClick, modifier = Modifier.size(40.dp.touchTarget())) {
         val bitmap = action.icon?.asImageBitmap()
         if (bitmap != null) Icon(bitmap, contentDescription = action.name, modifier = Modifier.size(22.dp))
         else Text(action.name.take(2), style = MaterialTheme.typography.labelMedium)
@@ -321,7 +323,7 @@ private fun FullPlayer(info: NowPlayingInfo, viewModel: HomeViewModel, height: D
                     Text(
                         info.appLabel,
                         style = if (large) typography.titleSmall else typography.labelLarge,
-                        color = LocalContentColor.current.copy(alpha = 0.5f),
+                        color = LocalContentColor.current.softened(0.5f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -335,7 +337,7 @@ private fun FullPlayer(info: NowPlayingInfo, viewModel: HomeViewModel, height: D
                 if (info.artist.isNotBlank()) {
                     Text(
                         info.artist,
-                        color = LocalContentColor.current.copy(alpha = 0.7f),
+                        color = LocalContentColor.current.softened(0.7f),
                         maxLines = 1,
                         modifier = Modifier.basicMarquee(),
                         style = if (large) typography.titleLarge else typography.titleMedium
@@ -344,7 +346,7 @@ private fun FullPlayer(info: NowPlayingInfo, viewModel: HomeViewModel, height: D
                 if (info.album.isNotBlank()) {
                     Text(
                         info.album,
-                        color = LocalContentColor.current.copy(alpha = 0.5f),
+                        color = LocalContentColor.current.softened(0.5f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         style = if (large) typography.titleMedium else typography.bodyMedium
@@ -415,17 +417,17 @@ private fun CompactPlayer(info: NowPlayingInfo, viewModel: HomeViewModel) {
                 )
                 Text(
                     info.artist,
-                    color = LocalContentColor.current.copy(alpha = 0.6f),
+                    color = LocalContentColor.current.softened(0.6f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-            IconButton(onClick = viewModel::skipPrevious, modifier = Modifier.size(32.dp)) {
+            IconButton(onClick = viewModel::skipPrevious, modifier = Modifier.size(32.dp.touchTarget())) {
                 Icon(Icons.Filled.SkipPrevious, contentDescription = stringResource(R.string.widget_music_previous))
             }
             Box(modifier = Modifier.padding(horizontal = 8.dp)) { PlayPauseButton(info, viewModel, 36.dp) }
-            IconButton(onClick = viewModel::skipNext, modifier = Modifier.size(32.dp)) {
+            IconButton(onClick = viewModel::skipNext, modifier = Modifier.size(32.dp.touchTarget())) {
                 Icon(Icons.Filled.SkipNext, contentDescription = stringResource(R.string.widget_music_next))
             }
         }

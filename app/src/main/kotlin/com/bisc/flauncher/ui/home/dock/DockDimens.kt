@@ -47,6 +47,16 @@ object DockDimens {
         return topPadding + innerVerticalPadding + rowContent * rows + rowGap * (rows - 1).coerceAtLeast(0)
     }
     val barHeight = iconSize + innerVerticalPadding * 2
+
+    /** How much larger Dock and Panel icons are drawn in the accessibility mode. Only what is drawn
+     *  grows: a page's room is still counted with [height], so turning the mode on never moves rows. */
+    val accessibilityExtra: Dp get() = if (com.bisc.flauncher.ui.AccessibilityMode.on) 12.dp else 0.dp
+
+    /** The icon size as drawn. */
+    val shownIconSize: Dp get() = iconSize + accessibilityExtra
+
+    /** The Dock's height as drawn: [height] plus the larger icons of the accessibility mode. */
+    fun shownHeight(row: PageRow): Dp = height(row) + accessibilityExtra * row.dockRows().size
     // Extra height a pill bar needs to fit a caption line under each icon (PageRow.showLabels) - 
     // only relevant to PillRow's own fixed-height Box; PillRowEntries used directly inside a
     // naturally-sizing container (the live dock's DockPanelSurface, a settings preview) just grows.

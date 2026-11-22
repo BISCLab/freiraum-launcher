@@ -121,7 +121,7 @@ fun AlphabetIndex(
                             .padding(vertical = 1.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(entry.label(), style = MaterialTheme.typography.labelSmall, color = railColors.text)
+                        Text(entry.label(), style = if (com.bisc.flauncher.ui.AccessibilityMode.on) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall, color = railColors.text)
                     }
                 }
             }

@@ -125,7 +125,7 @@ fun PagePreview(
         androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
         androidx.compose.foundation.layout.WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
     ).takeIf { it > 0.dp } ?: STATUS_BAR
-    val dockHeight = shownDock?.let { com.bisc.flauncher.ui.home.dock.DockDimens.height(it) + navBar }
+    val dockHeight = shownDock?.let { com.bisc.flauncher.ui.home.dock.DockDimens.shownHeight(it) + navBar }
     val bottomReserve = dockHeight?.let { it + PageRowDimens.rowSpacing } ?: (navBar + 16.dp)
     val unit = PageRowDimens.stretchedUnit(screenHeight - topInset - 16.dp - bottomReserve, unitCounts[pageId] ?: 0)
 

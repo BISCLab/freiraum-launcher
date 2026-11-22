@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.ui.accessibleOutline
 import androidx.compose.foundation.layout.width
 import com.bisc.flauncher.ui.theme.current
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -699,6 +700,7 @@ fun SettingsTileGrid(tiles: List<SettingsTile>, columns: Int = 2, title: String?
                         modifier = Modifier
                             .clip(SettingsCardShape)
                             .background(MaterialTheme.colorScheme.surfaceContainer)
+                            .accessibleOutline(SettingsCardShape)
                             .clickable(onClick = tile.onClick)
                             .padding(horizontal = if (small) 10.dp else 14.dp, vertical = if (compact) 10.dp else if (small) 14.dp else 16.dp),
                         horizontalAlignment = if (small) Alignment.CenterHorizontally else Alignment.Start,

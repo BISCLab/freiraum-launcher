@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home
 
+import com.bisc.flauncher.ui.forAppName
 import android.content.ComponentName
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -731,7 +732,7 @@ fun PillRow(
         val barShape = remember(row.cornerRadiusPercent) {
             com.bisc.flauncher.ui.theme.PartCornerShape(row.cornerRadiusPercent)
         }
-        val barHeight = if (row.showLabels) DockDimens.barHeight + DockDimens.labelExtraHeight else DockDimens.barHeight
+        val barHeight = (if (row.showLabels) DockDimens.barHeight + DockDimens.labelExtraHeight else DockDimens.barHeight) + DockDimens.accessibilityExtra
 
         Box(
             modifier = Modifier
@@ -808,7 +809,7 @@ fun PillRowEntries(
         entries.forEach { entry ->
             key(entry.id) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(modifier = Modifier.size(DockDimens.iconSize).clip(itemShape), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.size(DockDimens.shownIconSize).clip(itemShape), contentAlignment = Alignment.Center) {
                     when (entry.type) {
                         GridItemType.APP -> {
                             val componentName = remember(entry.payload) { ComponentName.unflattenFromString(entry.payload) }
@@ -827,7 +828,7 @@ fun PillRowEntries(
                                 // An app's own size, relative to the size for all apps; never past its place.
                                 val resolver = LocalIconSizeResolver.current
                                 val ownScale = resolver?.let { (it(entry.payload) / it("").coerceAtLeast(0.01f)).coerceAtMost(1f) } ?: 1f
-                                if (bitmap != null) Image(bitmap = bitmap, contentDescription = label, modifier = Modifier.size(DockDimens.iconSize * ownScale))
+                                if (bitmap != null) Image(bitmap = bitmap, contentDescription = label, modifier = Modifier.size(DockDimens.shownIconSize * ownScale))
                                 else Icon(imageVector = unsetAppSlotIcon, contentDescription = null, tint = Color.White)
                             }
                         }
@@ -878,7 +879,7 @@ fun PillRowEntries(
                                 modifier = Modifier.fillMaxSize().background(background)
                                     .clickable(enabled = page != null) { page?.let { onOpenPageLink(it.id, it.kind) } },
                                 contentAlignment = Alignment.Center
-                            ) { PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(DockDimens.iconSize * 0.55f)) }
+                            ) { PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(DockDimens.shownIconSize * 0.55f)) }
                         }
                         GridItemType.CONTACT -> {
                             val contactId = remember(entry.payload) { entry.payload.toLongOrNull() }
@@ -892,7 +893,7 @@ fun PillRowEntries(
                                         contactId = contact.contactId,
                                         photoUri = contact.photoUri,
                                         loadPhoto = loadContactPhoto,
-                                        size = DockDimens.iconSize
+                                        size = DockDimens.shownIconSize
                                     )
                                 } else {
                                     Icon(imageVector = Icons.Filled.Person, contentDescription = null, tint = Color.White)
@@ -924,7 +925,7 @@ fun PillRowEntries(
                     GridLabel(
                         text = entryLabel(entry, folders, savedMapTargets, pinnedWebsites, pages, pinnedContacts, resolveLabel, actionButtons),
                         color = labelColor,
-                        modifier = Modifier.width(DockDimens.iconSize)
+                        modifier = Modifier.width(DockDimens.shownIconSize)
                     )
                 }
                 }
@@ -936,7 +937,7 @@ fun PillRowEntries(
                 key("empty_$slotIndex") {
                     Box(
                         modifier = Modifier
-                            .size(DockDimens.iconSize)
+                            .size(DockDimens.shownIconSize)
                             .clip(itemShape)
                             .background(UNSET_APP_SLOT_COLOR)
                             .clickable { onAddEmptySlot(slotIndex) },
@@ -956,7 +957,7 @@ private fun GridLabel(text: String, color: Color = Color.White, modifier: Modifi
         overflow = TextOverflow.Ellipsis,
         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
         modifier = modifier,
-        style = MaterialTheme.typography.labelSmall.copy(color = color)
+        style = MaterialTheme.typography.labelSmall.copy(color = color).forAppName()
     )
 }
 

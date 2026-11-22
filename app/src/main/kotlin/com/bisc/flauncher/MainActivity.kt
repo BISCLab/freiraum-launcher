@@ -152,7 +152,9 @@ class MainActivity : ComponentActivity() {
             val menuAppearance by settingsVm.menuAppearance.collectAsState()
             val menuCorner by settingsVm.menuCornerPercent.collectAsState()
             val chosenMotion by settingsVm.motionLevel.collectAsState()
-            val motionPrefs by settingsVm.motionPrefs.collectAsState()
+            val savedMotionPrefs by settingsVm.motionPrefs.collectAsState()
+            // The accessibility mode leaves out the purely decorative motion; the saved choices stay as they are.
+            val motionPrefs = if (accessibilityMode) savedMotionPrefs.copy(pageDepth = false, gestureRipples = false, logoShape = false) else savedMotionPrefs
             val designEffects by settingsVm.designEffects.collectAsState()
             // Android's "Remove animations" wins over the launcher's own choice; re-read on every return.
             var systemAnimationsOff by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(com.bisc.flauncher.ui.systemAnimationsOff(this)) }

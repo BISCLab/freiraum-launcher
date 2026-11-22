@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.ui.accessibleOutline
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.automirrored.filled.List
@@ -304,7 +305,7 @@ fun SettingsPreferenceGroup(title: String? = null, info: String? = null, content
             SettingsGroupLabel(title, info = info)
         }
         Column(
-            modifier = Modifier.clip(SettingsCardShape),
+            modifier = Modifier.accessibleOutline(SettingsCardShape).clip(SettingsCardShape),
             verticalArrangement = Arrangement.spacedBy(2.dp),
             content = content
         )

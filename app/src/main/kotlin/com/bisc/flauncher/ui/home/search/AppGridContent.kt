@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.search
 
+import com.bisc.flauncher.ui.forAppName
 import com.bisc.flauncher.ui.home.notificationDot
 import androidx.compose.foundation.layout.widthIn
 import android.content.ComponentName
@@ -272,7 +273,7 @@ private fun AppGridCell(
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
                 color = labelColor,
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelSmall.forAppName(),
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)
             )
         }

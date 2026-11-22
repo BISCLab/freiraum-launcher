@@ -52,7 +52,8 @@ import com.bisc.flauncher.ui.theme.designGlow
 import kotlin.math.roundToInt
 
 /** The rail is as slim as the App list's A-Z rail. */
-val SEARCH_RAIL_WIDTH = 28.dp
+/** Wider in the accessibility mode, with larger symbols that are easier to hit. */
+val SEARCH_RAIL_WIDTH: androidx.compose.ui.unit.Dp get() = if (com.bisc.flauncher.ui.AccessibilityMode.on) 36.dp else 28.dp
 /** Between the rail and the result cards. */
 val SEARCH_RAIL_GAP = 10.dp
 private val RAIL_SLOT = 40.dp
@@ -253,7 +254,7 @@ fun SearchCategoryRail(
                 Box(
                     modifier = Modifier.size(36.dp).clip(CircleShape).background(color.copy(alpha = 0.2f)),
                     contentAlignment = Alignment.Center
-                ) { Icon(category.shownIcon(), contentDescription = null, tint = color, modifier = Modifier.size(22.dp)) }
+                ) { Icon(category.shownIcon(), contentDescription = null, tint = color, modifier = Modifier.size(if (com.bisc.flauncher.ui.AccessibilityMode.on) 26.dp else 22.dp)) }
                 Text(
                     stringResource(category.filterLabelRes),
                     style = MaterialTheme.typography.titleSmall,

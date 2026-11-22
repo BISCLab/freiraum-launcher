@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.widgets
 
+import com.bisc.flauncher.ui.softened
 import kotlinx.coroutines.launch
 
 import androidx.compose.foundation.background
@@ -128,7 +129,7 @@ fun NotesWidget(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Filled.EditNote, contentDescription = null, tint = LocalContentColor.current.copy(alpha = 0.8f), modifier = Modifier.padding(end = 8.dp))
+                    Icon(Icons.Filled.EditNote, contentDescription = null, tint = LocalContentColor.current.softened(0.8f), modifier = Modifier.padding(end = 8.dp))
                     Text(stringResource(R.string.widget_notes_title), style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
                     // Notes hidden from this widget, to show again - otherwise hiding would be a dead end.
                     if (hiddenNotes.isNotEmpty()) {
@@ -173,7 +174,7 @@ fun NotesWidget(
                     modifier = Modifier.fillMaxSize().combinedClickable(onClick = { editingNote = null; showEditor = true }).padding(horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(stringResource(R.string.widget_notes_empty), color = LocalContentColor.current.copy(alpha = 0.7f))
+                    Text(stringResource(R.string.widget_notes_empty), color = LocalContentColor.current.softened(0.7f))
                 }
             } else {
                 HorizontalPager(state = pagerState, userScrollEnabled = !buttons, modifier = Modifier.weight(1f).fillMaxWidth()) { page ->
@@ -266,7 +267,7 @@ private fun NoteCell(
                     Icon(
                         Icons.Filled.Checklist,
                         contentDescription = null,
-                        tint = LocalContentColor.current.copy(alpha = 0.7f),
+                        tint = LocalContentColor.current.softened(0.7f),
                         modifier = Modifier.size(16.dp).padding(end = 4.dp)
                     )
                 }

@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.dock
 
+import com.bisc.flauncher.ui.softened
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -30,6 +31,6 @@ fun ContactPhotoIcon(contactId: Long, photoUri: String?, loadPhoto: suspend (Lon
     if (loaded != null) {
         Image(bitmap = loaded, contentDescription = null, modifier = Modifier.size(size).clip(CircleShape))
     } else {
-        Icon(Icons.Filled.Person, contentDescription = null, tint = LocalContentColor.current.copy(alpha = 0.7f), modifier = Modifier.size(size))
+        Icon(Icons.Filled.Person, contentDescription = null, tint = LocalContentColor.current.softened(0.7f), modifier = Modifier.size(size))
     }
 }

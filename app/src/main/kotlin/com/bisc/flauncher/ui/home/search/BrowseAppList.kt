@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.search
 
+import com.bisc.flauncher.ui.forAppName
 import com.bisc.flauncher.ui.home.notificationDot
 import androidx.compose.runtime.collectAsState
 import com.bisc.flauncher.ui.theme.designGlow
@@ -481,7 +482,7 @@ internal fun AppBrowseRow(app: AppInfo, loadIcon: (ComponentName) -> ImageBitmap
                 menu?.Menu?.invoke()
             }
         }
-        val label = @Composable { Text(app.label) }
+        val label = @Composable { Text(app.label, style = androidx.compose.material3.LocalTextStyle.current.forAppName()) }
         if (isLeft) {
             label(); icon()
         } else {

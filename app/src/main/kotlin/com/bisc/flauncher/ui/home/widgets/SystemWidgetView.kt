@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.widgets
 
+import com.bisc.flauncher.ui.softened
 import android.appwidget.AppWidgetHostView
 import android.view.View
 import android.view.ViewGroup
@@ -87,7 +88,7 @@ fun SystemWidgetView(
             // came from a backup restored on a fresh install) - say so instead of a forever "···".
             Text(
                 if (info == null) stringResource(R.string.widget_system_unavailable) else "···",
-                color = androidx.compose.material3.LocalContentColor.current.copy(alpha = 0.6f),
+                color = androidx.compose.material3.LocalContentColor.current.softened(0.6f),
                 style = MaterialTheme.typography.bodySmall
             )
         }

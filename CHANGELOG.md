@@ -3,6 +3,7 @@
 ## Unreleased
 
 - The keyboard extension is now called Keyboard cover; its color menu has a try-out line that opens the keyboard with the cover sitting on it in the chosen color, plus the system colors many keyboards use, one tap each
+- Accessibility mode, complete: the clock and date in pure black or white with a strong halo; second lines in widgets (dates, hints, times) at full strength; Dock and Panel icons larger; app names larger and heavier; small widget buttons at least 48 dp; the category rail wider and the A-Z letters larger; no 3D page depth, gesture ripples or shape-changing logo (your saved choices stay); the settings with outlined cards and tiles and full-strength second lines
 
 ## 0.16.0
 

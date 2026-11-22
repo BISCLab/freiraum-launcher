@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.widgets
 
+import com.bisc.flauncher.ui.softened
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -102,10 +103,10 @@ fun WeatherWidget(
         val weather = snapshot
         if (weather == null) {
             Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.Cloud, contentDescription = null, tint = LocalContentColor.current.copy(alpha = 0.6f))
+                Icon(Icons.Filled.Cloud, contentDescription = null, tint = LocalContentColor.current.softened(0.6f))
                 Text(
                     stringResource(R.string.widget_weather_no_data),
-                    color = LocalContentColor.current.copy(alpha = 0.6f),
+                    color = LocalContentColor.current.softened(0.6f),
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
@@ -304,7 +305,7 @@ private fun Header(
             )
             Text(
                 conditionText,
-                color = content.copy(alpha = 0.8f),
+                color = content.softened(0.8f),
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -312,7 +313,7 @@ private fun Header(
             if (roomy && feelsLikeC != null) {
                 Text(
                     stringResource(R.string.widget_weather_feels_like, feelsLikeC.roundToInt()),
-                    color = content.copy(alpha = 0.8f),
+                    color = content.softened(0.8f),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -331,7 +332,7 @@ private fun Header(
                 }
                 Text(
                     updatedText,
-                    color = content.copy(alpha = 0.5f),
+                    color = content.softened(0.5f),
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
                     modifier = Modifier.padding(top = 2.dp)
                 )
@@ -343,7 +344,7 @@ private fun Header(
             if (compact) {
                 Text(
                     stringResource(R.string.widget_weather_minmax, weather.todayMinC.roundToInt(), weather.todayMaxC.roundToInt()),
-                    color = content.copy(alpha = 0.8f),
+                    color = content.softened(0.8f),
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(top = 4.dp)
                 )
@@ -391,7 +392,7 @@ private class DetailItem(val icon: @Composable () -> Unit, val text: String)
 
 @Composable
 private fun DetailIcon(icon: ImageVector, modifier: Modifier = Modifier) {
-    Icon(icon, contentDescription = null, tint = LocalContentColor.current.copy(alpha = 0.75f), modifier = modifier.size(14.dp))
+    Icon(icon, contentDescription = null, tint = LocalContentColor.current.softened(0.75f), modifier = modifier.size(14.dp))
 }
 
 @Composable
@@ -452,7 +453,7 @@ private fun HourSelector(
                         Text(
                             if (precip != null && precip >= 10) "$precip%" else "\u00A0",
                             style = labelStyle,
-                            color = LocalContentColor.current.copy(alpha = 0.6f),
+                            color = LocalContentColor.current.softened(0.6f),
                             softWrap = false
                         )
                     }

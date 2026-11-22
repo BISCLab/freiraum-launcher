@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.widgets
 
+import com.bisc.flauncher.ui.softened
 import android.app.AlarmManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -150,8 +151,11 @@ fun ClockWidget(
     }
 
     val surfaceDark = LocalSurfaceIsDark.current ?: (MaterialTheme.colorScheme.background.luminance() < 0.5f)
-    val ink = customInk ?: (if (surfaceDark) Color.White else ClockInkOnLight)
-    val shadow = if (surfaceDark) Shadow(Color.Black.copy(alpha = 0.6f), blurRadius = 8f)
+    // Accessibility mode: pure black or white with a strong halo, readable on any wallpaper.
+    val a11y = com.bisc.flauncher.ui.AccessibilityMode.on
+    val ink = if (a11y) (if (surfaceDark) Color.White else Color.Black) else customInk ?: (if (surfaceDark) Color.White else ClockInkOnLight)
+    val shadow = if (a11y) Shadow(if (surfaceDark) Color.Black else Color.White, blurRadius = 16f)
+    else if (surfaceDark) Shadow(Color.Black.copy(alpha = 0.6f), blurRadius = 8f)
     else Shadow(Color.White.copy(alpha = 0.35f), blurRadius = 6f)
     val dateModifier = if (onDateClick != null) Modifier.clickable(onClick = onDateClick) else Modifier
     val timeModifier = if (onTimeClick != null) Modifier.clickable(onClick = onTimeClick) else Modifier
@@ -191,7 +195,7 @@ fun ClockWidget(
                     val reserve = DATE_GAP + CAP_HEIGHT * dateFs + 8f
                     val fs = minOf((h - reserve - alarmReserve - 8f) / 1.2f, w / (if (use24h) 3.2f else 3.0f), 128f).coerceAtLeast(24f)
                     TimeText("$hourText:$minuteText", fs, FontWeight.Bold, FontFamily.Default, ink, shadow, textAlign, ::sp, timeModifier)
-                    DateText(dateText, dateFs, FontFamily.Default, FontWeight.Normal, ink.copy(alpha = 0.8f), shadow, textAlign, ::sp, dateModifier)
+                    DateText(dateText, dateFs, FontFamily.Default, FontWeight.Normal, ink.softened(0.8f), shadow, textAlign, ::sp, dateModifier)
                 }
 
                 ClockStyle.STACKED -> {
@@ -210,7 +214,7 @@ fun ClockWidget(
                         lineHeightFactor = 0.8f,
                         maxLines = 2
                     )
-                    DateText(longDateText, dateFs, FontFamily.Serif, FontWeight.Bold, ink.copy(alpha = 0.9f), shadow, textAlign, ::sp, dateModifier)
+                    DateText(longDateText, dateFs, FontFamily.Serif, FontWeight.Bold, ink.softened(0.9f), shadow, textAlign, ::sp, dateModifier)
                 }
 
                 ClockStyle.ANALOG -> {
@@ -329,7 +333,7 @@ private fun LabelDate(
         textAlign = textAlign,
         maxLines = 1,
         style = MaterialTheme.typography.labelLarge.copy(
-            color = ink.copy(alpha = 0.75f),
+            color = ink.softened(0.75f),
             letterSpacing = 2.sp,
             shadow = shadow
         )
@@ -344,13 +348,13 @@ private fun NextAlarmLine(text: String?, ink: Color) {
         Icon(
             imageVector = Icons.Filled.Alarm,
             contentDescription = null,
-            tint = ink.copy(alpha = 0.75f),
+            tint = ink.softened(0.75f),
             modifier = Modifier.size(14.dp)
         )
         Text(
             text = text,
             modifier = Modifier.padding(start = 4.dp),
-            style = MaterialTheme.typography.labelMedium.copy(color = ink.copy(alpha = 0.75f), shadow = smallShadow)
+            style = MaterialTheme.typography.labelMedium.copy(color = ink.softened(0.75f), shadow = smallShadow)
         )
     }
 }

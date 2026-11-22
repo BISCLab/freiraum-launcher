@@ -71,7 +71,10 @@ fun SettingsAreaTheme(area: SettingsArea, content: @Composable () -> Unit) {
             secondaryContainer = container, onSecondaryContainer = scheme.onSurface,
             // Hints and second lines a little stronger than the system's grey, so small text reads
             // well for everyone, also in bright light.
-            onSurfaceVariant = androidx.compose.ui.graphics.lerp(scheme.onSurfaceVariant, scheme.onSurface, 0.35f),
+            // In the accessibility mode they take the full text color.
+            onSurfaceVariant = if (com.bisc.flauncher.ui.AccessibilityMode.on) scheme.onSurface
+                else androidx.compose.ui.graphics.lerp(scheme.onSurfaceVariant, scheme.onSurface, 0.35f),
+            outline = if (com.bisc.flauncher.ui.AccessibilityMode.on) scheme.onSurface else scheme.outline,
             surfaceTint = c
         ),
         typography = MaterialTheme.typography

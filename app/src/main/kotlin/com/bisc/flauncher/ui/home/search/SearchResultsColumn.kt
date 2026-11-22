@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.search
 
+import com.bisc.flauncher.ui.forAppName
 import com.bisc.flauncher.ui.home.rememberAppIcon
 import android.content.ComponentName
 import androidx.compose.foundation.Image
@@ -452,7 +453,7 @@ private fun AppTileGrid(
                         }
                         Text(
                             text = app.label,
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MaterialTheme.typography.labelSmall.forAppName(),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             textAlign = TextAlign.Center,

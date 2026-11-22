@@ -717,7 +717,7 @@ fun HomeScreen(
             // uses below, rather than a flat generous guess - any slack here is slack the Column's
             // Arrangement.Top has to center into, pushing the top row down from the top edge.
             val dockRowShape = homeDockRow.dockRows()
-            val dockHeight = DockDimens.height(homeDockRow)
+            val dockHeight = DockDimens.shownHeight(homeDockRow)
             androidx.compose.animation.AnimatedVisibility(
                 visible = dockExpanded,
                 enter = fadeIn(tween(160)),
