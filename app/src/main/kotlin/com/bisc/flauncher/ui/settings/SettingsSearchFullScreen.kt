@@ -175,10 +175,10 @@ fun SettingsSearchKeyboardScreen(navController: NavController, onBack: () -> Uni
                 trailing = { Switch(checked = capEnabled, onCheckedChange = viewModel::setSearchKeyboardCapEnabled) }
             )
             if (capEnabled) {
-                ColorPickerRow(
-                    title = stringResource(R.string.settings_search_keyboard_cap_color),
-                    info = stringResource(R.string.settings_search_keyboard_cap_color_info),
+                KeyboardCoverColorRow(
                     color = capColor,
+                    cornerRadiusPercent = capCornerPercent,
+                    arrow = capArrow,
                     onColorChange = viewModel::setSearchKeyboardCapColor
                 )
                 SettingsPreference(

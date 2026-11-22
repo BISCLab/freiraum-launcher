@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- The keyboard extension is now called Keyboard cover; its color menu has a try-out line that opens the keyboard with the cover sitting on it in the chosen color, plus the system colors many keyboards use, one tap each
+
 ## 0.16.0
 
 - Accessibility mode (Settings > System): every element solid with a strong border and text in black or white, app icons a quarter larger, a darker backdrop instead of blur behind folders; findable in the settings search

@@ -57,7 +57,7 @@ object LauncherSettingsTargets {
         LauncherSettingsTarget(R.string.settings_search_behavior_label, "settings/search/behavior",
             listOf("suche verhalten", "kategorien", "reihenfolge", "aufbau", "search behavior", "categories", "order")),
         LauncherSettingsTarget(R.string.settings_search_keyboard_label, "settings/search/keyboard",
-            listOf("tastatur", "streifen", "keyboard", "strip")),
+            listOf("tastatur", "tastaturblende", "blende", "streifen", "keyboard", "keyboard cover", "cover", "strip")),
         LauncherSettingsTarget(R.string.settings_app_list_search_button, "settings/app_overview/search_button",
             listOf("suchbutton", "suchknopf", "search button")),
         LauncherSettingsTarget(R.string.settings_app_overview_az_index_label, "settings/app_overview/az_index",

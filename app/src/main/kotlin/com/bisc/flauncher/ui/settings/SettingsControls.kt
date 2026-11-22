@@ -487,6 +487,8 @@ fun SettingsEditPage(
     dirty: Boolean = false,
     /** Stays on top while the content below scrolls, e.g. a live preview of what is edited. */
     header: (@Composable () -> Unit)? = null,
+    /** Below the Save bar and riding on the keyboard, e.g. the keyboard cover tried on it. */
+    footer: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     var confirmLeave by remember { mutableStateOf(false) }
@@ -526,7 +528,12 @@ fun SettingsEditPage(
                     )
                 },
                 bottomBar = {
-                    if (onSave != null) SettingsSaveBar(enabled = dirty, onSave = { onSave(); onDismiss() })
+                    if (footer == null) {
+                        if (onSave != null) SettingsSaveBar(enabled = dirty, onSave = { onSave(); onDismiss() })
+                    } else Column(modifier = Modifier.imePadding()) {
+                        if (onSave != null) SettingsSaveBar(enabled = dirty, onSave = { onSave(); onDismiss() })
+                        footer()
+                    }
                 }
             ) { padding ->
                 androidx.compose.foundation.layout.Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.TopCenter) {
@@ -538,7 +545,7 @@ fun SettingsEditPage(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
-                                .imePadding()
+                                .then(if (footer == null) Modifier.imePadding() else Modifier)
                                 .verticalScroll(rememberScrollState())
                                 .padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(16.dp),
