@@ -446,13 +446,13 @@
     <string name="settings_folder_creator_selected">%1$d ausgewählt</string>
     <string name="settings_search_keyboard_auto_open">Tastatur automatisch öffnen</string>
     <string name="settings_search_page_label">Seite</string>
-    <string name="settings_search_keyboard_label">Streifen über der Tastatur</string>
+    <string name="settings_search_keyboard_label">Tastaturblende</string>
     <string name="settings_search_behavior_label">Verhalten</string>
     <string name="settings_search_results_label">Ergebniskästen</string>
     <string name="settings_search_keyboard_cap_label">Tastaturblende</string>
     <string name="settings_search_keyboard_cap_info">Eine schmale Blende mit abgerundeten Ecken direkt auf der Tastatur. In der Farbe deiner Tastatur wirkt die Tastatur oben abgerundet. Solange sie an ist, gilt sie als oberer Rand der Tastatur.</string>
     <string name="settings_search_keyboard_cap_color">Farbe</string>
-    <string name="settings_search_keyboard_cap_color_info">Tippe im Farbmenü in die Probierzeile: Die Tastatur klappt auf und die Blende sitzt in der gewählten Farbe darauf. So siehst du sofort, ob die Farbe passt. Die Systemfarben treffen viele Tastaturen genau, weil sie diese Farben selbst nutzen.</string>
+    <string name="settings_search_keyboard_cap_color_info">Tippe im Farbmenü in die Probierzeile: Die Tastatur klappt auf und die Blende sitzt in der gewählten Farbe darauf. So siehst du sofort, ob die Farbe passt. Die Systemfarben treffen viele Tastaturen genau, weil sie diese Farben selbst nutzen. Mit der Pipette nimmst du die Farbe genau aus einem Bildschirmfoto deiner Tastatur.</string>
     <string name="settings_search_keyboard_cap_arrow">Pfeil zum Schließen</string>
     <string name="settings_search_keyboard_cap_arrow_info">Zeigt einen kleinen Pfeil in der Blende. Tippen auf die Blende klappt die Tastatur ein; Zurückwischen funktioniert weiterhin wie gewohnt.</string>
     <string name="settings_keyboard_cover_try">Hier tippen: Tastatur aufklappen</string>
@@ -588,7 +588,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_app_grid_bar_text_search">Stattdessen Textsuche öffnen</string>
     <string name="settings_app_grid_bar_text_search_info">Ein Tipp auf das Feld öffnet die volle Textsuche, statt das Raster zu filtern.</string>
     <string name="settings_app_grid_keyboard">Tastatur sofort öffnen</string>
-    <string name="settings_app_grid_keyboard_info">Die Blende über der Tastatur folgt den Einstellungen der Textsuche.</string>
+    <string name="settings_app_grid_keyboard_info">Die Tastaturblende folgt den Einstellungen der Textsuche.</string>
     <string name="settings_app_grid_folders">Ordner</string>
     <string name="settings_app_grid_folders_info">Wähle, welche deiner Ordner im Raster erscheinen.</string>
     <string name="settings_app_grid_folders_empty">Noch keine Ordner</string>
@@ -794,7 +794,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_page_search_description">Ein Feld für alles: Apps, Kontakte, Orte, Links, Einstellungen und mehr, und was nicht auf dem Handy ist, geht weiter an Suchmaschine, Karten oder KI-App.</string>
     <string name="settings_hub_appearance_what">Wie es aussieht</string>
     <string name="settings_hub_behavior_what">Was es tut</string>
-    <string name="settings_hub_search_appearance">Seite, Suchfeld, Kategorienleiste, Ergebnisse, Streifen über der Tastatur</string>
+    <string name="settings_hub_search_appearance">Seite, Suchfeld, Kategorienleiste, Ergebnisse, Tastaturblende</string>
     <string name="settings_hub_search_behavior">Aufbau, Kategorien und ihre Reihenfolge, Suchmaschinen, KI-Apps, Favoriten</string>
     <string name="settings_hub_app_list_appearance">Seite, Buchstaben, A–Z-Leiste, Suchbutton, Suchfeld</string>
     <string name="settings_hub_app_list_behavior">Rand, was angezeigt wird, eigene Suche</string>
@@ -905,7 +905,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_widgets_weather_note">Das Wetter-Widget ist schon dabei. Seine Daten kommen im Moment von Breezy Weather über die Gadgetbridge-Weitergabe. Weitere Wetterquellen sind in Arbeit.</string>
     <string name="welcome_shape_part_category_rail">Kategorienleiste (Textsuche)</string>
     <string name="welcome_shape_part_widget_arrows">Pfeiltasten in Widgets</string>
-    <string name="welcome_shape_part_keyboard_strip">Streifen über der Tastatur</string>
+    <string name="welcome_shape_part_keyboard_strip">Tastaturblende</string>
     <string name="settings_icon_size_dock_note">Im Dock kann ein Symbol kleiner werden, aber nicht größer als sein Platz.</string>
     <string name="settings_manage_apps_visibility_app_grid_label">App-Raster</string>
     <string name="settings_page_dock_panel_label">Dock und Panel</string>
@@ -1069,4 +1069,11 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_gesture_two_up">Zwei Finger nach oben</string>
     <string name="settings_gesture_two_down">Zwei Finger nach unten</string>
     <string name="settings_gesture_pinch_in">Zusammenziehen</string>
+    <string name="settings_keyboard_cover_pipette">Pipette</string>
+    <string name="settings_keyboard_cover_pipette_info">Die Tastatur gehört zu einer anderen App, ihre Farbe kann der Launcher nicht direkt vom Bildschirm lesen. So geht es trotzdem genau: Oben in die Probierzeile tippen, mit Ein- und Leiser-Taste ein Bildschirmfoto machen, dann hier das Foto wählen und auf die Tastatur tippen.</string>
+    <string name="settings_keyboard_cover_pipette_pick">Farbe aus Bildschirmfoto</string>
+    <string name="settings_screenshot_picker_hint">Tippe auf die Tastatur oder fahre mit dem Finger darüber. Der Kreis zeigt die Farbe.</string>
+    <string name="settings_screenshot_picker_failed">Das Bild ließ sich nicht öffnen.</string>
+    <string name="settings_screenshot_picker_take">Übernehmen</string>
+    <string name="settings_search_keyboard_group">Tastatur</string>
 </resources>

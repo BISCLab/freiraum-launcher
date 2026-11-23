@@ -446,15 +446,15 @@
     <string name="settings_folder_creator_selected">%1$d selected</string>
     <string name="settings_search_keyboard_auto_open">Open keyboard automatically</string>
     <string name="settings_search_page_label">Page</string>
-    <string name="settings_search_keyboard_label">Strip over the keyboard</string>
+    <string name="settings_search_keyboard_label">Keyboard bezel</string>
     <string name="settings_search_behavior_label">Behavior</string>
     <string name="settings_search_results_label">Result cards</string>
-    <string name="settings_search_keyboard_cap_label">Keyboard cover</string>
-    <string name="settings_search_keyboard_cap_info">A slim cover with rounded corners right on top of the keyboard. In your keyboard\'s color it gives the keyboard rounded top corners. While it is on, it counts as the top edge of the keyboard.</string>
+    <string name="settings_search_keyboard_cap_label">Keyboard bezel</string>
+    <string name="settings_search_keyboard_cap_info">A slim bezel with rounded corners right on top of the keyboard. In your keyboard\'s color it gives the keyboard rounded top corners. While it is on, it counts as the top edge of the keyboard.</string>
     <string name="settings_search_keyboard_cap_color">Color</string>
-    <string name="settings_search_keyboard_cap_color_info">In the color menu, tap the try-out line: the keyboard opens and the cover sits on it in the chosen color, so you see at once whether it matches. The system colors match many keyboards exactly, as they use these colors themselves.</string>
+    <string name="settings_search_keyboard_cap_color_info">In the color menu, tap the try-out line: the keyboard opens and the bezel sits on it in the chosen color, so you see at once whether it matches. The system colors match many keyboards exactly, as they use these colors themselves. The eyedropper takes the exact color from a screenshot of your keyboard.</string>
     <string name="settings_search_keyboard_cap_arrow">Close arrow</string>
-    <string name="settings_search_keyboard_cap_arrow_info">Shows a small arrow in the cover. Tapping the cover closes the keyboard; swiping back still works as before.</string>
+    <string name="settings_search_keyboard_cap_arrow_info">Shows a small arrow in the bezel. Tapping the bezel closes the keyboard; swiping back still works as before.</string>
     <string name="settings_keyboard_cover_try">Tap here to open the keyboard</string>
     <string name="settings_keyboard_cover_system_colors">System colors</string>
     <string name="settings_keyboard_cover_system_colors_info">Many keyboards take on the system colors. Tap one and compare it with the open keyboard.</string>
@@ -588,7 +588,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_app_grid_bar_text_search">Open Text search instead</string>
     <string name="settings_app_grid_bar_text_search_info">Tapping the field opens the full Text search instead of filtering the grid.</string>
     <string name="settings_app_grid_keyboard">Open keyboard right away</string>
-    <string name="settings_app_grid_keyboard_info">The strip above the keyboard follows the Text search settings.</string>
+    <string name="settings_app_grid_keyboard_info">The keyboard bezel follows the Text search settings.</string>
     <string name="settings_app_grid_folders">Folders</string>
     <string name="settings_app_grid_folders_info">Choose which of your folders appear in the grid.</string>
     <string name="settings_app_grid_folders_empty">No folders yet</string>
@@ -794,7 +794,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_page_search_description">One field for everything: apps, contacts, places, links, settings and more, and whatever is not on the phone goes on to your search engine, maps or AI app.</string>
     <string name="settings_hub_appearance_what">How it looks</string>
     <string name="settings_hub_behavior_what">What it does</string>
-    <string name="settings_hub_search_appearance">Page, search field, category rail, results, strip over the keyboard</string>
+    <string name="settings_hub_search_appearance">Page, search field, category rail, results, keyboard bezel</string>
     <string name="settings_hub_search_behavior">Layout, categories and their order, search engines, AI apps, favorites</string>
     <string name="settings_hub_app_list_appearance">Page, letters, A-Z rail, search button, search field</string>
     <string name="settings_hub_app_list_behavior">Edge, what is shown, its own search</string>
@@ -905,7 +905,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_widgets_weather_note">The Weather widget is already included. For now its data comes from Breezy Weather through its Gadgetbridge sharing. More weather sources are in the works.</string>
     <string name="welcome_shape_part_category_rail">Category rail (Text search)</string>
     <string name="welcome_shape_part_widget_arrows">Arrows in widgets</string>
-    <string name="welcome_shape_part_keyboard_strip">Strip over the keyboard</string>
+    <string name="welcome_shape_part_keyboard_strip">Keyboard bezel</string>
     <string name="settings_icon_size_dock_note">In the Dock an icon can get smaller, but not bigger than its place.</string>
     <string name="settings_manage_apps_visibility_app_grid_label">App grid</string>
     <string name="settings_page_dock_panel_label">Dock and Panel</string>
@@ -1069,4 +1069,11 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_gesture_two_up">Two fingers up</string>
     <string name="settings_gesture_two_down">Two fingers down</string>
     <string name="settings_gesture_pinch_in">Pinch in</string>
+    <string name="settings_keyboard_cover_pipette">Eyedropper</string>
+    <string name="settings_keyboard_cover_pipette_info">The keyboard belongs to another app, so the launcher can\'t read its color off the screen. This way it is still exact: tap into the try-out line above, take a screenshot with the power and volume-down keys, then choose it here and tap on the keyboard.</string>
+    <string name="settings_keyboard_cover_pipette_pick">Color from a screenshot</string>
+    <string name="settings_screenshot_picker_hint">Tap on the keyboard or move your finger over it. The ring shows the color.</string>
+    <string name="settings_screenshot_picker_failed">The picture could not be opened.</string>
+    <string name="settings_screenshot_picker_take">Use</string>
+    <string name="settings_search_keyboard_group">Keyboard</string>
 </resources>

@@ -3,6 +3,9 @@
 ## Unreleased
 
 - Settings lock: Unlock works; where the fingerprint question is not available, the screen lock (PIN, pattern or password) is asked instead
+- "Keyboard does not learn" moved to Search > Behavior, into a Keyboard group with "Keyboard opens by itself"
+- The strip over the keyboard is called Keyboard bezel everywhere (formerly Keyboard cover)
+- Keyboard bezel: an eyedropper takes the exact color from a screenshot of your keyboard
 
 ## 0.17.0
 

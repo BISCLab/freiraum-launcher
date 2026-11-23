@@ -1,6 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.material.icons.filled.Colorize
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -57,6 +58,10 @@ private fun KeyboardCoverColorEditor(color: Int, cornerRadiusPercent: Int, arrow
     var pickerGeneration by remember { mutableIntStateOf(0) }
     var tryText by remember { mutableStateOf("") }
     val systemColors = rememberSystemKeyboardColors()
+    var screenshot by remember { mutableStateOf<android.net.Uri?>(null) }
+    val pickScreenshot = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia()
+    ) { uri -> if (uri != null) screenshot = uri }
     SettingsEditPage(
         title = stringResource(R.string.settings_search_keyboard_cap_label),
         onDismiss = onDismiss,
@@ -74,6 +79,22 @@ private fun KeyboardCoverColorEditor(color: Int, cornerRadiusPercent: Int, arrow
             shape = SettingsCardShape,
             modifier = Modifier.fillMaxWidth()
         )
+        Text(stringResource(R.string.settings_keyboard_cover_pipette), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+        Text(stringResource(R.string.settings_keyboard_cover_pipette_info), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        androidx.compose.material3.FilledTonalButton(
+            onClick = {
+                pickScreenshot.launch(
+                    androidx.activity.result.PickVisualMediaRequest(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+            }
+        ) {
+            androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Filled.Colorize, contentDescription = null, modifier = Modifier.size(18.dp))
+            androidx.compose.foundation.layout.Spacer(Modifier.size(8.dp))
+            Text(stringResource(R.string.settings_keyboard_cover_pipette_pick))
+        }
+        screenshot?.let { uri ->
+            ScreenshotColorPicker(uri = uri, onPick = { draft = it; pickerGeneration++ }, onDismiss = { screenshot = null })
+        }
         if (systemColors.isNotEmpty()) {
             Text(stringResource(R.string.settings_keyboard_cover_system_colors), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
             Text(stringResource(R.string.settings_keyboard_cover_system_colors_info), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

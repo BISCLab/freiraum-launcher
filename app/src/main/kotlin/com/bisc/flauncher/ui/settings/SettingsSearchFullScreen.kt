@@ -164,18 +164,8 @@ fun SettingsSearchKeyboardScreen(navController: NavController, onBack: () -> Uni
     val capColor by viewModel.searchKeyboardCapColor.collectAsState()
     val capCornerPercent by viewModel.searchKeyboardCapCornerRadiusPercent.collectAsState()
     val capArrow by viewModel.searchKeyboardCapArrow.collectAsState()
-    val noLearning by viewModel.searchKeyboardNoLearning.collectAsState()
 
     SettingsSubScreen(title = stringResource(R.string.settings_search_keyboard_label), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_keyboard_privacy_label)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_keyboard_no_learning),
-                summary = stringResource(R.string.settings_keyboard_no_learning_summary),
-                onClick = { viewModel.setSearchKeyboardNoLearning(!noLearning) },
-                trailing = { Switch(checked = noLearning, onCheckedChange = viewModel::setSearchKeyboardNoLearning) }
-            )
-        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_search_keyboard_cap_label)) {
             SettingsPreference(
                 icon = null,
@@ -219,6 +209,7 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
     val categoryColors by viewModel.categoryColors.collectAsState()
     val barAtBottom by viewModel.searchBarAtBottom.collectAsState()
     val keyboardAutoOpen by viewModel.searchKeyboardAutoOpen.collectAsState()
+    val noLearning by viewModel.searchKeyboardNoLearning.collectAsState()
     val railLeft by viewModel.searchCategoryRailLeft.collectAsState()
     var pickingColorFor by remember { mutableStateOf<SearchCategory?>(null) }
     SettingsSubScreen(title = stringResource(R.string.settings_search_behavior_label), navController = navController, onBack = onBack) {
@@ -250,13 +241,6 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
                 onSelect = viewModel::setSearchBarAtBottom,
                 info = stringResource(R.string.settings_search_field_position_info)
             )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_keyboard_auto_open),
-                info = stringResource(R.string.settings_search_keyboard_auto_open_summary),
-                onClick = { viewModel.setSearchKeyboardAutoOpen(!keyboardAutoOpen) },
-                trailing = { Switch(checked = keyboardAutoOpen, onCheckedChange = viewModel::setSearchKeyboardAutoOpen) }
-            )
             // The whole rail: switched off, no category has a place in it.
             SettingsPreference(
                 icon = null,
@@ -274,6 +258,22 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
                     onSelect = viewModel::setSearchCategoryRailLeft
                 )
             }
+        }
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_search_keyboard_group)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_search_keyboard_auto_open),
+                info = stringResource(R.string.settings_search_keyboard_auto_open_summary),
+                onClick = { viewModel.setSearchKeyboardAutoOpen(!keyboardAutoOpen) },
+                trailing = { Switch(checked = keyboardAutoOpen, onCheckedChange = viewModel::setSearchKeyboardAutoOpen) }
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_keyboard_no_learning),
+                summary = stringResource(R.string.settings_keyboard_no_learning_summary),
+                onClick = { viewModel.setSearchKeyboardNoLearning(!noLearning) },
+                trailing = { Switch(checked = noLearning, onCheckedChange = viewModel::setSearchKeyboardNoLearning) }
+            )
         }
 
         Column {
