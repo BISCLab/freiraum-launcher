@@ -37,6 +37,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -64,7 +67,7 @@ fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, vie
 /** The gestures phone with every marker tappable, and the pickers that set what a gesture does.
  *  Shared by the gestures settings and the welcome tour. */
 @Composable
-internal fun EditableGesturePhone(viewModel: SettingsViewModel, widthFraction: Float = 0.82f) {
+internal fun EditableGesturePhone(viewModel: SettingsViewModel, widthFraction: Float = 0.92f) {
     val gestureActions by viewModel.gestureActions.collectAsState()
     // Unfiltered - a gesture already bound to an app keeps showing its.
     val labeledApps by viewModel.labeledApps.collectAsState()
@@ -225,6 +228,14 @@ internal fun gestureLabel(gesture: HomeGesture): String = when (gesture) {
     HomeGesture.PINCH_IN -> stringResource(R.string.settings_gesture_pinch_in)
 }
 
+/** The gesture's name inside the phone, where the column already says one or two fingers. */
+@Composable
+private fun gestureShortLabel(gesture: HomeGesture): String = when (gesture) {
+    HomeGesture.TWO_FINGER_SWIPE_UP -> stringResource(R.string.settings_gesture_swipe_up)
+    HomeGesture.TWO_FINGER_SWIPE_DOWN -> stringResource(R.string.settings_gesture_swipe_down)
+    else -> gestureLabel(gesture)
+}
+
 @Composable
 internal fun gestureActionTypeLabel(type: GestureActionType): String = when (type) {
     GestureActionType.NONE -> stringResource(R.string.settings_gesture_action_none)
@@ -255,49 +266,71 @@ internal fun gestureActionSummary(action: GestureAction, pages: List<LauncherPag
 /** What one gesture's marker on [GesturePhone] shows. */
 internal data class GestureMarker(val summary: String, val enabled: Boolean)
 
-/** A phone outline with the four home gestures marked where they happen: swipe down at the top,
- *  double tap and long press in the middle, swipe up at the bottom. */
+/** A phone with every home gesture marked where it happens: one finger on the left, two fingers on
+ *  the right, side by side by direction. Swiping down at the top, tapping and pinching in the
+ *  middle, swiping up at the bottom. */
 @Composable
-internal fun GesturePhone(markers: Map<HomeGesture, GestureMarker>, onEdit: (HomeGesture) -> Unit, widthFraction: Float = 0.82f) {
+internal fun GesturePhone(markers: Map<HomeGesture, GestureMarker>, onEdit: (HomeGesture) -> Unit, widthFraction: Float = 0.92f) {
     Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
         Column(
             modifier = Modifier
                 .fillMaxWidth(widthFraction)
-                .aspectRatio(0.52f)
                 .clip(RoundedCornerShape(40.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainer)
                 .border(3.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(40.dp))
-                .padding(horizontal = 16.dp, vertical = 20.dp),
+                .padding(horizontal = 12.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             // The camera hole, so it reads as a phone at a glance.
             Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(MaterialTheme.colorScheme.outline))
-            GestureMarkerChip(HomeGesture.SWIPE_DOWN, Icons.Filled.ArrowDownward, markers, onEdit)
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                GestureMarkerChip(HomeGesture.DOUBLE_TAP, Icons.Filled.TouchApp, markers, onEdit)
-                GestureMarkerChip(HomeGesture.LONG_PRESS, Icons.Filled.TouchApp, markers, onEdit)
-            }
-            GestureMarkerChip(HomeGesture.SWIPE_UP, Icons.Filled.ArrowUpward, markers, onEdit)
+            GesturePair(
+                left = { GestureMarkerChip(HomeGesture.SWIPE_DOWN, Icons.Filled.ArrowDownward, markers, onEdit, it) },
+                right = { GestureMarkerChip(HomeGesture.TWO_FINGER_SWIPE_DOWN, Icons.Filled.SwipeDown, markers, onEdit, it) },
+                header = true
+            )
+            Spacer(Modifier.height(36.dp))
+            GesturePair(
+                left = { modifier ->
+                    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        GestureMarkerChip(HomeGesture.DOUBLE_TAP, Icons.Filled.TouchApp, markers, onEdit, Modifier.fillMaxWidth())
+                        GestureMarkerChip(HomeGesture.LONG_PRESS, Icons.Filled.Timer, markers, onEdit, Modifier.fillMaxWidth())
+                    }
+                },
+                right = { GestureMarkerChip(HomeGesture.PINCH_IN, Icons.Filled.Pinch, markers, onEdit, it) }
+            )
+            Spacer(Modifier.height(36.dp))
+            GesturePair(
+                left = { GestureMarkerChip(HomeGesture.SWIPE_UP, Icons.Filled.ArrowUpward, markers, onEdit, it) },
+                right = { GestureMarkerChip(HomeGesture.TWO_FINGER_SWIPE_UP, Icons.Filled.SwipeUp, markers, onEdit, it) }
+            )
             // The gesture bar.
             Box(modifier = Modifier.fillMaxWidth(0.35f).height(4.dp).clip(CircleShape).background(MaterialTheme.colorScheme.outline))
         }
     }
-    // The two-finger gestures happen anywhere on the page, so they stand below the phone.
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            stringResource(R.string.settings_gesture_two_fingers),
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.fillMaxWidth(widthFraction).padding(bottom = 8.dp)
-        )
-        Column(modifier = Modifier.fillMaxWidth(widthFraction), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            GestureMarkerChip(HomeGesture.TWO_FINGER_SWIPE_UP, Icons.Filled.SwipeUp, markers, onEdit)
-            GestureMarkerChip(HomeGesture.TWO_FINGER_SWIPE_DOWN, Icons.Filled.SwipeDown, markers, onEdit)
-            GestureMarkerChip(HomeGesture.PINCH_IN, Icons.Filled.Pinch, markers, onEdit)
+}
+
+/** One finger on the left, two fingers on the right, both as tall as the taller one. The first pair
+ *  names the two sides. */
+@Composable
+private fun GesturePair(left: @Composable (Modifier) -> Unit, right: @Composable (Modifier) -> Unit, header: Boolean = false) {
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        if (header) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(R.string.settings_gesture_one_finger, R.string.settings_gesture_two_fingers).forEach { res ->
+                    Text(
+                        stringResource(res),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+        Row(modifier = Modifier.fillMaxWidth().height(androidx.compose.foundation.layout.IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            left(Modifier.weight(1f).fillMaxHeight())
+            right(Modifier.weight(1f).fillMaxHeight())
         }
     }
 }
@@ -307,23 +340,29 @@ private fun GestureMarkerChip(
     gesture: HomeGesture,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     markers: Map<HomeGesture, GestureMarker>,
-    onEdit: (HomeGesture) -> Unit
+    onEdit: (HomeGesture) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val marker = markers[gesture] ?: return
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerHighest)
             .then(if (marker.enabled) Modifier.clickable { onEdit(gesture) } else Modifier)
             .alpha(if (marker.enabled) 1f else 0.5f)
             .padding(horizontal = 12.dp, vertical = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
-            Text(gestureLabel(gesture), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
+        // Symbol above the name: half a phone wide is too narrow for both in a line.
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+        Text(
+            gestureShortLabel(gesture),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier.padding(top = 2.dp)
+        )
         Text(
             marker.summary,
             style = MaterialTheme.typography.titleSmall,

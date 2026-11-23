@@ -262,7 +262,7 @@
     <string name="settings_more_settings_button">More settings</string>
 
     <string name="settings_section_gestures">Gestures</string>
-    <string name="settings_card_gestures_subtitle">Long press, double tap, swipes, home button</string>
+    <string name="settings_card_gestures_subtitle">Tap and swipe, with one or two fingers</string>
     <string name="settings_gesture_long_press">Long press</string>
     <string name="settings_gesture_double_tap">Double tap</string>
     <string name="settings_gesture_swipe_up">Swipe up</string>
@@ -1194,4 +1194,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_widgets_categories">Your categories with their apps. With tabs, stacked or as small tiles.</string>
     <string name="welcome_elements_categories">Categories sort your apps and elements. They have their own page, a widget and smart categories that fill themselves.</string>
     <string name="settings_categories_pick_title">Choose a category</string>
+    <string name="settings_gesture_one_finger">With one finger</string>
 </resources>

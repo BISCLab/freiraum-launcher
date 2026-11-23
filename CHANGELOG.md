@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Gestures: all of them in the phone, one finger on the left, two fingers on the right, each where it happens (down at the top, tapping and pinching in the middle, up at the bottom)
+
 ## 0.19.0
 
 - Pages settings: the Categories page shows among the function pages; all four tiles fit side by side

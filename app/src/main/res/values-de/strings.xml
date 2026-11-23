@@ -263,7 +263,7 @@
     <string name="settings_background_shade_value">%1$d%%</string>
 
     <string name="settings_section_gestures">Gesten</string>
-    <string name="settings_card_gestures_subtitle">Langes Drücken, Doppeltippen, Wischgesten, Home-Taste</string>
+    <string name="settings_card_gestures_subtitle">Tippen und Wischen, mit einem oder zwei Fingern</string>
     <string name="settings_gesture_long_press">Langes Drücken</string>
     <string name="settings_gesture_double_tap">Doppeltippen</string>
     <string name="settings_gesture_swipe_up">Nach oben wischen</string>
@@ -1194,4 +1194,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_widgets_categories">Deine Kategorien mit ihren Apps. Mit Reitern, untereinander oder als kleine Kacheln.</string>
     <string name="welcome_elements_categories">Kategorien sortieren deine Apps und Elemente. Sie haben eine eigene Seite, ein Widget und kluge Kategorien, die sich selbst füllen.</string>
     <string name="settings_categories_pick_title">Kategorie wählen</string>
+    <string name="settings_gesture_one_finger">Mit einem Finger</string>
 </resources>
