@@ -248,7 +248,7 @@ fun SettingsWallpaperPacksScreen(navController: NavController, onBack: () -> Uni
 
 /** A small portrait thumbnail of one picture, decoded at a fraction of its size. */
 @Composable
-private fun PackThumb(file: File?, height: Dp) {
+internal fun PackThumb(file: File?, height: Dp) {
     val shape = RoundedCornerShape(if (height > 40.dp) 10.dp else 4.dp)
     val bitmap by produceState<ImageBitmap?>(null, file) {
         value = withContext(Dispatchers.IO) {

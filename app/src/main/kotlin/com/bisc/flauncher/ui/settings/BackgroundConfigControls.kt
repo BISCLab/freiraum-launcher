@@ -139,6 +139,13 @@ fun BackgroundConfigSection(
         }
     }
     val launchImagePicker = { pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
+    var packPickerOpen by remember { mutableStateOf(false) }
+    if (packPickerOpen) PackPicturePicker(onPick = { file ->
+        scope.launch {
+            val path = withContext(Dispatchers.IO) { BackgroundImageStore.save(context, Uri.fromFile(file), imageKey) }
+            if (path != null) onConfigChange(config.withImage(path))
+        }
+    }, onDismiss = { packPickerOpen = false })
     val imagePath = config.imagePath
     val usesImage = config.source == BackgroundSource.IMAGE && imagePath != null
 
@@ -155,6 +162,7 @@ fun BackgroundConfigSection(
     )
 
     SettingsPreferenceGroup {
+        PackPictureRow { packPickerOpen = true }
         if (usesImage) {
             SettingsPreference(icon = null, title = stringResource(R.string.settings_background_change_image), onClick = launchImagePicker)
         } else {
@@ -216,6 +224,13 @@ fun BackgroundOverrideSection(
         }
     }
     val launchImagePicker = { pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
+    var packPickerOpen by remember { mutableStateOf(false) }
+    if (packPickerOpen) PackPicturePicker(onPick = { file ->
+        scope.launch {
+            val path = withContext(Dispatchers.IO) { BackgroundImageStore.save(context, Uri.fromFile(file), imageKey) }
+            if (path != null) onCustomColor(current.withImage(path))
+        }
+    }, onDismiss = { packPickerOpen = false })
     // Picking it again keeps an image picked before; only the first time opens the system picker.
     val selectOwnImage = {
         if (ownImagePath != null) onCustomColor(current.withImage(ownImagePath)) else launchImagePicker()
@@ -252,6 +267,7 @@ fun BackgroundOverrideSection(
             }
             usesOwnImage -> {
                 SettingsPreference(icon = null, title = stringResource(R.string.settings_background_change_image), onClick = launchImagePicker)
+                PackPictureRow { packPickerOpen = true }
                 ExpandableShadePercentSlider(
                     percent = (current.shade * 100).roundToInt(),
                     onSettled = { onCustomColor(current.copy(shade = it / 100f)) }
@@ -313,6 +329,17 @@ private fun WallpaperCard(selected: Boolean, label: String, onClick: () -> Unit,
         }
         Text(label, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
     }
+}
+
+/** Opens the pictures of the installed wallpapers, the extra ones for further pages included. */
+@Composable
+private fun PackPictureRow(onClick: () -> Unit) {
+    SettingsPreference(
+        icon = null,
+        title = stringResource(R.string.settings_background_from_packs),
+        summary = stringResource(R.string.settings_background_from_packs_summary),
+        onClick = onClick
+    )
 }
 
 private fun BackgroundConfig.withImage(path: String) =

@@ -1048,4 +1048,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="pin_shortcut_search_only">Only in the search</string>
     <string name="pin_shortcut_add">Add</string>
     <string name="pin_shortcut_added">“%1$s” added</string>
+    <string name="settings_background_from_packs">Picture from your wallpapers</string>
+    <string name="settings_background_from_packs_summary">Every picture of the installed wallpapers, the extra ones for further pages too</string>
+    <string name="settings_background_from_packs_empty">No wallpapers installed yet. You find them under Extensions.</string>
 </resources>
