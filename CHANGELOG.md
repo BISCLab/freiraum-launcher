@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Pages settings: the Categories page shows among the function pages; all four tiles fit side by side
+
 ## 0.18.0
 
 - Categories: labels for apps, links, places, contacts and shortcuts; one app can be in several (Settings > Apps & elements > Elements > Categories)

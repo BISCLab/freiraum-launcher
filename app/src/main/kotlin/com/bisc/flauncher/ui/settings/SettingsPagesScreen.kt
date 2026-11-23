@@ -88,7 +88,7 @@ fun SettingsPagesScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val rowsPages = remember(allPages) { allPages.filter { it.kind == LauncherPageKind.ROWS }.sortedBy { it.orderIndex } }
-    val otherPages = remember(allPages) { allPages.filter { it.kind != LauncherPageKind.ROWS } }
+    val otherPages = remember(allPages) { allPages.filter { it.kind != LauncherPageKind.ROWS }.sortedBy { it.orderIndex } }
 
     fun gestureForPage(pageId: Long): HomeGesture? = HomeGesture.entries.firstOrNull { gesture ->
         gestureActions[gesture]?.type == GestureActionType.PAGE && gestureActions[gesture]?.payload?.toLongOrNull() == pageId
@@ -413,7 +413,7 @@ private fun PagesCarousel(
     }
 }
 
-/** App list and Text search as tiles, sized exactly like the carousel's so the two rows line up. */
+/** The function pages as tiles in one row, never cut off at the edge. */
 @Composable
 private fun UtilityPagesRow(
     pages: List<LauncherPage>,
@@ -422,7 +422,9 @@ private fun UtilityPagesRow(
     onTileClick: (LauncherPage) -> Unit
 ) {
     androidx.compose.foundation.layout.BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val tileWidth = minOf((maxWidth - CAROUSEL_OUTER_PADDING * 2 - CAROUSEL_SPACING * 2) / 3, carouselTileMaxWidth())
+        // Up to three tiles are as big as the carousel's; more share the width, all the same size.
+        val count = pages.size.coerceAtLeast(3)
+        val tileWidth = minOf((maxWidth - CAROUSEL_OUTER_PADDING * 2 - CAROUSEL_SPACING * (count - 1)) / count, carouselTileMaxWidth())
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = CAROUSEL_OUTER_PADDING, vertical = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(CAROUSEL_SPACING, Alignment.CenterHorizontally)
