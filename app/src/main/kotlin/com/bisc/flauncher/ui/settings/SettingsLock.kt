@@ -72,17 +72,21 @@ internal fun SettingsLockGate() {
         if (result.resultCode == Activity.RESULT_OK) SettingsLock.unlocked = true
     }
     val title = stringResource(R.string.settings_lock_prompt_title)
+    // The system's own screen lock question, the way that works on every version.
+    val askCredential = {
+        @Suppress("DEPRECATION")
+        val intent = context.getSystemService(KeyguardManager::class.java)?.createConfirmDeviceCredentialIntent(title, null)
+        if (intent != null) runCatching { confirm.launch(intent) } else SettingsLock.unlocked = true
+        Unit
+    }
     val ask = {
         if (!SettingsLock.deviceSecure(context)) {
             // The screen lock was removed meanwhile: nothing to ask for.
             SettingsLock.unlocked = true
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && activity != null) {
-            askBiometric(activity, title)
+            askBiometric(activity, title, fallback = askCredential)
         } else {
-            context.getSystemService(KeyguardManager::class.java)
-                ?.createConfirmDeviceCredentialIntent(title, null)
-                ?.let { confirm.launch(it) }
-                ?: run { SettingsLock.unlocked = true }
+            askCredential()
         }
     }
     LaunchedEffect(Unit) { ask() }
@@ -99,7 +103,7 @@ internal fun SettingsLockGate() {
 }
 
 @androidx.annotation.RequiresApi(Build.VERSION_CODES.Q)
-private fun askBiometric(activity: Activity, title: String) {
+private fun askBiometric(activity: Activity, title: String, fallback: () -> Unit) {
     val builder = BiometricPrompt.Builder(activity).setTitle(title)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         builder.setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
@@ -112,8 +116,16 @@ private fun askBiometric(activity: Activity, title: String) {
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult?) {
                 SettingsLock.unlocked = true
             }
+
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence?) {
+                // Cancelled by the person: stay on the lock page. Anything else (no sensor, nothing
+                // enrolled, a busy sensor): ask with the plain screen lock instead.
+                if (errorCode != BiometricPrompt.BIOMETRIC_ERROR_USER_CANCELED &&
+                    errorCode != BiometricPrompt.BIOMETRIC_ERROR_CANCELED
+                ) fallback()
+            }
         })
-    }
+    }.onFailure { fallback() }
 }
 
 private fun Context.findActivity(): Activity? {

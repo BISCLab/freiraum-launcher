@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Settings lock: Unlock works; where the fingerprint question is not available, the screen lock (PIN, pattern or password) is asked instead
+
 ## 0.17.0
 
 - The keyboard extension is now called Keyboard cover; its color menu has a try-out line that opens the keyboard with the cover sitting on it in the chosen color, plus the system colors many keyboards use, one tap each

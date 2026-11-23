@@ -55,6 +55,7 @@
 
     <!-- Expands notifications and quick settings for gesture actions. -->
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
     <application
         android:enableOnBackInvokedCallback="true"
