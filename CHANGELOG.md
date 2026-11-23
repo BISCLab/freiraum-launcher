@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Pages settings: the carousel opens with Home in the middle and one page on each side, always exactly three whole tiles, and stops on a tile when swiped
+- Categories page settings built like the App grid's: a preview of the page, then Appearance (page, colors and symbols) and Behavior (view, search field, categories)
+
 ## 0.19.1
 
 - Gestures: all of them in the phone, one finger on the left, two fingers on the right, each where it happens (down at the top, tapping and pinching in the middle, up at the bottom)

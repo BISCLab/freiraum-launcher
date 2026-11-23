@@ -297,8 +297,9 @@ private fun PagesCarousel(
     var didInitialScroll by remember { mutableStateOf(false) }
     LaunchedEffect(pages.size) {
         if (!didInitialScroll && pages.isNotEmpty()) {
-            // +1 for the leading "+" ghost tile ahead of the page tiles.
-            listState.scrollToItem((homeIndex + 1).coerceAtMost((pages.size + 1).coerceAtLeast(0)))
+            // Home in the middle: the tile left of it first. With the leading "+" tile at index 0,
+            // Home sits at homeIndex + 1, so its left neighbor is at homeIndex.
+            listState.scrollToItem(homeIndex.coerceIn(0, pages.size))
             didInitialScroll = true
         }
     }
@@ -307,7 +308,10 @@ private fun PagesCarousel(
     // aspect-ratio page preview instead of a small icon-sized square.
     androidx.compose.foundation.layout.BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val tileWidth = minOf((maxWidth - CAROUSEL_OUTER_PADDING * 2 - CAROUSEL_SPACING * 2) / 3, carouselTileMaxWidth())
-        val stepPx = with(androidx.compose.ui.platform.LocalDensity.current) { (tileWidth + CAROUSEL_SPACING).toPx() }
+        // Where the tiles are held smaller (low screens), the gaps grow instead, so it stays exactly
+        // three tiles across and no fourth peeks in.
+        val spacing = ((maxWidth - CAROUSEL_OUTER_PADDING * 2 - tileWidth * 3) / 2).coerceAtLeast(CAROUSEL_SPACING)
+        val stepPx = with(androidx.compose.ui.platform.LocalDensity.current) { (tileWidth + spacing).toPx() }
 
         // Swaps the dragged page with a neighbor once it's been dragged past half a tile.
         fun swapIfPastHalf(pageId: Long) {
@@ -362,7 +366,12 @@ private fun PagesCarousel(
         LazyRow(
             state = listState,
             modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(CAROUSEL_SPACING, Alignment.CenterHorizontally),
+            // A fling always stops with one tile in the middle, never with half tiles at the edges.
+            flingBehavior = androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior(
+                listState,
+                androidx.compose.foundation.gestures.snapping.SnapPosition.Center
+            ),
+            horizontalArrangement = Arrangement.spacedBy(spacing, Alignment.CenterHorizontally),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = CAROUSEL_OUTER_PADDING)
         ) {
             item { GhostTile(width = tileWidth, onClick = onAddLeft) }

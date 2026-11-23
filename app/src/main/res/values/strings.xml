@@ -1195,4 +1195,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_elements_categories">Categories sort your apps and elements. They have their own page, a widget and smart categories that fill themselves.</string>
     <string name="settings_categories_pick_title">Choose a category</string>
     <string name="settings_gesture_one_finger">With one finger</string>
+    <string name="settings_page_categories_description">All categories on one page. Tap them as chips at the top and see what is in them below. You open the page with a gesture, an action button or from the Dock.</string>
+    <string name="settings_hub_categories_appearance">Page, colors and symbols</string>
+    <string name="settings_hub_categories_behavior">View, search field, categories</string>
+    <string name="settings_categories_colors_tile">Colors and symbols</string>
+    <string name="settings_categories_behavior_search">Categories page: Behavior</string>
 </resources>
