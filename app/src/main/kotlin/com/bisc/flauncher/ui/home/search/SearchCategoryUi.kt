@@ -56,7 +56,7 @@ val SearchCategory.defaultColor: Color
         SearchCategory.WEBSITES -> Color(0xFFA142F4)
         SearchCategory.PLACES -> Color(0xFFEA4335)
         SearchCategory.SHORTCUTS -> Color(0xFF26A69A)
-        SearchCategory.LABELS -> Color(0xFFE08A1E)
+        SearchCategory.LABELS -> Color(0xFFAFB42B)
         SearchCategory.LAUNCHER_SETTINGS -> Color(0xFF0758F5)
         SearchCategory.WEB -> Color(0xFF00ACC1)
         SearchCategory.AI -> Color(0xFFEC407A)

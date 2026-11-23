@@ -19,7 +19,7 @@ fun PageIconGlyph.defaultColor(): Color = when (this) {
     PageIconGlyph.APP_DRAWER -> Color(0xFF6366F1)
     PageIconGlyph.APP_LIST -> Color(0xFFF43F5E)
     PageIconGlyph.WIDGET_PAGE -> Color(0xFFA14AFF)
-    PageIconGlyph.CATEGORIES -> Color(0xFFE08A1E)
+    PageIconGlyph.CATEGORIES -> Color(0xFFAFB42B)
 }
 
 /** Placeholder glyph for an unset App slot - invites the user to tap and assign one. */

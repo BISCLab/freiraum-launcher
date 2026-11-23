@@ -207,6 +207,7 @@ internal fun CategoryCard(
     look: ElementAppearance,
     cornerRadiusPercent: Int,
     modifier: Modifier = Modifier,
+    animateSize: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colors = resolveElementColors(look)
@@ -217,6 +218,9 @@ internal fun CategoryCard(
                 .fillMaxWidth()
                 .then(Modifier.designGlow(shape, "widgets"))
                 .clip(shape)
+                // Inside the shape: growing and shrinking clips to the card's box, which would cut
+                // the 3D shadow around the round corners into hard ones.
+                .then(if (animateSize) Modifier.animateContentSize() else Modifier)
                 .background(colors.background, alpha = colors.backgroundAlpha)
                 .then(if (colors.showBorder) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)
                 .padding(12.dp)
@@ -409,7 +413,7 @@ fun HomeCategoriesPage(
                                 var expanded by remember(r.category.id) { mutableStateOf(false) }
                                 val limit = columns * cardRows
                                 val open = list || searching || expanded
-                                CategoryCard(look, corner, Modifier.animateContentSize()) {
+                                CategoryCard(look, corner, animateSize = true) {
                                     CategoryCardHead(r, expandable = !list && !searching && members.size > limit, expanded = expanded, onToggle = { expanded = !expanded })
                                     if (members.isEmpty()) {
                                         Text(stringResource(R.string.categories_nothing), modifier = Modifier.padding(12.dp), color = labelColor)
