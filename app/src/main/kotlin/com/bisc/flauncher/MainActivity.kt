@@ -245,8 +245,12 @@ class MainActivity : ComponentActivity() {
             // In the settings, the bar icons follow the settings' own color mode.
             val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
             // Back home, the settings lock again.
-            androidx.compose.runtime.LaunchedEffect(currentRoute) {
-                if (currentRoute != null && !currentRoute.startsWith("settings")) com.bisc.flauncher.ui.settings.SettingsLock.unlocked = false
+            // Only once the settings are fully gone: while they still slide away (back swipe, Home)
+            // they would otherwise lock themselves and ask for the unlock on the way out.
+            val visibleEntries by navController.visibleEntries.collectAsState()
+            val settingsVisible = visibleEntries.any { it.destination.route?.startsWith("settings") == true }
+            androidx.compose.runtime.LaunchedEffect(settingsVisible, currentRoute) {
+                if (!settingsVisible && currentRoute != null && !currentRoute.startsWith("settings")) com.bisc.flauncher.ui.settings.SettingsLock.unlocked = false
             }
             // Locked while away in another app: back to the home screen, not to the lock page.
             androidx.compose.runtime.LaunchedEffect(com.bisc.flauncher.ui.settings.SettingsLock.closeLocked) {
