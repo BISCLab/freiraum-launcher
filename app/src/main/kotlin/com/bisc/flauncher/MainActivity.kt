@@ -144,6 +144,8 @@ class MainActivity : ComponentActivity() {
             val showSettingsTips by settingsVm.showSettingsTips.collectAsState()
             val accessibilityMode by settingsVm.accessibilityMode.collectAsState()
             androidx.compose.runtime.SideEffect { com.bisc.flauncher.ui.AccessibilityMode.on = accessibilityMode }
+            val keyboardNoLearning by settingsVm.searchKeyboardNoLearning.collectAsState()
+            androidx.compose.runtime.SideEffect { com.bisc.flauncher.ui.home.search.KeyboardPrivacy.noLearning = keyboardNoLearning }
             val dotsOn by settingsVm.showNotificationDots.collectAsState()
             val dotPackages by notificationDots.packages.collectAsState()
             val lockPortrait by settingsVm.lockPortrait.collectAsState()

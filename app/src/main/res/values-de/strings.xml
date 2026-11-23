@@ -1054,4 +1054,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_themed_icons_label">Themensymbole</string>
     <string name="settings_themed_icons">Symbole in Systemfarben</string>
     <string name="settings_themed_icons_summary">Apps mit einfarbigem Symbol zeigen es in den Farben deines Hintergrunds, wie bei Android selbst. Apps ohne behalten ihr Symbol; ein Icon-Paket geht vor.</string>
+    <string name="settings_keyboard_privacy_label">Privatsphäre</string>
+    <string name="settings_keyboard_no_learning">Tastatur lernt nicht mit</string>
+    <string name="settings_keyboard_no_learning_summary">Was du in die Suchen des Launchers tippst, merkt sich die Tastatur nicht und schlägt es später nicht vor. Die meisten Tastaturen halten sich daran.</string>
 </resources>

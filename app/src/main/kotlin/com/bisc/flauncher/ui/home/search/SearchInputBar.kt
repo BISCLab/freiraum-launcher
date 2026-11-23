@@ -119,6 +119,7 @@ fun SearchInputBar(
                 if (value.text.isEmpty()) {
                     Text(placeholder, style = MaterialTheme.typography.bodyLarge, color = content.copy(alpha = 0.6f))
                 }
+                NoLearningKeyboard {
                 BasicTextField(
                     value = value,
                     onValueChange = {
@@ -132,6 +133,7 @@ fun SearchInputBar(
                     keyboardActions = KeyboardActions(onSearch = { onSubmit() }),
                     modifier = Modifier.fillMaxWidth().focusRequester(focusRequester)
                 )
+                }
             }
             if (value.text.isNotEmpty()) {
                 Icon(

@@ -272,6 +272,13 @@ class SettingsRepository @Inject constructor(
      *  unfocused until the user taps the input field. */
     val searchKeyboardAutoOpen: Flow<Boolean> = dataStore.data.map { it[SEARCH_KEYBOARD_OPEN_KEY] ?: true }
 
+    /** The keyboard does not learn from what is typed into the launcher's search fields. */
+    val searchKeyboardNoLearning: Flow<Boolean> = dataStore.data.map { it[SEARCH_KEYBOARD_NO_LEARNING_KEY] ?: false }
+
+    suspend fun setSearchKeyboardNoLearning(on: Boolean) {
+        dataStore.edit { it[SEARCH_KEYBOARD_NO_LEARNING_KEY] = on }
+    }
+
     suspend fun setSearchKeyboardAutoOpen(enabled: Boolean) {
         dataStore.edit { it[SEARCH_KEYBOARD_OPEN_KEY] = enabled }
     }
@@ -1298,6 +1305,7 @@ class SettingsRepository @Inject constructor(
         private const val WIDGET_ARROW_PREFIX = "widget_arrow"
         private val SHOW_SETTINGS_TIPS_KEY = booleanPreferencesKey("show_settings_tips")
         private val ACCESSIBILITY_MODE_KEY = booleanPreferencesKey("accessibility_mode")
+        private val SEARCH_KEYBOARD_NO_LEARNING_KEY = booleanPreferencesKey("search_keyboard_no_learning")
         private val SHOW_NOTIFICATION_DOTS_KEY = booleanPreferencesKey("show_notification_dots")
         private val CAROUSEL_ENDLESS_KEY = booleanPreferencesKey("carousel_endless")
         private val MUSIC_SOURCES_KEY = stringSetPreferencesKey("music_sources")

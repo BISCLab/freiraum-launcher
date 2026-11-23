@@ -164,8 +164,18 @@ fun SettingsSearchKeyboardScreen(navController: NavController, onBack: () -> Uni
     val capColor by viewModel.searchKeyboardCapColor.collectAsState()
     val capCornerPercent by viewModel.searchKeyboardCapCornerRadiusPercent.collectAsState()
     val capArrow by viewModel.searchKeyboardCapArrow.collectAsState()
+    val noLearning by viewModel.searchKeyboardNoLearning.collectAsState()
 
     SettingsSubScreen(title = stringResource(R.string.settings_search_keyboard_label), navController = navController, onBack = onBack) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_keyboard_privacy_label)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_keyboard_no_learning),
+                summary = stringResource(R.string.settings_keyboard_no_learning_summary),
+                onClick = { viewModel.setSearchKeyboardNoLearning(!noLearning) },
+                trailing = { Switch(checked = noLearning, onCheckedChange = viewModel::setSearchKeyboardNoLearning) }
+            )
+        }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_search_keyboard_cap_label)) {
             SettingsPreference(
                 icon = null,

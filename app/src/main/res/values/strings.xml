@@ -1054,4 +1054,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_themed_icons_label">Themed icons</string>
     <string name="settings_themed_icons">Icons in system colors</string>
     <string name="settings_themed_icons_summary">Apps with a one-color icon show it in the colors of your wallpaper, like Android itself. Apps without keep their icon; an icon pack comes first.</string>
+    <string name="settings_keyboard_privacy_label">Privacy</string>
+    <string name="settings_keyboard_no_learning">Keyboard does not learn</string>
+    <string name="settings_keyboard_no_learning_summary">The keyboard does not remember what you type into the launcher\'s searches and does not suggest it later. Most keyboards respect this.</string>
 </resources>

@@ -7,6 +7,7 @@
 - "Add to home screen" from other apps works: a website from Chrome or any other app shortcut asks where it goes (Home, a folder, or only the search) and shows its own icon there
 - Backgrounds: "Picture from your wallpapers" offers every picture of the installed wallpapers, the extra ones for further pages too, for any page or for all
 - Themed icons (Android 13+, Settings > Appearance > Icons): apps with a one-color icon show it in the system colors, light or dark with the launcher
+- Search > Keyboard: "Keyboard does not learn" asks the keyboard not to remember what is typed into the launcher's searches
 
 ## 0.16.0
 

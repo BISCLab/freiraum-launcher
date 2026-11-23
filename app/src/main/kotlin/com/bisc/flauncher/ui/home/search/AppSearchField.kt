@@ -84,6 +84,7 @@ fun AppSearchField(
                     Text(stringResource(R.string.app_search_hint), style = textStyle, color = colors.contentColor.copy(alpha = 0.6f))
                 }
                 if (onOpenTextSearch == null) {
+                    NoLearningKeyboard {
                     BasicTextField(
                         value = query,
                         onValueChange = onQueryChange,
@@ -94,6 +95,7 @@ fun AppSearchField(
                         keyboardActions = KeyboardActions(onGo = { onSubmit() }),
                         modifier = Modifier.fillMaxWidth().focusRequester(focusRequester)
                     )
+                    }
                 }
             }
             if (query.isNotEmpty()) {
