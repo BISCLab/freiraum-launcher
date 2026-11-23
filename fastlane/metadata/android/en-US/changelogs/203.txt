@@ -1,0 +1,9 @@
+New:
+- "Add to home screen" from other apps
+- Backgrounds from the pictures of installed wallpapers
+- Themed icons (Android 13+)
+- Keyboard does not learn (Search > Keyboard)
+- Lock the settings with the screen lock
+- New gestures: two fingers up/down, pinch in
+- Keyboard cover with a color try-out on the keyboard
+- Accessibility mode completed: clock, second lines, Dock, app names, buttons, motion, settings

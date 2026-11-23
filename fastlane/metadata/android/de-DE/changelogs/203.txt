@@ -1,0 +1,9 @@
+Neu:
+- "Zum Startbildschirm hinzufügen" aus anderen Apps
+- Hintergrund aus den Bildern installierter Wallpaper
+- Themensymbole (ab Android 13)
+- Tastatur lernt nicht mit (Suche > Tastatur)
+- Einstellungen sperren mit der Displaysperre
+- Neue Gesten: zwei Finger hoch/runter, Zusammenziehen
+- Tastaturblende mit Farbprobe auf der Tastatur
+- Barrierefreiheitsmodus vervollständigt: Uhr, Nebentexte, Dock, App-Namen, Tasten, Bewegung, Einstellungen
