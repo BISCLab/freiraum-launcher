@@ -1,0 +1,6 @@
+Korrekturen:
+- Einstellungen sperren: Entsperren funktioniert; ohne Fingerabdruck wird die Displaysperre abgefragt
+- "Tastatur lernt nicht mit" steht jetzt unter Suche > Verhalten
+- Überall einheitlich "Tastaturblende"
+Neu:
+- Tastaturblende: Pipette nimmt die Farbe genau aus einem Bildschirmfoto der Tastatur

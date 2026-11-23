@@ -1,0 +1,6 @@
+Fixes:
+- Settings lock: unlocking works; without a fingerprint the screen lock is asked
+- "Keyboard does not learn" is now under Search > Behavior
+- Named "Keyboard bezel" everywhere
+New:
+- Keyboard bezel: an eyedropper takes the exact color from a screenshot of your keyboard
