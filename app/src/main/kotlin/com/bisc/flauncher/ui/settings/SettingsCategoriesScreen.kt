@@ -191,7 +191,8 @@ fun SettingsCategoriesScreen(navController: NavController, onBack: () -> Unit, v
         NewRuleDialog(
             onCreate = { name, rule ->
                 makingRule = false
-                viewModel.addCategory(name, rule = rule, iconKey = CategoryRepository.ruleIconKey(rule)) { id -> navController.navigate("settings/elements/categories/$id") }
+                val param = if (rule == CategoryRule.ANDROID_KIND) com.bisc.flauncher.data.repository.AndroidAppKind.GAME.name else null
+                viewModel.addCategory(name, rule = rule, iconKey = CategoryRepository.ruleIconKey(rule), ruleParam = param) { id -> navController.navigate("settings/elements/categories/$id") }
             },
             onDismiss = { makingRule = false }
         )
@@ -487,10 +488,12 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
             initial = chosen,
             loadIcon = viewModel::loadIcon,
             onDone = { picked ->
-                val others = members.filter { it.type != GridItemType.APP }.map { it.type to it.payload }
-                val keptOrder = members.filter { it.type == GridItemType.APP && it.payload in picked }.map { it.payload }
+                // Everything kept stays where it was (an own order too); new apps come at the end, by name.
+                val kept = members.filter { it.type != GridItemType.APP || it.payload in picked }.map { it.type to it.payload }
                 val added = picked.filter { it !in chosen }
-                viewModel.replaceCategoryMembers(categoryId, (keptOrder + added).map { GridItemType.APP to it } + others)
+                    .sortedBy { key -> apps.find { it.componentName.flattenToString() == key }?.label?.lowercase() }
+                    .map { GridItemType.APP to it }
+                viewModel.replaceCategoryMembers(categoryId, kept + added)
                 pickingApps = false
             },
             onDismiss = { pickingApps = false }

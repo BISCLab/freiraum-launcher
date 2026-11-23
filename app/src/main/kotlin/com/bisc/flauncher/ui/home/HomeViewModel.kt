@@ -955,11 +955,12 @@ class HomeViewModel @Inject constructor(
 
     /** Categories whose name matches; "#" in front searches only them. */
     val categoryResults: StateFlow<List<com.bisc.flauncher.ui.home.search.CategoryHit>> =
-        combine(_searchQuery, resolvedCategories, labeledApps, activeSearchCategories) { query, resolved, apps, active ->
+        combine(_searchQuery, resolvedCategories, labeledApps, activeSearchCategories, appOverrides) { query, resolved, apps, active, overrides ->
             val q = query.trim().removePrefix("#").trim()
             if (q.isBlank() || SearchCategory.LABELS !in active) emptyList()
             else {
-                val byComponent = apps.associateBy { it.componentName.flattenToString() }
+                val byComponent = apps.filter { notInSearch(it.componentName.flattenToString(), overrides) != true }
+                    .associateBy { it.componentName.flattenToString() }
                 resolved.filter { matchesAllWordStarts(it.category.name, q) }.map { r ->
                     com.bisc.flauncher.ui.home.search.CategoryHit(
                         category = r.category,

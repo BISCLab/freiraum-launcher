@@ -48,7 +48,8 @@ internal fun statusBarPages(allPages: List<LauncherPage>): List<LauncherPage> =
     allPages.filter { it.kind == LauncherPageKind.ROWS }.sortedBy { it.orderIndex } +
         allPages.filter { it.kind == LauncherPageKind.APP_LIST } +
         allPages.filter { it.kind == LauncherPageKind.SEARCH } +
-        allPages.filter { it.kind == LauncherPageKind.APP_GRID }
+        allPages.filter { it.kind == LauncherPageKind.APP_GRID } +
+        allPages.filter { it.kind == LauncherPageKind.CATEGORIES }
 
 /** "Hidden on 5 of 8" - pages plus folders, for the one-line entry under System. */
 @Composable

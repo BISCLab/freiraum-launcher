@@ -3,6 +3,7 @@ package com.bisc.flauncher.ui.settings
 import androidx.compose.material.icons.filled.Settings
 import android.content.Context
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -46,6 +47,7 @@ private val QUICK_TARGETS = listOf(
     QuickTarget("search", Icons.Filled.Search, R.string.settings_section_search_full, "settings/search", "settings/search", "pages/search"),
     QuickTarget("app_list", Icons.AutoMirrored.Filled.List, R.string.welcome_screen_app_list, "settings/app_overview", "settings/app_overview", "pages/app_list"),
     QuickTarget("app_grid", Icons.Filled.GridView, R.string.settings_pages_app_grid, "settings/app_grid", "settings/app_grid", "pages/app_grid"),
+    QuickTarget("categories", Icons.AutoMirrored.Filled.Label, R.string.settings_pages_categories, "settings/elements/categories", "settings/elements/categories", "elements/categories"),
     QuickTarget("background", Icons.Filled.Image, R.string.settings_section_global_background, "settings/appearance/background", "settings/appearance/background", "appearance/background"),
     QuickTarget("designs", Icons.Filled.AutoAwesome, R.string.designs_title, "settings/appearance/designs", "settings/appearance/designs", "designs"),
     QuickTarget("wallpapers", Icons.Filled.Wallpaper, R.string.packs_title, "settings/wallpaper_packs", "settings/wallpaper_packs", "wallpapers"),

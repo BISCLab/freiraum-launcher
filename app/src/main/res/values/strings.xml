@@ -1094,7 +1094,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_categories_yours">Your categories</string>
     <string name="settings_categories_yours_info">Tap a category to edit it. Drag the handle to change the order.</string>
     <string name="settings_categories_empty">No categories yet.</string>
-    <string name="settings_categories_count">%1$d items</string>
+    <string name="settings_categories_count">Items: %1$d</string>
     <string name="settings_categories_smart_count">Fills itself · %1$d right now</string>
     <string name="settings_categories_new">New category</string>
     <string name="settings_categories_page">Categories page</string>

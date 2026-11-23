@@ -73,7 +73,7 @@ private val SECTIONS = listOf(
     SideSection("settings/appearance", Icons.Filled.Palette, R.string.settings_design_title, listOf("settings/appearance"), com.bisc.flauncher.ui.theme.SettingsArea.APPEARANCE),
     SideSection(
         "settings/pages", Icons.Filled.ViewCarousel, R.string.settings_section_pages,
-        listOf("settings/pages", "settings/search", "settings/app_overview", "settings/app_grid", "settings/gestures"),
+        listOf("settings/pages", "settings/search", "settings/app_overview", "settings/app_grid", "settings/categories", "settings/gestures"),
         com.bisc.flauncher.ui.theme.SettingsArea.PAGES
     ),
     SideSection("settings/elements", Icons.Filled.Apps, R.string.settings_section_elements, listOf("settings/elements", "settings/apps", "settings/folder"), com.bisc.flauncher.ui.theme.SettingsArea.ELEMENTS),

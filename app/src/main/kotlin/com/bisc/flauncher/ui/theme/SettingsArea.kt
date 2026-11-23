@@ -43,7 +43,7 @@ fun settingsAreaFor(route: String?): SettingsArea {
         r.isEmpty() || r == "find" -> SettingsArea.NEUTRAL
         r.startsWith("appearance/designs") || r.startsWith("wallpaper_packs") || r.startsWith("extensions") -> SettingsArea.EXTENSIONS
         r.startsWith("appearance") -> SettingsArea.APPEARANCE
-        r.startsWith("pages") || r.startsWith("search") || r.startsWith("app_overview") || r.startsWith("app_grid") || r.startsWith("gestures") -> SettingsArea.PAGES
+        r.startsWith("pages") || r.startsWith("search") || r.startsWith("app_overview") || r.startsWith("app_grid") || r.startsWith("categories") || r.startsWith("gestures") -> SettingsArea.PAGES
         r.startsWith("elements") || r.startsWith("apps") || r.startsWith("folder") -> SettingsArea.ELEMENTS
         r.startsWith("system") || r.startsWith("permissions") || r.startsWith("about") -> SettingsArea.SYSTEM
         else -> SettingsArea.NEUTRAL

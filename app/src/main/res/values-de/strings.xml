@@ -1094,7 +1094,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_categories_yours">Deine Kategorien</string>
     <string name="settings_categories_yours_info">Tipp auf eine Kategorie, um sie zu bearbeiten. Am Griff ziehen ändert die Reihenfolge.</string>
     <string name="settings_categories_empty">Noch keine Kategorien.</string>
-    <string name="settings_categories_count">%1$d Einträge</string>
+    <string name="settings_categories_count">Einträge: %1$d</string>
     <string name="settings_categories_smart_count">Füllt sich selbst · gerade %1$d</string>
     <string name="settings_categories_new">Neue Kategorie</string>
     <string name="settings_categories_page">Seite Kategorien</string>

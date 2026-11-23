@@ -197,6 +197,12 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
             val websiteId = entry.arguments?.getLong("websiteId")
             websites.find { it.id == websiteId }?.label ?: stringResource(R.string.settings_elements_links_title)
         }
+        "settings/elements/categories/{categoryId}" -> {
+            val viewModel: SettingsViewModel = hiltViewModel(entry)
+            val categories by viewModel.categories.collectAsState()
+            val categoryId = entry.arguments?.getLong("categoryId")
+            categories.find { it.id == categoryId }?.name ?: stringResource(R.string.settings_pages_categories)
+        }
         "settings/elements/actionbuttons" -> stringResource(R.string.settings_elements_actionbuttons_title)
         "settings/elements/actionbuttons/{buttonId}" -> {
             val viewModel: SettingsViewModel = hiltViewModel(entry)

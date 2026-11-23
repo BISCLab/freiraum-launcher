@@ -40,6 +40,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Apps
@@ -271,6 +272,7 @@ private fun settingsAreaLabel(route: String): String? {
         "search" -> stringResource(R.string.settings_section_search_full)
         "app_overview" -> stringResource(R.string.welcome_screen_app_list)
         "app_grid" -> stringResource(R.string.settings_pages_app_grid)
+        "categories" -> stringResource(R.string.settings_pages_categories)
         "folder", "elements", "apps" -> stringResource(R.string.settings_section_elements)
         "system", "permissions", "about" -> stringResource(R.string.settings_system_title)
         else -> null
@@ -288,6 +290,7 @@ private fun settingsAreaIcon(route: String): ImageVector {
         "search" -> Icons.Filled.Search
         "app_overview" -> androidx.compose.material.icons.Icons.AutoMirrored.Filled.List
         "app_grid" -> androidx.compose.material.icons.Icons.Filled.GridView
+        "categories" -> Icons.AutoMirrored.Filled.Label
         "folder" -> Icons.Filled.Folder
         "elements", "apps" -> Icons.Filled.Apps
         else -> Icons.Filled.PhoneAndroid

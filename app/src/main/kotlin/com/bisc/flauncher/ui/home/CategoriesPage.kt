@@ -19,6 +19,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -114,8 +117,15 @@ internal fun CategoryMemberGrid(
     val websites by viewModel.pinnedWebsites.collectAsState()
     val places by viewModel.savedMapTargets.collectAsState()
     val contacts by viewModel.pinnedContacts.collectAsState()
-    val entries = remember(members) {
-        members.mapIndexed { index, m -> RowEntry(id = -(index + 1L), pageRowId = -1L, orderIndex = index, type = m.type, payload = m.payload) }
+    val entries = remember(members, websites, places, contacts) {
+        members.filter { m ->
+            when (m.type) {
+                GridItemType.WEBSITE -> websites.any { it.id == m.payload.toLongOrNull() }
+                GridItemType.MAP_TARGET -> places.any { it.id == m.payload.toLongOrNull() }
+                GridItemType.CONTACT -> contacts.any { it.contactId == m.payload.toLongOrNull() }
+                else -> true
+            }
+        }.mapIndexed { index, m -> RowEntry(id = -(index + 1L), pageRowId = -1L, orderIndex = index, type = m.type, payload = m.payload) }
     }
     CompositionLocalProvider(LocalAppIconLoader provides viewModel.iconLoader) {
         GridEntries(
@@ -245,7 +255,9 @@ fun HomeCategoriesPage(
     onManage: () -> Unit
 ) {
     val resolved by viewModel.resolvedCategories.collectAsState()
-    val filter by viewModel.categoryFilter.collectAsState()
+    val rawFilter by viewModel.categoryFilter.collectAsState()
+    // A category deleted meanwhile no longer counts as chosen.
+    val filter = remember(rawFilter, resolved) { rawFilter.filter { id -> resolved.any { it.category.id == id } }.toSet() }
     val view by viewModel.categoriesView.collectAsState()
     val showSearch by viewModel.categoriesShowSearch.collectAsState()
     val cardRows by viewModel.categoriesCardRows.collectAsState()
@@ -265,7 +277,8 @@ fun HomeCategoriesPage(
         modifier = Modifier
             .fillMaxSize()
             .then(if (hideStatusBar) Modifier.windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top)) else Modifier.statusBarsPadding())
-            .navigationBarsPadding()
+            // Above the keyboard while searching, above the navigation bar otherwise.
+            .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
             .padding(top = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -293,8 +306,13 @@ fun HomeCategoriesPage(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 10.dp)
                 )
             }
-            val tabs = view == "TABS" && filter.isEmpty()
+            // Tabs: a single chosen category (opened from an element, a gesture or the search) is its tab.
+            val tabs = view == "TABS" && filter.size <= 1
             val pagerState = rememberPagerState(pageCount = { resolved.size })
+            LaunchedEffect(tabs, filter) {
+                val index = filter.singleOrNull()?.let { id -> resolved.indexOfFirst { it.category.id == id } } ?: -1
+                if (tabs && index >= 0) pagerState.scrollToPage(index)
+            }
             val scope = rememberCoroutineScope()
             val chipsState = rememberLazyListState()
             // The chips: "All" and every category. In tabs they pick the tab; otherwise each tap
@@ -305,7 +323,8 @@ fun HomeCategoriesPage(
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                item(key = "all") {
+                // In tabs every chip is a tab; "All" only makes sense where several show at once.
+                if (!tabs) item(key = "all") {
                     CategoryChip(
                         category = null,
                         label = stringResource(R.string.categories_all),
@@ -332,13 +351,13 @@ fun HomeCategoriesPage(
             }
             if (tabs) {
                 LaunchedEffect(pagerState) {
-                    snapshotFlow { pagerState.currentPage }.collect { page -> chipsState.animateScrollToItem((page + 1).coerceAtMost(resolved.size)) }
+                    snapshotFlow { pagerState.currentPage }.collect { page -> chipsState.animateScrollToItem(page.coerceIn(0, (resolved.size - 1).coerceAtLeast(0))) }
                 }
             }
             Spacer(Modifier.height(12.dp))
             BoxWithConstraints(modifier = Modifier.fillMaxWidth().weight(1f)) {
                 val columns = categoryColumns(maxWidth - 56.dp)
-                val chosen = resolved.filter { it.category.id in filter }
+                val chosen = if (tabs) emptyList() else resolved.filter { it.category.id in filter }
                 when {
                     chosen.isNotEmpty() -> {
                         val members = unionMembers(chosen).filter(::matches)
@@ -377,6 +396,9 @@ fun HomeCategoriesPage(
                             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
+                            if (searching && resolved.none { r -> r.members.any(::matches) }) {
+                                item { Text(stringResource(R.string.categories_nothing), color = pageInk, modifier = Modifier.padding(12.dp)) }
+                            }
                             items(resolved, key = { it.category.id }) { r ->
                                 val members = r.members.filter(::matches)
                                 if (searching && members.isEmpty()) return@items
