@@ -1189,4 +1189,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_category_no_icon">Kein Symbol</string>
     <string name="settings_category_no_color">Ohne Farbe</string>
     <string name="settings_category_no_color_summary">Nur ein Rand drumherum</string>
+    <string name="widget_categories_mode_rows">Mehrere untereinander</string>
+    <string name="widget_categories_mode_rows_summary">Jede Kategorie mit ihren Apps, eine unter der anderen. Du scrollst durch.</string>
 </resources>

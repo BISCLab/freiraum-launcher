@@ -60,7 +60,7 @@ data class ResolvedCategory(val category: Category, val members: List<CategoryMe
 
 /** How a Categories widget shows: one category ([SINGLE]), several with tabs ([TABS]), or the
  *  categories themselves as small tiles that open the Categories page ([TILES]). */
-enum class CategoryWidgetMode { SINGLE, TABS, TILES }
+enum class CategoryWidgetMode { SINGLE, TABS, ROWS, TILES }
 
 /** One Categories widget's own choice. [ids] empty means every category. */
 data class CategoryWidgetConfig(

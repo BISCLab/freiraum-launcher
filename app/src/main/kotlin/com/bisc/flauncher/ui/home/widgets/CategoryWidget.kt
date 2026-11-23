@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -66,7 +67,8 @@ internal fun widgetCategories(config: CategoryWidgetConfig, all: List<ResolvedCa
 /**
  * Categories as a widget: one category's apps ([CategoryWidgetMode.SINGLE]), several with tabs to
  * switch between them right in the widget ([CategoryWidgetMode.TABS]), or the categories as small
- * tiles that open the Categories page ([CategoryWidgetMode.TILES]). Tabs switch with the chips, by
+ * tiles that open the Categories page ([CategoryWidgetMode.TILES]), or several one below the other
+ * ([CategoryWidgetMode.ROWS]). Tabs switch with the chips, by
  * swiping, or with the paging buttons, as the widget is set.
  */
 @Composable
@@ -92,6 +94,7 @@ fun CategoryWidget(
         }
         when (config.mode) {
             CategoryWidgetMode.TILES -> CategoryTiles(shown, ink)
+            CategoryWidgetMode.ROWS -> CategoryRows(shown, ink, Modifier.weight(1f), viewModel)
             CategoryWidgetMode.SINGLE -> {
                 val r = shown.first()
                 CategoryHead(r, ink)
@@ -175,6 +178,50 @@ private fun MembersArea(r: ResolvedCategory, ink: androidx.compose.ui.graphics.C
         } else {
             Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                 CategoryMemberGrid(r.members, columns, ink, viewModel = viewModel)
+            }
+        }
+    }
+}
+
+/** Several categories one below the other, each with its name and its grid. A fling stops at the
+ *  start of a category, so none is left cut in half at the top. */
+@Composable
+private fun CategoryRows(shown: List<ResolvedCategory>, ink: androidx.compose.ui.graphics.Color, modifier: Modifier, viewModel: HomeViewModel) {
+    val listState = rememberLazyListState()
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        val columns = categoryColumns(maxWidth)
+        LazyColumn(
+            state = listState,
+            flingBehavior = androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior(listState),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(shown, key = { it.category.id }) { r ->
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            com.bisc.flauncher.ui.home.CategoryNamePill(
+                                r.category,
+                                MaterialTheme.typography.labelLarge,
+                                modifier = Modifier.clickable { LauncherCategories.open(r.category.id) },
+                                ink = ink,
+                                iconSize = 16.dp
+                            )
+                        }
+                        Text(
+                            r.members.size.toString(),
+                            color = ink.copy(alpha = 0.7f),
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(start = 12.dp, end = 8.dp)
+                        )
+                    }
+                    Spacer(Modifier.size(4.dp))
+                    if (r.members.isEmpty()) {
+                        Text(stringResource(R.string.categories_nothing), color = ink, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp))
+                    } else {
+                        CategoryMemberGrid(r.members, columns, ink, viewModel = viewModel)
+                    }
+                }
             }
         }
     }

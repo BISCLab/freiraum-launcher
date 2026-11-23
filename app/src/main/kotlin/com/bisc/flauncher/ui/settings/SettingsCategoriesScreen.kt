@@ -801,6 +801,7 @@ internal fun CategoryWidgetSettings(row: com.bisc.flauncher.data.model.PageRow, 
 
     SettingsPreferenceGroup(title = stringResource(R.string.widget_categories_mode)) {
         RadioPreference(stringResource(R.string.widget_categories_mode_tabs), com.bisc.flauncher.data.model.CategoryWidgetMode.TABS, config.mode, { set(config.copy(mode = it)) }, summary = stringResource(R.string.widget_categories_mode_tabs_summary))
+        RadioPreference(stringResource(R.string.widget_categories_mode_rows), com.bisc.flauncher.data.model.CategoryWidgetMode.ROWS, config.mode, { set(config.copy(mode = it)) }, summary = stringResource(R.string.widget_categories_mode_rows_summary))
         RadioPreference(stringResource(R.string.widget_categories_mode_single), com.bisc.flauncher.data.model.CategoryWidgetMode.SINGLE, config.mode, { set(config.copy(mode = it, ids = config.ids.take(1))) }, summary = stringResource(R.string.widget_categories_mode_single_summary))
         RadioPreference(stringResource(R.string.widget_categories_mode_tiles), com.bisc.flauncher.data.model.CategoryWidgetMode.TILES, config.mode, { set(config.copy(mode = it)) }, summary = stringResource(R.string.widget_categories_mode_tiles_summary))
         if (config.mode == com.bisc.flauncher.data.model.CategoryWidgetMode.TABS) {

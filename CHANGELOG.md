@@ -7,6 +7,7 @@
 - Categories can be without color (just an outline) and without symbol (first letter, or the name alone)
 - Search, Categories page and widget show a category's name in a pill of its color; the symbol lines up with the card title
 - Fixed: a category's new color, name or symbol was sometimes lost when saving
+- Categories widget: new view Several stacked, each category with its apps one below the other; scrolling stops at the start of a category
 
 ## 0.18.0
 
