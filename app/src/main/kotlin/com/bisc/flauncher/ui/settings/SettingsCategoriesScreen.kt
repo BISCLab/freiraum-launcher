@@ -344,7 +344,8 @@ internal fun NewCategoryDialog(onCreate: (String) -> Unit, onDismiss: () -> Unit
     )
 }
 
-/** One category: name, symbol and color as a draft with Save; its members change right away. */
+/** One category: everything on it (name, symbol, color, rule, what it holds and in which order)
+ *  is a draft, written together with Save, like the other editors in the settings. */
 @Composable
 fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val homeViewModel: HomeViewModel = hiltViewModel()
@@ -353,6 +354,9 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
     val saved = categories.find { it.id == categoryId } ?: return
     var draft by rememberDraft(saved)
     val members = resolved.find { it.category.id == categoryId }?.members.orEmpty()
+    // What an own category holds, as a draft: kind and payload in their stored order.
+    val savedMembers = members.map { it.type to it.payload }
+    var draftMembers by rememberDraft(savedMembers)
     val apps by viewModel.labeledApps.collectAsState()
     val websites by viewModel.pinnedWebsites.collectAsState()
     val places by viewModel.savedMapTargets.collectAsState()
@@ -363,8 +367,26 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
     var pickingElements by remember { mutableStateOf(false) }
     var confirmingDelete by remember { mutableStateOf(false) }
     val rule = saved.smartRule
+    // Shown like the category will show them: in the own order, else apps by name and the rest after.
+    val shownMembers: List<CategoryMember> = if (rule != null) members else {
+        val ordered = if (draft.manualOrder) draftMembers else {
+            val (appMembers, others) = draftMembers.partition { it.first == GridItemType.APP }
+            appMembers.sortedBy { (_, key) -> apps.find { it.componentName.flattenToString() == key }?.label?.lowercase() } + others
+        }
+        ordered.mapIndexed { index, (type, payload) -> CategoryMember(categoryId = categoryId, type = type, payload = payload, orderIndex = index) }
+    }
+    val membersChanged = rule == null && if (draft.manualOrder) draftMembers != savedMembers else draftMembers.toSet() != savedMembers.toSet()
 
-    SettingsSubScreen(title = saved.name, navController = navController, onBack = onBack, onSave = { viewModel.updateCategory(draft) }, dirty = draft != saved) {
+    SettingsSubScreen(
+        title = saved.name,
+        navController = navController,
+        onBack = onBack,
+        onSave = {
+            viewModel.updateCategory(draft)
+            if (membersChanged || draft.manualOrder != saved.manualOrder) viewModel.replaceCategoryMembers(categoryId, shownMembers.map { it.type to it.payload })
+        },
+        dirty = draft != saved || membersChanged
+    ) {
         SettingsPreferenceGroup {
             Row(
                 modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(16.dp),
@@ -411,33 +433,30 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
             }
         }
         if (rule != null) RuleSettings(draft) { draft = it }
-        if (rule == null && members.size > 1) {
+        if (rule == null && shownMembers.size > 1) {
+            // Switching on keeps the order as it is shown now, ready to be dragged.
+            val setManual = { on: Boolean ->
+                if (on) draftMembers = shownMembers.map { it.type to it.payload }
+                draft = draft.copy(manualOrder = on)
+            }
             SettingsPreferenceGroup {
                 SettingsPreference(
                     icon = null,
                     title = stringResource(R.string.settings_category_manual_order),
-                    summary = stringResource(if (saved.manualOrder) R.string.settings_category_manual_order_on else R.string.settings_category_manual_order_off),
-                    onClick = {
-                        // Keeps the order as it is shown now; pending changes above are saved with it.
-                        if (!saved.manualOrder) viewModel.reorderCategoryMembers(members)
-                        viewModel.updateCategory(draft.copy(manualOrder = !saved.manualOrder))
-                    },
-                    trailing = {
-                        androidx.compose.material3.Switch(checked = saved.manualOrder, onCheckedChange = { on ->
-                            if (on) viewModel.reorderCategoryMembers(members)
-                            viewModel.updateCategory(draft.copy(manualOrder = on))
-                        })
-                    }
+                    summary = stringResource(if (draft.manualOrder) R.string.settings_category_manual_order_on else R.string.settings_category_manual_order_off),
+                    onClick = { setManual(!draft.manualOrder) },
+                    trailing = { androidx.compose.material3.Switch(checked = draft.manualOrder, onCheckedChange = { setManual(it) }) }
                 )
             }
         }
         Column {
-            SettingsGroupLabel(stringResource(R.string.settings_category_members, members.size))
-            if (rule == null && saved.manualOrder && members.size > 1) {
+            SettingsGroupLabel(stringResource(R.string.settings_category_members, shownMembers.size))
+            val removeMember = { member: CategoryMember -> draftMembers = draftMembers - (member.type to member.payload) }
+            if (rule == null && draft.manualOrder && shownMembers.size > 1) {
                 ReorderableList(
-                    items = members,
-                    key = { it.id },
-                    onReorder = viewModel::reorderCategoryMembers,
+                    items = shownMembers,
+                    key = { "${it.type}|${it.payload}" },
+                    onReorder = { ordered -> draftMembers = ordered.map { it.type to it.payload } },
                     itemHeight = 64.dp,
                     dividers = true
                 ) { member ->
@@ -448,11 +467,11 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
                         places = places,
                         contacts = contacts,
                         loadIcon = viewModel::loadIcon,
-                        onRemove = { viewModel.setCategoryMember(categoryId, member.type, member.payload, false) },
+                        onRemove = { removeMember(member) },
                         inList = true
                     )
                 }
-            } else if (members.isEmpty()) {
+            } else if (shownMembers.isEmpty()) {
                 SettingsPreferenceGroup {
                     SettingsPreference(
                         icon = null,
@@ -463,7 +482,7 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
                 }
             } else {
                 SettingsPreferenceGroup {
-                    members.forEach { member ->
+                    shownMembers.forEach { member ->
                         CategoryMemberRow(
                             member = member,
                             apps = apps,
@@ -471,7 +490,7 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
                             places = places,
                             contacts = contacts,
                             loadIcon = viewModel::loadIcon,
-                            onRemove = if (rule == null) ({ viewModel.setCategoryMember(categoryId, member.type, member.payload, false) }) else null
+                            onRemove = if (rule == null) ({ removeMember(member) }) else null
                         )
                     }
                 }
@@ -502,7 +521,7 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
         )
     }
     if (pickingApps) {
-        val chosen = members.filter { it.type == GridItemType.APP }.map { it.payload }.toSet()
+        val chosen = draftMembers.filter { it.first == GridItemType.APP }.map { it.second }.toSet()
         CategoryAppsPicker(
             title = saved.name,
             apps = apps,
@@ -510,11 +529,11 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
             loadIcon = viewModel::loadIcon,
             onDone = { picked ->
                 // Everything kept stays where it was (an own order too); new apps come at the end, by name.
-                val kept = members.filter { it.type != GridItemType.APP || it.payload in picked }.map { it.type to it.payload }
+                val kept = draftMembers.filter { it.first != GridItemType.APP || it.second in picked }
                 val added = picked.filter { it !in chosen }
                     .sortedBy { key -> apps.find { it.componentName.flattenToString() == key }?.label?.lowercase() }
                     .map { GridItemType.APP to it }
-                viewModel.replaceCategoryMembers(categoryId, kept + added)
+                draftMembers = kept + added
                 pickingApps = false
             },
             onDismiss = { pickingApps = false }
@@ -522,12 +541,14 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
     }
     if (pickingElements) {
         CategoryElementsSheet(
-            members = members,
+            members = shownMembers,
             websites = websites,
             places = places,
             contacts = contacts,
             shortcuts = shortcuts,
-            onToggle = { type, payload, on -> viewModel.setCategoryMember(categoryId, type, payload, on) },
+            onToggle = { type, payload, on ->
+                draftMembers = if (on) (draftMembers - (type to payload)) + (type to payload) else draftMembers - (type to payload)
+            },
             onDismiss = { pickingElements = false }
         )
     }
@@ -619,7 +640,7 @@ internal fun CategoryAppsPicker(
     SettingsFixedDialog(
         title = title,
         onDismiss = onDismiss,
-        actions = { TextButton(onClick = { onDone(selected.toSet()) }) { Text(stringResource(R.string.settings_save)) } },
+        actions = { TextButton(onClick = { onDone(selected.toSet()) }) { Text(stringResource(R.string.settings_categories_done)) } },
         bottomBar = {
             Button(
                 onClick = { onDone(selected.toSet()) },

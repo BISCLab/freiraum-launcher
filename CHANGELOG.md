@@ -17,6 +17,7 @@
 - Fixed: unticking the last category of a widget showed all categories again
 - Choosing a category (folder, gesture, Add) has a title, marks the current one and can make a new one right there
 - Categories: Done button when picking links, places, contacts and shortcuts; name fields in the usual shape
+- A category's page works like the other editors: name, symbol, color, rule, what it holds and its order are all kept with Save, and leaving without saving asks first
 
 ## 0.18.0
 

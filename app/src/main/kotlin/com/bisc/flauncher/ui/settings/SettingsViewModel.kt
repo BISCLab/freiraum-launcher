@@ -755,7 +755,8 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun replaceCategoryMembers(categoryId: Long, members: List<Pair<com.bisc.flauncher.data.model.GridItemType, String>>) {
-        viewModelScope.launch { categoryRepository.replaceMembers(categoryId, members) }
+        // Save closes the screen right away; the write must not die with it.
+        viewModelScope.launch(kotlinx.coroutines.NonCancellable) { categoryRepository.replaceMembers(categoryId, members) }
     }
 
     fun resolveLabel(componentName: ComponentName): String {
