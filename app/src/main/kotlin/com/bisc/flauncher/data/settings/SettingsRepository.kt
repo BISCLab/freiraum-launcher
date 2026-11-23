@@ -365,6 +365,22 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[CATEGORIES_CARD_ROWS_KEY] = rows.coerceIn(1, 3) }
     }
 
+    /** Every Categories widget's own choice, by [com.bisc.flauncher.data.model.CategoryWidgetConfig.keyFor]. */
+    val categoryWidgetConfigs: Flow<Map<String, com.bisc.flauncher.data.model.CategoryWidgetConfig>> = dataStore.data.map { prefs ->
+        runCatching {
+            val json = org.json.JSONObject(prefs[CATEGORY_WIDGETS_KEY] ?: "{}")
+            json.keys().asSequence().associateWith { com.bisc.flauncher.data.model.CategoryWidgetConfig.fromJson(json.optJSONObject(it)) }
+        }.getOrDefault(emptyMap())
+    }
+
+    suspend fun setCategoryWidgetConfig(key: String, config: com.bisc.flauncher.data.model.CategoryWidgetConfig) {
+        dataStore.edit { prefs ->
+            val json = runCatching { org.json.JSONObject(prefs[CATEGORY_WIDGETS_KEY] ?: "{}") }.getOrDefault(org.json.JSONObject())
+            json.put(key, config.toJson())
+            prefs[CATEGORY_WIDGETS_KEY] = json.toString()
+        }
+    }
+
     /** When each app was last opened from the launcher. Stays on the phone, like the counts. */
     val appLastLaunches: Flow<Map<String, Long>> = dataStore.data.map { prefs ->
         runCatching {
@@ -1341,6 +1357,7 @@ class SettingsRepository @Inject constructor(
         private val APP_LAUNCH_COUNTS_KEY = stringPreferencesKey("app_launch_counts")
         private val APP_LAST_LAUNCH_KEY = stringPreferencesKey("app_last_launch")
         private val CATEGORIES_VIEW_KEY = stringPreferencesKey("categories_view")
+        private val CATEGORY_WIDGETS_KEY = stringPreferencesKey("category_widgets")
         private val CATEGORIES_SHOW_SEARCH_KEY = booleanPreferencesKey("categories_show_search")
         private val CATEGORIES_CARD_ROWS_KEY = intPreferencesKey("categories_card_rows")
         private val LAUNCH_TRACKING_SINCE_KEY = longPreferencesKey("launch_tracking_since")

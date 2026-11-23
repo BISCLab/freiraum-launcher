@@ -493,6 +493,13 @@ class HomeViewModel @Inject constructor(
     val categoryBoxLook: StateFlow<Pair<ElementAppearance, Int>> = settingsRepository.boxLook
         .stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor(false) to com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT)
 
+    val categoryWidgetConfigs: StateFlow<Map<String, com.bisc.flauncher.data.model.CategoryWidgetConfig>> =
+        settingsRepository.categoryWidgetConfigs.stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+
+    fun setCategoryWidgetConfig(key: String, config: com.bisc.flauncher.data.model.CategoryWidgetConfig) {
+        viewModelScope.launch { settingsRepository.setCategoryWidgetConfig(key, config) }
+    }
+
     fun setCategoriesView(view: String) { viewModelScope.launch { settingsRepository.setCategoriesView(view) } }
     fun setCategoriesShowSearch(show: Boolean) { viewModelScope.launch { settingsRepository.setCategoriesShowSearch(show) } }
     fun setCategoriesCardRows(rows: Int) { viewModelScope.launch { settingsRepository.setCategoriesCardRows(rows) } }

@@ -202,7 +202,10 @@ internal fun WidgetEditor(
                 )
             }
         }
-        if (isBuiltIn && (row.payload == WidgetKind.WEATHER || row.payload == WidgetKind.NOTES)) {
+        if (isBuiltIn && row.payload == WidgetKind.CATEGORIES) {
+            CategoryWidgetSettings(row = row, navController = navController, viewModel = viewModel)
+        }
+        if (isBuiltIn && (row.payload == WidgetKind.WEATHER || row.payload == WidgetKind.NOTES || row.payload == WidgetKind.CATEGORIES)) {
             SettingsPreferenceGroup(
                 title = stringResource(R.string.settings_widget_paging_mode),
                 info = stringResource(R.string.settings_widget_paging_mode_row_info)

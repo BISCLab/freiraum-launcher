@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Dashboard
@@ -277,7 +278,7 @@ internal fun AddRowSheet(
             modifier = Modifier.fillMaxWidth().heightIn(max = 640.dp).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            listOf(WidgetKind.CLOCK, WidgetKind.MUSIC, WidgetKind.WEATHER, WidgetKind.NOTES, WidgetKind.SPACER).forEach { kind ->
+            listOf(WidgetKind.CLOCK, WidgetKind.MUSIC, WidgetKind.WEATHER, WidgetKind.NOTES, WidgetKind.CATEGORIES, WidgetKind.SPACER).forEach { kind ->
                 SettingsPreference(icon = widgetKindIcon(kind), title = widgetKindLabel(kind), onClick = { onWidgetKindSelected(kind) }, trailing = null)
             }
             SettingsPreference(icon = Icons.Filled.Widgets, title = stringResource(R.string.picker_widget_more), onClick = onMoreWidgetsSelected, trailing = null)
@@ -375,6 +376,7 @@ internal fun widgetKindIcon(kind: String): ImageVector = when (kind) {
     WidgetKind.MUSIC -> Icons.Filled.MusicNote
     WidgetKind.WEATHER -> Icons.Filled.Cloud
     WidgetKind.NOTES -> Icons.Filled.EditNote
+    WidgetKind.CATEGORIES -> Icons.AutoMirrored.Filled.Label
     WidgetKind.SPACER -> Icons.Filled.HorizontalRule
     else -> Icons.Filled.Schedule
 }
@@ -411,6 +413,7 @@ internal fun widgetKindLabel(kind: String): String = when (kind) {
     WidgetKind.MUSIC -> stringResource(R.string.picker_widget_music)
     WidgetKind.WEATHER -> stringResource(R.string.picker_widget_weather)
     WidgetKind.NOTES -> stringResource(R.string.picker_widget_notes)
+    WidgetKind.CATEGORIES -> stringResource(R.string.settings_pages_categories)
     WidgetKind.SPACER -> stringResource(R.string.picker_widget_spacer)
     else -> kind
 }

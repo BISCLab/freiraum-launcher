@@ -1144,4 +1144,18 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="categories_nothing">Nothing in here.</string>
     <string name="categories_page_empty">You have no categories yet.</string>
     <string name="categories_page_make">Make categories</string>
+    <string name="widget_categories_empty">No categories yet. Tap here to make some.</string>
+    <string name="widget_categories_mode">What the widget shows</string>
+    <string name="widget_categories_mode_tabs">Several with tabs</string>
+    <string name="widget_categories_mode_tabs_summary">You switch between the categories right in the widget</string>
+    <string name="widget_categories_mode_single">One category</string>
+    <string name="widget_categories_mode_single_summary">The apps of one category as a grid</string>
+    <string name="widget_categories_mode_tiles">Compact</string>
+    <string name="widget_categories_mode_tiles_summary">The categories as small tiles. A tap opens them on the Categories page.</string>
+    <string name="widget_categories_chips">Show chips</string>
+    <string name="widget_categories_chips_summary">At the top of the widget, to tap. Without chips only the name shows there.</string>
+    <string name="widget_categories_which">Which categories</string>
+    <string name="widget_categories_which_one">Which category</string>
+    <string name="widget_categories_which_info">New categories join by themselves while “All” is picked.</string>
+    <string name="widget_categories_all">All</string>
 </resources>

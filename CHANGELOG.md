@@ -8,6 +8,7 @@
 - Long press on an app: Categories, to put it in or take it out, or to make a new one
 - New page Categories: all categories as chips, several can be chosen at once; below them as cards, tabs or a list, with a search field
 - A category is an element: put it in the Dock, the Panel, an element box or a folder, a tap opens it on the Categories page
+- Categories widget for pages, the Panel and folders: one category as a grid, several with tabs to switch right in the widget (chips, swiping or paging buttons), or all of them as small tiles
 
 ## 0.17.2
 

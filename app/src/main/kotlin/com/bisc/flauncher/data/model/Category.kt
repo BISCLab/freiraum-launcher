@@ -50,3 +50,34 @@ val CategoryMemberTypes = setOf(GridItemType.APP, GridItemType.SHORTCUT, GridIte
 
 /** A category with the elements it holds right now, smart ones worked out. */
 data class ResolvedCategory(val category: Category, val members: List<CategoryMember>)
+
+/** How a Categories widget shows: one category ([SINGLE]), several with tabs ([TABS]), or the
+ *  categories themselves as small tiles that open the Categories page ([TILES]). */
+enum class CategoryWidgetMode { SINGLE, TABS, TILES }
+
+/** One Categories widget's own choice. [ids] empty means every category. */
+data class CategoryWidgetConfig(
+    val mode: CategoryWidgetMode = CategoryWidgetMode.TABS,
+    val ids: List<Long> = emptyList(),
+    val chips: Boolean = true
+) {
+    fun toJson(): org.json.JSONObject = org.json.JSONObject()
+        .put("mode", mode.name)
+        .put("ids", org.json.JSONArray(ids))
+        .put("chips", chips)
+
+    companion object {
+        fun fromJson(json: org.json.JSONObject?): CategoryWidgetConfig {
+            if (json == null) return CategoryWidgetConfig()
+            val ids = json.optJSONArray("ids")?.let { array -> (0 until array.length()).map { array.getLong(it) } }.orEmpty()
+            return CategoryWidgetConfig(
+                mode = runCatching { CategoryWidgetMode.valueOf(json.optString("mode")) }.getOrDefault(CategoryWidgetMode.TABS),
+                ids = ids,
+                chips = json.optBoolean("chips", true)
+            )
+        }
+
+        /** The key a widget's choice is kept under: page rows and folder widgets number apart. */
+        fun keyFor(row: PageRow): String = if (row.pageId == -1L) "f${row.id}" else "r${row.id}"
+    }
+}

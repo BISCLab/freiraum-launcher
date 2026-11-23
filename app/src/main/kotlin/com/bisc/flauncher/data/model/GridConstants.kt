@@ -13,6 +13,7 @@ object WidgetKind {
     const val MUSIC = "music"
     const val WEATHER = "weather"
     const val NOTES = "notes"
+    const val CATEGORIES = "categories"
 
     const val SPACER = "spacer"
 
@@ -21,6 +22,7 @@ object WidgetKind {
         MUSIC -> 2
         WEATHER -> 3
         NOTES -> 2
+        CATEGORIES -> 2
         SPACER -> 1
         else -> 1
     }
@@ -39,6 +41,7 @@ object WidgetKind {
         MUSIC -> 3
         WEATHER -> 3
         NOTES -> 4
+        CATEGORIES -> 6
         SPACER -> 10
         else -> 5
     }

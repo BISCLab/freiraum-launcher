@@ -610,3 +610,63 @@ fun ElementCategoriesDialog(
         NewCategoryDialog(onCreate = { name -> creating = false; onCreate(name) }, onDismiss = { creating = false })
     }
 }
+
+/** A Categories widget's own choice: how it shows, which categories, and the chips. Changes apply
+ *  right away, like the widget's paging buttons look. */
+@Composable
+internal fun CategoryWidgetSettings(row: com.bisc.flauncher.data.model.PageRow, navController: NavController, viewModel: HomeViewModel) {
+    val configs by viewModel.categoryWidgetConfigs.collectAsState()
+    val resolved by viewModel.resolvedCategories.collectAsState()
+    val key = com.bisc.flauncher.data.model.CategoryWidgetConfig.keyFor(row)
+    val config = configs[key] ?: com.bisc.flauncher.data.model.CategoryWidgetConfig()
+    fun set(new: com.bisc.flauncher.data.model.CategoryWidgetConfig) = viewModel.setCategoryWidgetConfig(key, new)
+    val single = config.mode == com.bisc.flauncher.data.model.CategoryWidgetMode.SINGLE
+
+    SettingsPreferenceGroup(title = stringResource(R.string.widget_categories_mode)) {
+        RadioPreference(stringResource(R.string.widget_categories_mode_tabs), com.bisc.flauncher.data.model.CategoryWidgetMode.TABS, config.mode, { set(config.copy(mode = it)) }, summary = stringResource(R.string.widget_categories_mode_tabs_summary))
+        RadioPreference(stringResource(R.string.widget_categories_mode_single), com.bisc.flauncher.data.model.CategoryWidgetMode.SINGLE, config.mode, { set(config.copy(mode = it, ids = config.ids.take(1))) }, summary = stringResource(R.string.widget_categories_mode_single_summary))
+        RadioPreference(stringResource(R.string.widget_categories_mode_tiles), com.bisc.flauncher.data.model.CategoryWidgetMode.TILES, config.mode, { set(config.copy(mode = it)) }, summary = stringResource(R.string.widget_categories_mode_tiles_summary))
+        if (config.mode == com.bisc.flauncher.data.model.CategoryWidgetMode.TABS) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.widget_categories_chips),
+                summary = stringResource(R.string.widget_categories_chips_summary),
+                onClick = { set(config.copy(chips = !config.chips)) },
+                trailing = { androidx.compose.material3.Switch(checked = config.chips, onCheckedChange = { set(config.copy(chips = it)) }) }
+            )
+        }
+    }
+    SettingsPreferenceGroup(
+        title = stringResource(if (single) R.string.widget_categories_which_one else R.string.widget_categories_which),
+        info = if (single) null else stringResource(R.string.widget_categories_which_info)
+    ) {
+        if (resolved.isEmpty()) {
+            SettingsPreference(icon = null, title = stringResource(R.string.settings_categories_empty), onClick = { navController.navigate("settings/elements/categories") })
+        }
+        if (!single) {
+            RadioPreference(stringResource(R.string.widget_categories_all), true, config.ids.isEmpty(), { if (it) set(config.copy(ids = emptyList())) })
+        }
+        resolved.forEach { r ->
+            val id = r.category.id
+            val checked = if (single) (config.ids.firstOrNull() ?: resolved.first().category.id) == id else config.ids.isEmpty() || id in config.ids
+            SettingsPreference(
+                icon = null,
+                leading = { CategoryBadge(r.category, 32.dp) },
+                title = r.category.name,
+                onClick = {
+                    if (single) set(config.copy(ids = listOf(id)))
+                    else {
+                        // Leaving "all" starts from all of them, so unticking one keeps the rest.
+                        val current = config.ids.ifEmpty { resolved.map { it.category.id } }
+                        val next = if (id in current) current - id else resolved.map { it.category.id }.filter { it in current || it == id }
+                        set(config.copy(ids = if (next.size == resolved.size) emptyList() else next))
+                    }
+                },
+                trailing = {
+                    if (single) androidx.compose.material3.RadioButton(selected = checked, onClick = null)
+                    else Checkbox(checked = checked, onCheckedChange = null)
+                }
+            )
+        }
+    }
+}

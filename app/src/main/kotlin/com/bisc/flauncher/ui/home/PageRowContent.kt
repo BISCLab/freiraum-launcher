@@ -126,6 +126,7 @@ fun PageRowContent(
                     WidgetKind.MUSIC -> MusicWidget(appearance = row.appearance(), cornerRadiusPercent = row.cornerRadiusPercent, horizontalMargin = horizontalMargin)
                     WidgetKind.WEATHER -> WeatherWidget(appearance = row.appearance(), cornerRadiusPercent = row.cornerRadiusPercent, horizontalMargin = horizontalMargin, pagingButtons = row.pagingButtons)
                     WidgetKind.NOTES -> NotesWidget(appearance = row.appearance(), cornerRadiusPercent = row.cornerRadiusPercent, horizontalMargin = horizontalMargin, spanY = row.spanY, pagingButtons = row.pagingButtons)
+                    WidgetKind.CATEGORIES -> com.bisc.flauncher.ui.home.widgets.CategoryWidget(row = row, horizontalMargin = horizontalMargin)
                     WidgetKind.SPACER -> Unit
                 }
             }

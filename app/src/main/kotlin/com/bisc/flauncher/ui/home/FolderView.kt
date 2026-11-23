@@ -374,6 +374,7 @@ internal fun FolderWidgetRow(
                 WidgetKind.MUSIC -> MusicWidget(appearance = item.appearance(), cornerRadiusPercent = item.cornerRadiusPercent)
                 WidgetKind.WEATHER -> WeatherWidget(appearance = item.appearance(), cornerRadiusPercent = item.cornerRadiusPercent, pagingButtons = item.pagingButtons)
                 WidgetKind.NOTES -> NotesWidget(appearance = item.appearance(), cornerRadiusPercent = item.cornerRadiusPercent, spanY = item.spanY, pagingButtons = item.pagingButtons)
+                WidgetKind.CATEGORIES -> com.bisc.flauncher.ui.home.widgets.CategoryWidget(row = item.asWidgetRow())
             }
             GridItemType.SYSTEM_WIDGET -> item.payload.toIntOrNull()?.let { appWidgetId ->
                 SystemWidgetView(

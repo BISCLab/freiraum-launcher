@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.HorizontalRule
 import androidx.compose.material.icons.filled.EditNote
@@ -266,6 +267,7 @@ private fun MiniOwnWidget(kind: String, ink: Color) {
             when (kind) {
                 WidgetKind.WEATHER -> Icons.Filled.Cloud
                 WidgetKind.MUSIC -> Icons.Filled.MusicNote
+                WidgetKind.CATEGORIES -> Icons.AutoMirrored.Filled.Label
                 else -> Icons.Filled.EditNote
             },
             contentDescription = null,

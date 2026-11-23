@@ -23,6 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Add
@@ -564,7 +565,8 @@ internal fun FolderWidgetKindSheet(onKindSelected: (String) -> Unit, onMoreSelec
                 com.bisc.flauncher.data.model.WidgetKind.CLOCK,
                 com.bisc.flauncher.data.model.WidgetKind.MUSIC,
                 com.bisc.flauncher.data.model.WidgetKind.WEATHER,
-                com.bisc.flauncher.data.model.WidgetKind.NOTES
+                com.bisc.flauncher.data.model.WidgetKind.NOTES,
+                com.bisc.flauncher.data.model.WidgetKind.CATEGORIES
             ).forEach { kind ->
                 Row(
                     modifier = Modifier
@@ -652,6 +654,7 @@ private fun folderWidgetKindIcon(kind: String) = when (kind) {
     com.bisc.flauncher.data.model.WidgetKind.MUSIC -> Icons.Filled.MusicNote
     com.bisc.flauncher.data.model.WidgetKind.WEATHER -> Icons.Filled.Cloud
     com.bisc.flauncher.data.model.WidgetKind.NOTES -> Icons.Filled.EditNote
+    com.bisc.flauncher.data.model.WidgetKind.CATEGORIES -> Icons.AutoMirrored.Filled.Label
     else -> Icons.Filled.MusicNote
 }
 
@@ -661,6 +664,7 @@ private fun folderWidgetKindLabel(kind: String): String = when (kind) {
     com.bisc.flauncher.data.model.WidgetKind.MUSIC -> stringResource(R.string.picker_widget_music)
     com.bisc.flauncher.data.model.WidgetKind.WEATHER -> stringResource(R.string.picker_widget_weather)
     com.bisc.flauncher.data.model.WidgetKind.NOTES -> stringResource(R.string.picker_widget_notes)
+    com.bisc.flauncher.data.model.WidgetKind.CATEGORIES -> stringResource(R.string.settings_pages_categories)
     else -> ""
 }
 
