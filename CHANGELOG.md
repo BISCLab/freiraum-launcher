@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Simpler, friendlier explanations for the keyboard bezel, its eyedropper, the settings lock, themed icons and "Keyboard does not learn"
+- All explanations in the settings and the welcome tour rewritten in short, simple sentences
 
 ## 0.17.1
 

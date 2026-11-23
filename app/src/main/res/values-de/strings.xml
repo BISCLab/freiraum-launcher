@@ -89,7 +89,7 @@
 
     <string name="settings_title">Einstellungen</string>
     <string name="settings_theme_confirm_title">„%1$s“ anwenden?</string>
-    <string name="settings_theme_confirm_message">Setzt die Farben aller Widgets, Karten, von Dock, Panel und Suche auf den neuen Modus. Deine Hintergründe und Bilder bleiben, wie sie sind. Jede Fläche lässt sich danach weiter einzeln anpassen.</string>
+    <string name="settings_theme_confirm_message">Alle Widgets, Karten, Dock, Panel und Suche bekommen die Farben des neuen Modus. Deine Hintergründe und Bilder bleiben. Danach kannst du jedes Teil wieder einzeln ändern.</string>
     <string name="settings_theme_apply">Anwenden</string>
     <string name="settings_language_label">Sprache</string>
     <string name="settings_language_system">Systemstandard</string>
@@ -97,7 +97,7 @@
     <string name="settings_theme_dark">Dunkel</string>
     <string name="settings_theme_system">System</string>
     <string name="settings_accent_label">Akzentfarbe</string>
-    <string name="settings_accent_global_info">Gilt für die Blase beim Scrollen in der App-Liste und die Ladeanimation. Die Ladeanimation kann in ihren eigenen Einstellungen auch eine eigene Farbe bekommen.</string>
+    <string name="settings_accent_global_info">Diese Farbe hat die Blase beim Scrollen in der App-Liste und die Ladeanimation. Der Ladeanimation kannst du auch eine eigene Farbe geben.</string>
     <string name="settings_accent_follows_global">Folgt der globalen Akzentfarbe</string>
     <string name="settings_accent_custom">Eigene Farbe</string>
     <string name="settings_design_title">Aussehen</string>
@@ -163,7 +163,7 @@
     <string name="settings_elements_delete_link">Link löschen</string>
     <string name="settings_elements_actionbuttons_title">Aktionsbuttons</string>
     <string name="settings_elements_actionbuttons_empty">Noch keine Aktionsbuttons.</string>
-    <string name="settings_elements_actionbuttons_picker_empty">Noch keine Aktionsbuttons – erstelle einen unter Einstellungen -&gt; Elemente -&gt; Aktionsbuttons.</string>
+    <string name="settings_elements_actionbuttons_picker_empty">Du hast noch keine Aktionsbuttons. Leg einen unter Einstellungen → Elemente → Aktionsbuttons an.</string>
     <string name="settings_elements_add_actionbutton">Aktionsbutton hinzufügen</string>
     <string name="settings_elements_actionbutton_name_hint">Name</string>
     <string name="settings_elements_actionbutton_action_label">Aktion</string>
@@ -193,18 +193,18 @@
     <string name="settings_charging_label">Laden</string>
     <string name="settings_charging_animation">Ladeanimation</string>
     <string name="settings_charging_color">Blasenfarbe</string>
-    <string name="settings_charging_animation_summary">Blasen steigen über den Startbildschirm auf, solange das Gerät lädt.</string>
+    <string name="settings_charging_animation_summary">Beim Laden steigen Blasen über den Startbildschirm.</string>
     <string name="settings_section_permissions">Berechtigungen &amp; System</string>
     <string name="settings_permissions_launcher_group">Launcher</string>
     <string name="settings_permissions_access_group">Zugriff</string>
     <string name="settings_permissions_granted">Erteilt</string>
     <string name="settings_permissions_not_granted">Nicht erteilt</string>
     <string name="settings_permissions_shortcuts">Zugriff auf Verknüpfungen</string>
-    <string name="settings_permissions_shortcuts_purpose">App-Verknüpfungen anheften und starten. Wird mit der Standard-Launcher-Rolle erteilt.</string>
+    <string name="settings_permissions_shortcuts_purpose">Damit kannst du App-Verknüpfungen anheften und öffnen. Das bekommt Freiraum von selbst, wenn es dein Standard-Launcher ist.</string>
     <string name="settings_permissions_contacts">Kontakte</string>
     <string name="settings_permissions_contacts_purpose">Kontakte suchen und anheften.</string>
     <string name="settings_permissions_notifications">Benachrichtigungszugriff</string>
-    <string name="settings_permissions_notifications_purpose">Aktuelle Wiedergabe im Musik-Widget und Punkte an App-Symbolen.</string>
+    <string name="settings_permissions_notifications_purpose">Für das Musik-Widget und die Punkte an App-Symbolen.</string>
     <string name="settings_default_launcher_description">Freiraum als Standard-Launcher festlegen.</string>
     <string name="settings_default_launcher_already_set">Freiraum ist der Standard-Launcher.</string>
 
@@ -223,11 +223,11 @@
     <string name="settings_manage_apps_name_label">Anzeigename</string>
     <string name="settings_manage_apps_visibility_label">Sichtbarkeit</string>
     <string name="settings_manage_apps_visibility_app_list_label">App-Liste</string>
-    <string name="settings_manage_apps_visibility_app_list_description">Blendet die App auch in der App-Auswahl aus. Platzierungen auf Seiten, im Dock und in Ordnern bleiben erhalten.</string>
+    <string name="settings_manage_apps_visibility_app_list_description">Die App fehlt dann auch, wenn du Apps auswählst. Wo sie schon liegt, auf Seiten, im Dock oder in Ordnern, bleibt sie.</string>
     <string name="settings_manage_apps_visibility_search_label">Textsuche</string>
-    <string name="settings_manage_apps_visibility_search_description">Blendet die App in der Textsuche aus.</string>
+    <string name="settings_manage_apps_visibility_search_description">Die App taucht in der Textsuche nicht auf.</string>
     <string name="settings_manage_apps_reveal_search_code">Mit Suchcode einblenden</string>
-    <string name="settings_manage_apps_reveal_search_code_description">Nur noch über den exakten Code unten auffindbar, statt über den Namen.</string>
+    <string name="settings_manage_apps_reveal_search_code_description">Du findest die App dann nur noch mit dem Code unten, nicht mehr über ihren Namen.</string>
     <string name="settings_manage_apps_reveal_code_hint">Suchcode</string>
     <string name="settings_more_settings_button">Weitere Einstellungen</string>
 
@@ -241,7 +241,7 @@
     <string name="settings_folder_edit_title">Ordner bearbeiten</string>
     <string name="settings_folder_name_label">Name</string>
     <string name="settings_folder_delete">Ordner löschen</string>
-    <string name="settings_folder_delete_confirm_message">Löscht den Ordner und alle enthaltenen Elemente dauerhaft.</string>
+    <string name="settings_folder_delete_confirm_message">Der Ordner und alles darin werden für immer gelöscht.</string>
     <string name="settings_folder_widget_app_widget">App-Widget</string>
     <string name="settings_folder_icon_pack_label">Icon-Pack</string>
     <string name="settings_folder_icon_pack_choose_icon">Symbol auswählen</string>
@@ -254,7 +254,7 @@
     <string name="settings_background_change_image">Bild ändern</string>
     <string name="settings_background_source_color">Farbe</string>
     <string name="settings_background_use_global">Globaler Hintergrund</string>
-    <string name="settings_background_use_global_summary">Derselbe Hintergrund überall, einmal unter Globale Einstellungen eingestellt.</string>
+    <string name="settings_background_use_global_summary">Überall derselbe Hintergrund. Du stellst ihn einmal unter Globale Einstellungen ein.</string>
     <string name="settings_section_global_background">Hintergrund</string>
     <string name="settings_card_global_background_subtitle">Ein Hintergrundbild oder eine Farbe für jeden Bildschirm</string>
     <string name="settings_background_opacity_label">Deckkraft</string>
@@ -296,16 +296,16 @@
     <string name="settings_pages_carousel_label">Karussell</string>
     <string name="settings_music_sources">Musikquellen</string>
     <string name="settings_music_sources_all">Alle Apps</string>
-    <string name="settings_music_sources_info">Nur die Wiedergabe dieser Apps erscheint im Musik-Widget und wird von ihm gesteuert. Ist keine angehakt, zählt jede App, auch Browser und Video-Apps.</string>
+    <string name="settings_music_sources_info">Das Musik-Widget zeigt und steuert nur, was in diesen Apps läuft. Hakst du keine an, zählt jede App, auch Browser und Video-Apps.</string>
     <string name="settings_music_cover_label">Cover</string>
     <string name="settings_music_cover_rounded">Abgerundetes Cover</string>
-    <string name="settings_music_cover_rounded_info">Das große Album-Cover bekommt abgerundete statt spitzer Ecken.</string>
+    <string name="settings_music_cover_rounded_info">Das große Album-Cover bekommt runde Ecken.</string>
     <plurals name="settings_music_sources_count">
         <item quantity="one">%1$d App</item>
         <item quantity="other">%1$d Apps</item>
     </plurals>
     <string name="settings_pages_carousel_endless">Endlos-Karussell</string>
-    <string name="settings_pages_carousel_endless_info">Nach der letzten Seite geht es mit der ersten weiter und umgekehrt, wie im Kreis.</string>
+    <string name="settings_pages_carousel_endless_info">Nach der letzten Seite kommt wieder die erste, wie im Kreis.</string>
     <string name="settings_pages_other_label">Funktionsseiten</string>
     <string name="settings_pages_behavior_label">Verhalten</string>
     <string name="settings_pages_add_template_label">Ausgangspunkt</string>
@@ -323,8 +323,8 @@
     <string name="settings_page_icon_glyph_widget_page">Widget-Seite</string>
 
     <string name="settings_rows_title">Zeilen</string>
-    <string name="settings_rows_empty">Keine Zeilen auf dieser Seite. Über „Zeile hinzufügen“ ein Widget oder eine Element-Box ergänzen.</string>
-    <string name="settings_page_app_overview_description">Vollbildliste aller Apps. Wird per Geste geöffnet (Standard: Nach oben wischen, siehe Gesten).</string>
+    <string name="settings_rows_empty">Auf dieser Seite ist noch nichts. Tipp auf „Zeile hinzufügen“ für ein Widget oder eine Element-Box.</string>
+    <string name="settings_page_app_overview_description">Alle deine Apps in einer Liste über den ganzen Bildschirm. Du öffnest sie mit einer Geste, zum Beispiel nach oben wischen.</string>
     <plurals name="settings_widget_size_rows">
         <item quantity="one">%1$d Zeile</item>
         <item quantity="other">%1$d Zeilen</item>
@@ -340,13 +340,13 @@
     <string name="settings_rows_remove">Zeile entfernen</string>
     <string name="settings_widgets_edit_title">Widget bearbeiten</string>
     <string name="settings_page_full_title">Diese Seite ist voll</string>
-    <string name="settings_page_full_message">Es passt hier nicht mehr neben das, was schon auf dieser Seite ist. Eine neue Seite dafür anlegen?</string>
+    <string name="settings_page_full_message">Das passt hier nicht mehr mit drauf. Soll eine neue Seite dafür her?</string>
     <string name="settings_page_full_confirm">Seite hinzufügen</string>
     <string name="settings_widgets_corner_shape_label">Eckenrundung</string>
     <string name="settings_widgets_edge_label">Rand</string>
     <string name="settings_widgets_edge_to_edge_label">Randlos</string>
-    <string name="settings_widgets_edge_to_edge_summary">Entfernt den seitlichen Abstand, das Widget nutzt die volle Bildschirmbreite. Standardmäßig aus; die Breite entspricht dann dem Dock.</string>
-    <string name="settings_edge_to_edge_summary">Entfernt den seitlichen Abstand, es nutzt die volle Bildschirmbreite. Standardmäßig aus: Ein feiner Abstand zum Bildschirmrand bleibt.</string>
+    <string name="settings_widgets_edge_to_edge_summary">Das Widget geht bis ganz an den Bildschirmrand. Ist das aus, ist es so breit wie das Dock.</string>
+    <string name="settings_edge_to_edge_summary">Es geht bis ganz an den Bildschirmrand. Ist das aus, bleibt ein kleiner Abstand.</string>
 
     <string name="settings_clock_alignment_label">Ausrichtung</string>
     <string name="settings_clock_alignment_center">Mittig</string>
@@ -368,9 +368,9 @@
     <string name="settings_clock_time_format_12h">12-Stunden</string>
     <string name="settings_clock_date_format_label">Datumsformat</string>
     <string name="settings_clock_date_format_placeholder">EEEE, dd.MM.yyyy</string>
-    <string name="settings_clock_date_format_summary">Leer: übliches Format deiner Sprache, z. B. „Montag, 26.10.2026“. Sonst ein Datumsmuster, zum Beispiel „EEEE, dd.MM.yyyy“ oder „d. MMM“.</string>
+    <string name="settings_clock_date_format_summary">Leer lassen für das übliche Format, zum Beispiel „Montag, 26.10.2026“. Oder ein eigenes Muster wie „EEEE, dd.MM.yyyy“ oder „d. MMM“.</string>
     <string name="settings_clock_show_next_alarm">Nächsten Alarm anzeigen</string>
-    <string name="settings_clock_show_next_alarm_summary">Zeigt den nächsten Alarm unter dem Datum. Keine zusätzliche Berechtigung erforderlich.</string>
+    <string name="settings_clock_show_next_alarm_summary">Dein nächster Wecker steht unter dem Datum.</string>
 
     <string name="settings_element_box_edit_title">Element-Box bearbeiten</string>
     <string name="settings_element_box_columns_label">Spalten</string>
@@ -389,7 +389,7 @@
     <string name="settings_row_entry_add_actionbutton">Aktionsbutton hinzufügen</string>
     <string name="settings_element_box_form_label">Form</string>
     <string name="settings_element_box_pill_mode_label">Einzeiliges Layout</string>
-    <string name="settings_element_box_pill_mode_summary">Einträge in einer Zeile ohne Umbruch statt im Raster — so wie das Dock</string>
+    <string name="settings_element_box_pill_mode_summary">Alles in einer Reihe statt im Raster, wie im Dock</string>
     <string name="settings_map_mode_address">Adresse</string>
     <string name="settings_map_mode_coordinates">Koordinaten</string>
     <string name="settings_map_street_hint">Straße und Hausnummer</string>
@@ -403,9 +403,9 @@
     <string name="settings_all_saved">Alles gespeichert</string>
     <string name="settings_accessibility_label">Bedienungshilfen</string>
     <string name="settings_accessibility_mode">Barrierefreiheitsmodus</string>
-    <string name="settings_accessibility_mode_summary">Alle Elemente deckend mit kräftigem Rahmen, Schrift und Symbole in Schwarz oder Weiß, auch Uhr und Nebentexte. Größere App-Symbole und -Namen, größere Knöpfe, keine Unschärfe und keine Zier-Animationen. Auch die Einstellungen bekommen Rahmen und mehr Kontrast. Schrift wächst mit der in Android eingestellten Schriftgröße.</string>
+    <string name="settings_accessibility_mode_summary">Alles wird kräftiger und leichter zu sehen. Elemente sind nicht mehr durchsichtig und haben einen deutlichen Rahmen. Schrift ist schwarz oder weiß. App-Symbole, Namen und Knöpfe werden größer. Unschärfe und Zier-Animationen fallen weg. Die Schrift wächst mit der Schriftgröße von Android.</string>
     <string name="settings_unsaved_title">Nicht gespeicherte Änderungen</string>
-    <string name="settings_unsaved_message">Möchtest du deine Änderungen vor dem Verlassen speichern?</string>
+    <string name="settings_unsaved_message">Willst du deine Änderungen speichern?</string>
     <string name="settings_unsaved_discard">Verwerfen</string>
     <string name="settings_unsaved_keep_editing">Weiter bearbeiten</string>
     <string name="shortcut_settings">Einstellungen</string>
@@ -413,11 +413,11 @@
     <string name="settings_row_entry_new_folder">Neuer Ordner</string>
     <string name="settings_row_entry_no_folders">Keine weiteren Ordner. Oben einen anlegen.</string>
     <string name="settings_backup_label">Sicherung</string>
-    <string name="settings_backup_info">Eine Sicherung enthält alles, um Freiraum auf ein neues Handy umzuziehen oder neu zu installieren, ohne neu einzurichten: dein Aussehen (Farbmodi, Farben, Rahmen, Ecken, Effekte, Hintergründe, installierte Designs und Wallpaper) und deine eigenen Sachen (Seiten, Apps, Ordner, Notizen, Adressen, Kontakte, Links). Beim Importieren wird alles ersetzt und der Launcher neu gestartet.</string>
+    <string name="settings_backup_info">Mit einer Sicherung ziehst du Freiraum auf ein neues Handy um, ohne alles neu einzurichten. Drin ist dein Aussehen mit Farben, Designs, Wallpapern und Hintergründen. Und deine eigenen Sachen: Seiten, Apps, Ordner, Notizen, Adressen, Kontakte und Links. Beim Einspielen wird alles ersetzt und Freiraum startet neu.</string>
     <string name="settings_backup_export">Sicherung exportieren</string>
     <string name="settings_backup_import">Sicherung importieren</string>
     <string name="settings_backup_import_confirm_title">Sicherung importieren?</string>
-    <string name="settings_backup_import_confirm_message">Ersetzt alles durch den Inhalt der Datei: Aussehen, Designs, Wallpaper, Hintergründe, Seiten, Apps, Ordner und persönliche Daten. Freiraum wird anschließend neu gestartet.</string>
+    <string name="settings_backup_import_confirm_message">Alles wird durch die Sicherung ersetzt: Aussehen, Seiten, Apps, Ordner und deine Daten. Danach startet Freiraum neu.</string>
     <string name="settings_backup_export_done">Sicherung gespeichert</string>
     <string name="settings_backup_export_failed">Sicherung konnte nicht gespeichert werden</string>
     <string name="settings_backup_import_restarting">Sicherung gefunden. Neustart zum Anwenden…</string>
@@ -425,20 +425,20 @@
     <string name="settings_backup_import_too_new">Sicherung stammt aus einer neueren Freiraum-Version</string>
     <string name="settings_backup_import_failed">Datei konnte nicht gelesen werden</string>
     <string name="settings_statusbar_hide_all">Überall ausblenden</string>
-    <string name="settings_statusbar_hide_all_summary">Schaltet die Statusleiste auf jeder Seite, der App-Liste, der Textsuche und in Ordnern aus. Danach kann sie pro Bildschirm einzeln wieder eingeschaltet werden. Wischen vom oberen Rand zeigt sie immer kurzzeitig an.</string>
-    <string name="settings_statusbar_confirm_hide_message">Dadurch wird die Statusleiste auf jeder Seite, der App-Liste, der Textsuche und in Ordnern auf einmal ausgeblendet — unabhängig davon, wie jede einzeln aktuell eingestellt ist.</string>
+    <string name="settings_statusbar_hide_all_summary">Die Statusleiste verschwindet überall: auf allen Seiten, in der App-Liste, der Textsuche und in Ordnern. Danach kannst du sie für einzelne Bildschirme wieder anmachen. Wischst du vom oberen Rand, siehst du sie kurz.</string>
+    <string name="settings_statusbar_confirm_hide_message">Die Statusleiste verschwindet dann überall auf einmal, egal wie sie gerade eingestellt ist.</string>
     <string name="settings_corner_radius_value">%1$d%%</string>
     <string name="settings_statusbar_hide_page">Statusleiste ausblenden</string>
     <string name="settings_folder_hide_status_bar">Statusleiste in Ordnern ausblenden</string>
     <string name="settings_folder_hide_dock">Dock in Ordnern ausblenden</string>
-    <string name="settings_folder_hide_dock_summary">Standardmäßig aus, sodass das schwebende Dock sichtbar bleibt, während ein Ordner geöffnet ist.</string>
+    <string name="settings_folder_hide_dock_summary">Ist das aus, bleibt das Dock sichtbar, solange ein Ordner offen ist.</string>
 
     <string name="settings_folder_creator_title">Neuer Ordner</string>
     <string name="settings_folder_creator_name_hint">Ordnername</string>
     <string name="settings_folder_creator_create">Erstellen</string>
     <string name="settings_section_search_full">Textsuche</string>
     <string name="settings_app_list_search_button">Suchbutton</string>
-    <string name="settings_app_list_search_button_summary">Schwebender Suchbutton in der App-Liste an der Position des Dock-Buttons.</string>
+    <string name="settings_app_list_search_button_summary">Ein runder Suchknopf in der App-Liste, an derselben Stelle wie der Knopf im Dock.</string>
     <string name="settings_app_icon_label">Symbol</string>
     <string name="settings_app_icon_default">Standard</string>
     <string name="settings_app_icon_reset">Standardsymbol verwenden</string>
@@ -460,7 +460,7 @@
     <string name="settings_keyboard_cover_system_colors_info">Viele Tastaturen nutzen genau diese Farben. Tipp eine an und vergleiche.</string>
     <string name="settings_keyboard_cover_own_color">Eigene Farbe</string>
     <string name="search_keyboard_close">Tastatur schließen</string>
-    <string name="settings_search_keyboard_auto_open_summary">Aus: Die Suche öffnet nur mit dem Eingabefeld; antippen zeigt die Tastatur.</string>
+    <string name="settings_search_keyboard_auto_open_summary">Ist das aus, tippst du erst ins Suchfeld, dann kommt die Tastatur.</string>
     <string name="search_filter_ai">KI-App</string>
     <string name="settings_search_include_ai">KI-App</string>
     <string name="search_command_ai">%1$s fragen: %2$s</string>
@@ -470,7 +470,7 @@
     <string name="contact_action_telegram">Telegram</string>
     <string name="contact_action_open_in_contacts">In Kontakte-App öffnen</string>
     <string name="contact_action_no_number">Keine Telefonnummer für diesen Kontakt.</string>
-    <string name="settings_search_categories_info">Zwei Schalter pro Kategorie. Suche: Ihre Ergebnisse kommen bei jeder Eingabe. Leiste: Sie hat einen Platz in der Leiste neben den Ergebnissen. Beides = immer dabei. Nur Suche = Ergebnisse ohne Platz in der Leiste. Nur Leiste = auf Abruf, ihre Ergebnisse erscheinen erst nach einem Tipp auf sie in der Leiste. Keins = aus. Tippe auf ein Symbol, um es und die Farbe zu ändern, ziehe, um die Reihenfolge zu ändern. Web und Karten übergeben die Anfrage nur an deinen Browser bzw. deine Karten-App; der Launcher selbst geht nie ins Netz.</string>
+    <string name="settings_search_categories_info">Jede Kategorie hat zwei Schalter. Suche an: Ihre Ergebnisse kommen sofort beim Tippen. Leiste an: Sie hat ein Symbol in der Leiste neben den Ergebnissen. Ist nur die Leiste an, kommen ihre Ergebnisse erst, wenn du auf ihr Symbol tippst. Tipp auf ein Symbol, um es und seine Farbe zu ändern. Zum Sortieren einfach ziehen. Web und Karten geben deine Suche nur an deinen Browser oder deine Karten-App weiter. Freiraum selbst geht nie ins Internet.</string>
     <string name="settings_search_categories_label">Suchkategorien</string>
     <string name="settings_search_include_apps">Apps</string>
     <string name="settings_search_include_contacts">Kontakte</string>
@@ -480,7 +480,7 @@
     <string name="settings_search_include_shortcuts">Verknüpfungen</string>
     <string name="settings_search_open_with_default">Systemstandard</string>
     <string name="settings_search_open_with_clear">Systemstandard verwenden</string>
-    <string name="settings_search_open_with_info">Standardmäßig werden der Browser und die Karten-App aus den Android-Einstellungen verwendet. Hier kannst du nur für Freiraum eine andere App wählen. Kann sie eine Anfrage nicht öffnen, wird stattdessen der Systemstandard genutzt.</string>
+    <string name="settings_search_open_with_info">Normalerweise nimmt Freiraum den Browser und die Karten-App, die du in Android eingestellt hast. Hier kannst du nur für Freiraum andere wählen. Klappt es mit der gewählten App nicht, springt die normale ein.</string>
     <string name="settings_search_browser_title">Browser</string>
     <string name="settings_search_browser_pick">Browser auswählen</string>
     <string name="settings_search_maps_title">Karten-App</string>
@@ -494,7 +494,7 @@
     <string name="picker_widget_spacer">Leerraum</string>
     <string name="picker_widget_more">Weitere Widgets</string>
 
-    <string name="system_widget_picker_empty">Keine Drittanbieter-Widgets installiert</string>
+    <string name="system_widget_picker_empty">Keine Widgets von anderen Apps gefunden</string>
 
     <string name="widget_music_placeholder_title">Musik</string>
     <string name="widget_music_enable_access">Tippen, um Medienzugriff zu erlauben</string>
@@ -505,7 +505,7 @@
     <string name="widget_music_pause">Pause</string>
     <string name="widget_music_next">Nächster Titel</string>
 
-    <string name="widget_weather_no_data">Keine Wetterdaten. Die Daten stammen von Breezy Weather oder Gadgetbridge.</string>
+    <string name="widget_weather_no_data">Noch kein Wetter da. Das Wetter kommt von Breezy Weather oder Gadgetbridge.</string>
     <string name="widget_weather_temp">%1$d°</string>
     <string name="widget_weather_minmax">%1$d° / %2$d°</string>
     <string name="widget_weather_updated">Aktualisiert %1$s</string>
@@ -532,7 +532,7 @@
     <string name="widget_notes_hidden">Ausgeblendete Notizen</string>
     <string name="widget_notes_show_again">„%1$s“ wieder einblenden</string>
     <string name="widget_weather_updated_on">Aktualisiert %1$s, %2$s</string>
-    <string name="widget_system_unavailable">Dieses Widget ist nicht mehr verfügbar. Seine App wurde entfernt oder es stammt aus einem Backup – entferne es und füge es neu hinzu.</string>
+    <string name="widget_system_unavailable">Dieses Widget geht nicht mehr. Vielleicht wurde seine App gelöscht oder es kommt aus einer Sicherung. Entfern es und füg es neu hinzu.</string>
     <string name="widget_notes_add">Neue Notiz</string>
     <string name="widget_notes_edit">Bearbeiten</string>
     <string name="widget_notes_close">Schließen</string>
@@ -575,7 +575,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="search_section_launcher_settings">Freiraum-Einstellungen</string>
     <string name="contact_action_email">E-Mail schreiben</string>
     <string name="settings_pages_app_grid">App-Raster</string>
-    <string name="settings_page_app_grid_description">Alle Apps als Raster mit eigenem Suchfeld. Wird per Geste, Aktionsbutton oder Dock-Slot geöffnet.</string>
+    <string name="settings_page_app_grid_description">Alle Apps als Raster mit eigenem Suchfeld. Du öffnest es mit einer Geste, einem Aktionsbutton oder über das Dock.</string>
     <string name="app_search_hint">Apps suchen…</string>
     <string name="settings_app_grid_grid_label">Raster</string>
     <string name="settings_app_grid_columns">Spalten</string>
@@ -586,9 +586,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_app_grid_bar_top">Oben</string>
     <string name="settings_app_grid_bar_none">Aus</string>
     <string name="settings_app_grid_bar_text_search">Stattdessen Textsuche öffnen</string>
-    <string name="settings_app_grid_bar_text_search_info">Ein Tipp auf das Feld öffnet die volle Textsuche, statt das Raster zu filtern.</string>
+    <string name="settings_app_grid_bar_text_search_info">Tippst du ins Feld, öffnet sich die ganze Textsuche.</string>
     <string name="settings_app_grid_keyboard">Tastatur sofort öffnen</string>
-    <string name="settings_app_grid_keyboard_info">Die Tastaturblende folgt den Einstellungen der Textsuche.</string>
+    <string name="settings_app_grid_keyboard_info">Die Tastaturblende sieht aus wie in der Textsuche.</string>
     <string name="settings_app_grid_folders">Ordner</string>
     <string name="settings_app_grid_folders_info">Wähle, welche deiner Ordner im Raster erscheinen.</string>
     <string name="settings_app_grid_folders_empty">Noch keine Ordner</string>
@@ -597,13 +597,13 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_app_grid_folders_alphabetical">Alphabetisch zwischen den Apps</string>
     <string name="settings_app_grid_hide_folder_apps">Apps aus diesen Ordnern ausblenden</string>
     <string name="settings_app_list_own_search">Eigene App-Suche</string>
-    <string name="settings_app_list_own_search_info">Der Suchbutton öffnet eine Suche nur nach Apps direkt in der Liste statt der Textsuche.</string>
+    <string name="settings_app_list_own_search_info">Der Suchknopf sucht dann nur nach Apps, direkt in der Liste.</string>
     <string name="settings_search_bar_position_label">Position</string>
-    <string name="settings_pages_carousel_endless_summary">Kann das Wischen zwischen den Seiten weniger flüssig machen</string>
+    <string name="settings_pages_carousel_endless_summary">Das Wischen kann dadurch etwas ruckeln</string>
     <string name="lock_wallpaper_offer_yes">Ja, setzen</string>
     <string name="lock_wallpaper_offer_no">Nein danke</string>
     <string name="settings_lock_portrait">Auf Hochformat sperren</string>
-    <string name="settings_lock_portrait_summary">Der Launcher bleibt aufrecht, wenn das Gerät gedreht wird</string>
+    <string name="settings_lock_portrait_summary">Der Launcher dreht sich nicht mit, wenn du dein Handy drehst</string>
     <string name="widget_page_next">Weiter</string>
     <string name="widget_page_previous">Zurück</string>
     <string name="settings_widget_paging_title">Pfeiltasten in Widgets</string>
@@ -616,25 +616,25 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_widget_arrow_triangle">Dreieck</string>
     <string name="settings_widget_arrow_arrow">Pfeil</string>
     <string name="settings_widget_paging_opacity">Deckkraft</string>
-    <string name="settings_widget_paging_opacity_info">Auch bei 0 lassen sich die Tasten noch antippen, sie sind nur unsichtbar.</string>
-    <string name="settings_widget_paging_hint">Wetter: Die hohen Tasten blättern die Uhrzeiten, die breiten die Tage. Notizen: Die Tasten sitzen links neben dem Plus.</string>
+    <string name="settings_widget_paging_opacity_info">Auch bei 0 kannst du die Tasten noch antippen. Du siehst sie nur nicht.</string>
+    <string name="settings_widget_paging_hint">Wetter: Die hohen Tasten wechseln die Stunden, die breiten die Tage. Notizen: Die Tasten sind links neben dem Plus.</string>
     <string name="welcome_skip">Überspringen</string>
     <string name="welcome_next">Weiter</string>
     <string name="welcome_done">Los geht\'s</string>
     <string name="welcome_hello_title">Willkommen bei Freiraum</string>
     <string name="welcome_hello_text">Ein ruhiger, aufgeräumter Startbildschirm. Seiten, Widgets, Suche und Aussehen richten sich nach dir, und nichts verlässt dein Handy.</string>
     <string name="welcome_gestures_title">Gesten</string>
-    <string name="welcome_gestures_text">So kommst du überall hin. Tipp eine Geste an, um festzulegen, was sie öffnet. Später geht das jederzeit unter Einstellungen → Seiten → Gesten.</string>
+    <string name="welcome_gestures_text">So kommst du überall hin. Tipp auf eine Geste und wähl aus, was sie öffnet. Ändern kannst du das jederzeit unter Einstellungen → Seiten → Gesten.</string>
     <string name="welcome_settings_title">Einstellungen</string>
-    <string name="welcome_settings_text">Der Knopf mit den Reglern im Dock öffnet die Einstellungen. Entfernst du ihn, findest du sie in der Textsuche unter Freiraum-Einstellungen oder in der App-Info von Freiraum in Android. Unter Erweiterungen kommen dort später Designs, Wallpaper und Widgets dazu.</string>
+    <string name="welcome_settings_text">Der Knopf mit den Reglern im Dock öffnet die Einstellungen. Nimmst du ihn weg, findest du sie über die Textsuche oder in der App-Info von Freiraum. In den Einstellungen holst du dir unter Erweiterungen später auch Designs, Wallpaper und Widgets.</string>
     <string name="welcome_permissions_title">Berechtigungen</string>
-    <string name="welcome_permissions_text">Alles hier ist freiwillig, und Freiraum hat keinen Internetzugriff. Tippe auf eine Zeile, um es jetzt zu erlauben, oder später in den Einstellungen.</string>
+    <string name="welcome_permissions_text">Alles hier ist freiwillig. Freiraum geht nie ins Internet. Tipp auf eine Zeile, um es gleich zu erlauben, oder mach es später in den Einstellungen.</string>
     <string name="welcome_lock_title">Sperrbildschirm</string>
-    <string name="welcome_lock_text">Dein Wallpaper hat auch ein Bild für den Sperrbildschirm. Dort verwenden? Nur der Sperrbildschirm ändert sich.</string>
+    <string name="welcome_lock_text">Zu deinem Wallpaper gehört auch ein Bild für den Sperrbildschirm. Möchtest du es dort haben? Nur der Sperrbildschirm ändert sich.</string>
     <string name="settings_motion_label">Animationen</string>
-    <string name="settings_motion_info">Apps, Ordner und Seiten zoomen aus dem Angetippten heraus, Seiten treten beim Wischen leicht zurück, und die Zurück-Geste lässt den Bildschirm mit dem Finger schrumpfen. Ist in Android „Animationen entfernen“ an, gibt es keine.</string>
+    <string name="settings_motion_info">Apps, Ordner und Seiten wachsen aus dem heraus, was du antippst. Beim Wischen treten Seiten ein wenig zurück. Und mit der Zurück-Geste schrumpft der Bildschirm unter deinem Finger. Hast du in Android „Animationen entfernen“ an, gibt es nichts davon.</string>
     <string name="settings_motion_system_off">In Android ist „Animationen entfernen“ an</string>
-    <string name="settings_motion_system_off_summary">Deshalb zeigt Freiraum keine Animationen. Tippe, um die Bedienungshilfen von Android zu öffnen (Farbe und Bewegung).</string>
+    <string name="settings_motion_system_off_summary">Darum gibt es hier keine Animationen. Tipp hier, um das in Android zu ändern (Farbe und Bewegung).</string>
     <string name="settings_motion_app_zoom">Apps öffnen aus ihrem Icon</string>
     <string name="settings_motion_overlay_zoom">App-Liste, App-Raster und Suche zoomen auf</string>
     <string name="settings_motion_folder_zoom">Ordner zoomen auf</string>
@@ -644,15 +644,15 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_motion_ripples">Wellen bei Tippen und Gesten</string>
     <string name="designs_title">Designs</string>
     <string name="designs_entry_summary">Fertiges Aussehen mit Farben, Rahmen, Ecken und Effekten</string>
-    <string name="designs_intro">Ein Design ändert nur das Aussehen: Farben, Rahmen, Ecken und Effekte. Deine Seiten, Apps, Ordner und Notizen bleiben, wie sie sind, ebenso deine Hintergründe, die mit Wallpapern kommen. Freiraum hat keinen Internetzugriff, deshalb lädst du Designs im Browser herunter und fügst sie hier hinzu.</string>
+    <string name="designs_intro">Ein Design ändert nur, wie alles aussieht: Farben, Rahmen, Ecken und Effekte. Deine Seiten, Apps, Ordner, Notizen und Hintergründe bleiben. Freiraum geht nicht ins Internet. Darum lädst du Designs im Browser herunter und fügst sie hier hinzu.</string>
     <string name="designs_find">Designs finden</string>
-    <string name="designs_find_summary">Öffnet die Designs in der Übersicht im Browser</string>
+    <string name="designs_find_summary">Zeigt dir die Designs im Browser</string>
     <string name="designs_add">Design hinzufügen</string>
-    <string name="designs_add_summary">Eine heruntergeladene .freiraum-design-Datei wählen</string>
+    <string name="designs_add_summary">Wähl ein heruntergeladenes Design aus</string>
     <string name="designs_installed">Installiert</string>
     <string name="designs_active">Aktiv</string>
     <string name="designs_restore">Design entfernen</string>
-    <string name="designs_restore_summary">Holt die Farben, Rahmen, Ecken und Effekte zurück, die du vor dem Anwenden eines Designs hattest</string>
+    <string name="designs_restore_summary">Holt dein Aussehen von vor dem Design zurück</string>
     <string name="designs_export">Aktuelles Aussehen als Design speichern</string>
     <string name="designs_export_summary">Zum Teilen oder als Grundlage für ein eigenes Design</string>
     <string name="designs_export_default_name">Mein Design</string>
@@ -670,7 +670,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_motion_all">Animationen</string>
     <string name="designs_remove_title">%1$s löschen?</string>
     <string name="designs_remove_text">Das Design wird aus Freiraum gelöscht. Du kannst es jederzeit wieder hinzufügen.</string>
-    <string name="designs_remove_active_text">Dieses Design ist gerade aktiv. Freiraum kehrt zuerst zu deinem eigenen Aussehen zurück und löscht dann das Design.</string>
+    <string name="designs_remove_active_text">Du nutzt dieses Design gerade. Freiraum holt erst dein eigenes Aussehen zurück und löscht dann das Design.</string>
     <string name="settings_group_basics">Grundeinstellungen</string>
     <string name="settings_group_extensions">Erweiterungen</string>
     <string name="settings_launcher_theme_label">Launcher</string>
@@ -681,23 +681,23 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_motion_summary_on">An, %1$d von %2$d</string>
     <string name="settings_motion_summary_off">Aus</string>
     <string name="settings_motion_summary_system_off">In den Android-Einstellungen aus</string>
-    <string name="settings_backup_export_warning">Die Sicherung enthält deinen ganzen Launcher: das Aussehen mit Designs, Wallpaper und Hintergründen und persönliche Daten wie Notizen, Orte, Kontakte, Links und deine Apps. Bewahre sie nur für dich auf und teile sie nicht. Wenn du nur einen Look teilen willst, speichere ihn als Design.</string>
+    <string name="settings_backup_export_warning">In der Sicherung steckt dein ganzer Launcher, auch Persönliches wie Notizen, Orte, Kontakte und Links. Behalte sie für dich. Willst du nur dein Aussehen teilen, speichere es als Design.</string>
     <string name="settings_backup_export_understood">Verstanden</string>
     <string name="settings_backup_export_confirm">Exportieren</string>
-    <string name="settings_widgets_corner_hint" formatted="false">Je höher, desto runder. Sehr runde Ecken können in den Inhalt am Rand des Widgets schneiden.</string>
-    <string name="designs_export_info">Ein Design enthält nur das Aussehen: Farben, Rahmen, Ecken und Effekte. Keine persönlichen Daten und keine Bilder, du kannst es also gefahrlos teilen.</string>
+    <string name="settings_widgets_corner_hint" formatted="false">Je höher, desto runder. Bei sehr runden Ecken kann am Rand etwas abgeschnitten werden.</string>
+    <string name="designs_export_info">Ein Design ist nur das Aussehen: Farben, Rahmen, Ecken und Effekte. Keine Bilder und nichts Persönliches. Du kannst es also ruhig teilen.</string>
     <string name="packs_title">Wallpaper</string>
     <string name="packs_entry_summary">Hintergrundbilder für alle Seiten</string>
-    <string name="packs_intro">Ein Wallpaper bringt für jede Seite ein Bild mit: Startseite, App-Liste, Textsuche, App-Raster, weitere für zusätzliche Seiten und eines für den Sperrbildschirm. Wallpaper passen zu jedem Design.</string>
+    <string name="packs_intro">Ein Wallpaper bringt für jede Seite ein Bild mit, auch für den Sperrbildschirm. Es passt zu jedem Design.</string>
     <string name="packs_find">Wallpaper finden</string>
-    <string name="packs_find_summary">Öffnet die Wallpaper in der Übersicht im Browser</string>
+    <string name="packs_find_summary">Zeigt dir die Wallpaper im Browser</string>
     <string name="packs_add">Wallpaper hinzufügen</string>
-    <string name="packs_add_summary">Eine heruntergeladene .freiraum-wallpapers-Datei wählen</string>
+    <string name="packs_add_summary">Wähl ein heruntergeladenes Wallpaper aus</string>
     <string name="packs_installed">Auswählen</string>
     <string name="packs_plain">Ohne Bilder</string>
     <string name="packs_plain_summary">Mattes Schwarz oder Kreideweiß</string>
-    <string name="packs_plain_text">Alle Seiten bekommen den schlichten Hintergrund des Farbmodus: mattes Schwarz im dunklen, Kreideweiß im hellen Modus. Eigene Bilder auf den Seiten werden ersetzt.</string>
-    <string name="packs_apply_text">Die Bilder kommen auf Startseite, App-Liste, Textsuche und App-Raster, die übrigen der Reihe nach auf deine weiteren Seiten. Selbst gesetzte Bilder werden ersetzt.</string>
+    <string name="packs_plain_text">Alle Seiten bekommen einen schlichten Hintergrund: Mattschwarz im dunklen Modus, Kreideweiß im hellen. Deine eigenen Bilder auf den Seiten werden ersetzt.</string>
+    <string name="packs_apply_text">Jede Seite bekommt ein Bild aus dem Wallpaper. Bilder, die du selbst gesetzt hast, werden ersetzt.</string>
     <string name="packs_applied">Wallpaper angewendet</string>
     <string name="packs_import_done">%1$s hinzugefügt</string>
     <string name="packs_import_failed">Das ist kein Freiraum-Wallpaper</string>
@@ -707,7 +707,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_quick_setup_summary">Übernimmt alles Empfohlene. Du kannst später alles in den Einstellungen ändern.</string>
     <string name="welcome_own_setup">Selbst einrichten</string>
     <string name="welcome_design_title">Design wählen</string>
-    <string name="welcome_design_text">Farben, Rahmen und Effekte. Oben siehst du es gleich auf deinem Startbildschirm. Neon und 3D gibt es zum Herunterladen.</string>
+    <string name="welcome_design_text">Farben, Rahmen und Effekte. Oben siehst du sofort, wie es aussieht. Neon und 3D kannst du herunterladen.</string>
     <string name="welcome_design_neon_light">Neon Hell</string>
     <string name="welcome_design_neon_dark">Neon Dunkel</string>
     <string name="welcome_wallpaper_title">Wallpaper wählen</string>
@@ -727,9 +727,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="welcome_shape_part_widgets">Widgets</string>
     <string name="welcome_shape_part_search_button">Suchbutton (App-Liste)</string>
     <string name="welcome_shape_part_folders">Ordner</string>
-    <string name="settings_widget_paging_mode_row_info">Wie dieses Widget blättert (Stunden und Tage, Notizen). Das Aussehen der Pfeiltasten gilt für alle Widgets gemeinsam.</string>
+    <string name="settings_widget_paging_mode_row_info">Wie dieses Widget blättert. Wie die Pfeiltasten aussehen, gilt für alle Widgets.</string>
     <string name="settings_color_modes_label">Farbmodi</string>
-    <string name="settings_color_modes_info">Launcher: der Startbildschirm mit seinen Seiten, Widgets und Ordnern. Einstellungen: nur die Einstellungen und die Einführung, so können sie hell sein, während der Launcher dunkel ist, oder umgekehrt.</string>
+    <string name="settings_color_modes_info">Launcher heißt: Startbildschirm, Seiten, Widgets und Ordner. Einstellungen heißt: nur die Einstellungen und die Einführung. So kann das eine hell sein und das andere dunkel.</string>
     <string name="settings_background_icons_label">Hintergrund und Icons</string>
     <string name="settings_motion_group_label">Bewegung</string>
     <string name="welcome_wallpaper_own_hint">Eigene Bilder kannst du jederzeit später wählen: Einstellungen → Aussehen → Hintergrund, oder in den Einstellungen jeder Seite.</string>
@@ -747,7 +747,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_ready_look_label">Fertiges Aussehen</string>
     <string name="settings_corners_all">Ecken aller Teile</string>
     <string name="settings_corners_all_summary">Rund, weich oder eckig, für alles oder Teil für Teil</string>
-    <string name="settings_corners_intro">Wähle eine Form für alles oder jedes Teil einzeln in der Tabelle. Die kleinen Bildschirme zeigen, welches Teil welches ist.</string>
+    <string name="settings_corners_intro">Wähl eine Form für alles oder für jedes Teil einzeln. Die kleinen Bildschirme zeigen dir, welches Teil was ist.</string>
     <string name="folder_widget_edit">Bearbeiten</string>
     <string name="folder_widget_remove">Entfernen</string>
     <string name="search_filter_favorites">Favoriten</string>
@@ -756,11 +756,11 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="search_favorite_add">Zu Favoriten hinzufügen</string>
     <string name="search_favorite_remove">Aus Favoriten entfernen</string>
     <string name="settings_search_rail_label">Kategorienleiste</string>
-    <string name="settings_search_rail_info">Die Kategorien stehen in einer Leiste neben den Ergebnissen, immer über der Tastatur. Antippen springt zu den Ergebnissen der Kategorie, Ziehen über die Leiste geht sie der Reihe nach durch.</string>
+    <string name="settings_search_rail_info">Die Kategorien stehen in einer Leiste neben den Ergebnissen, immer über der Tastatur. Tipp auf eine, und du springst zu ihren Ergebnissen. Fährst du mit dem Finger über die Leiste, gehst du sie alle durch.</string>
     <string name="settings_search_rail_show">Kategorienleiste zeigen</string>
     <string name="settings_search_rail_left">Links</string>
     <string name="settings_search_rail_right">Rechts</string>
-    <string name="settings_search_favorites_info">Favoriten sind die Apps, die du sofort griffbereit haben willst. Wähle sie selbst, lass Freiraum die am häufigsten geöffneten Apps ergänzen, oder beides. Sie erscheinen gleich beim Öffnen der Suche, solange Favoriten unten bei den Kategorien eingeschaltet ist; sonst über den Stern in der Leiste. Langes Drücken auf eine App in der Suche fügt sie hinzu oder entfernt sie. Das Zählen bleibt auf deinem Handy.</string>
+    <string name="settings_search_favorites_info">Favoriten sind die Apps, die du sofort zur Hand haben willst. Du wählst sie selbst, Freiraum ergänzt deine meistgenutzten Apps, oder beides. Sie sind gleich da, wenn du die Suche öffnest. Ist Favoriten unten bei den Kategorien aus, findest du sie über den Stern in der Leiste. Halt eine App in der Suche gedrückt, um sie hinzuzufügen oder zu entfernen. Was du wie oft öffnest, bleibt auf deinem Handy.</string>
     <string name="settings_search_favorites_mode_both">Gewählte, ergänzt um die häufigsten</string>
     <string name="settings_search_favorites_mode_manual">Nur selbst gewählte</string>
     <string name="settings_search_favorites_mode_auto">Nur die häufigsten</string>
@@ -775,7 +775,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_app_grid_rows">Zeilen pro Seite</string>
     <string name="settings_app_grid_rows_auto">So viele, wie passen</string>
     <string name="settings_app_grid_page_dots">Seitenpunkte zeigen</string>
-    <string name="settings_search_field_position_info">Oben, oder direkt auf der Tastatur in Reichweite des Daumens.</string>
+    <string name="settings_search_field_position_info">Oben, oder direkt über der Tastatur, wo dein Daumen gut hinkommt.</string>
     <string name="settings_search_rail_hidden">Ausgeblendet</string>
     <string name="settings_folder_look_own">Eigenes Aussehen</string>
     <string name="settings_folder_look_like_all">Wie alle Ordner</string>
@@ -783,7 +783,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_parts_label">Teile</string>
     <string name="settings_colors_all">Farben aller Teile</string>
     <string name="settings_colors_all_summary">Füllung, Text und Rahmen, für alles oder Teil für Teil</string>
-    <string name="settings_colors_intro">Wähle einen Farbsatz für alles, oder tippe ein Teil in der Tabelle an und gib ihm eigene Füllung, Textfarbe und Rahmen. Die kleinen Bildschirme zeigen das Ergebnis.</string>
+    <string name="settings_colors_intro">Wähl Farben für alles, oder tipp ein Teil in der Tabelle an und gib ihm eigene Farben. Die kleinen Bildschirme zeigen dir das Ergebnis.</string>
     <string name="settings_colors_light">Hell</string>
     <string name="settings_colors_dark">Dunkel</string>
     <string name="settings_colors_glass">Glas</string>
@@ -791,7 +791,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_statusbar_tile_shown">Sichtbar</string>
     <string name="settings_statusbar_tile_hidden">Ausgeblendet</string>
     <string name="settings_folder_widget_height">Höhe</string>
-    <string name="settings_page_search_description">Ein Feld für alles: Apps, Kontakte, Orte, Links, Einstellungen und mehr, und was nicht auf dem Handy ist, geht weiter an Suchmaschine, Karten oder KI-App.</string>
+    <string name="settings_page_search_description">Ein Feld für alles: Apps, Kontakte, Orte, Links, Einstellungen und mehr. Was nicht auf dem Handy ist, geht weiter an Suchmaschine, Karten oder KI-App.</string>
     <string name="settings_hub_appearance_what">Wie es aussieht</string>
     <string name="settings_hub_behavior_what">Was es tut</string>
     <string name="settings_hub_search_appearance">Seite, Suchfeld, Kategorienleiste, Ergebnisse, Tastaturblende</string>
@@ -801,33 +801,33 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_hub_app_grid_appearance">Seite, Raster, Suchfeld</string>
     <string name="settings_hub_app_grid_behavior">Suchfeld, Tastatur, Ordner</string>
     <string name="settings_folder_icon_tap_hint">Symbol antippen, um es zu ändern</string>
-    <string name="settings_folder_live_hint">So sieht der Ordner geöffnet aus. Tippe ein Widget, eine App oder ein Element an, um es zu ändern oder zu verschieben; das leere Feld fügt etwas hinzu.</string>
+    <string name="settings_folder_live_hint">So sieht der Ordner offen aus. Tipp auf etwas, um es zu ändern oder zu verschieben. Mit dem leeren Feld fügst du etwas hinzu.</string>
     <string name="settings_folder_add_content">App oder Element</string>
     <string name="settings_folder_add_widget">Widget</string>
     <string name="settings_folder_position">Position</string>
     <string name="settings_folder_widget_all_settings">Alle Einstellungen</string>
     <string name="settings_folder_rows_label">Zeilen</string>
-    <string name="settings_folder_rows_info">Wie viele Apps und Elemente in jeder Zeile nebeneinander stehen. Widgets nehmen immer die ganze Breite ein.</string>
-    <string name="settings_folder_intro">Ordner fassen Apps, Orte, Links und Widgets hinter einem Symbol zusammen. Tippe einen Ordner an, um ihn einzurichten, oder lege einen neuen an.</string>
-    <string name="settings_folder_creator_empty">Wähle unten Apps; Widgets und mehr kannst du gleich danach hinzufügen.</string>
+    <string name="settings_folder_rows_info">Wie viele Apps nebeneinander in eine Zeile passen. Widgets sind immer so breit wie der Ordner.</string>
+    <string name="settings_folder_intro">In einem Ordner sammelst du Apps, Orte, Links und Widgets hinter einem Symbol. Tipp auf einen Ordner zum Einrichten oder leg einen neuen an.</string>
+    <string name="settings_folder_creator_empty">Wähl unten Apps aus. Widgets und mehr kannst du gleich danach dazutun.</string>
     <string name="settings_category_symbol">Symbol</string>
     <string name="settings_category_color">Farbe</string>
     <string name="settings_search_web_engines">Suchmaschinen</string>
-    <string name="settings_search_web_engines_info">Die erste Suchmaschine startet mit einem Tipp auf die Karte und mit Enter. Ziehen ändert die Reihenfolge.</string>
+    <string name="settings_search_web_engines_info">Die erste Suchmaschine startet, wenn du auf die Karte tippst oder Enter drückst. Zum Sortieren ziehen.</string>
     <string name="settings_search_web_ai">KI-Apps</string>
-    <string name="settings_search_web_ai_info">Die Suchanfrage wird wie beim Teilen an die App übergeben. Der Launcher selbst geht nie ins Netz.</string>
+    <string name="settings_search_web_ai_info">Deine Frage geht an die App, wie beim Teilen. Freiraum selbst geht nie ins Internet.</string>
     <string name="settings_search_web_add_engine">Suchmaschine hinzufügen</string>
     <string name="settings_search_web_add_ai">KI-App hinzufügen</string>
     <string name="settings_search_web_custom_engine">Eigene Suchmaschine</string>
     <string name="settings_search_web_name">Name</string>
     <string name="settings_search_web_url">Suchadresse</string>
-    <string name="settings_search_web_url_info" formatted="false">Schreibe %s an die Stelle des Suchbegriffs, zum Beispiel https://example.org/search?q=%s. Ohne %s wird der Begriff als ?q= angehängt.</string>
+    <string name="settings_search_web_url_info" formatted="false">Schreib %s dahin, wo der Suchbegriff hin soll, zum Beispiel https://example.org/search?q=%s. Ohne %s kommt der Begriff hinten als ?q= dran.</string>
     <string name="settings_search_web_default">Standard</string>
     <string name="settings_search_web_choice">Zur Auswahl in derselben Karte</string>
     <string name="settings_search_web_icon_pick">Bild wählen</string>
     <string name="settings_search_web_icon_reset">Standardsymbol</string>
-    <string name="settings_search_web_icon_info">Ein eigenes Bild oder ein Symbol aus dem Icon-Pack ersetzt das Standardsymbol. Bilder werden quadratisch zugeschnitten.</string>
-    <string name="settings_search_web_no_ai">Noch keine KI-App. Ohne sie bleibt die KI-Karte ausgeblendet.</string>
+    <string name="settings_search_web_icon_info">Statt des normalen Symbols geht auch ein eigenes Bild oder ein Symbol aus dem Icon-Pack. Bilder werden quadratisch zugeschnitten.</string>
+    <string name="settings_search_web_no_ai">Noch keine KI-App. Solange keine da ist, siehst du die KI-Karte nicht.</string>
     <string name="settings_search_web_preview_query">Wetter morgen</string>
     <string name="settings_search_web_all_added">Alle fertigen Suchmaschinen sind hinzugefügt.</string>
     <string name="search_command_web_with">„%1$s“ mit %2$s suchen</string>
@@ -850,13 +850,13 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_bubble_label">Leisten-Blase</string>
     <string name="settings_search_bubble_summary">Namensblase und Lupe beim Wischen über die Leiste</string>
     <string name="settings_search_legend_search_body">Ihre Ergebnisse erscheinen bei jeder Eingabe.</string>
-    <string name="settings_search_legend_rail_body">Ein Platz in der Leiste. Nur Leiste = auf Abruf, Ergebnisse nach einem Tipp dort.</string>
-    <string name="settings_search_table_hint">Symbol antippen: Symbol und Farbe ändern. ≡ ziehen: Reihenfolge ändern.</string>
-    <string name="settings_search_web_intro_web">Die Web-Karte öffnet mit einem Tipp die erste Suchmaschine, die anderen liegen direkt darunter in derselben Karte zur Auswahl. Tippe auf ein Symbol, um ihm ein eigenes Bild zu geben.</string>
-    <string name="settings_search_web_intro_ai">Die KI-Karte übergibt die Anfrage mit einem Tipp an die erste App, die anderen liegen direkt darunter in derselben Karte. Tippe auf ein Symbol, um ihm ein eigenes Bild zu geben.</string>
+    <string name="settings_search_legend_rail_body">Ein Platz in der Leiste. Ist nur das an, kommen die Ergebnisse erst nach einem Tipp dort.</string>
+    <string name="settings_search_table_hint">Tipp auf ein Symbol, um es und seine Farbe zu ändern. Am ≡ ziehen zum Sortieren.</string>
+    <string name="settings_search_web_intro_web">Tippst du auf die Web-Karte, öffnet sich die erste Suchmaschine. Die anderen stehen direkt darunter zur Auswahl. Tipp auf ein Symbol, um ihm ein eigenes Bild zu geben.</string>
+    <string name="settings_search_web_intro_ai">Tippst du auf die KI-Karte, geht deine Frage an die erste App. Die anderen stehen direkt darunter zur Auswahl. Tipp auf ein Symbol, um ihm ein eigenes Bild zu geben.</string>
     <string name="link_open_failed">Dieser Link ließ sich nicht öffnen</string>
     <string name="link_address_invalid">Keine Adresse, die ein Link öffnen kann</string>
-    <string name="settings_manage_apps_reveal_code_note">Groß- und Kleinschreibung spielt keine Rolle. Ohne Code bleibt die App über ihren Namen auffindbar.</string>
+    <string name="settings_manage_apps_reveal_code_note">Groß oder klein ist egal. Ohne Code findest du die App weiter über ihren Namen.</string>
     <string name="app_menu_edit">Anpassen</string>
     <string name="app_menu_info">App-Info</string>
     <string name="app_menu_uninstall">Deinstallieren</string>
@@ -867,16 +867,16 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_rail_side">Seite der Leiste</string>
     <string name="incoming_unknown">Das ist weder ein Freiraum-Design noch ein Freiraum-Wallpaper</string>
     <string name="extensions_entry_summary">Designs, Wallpaper und Widgets hinzufügen</string>
-    <string name="extensions_intro">Erweiterungen bringen Neues in den Launcher: ein fertiges Aussehen, Bilder für jede Seite oder Daten für ein Widget. Freiraum hat keinen Internetzugriff. Du suchst sie im Browser aus, und ein Tipp dort öffnet sie hier.</string>
+    <string name="extensions_intro">Erweiterungen bringen Neues in den Launcher: ein fertiges Aussehen, Bilder für jede Seite oder Daten für ein Widget. Du suchst sie im Browser aus. Ein Tipp dort öffnet sie hier. Freiraum selbst geht nicht ins Internet.</string>
     <string name="extensions_widgets_title">Widgets</string>
     <string name="extensions_widgets_what">Uhr, Notizen und Musik sind dabei</string>
     <string name="extensions_widgets_contents">Wetter braucht eine App, die die Daten bringt</string>
     <string name="extensions_browse">Alle Erweiterungen ansehen</string>
-    <string name="extensions_browse_summary">Öffnet die Übersicht im Browser</string>
-    <string name="extensions_widgets_intro">Widgets legst du auf einer Seite als Zeile an. Manche zeigen, was schon auf dem Handy ist. Andere brauchen Daten aus dem Internet und bekommen sie von einer eigenen App, damit der Launcher selbst offline bleibt.</string>
+    <string name="extensions_browse_summary">Zeigt dir alles im Browser</string>
+    <string name="extensions_widgets_intro">Widgets legst du als Zeile auf eine Seite. Manche zeigen, was schon auf dem Handy ist. Andere brauchen Daten aus dem Internet. Die bekommen sie von einer eigenen App, damit Freiraum offline bleibt.</string>
     <string name="extensions_widgets_included">Immer dabei</string>
     <string name="extensions_widgets_with_source">Mit eigener Datenquelle</string>
-    <string name="extensions_weather_info">Das Wetter-Widget zeigt, was eine Wetter-App an den Launcher schickt, zum Beispiel Breezy Weather mit eingeschalteter Datenweitergabe an Gadgetbridge.</string>
+    <string name="extensions_weather_info">Das Wetter-Widget zeigt, was eine Wetter-App schickt. Zum Beispiel Breezy Weather, wenn dort die Weitergabe an Gadgetbridge an ist.</string>
     <string name="extensions_weather_no_source">Noch keine Daten empfangen</string>
     <string name="extensions_weather_receiving">Empfängt Daten, zuletzt %1$s</string>
     <string name="extensions_weather_find">Wetterquellen ansehen</string>
@@ -885,7 +885,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
         <item quantity="one">%1$d vorhanden</item>
         <item quantity="other">%1$d vorhanden</item>
     </plurals>
-    <string name="extensions_from_outside_note">Von außerhalb geöffnet (Link oder Datei) und schon hinzugefügt. Wende es nur an, wenn du der Quelle traust. Es ändert nur das Aussehen und lässt sich jederzeit wieder löschen.</string>
+    <string name="extensions_from_outside_note">Das kam von außen, über einen Link oder eine Datei, und ist schon hinzugefügt. Nutz es nur, wenn du der Quelle vertraust. Es ändert nur das Aussehen, und du kannst es jederzeit wieder löschen.</string>
     <string name="about_promise_offline">Kein Internet</string>
     <string name="about_promise_tracking">Kein Tracking</string>
     <string name="about_promise_ads">Keine Werbung</string>
@@ -893,16 +893,16 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="about_releases">Was ist neu</string>
     <string name="about_releases_summary">Alle Versionen und ihre Änderungen</string>
     <string name="welcome_widgets_title">Widgets</string>
-    <string name="welcome_widgets_text">Widgets liegen als Zeile auf einer Seite, im Panel oder in einem Ordner. Hinzufügen kannst du sie später unter Einstellungen → Seiten, bei der jeweiligen Seite, beim Panel oder im Ordner.</string>
+    <string name="welcome_widgets_text">Widgets liegen als Zeile auf einer Seite, im Panel oder in einem Ordner. Hinzufügen kannst du sie später unter Einstellungen → Seiten.</string>
     <string name="welcome_widgets_clock">Zeit, Datum, nächster Wecker</string>
     <string name="welcome_widgets_notes">Notizen und Listen direkt auf der Seite</string>
     <string name="welcome_widgets_music">Steuert, was gerade läuft. Braucht den Zugriff auf Benachrichtigungen</string>
-    <string name="welcome_widgets_weather">Braucht eine Wetter-App, die die Daten bringt, denn Freiraum geht nicht ins Internet</string>
+    <string name="welcome_widgets_weather">Braucht eine Wetter-App, die das Wetter liefert. Freiraum selbst geht nicht ins Internet</string>
     <string name="settings_menus_title">Menüs</string>
     <string name="settings_menus_summary">Langes Drücken auf Apps, Ordner-Einträge und Notizen</string>
     <string name="welcome_design_3d_light">3D Hell</string>
     <string name="welcome_design_3d_dark">3D Dunkel</string>
-    <string name="welcome_widgets_weather_note">Das Wetter-Widget ist schon dabei. Seine Daten kommen im Moment von Breezy Weather über die Gadgetbridge-Weitergabe. Weitere Wetterquellen sind in Arbeit.</string>
+    <string name="welcome_widgets_weather_note">Das Wetter-Widget ist schon dabei. Das Wetter kommt gerade von Breezy Weather über Gadgetbridge. Weitere Wetter-Apps folgen.</string>
     <string name="welcome_shape_part_category_rail">Kategorienleiste (Textsuche)</string>
     <string name="welcome_shape_part_widget_arrows">Pfeiltasten in Widgets</string>
     <string name="welcome_shape_part_keyboard_strip">Tastaturblende</string>
@@ -913,7 +913,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_page_shows_panel">Panel auf dieser Seite</string>
     <string name="settings_panel_widgets_label">Widgets</string>
     <string name="settings_panel_add_widget">Widget hinzufügen</string>
-    <string name="settings_panel_widgets_info">Widgets lassen sich zwischen die Zeilen setzen, mit den Pfeilen. Ist das Panel voll, lässt es sich scrollen, nur nicht, solange der Finger auf einem Widget liegt.</string>
+    <string name="settings_panel_widgets_info">Mit den Pfeilen setzt du Widgets zwischen die Zeilen. Ist das Panel voll, kannst du scrollen. Nur nicht, solange dein Finger auf einem Widget liegt.</string>
     <string name="settings_hub_elements_what">Was darin liegt: Apps, Ordner, Links und mehr</string>
     <string name="settings_hub_visibility_what">Wann es sich zeigt</string>
     <string name="settings_hub_bar_look_contents">Fläche, Schrift, Deckkraft, Rahmen, Ecken</string>
@@ -962,9 +962,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_entry_open_settings">Einstellungen</string>
     <string name="settings_weather_source_label">Datenquelle</string>
     <string name="settings_background_for_all">Hintergrund für alle Seiten</string>
-    <string name="settings_background_for_all_summary">Gilt überall, wo eine Seite keinen eigenen hat</string>
+    <string name="settings_background_for_all_summary">Für jede Seite ohne eigenen Hintergrund</string>
     <string name="settings_search_first_title">So funktioniert die Tabelle</string>
-    <string name="settings_search_first_text">Jede Zeile ist eine Art von Ergebnis. „Suche“ heißt: kommt bei jeder Eingabe. „Leiste“ heißt: hat einen Platz in der Leiste neben den Ergebnissen. Ziehen am Griff ändert die Reihenfolge, ein Tipp auf den Namen öffnet weitere Einstellungen.</string>
+    <string name="settings_search_first_text">Jede Zeile ist eine Art von Ergebnis. „Suche“ heißt: kommt sofort beim Tippen. „Leiste“ heißt: hat ein Symbol in der Leiste neben den Ergebnissen. Zum Sortieren am Griff ziehen. Tipp auf einen Namen für mehr Einstellungen.</string>
     <string name="settings_search_first_ok">Verstanden</string>
     <string name="settings_app_overview_behavior_label_search">App-Liste: Verhalten</string>
     <string name="settings_app_grid_behavior_label_search">App-Raster: Verhalten</string>
@@ -974,14 +974,14 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_settings_none">Nichts gefunden für „%1$s“</string>
     <string name="settings_display_motion_label">Anzeige und Bewegung</string>
     <string name="settings_color_modes_font_label">Farbmodus und Schrift</string>
-    <string name="settings_backup_export_locked_info">Die Sicherung enthält deinen ganzen Launcher mit persönlichen Daten wie Notizen, Orten, Kontakten und Links. Sie wird mit deinem Passwort verschlüsselt. Ohne das Passwort lässt sie sich nicht öffnen, auch nicht von uns. Merk es dir gut.</string>
+    <string name="settings_backup_export_locked_info">In der Sicherung steckt dein ganzer Launcher, auch Notizen, Orte, Kontakte und Links. Sie ist mit deinem Passwort verschlüsselt. Ohne Passwort kann sie niemand öffnen, auch wir nicht. Merk es dir gut.</string>
     <string name="settings_backup_password">Passwort</string>
     <string name="settings_backup_password_repeat">Passwort wiederholen</string>
     <string name="settings_backup_password_short">Mindestens %1$d Zeichen</string>
     <string name="settings_backup_password_mismatch">Die Passwörter sind nicht gleich</string>
     <string name="settings_backup_password_wrong">Falsches Passwort oder beschädigte Datei</string>
     <string name="settings_backup_password_show">Passwort zeigen</string>
-    <string name="settings_live_editor_hint">Tippe oben auf ein Element, um es zu verschieben, einzustellen oder zu entfernen. Ein + fügt an dieser Stelle etwas hinzu.</string>
+    <string name="settings_live_editor_hint">Tipp oben auf ein Element, um es zu verschieben, einzustellen oder zu entfernen. Mit + fügst du an der Stelle etwas hinzu.</string>
     <string name="profile_work">Arbeit</string>
     <string name="profile_private">Privat</string>
     <string name="profile_pause">Pausieren</string>
@@ -991,7 +991,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="profile_paused">Pausiert. Schalte das Profil ein, um seine Apps zu sehen.</string>
     <string name="profile_locked">Gesperrt. Entsperre den Bereich, um seine Apps zu sehen.</string>
     <string name="settings_dots_label">Benachrichtigungspunkte</string>
-    <string name="settings_dots_info">Ein kleiner Punkt in deiner Akzentfarbe zeigt an einem App-Symbol, dass die App eine Benachrichtigung hat. Freiraum sieht dafür nur, welche App etwas meldet, nie den Inhalt. Laufende Meldungen wie Musik zählen nicht.</string>
+    <string name="settings_dots_info">Hat eine App eine Benachrichtigung, zeigt ihr Symbol einen kleinen Punkt in deiner Akzentfarbe. Freiraum sieht nur, welche App etwas hat, nie was drinsteht. Laufende Sachen wie Musik zählen nicht.</string>
     <string name="settings_dots_show">Punkte an App-Symbolen</string>
     <string name="settings_dots_no_access">Braucht den Zugriff auf Benachrichtigungen</string>
     <string name="settings_dots_grant">Zugriff erlauben</string>
@@ -1000,7 +1000,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_background_for_all_edit">Hintergrund für alle Seiten ändern</string>
     <string name="settings_background_change_color">Farbe ändern</string>
     <string name="settings_entry_settings">Einstellungen</string>
-    <string name="settings_quick_info">Hier stehen die Seiten, die du von hier aus wahrscheinlich als Nächstes brauchst: was zur aktuellen Seite gehört (nach Ordner etwa Dock und Panel), dann die weit entfernten, dann was du oft öffnest. Alles bleibt auf dem Handy.</string>
+    <string name="settings_quick_info">Hier stehen die Seiten, die du wahrscheinlich als Nächstes brauchst. Erst was zur aktuellen Seite passt, dann was weit weg liegt, dann was du oft öffnest. Alles bleibt auf deinem Handy.</string>
     <string name="settings_search_settings_entry">Suchen oder schnell zu einer Seite</string>
     <string name="settings_find_crumb">Suche</string>
     <string name="settings_add_kind_app">App</string>
@@ -1015,7 +1015,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_choice_off">aus</string>
     <string name="settings_app_shape_like_all">Wie alle Apps</string>
     <string name="settings_app_visible_in">Zu sehen in</string>
-    <string name="settings_app_hidden_search_note">Nicht in der Textsuche: Die App ist dann auch kein Favorit und wird dort nicht mitgezählt.</string>
+    <string name="settings_app_hidden_search_note">Fehlt die App in der Textsuche, ist sie dort auch kein Favorit und wird nicht mitgezählt.</string>
     <string name="a11y_less">Weniger</string>
     <string name="a11y_more">Mehr</string>
     <string name="a11y_clear_input">Eingabe löschen</string>
@@ -1037,7 +1037,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_motion_logo_shape">Logo in den Einstellungen wechselt die Form</string>
     <string name="settings_part_letters_short">Buchstaben</string>
     <string name="settings_corner_own_value">Eigener Wert</string>
-    <string name="settings_page_room_too_small">Passt nicht mehr auf diese Seite: hier sind nur noch %1$d Zeilen frei. Beim Speichern kannst du eine neue Seite dafür anlegen.</string>
+    <string name="settings_page_room_too_small">Das passt hier nicht mehr hin. Auf dieser Seite sind nur noch %1$d Zeilen frei. Beim Speichern kannst du dafür eine neue Seite anlegen.</string>
     <plurals name="settings_page_room_left">
         <item quantity="one">Auf dieser Seite ist noch %1$d Zeile frei.</item>
         <item quantity="other">Auf dieser Seite sind noch %1$d Zeilen frei.</item>
@@ -1050,7 +1050,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="pin_shortcut_added">„%1$s“ hinzugefügt</string>
     <string name="settings_background_from_packs">Bild aus deinen Wallpapern</string>
     <string name="settings_background_from_packs_summary">Alle Bilder aus deinen installierten Wallpapern</string>
-    <string name="settings_background_from_packs_empty">Noch keine Wallpaper installiert. Du findest sie unter Erweiterungen.</string>
+    <string name="settings_background_from_packs_empty">Du hast noch keine Wallpaper. Du findest sie unter Erweiterungen.</string>
     <string name="settings_themed_icons_label">Themensymbole</string>
     <string name="settings_themed_icons">Symbole in Systemfarben</string>
     <string name="settings_themed_icons_summary">Viele Apps haben ein einfarbiges Symbol. Das zeigt sich dann in den Farben deines Hintergrunds. Alle anderen Apps bleiben, wie sie sind.</string>
@@ -1059,11 +1059,11 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_keyboard_no_learning_summary">Was du in die Suche tippst, merkt sich die Tastatur nicht. Fast alle Tastaturen halten sich daran.</string>
     <string name="settings_lock_label">Sperre</string>
     <string name="settings_lock_switch">Einstellungen sperren</string>
-    <string name="settings_lock_summary">Die Einstellungen gehen erst auf, wenn du dein Handy entsperrst, zum Beispiel mit Fingerabdruck oder PIN. Gehst du zurück zum Startbildschirm, sind sie wieder zu.</string>
+    <string name="settings_lock_summary">Die Einstellungen gehen erst auf, wenn du dein Handy entsperrst, zum Beispiel mit Fingerabdruck oder PIN. Gehst du zurück zum Startbildschirm oder machst eine Minute Pause, sind sie wieder zu.</string>
     <string name="settings_lock_needs_screen_lock">Dafür braucht dein Handy eine Displaysperre. Die richtest du in den Android-Einstellungen ein.</string>
     <string name="settings_lock_prompt_title">Einstellungen entsperren</string>
     <string name="settings_lock_locked">Einstellungen gesperrt</string>
-    <string name="settings_lock_locked_text">Entsperre sie mit deiner Displaysperre.</string>
+    <string name="settings_lock_locked_text">Entsperr sie so wie dein Handy.</string>
     <string name="settings_lock_unlock">Entsperren</string>
     <string name="settings_gesture_two_fingers">Mit zwei Fingern</string>
     <string name="settings_gesture_two_up">Zwei Finger nach oben</string>
