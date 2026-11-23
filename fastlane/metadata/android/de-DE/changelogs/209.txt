@@ -1,0 +1,2 @@
+- Seiten: der Startbildschirm steht beim Öffnen in der Mitte, immer genau drei ganze Kacheln
+- Einstellungen der Kategorien-Seite mit Vorschau, Aussehen und Verhalten wie bei den anderen Seiten

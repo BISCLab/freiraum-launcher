@@ -1,0 +1,2 @@
+- Pages: Home opens in the middle, always exactly three whole tiles
+- Categories page settings with a preview, Appearance and Behavior like the other pages

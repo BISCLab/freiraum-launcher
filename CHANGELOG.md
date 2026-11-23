@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.19.2
+
 - Pages settings: the carousel opens with Home in the middle and one page on each side, always exactly three whole tiles, and stops on a tile when swiped
 - Categories page settings built like the App grid's: a preview of the page, then Appearance (page, colors and symbols) and Behavior (view, search field, categories)
 
