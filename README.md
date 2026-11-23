@@ -49,6 +49,7 @@ boxes, folders).
 - **Wallpapers**: a picture for every page and the lock screen, see
   [wallpapers](wallpaper-packs/README.md)
 - Keyboard bezel: a strip over the keyboard in a color of your choice
+- Charging animation
 - Seven gestures (swipe, double tap, long press, two fingers up and down, pinch), each assignable
 
 ### Accessibility and privacy

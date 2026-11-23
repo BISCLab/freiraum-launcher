@@ -1,40 +1,68 @@
-<p>Freiraum ist ein Startbildschirm, der ruhig bleibt und dich genau festlegen lässt, was wo liegt. Er braucht keinen Internetzugang und sammelt keine Daten.</p>
+<p>Freiraum ist ein ruhiger Startbildschirm, den du genau so einrichtest, wie du willst. Er hat keine Internet-Berechtigung und sammelt keine Daten. Nichts verlässt dein Handy.</p>
 
 <p><b>Seiten</b></p>
 <ul>
 <li>Eine Startseite und beliebig viele weitere Seiten, jede mit eigenem Hintergrund, auf Wunsch als Endlos-Karussell</li>
-<li>Zeilen mit Apps, Ordnern, Kontakten, Adressen, Links, Shortcuts und Aktionsbuttons</li>
-<li>Eigene Widgets: Uhr, Musik, Wetter, Notizen und Abstandshalter, dazu normale Android-Widgets – alles in einem sauberen Zeilenraster</li>
-<li>Ein Dock unten und ein herunterziehbares Panel oben, beide mit festen Plätzen und auf jeder Seite sichtbar</li>
-<li>Ordner mit Apps, Links, Kontakten und Widgets</li>
+<li>Seiten bestehen aus Zeilen: Element-Boxen und Widgets in einem sauberen Zeilenraster</li>
+<li>Ein Dock unten und ein herunterziehbares Panel oben, auf jeder Seite sichtbar</li>
+<li>Funktionsseiten: App-Liste, App-Raster, Textsuche und Kategorien</li>
+</ul>
+
+<p><b>Elemente</b></p>
+<ul>
+<li>Alles, was du antippen kannst, ist ein Element: Apps, Ordner, Orte, Links, Kontakte, Verknüpfungen, Aktionsbuttons und Kategorien. Einmal einrichten, dann überall ablegen</li>
+<li>„Zum Startbildschirm hinzufügen“ aus anderen Apps, zum Beispiel eine Webseite aus dem Browser</li>
+</ul>
+
+<p><b>Kategorien</b></p>
+<ul>
+<li>Apps und andere Elemente sortieren; eine App kann in mehreren sein</li>
+<li>Fertig von Android, je nachdem, was eine App über sich sagt: Spiele, Musik, Fotos und mehr</li>
+<li>Kluge Kategorien, die sich selbst füllen: neu installiert, lange nicht benutzt, oft benutzt, ohne Kategorie, oder deine eigene Regel</li>
+<li>Eine eigene Seite mit Karten, Reitern oder Liste, Filter in der App-Liste, Treffer in der Textsuche und ein Widget</li>
+<li>Ordner können einer Kategorie folgen und füllen sich selbst</li>
+</ul>
+
+<p><b>Widgets</b></p>
+<ul>
+<li>Uhr, Notizen, Musik, Wetter, Kategorien und Leerraum, dazu normale Android-Widgets</li>
+<li>Das Wetter kommt von einer Wetter-App, die es liefert (Breezy Weather über Gadgetbridge); Freiraum selbst geht nie ins Internet</li>
 </ul>
 
 <p><b>App-Liste und Suche</b></p>
 <ul>
-<li>Alphabetische App-Liste mit A–Z-Index zum schnellen Scrollen</li>
-<li>App-Raster mit eigenem Suchfeld und wahlweise Ordnern</li>
-<li>Textsuche über Apps, Ordner, Kontakte, System- und Launcher-Einstellungen, Shortcuts, Links und Orte, mit Befehlen für Web, Karten und Rechner</li>
-<li>Apps in Liste oder Suche ausblenden, umbenennen oder nur per Suchcode anzeigen</li>
+<li>Alphabetische App-Liste mit schneller A–Z-Leiste und ein App-Raster mit eigenem Suchfeld</li>
+<li>Textsuche über Apps, Favoriten, Ordner, Kontakte, System- und Launcher-Einstellungen, Verknüpfungen, Links, Orte und Kategorien</li>
+<li>Rechner, Einheiten-Umrechner und Befehle, die eine Suche an deine Web-, Karten- oder KI-App weitergeben</li>
+<li>Apps umbenennen, in Liste oder Suche ausblenden oder nur per Suchcode zeigen</li>
+<li>Apps aus Arbeitsprofil und privatem Bereich in einem eigenen Abschnitt</li>
 </ul>
 
 <p><b>Aussehen</b></p>
 <ul>
-<li>Hell- und Dunkelmodus, Akzentfarbe, Eckenform und Icon-Packs</li>
-<li>Füllung, Rahmen und Textfarbe für jedes Element, mit Live-Vorschau</li>
-<li>Einstellbare Gesten für Wischen, Doppeltippen und langes Drücken</li>
-<li>Musik-Widget nur für die Player, die du auswählst</li>
-<li>Optionale Tastatur-Verlängerung und Ladeanimation</li>
+<li>Hell- und Dunkelmodus, Akzentfarbe, Eckenform, Icon-Packs und Themed Icons (Android 13+)</li>
+<li>Füllung, Rahmen und Textfarbe für jedes Teil, mit Live-Vorschau</li>
+<li>Designs (Neon, 3D) und Wallpaper-Pakete zum Herunterladen, mit Bildern für jede Seite und den Sperrbildschirm</li>
+<li>Tastaturblende über der Tastatur und eine Ladeanimation</li>
+<li>Sieben Gesten: nach oben und unten wischen, Doppeltippen, langes Drücken, zwei Finger nach oben und unten, Zusammenziehen</li>
+<li>Tablets: im Querformat zeigen Seiten ihre Zeilen in zwei Spalten</li>
 </ul>
 
-<p><b>Deine Daten</b></p>
+<p><b>Barrierefreiheit und Privatsphäre</b></p>
 <ul>
-<li>Alle Einstellungen, Seiten, Widgets, Ordner und Hintergründe als eine Sicherungsdatei exportieren und importieren</li>
-<li>Wetterdaten kommen von Apps, die das Gadgetbridge-Wetterformat senden; Freiraum selbst geht nicht online</li>
+<li>Barrierefreiheitsmodus: feste Elemente mit starkem Rand, größere Icons und Schrift, keine Bewegungseffekte</li>
+<li>Einstellungssperre mit deiner Displaysperre (Fingerabdruck, Gesicht, PIN, Muster oder Passwort)</li>
+<li>Bittet die Tastatur, sich nicht zu merken, was du in die Suche tippst</li>
+<li>Alles als eine Sicherungsdatei exportieren und importieren</li>
 </ul>
 
 <p><b>Berechtigungen</b></p>
 <ul>
-<li>Kontakte (optional): um Kontakte zu finden und anzuheften</li>
-<li>Benachrichtigungszugriff (optional): nur zur Steuerung der Musikwiedergabe im Musik-Widget; Benachrichtigungsinhalte werden nicht gelesen</li>
-<li>Statusleiste ausklappen: für die Geste, die die Benachrichtigungsleiste öffnet</li>
+<li>Kontakte (optional): um Kontakte zu finden und abzulegen</li>
+<li>Benachrichtigungszugriff (optional): nur für die Musiksteuerung im Musik-Widget; Inhalte werden nicht gelesen</li>
+<li>Statusleiste ausklappen: für Gesten, die Benachrichtigungen oder Schnelleinstellungen öffnen</li>
+<li>Hintergrund festlegen: für das Bild auf dem Sperrbildschirm, nur wenn du es möchtest</li>
+<li>Deinstallation anfragen: Apps aus ihrem Menü deinstallieren; Android fragt vorher</li>
+<li>Versteckte Profile: für den privaten Bereich (Android 15+)</li>
+<li>Biometrie: um die Einstellungen mit Fingerabdruck oder Gesicht zu entsperren</li>
 </ul>
