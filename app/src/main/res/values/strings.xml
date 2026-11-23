@@ -1051,4 +1051,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_background_from_packs">Picture from your wallpapers</string>
     <string name="settings_background_from_packs_summary">Every picture of the installed wallpapers, the extra ones for further pages too</string>
     <string name="settings_background_from_packs_empty">No wallpapers installed yet. You find them under Extensions.</string>
+    <string name="settings_themed_icons_label">Themed icons</string>
+    <string name="settings_themed_icons">Icons in system colors</string>
+    <string name="settings_themed_icons_summary">Apps with a one-color icon show it in the colors of your wallpaper, like Android itself. Apps without keep their icon; an icon pack comes first.</string>
 </resources>

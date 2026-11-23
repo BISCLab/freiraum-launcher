@@ -88,6 +88,20 @@ fun SettingsAppsGlobalScreen(navController: NavController, onBack: () -> Unit, v
             }
         }
 
+        // Themed icons exist from Android 13 on.
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            val themed by viewModel.themedIcons.collectAsState()
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_themed_icons_label)) {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_themed_icons),
+                    summary = stringResource(R.string.settings_themed_icons_summary),
+                    onClick = { viewModel.setThemedIcons(!themed) },
+                    trailing = { androidx.compose.material3.Switch(checked = themed, onCheckedChange = viewModel::setThemedIcons) }
+                )
+            }
+        }
+
         NotificationDotsGroup(viewModel)
 
         SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_size_label)) {
@@ -124,7 +138,7 @@ private fun IconsPreview(samples: List<AppInfo>, sizePercent: Int, shape: IconSh
     // exact rendering, all icons at once.
     val icons by produceState(
         samples.map { viewModel.iconLoader.peekRender(it.componentName, shape, pack) ?: viewModel.iconLoader.peek(it.componentName) },
-        samples, shape, pack
+        samples, shape, pack, viewModel.iconLoader.revision
     ) {
         value = withContext(Dispatchers.Default) {
             samples.map { app -> async { runCatching { viewModel.iconLoader.render(app.componentName, shape, pack) }.getOrNull() } }.awaitAll()

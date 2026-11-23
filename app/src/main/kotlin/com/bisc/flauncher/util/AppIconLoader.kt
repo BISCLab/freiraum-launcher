@@ -1,5 +1,6 @@
 package com.bisc.flauncher.util
 
+import com.bisc.flauncher.ui.theme.isDark
 import androidx.compose.ui.graphics.asAndroidBitmap
 import android.content.ComponentName
 import android.content.Context
@@ -9,6 +10,7 @@ import android.graphics.Canvas
 import android.graphics.Path
 import android.graphics.RectF
 import android.graphics.drawable.AdaptiveIconDrawable
+import android.os.Build
 import android.graphics.drawable.Drawable
 import android.util.LruCache
 import androidx.compose.runtime.getValue
@@ -46,6 +48,9 @@ class AppIconLoader @Inject constructor(
             ((value.width.toLong() * value.height.toLong() * 4L) / 1024L).toInt().coerceAtLeast(1)
     }
 
+    // Declared before init: the collectors started there may clear it right away.
+    private val renderCache = LruCache<Triple<ComponentName, IconShape, String?>, ImageBitmap>(96)
+
     // Bounded (and thread-safe).
     private val packIconCache = LruCache<Pair<String, String>, ImageBitmap>(400)
 
@@ -58,6 +63,10 @@ class AppIconLoader @Inject constructor(
 
     @Volatile
     private var globalShape: IconShape = IconShape.ROUNDED_SQUARE
+
+    /** Themed icons in light (false) or dark (true) colors; null while they are off. */
+    @Volatile
+    private var themedDark: Boolean? = null
 
     var revision by mutableIntStateOf(0)
         private set
@@ -77,6 +86,17 @@ class AppIconLoader @Inject constructor(
                         override.iconShape?.let { shape -> override.componentName to shape }
                     }.toMap()
                 )
+            }
+        }
+        CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+            kotlinx.coroutines.flow.combine(settingsRepository.themedIcons, settingsRepository.theme) { on, theme ->
+                if (on && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) theme.isDark(context) else null
+            }.collect { dark ->
+                if (dark != themedDark) {
+                    themedDark = dark
+                    renderCache.evictAll()
+                    clearCache()
+                }
             }
         }
         CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
@@ -148,7 +168,6 @@ class AppIconLoader @Inject constructor(
     private class PackIndex(val exact: Map<String, String>, val byPackage: Map<String, String>)
 
     private val packIndexes = java.util.concurrent.ConcurrentHashMap<String, PackIndex>()
-    private val renderCache = LruCache<Triple<ComponentName, IconShape, String?>, ImageBitmap>(96)
 
     private fun packIndex(pack: String): PackIndex = packIndexes.computeIfAbsent(pack) {
         val mappings = runCatching { IconPackAppFilterParser.parse(context, pack) }.getOrDefault(emptyList())
@@ -239,7 +258,19 @@ class AppIconLoader @Inject constructor(
             }
         }
         canvas.clipPath(path)
-        if (drawable is AdaptiveIconDrawable) {
+        val dark = themedDark
+        val monochrome = if (dark != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) (drawable as? AdaptiveIconDrawable)?.monochrome else null
+        if (dark != null && monochrome != null) {
+            // Themed icon: the app's one-color icon on a system-tinted background, like the system launcher.
+            val bg = context.getColor(if (dark) android.R.color.system_neutral1_800 else android.R.color.system_accent1_100)
+            val fg = context.getColor(if (dark) android.R.color.system_accent1_100 else android.R.color.system_accent1_700)
+            canvas.drawColor(bg)
+            monochrome.mutate().apply {
+                setTint(fg)
+                setBounds(0, 0, ICON_SIZE_PX, ICON_SIZE_PX)
+                draw(canvas)
+            }
+        } else if (drawable is AdaptiveIconDrawable) {
             drawable.background?.let { bg -> bg.setBounds(0, 0, ICON_SIZE_PX, ICON_SIZE_PX); bg.draw(canvas) }
             drawable.foreground?.let { fg -> fg.setBounds(0, 0, ICON_SIZE_PX, ICON_SIZE_PX); fg.draw(canvas) }
         } else {

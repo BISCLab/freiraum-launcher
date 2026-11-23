@@ -6,6 +6,7 @@
 - Accessibility mode, complete: the clock and date in pure black or white with a strong halo; second lines in widgets (dates, hints, times) at full strength; Dock and Panel icons larger; app names larger and heavier; small widget buttons at least 48 dp; the category rail wider and the A-Z letters larger; no 3D page depth, gesture ripples or shape-changing logo (your saved choices stay); the settings with outlined cards and tiles and full-strength second lines
 - "Add to home screen" from other apps works: a website from Chrome or any other app shortcut asks where it goes (Home, a folder, or only the search) and shows its own icon there
 - Backgrounds: "Picture from your wallpapers" offers every picture of the installed wallpapers, the extra ones for further pages too, for any page or for all
+- Themed icons (Android 13+, Settings > Appearance > Icons): apps with a one-color icon show it in the system colors, light or dark with the launcher
 
 ## 0.16.0
 

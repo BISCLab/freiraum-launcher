@@ -775,6 +775,13 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[FONT_KEY] = font.name }
     }
 
+    /** Themed icons: apps that have a one-color icon show it in the system colors (Android 13+). */
+    val themedIcons: Flow<Boolean> = dataStore.data.map { it[THEMED_ICONS_KEY] ?: false }
+
+    suspend fun setThemedIcons(on: Boolean) {
+        dataStore.edit { it[THEMED_ICONS_KEY] = on }
+    }
+
     suspend fun setIconShape(shape: IconShape) {
         dataStore.edit { it[ICON_SHAPE_KEY] = shape.name }
     }
@@ -1231,6 +1238,7 @@ class SettingsRepository @Inject constructor(
         private val ICON_PACK_KEY = stringPreferencesKey("active_icon_pack")
         private val FONT_KEY = stringPreferencesKey("font_preference")
         private val ICON_SHAPE_KEY = stringPreferencesKey("icon_shape")
+        private val THEMED_ICONS_KEY = booleanPreferencesKey("themed_icons")
         // Renamed from the old "icon_size_percent" key when the scale changed from a -50..50
         // offset to a direct 0..200 percent, so a pre-existing stored offset is never misread as
         // the new absolute percent - it just reads back as unset (100, the new default) instead.
