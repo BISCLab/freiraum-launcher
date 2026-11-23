@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.17.2
 
 - All explanations in the settings and the welcome tour rewritten in short, simple sentences
 

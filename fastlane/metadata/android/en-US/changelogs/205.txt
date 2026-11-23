@@ -1,0 +1,2 @@
+- All explanations in the settings and the welcome tour rewritten in short, simple sentences
+- The keyboard bezel's eyedropper is explained more simply
