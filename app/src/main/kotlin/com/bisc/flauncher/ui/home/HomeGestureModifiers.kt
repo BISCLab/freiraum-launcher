@@ -43,6 +43,10 @@ fun Modifier.detectHomeGestures(
     onTap: (() -> Unit)? = null,
     onSwipeUp: () -> Unit,
     onSwipeDown: () -> Unit,
+    /** Two fingers together up or down, and two fingers drawn together. */
+    onTwoFingerSwipeUp: () -> Unit = {},
+    onTwoFingerSwipeDown: () -> Unit = {},
+    onPinchIn: () -> Unit = {},
     // Excludes a strip at the top/bottom edge from triggering onSwipeDown/onSwipeUp when the drag
     // *starts* inside it, so Android's own edge gestures (status bar reveal when we've hidden it;
     // the gesture-nav task switcher) stay reachable even though this detector otherwise covers the
@@ -64,6 +68,9 @@ fun Modifier.detectHomeGestures(
     val currentOnLongPress = rememberUpdatedState(onLongPress)
     val currentOnDoubleTap = rememberUpdatedState(onDoubleTap)
     val currentOnTap = rememberUpdatedState(onTap)
+    val currentOnTwoUp = rememberUpdatedState(onTwoFingerSwipeUp)
+    val currentOnTwoDown = rememberUpdatedState(onTwoFingerSwipeDown)
+    val currentOnPinchIn = rememberUpdatedState(onPinchIn)
     return this
         .pointerInput(thresholdPx, topSafeZonePx, bottomSafeZonePx, exclusion) {
             awaitEachGesture {
@@ -82,8 +89,45 @@ fun Modifier.detectHomeGestures(
                 var dy = 0f
                 var vertical = false
                 var fired = false
+                // Two fingers: where they started, set when the second one lands.
+                var twoFingers = false
+                var startDistance = 0f
+                var startCenterY = 0f
                 while (true) {
                     val event = awaitPointerEvent(PointerEventPass.Main)
+                    val pressed = event.changes.filter { it.pressed }
+                    if (pressed.size >= 2) {
+                        val a = pressed[0].position
+                        val b = pressed[1].position
+                        val distance = (a - b).getDistance()
+                        val centerY = (a.y + b.y) / 2f
+                        if (!twoFingers) {
+                            // A second finger turns it into a two-finger gesture, unless one already fired.
+                            if (fired) break
+                            twoFingers = true
+                            startDistance = distance
+                            startCenterY = centerY
+                            continue
+                        }
+                        pressed.forEach { it.consume() }
+                        if (fired) continue
+                        val pinch = distance - startDistance
+                        val moved = centerY - startCenterY
+                        if (pinch <= -thresholdPx && abs(pinch) > abs(moved)) {
+                            currentOnPinchIn.value(); fired = true
+                        } else if (moved <= -thresholdPx) {
+                            currentOnTwoUp.value(); fired = true
+                        } else if (moved >= thresholdPx) {
+                            currentOnTwoDown.value(); fired = true
+                        }
+                        continue
+                    }
+                    // Lifting one of two fingers ends a two-finger gesture; it never turns into a one-finger one.
+                    if (twoFingers) {
+                        if (pressed.isEmpty()) break
+                        pressed.forEach { it.consume() }
+                        continue
+                    }
                     val change = event.changes.firstOrNull() ?: break
                     if (!change.pressed) break
                     if (!vertical && change.isConsumed) break

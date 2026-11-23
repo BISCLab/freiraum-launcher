@@ -95,6 +95,8 @@ object LauncherSettingsTargets {
         LauncherSettingsTarget(R.string.settings_motion_label, "settings/appearance/animations",
             listOf("animationen", "bewegung", "zoom", "wellen", "ladeanimation", "laden",
                 "animations", "motion", "ripples", "charging animation")),
+        LauncherSettingsTarget(R.string.settings_gesture_two_fingers, "settings/gestures",
+            listOf("zwei finger", "zusammenziehen", "kneifen", "two fingers", "pinch")),
         LauncherSettingsTarget(R.string.settings_lock_switch, "settings/system",
             listOf("sperre", "sperren", "schützen", "passwort", "fingerabdruck", "lock", "protect", "password", "fingerprint")),
         LauncherSettingsTarget(R.string.settings_accessibility_mode, "settings/system",

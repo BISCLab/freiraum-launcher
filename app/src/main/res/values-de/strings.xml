@@ -1065,4 +1065,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_lock_locked">Einstellungen gesperrt</string>
     <string name="settings_lock_locked_text">Entsperre sie mit deiner Displaysperre.</string>
     <string name="settings_lock_unlock">Entsperren</string>
+    <string name="settings_gesture_two_fingers">Mit zwei Fingern</string>
+    <string name="settings_gesture_two_up">Zwei Finger nach oben</string>
+    <string name="settings_gesture_two_down">Zwei Finger nach unten</string>
+    <string name="settings_gesture_pinch_in">Zusammenziehen</string>
 </resources>

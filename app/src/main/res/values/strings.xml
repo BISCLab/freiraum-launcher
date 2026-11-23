@@ -1065,4 +1065,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_lock_locked">Settings locked</string>
     <string name="settings_lock_locked_text">Unlock them with your screen lock.</string>
     <string name="settings_lock_unlock">Unlock</string>
+    <string name="settings_gesture_two_fingers">With two fingers</string>
+    <string name="settings_gesture_two_up">Two fingers up</string>
+    <string name="settings_gesture_two_down">Two fingers down</string>
+    <string name="settings_gesture_pinch_in">Pinch in</string>
 </resources>

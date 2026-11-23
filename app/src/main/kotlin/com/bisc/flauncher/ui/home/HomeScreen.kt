@@ -578,6 +578,9 @@ fun HomeScreen(
                                             viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.SWIPE_DOWN, context, openPageById, openSettingsFromGesture)
                                         }
                                     },
+                                    onTwoFingerSwipeUp = { viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.TWO_FINGER_SWIPE_UP, context, openPageById, openSettingsFromGesture) },
+                                    onTwoFingerSwipeDown = { viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.TWO_FINGER_SWIPE_DOWN, context, openPageById, openSettingsFromGesture) },
+                                    onPinchIn = { viewModel.executeGestureAction(com.bisc.flauncher.data.model.HomeGesture.PINCH_IN, context, openPageById, openSettingsFromGesture) },
                                     topSafeZonePx = edgeSafeZonePx,
                                     bottomSafeZonePx = edgeSafeZonePx,
                                     exclusion = homeGestureExclusion

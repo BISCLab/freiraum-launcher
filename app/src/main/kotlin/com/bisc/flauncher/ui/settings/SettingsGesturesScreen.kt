@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SwipeDown
+import androidx.compose.material.icons.filled.Pinch
 import androidx.compose.material.icons.filled.SwipeUp
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -190,6 +191,9 @@ internal fun gestureIcon(gesture: HomeGesture) = when (gesture) {
     HomeGesture.DOUBLE_TAP -> Icons.Filled.TouchApp
     HomeGesture.SWIPE_UP -> Icons.Filled.SwipeUp
     HomeGesture.SWIPE_DOWN -> Icons.Filled.SwipeDown
+    HomeGesture.TWO_FINGER_SWIPE_UP -> Icons.Filled.SwipeUp
+    HomeGesture.TWO_FINGER_SWIPE_DOWN -> Icons.Filled.SwipeDown
+    HomeGesture.PINCH_IN -> Icons.Filled.Pinch
 }
 
 @Composable
@@ -198,6 +202,9 @@ internal fun gestureLabel(gesture: HomeGesture): String = when (gesture) {
     HomeGesture.DOUBLE_TAP -> stringResource(R.string.settings_gesture_double_tap)
     HomeGesture.SWIPE_UP -> stringResource(R.string.settings_gesture_swipe_up)
     HomeGesture.SWIPE_DOWN -> stringResource(R.string.settings_gesture_swipe_down)
+    HomeGesture.TWO_FINGER_SWIPE_UP -> stringResource(R.string.settings_gesture_two_up)
+    HomeGesture.TWO_FINGER_SWIPE_DOWN -> stringResource(R.string.settings_gesture_two_down)
+    HomeGesture.PINCH_IN -> stringResource(R.string.settings_gesture_pinch_in)
 }
 
 @Composable
@@ -254,6 +261,23 @@ internal fun GesturePhone(markers: Map<HomeGesture, GestureMarker>, onEdit: (Hom
             GestureMarkerChip(HomeGesture.SWIPE_UP, Icons.Filled.ArrowUpward, markers, onEdit)
             // The gesture bar.
             Box(modifier = Modifier.fillMaxWidth(0.35f).height(4.dp).clip(CircleShape).background(MaterialTheme.colorScheme.outline))
+        }
+    }
+    // The two-finger gestures happen anywhere on the page, so they stand below the phone.
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            stringResource(R.string.settings_gesture_two_fingers),
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.fillMaxWidth(widthFraction).padding(bottom = 8.dp)
+        )
+        Column(modifier = Modifier.fillMaxWidth(widthFraction), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            GestureMarkerChip(HomeGesture.TWO_FINGER_SWIPE_UP, Icons.Filled.SwipeUp, markers, onEdit)
+            GestureMarkerChip(HomeGesture.TWO_FINGER_SWIPE_DOWN, Icons.Filled.SwipeDown, markers, onEdit)
+            GestureMarkerChip(HomeGesture.PINCH_IN, Icons.Filled.Pinch, markers, onEdit)
         }
     }
 }
