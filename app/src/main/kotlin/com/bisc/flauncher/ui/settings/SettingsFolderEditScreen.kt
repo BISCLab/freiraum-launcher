@@ -855,7 +855,9 @@ private fun FolderCategoryLink(folder: com.bisc.flauncher.data.model.Folder, onC
         CategoryPickerSheet(
             categories = categories,
             onSelect = { onChange(it.id); picking = false },
-            onDismiss = { picking = false }
+            onDismiss = { picking = false },
+            selectedId = folder.categoryId,
+            onCreate = { name -> viewModel.addCategory(name) { id -> onChange(id) }; picking = false }
         )
     }
 }

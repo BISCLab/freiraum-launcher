@@ -12,6 +12,11 @@
 - Welcome tour: Categories among the elements and the Categories widget among the widgets
 - Settings lock: when the settings lock while you are in another app, coming back leads to the home screen instead of the lock page
 - Page settings: rows in the small page carry a pen and light up when the page opens; the hint to tap them sits above the picture as a card
+- Categories widget settings are saved with Save like the rest of the widget screen; the preview shows them right away
+- Categories widget: paging buttons and swiping are only offered for the tabs view
+- Fixed: unticking the last category of a widget showed all categories again
+- Choosing a category (folder, gesture, Add) has a title, marks the current one and can make a new one right there
+- Categories: Done button when picking links, places, contacts and shortcuts; name fields in the usual shape
 
 ## 0.18.0
 

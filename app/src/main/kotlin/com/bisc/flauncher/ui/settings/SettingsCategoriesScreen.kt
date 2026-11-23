@@ -234,7 +234,9 @@ private fun NewRuleDialog(onCreate: (String, CategoryRule) -> Unit, onDismiss: (
                     value = name,
                     onValueChange = { name = it },
                     label = { Text(stringResource(R.string.settings_category_name)) },
-                    singleLine = true
+                    singleLine = true,
+                    shape = SettingsTextFieldShape,
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(Modifier.size(12.dp))
                 Text(stringResource(R.string.settings_category_rule_pick), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary)
@@ -332,7 +334,9 @@ internal fun NewCategoryDialog(onCreate: (String) -> Unit, onDismiss: () -> Unit
                 value = name,
                 onValueChange = { name = it },
                 label = { Text(stringResource(R.string.settings_category_name)) },
-                singleLine = true
+                singleLine = true,
+                shape = SettingsTextFieldShape,
+                modifier = Modifier.fillMaxWidth()
             )
         },
         confirmButton = { TextButton(onClick = { onCreate(name.trim()) }, enabled = name.isNotBlank()) { Text(stringResource(R.string.settings_save)) } },
@@ -716,29 +720,46 @@ private fun CategoryElementsSheet(
                     }
                 }
             }
+            Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) { Text(stringResource(R.string.settings_categories_done)) }
         }
     }
 }
 
-/** Picks an existing category for a "+" slot; new ones are made under Elements > Categories. */
+/** Picks a category: the current one checked, and a new one can be made right here. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryPickerSheet(categories: List<Category>, onSelect: (Category) -> Unit, onDismiss: () -> Unit) {
+fun CategoryPickerSheet(
+    categories: List<Category>,
+    onSelect: (Category) -> Unit,
+    onDismiss: () -> Unit,
+    selectedId: Long? = null,
+    onCreate: ((String) -> Unit)? = null
+) {
+    var creating by remember { mutableStateOf(false) }
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(modifier = Modifier.fillMaxWidth().heightIn(max = 480.dp).verticalScroll(rememberScrollState()).padding(16.dp)) {
-            if (categories.isEmpty()) {
+        Column(modifier = Modifier.fillMaxWidth().heightIn(max = 520.dp).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
+            Text(stringResource(R.string.settings_categories_pick_title), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 4.dp, bottom = 12.dp))
+            if (categories.isEmpty() && onCreate == null) {
                 Text(stringResource(R.string.settings_categories_picker_empty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            categories.forEach { category ->
-                SettingsPreference(
-                    icon = null,
-                    leading = { CategoryBadge(category) },
-                    title = category.name,
-                    onClick = { onSelect(category) },
-                    trailing = null
-                )
+            SettingsPreferenceGroup {
+                categories.forEach { category ->
+                    SettingsPreference(
+                        icon = null,
+                        leading = { CategoryBadge(category) },
+                        title = category.name,
+                        onClick = { onSelect(category) },
+                        trailing = if (category.id == selectedId) ({ Icon(Icons.Filled.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary) }) else null
+                    )
+                }
+                if (onCreate != null) {
+                    SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_categories_new), onClick = { creating = true }, trailing = null)
+                }
             }
         }
+    }
+    if (creating && onCreate != null) {
+        NewCategoryDialog(onCreate = { name -> creating = false; onCreate(name) }, onDismiss = { creating = false })
     }
 }
 
@@ -788,15 +809,17 @@ fun ElementCategoriesDialog(
     }
 }
 
-/** A Categories widget's own choice: how it shows, which categories, and the chips. Changes apply
- *  right away, like the widget's paging buttons look. */
+/** A Categories widget's own choice: how it shows, which categories, and the chips. Part of the
+ *  widget screen's draft, written with its Save. */
 @Composable
-internal fun CategoryWidgetSettings(row: com.bisc.flauncher.data.model.PageRow, navController: NavController, viewModel: HomeViewModel) {
-    val configs by viewModel.categoryWidgetConfigs.collectAsState()
+internal fun CategoryWidgetSettings(
+    config: com.bisc.flauncher.data.model.CategoryWidgetConfig,
+    onChange: (com.bisc.flauncher.data.model.CategoryWidgetConfig) -> Unit,
+    navController: NavController,
+    viewModel: HomeViewModel
+) {
     val resolved by viewModel.resolvedCategories.collectAsState()
-    val key = com.bisc.flauncher.data.model.CategoryWidgetConfig.keyFor(row)
-    val config = configs[key] ?: com.bisc.flauncher.data.model.CategoryWidgetConfig()
-    fun set(new: com.bisc.flauncher.data.model.CategoryWidgetConfig) = viewModel.setCategoryWidgetConfig(key, new)
+    fun set(new: com.bisc.flauncher.data.model.CategoryWidgetConfig) = onChange(new)
     val single = config.mode == com.bisc.flauncher.data.model.CategoryWidgetMode.SINGLE
 
     SettingsPreferenceGroup(title = stringResource(R.string.widget_categories_mode)) {
@@ -837,7 +860,8 @@ internal fun CategoryWidgetSettings(row: com.bisc.flauncher.data.model.PageRow, 
                         // Leaving "all" starts from all of them, so unticking one keeps the rest.
                         val current = config.ids.ifEmpty { resolved.map { it.category.id } }
                         val next = if (id in current) current - id else resolved.map { it.category.id }.filter { it in current || it == id }
-                        set(config.copy(ids = if (next.size == resolved.size) emptyList() else next))
+                        // At least one stays chosen.
+                        if (next.isNotEmpty()) set(config.copy(ids = if (next.size == resolved.size) emptyList() else next))
                     }
                 },
                 trailing = {
@@ -870,7 +894,7 @@ internal fun AppCategoryChips(app: AppInfo, viewModel: SettingsViewModel) {
                     selected = inIt,
                     onClick = { viewModel.setCategoryMember(r.category.id, GridItemType.APP, payload, !inIt) },
                     label = { Text(r.category.name) },
-                    leadingIcon = { Icon(categoryIcon(r.category), contentDescription = null, tint = categoryColor(r.category), modifier = Modifier.size(18.dp)) }
+                    leadingIcon = if (r.category.hasSymbol) ({ Icon(categoryIcon(r.category), contentDescription = null, tint = categoryColor(r.category), modifier = Modifier.size(18.dp)) }) else null
                 )
             }
             androidx.compose.material3.AssistChip(

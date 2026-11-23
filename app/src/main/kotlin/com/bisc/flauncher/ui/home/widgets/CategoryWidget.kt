@@ -60,6 +60,9 @@ import com.bisc.flauncher.ui.home.categoryIcon
 import com.bisc.flauncher.ui.home.inkOn
 import kotlinx.coroutines.launch
 
+/** A widget's choice while it is edited and not yet saved; the widget preview shows it. */
+val LocalCategoryWidgetDraft = androidx.compose.runtime.compositionLocalOf<CategoryWidgetConfig?> { null }
+
 /** The categories a widget shows, in its own order; all of them when it names none. */
 internal fun widgetCategories(config: CategoryWidgetConfig, all: List<ResolvedCategory>): List<ResolvedCategory> =
     if (config.ids.isEmpty()) all else config.ids.mapNotNull { id -> all.find { it.category.id == id } }
@@ -80,7 +83,7 @@ fun CategoryWidget(
     val all by viewModel.resolvedCategories.collectAsState()
     val configs by viewModel.categoryWidgetConfigs.collectAsState()
     val paging by viewModel.widgetPaging.collectAsState()
-    val config = configs[CategoryWidgetConfig.keyFor(row)] ?: CategoryWidgetConfig()
+    val config = LocalCategoryWidgetDraft.current ?: configs[CategoryWidgetConfig.keyFor(row)] ?: CategoryWidgetConfig()
     val shown = widgetCategories(config, all)
     val appearance = row.appearance()
     val ink = com.bisc.flauncher.ui.home.dock.resolveElementColors(appearance).contentColor

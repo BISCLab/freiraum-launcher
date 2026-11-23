@@ -1193,4 +1193,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="widget_categories_mode_rows_summary">Jede Kategorie mit ihren Apps, eine unter der anderen. Du scrollst durch.</string>
     <string name="welcome_widgets_categories">Deine Kategorien mit ihren Apps. Mit Reitern, untereinander oder als kleine Kacheln.</string>
     <string name="welcome_elements_categories">Kategorien sortieren deine Apps und Elemente. Sie haben eine eigene Seite, ein Widget und kluge Kategorien, die sich selbst füllen.</string>
+    <string name="settings_categories_pick_title">Kategorie wählen</string>
 </resources>

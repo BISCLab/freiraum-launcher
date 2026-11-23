@@ -152,6 +152,11 @@ internal fun WidgetEditor(
 
     val savedCoverRounded by viewModel.musicCoverRounded.collectAsState()
     var coverRounded by rememberDraft(savedCoverRounded)
+    val categoryConfigs by viewModel.categoryWidgetConfigs.collectAsState()
+    val categoryKey = com.bisc.flauncher.data.model.CategoryWidgetConfig.keyFor(savedRow)
+    val savedCategoryConfig = categoryConfigs[categoryKey] ?: com.bisc.flauncher.data.model.CategoryWidgetConfig()
+    var categoryConfig by rememberDraft(savedCategoryConfig)
+    val isCategories = row.type == PageRowType.WIDGET && row.payload == WidgetKind.CATEGORIES
     SettingsSubScreen(
         title = rowLabel(row),
         navController = navController,
@@ -159,9 +164,12 @@ internal fun WidgetEditor(
         onSave = {
             onSave(row)
             if (coverRounded != savedCoverRounded) viewModel.setMusicCoverRounded(coverRounded)
+            if (categoryConfig != savedCategoryConfig) viewModel.setCategoryWidgetConfig(categoryKey, categoryConfig)
         },
-        dirty = row != savedRow || coverRounded != savedCoverRounded
+        dirty = row != savedRow || coverRounded != savedCoverRounded || categoryConfig != savedCategoryConfig
     ) {
+      // The widget preview shows the choice below before it is saved.
+      androidx.compose.runtime.CompositionLocalProvider(com.bisc.flauncher.ui.home.widgets.LocalCategoryWidgetDraft provides if (isCategories) categoryConfig else null) {
         WidgetSizeEditor(
             row = row,
             minSpan = minSpan,
@@ -203,9 +211,11 @@ internal fun WidgetEditor(
             }
         }
         if (isBuiltIn && row.payload == WidgetKind.CATEGORIES) {
-            CategoryWidgetSettings(row = row, navController = navController, viewModel = viewModel)
+            CategoryWidgetSettings(config = categoryConfig, onChange = { categoryConfig = it }, navController = navController, viewModel = viewModel)
         }
-        if (isBuiltIn && (row.payload == WidgetKind.WEATHER || row.payload == WidgetKind.NOTES || row.payload == WidgetKind.CATEGORIES)) {
+        // Only tabs switch pages; the other ways of the Categories widget have nothing to page.
+        val categoriesPage = isCategories && categoryConfig.mode == com.bisc.flauncher.data.model.CategoryWidgetMode.TABS
+        if (isBuiltIn && (row.payload == WidgetKind.WEATHER || row.payload == WidgetKind.NOTES || categoriesPage)) {
             SettingsPreferenceGroup(
                 title = stringResource(R.string.settings_widget_paging_mode),
                 info = stringResource(R.string.settings_widget_paging_mode_row_info)
@@ -317,6 +327,7 @@ internal fun WidgetEditor(
         SettingsPreferenceGroup {
             SettingsPreference(icon = Icons.Filled.DeleteOutline, title = stringResource(R.string.settings_rows_remove), onClick = { confirmingRemove = true }, trailing = null)
         }
+      }
     }
 
     if (confirmingRemove) {

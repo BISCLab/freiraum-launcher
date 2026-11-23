@@ -132,7 +132,11 @@ internal fun EditableGesturePhone(viewModel: SettingsViewModel, widthFraction: F
                 viewModel.setGestureAction(gesture, GestureAction(GestureActionType.CATEGORY, category.id.toString()))
                 pickingCategoryFor = null
             },
-            onDismiss = { pickingCategoryFor = null }
+            onDismiss = { pickingCategoryFor = null },
+            onCreate = { name ->
+                viewModel.addCategory(name) { id -> viewModel.setGestureAction(gesture, GestureAction(GestureActionType.CATEGORY, id.toString())) }
+                pickingCategoryFor = null
+            }
         )
     }
 
