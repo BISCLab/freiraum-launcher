@@ -1160,4 +1160,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="widget_categories_all">All</string>
     <string name="settings_search_include_labels">Categories</string>
     <string name="settings_gesture_action_category">Open a category</string>
+    <string name="settings_folder_category_label">Follows a category</string>
+    <string name="settings_folder_category_info">Then the folder fills itself with everything in the category. Your own apps in the folder stay saved and come back when you turn this off again. Widgets stay in the folder.</string>
+    <string name="settings_folder_category_none">No category</string>
+    <string name="settings_folder_category_on">The folder shows what is in the category</string>
+    <string name="settings_folder_category_off">Tap here to pick one</string>
+    <string name="settings_folder_category_unlink">Stop following</string>
 </resources>

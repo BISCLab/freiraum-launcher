@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 66,
-    "identityHash": "a66e90518c43934ca2ea61c178512599",
+    "identityHash": "a48539ac3d31af4550ffbd81e4486584",
     "entities": [
       {
         "tableName": "launcher_pages",
@@ -393,7 +393,7 @@
       },
       {
         "tableName": "folders",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `iconMode` TEXT NOT NULL, `iconColor` TEXT, `iconPackPackage` TEXT, `iconPackDrawable` TEXT, `appearanceOverrideEnabled` INTEGER NOT NULL, `elementFillMode` TEXT NOT NULL, `fillColor` INTEGER NOT NULL, `fillSecondaryColor` INTEGER NOT NULL, `fillMode` TEXT NOT NULL, `fillDirection` TEXT NOT NULL, `elementOpacity` REAL NOT NULL, `elementContentColor` INTEGER, `borderOverrideEnabled` INTEGER NOT NULL, `borderEnabled` INTEGER NOT NULL, `elementBorderColor` INTEGER, `elementBorderWidth` REAL NOT NULL, `rowColumns` TEXT NOT NULL, `showLabelsOverrideEnabled` INTEGER NOT NULL, `showLabels` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `iconMode` TEXT NOT NULL, `iconColor` TEXT, `iconPackPackage` TEXT, `iconPackDrawable` TEXT, `appearanceOverrideEnabled` INTEGER NOT NULL, `elementFillMode` TEXT NOT NULL, `fillColor` INTEGER NOT NULL, `fillSecondaryColor` INTEGER NOT NULL, `fillMode` TEXT NOT NULL, `fillDirection` TEXT NOT NULL, `elementOpacity` REAL NOT NULL, `elementContentColor` INTEGER, `borderOverrideEnabled` INTEGER NOT NULL, `borderEnabled` INTEGER NOT NULL, `elementBorderColor` INTEGER, `elementBorderWidth` REAL NOT NULL, `rowColumns` TEXT NOT NULL, `showLabelsOverrideEnabled` INTEGER NOT NULL, `showLabels` INTEGER NOT NULL, `categoryId` INTEGER)",
         "fields": [
           {
             "fieldPath": "id",
@@ -515,6 +515,11 @@
             "columnName": "showLabels",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "categoryId",
+            "columnName": "categoryId",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -1250,7 +1255,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a66e90518c43934ca2ea61c178512599')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a48539ac3d31af4550ffbd81e4486584')"
     ]
   }
 }

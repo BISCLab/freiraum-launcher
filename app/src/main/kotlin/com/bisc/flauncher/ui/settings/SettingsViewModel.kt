@@ -326,6 +326,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { folderRepository.removeFolderItem(item) }
     }
 
+    fun setFolderCategory(folderId: Long, categoryId: Long?) {
+        viewModelScope.launch { folderRepository.setFolderCategory(folderId, categoryId) }
+    }
+
     fun renameFolder(folderId: Long, newName: String) {
         viewModelScope.launch(kotlinx.coroutines.NonCancellable) { folderRepository.renameFolderById(folderId, newName) }
     }

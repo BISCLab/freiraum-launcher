@@ -48,6 +48,10 @@ class FolderRepository @Inject constructor(
         folderDao.update(folder.copy(name = newName))
     }
 
+    suspend fun setFolderCategory(id: Long, categoryId: Long?) {
+        folderDao.get(id)?.let { folderDao.update(it.copy(categoryId = categoryId)) }
+    }
+
     suspend fun renameFolderById(id: Long, newName: String) {
         folderDao.get(id)?.let { folderDao.update(it.copy(name = newName)) }
     }

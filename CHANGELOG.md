@@ -11,6 +11,7 @@
 - Categories widget for pages, the Panel and folders: one category as a grid, several with tabs to switch right in the widget (chips, swiping or paging buttons), or all of them as small tiles
 - Text search finds your categories by name, with their apps right in the card; a # in front searches only categories (new entry Categories under Search > Behavior)
 - Gestures can open a category directly (Open a category)
+- A folder can follow a category and fills itself with what the category holds; its own apps come back when it stops following (folder settings > Follows a category)
 
 ## 0.17.2
 

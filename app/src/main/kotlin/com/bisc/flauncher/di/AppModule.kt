@@ -163,6 +163,7 @@ private val MIGRATION_65_66 = object : Migration(65, 66) {
         db.execSQL("CREATE TABLE IF NOT EXISTS `category_members` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `categoryId` INTEGER NOT NULL, `type` TEXT NOT NULL, `payload` TEXT NOT NULL, `orderIndex` INTEGER NOT NULL, FOREIGN KEY(`categoryId`) REFERENCES `categories`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_category_members_categoryId` ON `category_members` (`categoryId`)")
         db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_category_members_categoryId_type_payload` ON `category_members` (`categoryId`, `type`, `payload`)")
+        db.execSQL("ALTER TABLE folders ADD COLUMN categoryId INTEGER")
     }
 }
 

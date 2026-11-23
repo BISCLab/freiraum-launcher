@@ -243,7 +243,8 @@ fun FolderView(
                                                 enabled = movingItemId == null,
                                                 menuExpanded = menuForItemId == entry.id,
                                                 onClick = { if (entry.type == GridItemType.FOLDER) onFolderClick(entry) else onAppClick(entry) },
-                                                onLongClick = { menuForItemId = entry.id },
+                                                // Cells from a category the folder follows stay where they are.
+                                                onLongClick = { if (entry.id > 0) menuForItemId = entry.id },
                                                 onDismissMenu = { menuForItemId = null },
                                                 onRequestMove = { menuForItemId = null; movingItemId = entry.id },
                                                 onRequestRemove = { menuForItemId = null; pendingRemoval = entry },

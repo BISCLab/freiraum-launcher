@@ -259,6 +259,8 @@ fun SettingsFolderEditScreen(
 
         FolderAddButtons(onAddContent = { viewModel.reserveFolderSlot(folderId, null); showAddChooser = true }, onAddWidget = { showWidgetKindPicker = true })
 
+        FolderCategoryLink(folder = folder, onChange = { viewModel.setFolderCategory(folderId, it) }, viewModel = viewModel)
+
         SettingsPreferenceGroup(
             title = stringResource(R.string.settings_folder_rows_label),
             info = stringResource(R.string.settings_folder_rows_info)
@@ -830,3 +832,30 @@ fun SettingsFolderWidgetEditScreen(
     )
 }
 
+
+/** Lets a folder follow a category: it then fills itself with what the category holds. */
+@Composable
+private fun FolderCategoryLink(folder: com.bisc.flauncher.data.model.Folder, onChange: (Long?) -> Unit, viewModel: SettingsViewModel) {
+    val categories by viewModel.categories.collectAsState()
+    var picking by remember { mutableStateOf(false) }
+    val linked = categories.find { it.id == folder.categoryId }
+    SettingsPreferenceGroup(title = stringResource(R.string.settings_folder_category_label), info = stringResource(R.string.settings_folder_category_info)) {
+        SettingsPreference(
+            icon = null,
+            leading = if (linked != null) ({ CategoryBadge(linked, 32.dp) }) else null,
+            title = linked?.name ?: stringResource(R.string.settings_folder_category_none),
+            summary = stringResource(if (linked != null) R.string.settings_folder_category_on else R.string.settings_folder_category_off),
+            onClick = { picking = true }
+        )
+        if (linked != null) {
+            SettingsPreference(icon = null, title = stringResource(R.string.settings_folder_category_unlink), onClick = { onChange(null) }, trailing = null)
+        }
+    }
+    if (picking) {
+        CategoryPickerSheet(
+            categories = categories,
+            onSelect = { onChange(it.id); picking = false },
+            onDismiss = { picking = false }
+        )
+    }
+}

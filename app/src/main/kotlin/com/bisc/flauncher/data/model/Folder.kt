@@ -36,7 +36,9 @@ data class Folder(
     // Same override-vs-global pattern as [appearanceOverrideEnabled] - when false, this folder uses
     // the shared global default (SettingsRepository.folderShowLabels) instead of [showLabels].
     val showLabelsOverrideEnabled: Boolean = false,
-    val showLabels: Boolean = false
+    val showLabels: Boolean = false,
+    // Set: the folder follows this category and shows what it holds instead of its own apps.
+    val categoryId: Long? = null
 )
 
 /** Most elements one folder sub-row holds - as many as fit across the folder view. */
