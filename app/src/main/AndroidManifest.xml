@@ -121,6 +121,18 @@
             <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
         </activity>
 
+        <!-- "Add to home screen" from other apps: asks where the shortcut goes. -->
+        <activity
+            android:name=".PinShortcutActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.FLauncher.Dialog">
+            <intent-filter>
+                <action android:name="android.content.pm.action.CONFIRM_PIN_SHORTCUT" />
+            </intent-filter>
+        </activity>
+
         <!-- Weather broadcasts in the Gadgetbridge format; exported so companion apps can send them. -->
         <receiver
             android:name=".data.weather.GadgetbridgeWeatherReceiver"

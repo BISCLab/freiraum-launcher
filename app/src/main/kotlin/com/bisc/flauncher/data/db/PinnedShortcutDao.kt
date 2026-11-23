@@ -14,4 +14,7 @@ interface PinnedShortcutDao {
     @Insert
     suspend fun insert(shortcut: PinnedShortcut): Long
 
+    @Query("SELECT COUNT(*) FROM pinned_shortcuts WHERE packageName = :packageName AND shortcutId = :shortcutId")
+    suspend fun count(packageName: String, shortcutId: String): Int
+
 }

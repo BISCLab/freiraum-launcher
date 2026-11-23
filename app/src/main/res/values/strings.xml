@@ -1042,4 +1042,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
         <item quantity="one">%1$d row is still free on this page.</item>
         <item quantity="other">%1$d rows are still free on this page.</item>
     </plurals>
+    <string name="pin_shortcut_where">Where should the shortcut go?</string>
+    <string name="pin_shortcut_home">Home screen</string>
+    <string name="pin_shortcut_folder">Folder “%1$s”</string>
+    <string name="pin_shortcut_search_only">Only in the search</string>
+    <string name="pin_shortcut_add">Add</string>
+    <string name="pin_shortcut_added">“%1$s” added</string>
 </resources>

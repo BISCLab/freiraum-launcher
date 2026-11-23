@@ -48,6 +48,7 @@ class ShortcutRepository @Inject constructor(
 
     suspend fun pin(info: ShortcutInfo): Long {
         val label = (info.shortLabel ?: info.longLabel ?: info.id).toString()
+        if (dao.count(info.`package`, info.id) > 0) return 0
         return dao.insert(PinnedShortcut(packageName = info.`package`, shortcutId = info.id, label = label))
     }
 

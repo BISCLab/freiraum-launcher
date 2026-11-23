@@ -446,7 +446,9 @@ private fun FolderContentCell(
                 }
             }
             GridItemType.SHORTCUT -> {
-                Icon(imageVector = Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, modifier = Modifier.size(56.dp))
+                val shortcutIcon = rememberShortcutIcon(item.payload)
+                if (shortcutIcon != null) Image(bitmap = shortcutIcon, contentDescription = null, modifier = Modifier.size(56.dp))
+                else Icon(imageVector = Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, modifier = Modifier.size(56.dp))
                 if (showLabel) {
                     Spacer(Modifier.height(6.dp))
                     GridLabel(item.payload.split("|").getOrNull(2)?.takeIf { it.isNotBlank() } ?: item.payload.substringBefore('|'))

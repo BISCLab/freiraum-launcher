@@ -493,7 +493,9 @@ private fun ShortcutCell(payload: String, onClick: () -> Unit, showLabel: Boolea
         modifier = Modifier.clickable(onClick = onClick).padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(imageVector = Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, modifier = Modifier.size(56.dp * iconSizeScale))
+        val icon = rememberShortcutIcon(payload)
+        if (icon != null) androidx.compose.foundation.Image(icon, contentDescription = null, modifier = Modifier.size(56.dp * iconSizeScale))
+        else Icon(imageVector = Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, modifier = Modifier.size(56.dp * iconSizeScale))
         if (showLabel) {
             Spacer(Modifier.height(8.dp))
             GridLabel(label, color = labelColor)
@@ -845,10 +847,14 @@ fun PillRowEntries(
                             )
                         }
                         GridItemType.SHORTCUT -> {
+                            val shortcutIcon = rememberShortcutIcon(entry.payload)
                             Box(
-                                modifier = Modifier.fillMaxSize().background(UNSET_APP_SLOT_COLOR).clickable { onShortcutClick(entry.payload) },
+                                modifier = Modifier.fillMaxSize().background(if (shortcutIcon == null) UNSET_APP_SLOT_COLOR else Color.Transparent).clickable { onShortcutClick(entry.payload) },
                                 contentAlignment = Alignment.Center
-                            ) { Icon(imageVector = Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, tint = Color.White) }
+                            ) {
+                                if (shortcutIcon != null) androidx.compose.foundation.Image(shortcutIcon, contentDescription = null, modifier = Modifier.fillMaxSize())
+                                else Icon(imageVector = Icons.AutoMirrored.Filled.Shortcut, contentDescription = null, tint = Color.White)
+                            }
                         }
                         GridItemType.MAP_TARGET -> {
                             val targetId = remember(entry.payload) { entry.payload.toLongOrNull() }

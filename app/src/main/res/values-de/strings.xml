@@ -1042,4 +1042,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
         <item quantity="one">Auf dieser Seite ist noch %1$d Zeile frei.</item>
         <item quantity="other">Auf dieser Seite sind noch %1$d Zeilen frei.</item>
     </plurals>
+    <string name="pin_shortcut_where">Wohin soll die Verknüpfung?</string>
+    <string name="pin_shortcut_home">Startbildschirm</string>
+    <string name="pin_shortcut_folder">Ordner „%1$s“</string>
+    <string name="pin_shortcut_search_only">Nur in der Suche</string>
+    <string name="pin_shortcut_add">Hinzufügen</string>
+    <string name="pin_shortcut_added">„%1$s“ hinzugefügt</string>
 </resources>

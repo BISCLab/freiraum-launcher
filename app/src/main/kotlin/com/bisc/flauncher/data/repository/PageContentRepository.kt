@@ -625,6 +625,14 @@ class PageContentRepository @Inject constructor(
         return id
     }
 
+    /** A shortcut another app asked to add ("Add to home screen"): into Home's first element box,
+     *  or a new one when Home has none. A full page moves it on like any other addition. */
+    suspend fun addShortcutToHome(packageName: String, shortcutId: String, label: String) {
+        val home = pageDao.getHomePage() ?: return
+        val box = rowDao.getForPage(home.id).filter { it.type == PageRowType.ELEMENT_BOX && it.enabled }.minByOrNull { it.orderIndex }
+        addShortcutEntry(box?.id ?: addElementBox(home.id), packageName, shortcutId, label)
+    }
+
     suspend fun addShortcutEntry(pageRowId: Long, packageName: String, shortcutId: String, label: String, orderIndex: Int? = null): Long {
         val next = orderIndex ?: firstFreeSlot(pageRowId)
         val id = entryDao.insert(
