@@ -74,7 +74,8 @@ fun ChoicePanel(title: String, options: List<ChoiceOption>, onDismiss: () -> Uni
             Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 8.dp, top = 6.dp, bottom = 16.dp))
             Column(
                 modifier = Modifier
-                    .heightIn(max = 460.dp)
+                    // As tall as the screen allows, so most lists fit without scrolling.
+                    .heightIn(max = (androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp * 0.85f - 140f).coerceAtLeast(300f).dp)
                     .clip(RoundedCornerShape(22.dp))
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(PIECE_GAP)

@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Pages settings: the Categories page shows among the function pages; all four tiles fit side by side
+- Choice windows use more of the screen height, so lists like the gesture actions fit without scrolling
 
 ## 0.18.0
 
