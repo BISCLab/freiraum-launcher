@@ -67,6 +67,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
@@ -661,7 +662,7 @@ private fun PictureThumb(file: java.io.File?, modifier: Modifier) {
     }
 }
 
-/** The widgets there are: three that come along, and Weather with the way to an app that brings its data. */
+/** The widgets there are: those that come along, and Weather with the way to an app that brings its data. */
 @Composable
 private fun WidgetsOverview() {
     val context = LocalContext.current
@@ -670,6 +671,7 @@ private fun WidgetsOverview() {
             listOf(
                 Triple(Icons.Filled.Schedule, R.string.picker_widget_clock, R.string.welcome_widgets_clock),
                 Triple(Icons.Filled.EditNote, R.string.picker_widget_notes, R.string.welcome_widgets_notes),
+                Triple(Icons.AutoMirrored.Filled.Label, R.string.settings_pages_categories, R.string.welcome_widgets_categories),
                 Triple(Icons.Filled.MusicNote, R.string.picker_widget_music, R.string.welcome_widgets_music),
                 Triple(Icons.Filled.Cloud, R.string.picker_widget_weather, R.string.welcome_widgets_weather)
             ).forEach { (icon, title, summary) ->
@@ -699,11 +701,12 @@ private fun ElementsOverview() {
         Icons.Filled.Place to R.string.welcome_element_places,
         Icons.Filled.Language to R.string.welcome_element_links,
         Icons.Filled.Person to R.string.welcome_element_contacts,
-        Icons.Filled.Bolt to R.string.welcome_element_actions
+        Icons.Filled.Bolt to R.string.welcome_element_actions,
+        Icons.AutoMirrored.Filled.Label to R.string.settings_pages_categories
     )
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         // All of one size, whether a name takes one line or two.
-        com.bisc.flauncher.ui.EqualGrid(count = kinds.size, columns = 3) { index ->
+        com.bisc.flauncher.ui.EqualGrid(count = kinds.size, columns = 3, centerLastRow = true) { index ->
                 kinds[index].let { (icon, label) ->
                     Column(
                         modifier = Modifier
@@ -722,7 +725,7 @@ private fun ElementsOverview() {
                 }
         }
         Text(
-            stringResource(R.string.welcome_elements_where),
+            stringResource(R.string.welcome_elements_where) + "\n\n" + stringResource(R.string.welcome_elements_categories),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

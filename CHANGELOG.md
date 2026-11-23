@@ -8,6 +8,8 @@
 - Search, Categories page and widget show a category's name in a pill of its color; the symbol lines up with the card title
 - Fixed: a category's new color, name or symbol was sometimes lost when saving
 - Categories widget: new view Several stacked, each category with its apps one below the other; scrolling stops at the start of a category
+- Fixed: swiping past the last tab of a Categories or Notes widget left the pages standing between two; they now settle on one
+- Welcome tour: Categories among the elements and the Categories widget among the widgets
 
 ## 0.18.0
 

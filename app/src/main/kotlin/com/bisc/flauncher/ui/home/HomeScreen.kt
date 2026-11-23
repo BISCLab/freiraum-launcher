@@ -557,7 +557,7 @@ fun HomeScreen(
                         // mirrored in SettingsGesturesScreen, which shows that slot locked with a reason
                         // instead of letting it be rebound. A top/bottom safe zone keeps Android's own
                         // edge gestures (hidden status bar reveal; gesture-nav task switcher) reachable.
-                        modifier = Modifier.fillMaxSize().then(
+                        modifier = Modifier.fillMaxSize().settleHomePager(pagerState).then(
                             if (com.bisc.flauncher.ui.pageDepth(depthMotion) > 0f) Modifier.graphicsLayer {
                                 val offset = kotlin.math.abs((pagerState.currentPage - pageIndex) + pagerState.currentPageOffsetFraction).coerceAtMost(1f)
                                 val s = 1f - com.bisc.flauncher.ui.pageDepth(depthMotion) * offset

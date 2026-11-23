@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
  * their height is asked for before they are placed.
  */
 @Composable
-fun EqualGrid(count: Int, columns: Int, modifier: Modifier = Modifier, gap: Dp = 10.dp, item: @Composable (Int) -> Unit) {
+fun EqualGrid(count: Int, columns: Int, modifier: Modifier = Modifier, gap: Dp = 10.dp, centerLastRow: Boolean = false, item: @Composable (Int) -> Unit) {
     Layout(
         modifier = modifier.fillMaxWidth(),
         content = { repeat(count) { item(it) } }
@@ -27,7 +27,13 @@ fun EqualGrid(count: Int, columns: Int, modifier: Modifier = Modifier, gap: Dp =
         val placeables = measurables.map { it.measure(Constraints.fixed(width, height)) }
         val rows = (placeables.size + cols - 1) / cols
         layout(constraints.maxWidth, (rows * height + (rows - 1).coerceAtLeast(0) * space).coerceAtLeast(0)) {
-            placeables.forEachIndexed { i, p -> p.place((i % cols) * (width + space), (i / cols) * (height + space)) }
+            val lastRowCount = placeables.size - (rows - 1) * cols
+            // A short last row in the middle instead of on the left, when asked.
+            val lastShift = if (centerLastRow && lastRowCount < cols) (cols - lastRowCount) * (width + space) / 2 else 0
+            placeables.forEachIndexed { i, p ->
+                val shift = if (i / cols == rows - 1) lastShift else 0
+                p.place((i % cols) * (width + space) + shift, (i / cols) * (height + space))
+            }
         }
     }
 }
