@@ -25,6 +25,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.HorizontalRule
@@ -150,13 +152,23 @@ fun PagePreview(
 
             // On wide screens rows and Dock are as narrow and centered as on the real page.
             val contentWidth = com.bisc.flauncher.ui.MaxContentWidth * scale
+            // Rows that can be picked carry a pen and light up twice on opening, so it is clear they
+            // are there to be tapped.
+            val tappable = onRowTap != null && selectedRowId == null
+            val pulse = remember { androidx.compose.animation.core.Animatable(0f) }
+            androidx.compose.runtime.LaunchedEffect(Unit) {
+                if (onRowTap != null) repeat(2) {
+                    pulse.animateTo(1f, androidx.compose.animation.core.tween(420))
+                    pulse.animateTo(0f, androidx.compose.animation.core.tween(420))
+                }
+            }
             Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Column(
                     modifier = Modifier.widthIn(max = contentWidth).padding(top = (topInset + 16.dp) * scale),
                     verticalArrangement = Arrangement.spacedBy(PageRowDimens.rowSpacing * scale)
                 ) {
                     contentRows.forEach { row ->
-                        MiniRow(row, entriesByRow[row.id].orEmpty(), surfaceDark, scale, unit, viewModel, picked = row.id == selectedRowId) {
+                        MiniRow(row, entriesByRow[row.id].orEmpty(), surfaceDark, scale, unit, viewModel, picked = row.id == selectedRowId, editBadge = tappable, pulse = { pulse.value }) {
                             if (onRowTap != null) onRowTap(row) else when (row.type) {
                                 PageRowType.WIDGET, PageRowType.SYSTEM_WIDGET -> navController.navigate("$base/rows/${row.id}")
                                 else -> navController.navigate("$base/rows/${row.id}/elementbox")
@@ -182,7 +194,7 @@ private fun miniRadius(percent: Int): Dp = MINI_ROW_RADIUS * (percent.coerceIn(0
 /** One row in small at its real height: an element box with its real icons in its columns, a
  *  widget with its own symbol, an Android widget with its app's icon and name. */
 @Composable
-private fun MiniRow(row: PageRow, entries: List<RowEntry>, surfaceDark: Boolean, scale: Float, unit: Dp, viewModel: HomeViewModel, picked: Boolean = false, onClick: () -> Unit) {
+private fun MiniRow(row: PageRow, entries: List<RowEntry>, surfaceDark: Boolean, scale: Float, unit: Dp, viewModel: HomeViewModel, picked: Boolean = false, editBadge: Boolean = false, pulse: () -> Float = { 0f }, onClick: () -> Unit) {
     val appearance = row.appearance()
     val colors = resolveElementColors(appearance, surfaceDark)
     val shape: Shape = RoundedCornerShape(miniRadius(row.cornerRadiusPercent))
@@ -200,6 +212,7 @@ private fun MiniRow(row: PageRow, entries: List<RowEntry>, surfaceDark: Boolean,
     // Empty space is invisible on the page: here only a dashed outline, so it is not taken for a widget.
     val isSpacer = row.type == PageRowType.WIDGET && row.payload == WidgetKind.SPACER
     val outline = MaterialTheme.colorScheme.outline
+    val accent = MaterialTheme.colorScheme.primary
     Box(
         modifier = Modifier
             .padding(horizontal = side)
@@ -222,6 +235,20 @@ private fun MiniRow(row: PageRow, entries: List<RowEntry>, surfaceDark: Boolean,
                     .then(if (colors.showBorder) Modifier.border(colors.borderWidth / 2, colors.borderColor, shape) else Modifier)
             )
             .then(if (picked) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape) else Modifier)
+            .drawWithContent {
+                drawContent()
+                val a = pulse()
+                if (a > 0f) {
+                    val stroke = 2.5.dp.toPx()
+                    drawRoundRect(
+                        color = accent.copy(alpha = a),
+                        topLeft = androidx.compose.ui.geometry.Offset(stroke / 2, stroke / 2),
+                        size = androidx.compose.ui.geometry.Size(size.width - stroke, size.height - stroke),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(miniRadius(row.cornerRadiusPercent).toPx()),
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = stroke)
+                    )
+                }
+            }
             .clickable(onClick = onClick)
             .padding(4.dp),
         contentAlignment = Alignment.Center
@@ -230,6 +257,14 @@ private fun MiniRow(row: PageRow, entries: List<RowEntry>, surfaceDark: Boolean,
             PageRowType.ELEMENT_BOX -> MiniIcons(entries, if (row.pillMode) 5 else row.columns.coerceIn(1, 6), colors.contentColor, scale, viewModel)
             PageRowType.SYSTEM_WIDGET -> MiniAndroidWidget(row.payload.toIntOrNull(), colors.contentColor, viewModel)
             else -> MiniOwnWidget(row.payload, colors.contentColor)
+        }
+        if (editBadge) {
+            Box(
+                modifier = Modifier.align(Alignment.TopEnd).size(16.dp).clip(androidx.compose.foundation.shape.CircleShape).background(accent),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Filled.Edit, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(10.dp))
+            }
         }
     }
 }

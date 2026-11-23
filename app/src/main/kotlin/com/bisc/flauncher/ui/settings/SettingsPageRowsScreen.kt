@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Apps
@@ -104,6 +105,8 @@ fun SettingsPageRowsScreen(
     SettingsSubScreen(title = pageTitle, navController = navController, onBack = onBack) {
         // Tap a part of the miniature to edit it; the list below stays as the second way in.
         var selectedRowId by remember { mutableStateOf<Long?>(null) }
+        // Said before the picture, so it is read before looking for what to do.
+        if (selectedRowId == null && rows.isNotEmpty()) RowsTapHint()
         PagePreview(
             pageId = pageId,
             isHome = false,
@@ -141,13 +144,6 @@ fun SettingsPageRowsScreen(
                     }
                 }) { Text(stringResource(R.string.settings_row_open)) }
             }
-        } else if (rows.isNotEmpty()) {
-            Text(
-                stringResource(R.string.settings_rows_pick_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 4.dp)
-            )
         }
         // Icon, name, background and status bar all live in the page's own Appearance screen, same
         // split as Home's own hub.
@@ -416,4 +412,21 @@ internal fun widgetKindLabel(kind: String): String = when (kind) {
     WidgetKind.CATEGORIES -> stringResource(R.string.settings_pages_categories)
     WidgetKind.SPACER -> stringResource(R.string.picker_widget_spacer)
     else -> kind
+}
+
+/** "Tap a row" as a card with a finger, above the small page. */
+@Composable
+private fun RowsTapHint() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(SettingsCardShape)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Icon(Icons.Filled.TouchApp, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
+        Text(stringResource(R.string.settings_rows_pick_hint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSecondaryContainer)
+    }
 }

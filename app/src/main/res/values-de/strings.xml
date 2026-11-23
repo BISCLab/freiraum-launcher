@@ -957,7 +957,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_elements_links_short">Webseiten zum Antippen</string>
     <string name="settings_elements_actions_short">Knöpfe für Seiten, Panel, Dock</string>
     <string name="settings_row_open">Öffnen</string>
-    <string name="settings_rows_pick_hint">Tippe eine Zeile im Bild oben an, um sie zu verschieben oder zu öffnen.</string>
+    <string name="settings_rows_pick_hint">Tippe auf eine Zeile im Bild. Dann kannst du sie bearbeiten oder verschieben.</string>
     <string name="settings_entry_actions_text">Seine Einstellungen öffnen oder es hier entfernen.</string>
     <string name="settings_entry_open_settings">Einstellungen</string>
     <string name="settings_weather_source_label">Datenquelle</string>

@@ -11,6 +11,7 @@
 - Fixed: swiping past the last tab of a Categories or Notes widget left the pages standing between two; they now settle on one
 - Welcome tour: Categories among the elements and the Categories widget among the widgets
 - Settings lock: when the settings lock while you are in another app, coming back leads to the home screen instead of the lock page
+- Page settings: rows in the small page carry a pen and light up when the page opens; the hint to tap them sits above the picture as a card
 
 ## 0.18.0
 
