@@ -1057,4 +1057,12 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_keyboard_privacy_label">Privacy</string>
     <string name="settings_keyboard_no_learning">Keyboard does not learn</string>
     <string name="settings_keyboard_no_learning_summary">The keyboard does not remember what you type into the launcher\'s searches and does not suggest it later. Most keyboards respect this.</string>
+    <string name="settings_lock_label">Lock</string>
+    <string name="settings_lock_switch">Lock the settings</string>
+    <string name="settings_lock_summary">The settings open only after your screen lock (fingerprint, face, PIN, pattern or password). Going back home or a minute away locks them again.</string>
+    <string name="settings_lock_needs_screen_lock">Set up a screen lock in the Android settings first.</string>
+    <string name="settings_lock_prompt_title">Unlock the settings</string>
+    <string name="settings_lock_locked">Settings locked</string>
+    <string name="settings_lock_locked_text">Unlock them with your screen lock.</string>
+    <string name="settings_lock_unlock">Unlock</string>
 </resources>

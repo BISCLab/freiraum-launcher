@@ -406,6 +406,13 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setThemedIcons(on) }
     }
 
+    val settingsLocked: StateFlow<Boolean> =
+        repository.settingsLocked.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun setSettingsLocked(on: Boolean) {
+        viewModelScope.launch { repository.setSettingsLocked(on) }
+    }
+
     val accessibilityMode: StateFlow<Boolean> =
         repository.accessibilityMode.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 

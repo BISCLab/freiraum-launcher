@@ -115,6 +115,13 @@ class SettingsRepository @Inject constructor(
     /** The accessibility mode: solid elements with strong borders, larger icons, no blur. */
     val accessibilityMode: Flow<Boolean> = dataStore.data.map { it[ACCESSIBILITY_MODE_KEY] ?: false }
 
+    /** The settings open only after the device's own unlock. */
+    val settingsLocked: Flow<Boolean> = dataStore.data.map { it[SETTINGS_LOCKED_KEY] ?: false }
+
+    suspend fun setSettingsLocked(on: Boolean) {
+        dataStore.edit { it[SETTINGS_LOCKED_KEY] = on }
+    }
+
     suspend fun setAccessibilityMode(on: Boolean) {
         dataStore.edit { it[ACCESSIBILITY_MODE_KEY] = on }
     }
@@ -1305,6 +1312,7 @@ class SettingsRepository @Inject constructor(
         private const val WIDGET_ARROW_PREFIX = "widget_arrow"
         private val SHOW_SETTINGS_TIPS_KEY = booleanPreferencesKey("show_settings_tips")
         private val ACCESSIBILITY_MODE_KEY = booleanPreferencesKey("accessibility_mode")
+        private val SETTINGS_LOCKED_KEY = booleanPreferencesKey("settings_locked")
         private val SEARCH_KEYBOARD_NO_LEARNING_KEY = booleanPreferencesKey("search_keyboard_no_learning")
         private val SHOW_NOTIFICATION_DOTS_KEY = booleanPreferencesKey("show_notification_dots")
         private val CAROUSEL_ENDLESS_KEY = booleanPreferencesKey("carousel_endless")

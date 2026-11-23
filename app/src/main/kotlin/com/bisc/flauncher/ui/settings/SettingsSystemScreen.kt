@@ -55,6 +55,7 @@ fun SettingsSystemScreen(
     var exportPassword by remember { mutableStateOf<CharArray?>(null) }
     val showSettingsTips by viewModel.showSettingsTips.collectAsState()
     val accessibilityMode by viewModel.accessibilityMode.collectAsState()
+    val settingsLocked by viewModel.settingsLocked.collectAsState()
     var language by remember { mutableStateOf(com.bisc.flauncher.util.AppLanguage.current(context)) }
     // Only the chosen language shows; the full list opens on tap, so it stays short as more come.
     val languages = listOf("" to stringResource(R.string.settings_language_system), "en" to "English", "de" to "Deutsch")
@@ -105,6 +106,25 @@ fun SettingsSystemScreen(
                 summary = stringResource(R.string.settings_accessibility_mode_summary),
                 onClick = { viewModel.setAccessibilityMode(!accessibilityMode) },
                 trailing = { Switch(checked = accessibilityMode, onCheckedChange = viewModel::setAccessibilityMode) }
+            )
+        }
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_lock_label)) {
+            val secure = SettingsLock.deviceSecure(context)
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_lock_switch),
+                summary = stringResource(if (secure) R.string.settings_lock_summary else R.string.settings_lock_needs_screen_lock),
+                onClick = if (secure) ({
+                    // Turned on from inside the open settings: they stay open until left.
+                    SettingsLock.unlocked = true
+                    viewModel.setSettingsLocked(!settingsLocked)
+                }) else null,
+                trailing = {
+                    Switch(checked = settingsLocked && secure, enabled = secure, onCheckedChange = {
+                        SettingsLock.unlocked = true
+                        viewModel.setSettingsLocked(it)
+                    })
+                }
             )
         }
         SettingsTileGrid(

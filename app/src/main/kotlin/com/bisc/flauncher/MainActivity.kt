@@ -101,10 +101,12 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         widgetHostManager.startListening()
+        com.bisc.flauncher.ui.settings.SettingsLock.onStart()
     }
 
     override fun onStop() {
         widgetHostManager.stopListening()
+        com.bisc.flauncher.ui.settings.SettingsLock.onStop()
         super.onStop()
     }
 
@@ -144,6 +146,8 @@ class MainActivity : ComponentActivity() {
             val showSettingsTips by settingsVm.showSettingsTips.collectAsState()
             val accessibilityMode by settingsVm.accessibilityMode.collectAsState()
             androidx.compose.runtime.SideEffect { com.bisc.flauncher.ui.AccessibilityMode.on = accessibilityMode }
+            val settingsLocked by settingsVm.settingsLocked.collectAsState()
+            androidx.compose.runtime.SideEffect { com.bisc.flauncher.ui.settings.SettingsLock.enabled = settingsLocked }
             val keyboardNoLearning by settingsVm.searchKeyboardNoLearning.collectAsState()
             androidx.compose.runtime.SideEffect { com.bisc.flauncher.ui.home.search.KeyboardPrivacy.noLearning = keyboardNoLearning }
             val dotsOn by settingsVm.showNotificationDots.collectAsState()
@@ -223,6 +227,10 @@ class MainActivity : ComponentActivity() {
             }
             // In the settings, the bar icons follow the settings' own color mode.
             val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+            // Back home, the settings lock again.
+            androidx.compose.runtime.LaunchedEffect(currentRoute) {
+                if (currentRoute != null && !currentRoute.startsWith("settings")) com.bisc.flauncher.ui.settings.SettingsLock.unlocked = false
+            }
             val darkTheme = if (currentRoute?.startsWith("settings") == true)
                 com.bisc.flauncher.ui.theme.settingsDark(settingsThemeMode, launcherDark) else launcherDark
             androidx.compose.runtime.DisposableEffect(darkTheme) {
@@ -732,7 +740,11 @@ private fun androidx.navigation.NavGraphBuilder.settingsComposable(
             // Room for the sections on the left where there are any (wide tablets), none on phones.
             androidx.compose.foundation.layout.Box(
                 modifier = Modifier.padding(start = com.bisc.flauncher.ui.settings.settingsSideRailWidth())
-            ) { content(entry) }
+            ) {
+                if (com.bisc.flauncher.ui.settings.SettingsLock.enabled && !com.bisc.flauncher.ui.settings.SettingsLock.unlocked) {
+                    com.bisc.flauncher.ui.settings.SettingsLockGate()
+                } else content(entry)
+            }
         }
     }
 }

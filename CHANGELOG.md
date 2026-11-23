@@ -8,6 +8,7 @@
 - Backgrounds: "Picture from your wallpapers" offers every picture of the installed wallpapers, the extra ones for further pages too, for any page or for all
 - Themed icons (Android 13+, Settings > Appearance > Icons): apps with a one-color icon show it in the system colors, light or dark with the launcher
 - Search > Keyboard: "Keyboard does not learn" asks the keyboard not to remember what is typed into the launcher's searches
+- Settings > System > Lock: the settings open only after the screen lock (fingerprint, face, PIN, pattern or password); going home or a minute away locks them again
 
 ## 0.16.0
 

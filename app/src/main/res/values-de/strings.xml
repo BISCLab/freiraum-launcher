@@ -1057,4 +1057,12 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_keyboard_privacy_label">Privatsphäre</string>
     <string name="settings_keyboard_no_learning">Tastatur lernt nicht mit</string>
     <string name="settings_keyboard_no_learning_summary">Was du in die Suchen des Launchers tippst, merkt sich die Tastatur nicht und schlägt es später nicht vor. Die meisten Tastaturen halten sich daran.</string>
+    <string name="settings_lock_label">Sperre</string>
+    <string name="settings_lock_switch">Einstellungen sperren</string>
+    <string name="settings_lock_summary">Die Einstellungen öffnen sich erst nach deiner Displaysperre (Fingerabdruck, Gesicht, PIN, Muster oder Passwort). Nach dem Zurück zum Startbildschirm oder einer Minute Pause sind sie wieder gesperrt.</string>
+    <string name="settings_lock_needs_screen_lock">Richte dafür zuerst eine Displaysperre in den Android-Einstellungen ein.</string>
+    <string name="settings_lock_prompt_title">Einstellungen entsperren</string>
+    <string name="settings_lock_locked">Einstellungen gesperrt</string>
+    <string name="settings_lock_locked_text">Entsperre sie mit deiner Displaysperre.</string>
+    <string name="settings_lock_unlock">Entsperren</string>
 </resources>
