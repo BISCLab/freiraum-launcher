@@ -1,0 +1,9 @@
+Neu: Kategorien
+- Apps, Links, Orte, Kontakte und Verknüpfungen in Kategorien ordnen, auch fertig von Android
+- Kluge Kategorien: Neu, Lange nicht benutzt, Oft benutzt, Ohne Kategorie, eigene Regeln
+- Neue Seite Kategorien mit Karten, Reitern oder Liste
+- Kategorie als Element, als Widget und in der Suche
+- Ordner, die einer Kategorie folgen
+- Kategorie-Filter in der App-Liste
+- Designs bringen Kategorie-Farben mit
+- Jeder App-Start zählt jetzt

@@ -1,0 +1,9 @@
+New: Categories
+- Sort apps, links, places, contacts and shortcuts into categories, also ready-made from Android
+- Smart categories: New, Not used in a while, Used often, Without category, your own rules
+- New Categories page with cards, tabs or a list
+- A category as an element, as a widget and in the search
+- Folders that follow a category
+- Category filters in the App list
+- Designs bring category colors
+- Every app start counts now

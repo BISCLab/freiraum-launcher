@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.18.0
+
 - Categories: labels for apps, links, places, contacts and shortcuts; one app can be in several (Settings > Apps & elements > Elements > Categories)
 - Categories from Android: apps that say what they are (games, music, photos and more) are offered as ready-made categories
 - Smart categories that fill themselves: Newly installed, Not used in a while, Used often, Without category
