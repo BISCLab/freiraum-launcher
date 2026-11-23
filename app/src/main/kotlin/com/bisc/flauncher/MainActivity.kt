@@ -63,6 +63,7 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var themeRepository: com.bisc.flauncher.data.repository.ThemeRepository
 
     @Inject lateinit var settingsRepository: com.bisc.flauncher.data.settings.SettingsRepository
+    @Inject lateinit var appOverrideRepository: com.bisc.flauncher.data.repository.AppOverrideRepository
 
     private var homeButtonPressCount by mutableIntStateOf(0)
 
@@ -133,6 +134,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Every start is noted once, here, for as long as the launcher runs.
+        val launchScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.IO)
+        com.bisc.flauncher.util.AppLaunches.onLaunch = { component ->
+            launchScope.launch {
+                val id = component.flattenToString()
+                val override = appOverrideRepository.overrides.first().find { it.componentName == id }
+                val hiddenFromSearch = override != null && (override.hiddenFromSearch || override.revealMode == com.bisc.flauncher.data.model.RevealMode.SEARCH_CODE)
+                settingsRepository.recordAppLaunch(id, count = !hiddenFromSearch)
+            }
+        }
         handleSettingsIntent(intent)
         // Not again when the activity is only rebuilt with the same intent.
         if (savedInstanceState == null) handleIncomingIntent(intent)
@@ -151,7 +162,11 @@ class MainActivity : ComponentActivity() {
             val keyboardNoLearning by settingsVm.searchKeyboardNoLearning.collectAsState()
             androidx.compose.runtime.SideEffect { com.bisc.flauncher.ui.home.search.KeyboardPrivacy.noLearning = keyboardNoLearning }
             val resolvedCategories by settingsVm.resolvedCategories.collectAsState()
-            androidx.compose.runtime.SideEffect { com.bisc.flauncher.ui.home.LauncherCategories.resolved = resolvedCategories }
+            val categoryPalette by settingsVm.categoryPalette.collectAsState()
+            androidx.compose.runtime.SideEffect {
+                com.bisc.flauncher.ui.home.LauncherCategories.resolved = resolvedCategories
+                com.bisc.flauncher.ui.home.LauncherCategories.palette = categoryPalette
+            }
             val dotsOn by settingsVm.showNotificationDots.collectAsState()
             val dotPackages by notificationDots.packages.collectAsState()
             val lockPortrait by settingsVm.lockPortrait.collectAsState()

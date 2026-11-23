@@ -1169,4 +1169,21 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_app_categories_info">Tap a category to put the app in or take it out. It applies right away.</string>
     <string name="settings_app_list_category_chips">Categories as filters</string>
     <string name="settings_app_list_category_chips_info">Your categories sit at the top of the App list. Tap one to see only its apps.</string>
+    <string name="category_rule_name">Name contains</string>
+    <string name="category_rule_android_kind">Kind by Android</string>
+    <string name="category_rule_profile">Work &amp; private</string>
+    <string name="settings_category_rule_name_summary">All apps whose name has one of your words</string>
+    <string name="settings_category_rule_android_kind_summary">All apps that call themselves this, for example a game</string>
+    <string name="settings_category_rule_profile_summary">The apps of your work profile and private space</string>
+    <string name="settings_categories_own_rule">Own rule</string>
+    <string name="settings_categories_own_rule_summary">A category that fills itself by your rule</string>
+    <string name="settings_category_rule_pick">What goes in?</string>
+    <string name="settings_category_rule_days_new">Installed in the last … days</string>
+    <string name="settings_category_rule_days_unused">Not opened for … days</string>
+    <string name="settings_category_rule_most">At most this many apps</string>
+    <string name="settings_category_rule_words">Words</string>
+    <string name="settings_category_rule_words_hint">Separate several with a comma, for example: bank, pay</string>
+    <string name="settings_category_manual_order">Own order</string>
+    <string name="settings_category_manual_order_on">Drag the items below into your order</string>
+    <string name="settings_category_manual_order_off">Apps by name, then the rest</string>
 </resources>

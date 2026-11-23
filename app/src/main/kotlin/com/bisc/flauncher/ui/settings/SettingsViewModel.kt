@@ -702,6 +702,8 @@ class SettingsViewModel @Inject constructor(
 
     // ---- Categories ----
 
+    val categoryPalette: StateFlow<List<Int>> = repository.categoryPalette.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
     val categories: StateFlow<List<com.bisc.flauncher.data.model.Category>> =
         categoryRepository.categories.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
@@ -719,8 +721,12 @@ class SettingsViewModel @Inject constructor(
             }
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    fun addCategory(name: String, rule: com.bisc.flauncher.data.model.CategoryRule? = null, iconKey: String? = null, onCreated: (Long) -> Unit = {}) {
-        viewModelScope.launch { onCreated(categoryRepository.add(name, iconKey = iconKey, rule = rule)) }
+    fun addCategory(name: String, rule: com.bisc.flauncher.data.model.CategoryRule? = null, iconKey: String? = null, ruleParam: String? = null, onCreated: (Long) -> Unit = {}) {
+        viewModelScope.launch { onCreated(categoryRepository.add(name, iconKey = iconKey, rule = rule, ruleParam = ruleParam)) }
+    }
+
+    fun reorderCategoryMembers(ordered: List<com.bisc.flauncher.data.model.CategoryMember>) {
+        viewModelScope.launch { categoryRepository.reorderMembers(ordered) }
     }
 
     fun addCategoryFromSuggestion(suggestion: com.bisc.flauncher.data.repository.AndroidSuggestion) {
@@ -735,6 +741,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             categoryRepository.delete(category)
             pageContentRepository.removeEntriesEverywhere(com.bisc.flauncher.data.model.GridItemType.CATEGORY, category.id.toString())
+            folderRepository.unlinkCategory(category.id)
         }
     }
 

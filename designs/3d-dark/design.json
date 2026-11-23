@@ -4,7 +4,7 @@
   "name": "3D Dark",
   "name_de": "3D Dunkel",
   "author": "BISC Lab",
-  "version": "1.1",
+  "version": "1.2",
   "theme": "DARK",
   "accent": "#FF5B93FF",
   "font": "SYSTEM",
@@ -207,5 +207,13 @@
       "search",
       "widgets"
     ]
-  }
+  },
+  "categoryColors": [
+    "#FF5B93FF",
+    "#FFFF8A65",
+    "#FF4DD0A1",
+    "#FFB388FF",
+    "#FFFFC857",
+    "#FF4FC3F7"
+  ]
 }

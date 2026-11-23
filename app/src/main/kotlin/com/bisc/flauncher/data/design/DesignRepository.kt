@@ -174,6 +174,8 @@ class DesignRepository @Inject constructor(
         design.cornerRadiusPercent?.let { settingsRepository.setDefaultCornerRadiusPercent(it) }
         DESIGN_ELEMENTS.forEach { settingsRepository.setElementAppearanceByName(it, design.elements[it]) }
         design.keyboardCapColor?.let { settingsRepository.setSearchKeyboardCapColor(it) }
+        // A design without its own category colors gives the categories the accent again.
+        settingsRepository.setCategoryPalette(design.categoryColors)
 
         val corners = design.corners
         corners["folders"]?.let { settingsRepository.setFolderCornerPercent(it) }
@@ -264,6 +266,7 @@ class DesignRepository @Inject constructor(
             keyboardCapColor = settingsRepository.searchKeyboardCapColor.first(),
             effects = settingsRepository.designEffects.first(),
             widgetCornerRadiusPercent = rows.firstOrNull { it.type == PageRowType.WIDGET || it.type == PageRowType.SYSTEM_WIDGET }?.cornerRadiusPercent,
+            categoryColors = settingsRepository.categoryPalette.first().takeIf { it.isNotEmpty() },
             rowAppearances = if (withRows) rows.associate { it.id to it.appearance() } else null,
             folderItemAppearances = if (withRows) folderItemDao.observeAll().first().associate { it.id to it.appearance() } else null,
             rowCorners = if (withRows) rows.associate { it.id to it.cornerRadiusPercent } else null,

@@ -48,6 +48,8 @@ class FolderRepository @Inject constructor(
         folderDao.update(folder.copy(name = newName))
     }
 
+    suspend fun unlinkCategory(categoryId: Long) = folderDao.unlinkCategory(categoryId)
+
     suspend fun setFolderCategory(id: Long, categoryId: Long?) {
         folderDao.get(id)?.let { folderDao.update(it.copy(categoryId = categoryId)) }
     }

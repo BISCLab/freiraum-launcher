@@ -24,4 +24,8 @@ interface FolderDao {
 
     @Delete
     suspend fun delete(folder: Folder)
+
+    /** Folders that followed a deleted category become ordinary again. */
+    @Query("UPDATE folders SET categoryId = NULL WHERE categoryId = :categoryId")
+    suspend fun unlinkCategory(categoryId: Long)
 }

@@ -34,6 +34,8 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ViewModule
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -100,7 +102,8 @@ fun SettingsCategoriesScreen(navController: NavController, onBack: () -> Unit, v
     val counts = remember(resolved) { resolved.associate { it.category.id to it.members.size } }
     var creating by remember { mutableStateOf(false) }
     val usedRules = remember(categories) { categories.mapNotNull { it.smartRule }.toSet() }
-    val freeRules = CategoryRule.entries.filter { it !in usedRules }
+    val freeRules = CategoryRepository.READY_RULES.filter { it !in usedRules }
+    var makingRule by remember { mutableStateOf(false) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_pages_categories), navController = navController, onBack = onBack) {
         Text(
@@ -164,8 +167,7 @@ fun SettingsCategoriesScreen(navController: NavController, onBack: () -> Unit, v
                 }
             }
         }
-        if (freeRules.isNotEmpty()) {
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_categories_smart), info = stringResource(R.string.settings_categories_smart_info)) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_categories_smart), info = stringResource(R.string.settings_categories_smart_info)) {
                 freeRules.forEach { rule ->
                     val name = stringResource(CategoryRepository.ruleNameRes(rule))
                     SettingsPreference(
@@ -176,8 +178,23 @@ fun SettingsCategoriesScreen(navController: NavController, onBack: () -> Unit, v
                         trailing = { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.settings_categories_add_one), tint = MaterialTheme.colorScheme.primary) }
                     )
                 }
-            }
+                SettingsPreference(
+                    icon = Icons.Filled.Tune,
+                    title = stringResource(R.string.settings_categories_own_rule),
+                    summary = stringResource(R.string.settings_categories_own_rule_summary),
+                    onClick = { makingRule = true }
+                )
         }
+    }
+
+    if (makingRule) {
+        NewRuleDialog(
+            onCreate = { name, rule ->
+                makingRule = false
+                viewModel.addCategory(name, rule = rule, iconKey = CategoryRepository.ruleIconKey(rule)) { id -> navController.navigate("settings/elements/categories/$id") }
+            },
+            onDismiss = { makingRule = false }
+        )
     }
 
     if (creating) {
@@ -196,6 +213,109 @@ internal fun ruleSummaryRes(rule: CategoryRule): Int = when (rule) {
     CategoryRule.UNUSED -> R.string.settings_category_rule_unused_summary
     CategoryRule.FREQUENT -> R.string.settings_category_rule_frequent_summary
     CategoryRule.UNCATEGORIZED -> R.string.settings_category_rule_uncategorized_summary
+    CategoryRule.NAME -> R.string.settings_category_rule_name_summary
+    CategoryRule.ANDROID_KIND -> R.string.settings_category_rule_android_kind_summary
+    CategoryRule.PROFILE -> R.string.settings_category_rule_profile_summary
+}
+
+/** Makes a smart category with a rule of your own: a name and what fills it. */
+@Composable
+private fun NewRuleDialog(onCreate: (String, CategoryRule) -> Unit, onDismiss: () -> Unit) {
+    var name by remember { mutableStateOf("") }
+    var rule by remember { mutableStateOf(CategoryRule.NAME) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_categories_own_rule)) },
+        text = {
+            Column(modifier = Modifier.heightIn(max = 460.dp).verticalScroll(rememberScrollState())) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text(stringResource(R.string.settings_category_name)) },
+                    singleLine = true
+                )
+                Spacer(Modifier.size(12.dp))
+                Text(stringResource(R.string.settings_category_rule_pick), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary)
+                CategoryRule.entries.forEach { r ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { rule = r }.padding(vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        androidx.compose.material3.RadioButton(selected = rule == r, onClick = { rule = r })
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(stringResource(CategoryRepository.ruleNameRes(r)), style = MaterialTheme.typography.bodyLarge)
+                            Text(stringResource(ruleSummaryRes(r)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = { onCreate(name.trim(), rule) }, enabled = name.isNotBlank()) { Text(stringResource(R.string.settings_save)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.widget_notes_cancel)) } }
+    )
+}
+
+/** A number with a minus and a plus beside it. */
+@Composable
+private fun NumberStepper(title: String, value: Int, range: IntRange, step: Int, onChange: (Int) -> Unit) {
+    SettingsPreference(
+        icon = null,
+        title = title,
+        summary = value.toString(),
+        onClick = null,
+        trailing = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = { onChange((value - step).coerceIn(range)) }, enabled = value > range.first) {
+                    Icon(Icons.Filled.Remove, contentDescription = stringResource(R.string.a11y_less))
+                }
+                IconButton(onClick = { onChange((value + step).coerceIn(range)) }, enabled = value < range.last) {
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.a11y_more))
+                }
+            }
+        }
+    )
+}
+
+/** The setting of a smart category's rule: days, how many, the words, or Android's kind. */
+@Composable
+private fun RuleSettings(draft: Category, onChange: (Category) -> Unit) {
+    val rule = draft.smartRule ?: return
+    SettingsPreferenceGroup(title = stringResource(R.string.settings_category_smart_label), info = stringResource(ruleSummaryRes(rule))) {
+        when (rule) {
+            CategoryRule.NEW, CategoryRule.UNUSED -> {
+                val default = if (rule == CategoryRule.NEW) CategoryRepository.NEW_DAYS.toInt() else CategoryRepository.UNUSED_DAYS.toInt()
+                NumberStepper(
+                    title = stringResource(if (rule == CategoryRule.NEW) R.string.settings_category_rule_days_new else R.string.settings_category_rule_days_unused),
+                    value = draft.ruleParam?.toIntOrNull() ?: default,
+                    range = 1..365,
+                    step = if ((draft.ruleParam?.toIntOrNull() ?: default) >= 30) 5 else 1,
+                    onChange = { onChange(draft.copy(ruleParam = it.toString())) }
+                )
+            }
+            CategoryRule.FREQUENT -> NumberStepper(
+                title = stringResource(R.string.settings_category_rule_most),
+                value = draft.ruleParam?.toIntOrNull() ?: 16,
+                range = 1..60,
+                step = 1,
+                onChange = { onChange(draft.copy(ruleParam = it.toString())) }
+            )
+            CategoryRule.NAME -> Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(16.dp)) {
+                OutlinedTextField(
+                    value = draft.ruleParam.orEmpty(),
+                    onValueChange = { onChange(draft.copy(ruleParam = it)) },
+                    label = { Text(stringResource(R.string.settings_category_rule_words)) },
+                    supportingText = { Text(stringResource(R.string.settings_category_rule_words_hint)) },
+                    singleLine = true,
+                    shape = SettingsTextFieldShape,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            CategoryRule.ANDROID_KIND -> com.bisc.flauncher.data.repository.AndroidAppKind.entries.forEach { kind ->
+                RadioPreference(stringResource(kind.nameRes), kind.name, draft.ruleParam ?: "", { onChange(draft.copy(ruleParam = it)) })
+            }
+            CategoryRule.UNCATEGORIZED, CategoryRule.PROFILE -> SettingsPreference(icon = null, title = stringResource(ruleSummaryRes(rule)), onClick = null, trailing = null)
+        }
+    }
 }
 
 /** Asks for the name of a new category. */
@@ -264,19 +384,54 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
             AutomaticColorPicker(
                 title = stringResource(R.string.settings_category_color),
                 custom = draft.color,
-                automaticSeed = MaterialTheme.colorScheme.primary.toArgb(),
+                automaticSeed = categoryColor(draft.copy(color = null)).toArgb(),
                 onChange = { draft = draft.copy(color = it) },
                 ownGroup = false
             )
         }
-        if (rule != null) {
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_category_smart_label)) {
-                SettingsPreference(icon = null, title = stringResource(ruleSummaryRes(rule)), onClick = null, trailing = null)
+        if (rule != null) RuleSettings(draft) { draft = it }
+        if (rule == null && members.size > 1) {
+            SettingsPreferenceGroup {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_category_manual_order),
+                    summary = stringResource(if (saved.manualOrder) R.string.settings_category_manual_order_on else R.string.settings_category_manual_order_off),
+                    onClick = {
+                        // Keeps the order as it is shown now; pending changes above are saved with it.
+                        if (!saved.manualOrder) viewModel.reorderCategoryMembers(members)
+                        viewModel.updateCategory(draft.copy(manualOrder = !saved.manualOrder))
+                    },
+                    trailing = {
+                        androidx.compose.material3.Switch(checked = saved.manualOrder, onCheckedChange = { on ->
+                            if (on) viewModel.reorderCategoryMembers(members)
+                            viewModel.updateCategory(draft.copy(manualOrder = on))
+                        })
+                    }
+                )
             }
         }
         Column {
             SettingsGroupLabel(stringResource(R.string.settings_category_members, members.size))
-            if (members.isEmpty()) {
+            if (rule == null && saved.manualOrder && members.size > 1) {
+                ReorderableList(
+                    items = members,
+                    key = { it.id },
+                    onReorder = viewModel::reorderCategoryMembers,
+                    itemHeight = 64.dp,
+                    dividers = true
+                ) { member ->
+                    CategoryMemberRow(
+                        member = member,
+                        apps = apps,
+                        websites = websites,
+                        places = places,
+                        contacts = contacts,
+                        loadIcon = viewModel::loadIcon,
+                        onRemove = { viewModel.setCategoryMember(categoryId, member.type, member.payload, false) },
+                        inList = true
+                    )
+                }
+            } else if (members.isEmpty()) {
                 SettingsPreferenceGroup {
                     SettingsPreference(
                         icon = null,
@@ -385,10 +540,12 @@ private fun CategoryMemberRow(
     places: List<SavedMapTarget>,
     contacts: List<PinnedContact>,
     loadIcon: (ComponentName) -> ImageBitmap?,
-    onRemove: (() -> Unit)?
+    onRemove: (() -> Unit)?,
+    // Inside a reorderable list, which brings its own background and margins.
+    inList: Boolean = false
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp).background(MaterialTheme.colorScheme.surfaceContainer).padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = if (inList) Modifier.fillMaxWidth() else Modifier.fillMaxWidth().heightIn(min = 64.dp).background(MaterialTheme.colorScheme.surfaceContainer).padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {

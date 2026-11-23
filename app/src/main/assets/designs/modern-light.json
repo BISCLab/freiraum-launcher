@@ -145,5 +145,13 @@
       "borderWidth": 1.0
     }
   },
-  "keyboardCapColor": "#FFF2F2F7"
+  "keyboardCapColor": "#FFF2F2F7",
+  "categoryColors": [
+    "#FF2F6FEB",
+    "#FFE0603A",
+    "#FF1F9D6B",
+    "#FF7B4FD6",
+    "#FFC98A12",
+    "#FF1C8FB0"
+  ]
 }

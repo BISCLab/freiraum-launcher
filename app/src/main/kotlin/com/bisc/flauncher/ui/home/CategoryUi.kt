@@ -41,6 +41,9 @@ import kotlinx.coroutines.flow.asSharedFlow
 object LauncherCategories {
     var resolved by mutableStateOf<List<ResolvedCategory>>(emptyList())
 
+    /** A design's colors for categories without their own, see [categoryColor]. */
+    var palette by mutableStateOf<List<Int>>(emptyList())
+
     private val requests = MutableSharedFlow<Long>(extraBufferCapacity = 4)
     val openRequests: SharedFlow<Long> = requests.asSharedFlow()
 
@@ -58,9 +61,14 @@ fun categoryIcon(category: Category?): ImageVector =
         ?: category?.smartRule?.let { PictogramCatalog.iconFor(CategoryRepository.ruleIconKey(it)) }
         ?: Icons.AutoMirrored.Filled.Label
 
-/** A category's color, or the accent when it has none of its own. */
+/** A category's color; without one of its own, the design's color for its place, else the accent. */
 @Composable
-fun categoryColor(category: Category?): Color = category?.color?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
+fun categoryColor(category: Category?): Color {
+    category?.color?.let { return Color(it) }
+    val palette = LauncherCategories.palette
+    if (category != null && palette.isNotEmpty()) return Color(palette[category.orderIndex.mod(palette.size)])
+    return MaterialTheme.colorScheme.primary
+}
 
 /** Black or white on [background], whichever reads better. */
 fun inkOn(background: Color): Color = if (background.luminance() > 0.5f) Color.Black else Color.White

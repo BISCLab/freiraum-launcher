@@ -4,7 +4,14 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 
+/** Hears every app start, wherever it comes from (list, grid, search, Dock, boxes, folders), so
+ *  the launch counts and times behind favorites and smart categories see them all. */
+object AppLaunches {
+    @Volatile var onLaunch: ((ComponentName) -> Unit)? = null
+}
+
 fun launchApp(context: Context, componentName: ComponentName) {
+    AppLaunches.onLaunch?.invoke(componentName)
     // An app of the work profile or the private space starts in its profile; while that profile is
     // paused or locked, the system is asked to switch it on (it may ask for the screen lock).
     ProfileComponents.userOf(context, componentName)?.let { user ->

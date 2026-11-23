@@ -16,6 +16,10 @@
 - App list: categories as filters on top (Settings > App list > Behavior), one tap shows only that category's apps
 - Wallpapers put a picture on the Categories page too
 - Settings search finds Categories and the Categories page
+- Smart categories with your own rule: name contains (several words with commas), kind by Android, work and private apps; Newly installed, Not used and Used often with your own number of days or apps
+- Categories can keep your own order: switch on Own order and drag the items
+- Designs can give categories their colors; Neon, 3D and Modern bring a palette, categories without their own color take it in their order
+- Every app start counts now, from the Dock, element boxes and folders too, so Used often, Not used in a while and the favorites see them all
 
 ## 0.17.2
 

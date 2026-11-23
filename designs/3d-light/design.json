@@ -4,7 +4,7 @@
   "name": "3D Light",
   "name_de": "3D Hell",
   "author": "BISC Lab",
-  "version": "1.1",
+  "version": "1.2",
   "theme": "LIGHT",
   "accent": "#FF0758F5",
   "font": "SYSTEM",
@@ -207,5 +207,13 @@
       "search",
       "widgets"
     ]
-  }
+  },
+  "categoryColors": [
+    "#FF0758F5",
+    "#FFE8590C",
+    "#FF0E9F6E",
+    "#FF7C3AED",
+    "#FFD97706",
+    "#FF0891B2"
+  ]
 }

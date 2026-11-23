@@ -46,8 +46,11 @@ class CategoryRepository @Inject constructor(
     val categories: Flow<List<Category>> = dao.observeAll()
     val members: Flow<List<CategoryMember>> = dao.observeMembers()
 
-    suspend fun add(name: String, iconKey: String? = null, color: Int? = null, rule: CategoryRule? = null): Long =
-        dao.insert(Category(name = name, iconKey = iconKey, color = color, orderIndex = dao.maxOrderIndex() + 1, rule = rule?.name))
+    suspend fun add(name: String, iconKey: String? = null, color: Int? = null, rule: CategoryRule? = null, ruleParam: String? = null): Long =
+        dao.insert(Category(name = name, iconKey = iconKey, color = color, orderIndex = dao.maxOrderIndex() + 1, rule = rule?.name, ruleParam = ruleParam))
+
+    /** Puts the members of a category in this order (and keeps it from now on). */
+    suspend fun reorderMembers(ordered: List<CategoryMember>) = dao.reorderMembers(ordered)
 
     suspend fun update(category: Category) = dao.update(category)
 
@@ -81,7 +84,7 @@ class CategoryRepository @Inject constructor(
         runCatching { context.packageManager.getPackageInfo(packageName, 0).firstInstallTime }.getOrDefault(0L)
     }
 
-    private fun androidKindOf(packageName: String): AndroidAppKind? {
+    fun androidKindOf(packageName: String): AndroidAppKind? {
         val raw = androidKinds.getOrPut(packageName) {
             runCatching {
                 val info = context.packageManager.getApplicationInfo(packageName, 0)
@@ -150,25 +153,44 @@ class CategoryRepository @Inject constructor(
         return categories.map { category ->
             val resolved = when (category.smartRule) {
                 null -> {
-                    val own = byCategory[category.id].orEmpty()
-                    val (appMembers, others) = own.partition { it.type == GridItemType.APP }
-                    appMembers.filter { it.payload in byComponent }
-                        .sortedBy { byComponent[it.payload]?.label?.lowercase() } + others
+                    // Apps no longer on the phone are left out; links, places and the rest stay.
+                    val own = byCategory[category.id].orEmpty().filter { it.type != GridItemType.APP || it.payload in byComponent }
+                    if (category.manualOrder) own.sortedWith(compareBy({ it.orderIndex }, { it.id }))
+                    else {
+                        val (appMembers, others) = own.partition { it.type == GridItemType.APP }
+                        appMembers.sortedBy { byComponent[it.payload]?.label?.lowercase() } + others
+                    }
                 }
-                CategoryRule.NEW -> asMembers(category.id, apps.filter { installOf(it) >= now - NEW_DAYS * DAY }.sortedByDescending { installOf(it) })
+                CategoryRule.NEW -> {
+                    val days = category.ruleParam?.toLongOrNull()?.coerceIn(1, 365) ?: NEW_DAYS
+                    asMembers(category.id, apps.filter { installOf(it) >= now - days * DAY }.sortedByDescending { installOf(it) })
+                }
                 CategoryRule.UNUSED -> {
+                    val days = category.ruleParam?.toLongOrNull()?.coerceIn(1, 365) ?: UNUSED_DAYS
                     val since = trackingSince ?: now
                     asMembers(category.id, apps.filter { app ->
                         val key = app.componentName.flattenToString()
                         val last = lastLaunches[key] ?: maxOf(since, installOf(app))
-                        last < now - UNUSED_DAYS * DAY
+                        last < now - days * DAY
                     })
                 }
-                CategoryRule.FREQUENT -> asMembers(category.id, apps
-                    .filter { (launchCounts[it.componentName.flattenToString()] ?: 0) >= FREQUENT_MIN_LAUNCHES }
-                    .sortedByDescending { launchCounts[it.componentName.flattenToString()] ?: 0 }
-                    .take(FREQUENT_MAX))
+                CategoryRule.FREQUENT -> {
+                    val most = category.ruleParam?.toIntOrNull()?.coerceIn(1, 60) ?: FREQUENT_MAX
+                    asMembers(category.id, apps
+                        .filter { (launchCounts[it.componentName.flattenToString()] ?: 0) >= FREQUENT_MIN_LAUNCHES }
+                        .sortedByDescending { launchCounts[it.componentName.flattenToString()] ?: 0 }
+                        .take(most))
+                }
                 CategoryRule.UNCATEGORIZED -> asMembers(category.id, apps.filter { it.componentName.flattenToString() !in ownAppMembers })
+                CategoryRule.NAME -> {
+                    val words = category.ruleParam.orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() }
+                    asMembers(category.id, if (words.isEmpty()) emptyList() else apps.filter { app -> words.any { app.label.contains(it, ignoreCase = true) } })
+                }
+                CategoryRule.ANDROID_KIND -> {
+                    val kind = category.ruleParam?.let { p -> AndroidAppKind.entries.firstOrNull { it.name == p } }
+                    asMembers(category.id, if (kind == null) emptyList() else apps.filter { androidKindOf(ProfileComponents.real(it.componentName).packageName) == kind })
+                }
+                CategoryRule.PROFILE -> asMembers(category.id, apps.filter { ProfileComponents.isProfile(it.componentName) })
             }
             ResolvedCategory(category, resolved)
         }
@@ -186,6 +208,9 @@ class CategoryRepository @Inject constructor(
             CategoryRule.UNUSED -> R.string.category_rule_unused
             CategoryRule.FREQUENT -> R.string.category_rule_frequent
             CategoryRule.UNCATEGORIZED -> R.string.category_rule_uncategorized
+            CategoryRule.NAME -> R.string.category_rule_name
+            CategoryRule.ANDROID_KIND -> R.string.category_rule_android_kind
+            CategoryRule.PROFILE -> R.string.category_rule_profile
         }
 
         fun ruleIconKey(rule: CategoryRule): String = when (rule) {
@@ -193,6 +218,12 @@ class CategoryRepository @Inject constructor(
             CategoryRule.UNUSED -> "sleep"
             CategoryRule.FREQUENT -> "trending"
             CategoryRule.UNCATEGORIZED -> "inbox"
+            CategoryRule.NAME -> "search"
+            CategoryRule.ANDROID_KIND -> "apps"
+            CategoryRule.PROFILE -> "work"
         }
+
+        /** The four smart categories offered ready-made; the others are made with your own rule. */
+        val READY_RULES = listOf(CategoryRule.NEW, CategoryRule.UNUSED, CategoryRule.FREQUENT, CategoryRule.UNCATEGORIZED)
     }
 }

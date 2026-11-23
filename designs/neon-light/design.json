@@ -4,7 +4,7 @@
   "name": "Neon Light",
   "name_de": "Neon Hell",
   "author": "BISC Lab",
-  "version": "1.9",
+  "version": "1.10",
   "theme": "LIGHT",
   "accent": "#FF1E8FFF",
   "font": "SYSTEM",
@@ -206,5 +206,13 @@
     "folders": 50,
     "widgets": 80,
     "search_results": 80
-  }
+  },
+  "categoryColors": [
+    "#FF00C27A",
+    "#FF1E8FFF",
+    "#FF8B5CF6",
+    "#FFEC4899",
+    "#FFF59E0B",
+    "#FF14B8A6"
+  ]
 }

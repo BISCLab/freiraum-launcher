@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 66,
-    "identityHash": "a48539ac3d31af4550ffbd81e4486584",
+    "identityHash": "2edb879aa7e5f04435a0f2588ff06393",
     "entities": [
       {
         "tableName": "launcher_pages",
@@ -1132,7 +1132,7 @@
       },
       {
         "tableName": "categories",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `iconKey` TEXT, `color` INTEGER, `orderIndex` INTEGER NOT NULL, `rule` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `iconKey` TEXT, `color` INTEGER, `orderIndex` INTEGER NOT NULL, `rule` TEXT, `ruleParam` TEXT, `manualOrder` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -1166,6 +1166,17 @@
             "fieldPath": "rule",
             "columnName": "rule",
             "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ruleParam",
+            "columnName": "ruleParam",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "manualOrder",
+            "columnName": "manualOrder",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -1255,7 +1266,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a48539ac3d31af4550ffbd81e4486584')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2edb879aa7e5f04435a0f2588ff06393')"
     ]
   }
 }

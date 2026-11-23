@@ -64,6 +64,8 @@ data class Design(
     /** Search bar, field, results, app list parts, … by their settings name, see [DESIGN_ELEMENTS]. */
     val elements: Map<String, ElementAppearance> = emptyMap(),
     val keyboardCapColor: Int? = null,
+    /** Colors for categories without one of their own, given out in their order. */
+    val categoryColors: List<Int>? = null,
     val effects: DesignEffects? = null,
     /** Only in the snapshot of the user's own look: every row's and folder item's exact look. */
     val rowAppearances: Map<Long, ElementAppearance>? = null,
@@ -118,6 +120,7 @@ object DesignJson {
                 obj.keys().asSequence().filter { it in DESIGN_ELEMENTS }.associateWith { appearance(obj.getJSONObject(it)) }
             }.orEmpty(),
             keyboardCapColor = color(json.optString("keyboardCapColor")),
+            categoryColors = json.optJSONArray("categoryColors")?.let { array -> (0 until array.length()).mapNotNull { color(array.optString(it)) } }?.takeIf { it.isNotEmpty() },
             effects = json.optJSONObject("effects")?.let(::effects),
             rowAppearances = json.optJSONObject("rows")?.let { obj -> obj.keys().asSequence().associate { it.toLong() to appearance(obj.getJSONObject(it)) } },
             folderItemAppearances = json.optJSONObject("folderItems")?.let { obj -> obj.keys().asSequence().associate { it.toLong() to appearance(obj.getJSONObject(it)) } },
@@ -146,6 +149,7 @@ object DesignJson {
         design.panel?.let { put("panel", appearanceJson(it)) }
         put("elements", JSONObject().apply { design.elements.forEach { (k, v) -> put(k, appearanceJson(v)) } })
         design.keyboardCapColor?.let { put("keyboardCapColor", hex(it)) }
+        design.categoryColors?.let { colors -> put("categoryColors", JSONArray().apply { colors.forEach { put(hex(it)) } }) }
         design.effects?.let { put("effects", effectsJson(it)) }
         design.rowAppearances?.let { rows -> put("rows", JSONObject().apply { rows.forEach { (k, v) -> put(k.toString(), appearanceJson(v)) } }) }
         design.folderItemAppearances?.let { items -> put("folderItems", JSONObject().apply { items.forEach { (k, v) -> put(k.toString(), appearanceJson(v)) } }) }

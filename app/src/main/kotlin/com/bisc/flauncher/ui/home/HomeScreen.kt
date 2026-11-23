@@ -1071,7 +1071,6 @@ fun HomeScreen(
                     cornerRadiusPercent = railCorner ?: cornerRadiusPercent,
                     loadIcon = viewModel::loadIcon,
                     onAppClick = { app ->
-                        viewModel.recordAppLaunch(app.componentName)
                         launchApp(context, app.componentName)
                         viewModel.closeAppList()
                     },
@@ -1093,7 +1092,6 @@ fun HomeScreen(
                         onQueryChange = viewModel::updateAppQuery,
                         onSubmit = {
                             appQueryResults.firstOrNull()?.let { app ->
-                                viewModel.recordAppLaunch(app.componentName)
                                 launchApp(context, app.componentName)
                                 viewModel.closeAppList()
                             }
@@ -1467,7 +1465,6 @@ private fun HomeSearchOverlay(
         loadIcon = viewModel::loadIcon,
         onQueryChange = viewModel::updateSearchQuery,
         onAppClick = { app ->
-            viewModel.recordAppLaunch(app.componentName)
             launchApp(context, app.componentName)
             viewModel.closeSearch()
         },
@@ -1572,7 +1569,6 @@ private fun HomeAppGrid(
         loadPackIcon = viewModel::loadPackIcon,
         onQueryChange = viewModel::updateAppQuery,
         onAppClick = { app ->
-            viewModel.recordAppLaunch(app.componentName)
             launchApp(context, app.componentName)
             viewModel.closeAppGrid()
         },

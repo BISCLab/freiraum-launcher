@@ -5,8 +5,10 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-/** A smart category fills itself; it stores only its rule, the members are worked out live. */
-enum class CategoryRule { NEW, UNUSED, FREQUENT, UNCATEGORIZED }
+/** A smart category fills itself; it stores only its rule (and [Category.ruleParam]), the members
+ *  are worked out live. [NAME]: apps whose name holds a text. [ANDROID_KIND]: apps of one of
+ *  Android's own kinds. [PROFILE]: apps of the work profile or the private space. */
+enum class CategoryRule { NEW, UNUSED, FREQUENT, UNCATEGORIZED, NAME, ANDROID_KIND, PROFILE }
 
 /** A category: a label that apps and other elements carry. Unlike a folder it has no place of its
  *  own, and one app can be in many. [rule] set means a smart category (see [CategoryRule]). */
@@ -19,7 +21,12 @@ data class Category(
     // Null is the accent color.
     val color: Int? = null,
     val orderIndex: Int = 0,
-    val rule: String? = null
+    val rule: String? = null,
+    // The rule's own setting: days for NEW and UNUSED, how many for FREQUENT, the text for NAME,
+    // the kind for ANDROID_KIND. Null = the rule's default.
+    val ruleParam: String? = null,
+    // True: the members keep the order they were put in; false: apps by name, then the rest.
+    val manualOrder: Boolean = false
 ) {
     val smartRule: CategoryRule? get() = rule?.let { runCatching { CategoryRule.valueOf(it) }.getOrNull() }
 }

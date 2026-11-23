@@ -53,6 +53,14 @@ interface CategoryDao {
     @Query("DELETE FROM category_members WHERE categoryId = :categoryId")
     suspend fun clearMembers(categoryId: Long)
 
+    @Query("UPDATE category_members SET orderIndex = :orderIndex WHERE id = :id")
+    suspend fun setMemberOrder(id: Long, orderIndex: Int)
+
+    @Transaction
+    suspend fun reorderMembers(ordered: List<CategoryMember>) {
+        ordered.forEachIndexed { index, member -> setMemberOrder(member.id, index) }
+    }
+
     @Transaction
     suspend fun replaceMembers(categoryId: Long, members: List<CategoryMember>) {
         clearMembers(categoryId)

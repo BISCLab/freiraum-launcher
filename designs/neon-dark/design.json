@@ -4,7 +4,7 @@
   "name": "Neon Dark",
   "name_de": "Neon Dunkel",
   "author": "BISC Lab",
-  "version": "1.7",
+  "version": "1.8",
   "theme": "DARK",
   "accent": "#FF3DA5FF",
   "font": "SYSTEM",
@@ -206,5 +206,13 @@
     "folders": 50,
     "widgets": 80,
     "search_results": 80
-  }
+  },
+  "categoryColors": [
+    "#FF19E39A",
+    "#FF3DA5FF",
+    "#FFA78BFA",
+    "#FFF472B6",
+    "#FFFFD166",
+    "#FF5EEAD4"
+  ]
 }

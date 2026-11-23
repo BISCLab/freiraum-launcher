@@ -46,7 +46,8 @@ packs every folder here into `release/<id>.freiraum-design`.
 | `widgetCornerRadiusPercent` | Roundness of widgets (Freiraum's default is 10) |
 | `box`, `dock`, `panel` | Look of widgets and element boxes, the Dock, the Panel |
 | `elements` | Look of single parts: `search_bar`, `search_field`, `search_results`, `search_appearance`, `folder_card`, `app_list_search_button`, `app_list_search_field`, `search_alphabet_rail`, `search_header_letter`, `app_grid_search_bar`, `widget_arrow` |
-| `keyboardCapColor` | The strip above the keyboard |
+| `keyboardCapColor` | The keyboard bezel |
+| `categoryColors` | List of colors for categories without their own color, given out in their order |
 | `effects` | See below |
 
 A look (`box`, `dock`, … ) is `{"style": "COLOR" or "NONE", "fill": "#…", "fill2": "#…", "fillMode": "SOLID" or "GRADIENT", "opacity": 0–1, "border": true/false, "borderColor": "#…", "borderWidth": 0.5–6, "contentColor": "#…"}`.

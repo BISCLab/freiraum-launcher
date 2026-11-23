@@ -629,11 +629,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.toggleSearchFavorite(app.componentName.flattenToString()) }
     }
 
-    fun recordAppLaunch(component: android.content.ComponentName) {
-        val id = component.flattenToString()
-        if (notInSearch(id, appOverrides.value) == true) return
-        viewModelScope.launch { settingsRepository.recordAppLaunch(id) }
-    }
+
 
     private fun notInSearch(id: String, overrides: Map<String, AppOverride>): Boolean? = overrides[id]?.let {
         it.hiddenFromSearch || it.revealMode == RevealMode.SEARCH_CODE

@@ -333,11 +333,15 @@ class SettingsRepository @Inject constructor(
         }.getOrDefault(emptyMap())
     }
 
-    suspend fun recordAppLaunch(component: String) {
+    /** Notes a start. [count] false for apps the search leaves out: their time is kept (for the
+     *  smart categories), but they don't climb the favorites. */
+    suspend fun recordAppLaunch(component: String, count: Boolean = true) {
         dataStore.edit { prefs ->
-            val json = runCatching { org.json.JSONObject(prefs[APP_LAUNCH_COUNTS_KEY] ?: "{}") }.getOrDefault(org.json.JSONObject())
-            json.put(component, json.optInt(component) + 1)
-            prefs[APP_LAUNCH_COUNTS_KEY] = json.toString()
+            if (count) {
+                val json = runCatching { org.json.JSONObject(prefs[APP_LAUNCH_COUNTS_KEY] ?: "{}") }.getOrDefault(org.json.JSONObject())
+                json.put(component, json.optInt(component) + 1)
+                prefs[APP_LAUNCH_COUNTS_KEY] = json.toString()
+            }
             val last = runCatching { org.json.JSONObject(prefs[APP_LAST_LAUNCH_KEY] ?: "{}") }.getOrDefault(org.json.JSONObject())
             last.put(component, System.currentTimeMillis())
             prefs[APP_LAST_LAUNCH_KEY] = last.toString()
@@ -363,6 +367,18 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setCategoriesCardRows(rows: Int) {
         dataStore.edit { it[CATEGORIES_CARD_ROWS_KEY] = rows.coerceIn(1, 3) }
+    }
+
+    /** Colors a design gives to categories without one of their own; empty = the accent. */
+    val categoryPalette: Flow<List<Int>> = dataStore.data.map { prefs ->
+        prefs[CATEGORY_PALETTE_KEY].orEmpty().split(',').mapNotNull { it.trim().toLongOrNull(16)?.toInt() }
+    }
+
+    suspend fun setCategoryPalette(colors: List<Int>?) {
+        dataStore.edit {
+            if (colors.isNullOrEmpty()) it.remove(CATEGORY_PALETTE_KEY)
+            else it[CATEGORY_PALETTE_KEY] = colors.joinToString(",") { c -> Integer.toHexString(c) }
+        }
     }
 
     /** Every Categories widget's own choice, by [com.bisc.flauncher.data.model.CategoryWidgetConfig.keyFor]. */
@@ -1366,6 +1382,7 @@ class SettingsRepository @Inject constructor(
         private val CATEGORIES_VIEW_KEY = stringPreferencesKey("categories_view")
         private val APP_LIST_CATEGORY_CHIPS_KEY = booleanPreferencesKey("app_list_category_chips")
         private val CATEGORY_WIDGETS_KEY = stringPreferencesKey("category_widgets")
+        private val CATEGORY_PALETTE_KEY = stringPreferencesKey("category_palette")
         private val CATEGORIES_SHOW_SEARCH_KEY = booleanPreferencesKey("categories_show_search")
         private val CATEGORIES_CARD_ROWS_KEY = intPreferencesKey("categories_card_rows")
         private val LAUNCH_TRACKING_SINCE_KEY = longPreferencesKey("launch_tracking_since")
