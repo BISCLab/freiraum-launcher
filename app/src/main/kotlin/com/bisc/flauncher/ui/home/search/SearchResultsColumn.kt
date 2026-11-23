@@ -593,15 +593,15 @@ data class CategoryHit(val category: com.bisc.flauncher.data.model.Category, val
 @Composable
 private fun CategoryHitRow(hit: CategoryHit, onClick: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(horizontal = 4.dp, vertical = 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .noRippleClickable(onClick = onClick)
+            .padding(start = 16.dp - com.bisc.flauncher.ui.home.PILL_PADDING, end = 24.dp, top = 6.dp, bottom = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val accent = com.bisc.flauncher.ui.home.categoryColor(hit.category)
-        Box(modifier = Modifier.size(32.dp).clip(androidx.compose.foundation.shape.CircleShape).background(accent), contentAlignment = Alignment.Center) {
-            Icon(com.bisc.flauncher.ui.home.categoryIcon(hit.category), contentDescription = null, tint = com.bisc.flauncher.ui.home.inkOn(accent), modifier = Modifier.size(18.dp))
+        Box(modifier = Modifier.weight(1f)) {
+            com.bisc.flauncher.ui.home.CategoryNamePill(hit.category, MaterialTheme.typography.titleMedium)
         }
-        Spacer(Modifier.size(12.dp))
-        Text(hit.category.name, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f), maxLines = 1)
-        Text(hit.count.toString(), style = MaterialTheme.typography.labelLarge)
+        Text(hit.count.toString(), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(start = 12.dp))
     }
 }

@@ -11,6 +11,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Block
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +30,7 @@ import com.bisc.flauncher.ui.home.PictogramCatalog
 /** Picks one pictogram from [PictogramCatalog], used by Addresses/Links/Action buttons. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PictogramPickerSheet(selected: String?, onSelect: (String) -> Unit, onDismiss: () -> Unit) {
+fun PictogramPickerSheet(selected: String?, onSelect: (String) -> Unit, onDismiss: () -> Unit, noneKey: String? = null) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Text(
             stringResource(R.string.settings_pictogram_picker_title),
@@ -41,6 +43,26 @@ fun PictogramPickerSheet(selected: String?, onSelect: (String) -> Unit, onDismis
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxWidth().heightIn(max = 420.dp).padding(16.dp)
         ) {
+            // "No symbol" first, where the caller allows it.
+            if (noneKey != null) {
+                item {
+                    val isSelected = selected == noneKey
+                    androidx.compose.foundation.layout.Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
+                            .clickable { onSelect(noneKey) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Filled.Block,
+                            contentDescription = stringResource(R.string.settings_category_no_icon),
+                            tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
             items(PictogramCatalog.icons.entries.toList()) { (key, icon) ->
                 val isSelected = key == selected
                 androidx.compose.foundation.layout.Box(

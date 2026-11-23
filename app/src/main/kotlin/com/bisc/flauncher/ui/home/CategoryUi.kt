@@ -1,6 +1,15 @@
 package com.bisc.flauncher.ui.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,15 +64,26 @@ object LauncherCategories {
     const val ALL = 0L
 }
 
+/** Stored as a category's color: no fill, an outline instead. */
+const val CATEGORY_NO_COLOR = 0
+
+/** Stored as a category's symbol: none, the name alone. */
+const val CATEGORY_NO_ICON = "none"
+
+val Category?.hasFill: Boolean get() = this?.color != CATEGORY_NO_COLOR
+val Category?.hasSymbol: Boolean get() = this?.iconKey != CATEGORY_NO_ICON
+
 /** A category's own symbol: its pictogram, the smart rule's, or a plain label. */
 fun categoryIcon(category: Category?): ImageVector =
     PictogramCatalog.iconFor(category?.iconKey)
         ?: category?.smartRule?.let { PictogramCatalog.iconFor(CategoryRepository.ruleIconKey(it)) }
         ?: Icons.AutoMirrored.Filled.Label
 
-/** A category's color; without one of its own, the design's color for its place, else the accent. */
+/** A category's color; without one of its own, the design's color for its place, else the accent.
+ *  A category set to no color takes the color of the text around it. */
 @Composable
 fun categoryColor(category: Category?): Color {
+    if (!category.hasFill) return LocalContentColor.current
     category?.color?.let { return Color(it) }
     val palette = LauncherCategories.palette
     if (category != null && palette.isNotEmpty()) return Color(palette[category.orderIndex.mod(palette.size)])
@@ -83,19 +103,13 @@ internal fun CategoryCell(
     labelColor: Color = Color.White,
     iconSizeScale: Float = 1f
 ) {
-    val background = categoryColor(category)
     Column(
         modifier = Modifier
             .clickable(enabled = category != null, onClick = onClick)
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier.size(56.dp * iconSizeScale).clip(shape).background(background),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(imageVector = categoryIcon(category), contentDescription = null, tint = inkOn(background), modifier = Modifier.size(30.dp * iconSizeScale))
-        }
+        CategoryMark(category, iconSize = 30.dp * iconSizeScale, modifier = Modifier.size(56.dp * iconSizeScale), shape = shape, ink = labelColor)
         if (showLabel) {
             Spacer(Modifier.height(8.dp))
             Text(
@@ -112,11 +126,72 @@ internal fun CategoryCell(
 /** The same in the Dock's flush squares, without a caption of its own. */
 @Composable
 internal fun CategoryPillIcon(category: Category?, modifier: Modifier = Modifier) {
-    val background = categoryColor(category)
+    CategoryMark(
+        category,
+        iconSize = 24.dp,
+        modifier = modifier.clickable(enabled = category != null) { category?.let { LauncherCategories.open(it.id) } },
+        shape = RectangleShape,
+        contentDescription = category?.name
+    )
+}
+
+/** A category's sign: its symbol (or first letter) on its color, or in an outline without one. */
+@Composable
+fun CategoryMark(
+    category: Category?,
+    iconSize: Dp,
+    modifier: Modifier = Modifier,
+    shape: Shape = CircleShape,
+    ink: Color = LocalContentColor.current,
+    contentDescription: String? = null
+) {
+    val filled = category.hasFill
+    val accent = categoryColor(category)
+    val tint = if (filled) inkOn(accent) else ink
     Box(
-        modifier = modifier.background(background).clickable(enabled = category != null) { category?.let { LauncherCategories.open(it.id) } },
+        modifier = modifier.clip(shape).then(if (filled) Modifier.background(accent) else Modifier.border(1.5.dp, ink.copy(alpha = 0.6f), shape)),
         contentAlignment = Alignment.Center
     ) {
-        Icon(imageVector = categoryIcon(category), contentDescription = category?.name, tint = inkOn(background))
+        if (category.hasSymbol) {
+            Icon(categoryIcon(category), contentDescription = contentDescription, tint = tint, modifier = Modifier.size(iconSize))
+        } else {
+            Text(
+                category?.name?.trim()?.take(1)?.uppercase().orEmpty(),
+                color = tint,
+                fontSize = (iconSize.value * 0.8f).sp,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1
+            )
+        }
     }
 }
+
+/** A category's name in a pill of its color, its symbol in front; outlined without a color. */
+@Composable
+fun CategoryNamePill(
+    category: Category,
+    textStyle: TextStyle,
+    modifier: Modifier = Modifier,
+    ink: Color = LocalContentColor.current,
+    iconSize: Dp = 18.dp
+) {
+    val filled = category.hasFill
+    val accent = categoryColor(category)
+    val tint = if (filled) inkOn(accent) else ink
+    Row(
+        modifier = modifier
+            .clip(CircleShape)
+            .then(if (filled) Modifier.background(accent) else Modifier.border(1.5.dp, ink.copy(alpha = 0.6f), CircleShape))
+            .padding(horizontal = PILL_PADDING, vertical = 5.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (category.hasSymbol) {
+            Icon(categoryIcon(category), contentDescription = null, tint = tint, modifier = Modifier.size(iconSize))
+            Spacer(Modifier.size(8.dp))
+        }
+        Text(category.name, style = textStyle, color = tint, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+/** Inner start padding of [CategoryNamePill]; pull it back by this to line its content up. */
+val PILL_PADDING = 10.dp

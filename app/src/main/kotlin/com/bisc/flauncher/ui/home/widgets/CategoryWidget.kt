@@ -154,16 +154,14 @@ fun CategoryWidget(
 /** A category's symbol and name; a tap opens it on the Categories page. */
 @Composable
 private fun CategoryHead(r: ResolvedCategory, ink: androidx.compose.ui.graphics.Color) {
-    Row(
-        modifier = Modifier.fillMaxWidth().clip(CircleShape).clickable { LauncherCategories.open(r.category.id) }.padding(horizontal = 4.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        val accent = categoryColor(r.category)
-        Box(modifier = Modifier.size(24.dp).clip(CircleShape).background(accent), contentAlignment = Alignment.Center) {
-            Icon(categoryIcon(r.category), contentDescription = null, tint = inkOn(accent), modifier = Modifier.size(14.dp))
-        }
-        Spacer(Modifier.size(8.dp))
-        Text(r.category.name, color = ink, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    Box(modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
+        com.bisc.flauncher.ui.home.CategoryNamePill(
+            r.category,
+            MaterialTheme.typography.labelLarge,
+            modifier = Modifier.clickable { LauncherCategories.open(r.category.id) },
+            ink = ink,
+            iconSize = 16.dp
+        )
     }
 }
 
@@ -201,9 +199,7 @@ private fun CategoryTiles(shown: List<ResolvedCategory>, ink: androidx.compose.u
                                 .padding(vertical = 10.dp, horizontal = 6.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Box(modifier = Modifier.size(32.dp).clip(CircleShape).background(accent), contentAlignment = Alignment.Center) {
-                                Icon(categoryIcon(r.category), contentDescription = null, tint = inkOn(accent), modifier = Modifier.size(18.dp))
-                            }
+                            com.bisc.flauncher.ui.home.CategoryMark(r.category, iconSize = 18.dp, modifier = Modifier.size(32.dp), ink = ink)
                             Spacer(Modifier.size(6.dp))
                             Text(
                                 r.category.name,

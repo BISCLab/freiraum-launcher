@@ -4,6 +4,9 @@
 
 - Pages settings: the Categories page shows among the function pages; all four tiles fit side by side
 - Choice windows use more of the screen height, so lists like the gesture actions fit without scrolling
+- Categories can be without color (just an outline) and without symbol (first letter, or the name alone)
+- Search, Categories page and widget show a category's name in a pill of its color; the symbol lines up with the card title
+- Fixed: a category's new color, name or symbol was sometimes lost when saving
 
 ## 0.18.0
 

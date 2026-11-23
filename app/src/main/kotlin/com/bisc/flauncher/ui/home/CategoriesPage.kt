@@ -186,12 +186,14 @@ internal fun CategoryChip(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Icon(
-            if (category == null) androidx.compose.material.icons.Icons.Filled.Apps else categoryIcon(category),
-            contentDescription = null,
-            tint = if (selected) ink else if (category == null) ink else accent,
-            modifier = Modifier.size(18.dp)
-        )
+        if (category.hasSymbol) {
+            Icon(
+                if (category == null) androidx.compose.material.icons.Icons.Filled.Apps else categoryIcon(category),
+                contentDescription = null,
+                tint = if (selected) ink else if (category == null) ink else accent,
+                modifier = Modifier.size(18.dp)
+            )
+        }
         Text(label, color = ink, style = MaterialTheme.typography.labelLarge, maxLines = 1)
         if (count != null) {
             Text(count.toString(), color = ink.copy(alpha = if (com.bisc.flauncher.ui.AccessibilityMode.on) 1f else 0.7f), style = MaterialTheme.typography.labelMedium)
@@ -225,14 +227,16 @@ internal fun CategoryCard(
 /** The head of a category card: symbol, name, count, and the button that opens or closes it. */
 @Composable
 private fun CategoryCardHead(resolved: ResolvedCategory, expandable: Boolean, expanded: Boolean, onToggle: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(start = 4.dp, bottom = 4.dp)) {
-        val accent = categoryColor(resolved.category)
-        Box(modifier = Modifier.size(28.dp).clip(androidx.compose.foundation.shape.CircleShape).background(accent), contentAlignment = Alignment.Center) {
-            Icon(categoryIcon(resolved.category), contentDescription = null, tint = inkOn(accent), modifier = Modifier.size(16.dp))
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
+        Box(modifier = Modifier.weight(1f)) {
+            CategoryNamePill(resolved.category, MaterialTheme.typography.titleMedium)
         }
-        Spacer(Modifier.size(10.dp))
-        Text(resolved.category.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-        Text(resolved.members.size.toString(), style = MaterialTheme.typography.labelLarge, color = LocalContentColor.current.copy(alpha = 0.7f))
+        Text(
+            resolved.members.size.toString(),
+            style = MaterialTheme.typography.labelLarge,
+            color = LocalContentColor.current.copy(alpha = 0.7f),
+            modifier = Modifier.padding(start = 12.dp, end = if (expandable) 0.dp else 8.dp)
+        )
         if (expandable) {
             TextButton(onClick = onToggle) {
                 Text(stringResource(if (expanded) R.string.categories_show_less else R.string.categories_show_all), color = LocalContentColor.current)

@@ -1186,4 +1186,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_category_manual_order">Eigene Reihenfolge</string>
     <string name="settings_category_manual_order_on">Zieh die Einträge unten in deine Reihenfolge</string>
     <string name="settings_category_manual_order_off">Apps nach Namen, dann der Rest</string>
+    <string name="settings_category_no_icon">Kein Symbol</string>
+    <string name="settings_category_no_color">Ohne Farbe</string>
+    <string name="settings_category_no_color_summary">Nur ein Rand drumherum</string>
 </resources>

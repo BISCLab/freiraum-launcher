@@ -734,7 +734,8 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun updateCategory(category: com.bisc.flauncher.data.model.Category) {
-        viewModelScope.launch { categoryRepository.update(category) }
+        // Save closes the screen right away; the write must not die with it.
+        viewModelScope.launch(kotlinx.coroutines.NonCancellable) { categoryRepository.update(category) }
     }
 
     fun deleteCategory(category: com.bisc.flauncher.data.model.Category) {

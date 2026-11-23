@@ -82,14 +82,15 @@ import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.categoryColor
 import com.bisc.flauncher.ui.home.categoryIcon
 import com.bisc.flauncher.ui.home.inkOn
+import com.bisc.flauncher.ui.home.CATEGORY_NO_COLOR
+import com.bisc.flauncher.ui.home.CATEGORY_NO_ICON
+import com.bisc.flauncher.ui.home.hasFill
+import com.bisc.flauncher.ui.home.hasSymbol
 
 /** A category's symbol on its color, as a small round badge. */
 @Composable
 internal fun CategoryBadge(category: Category?, size: androidx.compose.ui.unit.Dp = 36.dp) {
-    val background = categoryColor(category)
-    Box(modifier = Modifier.size(size).clip(CircleShape).background(background), contentAlignment = Alignment.Center) {
-        Icon(categoryIcon(category), contentDescription = null, tint = inkOn(background), modifier = Modifier.size(size * 0.55f))
-    }
+    com.bisc.flauncher.ui.home.CategoryMark(category, iconSize = size * 0.55f, modifier = Modifier.size(size))
 }
 
 /** Settings > Elements > Categories: every category in its order, new ones, Android's own kinds as
@@ -377,18 +378,33 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
                 )
             }
             SettingsPreference(
-                icon = categoryIcon(draft),
+                icon = if (draft.hasSymbol) categoryIcon(draft) else null,
                 title = stringResource(R.string.settings_element_icon_label),
+                summary = if (draft.hasSymbol) null else stringResource(R.string.settings_category_no_icon),
                 onClick = { showIconPicker = true },
                 trailing = null
             )
-            AutomaticColorPicker(
-                title = stringResource(R.string.settings_category_color),
-                custom = draft.color,
-                automaticSeed = categoryColor(draft.copy(color = null)).toArgb(),
-                onChange = { draft = draft.copy(color = it) },
-                ownGroup = false
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_category_no_color),
+                summary = stringResource(R.string.settings_category_no_color_summary),
+                onClick = { draft = draft.copy(color = if (draft.hasFill) CATEGORY_NO_COLOR else null) },
+                trailing = {
+                    androidx.compose.material3.Switch(
+                        checked = !draft.hasFill,
+                        onCheckedChange = { off -> draft = draft.copy(color = if (off) CATEGORY_NO_COLOR else null) }
+                    )
+                }
             )
+            if (draft.hasFill) {
+                AutomaticColorPicker(
+                    title = stringResource(R.string.settings_category_color),
+                    custom = draft.color,
+                    automaticSeed = categoryColor(draft.copy(color = null)).toArgb(),
+                    onChange = { draft = draft.copy(color = it) },
+                    ownGroup = false
+                )
+            }
         }
         if (rule != null) RuleSettings(draft) { draft = it }
         if (rule == null && members.size > 1) {
@@ -476,6 +492,7 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
     if (showIconPicker) {
         PictogramPickerSheet(
             selected = draft.iconKey,
+            noneKey = CATEGORY_NO_ICON,
             onSelect = { key -> draft = draft.copy(iconKey = key); showIconPicker = false },
             onDismiss = { showIconPicker = false }
         )

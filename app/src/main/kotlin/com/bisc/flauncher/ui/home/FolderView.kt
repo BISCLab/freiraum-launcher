@@ -492,13 +492,7 @@ private fun FolderContentCell(
             }
             GridItemType.CATEGORY -> {
                 val category = LauncherCategories.find(item.payload.toLongOrNull())?.category
-                val background = categoryColor(category)
-                Box(
-                    modifier = Modifier.size(56.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp)).background(background),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(imageVector = categoryIcon(category), contentDescription = null, tint = inkOn(background), modifier = Modifier.size(30.dp))
-                }
+                CategoryMark(category, iconSize = 30.dp, modifier = Modifier.size(56.dp), shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
                 if (showLabel) {
                     Spacer(Modifier.height(6.dp))
                     GridLabel(category?.name.orEmpty())
