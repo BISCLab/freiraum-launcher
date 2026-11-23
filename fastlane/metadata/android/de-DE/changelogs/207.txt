@@ -1,0 +1,9 @@
+- Kategorien ohne Farbe (nur Rand) und ohne Symbol
+- Kategorie-Namen als farbige Pille in Suche, Seite und Widget
+- Kategorien-Widget: neue Ansicht untereinander
+- Seiten hängen nach dem Wischen im Widget nicht mehr fest
+- Gesperrte Einstellungen führen nach einer anderen App zum Startbildschirm
+- Seiten-Einstellungen: Zeilen im Bild deutlich zum Antippen
+- Kategorie-Seite: alles gilt mit Speichern
+- Einführung zeigt Kategorien
+- Behoben: Farbe einer Kategorie ging beim Speichern verloren

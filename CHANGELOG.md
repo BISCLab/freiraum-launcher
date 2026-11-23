@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.19.0
+
 - Pages settings: the Categories page shows among the function pages; all four tiles fit side by side
 - Choice windows use more of the screen height, so lists like the gesture actions fit without scrolling
 - Categories can be without color (just an outline) and without symbol (first letter, or the name alone)

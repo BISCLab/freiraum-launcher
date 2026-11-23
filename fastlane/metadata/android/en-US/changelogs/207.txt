@@ -1,0 +1,9 @@
+- Categories without color (outline only) and without symbol
+- Category names as a colored pill in search, page and widget
+- Categories widget: new stacked view
+- Pages no longer get stuck after swiping inside a widget
+- Locked settings lead home after visiting another app
+- Page settings: rows in the picture clearly tappable
+- Category page: everything applies with Save
+- Welcome tour shows categories
+- Fixed: a category's color was lost when saving
