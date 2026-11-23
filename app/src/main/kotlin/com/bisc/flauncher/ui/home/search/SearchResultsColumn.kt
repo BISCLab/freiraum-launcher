@@ -42,6 +42,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -84,6 +87,9 @@ fun SearchResultsColumn(
     shortcutResults: List<com.bisc.flauncher.data.model.ShortcutResult>,
     folderResults: List<com.bisc.flauncher.data.model.Folder> = emptyList(),
     mapTargetResults: List<com.bisc.flauncher.data.model.SavedMapTarget> = emptyList(),
+    /** Categories found by name, each with its apps. */
+    categoryResults: List<CategoryHit> = emptyList(),
+    onCategoryClick: (com.bisc.flauncher.data.model.Category) -> Unit = {},
     contactsPermissionGranted: Boolean,
     order: List<SearchCategory>,
     active: Set<SearchCategory>,
@@ -138,13 +144,14 @@ fun SearchResultsColumn(
     val shownShortcutResults = if (SearchCategory.SHORTCUTS in active) shortcutResults else emptyList()
     val shownFolderResults = if (SearchCategory.FOLDERS in active) folderResults else emptyList()
     val shownMapTargetResults = if (SearchCategory.PLACES in active) mapTargetResults else emptyList()
+    val shownCategoryResults = if (SearchCategory.LABELS in active) categoryResults else emptyList()
     val showWeb = SearchCategory.WEB in active && webChoices.isNotEmpty() && query.isNotBlank()
     val showMaps = SearchCategory.PLACES in active && query.isNotBlank()
     val showAi = SearchCategory.AI in active && aiChoices.isNotEmpty() && query.isNotBlank()
     val hasDirectResults = shownAppResults.isNotEmpty() || shownContactResults.isNotEmpty() || shownSettingsResults.isNotEmpty() ||
         shownLauncherSettingsResults.isNotEmpty() ||
         shownWebsiteResults.isNotEmpty() || shownShortcutResults.isNotEmpty() ||
-        shownFolderResults.isNotEmpty() || shownMapTargetResults.isNotEmpty()
+        shownFolderResults.isNotEmpty() || shownMapTargetResults.isNotEmpty() || shownCategoryResults.isNotEmpty()
 
     fun categoryColor(category: SearchCategory): Color = categoryColors[category]?.let { Color(it) } ?: category.defaultColor
 
@@ -164,6 +171,7 @@ fun SearchResultsColumn(
                 SearchCategory.WEBSITES -> if (shownWebsiteResults.isNotEmpty()) 1 else 0
                 SearchCategory.PLACES -> (if (shownMapTargetResults.isNotEmpty()) 1 else 0) + (if (showMaps) 1 else 0)
                 SearchCategory.SHORTCUTS -> if (shownShortcutResults.isNotEmpty()) 1 else 0
+                SearchCategory.LABELS -> if (shownCategoryResults.isNotEmpty()) 1 else 0
                 SearchCategory.LAUNCHER_SETTINGS -> if (shownLauncherSettingsResults.isNotEmpty()) 1 else 0
                 SearchCategory.WEB -> if (showWeb) 1 else 0
                 SearchCategory.AI -> if (showAi) 1 else 0
@@ -279,6 +287,27 @@ fun SearchResultsColumn(
                             onClick = { onShortcutClick(result.shortcut) }
                         )
                     }
+                    SearchCategory.LABELS -> if (shownCategoryResults.isNotEmpty()) {
+                        add(category.name) {
+                            ResultCard(cardAppearance, order = cards[category] ?: 0, dimmed = dimmed(category), onUndim = onClearFocus) {
+                                SectionTitle(stringResource(R.string.settings_pages_categories), categoryColor(category))
+                                shownCategoryResults.forEach { hit ->
+                                    CategoryHitRow(hit, onClick = { onCategoryClick(hit.category) })
+                                    if (hit.apps.isNotEmpty()) {
+                                        AppTileGrid(
+                                            apps = hit.apps,
+                                            expanded = isExpanded(category),
+                                            loadIcon = loadIcon,
+                                            onAppClick = onAppClick,
+                                            onToggleExpand = { toggleExpanded(category) },
+                                            favoriteIds = favoriteIds,
+                                            onToggleFavorite = onToggleFavorite
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                     SearchCategory.LAUNCHER_SETTINGS -> sectionCard(cards[category] ?: 0, dimmed(category), onClearFocus, category, shownLauncherSettingsResults, categoryColor(category), cardAppearance, isExpanded(category), { toggleExpanded(category) }) { target ->
                         ResultRow(leading = { Icon(category.shownIcon(), contentDescription = null, modifier = Modifier.size(28.dp), tint = categoryColor(category)) }, title = stringResource(target.labelRes), onClick = { onLauncherSettingsClick(target) })
                     }
@@ -363,6 +392,7 @@ private val SearchCategory.sectionTitleRes: Int
         SearchCategory.WEBSITES -> R.string.search_section_websites
         SearchCategory.PLACES -> R.string.search_section_places
         SearchCategory.SHORTCUTS -> R.string.search_section_shortcuts
+        SearchCategory.LABELS -> R.string.settings_pages_categories
         SearchCategory.LAUNCHER_SETTINGS -> R.string.search_section_launcher_settings
         SearchCategory.WEB -> R.string.search_section_apps
         SearchCategory.AI -> R.string.search_section_apps
@@ -553,5 +583,25 @@ private fun CommandRow(icon: ImageVector, color: Color, text: String, prominent:
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+/** A category found by name: the category and its apps, the apps shown as tiles. */
+data class CategoryHit(val category: com.bisc.flauncher.data.model.Category, val count: Int, val apps: List<AppInfo>)
+
+/** A found category: its symbol, name and count; a tap opens it on the Categories page. */
+@Composable
+private fun CategoryHitRow(hit: CategoryHit, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(horizontal = 4.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val accent = com.bisc.flauncher.ui.home.categoryColor(hit.category)
+        Box(modifier = Modifier.size(32.dp).clip(androidx.compose.foundation.shape.CircleShape).background(accent), contentAlignment = Alignment.Center) {
+            Icon(com.bisc.flauncher.ui.home.categoryIcon(hit.category), contentDescription = null, tint = com.bisc.flauncher.ui.home.inkOn(accent), modifier = Modifier.size(18.dp))
+        }
+        Spacer(Modifier.size(12.dp))
+        Text(hit.category.name, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f), maxLines = 1)
+        Text(hit.count.toString(), style = MaterialTheme.typography.labelLarge)
     }
 }

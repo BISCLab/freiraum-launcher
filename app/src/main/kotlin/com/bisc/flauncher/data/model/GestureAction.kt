@@ -7,7 +7,7 @@ enum class HomeGesture { LONG_PRESS, DOUBLE_TAP, SWIPE_UP, SWIPE_DOWN, TWO_FINGE
  *  Search/App overview are real pages now, so a dedicated action per singleton would
  *  just be a second way to say the same thing. */
 enum class GestureActionType {
-    NONE, APP, SHORTCUT, PAGE, SETTINGS, NOTIFICATIONS, QUICK_SETTINGS
+    NONE, APP, SHORTCUT, PAGE, CATEGORY, SETTINGS, NOTIFICATIONS, QUICK_SETTINGS
 }
 
 data class GestureAction(val type: GestureActionType = GestureActionType.NONE, val payload: String? = null) {

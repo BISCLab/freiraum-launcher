@@ -1391,6 +1391,7 @@ private fun HomeSearchOverlay(
     val websiteResults by viewModel.websiteResults.collectAsState()
     val shortcutResults by viewModel.shortcutResults.collectAsState()
     val folderResults by viewModel.folderResults.collectAsState()
+    val categoryResults by viewModel.categoryResults.collectAsState()
     val mapTargetResults by viewModel.mapTargetResults.collectAsState()
     val searchCategoryOrder by viewModel.searchCategoryOrder.collectAsState()
     val searchRailHidden by viewModel.searchRailHidden.collectAsState()
@@ -1412,6 +1413,8 @@ private fun HomeSearchOverlay(
         websiteResults = websiteResults,
         shortcutResults = shortcutResults,
         folderResults = folderResults,
+        categoryResults = categoryResults,
+        onCategoryClick = { LauncherCategories.open(it.id) },
         mapTargetResults = mapTargetResults,
         contactsPermissionGranted = contactsPermissionGranted,
         statusBarHidden = statusBarHidden,

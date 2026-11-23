@@ -1158,4 +1158,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="widget_categories_which_one">Welche Kategorie</string>
     <string name="widget_categories_which_info">Neue Kategorien kommen von selbst dazu, solange „Alle“ gewählt ist.</string>
     <string name="widget_categories_all">Alle</string>
+    <string name="settings_search_include_labels">Kategorien</string>
+    <string name="settings_gesture_action_category">Kategorie öffnen</string>
 </resources>

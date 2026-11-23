@@ -9,6 +9,8 @@
 - New page Categories: all categories as chips, several can be chosen at once; below them as cards, tabs or a list, with a search field
 - A category is an element: put it in the Dock, the Panel, an element box or a folder, a tap opens it on the Categories page
 - Categories widget for pages, the Panel and folders: one category as a grid, several with tabs to switch right in the widget (chips, swiping or paging buttons), or all of them as small tiles
+- Text search finds your categories by name, with their apps right in the card; a # in front searches only categories (new entry Categories under Search > Behavior)
+- Gestures can open a category directly (Open a category)
 
 ## 0.17.2
 

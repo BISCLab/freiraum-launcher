@@ -293,6 +293,7 @@ class HomeViewModel @Inject constructor(
                     else -> onOpenPage(id)
                 }
             }
+            GestureActionType.CATEGORY -> openCategories(action.payload?.toLongOrNull() ?: com.bisc.flauncher.ui.home.LauncherCategories.ALL)
             GestureActionType.SETTINGS -> onOpenSettings()
             GestureActionType.NOTIFICATIONS -> SystemActionsUtil.expandNotifications(context)
             GestureActionType.QUICK_SETTINGS -> SystemActionsUtil.expandQuickSettings(context)
@@ -941,6 +942,23 @@ class HomeViewModel @Inject constructor(
         combine(_searchQuery, folders, activeSearchCategories) { query, list, active ->
             val include = SearchCategory.FOLDERS in active
             if (query.isBlank() || !include) emptyList() else list.filter { matchesAllWordStarts(it.name, query) }
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    /** Categories whose name matches; "#" in front searches only them. */
+    val categoryResults: StateFlow<List<com.bisc.flauncher.ui.home.search.CategoryHit>> =
+        combine(_searchQuery, resolvedCategories, labeledApps, activeSearchCategories) { query, resolved, apps, active ->
+            val q = query.trim().removePrefix("#").trim()
+            if (q.isBlank() || SearchCategory.LABELS !in active) emptyList()
+            else {
+                val byComponent = apps.associateBy { it.componentName.flattenToString() }
+                resolved.filter { matchesAllWordStarts(it.category.name, q) }.map { r ->
+                    com.bisc.flauncher.ui.home.search.CategoryHit(
+                        category = r.category,
+                        count = r.members.size,
+                        apps = r.members.filter { it.type == GridItemType.APP }.mapNotNull { byComponent[it.payload] }
+                    )
+                }
+            }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val mapTargetResults: StateFlow<List<SavedMapTarget>> =

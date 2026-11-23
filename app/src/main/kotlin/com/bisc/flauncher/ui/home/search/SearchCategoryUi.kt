@@ -2,6 +2,7 @@ package com.bisc.flauncher.ui.home.search
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.Apps
@@ -55,6 +56,7 @@ val SearchCategory.defaultColor: Color
         SearchCategory.WEBSITES -> Color(0xFFA142F4)
         SearchCategory.PLACES -> Color(0xFFEA4335)
         SearchCategory.SHORTCUTS -> Color(0xFF26A69A)
+        SearchCategory.LABELS -> Color(0xFFE08A1E)
         SearchCategory.LAUNCHER_SETTINGS -> Color(0xFF0758F5)
         SearchCategory.WEB -> Color(0xFF00ACC1)
         SearchCategory.AI -> Color(0xFFEC407A)
@@ -71,6 +73,7 @@ val SearchCategory.icon: ImageVector
         SearchCategory.LAUNCHER_SETTINGS -> Icons.Filled.Tune
         SearchCategory.PLACES -> Icons.Filled.Place
         SearchCategory.SHORTCUTS -> Icons.AutoMirrored.Filled.Shortcut
+        SearchCategory.LABELS -> Icons.AutoMirrored.Filled.Label
         SearchCategory.WEB -> Icons.Filled.Language
         SearchCategory.AI -> Icons.Filled.AutoAwesome
     }
@@ -88,6 +91,7 @@ val SearchCategory.filterLabelRes: Int
         SearchCategory.LAUNCHER_SETTINGS -> R.string.search_filter_launcher_settings
         SearchCategory.PLACES -> R.string.search_filter_maps
         SearchCategory.SHORTCUTS -> R.string.search_filter_shortcuts
+        SearchCategory.LABELS -> R.string.settings_pages_categories
         SearchCategory.WEB -> R.string.search_filter_web
         SearchCategory.AI -> R.string.search_filter_ai
     }
@@ -105,6 +109,7 @@ val SearchCategory.settingsLabelRes: Int
         SearchCategory.LAUNCHER_SETTINGS -> R.string.settings_search_include_launcher_settings
         SearchCategory.PLACES -> R.string.settings_search_include_maps
         SearchCategory.SHORTCUTS -> R.string.settings_search_include_shortcuts
+        SearchCategory.LABELS -> R.string.settings_search_include_labels
         SearchCategory.WEB -> R.string.settings_search_include_web
         SearchCategory.AI -> R.string.settings_search_include_ai
     }

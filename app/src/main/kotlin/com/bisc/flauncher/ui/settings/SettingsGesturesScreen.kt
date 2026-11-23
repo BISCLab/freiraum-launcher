@@ -90,6 +90,7 @@ internal fun EditableGesturePhone(viewModel: SettingsViewModel, widthFraction: F
     var editingGesture by remember { mutableStateOf<HomeGesture?>(null) }
     var pickingAppFor by remember { mutableStateOf<HomeGesture?>(null) }
     var pickingPageFor by remember { mutableStateOf<HomeGesture?>(null) }
+    var pickingCategoryFor by remember { mutableStateOf<HomeGesture?>(null) }
     var pendingShortcutGesture by remember { mutableStateOf<HomeGesture?>(null) }
 
     // A phone with each gesture marked where it happens, instead of a list - tap a marker to change
@@ -115,10 +116,23 @@ internal fun EditableGesturePhone(viewModel: SettingsViewModel, widthFraction: F
                         viewModel.openShortcutAppPicker()
                     }
                     GestureActionType.PAGE -> pickingPageFor = gesture
+                    GestureActionType.CATEGORY -> pickingCategoryFor = gesture
                     else -> viewModel.setGestureAction(gesture, GestureAction(type))
                 }
             },
             onDismiss = { editingGesture = null }
+        )
+    }
+
+    pickingCategoryFor?.let { gesture ->
+        val categories by viewModel.categories.collectAsState()
+        CategoryPickerSheet(
+            categories = categories,
+            onSelect = { category ->
+                viewModel.setGestureAction(gesture, GestureAction(GestureActionType.CATEGORY, category.id.toString()))
+                pickingCategoryFor = null
+            },
+            onDismiss = { pickingCategoryFor = null }
         )
     }
 
@@ -213,6 +227,7 @@ internal fun gestureActionTypeLabel(type: GestureActionType): String = when (typ
     GestureActionType.APP -> stringResource(R.string.settings_gesture_action_app)
     GestureActionType.SHORTCUT -> stringResource(R.string.settings_gesture_action_shortcut)
     GestureActionType.PAGE -> stringResource(R.string.settings_gesture_action_page)
+    GestureActionType.CATEGORY -> stringResource(R.string.settings_gesture_action_category)
     GestureActionType.SETTINGS -> stringResource(R.string.settings_gesture_action_settings)
     GestureActionType.NOTIFICATIONS -> stringResource(R.string.settings_gesture_action_notifications)
     GestureActionType.QUICK_SETTINGS -> stringResource(R.string.settings_gesture_action_quick_settings)
@@ -229,6 +244,7 @@ internal fun gestureActionSummary(action: GestureAction, pages: List<LauncherPag
         val page = pages.find { it.id == pageId }
         page?.let { pageLabel(it, pages) } ?: gestureActionTypeLabel(action.type)
     }
+    GestureActionType.CATEGORY -> com.bisc.flauncher.ui.home.LauncherCategories.find(action.payload?.toLongOrNull())?.category?.name ?: gestureActionTypeLabel(action.type)
     else -> gestureActionTypeLabel(action.type)
 }
 

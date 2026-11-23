@@ -13,6 +13,8 @@ enum class SearchCategory(val storageKey: String, val legacyKey: String? = null)
     WEBSITES("websites", legacyKey = "documents"),
     PLACES("maps"),
     SHORTCUTS("shortcuts"),
+    // The user's own categories (labels), found by their name or with a # in front.
+    LABELS("labels"),
     WEB("web"),
     AI("ai")
 }
