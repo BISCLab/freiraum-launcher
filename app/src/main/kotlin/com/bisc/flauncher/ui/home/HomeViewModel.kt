@@ -104,7 +104,8 @@ class HomeViewModel @Inject constructor(
     private val widgetHostManager: SystemWidgetHostManager,
     private val appIconLoader: AppIconLoader,
     private val contactPhotoLoader: ContactPhotoLoader,
-    private val profileAppsRepository: com.bisc.flauncher.data.repository.ProfileAppsRepository
+    private val profileAppsRepository: com.bisc.flauncher.data.repository.ProfileAppsRepository,
+    private val categoryRepository: com.bisc.flauncher.data.repository.CategoryRepository
 ) : ViewModel() {
     // ---- Work profile and private space ----
 
@@ -288,6 +289,7 @@ class HomeViewModel @Inject constructor(
                     LauncherPageKind.APP_LIST -> openAppList()
                     LauncherPageKind.SEARCH -> openSearch()
                     LauncherPageKind.APP_GRID -> openAppGrid()
+                    LauncherPageKind.CATEGORIES -> openCategories()
                     else -> onOpenPage(id)
                 }
             }
@@ -393,6 +395,7 @@ class HomeViewModel @Inject constructor(
     fun openAppList() {
         _isPanelOpen.value = false
         _appGridOpen.value = false
+        _categoriesOpen.value = false
         _appQuery.value = ""
         _appListOpen.value = true
     }
@@ -421,6 +424,7 @@ class HomeViewModel @Inject constructor(
 
     fun openAppGrid() {
         _isPanelOpen.value = false
+        _categoriesOpen.value = false
         _appListOpen.value = false
         _appQuery.value = ""
         _appGridOpen.value = true
@@ -428,11 +432,78 @@ class HomeViewModel @Inject constructor(
 
     fun closeAppGrid() {
         _appGridOpen.value = false
+        _categoriesOpen.value = false
         _appQuery.value = ""
     }
 
     val appGridPageId: StateFlow<Long?> =
         pageContentRepository.appGridPageId.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    // ---- Categories page ----
+
+    private val _categoriesOpen = MutableStateFlow(false)
+    val categoriesOpen: StateFlow<Boolean> = _categoriesOpen.asStateFlow()
+
+    /** The chosen chips on the Categories page; empty shows every category as a card. */
+    private val _categoryFilter = MutableStateFlow<Set<Long>>(emptySet())
+    val categoryFilter: StateFlow<Set<Long>> = _categoryFilter.asStateFlow()
+
+    fun openCategories(categoryId: Long = com.bisc.flauncher.ui.home.LauncherCategories.ALL) {
+        _isPanelOpen.value = false
+        _appListOpen.value = false
+        _appGridOpen.value = false
+        _searchOpen.value = false
+        _appQuery.value = ""
+        _categoryFilter.value = if (categoryId == com.bisc.flauncher.ui.home.LauncherCategories.ALL) emptySet() else setOf(categoryId)
+        _categoriesOpen.value = true
+    }
+
+    fun closeCategories() {
+        _categoriesOpen.value = false
+        _appQuery.value = ""
+    }
+
+    fun toggleCategoryFilter(categoryId: Long) {
+        _categoryFilter.value = if (categoryId == com.bisc.flauncher.ui.home.LauncherCategories.ALL) emptySet()
+            else _categoryFilter.value.let { if (categoryId in it) it - categoryId else it + categoryId }
+    }
+
+    val categoriesPageId: StateFlow<Long?> =
+        pageContentRepository.allPages.map { list -> list.firstOrNull { it.kind == LauncherPageKind.CATEGORIES }?.id }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /** Every category with what it holds now, smart ones worked out. */
+    val resolvedCategories: StateFlow<List<com.bisc.flauncher.data.model.ResolvedCategory>> =
+        categoryRepository.resolvedFlow(labeledApps, appOverrides.map { o -> o.filterValues { it.hiddenFromAppList }.keys })
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    /** The Categories page's status bar choice and background, for the layer over Home. */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val categoriesPageLook: StateFlow<Pair<Boolean, BackgroundConfig>> = categoriesPageId
+        .flatMapLatest { id ->
+            if (id == null) kotlinx.coroutines.flow.flowOf(true to BackgroundConfig())
+            else combine(settingsRepository.pageHideStatusBar(id), pageBackgroundConfig(id)) { hide, bg -> hide to bg }
+        }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true to BackgroundConfig())
+
+    val categoriesView: StateFlow<String> = settingsRepository.categoriesView.stateIn(viewModelScope, SharingStarted.Eagerly, "CARDS")
+    val categoriesShowSearch: StateFlow<Boolean> = settingsRepository.categoriesShowSearch.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val categoriesCardRows: StateFlow<Int> = settingsRepository.categoriesCardRows.stateIn(viewModelScope, SharingStarted.Eagerly, 2)
+
+    val categoryBoxLook: StateFlow<Pair<ElementAppearance, Int>> = settingsRepository.boxLook
+        .stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor(false) to com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT)
+
+    fun setCategoriesView(view: String) { viewModelScope.launch { settingsRepository.setCategoriesView(view) } }
+    fun setCategoriesShowSearch(show: Boolean) { viewModelScope.launch { settingsRepository.setCategoriesShowSearch(show) } }
+    fun setCategoriesCardRows(rows: Int) { viewModelScope.launch { settingsRepository.setCategoriesCardRows(rows) } }
+
+    fun setCategoryMember(categoryId: Long, type: GridItemType, payload: String, inCategory: Boolean) {
+        viewModelScope.launch { categoryRepository.setMember(categoryId, type, payload, inCategory) }
+    }
+
+    fun addCategory(name: String, onCreated: (Long) -> Unit = {}) {
+        viewModelScope.launch { onCreated(categoryRepository.add(name)) }
+    }
 
     val appGridColumns: StateFlow<Int> = settingsRepository.appGridColumns.stateIn(viewModelScope, SharingStarted.Eagerly, 4)
     val appGridHorizontal: StateFlow<Boolean> = settingsRepository.appGridHorizontal.stateIn(viewModelScope, SharingStarted.Eagerly, false)
@@ -698,6 +769,11 @@ class HomeViewModel @Inject constructor(
     private var inFlightSystemWidget: InFlightSystemWidget? = null
 
     init {
+        viewModelScope.launch { com.bisc.flauncher.ui.home.LauncherCategories.openRequests.collect { openCategories(it) } }
+        viewModelScope.launch { settingsRepository.ensureLaunchTrackingSince() }
+    }
+
+    init {
         viewModelScope.launch { settingsRepository.separateRailFollowers() }
         viewModelScope.launch { pageContentRepository.ensureSeeded() }
         viewModelScope.launch {
@@ -918,6 +994,7 @@ class HomeViewModel @Inject constructor(
         // The search backdrop is translucent, so the app overview must not stay open behind it.
         _appListOpen.value = false
         _appGridOpen.value = false
+        _categoriesOpen.value = false
         _appQuery.value = ""
         _searchOpen.value = true
         _searchFilter.value = null
@@ -1210,6 +1287,10 @@ class HomeViewModel @Inject constructor(
             contactsRepository.pin(contact)
             pageContentRepository.addContactEntry(pageRowId, contact.id, orderIndex = takeRowSlot(pageRowId))
         }
+    }
+
+    fun addCategoryEntryToRow(pageRowId: Long, categoryId: Long) {
+        viewModelScope.launch { pageContentRepository.addCategoryEntry(pageRowId, categoryId, orderIndex = takeRowSlot(pageRowId)) }
     }
 
     fun addActionButtonEntryToRow(pageRowId: Long, actionButtonId: Long) {

@@ -33,4 +33,7 @@ interface FolderItemDao {
 
     @Delete
     suspend fun delete(item: FolderItem)
+
+    @Query("DELETE FROM folder_items WHERE type = :type AND payload = :payload")
+    suspend fun deleteByTypeAndPayload(type: com.bisc.flauncher.data.model.GridItemType, payload: String)
 }

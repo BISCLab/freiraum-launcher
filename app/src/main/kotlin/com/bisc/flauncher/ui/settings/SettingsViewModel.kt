@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -65,7 +66,8 @@ class SettingsViewModel @Inject constructor(
     private val folderRepository: FolderRepository,
     private val websiteRepository: com.bisc.flauncher.data.repository.WebsiteRepository,
     private val actionButtonRepository: com.bisc.flauncher.data.repository.ActionButtonRepository,
-    private val backupManager: com.bisc.flauncher.data.backup.BackupManager
+    private val backupManager: com.bisc.flauncher.data.backup.BackupManager,
+    private val categoryRepository: com.bisc.flauncher.data.repository.CategoryRepository
 ) : ViewModel() {
     fun exportBackup(uri: android.net.Uri, password: CharArray, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
@@ -256,6 +258,10 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun addCategoryToFolder(folderId: Long, categoryId: Long) {
+        viewModelScope.launch { folderRepository.addItemToFolder(folderId, com.bisc.flauncher.data.model.GridItemType.CATEGORY, categoryId.toString()) }
+    }
+
     fun addWebsiteToFolder(folderId: Long, websiteId: Long) {
         viewModelScope.launch { folderRepository.addWebsiteToFolder(folderId, websiteId) }
     }
@@ -278,7 +284,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun removeMapTarget(target: com.bisc.flauncher.data.model.SavedMapTarget) {
-        viewModelScope.launch { mapsRepository.remove(target) }
+        viewModelScope.launch { mapsRepository.remove(target); categoryRepository.forget(com.bisc.flauncher.data.model.GridItemType.MAP_TARGET, target.id.toString()) }
     }
 
     fun addWebsite(label: String, url: String) {
@@ -290,7 +296,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun removeWebsite(website: com.bisc.flauncher.data.model.PinnedWebsite) {
-        viewModelScope.launch { websiteRepository.remove(website) }
+        viewModelScope.launch { websiteRepository.remove(website); categoryRepository.forget(com.bisc.flauncher.data.model.GridItemType.WEBSITE, website.id.toString()) }
     }
 
     val actionButtons: StateFlow<List<com.bisc.flauncher.data.model.ActionButton>> =
@@ -688,6 +694,56 @@ class SettingsViewModel @Inject constructor(
             apps.filter { overrides[it.componentName.flattenToString()]?.hiddenFromAppList != true && !com.bisc.flauncher.util.ProfileComponents.isProfile(it.componentName) }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
+    // ---- Categories ----
+
+    val categories: StateFlow<List<com.bisc.flauncher.data.model.Category>> =
+        categoryRepository.categories.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    /** Every category with what it holds now, smart ones worked out. */
+    val resolvedCategories: StateFlow<List<com.bisc.flauncher.data.model.ResolvedCategory>> =
+        categoryRepository.resolvedFlow(labeledApps, appOverrides.map { o -> o.filterValues { it.hiddenFromAppList }.keys })
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    /** Android's own kinds not yet made into a category of the same name. */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val androidCategorySuggestions: StateFlow<List<com.bisc.flauncher.data.repository.AndroidSuggestion>> =
+        combine(browsableApps, categories) { apps, cats -> apps to cats.map { it.name.lowercase() }.toSet() }
+            .mapLatest { (apps, names) ->
+                categoryRepository.androidSuggestions(apps, names)
+            }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    fun addCategory(name: String, rule: com.bisc.flauncher.data.model.CategoryRule? = null, iconKey: String? = null, onCreated: (Long) -> Unit = {}) {
+        viewModelScope.launch { onCreated(categoryRepository.add(name, iconKey = iconKey, rule = rule)) }
+    }
+
+    fun addCategoryFromSuggestion(suggestion: com.bisc.flauncher.data.repository.AndroidSuggestion) {
+        viewModelScope.launch { categoryRepository.addFromSuggestion(suggestion) }
+    }
+
+    fun updateCategory(category: com.bisc.flauncher.data.model.Category) {
+        viewModelScope.launch { categoryRepository.update(category) }
+    }
+
+    fun deleteCategory(category: com.bisc.flauncher.data.model.Category) {
+        viewModelScope.launch {
+            categoryRepository.delete(category)
+            pageContentRepository.removeEntriesEverywhere(com.bisc.flauncher.data.model.GridItemType.CATEGORY, category.id.toString())
+        }
+    }
+
+    fun reorderCategories(ordered: List<com.bisc.flauncher.data.model.Category>) {
+        viewModelScope.launch { categoryRepository.reorder(ordered) }
+    }
+
+    fun setCategoryMember(categoryId: Long, type: com.bisc.flauncher.data.model.GridItemType, payload: String, inCategory: Boolean) {
+        viewModelScope.launch { categoryRepository.setMember(categoryId, type, payload, inCategory) }
+    }
+
+    fun replaceCategoryMembers(categoryId: Long, members: List<Pair<com.bisc.flauncher.data.model.GridItemType, String>>) {
+        viewModelScope.launch { categoryRepository.replaceMembers(categoryId, members) }
+    }
+
     fun resolveLabel(componentName: ComponentName): String {
         val custom = appOverrides.value[componentName.flattenToString()]?.customLabel
         return if (!custom.isNullOrBlank()) custom else installedAppsRepository.rawLabelFor(componentName)
@@ -735,7 +791,7 @@ class SettingsViewModel @Inject constructor(
 
 
 
-    private val pinnedShortcuts: StateFlow<List<com.bisc.flauncher.data.model.PinnedShortcut>> =
+    val pinnedShortcuts: StateFlow<List<com.bisc.flauncher.data.model.PinnedShortcut>> =
         shortcutRepository.pinnedShortcuts.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val savedMapTargets: StateFlow<List<com.bisc.flauncher.data.model.SavedMapTarget>> =

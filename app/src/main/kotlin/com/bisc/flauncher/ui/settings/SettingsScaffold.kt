@@ -101,6 +101,8 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
         "settings/extensions/widgets" -> stringResource(R.string.extensions_widgets_title)
         "settings/about" -> stringResource(R.string.about_title)
         "settings/appearance/background" -> stringResource(R.string.settings_section_global_background)
+        "settings/categories" -> stringResource(R.string.settings_pages_categories)
+        "settings/elements/categories" -> stringResource(R.string.settings_pages_categories)
         "settings/search" -> stringResource(R.string.settings_section_search_full)
         "settings/search/results" -> stringResource(R.string.settings_search_results_label)
         "settings/search/field" -> stringResource(R.string.settings_app_grid_search_field)

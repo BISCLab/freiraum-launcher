@@ -94,4 +94,5 @@ private fun pageIconGlyphLabel(glyph: PageIconGlyph): String = when (glyph) {
     PageIconGlyph.APP_DRAWER -> stringResource(R.string.settings_page_icon_glyph_app_drawer)
     PageIconGlyph.APP_LIST -> stringResource(R.string.settings_page_icon_glyph_app_list)
     PageIconGlyph.WIDGET_PAGE -> stringResource(R.string.settings_page_icon_glyph_widget_page)
+    PageIconGlyph.CATEGORIES -> stringResource(R.string.settings_pages_categories)
 }

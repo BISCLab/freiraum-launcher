@@ -30,6 +30,7 @@ import android.provider.Settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
@@ -70,7 +71,9 @@ class AppMenuHost(
     val shortcutIcon: (ShortcutInfo) -> Drawable?,
     val launchShortcut: (String, String) -> Unit,
     /** Opens this app's page in the launcher's own settings: name, icon, where it shows. */
-    val edit: (ComponentName) -> Unit
+    val edit: (ComponentName) -> Unit,
+    /** Asks which categories the app is in. */
+    val editCategories: (AppInfo) -> Unit = {}
 )
 
 val LocalAppMenuHost = compositionLocalOf<AppMenuHost?> { null }
@@ -81,6 +84,7 @@ fun AppMenuProvider(onEdit: (ComponentName) -> Unit, viewModel: HomeViewModel = 
     val favoriteIds by viewModel.searchFavoriteIds.collectAsState()
     val notInSearchIds by viewModel.notInSearchIds.collectAsState()
     val currentOnEdit by androidx.compose.runtime.rememberUpdatedState(onEdit)
+    var categoriesFor by remember { mutableStateOf<AppInfo?>(null) }
     val host = remember(favoriteIds, notInSearchIds) {
         AppMenuHost(
             favoriteIds = favoriteIds,
@@ -89,10 +93,27 @@ fun AppMenuProvider(onEdit: (ComponentName) -> Unit, viewModel: HomeViewModel = 
             shortcutsFor = viewModel::appShortcutsFor,
             shortcutIcon = viewModel::loadShortcutIcon,
             launchShortcut = viewModel::launchAppShortcut,
-            edit = { currentOnEdit(it) }
+            edit = { currentOnEdit(it) },
+            editCategories = { categoriesFor = it }
         )
     }
     CompositionLocalProvider(LocalAppMenuHost provides host, content = content)
+    categoriesFor?.let { app ->
+        val resolved by viewModel.resolvedCategories.collectAsState()
+        val payload = app.componentName.flattenToString()
+        val memberOf = remember(resolved, payload) {
+            resolved.filter { r -> r.category.smartRule == null && r.members.any { it.type == com.bisc.flauncher.data.model.GridItemType.APP && it.payload == payload } }
+                .map { it.category.id }.toSet()
+        }
+        com.bisc.flauncher.ui.settings.ElementCategoriesDialog(
+            title = app.label,
+            categories = resolved.map { it.category },
+            members = memberOf,
+            onToggle = { id, on -> viewModel.setCategoryMember(id, com.bisc.flauncher.data.model.GridItemType.APP, payload, on) },
+            onCreate = { name -> viewModel.addCategory(name) { id -> viewModel.setCategoryMember(id, com.bisc.flauncher.data.model.GridItemType.APP, payload, true) } },
+            onDismiss = { categoriesFor = null }
+        )
+    }
 }
 
 /** An app's long-press menu: [open] goes on the long press, [Menu] inside the app's own layout, so
@@ -154,6 +175,9 @@ private fun AppMenuItems(app: AppInfo, host: AppMenuHost, close: () -> Unit) {
         leadingIcon = { Icon(if (favorite) Icons.Filled.Star else Icons.Filled.StarBorder, contentDescription = null) },
         enabled = searchable
     )
+    MenuEntry(text = stringResource(R.string.app_menu_categories), onClick = { close(); host.editCategories(app) }) {
+        Icon(Icons.AutoMirrored.Filled.Label, contentDescription = null)
+    }
     MenuEntry(text = stringResource(R.string.app_menu_edit), onClick = { close(); host.edit(app.componentName) }) {
         Icon(Icons.Filled.Edit, contentDescription = null)
     }

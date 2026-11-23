@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bolt
@@ -240,6 +241,7 @@ fun SettingsDockElementsScreen(pageId: Long, navController: NavController, onBac
             onAddPageLinkClick = { showAddChooser = false; showPagePicker = true },
             onAddContactClick = { showAddChooser = false; viewModel.openContactPicker() },
             onAddActionButtonClick = { showAddChooser = false; showActionButtonPicker = true },
+            onAddCategory = { id -> viewModel.addCategoryEntryToRow(row.id, id) },
             onDismiss = { showAddChooser = false }
         )
     }
@@ -349,8 +351,19 @@ internal fun AddElementChooserSheet(
     onAddPageLinkClick: (() -> Unit)? = null,
     onAddContactClick: (() -> Unit)? = null,
     onAddActionButtonClick: (() -> Unit)? = null,
+    /** Puts the picked category in place; the chooser asks which one itself. */
+    onAddCategory: ((Long) -> Unit)? = null,
     onDismiss: () -> Unit
 ) {
+    var pickingCategory by remember { mutableStateOf(false) }
+    if (pickingCategory && onAddCategory != null) {
+        CategoryPickerSheet(
+            categories = com.bisc.flauncher.ui.home.LauncherCategories.resolved.map { it.category },
+            onSelect = { category -> onAddCategory(category.id); onDismiss() },
+            onDismiss = onDismiss
+        )
+        return
+    }
     // Every kind in a tile of the same size, named in a word: the title already says "Add".
     // New folders are made under Folders; here an existing one is put in place.
     val tiles = listOfNotNull(
@@ -361,7 +374,8 @@ internal fun AddElementChooserSheet(
         SettingsTile(Icons.Filled.Language, stringResource(R.string.settings_add_kind_link), onClick = onAddWebsiteClick),
         onAddPageLinkClick?.let { SettingsTile(Icons.Filled.ViewCarousel, stringResource(R.string.settings_add_kind_page), onClick = it) },
         onAddContactClick?.let { SettingsTile(Icons.Filled.Person, stringResource(R.string.settings_add_kind_contact), onClick = it) },
-        onAddActionButtonClick?.let { SettingsTile(Icons.Filled.Bolt, stringResource(R.string.settings_add_kind_action), onClick = it) }
+        onAddActionButtonClick?.let { SettingsTile(Icons.Filled.Bolt, stringResource(R.string.settings_add_kind_action), onClick = it) },
+        onAddCategory?.let { SettingsTile(Icons.AutoMirrored.Filled.Label, stringResource(R.string.settings_add_kind_category), onClick = { pickingCategory = true }) }
     )
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
@@ -399,6 +413,7 @@ internal fun entrySettingsRoute(entry: com.bisc.flauncher.data.model.RowEntry): 
     com.bisc.flauncher.data.model.GridItemType.MAP_TARGET -> "settings/elements/addresses/${entry.payload}"
     com.bisc.flauncher.data.model.GridItemType.WEBSITE -> "settings/elements/links/${entry.payload}"
     com.bisc.flauncher.data.model.GridItemType.ACTION_BUTTON -> "settings/elements/actionbuttons/${entry.payload}"
+    com.bisc.flauncher.data.model.GridItemType.CATEGORY -> "settings/elements/categories/${entry.payload}"
     else -> null
 }
 

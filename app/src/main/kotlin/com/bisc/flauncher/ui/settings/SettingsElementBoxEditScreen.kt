@@ -253,6 +253,7 @@ fun SettingsElementBoxEditScreen(
             onAddMapTargetClick = { addingElement = false; showMapTargetPicker = true },
             onAddWebsiteClick = { addingElement = false; showWebsitePicker = true },
             onAddPageLinkClick = { addingElement = false; showPagePicker = true },
+            onAddCategory = { id -> viewModel.addCategoryEntryToRow(row.id, id) },
             onDismiss = { addingElement = false }
         )
     }

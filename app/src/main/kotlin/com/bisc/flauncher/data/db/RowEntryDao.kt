@@ -30,4 +30,7 @@ interface RowEntryDao {
 
     @Delete
     suspend fun delete(entry: RowEntry)
+
+    @Query("DELETE FROM row_entries WHERE type = :type AND payload = :payload")
+    suspend fun deleteByTypeAndPayload(type: com.bisc.flauncher.data.model.GridItemType, payload: String)
 }

@@ -156,6 +156,16 @@ private val MIGRATION_64_65 = object : Migration(64, 65) {
     }
 }
 
+/** Categories: a label that apps and other elements carry, with their members. */
+private val MIGRATION_65_66 = object : Migration(65, 66) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS `categories` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `iconKey` TEXT, `color` INTEGER, `orderIndex` INTEGER NOT NULL, `rule` TEXT)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `category_members` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `categoryId` INTEGER NOT NULL, `type` TEXT NOT NULL, `payload` TEXT NOT NULL, `orderIndex` INTEGER NOT NULL, FOREIGN KEY(`categoryId`) REFERENCES `categories`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_category_members_categoryId` ON `category_members` (`categoryId`)")
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_category_members_categoryId_type_payload` ON `category_members` (`categoryId`, `type`, `payload`)")
+    }
+}
+
 private val MIGRATION_63_64 = object : Migration(63, 64) {
     override fun migrate(db: SupportSQLiteDatabase) {
         val rows = mutableListOf<Triple<Long, Long, String>>()
@@ -187,7 +197,7 @@ object AppModule {
             .addMigrations(
                 MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33,
                 MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36, MIGRATION_36_37, MIGRATION_60_61, MIGRATION_61_62,
-                MIGRATION_62_63, MIGRATION_63_64, MIGRATION_64_65
+                MIGRATION_62_63, MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66
             )
             // Only a last resort now for jumps with no migration path above (e.g. a much older install
             // skipping several versions at once, or a version older than 27). Every future version bump
@@ -195,6 +205,9 @@ object AppModule {
             // widgets and settings intact across an update instead of silently wiping them.
             .fallbackToDestructiveMigration(dropAllTables = true)
             .build()
+
+    @Provides
+    fun provideCategoryDao(db: FLauncherDatabase): com.bisc.flauncher.data.db.CategoryDao = db.categoryDao()
 
     @Provides
     fun provideLauncherPageDao(db: FLauncherDatabase): LauncherPageDao = db.launcherPageDao()

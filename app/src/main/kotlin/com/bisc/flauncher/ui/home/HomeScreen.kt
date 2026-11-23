@@ -184,6 +184,8 @@ fun HomeScreen(
     val searchHideStatusBar by viewModel.searchHideStatusBar.collectAsState()
     val appListHeaderLetterAppearance by viewModel.appListHeaderLetterAppearance.collectAsState()
     val appGridOpen by viewModel.appGridOpen.collectAsState()
+    val categoriesOpen by viewModel.categoriesOpen.collectAsState()
+    val categoriesPageLook by viewModel.categoriesPageLook.collectAsState()
     val appGridPageId by viewModel.appGridPageId.collectAsState()
     val appGridBackground by remember(appGridPageId) { viewModel.pageBackgroundConfig(appGridPageId ?: -1L) }
         .collectAsState(initial = BackgroundConfig())
@@ -229,6 +231,7 @@ fun HomeScreen(
         folderOpen -> folderHideStatusBar
         onAppOverviewPage -> appOverviewHideStatusBar
         appGridOpen -> appGridHideStatusBar
+        categoriesOpen -> categoriesPageLook.first
         searchOpen -> searchHideStatusBar
         else -> currentPageHideStatusBar
     }
@@ -298,6 +301,7 @@ fun HomeScreen(
         val statusBarBackdrop = when {
             appListOpen -> appOverviewBackground
             appGridOpen -> appGridBackground
+            categoriesOpen -> categoriesPageLook.second
             else -> currentPageBackground
         }
         com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(
@@ -394,6 +398,7 @@ fun HomeScreen(
             com.bisc.flauncher.data.model.LauncherPageKind.APP_LIST -> viewModel.openAppList()
             com.bisc.flauncher.data.model.LauncherPageKind.SEARCH -> viewModel.openSearch()
             com.bisc.flauncher.data.model.LauncherPageKind.APP_GRID -> viewModel.openAppGrid()
+            com.bisc.flauncher.data.model.LauncherPageKind.CATEGORIES -> viewModel.openCategories()
         }
     }
     // An Action button's action: open a page (same dispatch as a plain page-link entry), trigger
@@ -419,6 +424,7 @@ fun HomeScreen(
         viewModel.closeSearch()
         viewModel.closeAppList()
         viewModel.closeAppGrid()
+        viewModel.closeCategories()
         viewModel.closeOverview()
         viewModel.closeAllFolders()
         if (realIndex(pagerState.currentPage) != homeIndex) coroutineScope.launch { pagerState.animateScrollToPage(virtualIndexOf(homeIndex)) }
@@ -436,7 +442,7 @@ fun HomeScreen(
         animationSpec = tween(if (folderOpen) 300 else 260, easing = com.bisc.flauncher.ui.EmphasizedEasing),
         label = "folderBackdropBlur"
     )
-    val overlayHidesPage = searchOpen || appListOpen || appGridOpen || (isPanelOpen && !folderOpen)
+    val overlayHidesPage = searchOpen || appListOpen || appGridOpen || categoriesOpen || (isPanelOpen && !folderOpen)
     val pageContentAlpha by animateFloatAsState(
         targetValue = if (overlayHidesPage) 0f else 1f,
         animationSpec = tween(200),
@@ -980,7 +986,7 @@ fun HomeScreen(
     // screen" contract: from either search surface, from plain app overview, and from any other page
     // with nothing open on top - not just closing whatever overlay happens to be up while leaving the
     // pager wherever it already was.
-    androidx.activity.compose.PredictiveBackHandler(enabled = appListOpen || appGridOpen || searchOpen) { progress ->
+    androidx.activity.compose.PredictiveBackHandler(enabled = appListOpen || appGridOpen || categoriesOpen || searchOpen) { progress ->
         try {
             progress.collect { backProgress = it.progress }
             returnHome()
@@ -988,7 +994,7 @@ fun HomeScreen(
             backProgress = 0f
         }
     }
-    BackHandler(enabled = !appListOpen && !appGridOpen && !searchOpen && !folderOpen && realIndex(pagerState.currentPage) != homeIndex) { returnHome() }
+    BackHandler(enabled = !appListOpen && !appGridOpen && !categoriesOpen && !searchOpen && !folderOpen && realIndex(pagerState.currentPage) != homeIndex) { returnHome() }
     // Back first leaves the app list's own search, then the list.
     BackHandler(enabled = appListOpen && appListSearching && !searchOpen && !folderOpen) {
         appListSearching = false
@@ -1132,6 +1138,17 @@ fun HomeScreen(
             }
         }
     }
+
+    HomeCategoriesLayer(
+        viewModel = viewModel,
+        visible = categoriesOpen,
+        hideStatusBar = categoriesPageLook.first,
+        background = categoriesPageLook.second,
+        motion = overlayMotion,
+        iconSizeScale = iconSizeScale,
+        onManage = { onNavigateToSettings("settings/elements/categories") },
+        modifier = backGestureModifier
+    )
 
     AnimatedVisibility(
         visible = searchOpen,
@@ -1310,6 +1327,7 @@ private fun HomeFolderOverlay(
                     GridItemType.WEBSITE -> item.payload.toLongOrNull()
                         ?.let { id -> pinnedWebsites.find { it.id == id } }
                         ?.let { website -> openWebsite(context, website) }
+                    GridItemType.CATEGORY -> item.payload.toLongOrNull()?.let { LauncherCategories.open(it) }
                     GridItemType.FOLDER, GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE, GridItemType.CONTACT, GridItemType.ACTION_BUTTON -> Unit
                 }
                 viewModel.closeAllFolders()

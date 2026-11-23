@@ -9,4 +9,4 @@ package com.bisc.flauncher.data.model
  * - a global Element like [CONTACT]/[MAP_TARGET]/[WEBSITE] (see Settings -> Elements -> Action
  *  buttons), distinct from a plain [PAGE] link because its action can also be "open the Panel" or
  *  "open the Dock", not just navigate to a page. */
-enum class GridItemType { APP, SHORTCUT, MAP_TARGET, WEBSITE, WIDGET, SYSTEM_WIDGET, FOLDER, PAGE, CONTACT, ACTION_BUTTON }
+enum class GridItemType { APP, SHORTCUT, MAP_TARGET, WEBSITE, WIDGET, SYSTEM_WIDGET, FOLDER, PAGE, CONTACT, ACTION_BUTTON, CATEGORY }

@@ -55,6 +55,12 @@ class PageContentRepository @Inject constructor(
 ) {
     val allPages: Flow<List<LauncherPage>> = pageDao.observeAll()
 
+    /** Takes an element that no longer exists out of every row and folder. */
+    suspend fun removeEntriesEverywhere(type: GridItemType, payload: String) {
+        entryDao.deleteByTypeAndPayload(type, payload)
+        folderItemDao.deleteByTypeAndPayload(type, payload)
+    }
+
     val pages: Flow<List<LauncherPage>> = allPages.map { list -> list.filter { it.kind == LauncherPageKind.ROWS } }
 
     val appOverviewPageId: Flow<Long?> = allPages.map { list -> list.firstOrNull { it.kind == LauncherPageKind.APP_LIST }?.id }
@@ -138,6 +144,13 @@ class PageContentRepository @Inject constructor(
                 LauncherPage(orderIndex = (pageDao.maxOrderIndex() ?: -1) + 1, kind = LauncherPageKind.APP_GRID)
             )
             settingsRepository.setPageHideStatusBar(gridId, true)
+        }
+
+        if (pageDao.getByKind(LauncherPageKind.CATEGORIES) == null) {
+            val categoriesId = pageDao.insert(
+                LauncherPage(orderIndex = (pageDao.maxOrderIndex() ?: -1) + 1, kind = LauncherPageKind.CATEGORIES)
+            )
+            settingsRepository.setPageHideStatusBar(categoriesId, true)
         }
 
         if (freshInstall) applyFreshInstallPages(homeId)
@@ -669,6 +682,13 @@ class PageContentRepository @Inject constructor(
     suspend fun addContactEntry(pageRowId: Long, contactId: Long, orderIndex: Int? = null): Long {
         val next = orderIndex ?: firstFreeSlot(pageRowId)
         val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.CONTACT, payload = contactId.toString()))
+        rebalanceForRow(pageRowId)
+        return id
+    }
+
+    suspend fun addCategoryEntry(pageRowId: Long, categoryId: Long, orderIndex: Int? = null): Long {
+        val next = orderIndex ?: firstFreeSlot(pageRowId)
+        val id = entryDao.insert(RowEntry(pageRowId = pageRowId, orderIndex = next, type = GridItemType.CATEGORY, payload = categoryId.toString()))
         rebalanceForRow(pageRowId)
         return id
     }

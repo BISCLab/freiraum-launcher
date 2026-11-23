@@ -518,6 +518,7 @@ fun SettingsPanelElementsScreen(pageId: Long, navController: NavController, onBa
             onAddPageLinkClick = { showAddChooser = false; showPagePicker = true },
             onAddContactClick = { showAddChooser = false; viewModel.openContactPicker() },
             onAddActionButtonClick = { showAddChooser = false; showActionButtonPicker = true },
+            onAddCategory = { id -> viewModel.addCategoryEntryToRow(row.id, id) },
             onDismiss = { showAddChooser = false }
         )
     }

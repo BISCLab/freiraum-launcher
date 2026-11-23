@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
  *  [APP_LIST]/[SEARCH]/[APP_GRID] are singleton pages (auto-seeded, not deletable) that live in the pages list
  *  for identity/icon/settings purposes but render as their own overlay instead of pager content - 
  *  see [com.bisc.flauncher.ui.home.HomeViewModel.openAppList]/`openSearch`. */
-enum class LauncherPageKind { ROWS, APP_LIST, SEARCH, APP_GRID }
+enum class LauncherPageKind { ROWS, APP_LIST, SEARCH, APP_GRID, CATEGORIES }
 
 /** A home-screen page. [iconGlyph]/[iconBackgroundColor]/[iconColor] control how this page looks
  *  when shown as a dock slot (a dock slot can link to any page) - null means "default for this

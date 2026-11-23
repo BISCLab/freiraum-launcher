@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Categories: labels for apps, links, places, contacts and shortcuts; one app can be in several (Settings > Apps & elements > Elements > Categories)
+- Categories from Android: apps that say what they are (games, music, photos and more) are offered as ready-made categories
+- Smart categories that fill themselves: Newly installed, Not used in a while, Used often, Without category
+- Long press on an app: Categories, to put it in or take it out, or to make a new one
+- New page Categories: all categories as chips, several can be chosen at once; below them as cards, tabs or a list, with a search field
+- A category is an element: put it in the Dock, the Panel, an element box or a folder, a tap opens it on the Categories page
+
 ## 0.17.2
 
 - All explanations in the settings and the welcome tour rewritten in short, simple sentences

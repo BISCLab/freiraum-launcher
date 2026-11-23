@@ -22,9 +22,10 @@ import com.bisc.flauncher.data.model.SavedMapTarget
         LauncherPage::class, PageRow::class, RowEntry::class, Folder::class, FolderItem::class,
         Note::class, IconPackMapping::class, SavedMapTarget::class, PinnedWebsite::class,
         PinnedShortcut::class, AppOverride::class,
-        PinnedContact::class, ActionButton::class
+        PinnedContact::class, ActionButton::class,
+        com.bisc.flauncher.data.model.Category::class, com.bisc.flauncher.data.model.CategoryMember::class
     ],
-    version = 65,
+    version = 66,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -42,4 +43,5 @@ abstract class FLauncherDatabase : RoomDatabase() {
     abstract fun appOverrideDao(): AppOverrideDao
     abstract fun pinnedContactDao(): PinnedContactDao
     abstract fun actionButtonDao(): ActionButtonDao
+    abstract fun categoryDao(): CategoryDao
 }

@@ -1,0 +1,612 @@
+package com.bisc.flauncher.ui.settings
+
+import android.content.ComponentName
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Shortcut
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ViewModule
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.bisc.flauncher.R
+import com.bisc.flauncher.data.model.AppInfo
+import com.bisc.flauncher.data.model.Category
+import com.bisc.flauncher.data.model.CategoryMember
+import com.bisc.flauncher.data.model.CategoryRule
+import com.bisc.flauncher.data.model.GridItemType
+import com.bisc.flauncher.data.model.PinnedContact
+import com.bisc.flauncher.data.model.PinnedShortcut
+import com.bisc.flauncher.data.model.PinnedWebsite
+import com.bisc.flauncher.data.model.SavedMapTarget
+import com.bisc.flauncher.data.repository.CategoryRepository
+import com.bisc.flauncher.ui.home.ConfirmRemoveDialog
+import com.bisc.flauncher.ui.home.HomeViewModel
+import com.bisc.flauncher.ui.home.categoryColor
+import com.bisc.flauncher.ui.home.categoryIcon
+import com.bisc.flauncher.ui.home.inkOn
+
+/** A category's symbol on its color, as a small round badge. */
+@Composable
+internal fun CategoryBadge(category: Category?, size: androidx.compose.ui.unit.Dp = 36.dp) {
+    val background = categoryColor(category)
+    Box(modifier = Modifier.size(size).clip(CircleShape).background(background), contentAlignment = Alignment.Center) {
+        Icon(categoryIcon(category), contentDescription = null, tint = inkOn(background), modifier = Modifier.size(size * 0.55f))
+    }
+}
+
+/** Settings > Elements > Categories: every category in its order, new ones, Android's own kinds as
+ *  ready-made offers and the smart categories that fill themselves. */
+@Composable
+fun SettingsCategoriesScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+    val categories by viewModel.categories.collectAsState()
+    val resolved by viewModel.resolvedCategories.collectAsState()
+    val suggestions by viewModel.androidCategorySuggestions.collectAsState()
+    val counts = remember(resolved) { resolved.associate { it.category.id to it.members.size } }
+    var creating by remember { mutableStateOf(false) }
+    val usedRules = remember(categories) { categories.mapNotNull { it.smartRule }.toSet() }
+    val freeRules = CategoryRule.entries.filter { it !in usedRules }
+
+    SettingsSubScreen(title = stringResource(R.string.settings_pages_categories), navController = navController, onBack = onBack) {
+        Text(
+            stringResource(R.string.settings_categories_intro),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 4.dp)
+        )
+        Column {
+            SettingsGroupLabel(stringResource(R.string.settings_categories_yours), info = stringResource(R.string.settings_categories_yours_info))
+            if (categories.isEmpty()) {
+                SettingsPreferenceGroup {
+                    SettingsPreference(icon = null, title = stringResource(R.string.settings_categories_empty), onClick = null, trailing = null)
+                }
+            } else {
+                ReorderableList(
+                    items = categories,
+                    key = { it.id },
+                    onReorder = viewModel::reorderCategories,
+                    itemHeight = 72.dp,
+                    dividers = true
+                ) { category ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().clickable { navController.navigate("settings/elements/categories/${category.id}") },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        CategoryBadge(category)
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(category.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(
+                                if (category.smartRule != null) stringResource(R.string.settings_categories_smart_count, counts[category.id] ?: 0)
+                                else stringResource(R.string.settings_categories_count, counts[category.id] ?: 0),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        SettingsPreferenceGroup {
+            SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_categories_new), onClick = { creating = true }, trailing = null)
+            SettingsPreference(
+                icon = Icons.Filled.ViewModule,
+                title = stringResource(R.string.settings_categories_page),
+                summary = stringResource(R.string.settings_categories_page_summary),
+                onClick = { navController.navigate("settings/categories") }
+            )
+        }
+        if (suggestions.isNotEmpty()) {
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_categories_android), info = stringResource(R.string.settings_categories_android_info)) {
+                suggestions.forEach { suggestion ->
+                    SettingsPreference(
+                        icon = com.bisc.flauncher.ui.home.PictogramCatalog.iconFor(suggestion.kind.iconKey),
+                        title = stringResource(suggestion.kind.nameRes),
+                        summary = stringResource(R.string.settings_categories_count, suggestion.apps.size),
+                        onClick = { viewModel.addCategoryFromSuggestion(suggestion) },
+                        trailing = { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.settings_categories_add_one), tint = MaterialTheme.colorScheme.primary) }
+                    )
+                }
+            }
+        }
+        if (freeRules.isNotEmpty()) {
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_categories_smart), info = stringResource(R.string.settings_categories_smart_info)) {
+                freeRules.forEach { rule ->
+                    val name = stringResource(CategoryRepository.ruleNameRes(rule))
+                    SettingsPreference(
+                        icon = com.bisc.flauncher.ui.home.PictogramCatalog.iconFor(CategoryRepository.ruleIconKey(rule)),
+                        title = name,
+                        summary = stringResource(ruleSummaryRes(rule)),
+                        onClick = { viewModel.addCategory(name, rule = rule) },
+                        trailing = { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.settings_categories_add_one), tint = MaterialTheme.colorScheme.primary) }
+                    )
+                }
+            }
+        }
+    }
+
+    if (creating) {
+        NewCategoryDialog(
+            onCreate = { name ->
+                creating = false
+                viewModel.addCategory(name) { id -> navController.navigate("settings/elements/categories/$id") }
+            },
+            onDismiss = { creating = false }
+        )
+    }
+}
+
+internal fun ruleSummaryRes(rule: CategoryRule): Int = when (rule) {
+    CategoryRule.NEW -> R.string.settings_category_rule_new_summary
+    CategoryRule.UNUSED -> R.string.settings_category_rule_unused_summary
+    CategoryRule.FREQUENT -> R.string.settings_category_rule_frequent_summary
+    CategoryRule.UNCATEGORIZED -> R.string.settings_category_rule_uncategorized_summary
+}
+
+/** Asks for the name of a new category. */
+@Composable
+internal fun NewCategoryDialog(onCreate: (String) -> Unit, onDismiss: () -> Unit) {
+    var name by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_categories_new)) },
+        text = {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text(stringResource(R.string.settings_category_name)) },
+                singleLine = true
+            )
+        },
+        confirmButton = { TextButton(onClick = { onCreate(name.trim()) }, enabled = name.isNotBlank()) { Text(stringResource(R.string.settings_save)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.widget_notes_cancel)) } }
+    )
+}
+
+/** One category: name, symbol and color as a draft with Save; its members change right away. */
+@Composable
+fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+    val homeViewModel: HomeViewModel = hiltViewModel()
+    val categories by viewModel.categories.collectAsState()
+    val resolved by viewModel.resolvedCategories.collectAsState()
+    val saved = categories.find { it.id == categoryId } ?: return
+    var draft by rememberDraft(saved)
+    val members = resolved.find { it.category.id == categoryId }?.members.orEmpty()
+    val apps by viewModel.labeledApps.collectAsState()
+    val websites by viewModel.pinnedWebsites.collectAsState()
+    val places by viewModel.savedMapTargets.collectAsState()
+    val shortcuts by viewModel.pinnedShortcuts.collectAsState()
+    val contacts by homeViewModel.pinnedContacts.collectAsState()
+    var showIconPicker by remember { mutableStateOf(false) }
+    var pickingApps by remember { mutableStateOf(false) }
+    var pickingElements by remember { mutableStateOf(false) }
+    var confirmingDelete by remember { mutableStateOf(false) }
+    val rule = saved.smartRule
+
+    SettingsSubScreen(title = saved.name, navController = navController, onBack = onBack, onSave = { viewModel.updateCategory(draft) }, dirty = draft != saved) {
+        SettingsPreferenceGroup {
+            Row(
+                modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Box(modifier = Modifier.clickable { showIconPicker = true }) { CategoryBadge(draft, 48.dp) }
+                OutlinedTextField(
+                    value = draft.name,
+                    onValueChange = { draft = draft.copy(name = it) },
+                    label = { Text(stringResource(R.string.settings_category_name)) },
+                    singleLine = true,
+                    shape = SettingsTextFieldShape,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            SettingsPreference(
+                icon = categoryIcon(draft),
+                title = stringResource(R.string.settings_element_icon_label),
+                onClick = { showIconPicker = true },
+                trailing = null
+            )
+            AutomaticColorPicker(
+                title = stringResource(R.string.settings_category_color),
+                custom = draft.color,
+                automaticSeed = MaterialTheme.colorScheme.primary.toArgb(),
+                onChange = { draft = draft.copy(color = it) },
+                ownGroup = false
+            )
+        }
+        if (rule != null) {
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_category_smart_label)) {
+                SettingsPreference(icon = null, title = stringResource(ruleSummaryRes(rule)), onClick = null, trailing = null)
+            }
+        }
+        Column {
+            SettingsGroupLabel(stringResource(R.string.settings_category_members, members.size))
+            if (members.isEmpty()) {
+                SettingsPreferenceGroup {
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(if (rule != null) R.string.settings_category_smart_empty else R.string.settings_category_members_empty),
+                        onClick = null,
+                        trailing = null
+                    )
+                }
+            } else {
+                SettingsPreferenceGroup {
+                    members.forEach { member ->
+                        CategoryMemberRow(
+                            member = member,
+                            apps = apps,
+                            websites = websites,
+                            places = places,
+                            contacts = contacts,
+                            loadIcon = viewModel::loadIcon,
+                            onRemove = if (rule == null) ({ viewModel.setCategoryMember(categoryId, member.type, member.payload, false) }) else null
+                        )
+                    }
+                }
+            }
+        }
+        if (rule == null) {
+            SettingsPreferenceGroup {
+                SettingsPreference(icon = Icons.Filled.Apps, title = stringResource(R.string.settings_category_pick_apps), onClick = { pickingApps = true })
+                SettingsPreference(
+                    icon = Icons.Filled.Language,
+                    title = stringResource(R.string.settings_category_pick_elements),
+                    summary = stringResource(R.string.settings_category_pick_elements_summary),
+                    onClick = { pickingElements = true }
+                )
+            }
+        }
+        SettingsPreferenceGroup {
+            SettingsPreference(icon = Icons.Filled.DeleteOutline, title = stringResource(R.string.settings_category_delete), onClick = { confirmingDelete = true }, trailing = null)
+        }
+    }
+
+    if (showIconPicker) {
+        PictogramPickerSheet(
+            selected = draft.iconKey,
+            onSelect = { key -> draft = draft.copy(iconKey = key); showIconPicker = false },
+            onDismiss = { showIconPicker = false }
+        )
+    }
+    if (pickingApps) {
+        val chosen = members.filter { it.type == GridItemType.APP }.map { it.payload }.toSet()
+        CategoryAppsPicker(
+            title = saved.name,
+            apps = apps,
+            initial = chosen,
+            loadIcon = viewModel::loadIcon,
+            onDone = { picked ->
+                val others = members.filter { it.type != GridItemType.APP }.map { it.type to it.payload }
+                val keptOrder = members.filter { it.type == GridItemType.APP && it.payload in picked }.map { it.payload }
+                val added = picked.filter { it !in chosen }
+                viewModel.replaceCategoryMembers(categoryId, (keptOrder + added).map { GridItemType.APP to it } + others)
+                pickingApps = false
+            },
+            onDismiss = { pickingApps = false }
+        )
+    }
+    if (pickingElements) {
+        CategoryElementsSheet(
+            members = members,
+            websites = websites,
+            places = places,
+            contacts = contacts,
+            shortcuts = shortcuts,
+            onToggle = { type, payload, on -> viewModel.setCategoryMember(categoryId, type, payload, on) },
+            onDismiss = { pickingElements = false }
+        )
+    }
+    if (confirmingDelete) {
+        ConfirmRemoveDialog(
+            label = saved.name,
+            onConfirm = { viewModel.deleteCategory(saved); confirmingDelete = false; onBack() },
+            onDismiss = { confirmingDelete = false }
+        )
+    }
+}
+
+/** The name of any member, for lists. */
+internal fun categoryMemberLabel(
+    member: CategoryMember,
+    apps: List<AppInfo>,
+    websites: List<PinnedWebsite>,
+    places: List<SavedMapTarget>,
+    contacts: List<PinnedContact>
+): String = when (member.type) {
+    GridItemType.APP -> apps.find { it.componentName.flattenToString() == member.payload }?.label.orEmpty()
+    GridItemType.WEBSITE -> websites.find { it.id == member.payload.toLongOrNull() }?.label.orEmpty()
+    GridItemType.MAP_TARGET -> places.find { it.id == member.payload.toLongOrNull() }?.label.orEmpty()
+    GridItemType.CONTACT -> contacts.find { it.contactId == member.payload.toLongOrNull() }?.displayName.orEmpty()
+    GridItemType.SHORTCUT -> member.payload.split("|").getOrNull(2)?.takeIf { it.isNotBlank() } ?: member.payload.substringBefore('|')
+    else -> ""
+}
+
+@Composable
+private fun CategoryMemberRow(
+    member: CategoryMember,
+    apps: List<AppInfo>,
+    websites: List<PinnedWebsite>,
+    places: List<SavedMapTarget>,
+    contacts: List<PinnedContact>,
+    loadIcon: (ComponentName) -> ImageBitmap?,
+    onRemove: (() -> Unit)?
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp).background(MaterialTheme.colorScheme.surfaceContainer).padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        Box(modifier = Modifier.size(36.dp), contentAlignment = Alignment.Center) {
+            when (member.type) {
+                GridItemType.APP -> {
+                    val component = remember(member.payload) { ComponentName.unflattenFromString(member.payload) }
+                    val bitmap = com.bisc.flauncher.ui.home.rememberAppIcon(component, loadIcon)
+                    if (bitmap != null) Image(bitmap, contentDescription = null, modifier = Modifier.size(36.dp))
+                }
+                else -> Icon(memberTypeIcon(member.type), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        Text(categoryMemberLabel(member, apps, websites, places, contacts), style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+        if (onRemove != null) {
+            IconButton(onClick = onRemove) {
+                Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.a11y_remove), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+    }
+}
+
+internal fun memberTypeIcon(type: GridItemType) = when (type) {
+    GridItemType.WEBSITE -> Icons.Filled.Language
+    GridItemType.MAP_TARGET -> Icons.Filled.Place
+    GridItemType.CONTACT -> Icons.Filled.Person
+    GridItemType.SHORTCUT -> Icons.AutoMirrored.Filled.Shortcut
+    else -> Icons.Filled.Apps
+}
+
+/** Picks the apps of a category: all of them in a grid, the chosen ones marked. */
+@Composable
+internal fun CategoryAppsPicker(
+    title: String,
+    apps: List<AppInfo>,
+    initial: Set<String>,
+    loadIcon: (ComponentName) -> ImageBitmap?,
+    onDone: (Set<String>) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val selected = remember { mutableStateListOf<String>().apply { addAll(initial) } }
+    var query by remember { mutableStateOf("") }
+    val filtered = remember(apps, query) {
+        val q = query.trim()
+        if (q.isEmpty()) apps else apps.filter { it.label.contains(q, ignoreCase = true) }
+    }
+    SettingsFixedDialog(
+        title = title,
+        onDismiss = onDismiss,
+        actions = { TextButton(onClick = { onDone(selected.toSet()) }) { Text(stringResource(R.string.settings_save)) } },
+        bottomBar = {
+            Button(
+                onClick = { onDone(selected.toSet()) },
+                modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp, vertical = 8.dp)
+            ) { Text(stringResource(R.string.settings_category_apps_done, selected.size)) }
+        }
+    ) {
+        OutlinedTextField(
+            value = query,
+            onValueChange = { query = it },
+            placeholder = { Text(stringResource(R.string.settings_folder_creator_search)) },
+            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+            singleLine = true,
+            shape = SettingsTextFieldShape,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp)
+        )
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(84.dp),
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+            contentPadding = PaddingValues(bottom = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            items(filtered.size, key = { filtered[it].componentName.flattenToString() }) { index ->
+                val app = filtered[index]
+                val key = app.componentName.flattenToString()
+                val bitmap = com.bisc.flauncher.ui.home.rememberAppIcon(app.componentName, loadIcon)
+                val isSelected = key in selected
+                Column(
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f) else Color.Transparent)
+                        .clickable { if (isSelected) selected.remove(key) else selected.add(key) }
+                        .padding(vertical = 8.dp, horizontal = 4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box {
+                        if (bitmap != null) Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(44.dp))
+                        else Spacer(Modifier.size(44.dp))
+                        if (isSelected) {
+                            Box(
+                                modifier = Modifier.align(Alignment.TopEnd).size(18.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
+                                contentAlignment = Alignment.Center
+                            ) { Icon(Icons.Filled.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(12.dp)) }
+                        }
+                    }
+                    Text(
+                        app.label,
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** Links, places, contacts and shortcuts you already have, each with a box to put it in or out. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CategoryElementsSheet(
+    members: List<CategoryMember>,
+    websites: List<PinnedWebsite>,
+    places: List<SavedMapTarget>,
+    contacts: List<PinnedContact>,
+    shortcuts: List<PinnedShortcut>,
+    onToggle: (GridItemType, String, Boolean) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val inCategory = remember(members) { members.map { it.type to it.payload }.toSet() }
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(modifier = Modifier.fillMaxWidth().heightIn(max = 560.dp).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
+            Text(stringResource(R.string.settings_category_pick_elements), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 4.dp, bottom = 12.dp))
+            val sections = listOf(
+                Triple(R.string.settings_add_kind_link, GridItemType.WEBSITE, websites.map { it.id.toString() to it.label }),
+                Triple(R.string.settings_add_kind_place, GridItemType.MAP_TARGET, places.map { it.id.toString() to it.label }),
+                Triple(R.string.settings_add_kind_contact, GridItemType.CONTACT, contacts.map { it.contactId.toString() to it.displayName }),
+                Triple(R.string.settings_add_kind_shortcut, GridItemType.SHORTCUT, shortcuts.map { "${it.packageName}|${it.shortcutId}|${it.label}" to it.label })
+            )
+            if (sections.all { it.third.isEmpty() }) {
+                Text(stringResource(R.string.settings_category_no_elements), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(4.dp))
+            }
+            sections.forEach { (titleRes, type, items) ->
+                if (items.isEmpty()) return@forEach
+                Text(stringResource(titleRes), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(start = 4.dp, top = 12.dp, bottom = 4.dp))
+                items.forEach { (payload, label) ->
+                    val checked = (type to payload) in inCategory
+                    Row(
+                        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { onToggle(type, payload, !checked) }.padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(memberTypeIcon(type), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 8.dp))
+                        Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Checkbox(checked = checked, onCheckedChange = { onToggle(type, payload, it) })
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Picks an existing category for a "+" slot; new ones are made under Elements > Categories. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CategoryPickerSheet(categories: List<Category>, onSelect: (Category) -> Unit, onDismiss: () -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(modifier = Modifier.fillMaxWidth().heightIn(max = 480.dp).verticalScroll(rememberScrollState()).padding(16.dp)) {
+            if (categories.isEmpty()) {
+                Text(stringResource(R.string.settings_categories_picker_empty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            categories.forEach { category ->
+                SettingsPreference(
+                    icon = null,
+                    leading = { CategoryBadge(category) },
+                    title = category.name,
+                    onClick = { onSelect(category) },
+                    trailing = null
+                )
+            }
+        }
+    }
+}
+
+/** The categories of one element with a check each, and a way to make a new one on the spot. */
+@Composable
+fun ElementCategoriesDialog(
+    title: String,
+    categories: List<Category>,
+    members: Set<Long>,
+    onToggle: (Long, Boolean) -> Unit,
+    onCreate: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var creating by remember { mutableStateOf(false) }
+    val own = categories.filter { it.smartRule == null }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+        text = {
+            Column(modifier = Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState())) {
+                if (own.isEmpty()) {
+                    Text(stringResource(R.string.settings_categories_empty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                own.forEach { category ->
+                    val checked = category.id in members
+                    Row(
+                        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { onToggle(category.id, !checked) }.padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CategoryBadge(category, 28.dp)
+                        Spacer(Modifier.width(12.dp))
+                        Text(category.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Checkbox(checked = checked, onCheckedChange = { onToggle(category.id, it) })
+                    }
+                }
+                TextButton(onClick = { creating = true }, modifier = Modifier.padding(top = 4.dp)) {
+                    Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.settings_categories_new))
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_categories_done)) } }
+    )
+    if (creating) {
+        NewCategoryDialog(onCreate = { name -> creating = false; onCreate(name) }, onDismiss = { creating = false })
+    }
+}

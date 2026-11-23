@@ -357,6 +357,17 @@ fun GridEntries(
                     iconSizeScale = iconSizeScale
                 )
             }
+            GridItemType.CATEGORY -> {
+                val category = LauncherCategories.find(entry.payload.toLongOrNull())?.category
+                CategoryCell(
+                    category = category,
+                    shape = elementCellShape(LocalIconShape.current),
+                    onClick = editOverride ?: { if (category != null) LauncherCategories.open(category.id) },
+                    showLabel = showLabels,
+                    labelColor = labelColor,
+                    iconSizeScale = iconSizeScale
+                )
+            }
             GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Unit
         }
         }
@@ -924,6 +935,7 @@ fun PillRowEntries(
                                 contentAlignment = Alignment.Center
                             ) { Icon(imageVector = icon, contentDescription = null, tint = tint) }
                         }
+                        GridItemType.CATEGORY -> CategoryPillIcon(LauncherCategories.find(entry.payload.toLongOrNull())?.category, Modifier.fillMaxSize())
                         GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Unit
                     }
                 }
@@ -988,5 +1000,6 @@ internal fun entryLabel(
     GridItemType.PAGE -> pages.find { it.id == entry.payload.toLongOrNull() }?.let { pageLabel(it, pages) }.orEmpty()
     GridItemType.CONTACT -> pinnedContacts.find { it.contactId == entry.payload.toLongOrNull() }?.displayName.orEmpty()
     GridItemType.ACTION_BUTTON -> actionButtons.find { it.id == entry.payload.toLongOrNull() }?.label.orEmpty()
+    GridItemType.CATEGORY -> LauncherCategories.find(entry.payload.toLongOrNull())?.category?.name.orEmpty()
     GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> ""
 }

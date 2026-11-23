@@ -150,6 +150,8 @@ class MainActivity : ComponentActivity() {
             androidx.compose.runtime.SideEffect { com.bisc.flauncher.ui.settings.SettingsLock.enabled = settingsLocked }
             val keyboardNoLearning by settingsVm.searchKeyboardNoLearning.collectAsState()
             androidx.compose.runtime.SideEffect { com.bisc.flauncher.ui.home.search.KeyboardPrivacy.noLearning = keyboardNoLearning }
+            val resolvedCategories by settingsVm.resolvedCategories.collectAsState()
+            androidx.compose.runtime.SideEffect { com.bisc.flauncher.ui.home.LauncherCategories.resolved = resolvedCategories }
             val dotsOn by settingsVm.showNotificationDots.collectAsState()
             val dotPackages by notificationDots.packages.collectAsState()
             val lockPortrait by settingsVm.lockPortrait.collectAsState()
@@ -376,6 +378,8 @@ class MainActivity : ComponentActivity() {
                                             navController.navigate("settings/search")
                                         page.kind == com.bisc.flauncher.data.model.LauncherPageKind.APP_GRID ->
                                             navController.navigate("settings/app_grid")
+                                        page.kind == com.bisc.flauncher.data.model.LauncherPageKind.CATEGORIES ->
+                                            navController.navigate("settings/categories")
                                     }
                                 }
                             )
@@ -708,6 +712,19 @@ class MainActivity : ComponentActivity() {
                         ) { backStackEntry ->
                             val websiteId = backStackEntry.arguments?.getLong("websiteId") ?: return@settingsComposable
                             com.bisc.flauncher.ui.settings.SettingsLinkDetailScreen(websiteId = websiteId, navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        settingsComposable("settings/elements/categories") {
+                            com.bisc.flauncher.ui.settings.SettingsCategoriesScreen(navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        settingsComposable(
+                            "settings/elements/categories/{categoryId}",
+                            arguments = listOf(navArgument("categoryId") { type = NavType.LongType })
+                        ) { backStackEntry ->
+                            val categoryId = backStackEntry.arguments?.getLong("categoryId") ?: return@settingsComposable
+                            com.bisc.flauncher.ui.settings.SettingsCategoryDetailScreen(categoryId = categoryId, navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        settingsComposable("settings/categories") {
+                            com.bisc.flauncher.ui.settings.SettingsCategoriesPageScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         settingsComposable("settings/elements/actionbuttons") {
                             com.bisc.flauncher.ui.settings.SettingsActionButtonsScreen(navController = navController, onBack = { navController.popBackStack() })

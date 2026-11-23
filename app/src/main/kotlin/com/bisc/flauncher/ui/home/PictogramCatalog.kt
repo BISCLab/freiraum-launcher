@@ -21,6 +21,23 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Work
+import androidx.compose.material.icons.automirrored.filled.Label
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.Accessibility
+import androidx.compose.material.icons.filled.Bedtime
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.NewReleases
+import androidx.compose.material.icons.filled.Newspaper
+import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.ui.graphics.vector.ImageVector
 
 /**
@@ -49,7 +66,24 @@ object PictogramCatalog {
         "car" to Icons.Filled.DirectionsCar,
         "flight" to Icons.Filled.Flight,
         "hotel" to Icons.Filled.Hotel,
-        "money" to Icons.Filled.AttachMoney
+        "money" to Icons.Filled.AttachMoney,
+        "label" to Icons.AutoMirrored.Filled.Label,
+        "game" to Icons.Filled.SportsEsports,
+        "music" to Icons.Filled.MusicNote,
+        "video" to Icons.Filled.Movie,
+        "photo" to Icons.Filled.PhotoCamera,
+        "social" to Icons.Filled.Group,
+        "news" to Icons.Filled.Newspaper,
+        "map" to Icons.Filled.Map,
+        "accessibility" to Icons.Filled.Accessibility,
+        "book" to Icons.Filled.MenuBook,
+        "fitness" to Icons.Filled.FitnessCenter,
+        "pets" to Icons.Filled.Pets,
+        "tools" to Icons.Filled.Build,
+        "new" to Icons.Filled.NewReleases,
+        "sleep" to Icons.Filled.Bedtime,
+        "trending" to Icons.AutoMirrored.Filled.TrendingUp,
+        "inbox" to Icons.Filled.Inbox
     )
 
     fun iconFor(key: String?): ImageVector? = key?.let { icons[it] }

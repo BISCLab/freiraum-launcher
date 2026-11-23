@@ -396,6 +396,7 @@ fun SettingsFolderEditScreen(
             onAddShortcutClick = { showAddChooser = false; viewModel.openFolderShortcutAppPicker(folderId) },
             onAddMapTargetClick = { showAddChooser = false; showMapTargetPicker = true },
             onAddWebsiteClick = { showAddChooser = false; showWebsitePicker = true },
+            onAddCategory = { id -> viewModel.addCategoryToFolder(folderId, id) },
             onDismiss = { showAddChooser = false }
         )
     }

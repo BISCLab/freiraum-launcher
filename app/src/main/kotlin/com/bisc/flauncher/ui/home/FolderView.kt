@@ -315,6 +315,7 @@ private fun folderItemLabel(
     GridItemType.SHORTCUT -> item.payload.split("|").getOrNull(2)?.takeIf { it.isNotBlank() } ?: item.payload.substringBefore('|')
     GridItemType.MAP_TARGET -> savedMapTargets.find { it.id == item.payload.toLongOrNull() }?.label.orEmpty()
     GridItemType.WEBSITE -> pinnedWebsites.find { it.id == item.payload.toLongOrNull() }?.label.orEmpty()
+    GridItemType.CATEGORY -> LauncherCategories.find(item.payload.toLongOrNull())?.category?.name.orEmpty()
     GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE, GridItemType.CONTACT, GridItemType.ACTION_BUTTON -> ""
 }
 
@@ -382,7 +383,7 @@ internal fun FolderWidgetRow(
                     cornerRadiusPercent = item.cornerRadiusPercent
                 )
             }
-            GridItemType.APP, GridItemType.SHORTCUT, GridItemType.MAP_TARGET, GridItemType.WEBSITE, GridItemType.FOLDER, GridItemType.PAGE, GridItemType.CONTACT, GridItemType.ACTION_BUTTON -> Unit
+            GridItemType.APP, GridItemType.SHORTCUT, GridItemType.MAP_TARGET, GridItemType.WEBSITE, GridItemType.FOLDER, GridItemType.PAGE, GridItemType.CONTACT, GridItemType.ACTION_BUTTON, GridItemType.CATEGORY -> Unit
         }
     }
 }
@@ -485,6 +486,20 @@ private fun FolderContentCell(
                 if (showLabel) {
                     Spacer(Modifier.height(6.dp))
                     GridLabel(childFolder?.name.orEmpty())
+                }
+            }
+            GridItemType.CATEGORY -> {
+                val category = LauncherCategories.find(item.payload.toLongOrNull())?.category
+                val background = categoryColor(category)
+                Box(
+                    modifier = Modifier.size(56.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp)).background(background),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(imageVector = categoryIcon(category), contentDescription = null, tint = inkOn(background), modifier = Modifier.size(30.dp))
+                }
+                if (showLabel) {
+                    Spacer(Modifier.height(6.dp))
+                    GridLabel(category?.name.orEmpty())
                 }
             }
             GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE, GridItemType.CONTACT, GridItemType.ACTION_BUTTON -> Unit

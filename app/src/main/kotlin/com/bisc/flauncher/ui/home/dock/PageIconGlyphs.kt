@@ -20,7 +20,7 @@ import com.bisc.flauncher.data.model.LauncherPageKind
  * fragile than just reproducing the geometry at the right ratios.
  */
 enum class PageIconGlyph {
-    SEARCH, APP_DRAWER, APP_LIST, WIDGET_PAGE;
+    SEARCH, APP_DRAWER, APP_LIST, WIDGET_PAGE, CATEGORIES;
 
     companion object {
         /** The glyph a page shows by default, before any per-page override. */
@@ -29,6 +29,7 @@ enum class PageIconGlyph {
             LauncherPageKind.APP_LIST -> APP_LIST
             LauncherPageKind.SEARCH -> SEARCH
             LauncherPageKind.APP_GRID -> APP_DRAWER
+            LauncherPageKind.CATEGORIES -> CATEGORIES
         }
     }
 }
@@ -41,8 +42,28 @@ fun PageIconGlyphImage(glyph: PageIconGlyph, tint: Color, modifier: Modifier = M
             PageIconGlyph.APP_DRAWER -> drawAppDrawerGlyph(tint)
             PageIconGlyph.APP_LIST -> drawAppListGlyph(tint)
             PageIconGlyph.WIDGET_PAGE -> drawWidgetPageGlyph(tint)
+            PageIconGlyph.CATEGORIES -> drawCategoriesGlyph(tint)
         }
     }
+}
+
+/** Chips: two rows of rounded labels, one long and one short each, crossed over. */
+private fun DrawScope.drawCategoriesGlyph(color: Color) {
+    val w = size.width
+    val h = size.height
+    val pill = h * 0.2f
+    val corner = CornerRadius(pill / 2f, pill / 2f)
+    val left = w * 0.18f
+    val right = w * 0.82f
+    val gap = w * 0.06f
+    val top1 = h * 0.28f
+    val top2 = h * 0.52f
+    val long = (right - left - gap) * 0.62f
+    val short = right - left - gap - long
+    drawRoundRect(color, Offset(left, top1), Size(long, pill), corner)
+    drawRoundRect(color, Offset(left + long + gap, top1), Size(short, pill), corner)
+    drawRoundRect(color, Offset(left, top2), Size(short, pill), corner)
+    drawRoundRect(color, Offset(left + short + gap, top2), Size(long, pill), corner)
 }
 
 /** Figma "Search Ring / Smooth Glass Fold" (88:7), reduced to its base ring (outer r=68.34/140,

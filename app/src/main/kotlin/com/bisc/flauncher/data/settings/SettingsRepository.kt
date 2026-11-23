@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.bisc.flauncher.data.model.AppGridBarPosition
 import com.bisc.flauncher.data.model.BackgroundConfig
@@ -337,7 +338,46 @@ class SettingsRepository @Inject constructor(
             val json = runCatching { org.json.JSONObject(prefs[APP_LAUNCH_COUNTS_KEY] ?: "{}") }.getOrDefault(org.json.JSONObject())
             json.put(component, json.optInt(component) + 1)
             prefs[APP_LAUNCH_COUNTS_KEY] = json.toString()
+            val last = runCatching { org.json.JSONObject(prefs[APP_LAST_LAUNCH_KEY] ?: "{}") }.getOrDefault(org.json.JSONObject())
+            last.put(component, System.currentTimeMillis())
+            prefs[APP_LAST_LAUNCH_KEY] = last.toString()
+            if (prefs[LAUNCH_TRACKING_SINCE_KEY] == null) prefs[LAUNCH_TRACKING_SINCE_KEY] = System.currentTimeMillis()
         }
+    }
+
+    /** The Categories page: how it shows them (cards, tabs or a list), its search field, and how
+     *  many rows of a card show before "Show all". */
+    val categoriesView: Flow<String> = dataStore.data.map { it[CATEGORIES_VIEW_KEY] ?: "CARDS" }
+
+    suspend fun setCategoriesView(view: String) {
+        dataStore.edit { it[CATEGORIES_VIEW_KEY] = view }
+    }
+
+    val categoriesShowSearch: Flow<Boolean> = dataStore.data.map { it[CATEGORIES_SHOW_SEARCH_KEY] ?: true }
+
+    suspend fun setCategoriesShowSearch(show: Boolean) {
+        dataStore.edit { it[CATEGORIES_SHOW_SEARCH_KEY] = show }
+    }
+
+    val categoriesCardRows: Flow<Int> = dataStore.data.map { (it[CATEGORIES_CARD_ROWS_KEY] ?: 2).coerceIn(1, 3) }
+
+    suspend fun setCategoriesCardRows(rows: Int) {
+        dataStore.edit { it[CATEGORIES_CARD_ROWS_KEY] = rows.coerceIn(1, 3) }
+    }
+
+    /** When each app was last opened from the launcher. Stays on the phone, like the counts. */
+    val appLastLaunches: Flow<Map<String, Long>> = dataStore.data.map { prefs ->
+        runCatching {
+            val json = org.json.JSONObject(prefs[APP_LAST_LAUNCH_KEY] ?: "{}")
+            json.keys().asSequence().associateWith { json.getLong(it) }
+        }.getOrDefault(emptyMap())
+    }
+
+    /** Since when launches are noted; an app not opened since then counts from this moment. */
+    val launchTrackingSince: Flow<Long?> = dataStore.data.map { it[LAUNCH_TRACKING_SINCE_KEY] }
+
+    suspend fun ensureLaunchTrackingSince() {
+        dataStore.edit { if (it[LAUNCH_TRACKING_SINCE_KEY] == null) it[LAUNCH_TRACKING_SINCE_KEY] = System.currentTimeMillis() }
     }
 
     /** Own corners of the App list's search button and its A-Z rail; null = the general roundness. */
@@ -349,6 +389,14 @@ class SettingsRepository @Inject constructor(
     suspend fun newPartLook(widget: Boolean, isDark: Boolean): ElementAppearance =
         elementAppearanceOrNull(if (widget) NEW_WIDGET_LOOK else NEW_BOX_LOOK)
             ?: com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor(isDark)
+
+    /** The look and corners new element boxes get, kept up to date: the Categories page and its
+     *  widget draw their cards with it, so they look like the element boxes. */
+    val boxLook: Flow<Pair<ElementAppearance, Int>> = kotlinx.coroutines.flow.combine(dataStore.data, theme) { prefs, themePref ->
+        val look = if (prefs[elementFillModeKeyEnum(NEW_BOX_LOOK)] == null) com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor(themePref.isDark(context))
+            else readElementAppearance(prefs, NEW_BOX_LOOK, ElementAppearance(), null)
+        look to (prefs[NEW_BOX_CORNER_KEY] ?: prefs[DEFAULT_CORNER_RADIUS_PERCENT_KEY] ?: com.bisc.flauncher.ui.theme.DEFAULT_CORNER_RADIUS_PERCENT)
+    }
 
     suspend fun newPartCorner(widget: Boolean): Int? = dataStore.data.first()[if (widget) NEW_WIDGET_CORNER_KEY else NEW_BOX_CORNER_KEY]
 
@@ -1291,6 +1339,11 @@ class SettingsRepository @Inject constructor(
         private val SEARCH_FAVORITES_KEY = stringPreferencesKey("search_favorites")
         private val SEARCH_FAVORITES_MODE_KEY = stringPreferencesKey("search_favorites_mode")
         private val APP_LAUNCH_COUNTS_KEY = stringPreferencesKey("app_launch_counts")
+        private val APP_LAST_LAUNCH_KEY = stringPreferencesKey("app_last_launch")
+        private val CATEGORIES_VIEW_KEY = stringPreferencesKey("categories_view")
+        private val CATEGORIES_SHOW_SEARCH_KEY = booleanPreferencesKey("categories_show_search")
+        private val CATEGORIES_CARD_ROWS_KEY = intPreferencesKey("categories_card_rows")
+        private val LAUNCH_TRACKING_SINCE_KEY = longPreferencesKey("launch_tracking_since")
         private val LOCK_PORTRAIT_KEY = booleanPreferencesKey("lock_portrait")
         private val SETTINGS_THEME_KEY = stringPreferencesKey("settings_theme")
         private val ACTIVE_WALLPAPER_PACK_KEY = stringPreferencesKey("active_wallpaper_pack")
