@@ -12,6 +12,10 @@
 - Text search finds your categories by name, with their apps right in the card; a # in front searches only categories (new entry Categories under Search > Behavior)
 - Gestures can open a category directly (Open a category)
 - A folder can follow a category and fills itself with what the category holds; its own apps come back when it stops following (folder settings > Follows a category)
+- App settings page: the app's categories as chips, a tap puts it in or takes it out
+- App list: categories as filters on top (Settings > App list > Behavior), one tap shows only that category's apps
+- Wallpapers put a picture on the Categories page too
+- Settings search finds Categories and the Categories page
 
 ## 0.17.2
 

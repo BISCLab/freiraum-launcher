@@ -147,6 +147,8 @@ class WallpaperPackRepository @Inject constructor(
         home?.let { page -> setPage(page.id, image(pack.images["home"], "page_${page.id}")) }
         pages.firstOrNull { it.kind == LauncherPageKind.APP_LIST }?.let { page -> setPage(page.id, image(pack.images["appList"], "page_${page.id}")) }
         pages.firstOrNull { it.kind == LauncherPageKind.APP_GRID }?.let { page -> setPage(page.id, image(pack.images["appGrid"], "page_${page.id}")) }
+        // Packs made before the Categories page have no picture of their own for it: the App grid's fits.
+        pages.firstOrNull { it.kind == LauncherPageKind.CATEGORIES }?.let { page -> setPage(page.id, image(pack.images["categories"] ?: pack.images["appGrid"], "page_${page.id}")) }
         val search = image(pack.images["search"], SettingsRepository.SEARCH_BACKGROUND_KEY)
         if (search != null) settingsRepository.setSearchBackgroundConfig(search) else settingsRepository.clearSearchBackgroundConfig()
         // The pages beside Home belong to it: they show the same picture (the global one).

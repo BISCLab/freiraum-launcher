@@ -430,3 +430,36 @@ fun HomeCategoriesLayer(
         }
     }
 }
+
+/** The apps of one category, out of [apps] (the App list's own), in their order there. */
+internal fun categoryApps(categoryId: Long?, apps: List<com.bisc.flauncher.data.model.AppInfo>): List<com.bisc.flauncher.data.model.AppInfo> {
+    val members = LauncherCategories.find(categoryId)?.members.orEmpty()
+        .filter { it.type == GridItemType.APP }.map { it.payload }.toSet()
+    return apps.filter { it.componentName.flattenToString() in members }
+}
+
+/** Category chips over the App list: one picked shows only its apps, "All" shows them all again. */
+@Composable
+internal fun AppListCategoryChips(selected: Long?, onSelect: (Long?) -> Unit, surfaceDark: Boolean, modifier: Modifier = Modifier) {
+    val look = ElementAppearance(
+        fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE,
+        borderEnabled = true,
+        contentColor = if (surfaceDark) android.graphics.Color.WHITE else android.graphics.Color.BLACK
+    )
+    val withApps = LauncherCategories.resolved.filter { r -> r.members.any { it.type == GridItemType.APP } }
+    LazyRow(
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        item(key = "all") {
+            CategoryChip(null, stringResource(R.string.categories_all), null, selected == null, look, onClick = { onSelect(null) })
+        }
+        items(withApps, key = { it.category.id }) { r ->
+            CategoryChip(
+                r.category, r.category.name, r.members.count { it.type == GridItemType.APP }, selected == r.category.id, look,
+                onClick = { onSelect(if (selected == r.category.id) null else r.category.id) }
+            )
+        }
+    }
+}

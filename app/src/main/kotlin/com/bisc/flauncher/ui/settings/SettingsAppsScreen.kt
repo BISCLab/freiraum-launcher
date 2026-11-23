@@ -325,6 +325,8 @@ private fun AppOverrideEditSheetContent(
             )
         }
 
+        AppCategoryChips(app, viewModel)
+
         // The shape as three tiles, each with this app's own icon drawn in it as the launcher does.
         val globalShape by viewModel.iconShape.collectAsState()
         val activePack by viewModel.activeIconPack.collectAsState()

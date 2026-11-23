@@ -1040,9 +1040,28 @@ fun HomeScreen(
                       .fillMaxSize()
                       .then(if (appListSearching) Modifier.windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars)) else Modifier)
               ) {
+                val categoryChips by viewModel.appListCategoryChips.collectAsState()
+                var listCategory by remember { mutableStateOf<Long?>(null) }
+                val chipsShown = categoryChips && !appListSearching && LauncherCategories.resolved.isNotEmpty()
+                if (chipsShown) {
+                    AppListCategoryChips(
+                        selected = listCategory,
+                        onSelect = { listCategory = it },
+                        surfaceDark = overviewSurfaceDark,
+                        modifier = Modifier
+                            .then(
+                                if (immersiveSearch) Modifier.windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top))
+                                else Modifier.statusBarsPadding()
+                            )
+                            .padding(top = 12.dp)
+                    )
+                }
+                val listApps = if (appListSearching && appQuery.isNotBlank()) appQueryResults.sortedBy { it.label.lowercase() }
+                    else if (chipsShown && listCategory != null) categoryApps(listCategory, browsableApps)
+                    else browsableApps
                 AppOverviewContent(
                     showSearchButton = appListShowSearchButton && !appListSearching,
-                    allApps = if (appListSearching && appQuery.isNotBlank()) appQueryResults.sortedBy { it.label.lowercase() } else browsableApps,
+                    allApps = listApps,
                     showAzIndex = appListShowAzIndex,
                     headerLetterAppearance = appListHeaderLetterAppearance,
                     pageBackground = appOverviewBackground,
@@ -1063,10 +1082,10 @@ fun HomeScreen(
                         .weight(1f)
                         .fillMaxWidth()
                         .then(
-                            if (immersiveSearch) Modifier.windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top))
-                            else Modifier.statusBarsPadding()
+                            if (chipsShown) Modifier.padding(top = 4.dp)
+                            else if (immersiveSearch) Modifier.windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top)).padding(top = 16.dp)
+                            else Modifier.statusBarsPadding().padding(top = 16.dp)
                         )
-                        .padding(top = 16.dp)
                 )
                 if (appListSearching) {
                     com.bisc.flauncher.ui.home.search.AppSearchField(

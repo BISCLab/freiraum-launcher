@@ -670,3 +670,45 @@ internal fun CategoryWidgetSettings(row: com.bisc.flauncher.data.model.PageRow, 
         }
     }
 }
+
+/** The categories of one app as chips: a tap puts it in or takes it out right away. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+internal fun AppCategoryChips(app: AppInfo, viewModel: SettingsViewModel) {
+    val resolved by viewModel.resolvedCategories.collectAsState()
+    val payload = app.componentName.flattenToString()
+    val own = resolved.filter { it.category.smartRule == null }
+    var creating by remember { mutableStateOf(false) }
+    Column {
+        SettingsGroupLabel(stringResource(R.string.app_menu_categories), info = stringResource(R.string.settings_app_categories_info))
+        androidx.compose.foundation.layout.FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            own.forEach { r ->
+                val inIt = r.members.any { it.type == GridItemType.APP && it.payload == payload }
+                androidx.compose.material3.FilterChip(
+                    selected = inIt,
+                    onClick = { viewModel.setCategoryMember(r.category.id, GridItemType.APP, payload, !inIt) },
+                    label = { Text(r.category.name) },
+                    leadingIcon = { Icon(categoryIcon(r.category), contentDescription = null, tint = categoryColor(r.category), modifier = Modifier.size(18.dp)) }
+                )
+            }
+            androidx.compose.material3.AssistChip(
+                onClick = { creating = true },
+                label = { Text(stringResource(R.string.settings_categories_new)) },
+                leadingIcon = { Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp)) }
+            )
+        }
+    }
+    if (creating) {
+        NewCategoryDialog(
+            onCreate = { name ->
+                creating = false
+                viewModel.addCategory(name) { id -> viewModel.setCategoryMember(id, GridItemType.APP, payload, true) }
+            },
+            onDismiss = { creating = false }
+        )
+    }
+}

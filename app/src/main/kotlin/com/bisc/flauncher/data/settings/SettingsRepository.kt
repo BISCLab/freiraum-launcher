@@ -1068,6 +1068,13 @@ class SettingsRepository @Inject constructor(
         setElementAppearanceFor("app_list_search_button", appearance)
 
     /** Whether the app list's search button opens its own app-only search instead of Text search. */
+    /** Category chips above the App list, to show only one category's apps. */
+    val appListCategoryChips: Flow<Boolean> = dataStore.data.map { it[APP_LIST_CATEGORY_CHIPS_KEY] ?: false }
+
+    suspend fun setAppListCategoryChips(show: Boolean) {
+        dataStore.edit { it[APP_LIST_CATEGORY_CHIPS_KEY] = show }
+    }
+
     val appListOwnSearch: Flow<Boolean> = dataStore.data.map { it[APP_LIST_OWN_SEARCH_KEY] ?: false }
 
     suspend fun setAppListOwnSearch(own: Boolean) {
@@ -1357,6 +1364,7 @@ class SettingsRepository @Inject constructor(
         private val APP_LAUNCH_COUNTS_KEY = stringPreferencesKey("app_launch_counts")
         private val APP_LAST_LAUNCH_KEY = stringPreferencesKey("app_last_launch")
         private val CATEGORIES_VIEW_KEY = stringPreferencesKey("categories_view")
+        private val APP_LIST_CATEGORY_CHIPS_KEY = booleanPreferencesKey("app_list_category_chips")
         private val CATEGORY_WIDGETS_KEY = stringPreferencesKey("category_widgets")
         private val CATEGORIES_SHOW_SEARCH_KEY = booleanPreferencesKey("categories_show_search")
         private val CATEGORIES_CARD_ROWS_KEY = intPreferencesKey("categories_card_rows")

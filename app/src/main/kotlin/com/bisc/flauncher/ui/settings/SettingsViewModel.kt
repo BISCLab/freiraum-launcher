@@ -583,6 +583,8 @@ class SettingsViewModel @Inject constructor(
     }
 
     val appListOwnSearch: StateFlow<Boolean> = repository.appListOwnSearch.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val appListCategoryChips: StateFlow<Boolean> = repository.appListCategoryChips.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    fun setAppListCategoryChips(show: Boolean) { viewModelScope.launch { repository.setAppListCategoryChips(show) } }
     fun setAppListOwnSearch(own: Boolean) { viewModelScope.launch { repository.setAppListOwnSearch(own) } }
 
     // ---- App grid page ----

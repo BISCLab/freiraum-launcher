@@ -533,6 +533,7 @@ class HomeViewModel @Inject constructor(
     val appGridHideFolderApps: StateFlow<Boolean> =
         settingsRepository.appGridHideFolderApps.stateIn(viewModelScope, SharingStarted.Eagerly, false)
     val appListOwnSearch: StateFlow<Boolean> = settingsRepository.appListOwnSearch.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val appListCategoryChips: StateFlow<Boolean> = settingsRepository.appListCategoryChips.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     // The app-only search of the App grid and the app list.
     private val _appQuery = MutableStateFlow("")

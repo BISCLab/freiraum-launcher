@@ -1166,4 +1166,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_folder_category_on">The folder shows what is in the category</string>
     <string name="settings_folder_category_off">Tap here to pick one</string>
     <string name="settings_folder_category_unlink">Stop following</string>
+    <string name="settings_app_categories_info">Tap a category to put the app in or take it out. It applies right away.</string>
+    <string name="settings_app_list_category_chips">Categories as filters</string>
+    <string name="settings_app_list_category_chips_info">Your categories sit at the top of the App list. Tap one to see only its apps.</string>
 </resources>
