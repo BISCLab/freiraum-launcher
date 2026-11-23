@@ -10,6 +10,7 @@
 - Categories widget: new view Several stacked, each category with its apps one below the other; scrolling stops at the start of a category
 - Fixed: swiping past the last tab of a Categories or Notes widget left the pages standing between two; they now settle on one
 - Welcome tour: Categories among the elements and the Categories widget among the widgets
+- Settings lock: when the settings lock while you are in another app, coming back leads to the home screen instead of the lock page
 
 ## 0.18.0
 

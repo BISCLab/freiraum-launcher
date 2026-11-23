@@ -248,6 +248,13 @@ class MainActivity : ComponentActivity() {
             androidx.compose.runtime.LaunchedEffect(currentRoute) {
                 if (currentRoute != null && !currentRoute.startsWith("settings")) com.bisc.flauncher.ui.settings.SettingsLock.unlocked = false
             }
+            // Locked while away in another app: back to the home screen, not to the lock page.
+            androidx.compose.runtime.LaunchedEffect(com.bisc.flauncher.ui.settings.SettingsLock.closeLocked) {
+                if (com.bisc.flauncher.ui.settings.SettingsLock.closeLocked) {
+                    if (navController.currentDestination?.route?.startsWith("settings") == true) navController.popBackStack("home", inclusive = false)
+                    com.bisc.flauncher.ui.settings.SettingsLock.closeLocked = false
+                }
+            }
             val darkTheme = if (currentRoute?.startsWith("settings") == true)
                 com.bisc.flauncher.ui.theme.settingsDark(settingsThemeMode, launcherDark) else launcherDark
             androidx.compose.runtime.DisposableEffect(darkTheme) {

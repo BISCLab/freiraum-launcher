@@ -51,8 +51,16 @@ object SettingsLock {
     /** Back on the screen: after more than a minute away the settings lock again. A short trip, like
      *  picking a picture in the system's picker, keeps them open. */
     fun onStart() {
-        if (stoppedAt != 0L && System.currentTimeMillis() - stoppedAt > RELOCK_AFTER_MS) unlocked = false
+        if (stoppedAt != 0L && System.currentTimeMillis() - stoppedAt > RELOCK_AFTER_MS && unlocked) {
+            unlocked = false
+            // Locked while away: the way back leads home, not to the lock page.
+            if (enabled) closeLocked = true
+        }
     }
+
+    /** Set when the settings locked while the launcher was away; the settings then close to the home
+     *  screen instead of asking for the unlock. */
+    var closeLocked by mutableStateOf(false)
 
     /** Whether the device has a screen lock at all; without one there is nothing to ask for. */
     fun deviceSecure(context: Context): Boolean =
@@ -88,6 +96,13 @@ internal fun SettingsLockGate() {
         } else {
             askCredential()
         }
+    }
+    // On the way home after locking while away: nothing to ask, the settings close.
+    // Kept for the gate's whole life, so it doesn't ask while the settings slide away.
+    val leaving = androidx.compose.runtime.remember { SettingsLock.closeLocked }
+    if (leaving) {
+        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {}
+        return
     }
     LaunchedEffect(Unit) { ask() }
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
