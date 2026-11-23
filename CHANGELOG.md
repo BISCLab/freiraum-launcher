@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.19.1
+
 - Gestures: all of them in the phone, one finger on the left, two fingers on the right, each where it happens (down at the top, tapping and pinching in the middle, up at the bottom)
 - Fixed: on the Categories page a hard corner of the 3D shadow showed behind some cards
 - Text search: categories have their own color (lime) instead of the folders' orange

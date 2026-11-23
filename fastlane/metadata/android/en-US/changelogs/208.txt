@@ -1,0 +1,4 @@
+- Gestures: all in the phone, one finger left, two fingers right
+- Categories have their own color in the text search
+- Fixed: hard shadow corner behind cards on the Categories page
+- Fixed: closing locked settings asked for the unlock again

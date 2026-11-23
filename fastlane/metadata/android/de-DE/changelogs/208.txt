@@ -1,0 +1,4 @@
+- Gesten: alle im Telefon, ein Finger links, zwei Finger rechts
+- Kategorien in der Textsuche mit eigener Farbe
+- Behoben: harte Schattenecke hinter Karten der Kategorien-Seite
+- Behoben: Schließen gesperrter Einstellungen fragte erneut nach dem Entsperren
