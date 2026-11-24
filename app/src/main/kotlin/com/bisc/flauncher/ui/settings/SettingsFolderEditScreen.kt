@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.core.graphics.toColorInt
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -359,7 +360,7 @@ fun SettingsFolderEditScreen(
                         Box(
                             modifier = Modifier
                                 .size(32.dp)
-                                .background(Color(android.graphics.Color.parseColor(hex)), CircleShape)
+                                .background(Color(hex.toColorInt()), CircleShape)
                                 .combinedClickable(onClick = {
                                     viewModel.setFolderIcon(folderId, FolderIconMode.CUSTOM_COLOR, color = hex)
                                     pickingFolderIcon = false

@@ -1,10 +1,10 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.core.net.toUri
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -60,7 +60,7 @@ internal fun PermissionGroups(viewModel: SettingsViewModel, purposeVisible: Bool
     val shortcuts = refreshTick.let { viewModel.hasShortcutHostPermission() }
 
     val openAppDetails = {
-        context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")))
+        context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, "package:${context.packageName}".toUri()))
     }
     val roleLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { refreshTick++ }
     val requestDefault = {

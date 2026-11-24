@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home
 
+import androidx.core.net.toUri
 import com.bisc.flauncher.util.foldForSearch
 import com.bisc.flauncher.util.matchesAllWordStarts
 import android.appwidget.AppWidgetHostView
@@ -1573,7 +1574,7 @@ class HomeViewModel @Inject constructor(
 
 /** A link's host without "www." for matching ("https://www.youtube.com/x" -> "youtube.com"). */
 private fun siteAddress(url: String): String =
-    runCatching { android.net.Uri.parse(url.trim()).host }.getOrNull()?.removePrefix("www.") ?: url
+    runCatching { url.trim().toUri().host }.getOrNull()?.removePrefix("www.") ?: url
 
 /** What a folder that follows a category can show: contacts have no cell in folders. */
 private val FOLDER_CATEGORY_TYPES = setOf(GridItemType.APP, GridItemType.SHORTCUT, GridItemType.MAP_TARGET, GridItemType.WEBSITE)

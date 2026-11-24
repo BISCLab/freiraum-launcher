@@ -1,5 +1,6 @@
 package com.bisc.flauncher.data.model
 
+import androidx.core.net.toUri
 import android.net.Uri
 import org.json.JSONArray
 import org.json.JSONObject
@@ -12,7 +13,7 @@ data class WebEngine(val id: String, val name: String, val template: String) {
     val isPreset: Boolean get() = presets.any { it.id == id }
 
     /** The address without scheme and path, to show under the name. */
-    val host: String get() = Uri.parse(if (template.contains("://")) template else "https://$template").host?.removePrefix("www.") ?: template
+    val host: String get() = (if (template.contains("://")) template else "https://$template").toUri().host?.removePrefix("www.") ?: template
 
     companion object {
         val presets: List<WebEngine> get() = listOf(
@@ -83,7 +84,7 @@ fun webSearchUrl(template: String, query: String): String {
 
 /** A bare start-page address of a well-known engine, turned into that engine's real search URL. */
 private fun bareDomainSearch(url: String, encoded: String): String? {
-    val uri = Uri.parse(url)
+    val uri = url.toUri()
     if (!uri.encodedPath.isNullOrEmpty() && uri.encodedPath != "/" || uri.encodedQuery != null) return null
     val host = uri.host?.lowercase() ?: return null
     val path = when {

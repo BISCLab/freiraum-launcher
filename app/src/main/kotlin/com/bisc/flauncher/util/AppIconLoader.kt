@@ -1,5 +1,7 @@
 package com.bisc.flauncher.util
 
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.graphics.createBitmap
 import com.bisc.flauncher.ui.theme.isDark
 import androidx.compose.ui.graphics.asAndroidBitmap
 import android.content.ComponentName
@@ -239,13 +241,13 @@ class AppIconLoader @Inject constructor(
             renderMasked(info.getIcon(0), shape ?: shapeOverrides[marked.flattenToString()] ?: globalShape)
         }
         val badged = runCatching {
-            context.packageManager.getUserBadgedIcon(android.graphics.drawable.BitmapDrawable(context.resources, base), user)
+            context.packageManager.getUserBadgedIcon(base.toDrawable(context.resources), user)
         }.getOrNull() ?: return base.asImageBitmap()
         return badged.toBitmap(width = ICON_SIZE_PX, height = ICON_SIZE_PX).asImageBitmap()
     }
 
     private fun renderMasked(drawable: Drawable, shape: IconShape): Bitmap {
-        val output = Bitmap.createBitmap(ICON_SIZE_PX, ICON_SIZE_PX, Bitmap.Config.ARGB_8888)
+        val output = createBitmap(ICON_SIZE_PX, ICON_SIZE_PX, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(output)
         val path = when (shape) {
             IconShape.CIRCLE -> Path().apply {

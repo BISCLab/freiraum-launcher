@@ -1,5 +1,6 @@
 package com.bisc.flauncher.data.design
 
+import androidx.core.graphics.toColorInt
 import com.bisc.flauncher.data.model.ColorFill
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.ElementFillMode
@@ -227,7 +228,7 @@ object DesignJson {
         array?.let { a -> (0 until a.length()).mapNotNull { color(a.optString(it)) } }.orEmpty()
 
     /** `#RRGGBB` or `#AARRGGBB`. */
-    fun color(value: String?): Int? = value?.takeIf { it.startsWith("#") }?.let { runCatching { android.graphics.Color.parseColor(it) }.getOrNull() }
+    fun color(value: String?): Int? = value?.takeIf { it.startsWith("#") }?.let { runCatching { it.toColorInt() }.getOrNull() }
 
     fun hex(color: Int): String = String.format("#%08X", color)
 }

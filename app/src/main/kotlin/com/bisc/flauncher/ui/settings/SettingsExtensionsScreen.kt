@@ -1,8 +1,8 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.core.net.toUri
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -36,7 +36,7 @@ import com.bisc.flauncher.ui.home.HomeViewModel
 internal const val EXTENSIONS_URL = "https://bisclab.github.io/freiraum-launcher/"
 
 internal fun openExtensionsPage(context: Context, section: String = "") {
-    runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(EXTENSIONS_URL + section)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+    runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, (EXTENSIONS_URL + section).toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
 }
 
 /** Extensions: what can be added to the launcher - designs, wallpaper packs and widgets - with what

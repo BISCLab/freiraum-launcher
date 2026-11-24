@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home
 
+import androidx.core.content.edit
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Language
@@ -122,7 +123,7 @@ fun WelcomeWalkthrough(
     val steps = WelcomeStep.entries.filter { it != WelcomeStep.LOCK_SCREEN || lockPicture != null }
     val tourPrefs = remember { context.getSharedPreferences("welcome_tour", android.content.Context.MODE_PRIVATE) }
     val pagerState = rememberPagerState(initialPage = tourPrefs.getInt("step", 0).coerceIn(0, steps.lastIndex)) { steps.size }
-    LaunchedEffect(pagerState.currentPage) { tourPrefs.edit().putInt("step", pagerState.currentPage).apply() }
+    LaunchedEffect(pagerState.currentPage) { tourPrefs.edit { putInt("step", pagerState.currentPage) } }
     val scope = rememberCoroutineScope()
     val dark = settingsDark(LocalSettingsThemeMode.current, isSystemInDarkTheme())
     var lockAnswered by remember { mutableStateOf(false) }

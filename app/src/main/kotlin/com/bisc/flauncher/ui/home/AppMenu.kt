@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home
 
+import androidx.core.net.toUri
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Alignment
@@ -25,7 +26,6 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.ShortcutInfo
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
@@ -199,7 +199,7 @@ private fun openAppInfo(context: Context, component: ComponentName) {
                 .startAppDetailsActivity(com.bisc.flauncher.util.ProfileComponents.real(component), user, null, null)
         } else {
             context.startActivity(
-                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${component.packageName}")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, "package:${component.packageName}".toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             )
         }
     }
@@ -213,6 +213,6 @@ private fun canUninstall(context: Context, packageName: String): Boolean = runCa
 /** Hands over to Android, which asks before it removes anything. */
 private fun requestUninstall(context: Context, packageName: String) {
     runCatching {
-        context.startActivity(Intent(Intent.ACTION_DELETE, Uri.parse("package:$packageName")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        context.startActivity(Intent(Intent.ACTION_DELETE, "package:$packageName".toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 }

@@ -1,7 +1,7 @@
 package com.bisc.flauncher.ui.home
 
+import androidx.core.graphics.toColorInt
 import android.content.ComponentName
-import android.graphics.Color as AndroidColor
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -45,7 +45,7 @@ fun FolderIcon(
     } else null
 
     val backgroundColor = if (isCustomColor) {
-        folder?.iconColor?.let { runCatching { Color(AndroidColor.parseColor(it)) }.getOrNull() } ?: DefaultFolderColor
+        folder?.iconColor?.let { runCatching { Color(it.toColorInt()) }.getOrNull() } ?: DefaultFolderColor
     } else {
         AutoStackColor
     }

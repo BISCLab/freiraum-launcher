@@ -1,5 +1,6 @@
 package com.bisc.flauncher.util
 
+import androidx.core.graphics.scale
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -60,7 +61,7 @@ object SearchIconStore {
         val source = if (original.config == Bitmap.Config.HARDWARE) original.copy(Bitmap.Config.ARGB_8888, false) else original
         val side = minOf(source.width, source.height)
         val square = Bitmap.createBitmap(source, (source.width - side) / 2, (source.height - side) / 2, side, side)
-        val scaled = Bitmap.createScaledBitmap(square, SIZE, SIZE, true)
+        val scaled = square.scale(SIZE, SIZE, true)
         stamps(context)
         dir(context).mkdirs()
         file(context, id).outputStream().use { scaled.compress(Bitmap.CompressFormat.PNG, 100, it) }

@@ -1,5 +1,6 @@
 package com.bisc.flauncher.util
 
+import androidx.core.graphics.scale
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -83,7 +84,7 @@ object BackgroundImageStore {
     }
 
     private fun averageLuminance(bitmap: Bitmap): Float {
-        val small = Bitmap.createScaledBitmap(bitmap, 16, 16, true)
+        val small = bitmap.scale(16, 16, true)
         val pixels = IntArray(16 * 16)
         small.getPixels(pixels, 0, 16, 0, 0, 16, 16)
         if (small !== bitmap) small.recycle()

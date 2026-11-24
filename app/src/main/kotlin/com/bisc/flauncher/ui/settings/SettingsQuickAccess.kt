@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.core.content.edit
 import androidx.compose.material.icons.filled.Settings
 import android.content.Context
 import androidx.compose.material.icons.Icons
@@ -74,7 +75,7 @@ object SettingsQuickAccess {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         val now = System.currentTimeMillis()
         val score = decayed(prefs.getFloat("score_${target.key}", 0f), prefs.getLong("at_${target.key}", now), now) + 1f
-        prefs.edit().putFloat("score_${target.key}", score).putLong("at_${target.key}", now).apply()
+        prefs.edit { putFloat("score_${target.key}", score); putLong("at_${target.key}", now) }
     }
 
     private fun decayed(score: Float, at: Long, now: Long): Float {

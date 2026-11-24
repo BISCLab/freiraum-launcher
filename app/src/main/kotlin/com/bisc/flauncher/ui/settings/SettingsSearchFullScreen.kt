@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.core.net.toUri
+import androidx.core.content.edit
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.selection.toggleable
@@ -227,7 +229,7 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
             ) {
                 Text(stringResource(R.string.settings_search_first_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
                 Text(stringResource(R.string.settings_search_first_text), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                androidx.compose.material3.FilledTonalButton(onClick = { tableUnderstood = true; hints.edit().putBoolean("search_table", true).apply() }, modifier = Modifier.align(Alignment.End)) {
+                androidx.compose.material3.FilledTonalButton(onClick = { tableUnderstood = true; hints.edit { putBoolean("search_table", true) } }, modifier = Modifier.align(Alignment.End)) {
                     Text(stringResource(R.string.settings_search_first_ok))
                 }
             }
@@ -751,7 +753,7 @@ internal fun AppPickerDialog(
 /** Apps that handle [uri] as a view intent, sorted by name. */
 internal fun appsHandling(context: android.content.Context, uri: String, browsable: Boolean): List<PickableApp> {
     val pm = context.packageManager
-    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(uri))
+    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, uri.toUri())
     if (browsable) intent.addCategory(android.content.Intent.CATEGORY_BROWSABLE)
     return pm.queryIntentActivities(intent, 0)
         .map { PickableApp(it.activityInfo.packageName, it.loadLabel(pm).toString()) }

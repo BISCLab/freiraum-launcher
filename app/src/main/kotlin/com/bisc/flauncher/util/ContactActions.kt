@@ -1,5 +1,6 @@
 package com.bisc.flauncher.util
 
+import androidx.core.net.toUri
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -12,16 +13,16 @@ object ContactActions {
         runCatching { context.packageManager.getPackageInfo(packageName, 0) }.isSuccess
 
     fun dialIntent(number: String): Intent =
-        Intent(Intent.ACTION_DIAL, Uri.parse("tel:${Uri.encode(number)}"))
+        Intent(Intent.ACTION_DIAL, "tel:${Uri.encode(number)}".toUri())
 
     fun smsIntent(number: String): Intent =
-        Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:${Uri.encode(number)}"))
+        Intent(Intent.ACTION_SENDTO, "smsto:${Uri.encode(number)}".toUri())
 
     fun whatsAppChatIntent(number: String): Intent =
-        Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/${number.filter { it.isDigit() }}"))
+        Intent(Intent.ACTION_VIEW, "https://wa.me/${number.filter { it.isDigit() }}".toUri())
 
     fun telegramChatIntent(number: String): Intent =
-        Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/+${number.filter { it.isDigit() }}"))
+        Intent(Intent.ACTION_VIEW, "https://t.me/+${number.filter { it.isDigit() }}".toUri())
 
     const val WHATSAPP_PACKAGE = "com.whatsapp"
     const val TELEGRAM_PACKAGE = "org.telegram.messenger"

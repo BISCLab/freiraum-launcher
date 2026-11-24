@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.core.graphics.get
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -84,7 +85,7 @@ internal fun ScreenshotColorPicker(uri: Uri, onPick: (Int) -> Unit, onDismiss: (
                             val y = ((position.y - fit.offset.y) / fit.scale).toInt()
                             if (x in 0 until image.width && y in 0 until image.height) {
                                 touch = position
-                                picked = image.getPixel(x, y) or 0xFF000000.toInt()
+                                picked = image[x, y] or 0xFF000000.toInt()
                             }
                         }
                         Canvas(

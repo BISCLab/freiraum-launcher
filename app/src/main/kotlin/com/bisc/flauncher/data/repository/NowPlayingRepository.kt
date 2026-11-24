@@ -1,5 +1,7 @@
 package com.bisc.flauncher.data.repository
 
+import androidx.core.graphics.scale
+import androidx.core.content.edit
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -71,7 +73,7 @@ class NowPlayingRepository @Inject constructor(
         lastCachedKey = null
         cacheWriter.execute {
             runCatching {
-                cachePrefs.edit().clear().apply()
+                cachePrefs.edit { clear() }
                 cacheArtFile.delete()
             }
         }
@@ -245,16 +247,16 @@ class NowPlayingRepository @Inject constructor(
         lastCachedKey = key
         cacheWriter.execute {
             runCatching {
-                cachePrefs.edit()
-                    .putString("title", info.title).putString("artist", info.artist).putString("album", info.album)
-                    .putString("package", info.packageName).putString("label", info.appLabel)
-                    .putLong("duration", info.durationMs).putLong("position", info.positionMs)
-                    .apply()
+                cachePrefs.edit {
+                    putString("title", info.title); putString("artist", info.artist); putString("album", info.album)
+                    putString("package", info.packageName); putString("label", info.appLabel)
+                    putLong("duration", info.durationMs); putLong("position", info.positionMs)
+                }
                 val art = info.art
                 if (art != null) {
                     val scaled = if (maxOf(art.width, art.height) > 512) {
                         val f = 512f / maxOf(art.width, art.height)
-                        Bitmap.createScaledBitmap(art, (art.width * f).toInt().coerceAtLeast(1), (art.height * f).toInt().coerceAtLeast(1), true)
+                        art.scale((art.width * f).toInt().coerceAtLeast(1), (art.height * f).toInt().coerceAtLeast(1), true)
                     } else art
                     cacheArtFile.outputStream().use { scaled.compress(Bitmap.CompressFormat.JPEG, 88, it) }
                 } else cacheArtFile.delete()

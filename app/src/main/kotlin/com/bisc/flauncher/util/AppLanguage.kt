@@ -1,5 +1,6 @@
 package com.bisc.flauncher.util
 
+import androidx.core.content.edit
 import android.app.Activity
 import android.app.LocaleManager
 import android.content.Context
@@ -24,7 +25,7 @@ object AppLanguage {
         if (Build.VERSION.SDK_INT >= 33) {
             activity.getSystemService(LocaleManager::class.java).applicationLocales = LocaleList.forLanguageTags(tag)
         } else {
-            activity.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(KEY, tag).apply()
+            activity.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit { putString(KEY, tag) }
             activity.recreate()
         }
     }

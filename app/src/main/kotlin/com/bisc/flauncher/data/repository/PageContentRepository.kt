@@ -1,10 +1,10 @@
 package com.bisc.flauncher.data.repository
 
+import androidx.core.net.toUri
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.provider.MediaStore
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.db.RowEntryDao
@@ -187,7 +187,7 @@ class PageContentRepository @Inject constructor(
             resolveLauncherComponentFor(Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA))?.let { component ->
                 entryDao.insert(RowEntry(pageRowId = dockRowId, orderIndex = order++, type = GridItemType.APP, payload = component.flattenToString()))
             }
-            resolveLauncherComponentFor(Intent(Intent.ACTION_VIEW, Uri.parse("https://")).addCategory(Intent.CATEGORY_BROWSABLE))?.let { component ->
+            resolveLauncherComponentFor(Intent(Intent.ACTION_VIEW, "https://".toUri()).addCategory(Intent.CATEGORY_BROWSABLE))?.let { component ->
                 entryDao.insert(RowEntry(pageRowId = dockRowId, orderIndex = order++, type = GridItemType.APP, payload = component.flattenToString()))
             }
             resolveLauncherComponentFor(Intent(Intent.ACTION_DIAL))?.let { component ->

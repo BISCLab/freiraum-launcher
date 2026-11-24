@@ -1,7 +1,7 @@
 package com.bisc.flauncher.util
 
+import androidx.core.net.toUri
 import android.content.Context
-import android.net.Uri
 import android.widget.Toast
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.PinnedWebsite
@@ -17,12 +17,12 @@ fun linkAddress(raw: String): String? {
     // "mailto:..." or "spotify:..." name a scheme; "example.com:8080" is a host with a port.
     val hasScheme = text.contains("://") || Regex("^[a-zA-Z][a-zA-Z0-9+-]*:(?![0-9]{1,5}(/|$))").containsMatchIn(text)
     val url = if (hasScheme) text else "https://$text"
-    val scheme = runCatching { Uri.parse(url).scheme }.getOrNull()?.lowercase() ?: return null
+    val scheme = runCatching { url.toUri().scheme }.getOrNull()?.lowercase() ?: return null
     return url.takeIf { scheme !in BLOCKED_SCHEMES }
 }
 
 /** Opens a pinned website in the chosen browser, or the device default; says so if nothing opens it. */
 fun openWebsite(context: Context, website: PinnedWebsite) {
-    val opened = linkAddress(website.url)?.let { startView(context, Uri.parse(it), website.browserApp ?: ExternalApps.browser) } ?: false
+    val opened = linkAddress(website.url)?.let { startView(context, it.toUri(), website.browserApp ?: ExternalApps.browser) } ?: false
     if (!opened) Toast.makeText(context, R.string.link_open_failed, Toast.LENGTH_SHORT).show()
 }

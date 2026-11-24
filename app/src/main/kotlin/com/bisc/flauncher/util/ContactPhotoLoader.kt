@@ -1,8 +1,8 @@
 package com.bisc.flauncher.util
 
+import androidx.core.net.toUri
 import android.content.Context
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.util.LruCache
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -24,7 +24,7 @@ class ContactPhotoLoader @Inject constructor(
         if (photoUri == null) return null
         val bitmap = withContext(Dispatchers.IO) {
             runCatching {
-                context.contentResolver.openInputStream(Uri.parse(photoUri))?.use { BitmapFactory.decodeStream(it) }
+                context.contentResolver.openInputStream(photoUri.toUri())?.use { BitmapFactory.decodeStream(it) }
             }.getOrNull()
         }?.asImageBitmap() ?: return null
         cache.put(contactId, bitmap)
