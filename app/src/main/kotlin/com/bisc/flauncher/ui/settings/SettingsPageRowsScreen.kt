@@ -324,7 +324,7 @@ internal fun WidgetSizeSheet(
                 val fits = spanY <= freeUnits
                 Text(
                     if (fits) androidx.compose.ui.res.pluralStringResource(R.plurals.settings_page_room_left, freeUnits, freeUnits)
-                    else stringResource(R.string.settings_page_room_too_small, freeUnits),
+                    else androidx.compose.ui.res.pluralStringResource(R.plurals.settings_page_room_too_small, freeUnits, freeUnits),
                     style = MaterialTheme.typography.bodyMedium,
                     color = if (fits) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error
                 )

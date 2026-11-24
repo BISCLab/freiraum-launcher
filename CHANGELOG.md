@@ -6,6 +6,7 @@
 - Symbols in front of category names can be switched on per place: Categories page, text search, App list chips and each Categories widget
 - A category's symbol can come from an installed icon pack, like folder icons
 - Fixed: the welcome tour's phone preview really fades between designs and wallpapers
+- Widget size: with one row left the page says "1 row" instead of "1 rows"
 
 ## 0.19.2
 

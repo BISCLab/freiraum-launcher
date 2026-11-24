@@ -33,6 +33,7 @@ fun PageRowsColumn(
     entriesByRow: Map<Long, List<RowEntry>>,
     folders: List<Folder>,
     folderItemsByFolder: Map<Long, List<FolderItem>>,
+    modifier: Modifier = Modifier,
     savedMapTargets: List<SavedMapTarget> = emptyList(),
     pinnedWebsites: List<PinnedWebsite> = emptyList(),
     pages: List<LauncherPage> = emptyList(),
@@ -49,7 +50,6 @@ fun PageRowsColumn(
      *  [unitsPerColumn] row units each. */
     columns: Int = 1,
     unitsPerColumn: Int = 0,
-    modifier: Modifier = Modifier
 ) {
     if (columns >= 2 && unitsPerColumn > 0) {
         val unit = LocalRowUnitHeight.current

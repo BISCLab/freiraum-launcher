@@ -32,12 +32,12 @@ fun AppOverviewContent(
     cornerRadiusPercent: Int,
     loadIcon: (ComponentName) -> ImageBitmap?,
     onAppClick: (AppInfo) -> Unit,
+    modifier: Modifier = Modifier,
     showSearchButton: Boolean = false,
     /** Work profile and private space, listed after the own apps. */
     profiles: ProfileListHost? = null,
     /** While searching: only the profiles' apps that match. */
     profileQuery: String = "",
-    modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()

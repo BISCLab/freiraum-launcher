@@ -144,6 +144,7 @@ fun FolderView(
     items: List<FolderItem>,
     folders: List<Folder>,
     folderItemsByFolder: Map<Long, List<FolderItem>>,
+    modifier: Modifier = Modifier,
     savedMapTargets: List<SavedMapTarget> = emptyList(),
     pinnedWebsites: List<PinnedWebsite> = emptyList(),
     showLabels: Boolean = false,
@@ -162,7 +163,6 @@ fun FolderView(
     onExecuteAction: (com.bisc.flauncher.data.model.GestureAction) -> Unit = {},
     /** Opens a widget's own settings (long press on it, then Edit). */
     onEditWidget: (FolderItem) -> Unit = {},
-    modifier: Modifier = Modifier
 ) {
     // A pending removal asks first; picking "move" instead switches into reorder mode below.
     var pendingRemoval by remember(folder.id) { mutableStateOf<FolderItem?>(null) }

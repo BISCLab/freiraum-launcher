@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Freiraum Launcher</string>
 
 
@@ -422,7 +422,7 @@
     <string name="settings_app_icon_default">Default</string>
     <string name="settings_app_icon_reset">Use default icon</string>
     <string name="settings_folder_creator_search">Search apps</string>
-    <string name="settings_folder_creator_selected">%1$d selected</string>
+    <string name="settings_folder_creator_selected" tools:ignore="PluralsCandidate">%1$d selected</string>
     <string name="settings_search_keyboard_auto_open">Open keyboard automatically</string>
     <string name="settings_search_page_label">Page</string>
     <string name="settings_search_keyboard_label">Keyboard bezel</string>
@@ -522,7 +522,7 @@
     <string name="widget_notes_delete">Delete</string>
     <string name="widget_notes_cancel">Cancel</string>
     <string name="widget_notes_save">Save</string>
-    <string name="widget_notes_checklist_progress">%1$d/%2$d checked</string>
+    <string name="widget_notes_checklist_progress" tools:ignore="PluralsCandidate">%1$d/%2$d checked</string>
     <string name="note_type_text">Text</string>
     <string name="note_type_checklist">Checklist</string>
     <string name="note_add_item">Add item</string>
@@ -928,7 +928,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_backup_export_locked_info">The backup holds your whole launcher, notes, places, contacts and links too. It is locked with your password. Without it nobody can open the backup, not even us. Keep it safe.</string>
     <string name="settings_backup_password">Password</string>
     <string name="settings_backup_password_repeat">Repeat password</string>
-    <string name="settings_backup_password_short">At least %1$d characters</string>
+    <string name="settings_backup_password_short" tools:ignore="PluralsCandidate">At least %1$d characters</string>
     <string name="settings_backup_password_mismatch">The passwords do not match</string>
     <string name="settings_backup_password_wrong">Wrong password or damaged file</string>
     <string name="settings_backup_password_show">Show password</string>
@@ -987,7 +987,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_motion_logo_shape">Logo in the settings changes its shape</string>
     <string name="settings_part_letters_short">Letters</string>
     <string name="settings_corner_own_value">Own value</string>
-    <string name="settings_page_room_too_small">This won\'t fit here anymore. Only %1$d rows are free on this page. When you save, you can make a new page for it.</string>
     <plurals name="settings_page_room_left">
         <item quantity="one">%1$d row is still free on this page.</item>
         <item quantity="other">%1$d rows are still free on this page.</item>
@@ -1044,7 +1043,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_categories_yours_info">Tap a category to edit it. Drag the handle to change the order.</string>
     <string name="settings_categories_empty">No categories yet.</string>
     <string name="settings_categories_count">Items: %1$d</string>
-    <string name="settings_categories_smart_count">Fills itself · %1$d right now</string>
+    <string name="settings_categories_smart_count" tools:ignore="PluralsCandidate">Fills itself · %1$d right now</string>
     <string name="settings_categories_new">New category</string>
     <string name="settings_categories_page">Categories page</string>
     <string name="settings_categories_page_summary">How the page looks and what it shows</string>
@@ -1066,7 +1065,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_category_pick_elements">More elements</string>
     <string name="settings_category_pick_elements_summary">Links, places, contacts and shortcuts</string>
     <string name="settings_category_delete">Delete category</string>
-    <string name="settings_category_apps_done">Done (%1$d picked)</string>
+    <string name="settings_category_apps_done" tools:ignore="PluralsCandidate">Done (%1$d picked)</string>
     <string name="settings_category_no_elements">You have no links, places, contacts or shortcuts yet. Make them under Elements, or put them in the Dock, the Panel or a folder.</string>
     <string name="settings_categories_picker_empty">No categories yet. Make some under Elements → Categories.</string>
     <string name="settings_categories_done">Done</string>
@@ -1163,4 +1162,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_category_symbols_search_summary">In front of found categories that have a symbol</string>
     <string name="settings_category_symbols_applist_summary">In the category chips above the list</string>
     <string name="settings_category_symbols_widget_summary">In chips and headings, for categories with a symbol</string>
+    <plurals name="settings_page_room_too_small">
+        <item quantity="one">This won\'t fit here anymore. Only %1$d row is free on this page. When you save, you can make a new page for it.</item>
+        <item quantity="other">This won\'t fit here anymore. Only %1$d rows are free on this page. When you save, you can make a new page for it.</item>
+    </plurals>
 </resources>

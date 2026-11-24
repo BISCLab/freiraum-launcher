@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Package visibility (Android 11+): launchable apps, the weather app, icon packs (Nova and ADW actions), browsers and maps apps for the search. -->
     <queries>
@@ -66,7 +67,10 @@
         android:supportsRtl="true"
         android:localeConfig="@xml/locales_config"
         android:theme="@style/Theme.FLauncher"
-        android:allowBackup="false">
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="false"
+        tools:ignore="UnusedAttribute">
 
         <!-- Home screen: singleTask with clearTaskOnLaunch, as in AOSP launchers. -->
         <activity
@@ -137,7 +141,8 @@
         <!-- Weather broadcasts in the Gadgetbridge format; exported so companion apps can send them. -->
         <receiver
             android:name=".data.weather.GadgetbridgeWeatherReceiver"
-            android:exported="true">
+            android:exported="true"
+            tools:ignore="ExportedReceiver">
             <intent-filter>
                 <action android:name="nodomain.freeyourgadget.gadgetbridge.ACTION_GENERIC_WEATHER" />
             </intent-filter>

@@ -718,6 +718,7 @@ fun PillRow(
     pinnedWebsites: List<PinnedWebsite>,
     pages: List<LauncherPage>,
     loadIcon: (ComponentName) -> ImageBitmap?,
+    modifier: Modifier = Modifier,
     loadPackIcon: (String, String) -> ImageBitmap? = { _, _ -> null },
     resolveLabel: (ComponentName) -> String = { "" },
     iconShape: IconShape = IconShape.ROUNDED_SQUARE,
@@ -725,7 +726,6 @@ fun PillRow(
     onShortcutClick: (String) -> Unit = {},
     onOpenPageLink: (Long, LauncherPageKind) -> Unit = { _, _ -> },
     onAddEmptySlot: ((Int) -> Unit)? = null,
-    modifier: Modifier = Modifier
 ) {
     val colors = resolveElementColors(row.appearance())
     // Same width rule as every other in-page element: the full row width, either with the fine

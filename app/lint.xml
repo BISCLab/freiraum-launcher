@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Checks that do not fit this app, each on purpose. -->
+<lint>
+    <!-- Released as APKs, not as an app bundle split by language: every language is always inside. -->
+    <issue id="AppBundleLocaleChanges" severity="ignore" />
+    <!-- Icon packs are other apps; their pictures can only be found by name. -->
+    <issue id="DiscouragedApi" severity="ignore">
+        <ignore path="src/main/kotlin/com/bisc/flauncher/util/AppIconLoader.kt" />
+        <ignore path="src/main/kotlin/com/bisc/flauncher/util/IconPackAppFilterParser.kt" />
+        <ignore path="src/main/kotlin/com/bisc/flauncher/util/IconPackDrawableXmlParser.kt" />
+        <ignore path="src/main/kotlin/com/bisc/flauncher/data/repository/PageContentRepository.kt" />
+    </issue>
+</lint>

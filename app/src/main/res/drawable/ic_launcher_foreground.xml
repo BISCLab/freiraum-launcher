@@ -3,6 +3,8 @@
      @color/ic_launcher_background. The 1095 canvas is centred so it maps onto the ~72dp an adaptive
      icon mask leaves visible, keeping the original proportion of mark to icon. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="VectorPath"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="1642.5"

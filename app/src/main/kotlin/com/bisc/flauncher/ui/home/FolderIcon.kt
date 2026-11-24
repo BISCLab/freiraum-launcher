@@ -34,8 +34,8 @@ fun FolderIcon(
     folder: FolderModel?,
     previewItems: List<FolderItem>,
     loadIcon: (ComponentName) -> ImageBitmap?,
+    modifier: Modifier = Modifier,
     loadPackIcon: (String, String) -> ImageBitmap? = { _, _ -> null },
-    modifier: Modifier = Modifier
 ) {
     val isCustomColor = folder?.iconMode == FolderIconMode.CUSTOM_COLOR
     val packIconBitmap = if (folder?.iconMode == FolderIconMode.ICON_PACK) {

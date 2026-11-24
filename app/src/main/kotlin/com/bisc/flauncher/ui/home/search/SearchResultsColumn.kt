@@ -85,6 +85,7 @@ fun SearchResultsColumn(
     launcherSettingsResults: List<com.bisc.flauncher.data.model.LauncherSettingsTarget>,
     websiteResults: List<PinnedWebsite>,
     shortcutResults: List<com.bisc.flauncher.data.model.ShortcutResult>,
+    modifier: Modifier = Modifier,
     folderResults: List<com.bisc.flauncher.data.model.Folder> = emptyList(),
     mapTargetResults: List<com.bisc.flauncher.data.model.SavedMapTarget> = emptyList(),
     /** Categories found by name, each with its apps. */
@@ -110,7 +111,6 @@ fun SearchResultsColumn(
     onMapsCommand: () -> Unit,
     onAiCommand: (String) -> Unit,
     onCalculatorResultClick: (String) -> Unit,
-    modifier: Modifier = Modifier,
     /** Card corner roundness, 0-100% of [SearchDimens.cornerRadius]; null = fully rounded. */
     cardCornerRadiusPercent: Int? = null,
     /** Off = the same fine side margin every other element keeps. */

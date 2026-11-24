@@ -124,7 +124,7 @@ private fun NoteEditForm(
     onDelete: (Note) -> Unit
 ) {
     var confirmingDelete by remember { mutableStateOf(false) }
-    var noteId by remember(note?.id) { mutableStateOf(note?.id ?: 0L) }
+    var noteId by remember(note?.id) { androidx.compose.runtime.mutableLongStateOf(note?.id ?: 0L) }
     var title by remember(note?.id) { mutableStateOf(note?.title.orEmpty()) }
     var type by remember(note?.id) { mutableStateOf(note?.type ?: NoteType.FREITEXT) }
     var content by remember(note?.id) { mutableStateOf(note?.content.orEmpty()) }

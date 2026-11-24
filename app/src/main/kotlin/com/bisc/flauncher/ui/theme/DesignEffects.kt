@@ -93,7 +93,7 @@ private fun rememberGlowAngle(effects: DesignEffects): State<Float> {
 @Composable
 fun Modifier.designGlow(shape: Shape, target: String): Modifier {
     val effects = LocalDesignEffects.current ?: return this
-    val relief = if (effects.depth > 0f && target in effects.depthTargets) designRelief(shape, effects.depth) else Modifier
+    val relief = if (effects.depth > 0f && target in effects.depthTargets) Modifier.designRelief(shape, effects.depth) else Modifier
     if (!effects.glowBorder || target !in effects.targets) return this.then(relief)
     val (colors, stops) = remember(effects) { sweepColors(effects) }
     val angle = rememberGlowAngle(effects)
@@ -130,7 +130,7 @@ fun Modifier.designGlow(shape: Shape, target: String): Modifier {
  * a see-through surface stays clean), a light edge on top that turns dark towards the bottom, and
  * a faint sheen over the upper part. Nothing moves, so it is drawn once and costs nothing after.
  */
-private fun designRelief(shape: Shape, depth: Float): Modifier = Modifier
+private fun Modifier.designRelief(shape: Shape, depth: Float): Modifier = this
     .drawBehind {
         val outline = shape.createOutline(size, layoutDirection, this)
         val path = Path().apply { addOutline(outline) }
