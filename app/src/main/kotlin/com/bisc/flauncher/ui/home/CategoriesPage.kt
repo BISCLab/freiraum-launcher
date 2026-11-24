@@ -186,13 +186,10 @@ internal fun CategoryChip(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        if (category.hasSymbol) {
-            Icon(
-                if (category == null) androidx.compose.material.icons.Icons.Filled.Apps else categoryIcon(category),
-                contentDescription = null,
-                tint = if (selected) ink else if (category == null) ink else accent,
-                modifier = Modifier.size(18.dp)
-            )
+        if (category == null) {
+            Icon(androidx.compose.material.icons.Icons.Filled.Apps, contentDescription = null, tint = ink, modifier = Modifier.size(18.dp))
+        } else if (category.hasSymbol) {
+            CategorySymbol(category, 18.dp, if (selected) ink else accent)
         }
         Text(label, color = ink, style = MaterialTheme.typography.labelLarge, maxLines = 1)
         if (count != null) {

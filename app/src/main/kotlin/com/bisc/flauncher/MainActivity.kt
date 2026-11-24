@@ -163,9 +163,12 @@ class MainActivity : ComponentActivity() {
             androidx.compose.runtime.SideEffect { com.bisc.flauncher.ui.home.search.KeyboardPrivacy.noLearning = keyboardNoLearning }
             val resolvedCategories by settingsVm.resolvedCategories.collectAsState()
             val categoryPalette by settingsVm.categoryPalette.collectAsState()
+            val categorySymbols by settingsVm.categoriesShowSymbols.collectAsState()
             androidx.compose.runtime.SideEffect {
                 com.bisc.flauncher.ui.home.LauncherCategories.resolved = resolvedCategories
                 com.bisc.flauncher.ui.home.LauncherCategories.palette = categoryPalette
+                com.bisc.flauncher.ui.home.LauncherCategories.showSymbols = categorySymbols
+                com.bisc.flauncher.ui.home.LauncherCategories.loadPackIcon = settingsVm::loadPackIcon
             }
             val dotsOn by settingsVm.showNotificationDots.collectAsState()
             val dotPackages by notificationDots.packages.collectAsState()

@@ -59,7 +59,7 @@ object LauncherSettingsTargets {
         LauncherSettingsTarget(R.string.settings_search_keyboard_label, "settings/search/keyboard",
             listOf("tastatur", "tastaturblende", "blende", "streifen", "keyboard", "keyboard bezel", "bezel", "strip")),
         LauncherSettingsTarget(R.string.settings_pages_categories, "settings/elements/categories",
-            listOf("kategorien", "kategorie", "tags", "etiketten", "sammlungen", "kluge", "categories", "category", "labels", "smart")),
+            listOf("kategorien", "kategorie", "tags", "etiketten", "sammlungen", "kluge", "symbole", "kategorie symbole", "categories", "category", "labels", "smart", "symbols")),
         LauncherSettingsTarget(R.string.settings_categories_page, "settings/categories",
             listOf("kategorien seite", "categories page")),
         LauncherSettingsTarget(R.string.settings_categories_behavior_search, "settings/categories/behavior",

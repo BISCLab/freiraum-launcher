@@ -357,6 +357,13 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[CATEGORIES_VIEW_KEY] = view }
     }
 
+    /** Whether categories show their symbols anywhere; off = the name alone (a tile: its first letter). */
+    val categoriesShowSymbols: Flow<Boolean> = dataStore.data.map { it[CATEGORIES_SHOW_SYMBOLS_KEY] ?: true }
+
+    suspend fun setCategoriesShowSymbols(show: Boolean) {
+        dataStore.edit { it[CATEGORIES_SHOW_SYMBOLS_KEY] = show }
+    }
+
     val categoriesShowSearch: Flow<Boolean> = dataStore.data.map { it[CATEGORIES_SHOW_SEARCH_KEY] ?: true }
 
     suspend fun setCategoriesShowSearch(show: Boolean) {
@@ -1384,6 +1391,7 @@ class SettingsRepository @Inject constructor(
         private val CATEGORY_WIDGETS_KEY = stringPreferencesKey("category_widgets")
         private val CATEGORY_PALETTE_KEY = stringPreferencesKey("category_palette")
         private val CATEGORIES_SHOW_SEARCH_KEY = booleanPreferencesKey("categories_show_search")
+        private val CATEGORIES_SHOW_SYMBOLS_KEY = booleanPreferencesKey("categories_show_symbols")
         private val CATEGORIES_CARD_ROWS_KEY = intPreferencesKey("categories_card_rows")
         private val LAUNCH_TRACKING_SINCE_KEY = longPreferencesKey("launch_tracking_since")
         private val LOCK_PORTRAIT_KEY = booleanPreferencesKey("lock_portrait")

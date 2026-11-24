@@ -1200,4 +1200,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_hub_categories_behavior">Darstellung, Suchfeld, Kategorien</string>
     <string name="settings_categories_colors_tile">Farben und Symbole</string>
     <string name="settings_categories_behavior_search">Kategorien-Seite: Verhalten</string>
+    <string name="settings_categories_symbols">Symbole zeigen</string>
+    <string name="settings_categories_symbols_summary">Gilt für alle Kategorien. Aus: nur der Name, auf Kacheln der erste Buchstabe.</string>
+    <string name="settings_categories_symbols_off_hint">Symbole sind für alle Kategorien aus</string>
+    <string name="settings_category_icon_pack">Aus Icon-Pack</string>
 </resources>

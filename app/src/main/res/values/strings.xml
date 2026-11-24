@@ -1200,4 +1200,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_hub_categories_behavior">View, search field, categories</string>
     <string name="settings_categories_colors_tile">Colors and symbols</string>
     <string name="settings_categories_behavior_search">Categories page: Behavior</string>
+    <string name="settings_categories_symbols">Show symbols</string>
+    <string name="settings_categories_symbols_summary">For all categories. Off: just the name, tiles show the first letter.</string>
+    <string name="settings_categories_symbols_off_hint">Symbols are off for all categories</string>
+    <string name="settings_category_icon_pack">From an icon pack</string>
 </resources>

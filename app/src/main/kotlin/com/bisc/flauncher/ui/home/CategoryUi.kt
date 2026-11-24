@@ -53,6 +53,12 @@ object LauncherCategories {
     /** A design's colors for categories without their own, see [categoryColor]. */
     var palette by mutableStateOf<List<Int>>(emptyList())
 
+    /** Symbols shown at all; off = names alone, tiles with their first letter. */
+    var showSymbols by mutableStateOf(true)
+
+    /** Loads a picture from an icon pack, for symbols taken from one. */
+    var loadPackIcon: (String, String) -> androidx.compose.ui.graphics.ImageBitmap? = { _, _ -> null }
+
     private val requests = MutableSharedFlow<Long>(extraBufferCapacity = 4)
     val openRequests: SharedFlow<Long> = requests.asSharedFlow()
 
@@ -71,7 +77,33 @@ const val CATEGORY_NO_COLOR = 0
 const val CATEGORY_NO_ICON = "none"
 
 val Category?.hasFill: Boolean get() = this?.color != CATEGORY_NO_COLOR
-val Category?.hasSymbol: Boolean get() = this?.iconKey != CATEGORY_NO_ICON
+val Category?.hasSymbol: Boolean get() = LauncherCategories.showSymbols && this?.iconKey != CATEGORY_NO_ICON
+
+/** A symbol from an icon pack is stored as its key with this in front: "pack:<package>|<drawable>". */
+const val CATEGORY_PACK_PREFIX = "pack:"
+
+fun categoryPackIconKey(pack: String, drawable: String): String = "$CATEGORY_PACK_PREFIX$pack|$drawable"
+
+/** The icon pack and drawable of a symbol taken from one, else null. */
+fun Category?.packIcon(): Pair<String, String>? =
+    this?.iconKey?.takeIf { it.startsWith(CATEGORY_PACK_PREFIX) }?.removePrefix(CATEGORY_PACK_PREFIX)
+        ?.split('|', limit = 2)?.takeIf { it.size == 2 }?.let { it[0] to it[1] }
+
+/** A category's symbol in [size]: its pictogram in [tint], or the icon pack's picture as it is. */
+@Composable
+fun CategorySymbol(category: Category?, size: Dp, tint: Color, contentDescription: String? = null) {
+    val pack = category.packIcon()
+    if (pack != null) {
+        val bitmap by androidx.compose.runtime.produceState<androidx.compose.ui.graphics.ImageBitmap?>(null, pack) {
+            value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) { runCatching { LauncherCategories.loadPackIcon(pack.first, pack.second) }.getOrNull() }
+        }
+        val image = bitmap
+        if (image != null) androidx.compose.foundation.Image(image, contentDescription = contentDescription, modifier = Modifier.size(size))
+        else Spacer(Modifier.size(size))
+    } else {
+        Icon(categoryIcon(category), contentDescription = contentDescription, tint = tint, modifier = Modifier.size(size))
+    }
+}
 
 /** A category's own symbol: its pictogram, the smart rule's, or a plain label. */
 fun categoryIcon(category: Category?): ImageVector =
@@ -153,7 +185,8 @@ fun CategoryMark(
         contentAlignment = Alignment.Center
     ) {
         if (category.hasSymbol) {
-            Icon(categoryIcon(category), contentDescription = contentDescription, tint = tint, modifier = Modifier.size(iconSize))
+            // A picture from an icon pack fills more of the tile, like an app icon.
+            CategorySymbol(category, if (category.packIcon() != null) iconSize * 1.4f else iconSize, tint, contentDescription)
         } else {
             Text(
                 category?.name?.trim()?.take(1)?.uppercase().orEmpty(),
@@ -186,7 +219,7 @@ fun CategoryNamePill(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (category.hasSymbol) {
-            Icon(categoryIcon(category), contentDescription = null, tint = tint, modifier = Modifier.size(iconSize))
+            CategorySymbol(category, iconSize, tint)
             Spacer(Modifier.size(8.dp))
         }
         Text(category.name, style = textStyle, color = tint, maxLines = 1, overflow = TextOverflow.Ellipsis)

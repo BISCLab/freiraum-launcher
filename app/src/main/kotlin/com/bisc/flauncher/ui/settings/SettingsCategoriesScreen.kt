@@ -86,6 +86,7 @@ import com.bisc.flauncher.ui.home.CATEGORY_NO_COLOR
 import com.bisc.flauncher.ui.home.CATEGORY_NO_ICON
 import com.bisc.flauncher.ui.home.hasFill
 import com.bisc.flauncher.ui.home.hasSymbol
+import com.bisc.flauncher.ui.home.packIcon
 
 /** A category's symbol on its color, as a small round badge. */
 @Composable
@@ -145,6 +146,16 @@ fun SettingsCategoriesScreen(navController: NavController, onBack: () -> Unit, v
                     }
                 }
             }
+        }
+        val showSymbols by viewModel.categoriesShowSymbols.collectAsState()
+        SettingsPreferenceGroup {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_categories_symbols),
+                summary = stringResource(R.string.settings_categories_symbols_summary),
+                onClick = { viewModel.setCategoriesShowSymbols(!showSymbols) },
+                trailing = { androidx.compose.material3.Switch(checked = showSymbols, onCheckedChange = viewModel::setCategoriesShowSymbols) }
+            )
         }
         SettingsPreferenceGroup {
             SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_categories_new), onClick = { creating = true }, trailing = null)
@@ -363,6 +374,7 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
     val shortcuts by viewModel.pinnedShortcuts.collectAsState()
     val contacts by homeViewModel.pinnedContacts.collectAsState()
     var showIconPicker by remember { mutableStateOf(false) }
+    var pickingPackIcon by remember { mutableStateOf(false) }
     var pickingApps by remember { mutableStateOf(false) }
     var pickingElements by remember { mutableStateOf(false) }
     var confirmingDelete by remember { mutableStateOf(false) }
@@ -404,9 +416,14 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
                 )
             }
             SettingsPreference(
-                icon = if (draft.hasSymbol) categoryIcon(draft) else null,
+                icon = null,
+                leading = if (draft.hasSymbol) ({ com.bisc.flauncher.ui.home.CategorySymbol(draft, 24.dp, MaterialTheme.colorScheme.onSurface) }) else null,
                 title = stringResource(R.string.settings_element_icon_label),
-                summary = if (draft.hasSymbol) null else stringResource(R.string.settings_category_no_icon),
+                summary = when {
+                    !LauncherCategoriesSymbols() -> stringResource(R.string.settings_categories_symbols_off_hint)
+                    !draft.hasSymbol -> stringResource(R.string.settings_category_no_icon)
+                    else -> null
+                },
                 onClick = { showIconPicker = true },
                 trailing = null
             )
@@ -517,8 +534,23 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
             selected = draft.iconKey,
             noneKey = CATEGORY_NO_ICON,
             onSelect = { key -> draft = draft.copy(iconKey = key); showIconPicker = false },
-            onDismiss = { showIconPicker = false }
+            onDismiss = { showIconPicker = false },
+            onIconPack = { showIconPicker = false; pickingPackIcon = true }
         )
+    }
+    if (pickingPackIcon) {
+        val current = draft.packIcon()
+        SettingsFixedDialog(title = stringResource(R.string.settings_folder_icon_pack_choose_icon), onDismiss = { pickingPackIcon = false }) {
+            IconPackPickerContent(
+                viewModel = viewModel,
+                currentPack = current?.first,
+                currentDrawable = current?.second,
+                onPick = { pack, drawable ->
+                    draft = draft.copy(iconKey = com.bisc.flauncher.ui.home.categoryPackIconKey(pack, drawable))
+                    pickingPackIcon = false
+                }
+            )
+        }
     }
     if (pickingApps) {
         val chosen = draftMembers.filter { it.first == GridItemType.APP }.map { it.second }.toSet()
@@ -915,7 +947,7 @@ internal fun AppCategoryChips(app: AppInfo, viewModel: SettingsViewModel) {
                     selected = inIt,
                     onClick = { viewModel.setCategoryMember(r.category.id, GridItemType.APP, payload, !inIt) },
                     label = { Text(r.category.name) },
-                    leadingIcon = if (r.category.hasSymbol) ({ Icon(categoryIcon(r.category), contentDescription = null, tint = categoryColor(r.category), modifier = Modifier.size(18.dp)) }) else null
+                    leadingIcon = if (r.category.hasSymbol) ({ com.bisc.flauncher.ui.home.CategorySymbol(r.category, 18.dp, categoryColor(r.category)) }) else null
                 )
             }
             androidx.compose.material3.AssistChip(
@@ -935,3 +967,6 @@ internal fun AppCategoryChips(app: AppInfo, viewModel: SettingsViewModel) {
         )
     }
 }
+
+/** Whether category symbols are shown at all (the switch under Elements > Categories). */
+private fun LauncherCategoriesSymbols(): Boolean = com.bisc.flauncher.ui.home.LauncherCategories.showSymbols

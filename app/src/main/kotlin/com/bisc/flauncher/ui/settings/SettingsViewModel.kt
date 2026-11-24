@@ -702,6 +702,12 @@ class SettingsViewModel @Inject constructor(
 
     // ---- Categories ----
 
+    val categoriesShowSymbols: StateFlow<Boolean> = repository.categoriesShowSymbols.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    fun setCategoriesShowSymbols(show: Boolean) {
+        viewModelScope.launch { repository.setCategoriesShowSymbols(show) }
+    }
+
     val categoryPalette: StateFlow<List<Int>> = repository.categoryPalette.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val categories: StateFlow<List<com.bisc.flauncher.data.model.Category>> =

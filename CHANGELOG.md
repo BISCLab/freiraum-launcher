@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Categories: one switch shows or hides the symbols of all categories (Elements > Categories)
+- A category's symbol can come from an installed icon pack, like folder icons
+
 ## 0.19.2
 
 - Pages settings: the carousel opens with Home in the middle and one page on each side, always exactly three whole tiles, and stops on a tile when swiped

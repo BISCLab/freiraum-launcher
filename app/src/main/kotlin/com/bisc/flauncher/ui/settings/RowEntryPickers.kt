@@ -138,7 +138,7 @@ internal fun RowEntryRow(
             }
             GridItemType.CATEGORY -> {
                 val category = com.bisc.flauncher.ui.home.LauncherCategories.find(entry.payload.toLongOrNull())?.category
-                Icon(com.bisc.flauncher.ui.home.categoryIcon(category), contentDescription = null, tint = com.bisc.flauncher.ui.home.categoryColor(category), modifier = Modifier.size(28.dp))
+                com.bisc.flauncher.ui.home.CategoryMark(category, iconSize = 16.dp, modifier = Modifier.size(28.dp))
                 Text(category?.name.orEmpty(), modifier = Modifier.weight(1f))
             }
             GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Text("", modifier = Modifier.weight(1f))

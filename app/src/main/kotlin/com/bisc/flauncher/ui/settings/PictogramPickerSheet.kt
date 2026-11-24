@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Collections
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +31,7 @@ import com.bisc.flauncher.ui.home.PictogramCatalog
 /** Picks one pictogram from [PictogramCatalog], used by Addresses/Links/Action buttons. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PictogramPickerSheet(selected: String?, onSelect: (String) -> Unit, onDismiss: () -> Unit, noneKey: String? = null) {
+fun PictogramPickerSheet(selected: String?, onSelect: (String) -> Unit, onDismiss: () -> Unit, noneKey: String? = null, onIconPack: (() -> Unit)? = null) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Text(
             stringResource(R.string.settings_pictogram_picker_title),
@@ -43,6 +44,26 @@ fun PictogramPickerSheet(selected: String?, onSelect: (String) -> Unit, onDismis
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxWidth().heightIn(max = 420.dp).padding(16.dp)
         ) {
+            // A picture from an installed icon pack, where the caller allows it.
+            if (onIconPack != null) {
+                item {
+                    val fromPack = selected?.startsWith(com.bisc.flauncher.ui.home.CATEGORY_PACK_PREFIX) == true
+                    androidx.compose.foundation.layout.Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(if (fromPack) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
+                            .clickable { onIconPack() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Filled.Collections,
+                            contentDescription = stringResource(R.string.settings_category_icon_pack),
+                            tint = if (fromPack) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
             // "No symbol" first, where the caller allows it.
             if (noneKey != null) {
                 item {
