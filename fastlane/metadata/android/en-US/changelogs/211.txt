@@ -1,0 +1,6 @@
+- One tile editor for folders and categories: contents, symbol or letter; symbol from the catalog or an icon pack; surface; symbol color; preview on your background
+- Folders can use catalog symbols
+- Categories: color and name look set separately
+- Folders: every row in the list, dashed fields for adding, an eye for the real view
+- Sheets from below open in full
+- Settings search fades out at the bottom

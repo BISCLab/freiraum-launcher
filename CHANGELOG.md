@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.21.0
+
 - About: "BISC Lab" in the normal text color
 - Sheets that slide up from below open in full and use most of the screen height, so lists like the symbols show whole without scrolling
 - Folders and categories share one tile editor (folder or category > As a tile): what the tile shows (contents, a symbol or the letter), the symbol from the catalog or an icon pack, the surface behind it and the symbol's color; with a preview on your page background, light or dark

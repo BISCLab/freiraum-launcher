@@ -1,0 +1,6 @@
+- Ein Kachel-Editor für Ordner und Kategorien: Inhalt, Symbol oder Buchstabe; Symbol aus Katalog oder Icon-Pack; Fläche; Farbe des Symbols; Vorschau auf deinem Hintergrund
+- Ordner können Symbole aus dem Katalog nutzen
+- Kategorien: Farbe und Aussehen des Namens getrennt einstellbar
+- Ordner: alle Zeilen in der Liste, gestrichelte Felder zum Hinzufügen, Auge für die echte Ansicht
+- Menüs von unten öffnen ganz
+- Einstellungssuche blendet unten weich aus
