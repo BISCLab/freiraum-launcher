@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- About: "BISC Lab" in the normal text color
+
 ## 0.20.0
 
 - Categories show by name, without a symbol; the symbol is only their face as a tile (Dock, Panel, element boxes, folders). As a tile a category shows what it holds like a folder, its symbol or its first letter (category > As a tile)

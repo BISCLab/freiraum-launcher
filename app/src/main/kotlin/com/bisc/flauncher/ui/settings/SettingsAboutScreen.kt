@@ -62,8 +62,6 @@ private object AboutInfo {
     const val LICENSE_URL = "https://www.gnu.org/licenses/gpl-3.0.html"
 }
 
-/** BISC Lab's brand red, darkened for text. */
-private val BISC_RED = androidx.compose.ui.graphics.Color(0xFFB3202A)
 
 /** The app's own icon, drawn from the adaptive icon's layers (Compose can't paint the adaptive icon itself). */
 @Composable
@@ -321,7 +319,7 @@ fun SettingsAboutScreen(navController: NavController, onBack: () -> Unit) {
         ) {
             Text(stringResource(R.string.about_made_by), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Image(painterResource(R.drawable.bisc_logo), contentDescription = null, modifier = Modifier.size(width = 24.dp, height = 48.dp))
-            Text(AboutInfo.DEVELOPER, style = MaterialTheme.typography.titleSmall, color = BISC_RED)
+            Text(AboutInfo.DEVELOPER, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
         }
     }
 
