@@ -71,7 +71,7 @@ All optional ones are asked for only when you use the feature.
 | Permission | Why |
 |---|---|
 | `READ_CONTACTS` (optional) | Find and place contacts |
-| Notification access (optional) | Control music playback in the music widget; notification content is not read |
+| Notification access (optional) | Control music in the music widget, and notification dots on app icons; only which apps have notifications is seen, never their content |
 | `EXPAND_STATUS_BAR` | Gestures that open the notifications or quick settings |
 | `SET_WALLPAPER` | Put a wallpaper's picture on the lock screen, only when you ask for it |
 | `REQUEST_DELETE_PACKAGES` | Uninstall an app from its menu; Android asks you to confirm |

@@ -52,14 +52,14 @@
 <ul>
 <li>Barrierefreiheitsmodus: feste Elemente mit starkem Rand, größere Icons und Schrift, keine Bewegungseffekte</li>
 <li>Einstellungssperre mit deiner Displaysperre (Fingerabdruck, Gesicht, PIN, Muster oder Passwort)</li>
-<li>Bittet die Tastatur, sich nicht zu merken, was du in die Suche tippst</li>
+<li>Die Tastatur soll sich Suchen nicht merken</li>
 <li>Alles als eine Sicherungsdatei exportieren und importieren</li>
 </ul>
 
 <p><b>Berechtigungen</b></p>
 <ul>
 <li>Kontakte (optional): um Kontakte zu finden und abzulegen</li>
-<li>Benachrichtigungszugriff (optional): nur für die Musiksteuerung im Musik-Widget; Inhalte werden nicht gelesen</li>
+<li>Benachrichtigungszugriff (optional): für das Musik-Widget und Benachrichtigungspunkte; gelesen wird nur, welche Apps Benachrichtigungen haben, nie deren Inhalt</li>
 <li>Statusleiste ausklappen: für Gesten, die Benachrichtigungen oder Schnelleinstellungen öffnen</li>
 <li>Hintergrund festlegen: für das Bild auf dem Sperrbildschirm, nur wenn du es möchtest</li>
 <li>Deinstallation anfragen: Apps aus ihrem Menü deinstallieren; Android fragt vorher</li>

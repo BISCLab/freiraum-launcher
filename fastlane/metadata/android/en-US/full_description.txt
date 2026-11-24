@@ -60,7 +60,7 @@
 <p><b>Permissions</b></p>
 <ul>
 <li>Contacts (optional): to find and place contacts</li>
-<li>Notification access (optional): only to control music playback in the music widget; notification content is not read</li>
+<li>Notification access (optional): for the music widget and notification dots; only which apps have notifications is seen, never their content</li>
 <li>Expand status bar: for gestures that open the notifications or quick settings</li>
 <li>Set wallpaper: to put a wallpaper's picture on the lock screen, only when you ask for it</li>
 <li>Request delete packages: to uninstall an app from its menu; Android asks you to confirm</li>
