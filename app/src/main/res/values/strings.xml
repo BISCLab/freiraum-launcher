@@ -101,11 +101,9 @@
     <string name="settings_accent_follows_global">Follows the global accent color</string>
     <string name="settings_accent_custom">Custom color</string>
     <string name="settings_design_title">Appearance</string>
-    <string name="settings_card_design_subtitle">Designs, color modes, accent, font, corners, background, icons, animations</string>
     <string name="settings_icons_label">Icons</string>
     <string name="settings_icons_summary">Shape, size and icon pack for every app</string>
     <string name="settings_system_title">System</string>
-    <string name="settings_card_system_subtitle">Permissions, language, default apps, tips, backup</string>
     <string name="settings_element_fill_label">Fill</string>
     <string name="settings_font_label">Font</string>
     <string name="settings_font_system">System default</string>
@@ -146,7 +144,6 @@
     <string name="settings_captions_label">Captions</string>
 
     <string name="settings_section_elements">Apps &amp; elements</string>
-    <string name="settings_card_elements_subtitle">Apps, folders, places, links, action buttons</string>
     <string name="settings_elements_addresses_title">Places</string>
     <string name="settings_elements_addresses_empty">No places yet.</string>
     <string name="settings_elements_add_address">Add place</string>
@@ -208,7 +205,6 @@
     <string name="settings_default_launcher_already_set">Freiraum is the default launcher.</string>
 
     <string name="settings_section_manage_apps">Apps</string>
-    <string name="settings_card_manage_apps_subtitle">Hide and rename apps, icons, icon pack</string>
     <string name="settings_manage_apps_search_hint">Search apps…</string>
     <string name="settings_manage_apps_hidden_summary">Hidden</string>
     <string name="settings_manage_apps_hidden_from_list_summary">Hidden from app list</string>
@@ -220,10 +216,8 @@
     <string name="settings_manage_apps_empty">No apps found</string>
 
     <string name="settings_section_folder">Folder</string>
-    <string name="settings_card_folder_subtitle">Display options and folder list</string>
 <string name="settings_folder_title">Folder</string>
     <string name="settings_folder_global_label">Template for all folders</string>
-    <string name="settings_folder_global_subtitle">Appearance, border and visibility shared by every folder</string>
     <string name="settings_folder_visibility_label">Visibility</string>
     <string name="settings_folder_create">Create folder</string>
     <string name="settings_folder_edit_title">Edit folder</string>
@@ -241,8 +235,6 @@
     <string name="settings_background_source_custom_image">Custom image</string>
     <string name="settings_background_change_image">Change image</string>
     <string name="settings_background_source_color">Color</string>
-    <string name="settings_background_use_global">Global background</string>
-    <string name="settings_background_use_global_summary">The same background everywhere. You set it once in Global settings.</string>
     <string name="settings_section_global_background">Background</string>
     <string name="settings_card_global_background_subtitle">One background image or color for every screen</string>
     <string name="settings_background_opacity_label">Opacity</string>
@@ -251,15 +243,12 @@
     <string name="settings_background_shade_value">%1$d%%</string>
     <string name="settings_manage_apps_edit_title">Edit app</string>
     <string name="settings_manage_apps_name_label">Display name</string>
-    <string name="settings_manage_apps_visibility_label">Visibility</string>
     <string name="settings_manage_apps_visibility_app_list_label">App list</string>
     <string name="settings_manage_apps_visibility_app_list_description">The app is also left out when you pick apps. Where it already is, on pages, in the Dock or in folders, it stays.</string>
     <string name="settings_manage_apps_visibility_search_label">Text search</string>
-    <string name="settings_manage_apps_visibility_search_description">The app won\'t show up in the text search.</string>
     <string name="settings_manage_apps_reveal_search_code">Reveal with search code</string>
     <string name="settings_manage_apps_reveal_search_code_description">You then find the app only with the code below, not by its name.</string>
     <string name="settings_manage_apps_reveal_code_hint">Search code</string>
-    <string name="settings_more_settings_button">More settings</string>
 
     <string name="settings_section_gestures">Gestures</string>
     <string name="settings_card_gestures_subtitle">Tap and swipe, with one or two fingers</string>
@@ -279,7 +268,6 @@
 
     <string name="settings_section_pages">Pages</string>
     <string name="settings_section_app_overview">App list</string>
-    <string name="settings_card_pages_subtitle">Widgets, element boxes, backgrounds</string>
     <string name="settings_pages_home">Home screen</string>
     <string name="settings_home_appearance_title">Appearance</string>
     <string name="settings_home_appearance_subtitle">Background, status bar</string>
@@ -376,16 +364,7 @@
     <string name="settings_panel_rows_label">Rows</string>
     <string name="settings_panel_row_number">Row %1$d</string>
     <string name="settings_panel_add_row">Add row</string>
-    <string name="settings_element_box_entries_label">Apps</string>
-    <string name="settings_element_box_empty">No apps. Add one below.</string>
-    <string name="settings_row_entry_add_app">Add app</string>
     <string name="settings_row_entry_add_folder">Add folder</string>
-    <string name="settings_row_entry_add_shortcut">Add shortcut</string>
-    <string name="settings_row_entry_add_map_target">Place</string>
-    <string name="settings_row_entry_add_website">Link</string>
-    <string name="settings_row_entry_add_page_link">Link a page</string>
-    <string name="settings_row_entry_add_contact">Add contact</string>
-    <string name="settings_row_entry_add_actionbutton">Add action button</string>
     <string name="settings_element_box_form_label">Shape</string>
     <string name="settings_element_box_pill_mode_label">Single-line layout</string>
     <string name="settings_element_box_pill_mode_summary">Everything in one row instead of a grid, like the Dock</string>
@@ -556,7 +535,6 @@
     <string name="about_project_label">Project</string>
     <string name="about_source">Source code</string>
     <string name="about_issues">Report a problem</string>
-    <string name="about_issues_summary">Bugs, ideas and questions</string>
     <string name="about_legal_label">Legal</string>
     <string name="about_license">License</string>
     <string name="about_license_summary">GNU General Public License v3.0</string>
@@ -674,15 +652,12 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_group_basics">Basics</string>
     <string name="settings_group_extensions">Extensions</string>
     <string name="settings_launcher_theme_label">Launcher</string>
-    <string name="settings_display_label">Display</string>
     <string name="settings_settings_theme_label">Settings</string>
     <string name="settings_settings_theme_launcher">Like the launcher</string>
     <string name="settings_statusbar_summary">Hidden on %1$d of %2$d</string>
     <string name="settings_motion_summary_on">On, %1$d of %2$d</string>
     <string name="settings_motion_summary_off">Off</string>
     <string name="settings_motion_summary_system_off">Off in the Android settings</string>
-    <string name="settings_backup_export_warning">The backup holds your whole launcher, personal things like notes, places, contacts and links too. Keep it to yourself. To share only your look, save it as a design.</string>
-    <string name="settings_backup_export_understood">Understood</string>
     <string name="settings_backup_export_confirm">Export</string>
     <string name="settings_widgets_corner_hint" formatted="false">The higher, the rounder. Very round corners can cut off a bit at the edge.</string>
     <string name="designs_export_info">A design is only the look: colors, borders, corners and effects. No pictures and nothing personal. So you can share it without worry.</string>
@@ -728,10 +703,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_shape_part_search_button">Search button (App list)</string>
     <string name="welcome_shape_part_folders">Folders</string>
     <string name="settings_widget_paging_mode_row_info">How this widget turns its pages. How the arrow buttons look counts for all widgets.</string>
-    <string name="settings_color_modes_label">Color modes</string>
     <string name="settings_color_modes_info">Launcher means the home screen, pages, widgets and folders. Settings means only the settings and the welcome tour. So one can be light and the other dark.</string>
     <string name="settings_background_icons_label">Background and icons</string>
-    <string name="settings_motion_group_label">Motion</string>
     <string name="welcome_wallpaper_own_hint">You can pick your own pictures any time later: Settings → Appearance → Background, or in the settings of each page.</string>
     <string name="welcome_screen_home">Home</string>
     <string name="welcome_screen_panel">Panel</string>
@@ -746,7 +719,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_shape_part_search_results">Search results (Text search)</string>
     <string name="settings_ready_look_label">Ready-made look</string>
     <string name="settings_corners_all">Corners of all parts</string>
-    <string name="settings_corners_all_summary">Round, soft or square, for everything or part by part</string>
     <string name="settings_corners_intro">Pick one shape for everything or for each part on its own. The small screens show you which part is which.</string>
     <string name="folder_widget_edit">Edit</string>
     <string name="folder_widget_remove">Remove</string>
@@ -782,18 +754,13 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_folder_look_reset">Same look as all folders</string>
     <string name="settings_parts_label">Parts</string>
     <string name="settings_colors_all">Colors of all parts</string>
-    <string name="settings_colors_all_summary">Fill, text and border, for everything or part by part</string>
     <string name="settings_colors_intro">Pick colors for everything, or tap a part in the table and give it its own colors. The small screens show you the result.</string>
     <string name="settings_colors_light">Light</string>
     <string name="settings_colors_dark">Dark</string>
     <string name="settings_colors_glass">Glass</string>
     <string name="settings_colors_accent">Accent</string>
-    <string name="settings_statusbar_tile_shown">Shown</string>
-    <string name="settings_statusbar_tile_hidden">Hidden</string>
     <string name="settings_folder_widget_height">Height</string>
     <string name="settings_page_search_description">One field for everything: apps, contacts, places, links, settings and more. What is not on the phone goes on to your search engine, maps or AI app.</string>
-    <string name="settings_hub_appearance_what">How it looks</string>
-    <string name="settings_hub_behavior_what">What it does</string>
     <string name="settings_hub_search_appearance">Page, search field, category rail, results, keyboard bezel</string>
     <string name="settings_hub_search_behavior">Layout, categories and their order, search engines, AI apps, favorites</string>
     <string name="settings_hub_app_list_appearance">Page, letters, A-Z rail, search button, search field</string>
@@ -805,7 +772,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_folder_add_content">App or element</string>
     <string name="settings_folder_add_widget">Widget</string>
     <string name="settings_folder_position">Position</string>
-    <string name="settings_folder_widget_all_settings">All settings</string>
     <string name="settings_folder_rows_label">Rows</string>
     <string name="settings_folder_rows_info">How many apps fit side by side in a row. Widgets are always as wide as the folder.</string>
     <string name="settings_folder_intro">A folder gathers apps, places, links and widgets behind one icon. Tap a folder to set it up, or make a new one.</string>
@@ -848,7 +814,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_look_automatic">Automatic, matching the page</string>
     <string name="settings_look_reset">Back to automatic</string>
     <string name="settings_search_bubble_label">Rail bubble</string>
-    <string name="settings_search_bubble_summary">The name bubble and the magnifier while dragging along the rail</string>
     <string name="settings_search_legend_search_body">Its results show with every query.</string>
     <string name="settings_search_legend_rail_body">A place in the rail. If only this is on, the results come after a tap there.</string>
     <string name="settings_search_table_hint">Tap a symbol to change it and its color. Drag ≡ to sort.</string>
@@ -861,16 +826,11 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="app_menu_info">App info</string>
     <string name="app_menu_uninstall">Uninstall</string>
     <string name="settings_back">Back</string>
-    <string name="settings_home_layout_what">What is on it</string>
-    <string name="settings_home_appearance_what">How the page looks</string>
     <string name="settings_search_layout_label">Layout</string>
     <string name="settings_search_rail_side">Side of the rail</string>
     <string name="incoming_unknown">This is neither a Freiraum design nor a Freiraum wallpaper</string>
-    <string name="extensions_entry_summary">Add designs, wallpapers and widgets</string>
     <string name="extensions_intro">Extensions bring something new into the launcher: a ready-made look, pictures for every page or data for a widget. You pick them in the browser. A tap there opens them here. Freiraum itself does not go online.</string>
     <string name="extensions_widgets_title">Widgets</string>
-    <string name="extensions_widgets_what">Clock, Notes and Music are included</string>
-    <string name="extensions_widgets_contents">Weather needs an app that brings the data</string>
     <string name="extensions_browse">See all extensions</string>
     <string name="extensions_browse_summary">Shows you everything in the browser</string>
     <string name="extensions_widgets_intro">You place widgets on a page as a row. Some show what is already on the phone. Others need data from the internet. They get it from an app of their own, so Freiraum stays offline.</string>
@@ -891,7 +851,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="about_promise_ads">No ads</string>
     <string name="about_made_by">Made by</string>
     <string name="about_releases">What is new</string>
-    <string name="about_releases_summary">All versions and their changes</string>
     <string name="welcome_widgets_title">Widgets</string>
     <string name="welcome_widgets_text">Widgets sit as a row on a page, in the Panel or in a folder. You can add them later under Settings → Pages.</string>
     <string name="welcome_widgets_clock">Time, date, next alarm</string>
@@ -899,7 +858,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="welcome_widgets_music">Controls what is playing. Needs access to notifications</string>
     <string name="welcome_widgets_weather">Needs a weather app that brings the weather. Freiraum itself does not go online</string>
     <string name="settings_menus_title">Menus</string>
-    <string name="settings_menus_summary">Long press on apps, folder entries and notes</string>
     <string name="welcome_design_3d_light">3D Light</string>
     <string name="welcome_design_3d_dark">3D Dark</string>
     <string name="welcome_widgets_weather_note">The weather widget is already included. For now the weather comes from Breezy Weather through Gadgetbridge. More weather apps will follow.</string>
@@ -914,14 +872,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_panel_widgets_label">Widgets</string>
     <string name="settings_panel_add_widget">Add widget</string>
     <string name="settings_panel_widgets_info">Use the arrows to put widgets between the rows. When the Panel is full, you can scroll. Just not while your finger is on a widget.</string>
-    <string name="settings_hub_elements_what">What is in it: apps, folders, links and more</string>
-    <string name="settings_hub_visibility_what">When it shows</string>
     <string name="settings_hub_bar_look_contents">Fill, text, opacity, border, corners</string>
     <string name="settings_panel_content_title">Content</string>
     <string name="settings_hub_panel_content_what">Widgets on top, below them apps, folders, links and more</string>
-    <string name="settings_folder_place_label">Sits in</string>
-    <string name="settings_folder_in_dock">Dock</string>
-    <string name="settings_folder_in_panel">Panel</string>
     <string name="settings_folder_content_label">Content</string>
     <string name="welcome_elements_title">Elements</string>
     <string name="welcome_elements_text">Everything you can tap is an element. You set it up once and then place it anywhere.</string>
@@ -961,7 +914,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_entry_actions_text">Open its own settings, or take it out of here.</string>
     <string name="settings_entry_open_settings">Settings</string>
     <string name="settings_weather_source_label">Data source</string>
-    <string name="settings_background_for_all">Background for all pages</string>
     <string name="settings_background_for_all_summary">For every page without its own background</string>
     <string name="settings_search_first_title">How the table works</string>
     <string name="settings_search_first_text">Each line is a kind of result. Search means it comes as you type. Rail means it has a symbol in the rail beside the results. Drag the handle to sort. Tap a name for more settings.</string>
@@ -970,7 +922,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_app_grid_behavior_label_search">App grid: behavior</string>
     <string name="settings_gesture_action_title">What should happen?</string>
     <string name="settings_search_settings_hint">Search settings</string>
-    <string name="settings_search_settings_empty">Type what you are looking for, for example Dock, font or swipe.</string>
     <string name="settings_search_settings_none">Nothing found for “%1$s”</string>
     <string name="settings_display_motion_label">Display and motion</string>
     <string name="settings_color_modes_font_label">Color mode and font</string>
@@ -1001,7 +952,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_background_change_color">Change color</string>
     <string name="settings_entry_settings">Settings</string>
     <string name="settings_quick_info">Here are the pages you most likely need next. First what goes with this page, then what is far away, then what you open often. All of it stays on your phone.</string>
-    <string name="settings_search_settings_entry">Search, or jump to a page</string>
     <string name="settings_find_crumb">Search</string>
     <string name="settings_add_kind_app">App</string>
     <string name="settings_add_kind_folder">Folder</string>
@@ -1054,7 +1004,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_themed_icons_label">Themed icons</string>
     <string name="settings_themed_icons">Icons in system colors</string>
     <string name="settings_themed_icons_summary">Many apps have a one-color icon. It then shows in the colors of your wallpaper. All other apps stay as they are.</string>
-    <string name="settings_keyboard_privacy_label">Privacy</string>
     <string name="settings_keyboard_no_learning">Keyboard does not learn</string>
     <string name="settings_keyboard_no_learning_summary">Your keyboard won\'t remember what you type into the search. Almost all keyboards respect this.</string>
     <string name="settings_lock_label">Lock</string>
