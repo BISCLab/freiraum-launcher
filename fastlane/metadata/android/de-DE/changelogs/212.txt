@@ -1,0 +1,3 @@
+- Symbol für Ordner und Kategorien auf eigener Seite wählen
+- Eigene Farbe für den Namen unter der Kachel
+- Ordner und Kategorie gleich aufgebaut: Vorschau fest oben, schrumpft beim Scrollen
