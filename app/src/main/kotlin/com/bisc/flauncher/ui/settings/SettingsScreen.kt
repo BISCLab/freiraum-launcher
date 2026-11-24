@@ -264,6 +264,29 @@ private fun SettingsSearchResults(query: String, fromRoute: String?, onOpen: (St
     }
 }
 
+/** True while the page under a fixed preview is scrolled away from its top. */
+val LocalHeaderCompact = androidx.compose.runtime.compositionLocalOf { false }
+
+/** While something lies above, the top of a list fades in, so content slides softly under what
+ *  stays fixed above it. */
+internal fun Modifier.fadeWhenMoreAbove(scroll: androidx.compose.foundation.ScrollState, height: androidx.compose.ui.unit.Dp = 28.dp): Modifier = this
+    .graphicsLayer { compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen }
+    .drawWithContent {
+        drawContent()
+        if (scroll.canScrollBackward) {
+            val h = height.toPx().coerceAtMost(size.height)
+            drawRect(
+                brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                    listOf(androidx.compose.ui.graphics.Color.Transparent, androidx.compose.ui.graphics.Color.Black),
+                    startY = 0f,
+                    endY = h
+                ),
+                size = androidx.compose.ui.geometry.Size(size.width, h),
+                blendMode = androidx.compose.ui.graphics.BlendMode.DstIn
+            )
+        }
+    }
+
 /** While more lies below, the bottom of a list fades out instead of being cut off, so it is clear
  *  that it scrolls on. At the end the last entry shows whole. */
 internal fun Modifier.fadeWhenMoreBelow(scroll: androidx.compose.foundation.ScrollState, height: androidx.compose.ui.unit.Dp = 72.dp): Modifier = this
@@ -552,17 +575,24 @@ fun SettingsSubScreen(
             }
         }
     ) { padding ->
+        val scroll = rememberScrollState()
+        // Scrolled away from the top: a fixed preview steps back to a smaller size.
+        val compact by remember { androidx.compose.runtime.derivedStateOf { scroll.value > 40 } }
         Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             Column(modifier = Modifier.widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth()) {
                 if (header != null) {
-                    Box(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp)) { header() }
+                    androidx.compose.runtime.CompositionLocalProvider(LocalHeaderCompact provides compact) {
+                        Box(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp)) { header() }
+                    }
                 }
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
                         .imePadding()
-                        .verticalScroll(rememberScrollState())
+                        // Under a fixed preview the page slides away softly instead of being cut.
+                        .then(if (header != null) Modifier.fadeWhenMoreAbove(scroll) else Modifier)
+                        .verticalScroll(scroll)
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp),
                     content = content

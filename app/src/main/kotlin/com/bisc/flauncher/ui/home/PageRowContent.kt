@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home
 
+import com.bisc.flauncher.data.model.face
 import com.bisc.flauncher.ui.forAppName
 import android.content.ComponentName
 import androidx.compose.foundation.Image
@@ -589,7 +590,7 @@ internal fun FolderCell(
         FolderIcon(folder = folder, previewItems = previewItems, modifier = Modifier.size(56.dp * iconSizeScale))
         if (showLabel) {
             Spacer(Modifier.height(8.dp))
-            GridLabel(folder?.name.orEmpty(), color = labelColor)
+            GridLabel(folder?.name.orEmpty(), color = folder?.face()?.labelColor?.let { Color(it) } ?: labelColor)
         }
     }
 }

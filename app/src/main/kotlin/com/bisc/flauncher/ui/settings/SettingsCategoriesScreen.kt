@@ -396,6 +396,7 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
             TilePreviewHeader(
                 name = draft.name,
                 tile = { around -> com.bisc.flauncher.ui.home.CategoryMark(draft, modifier = Modifier.fillMaxSize(), shape = RoundedCornerShape(16.dp), ink = around) },
+                labelColor = draft.face().labelColor?.let { androidx.compose.ui.graphics.Color(it) },
                 extra = { around -> com.bisc.flauncher.ui.home.CategoryNamePill(draft, MaterialTheme.typography.labelLarge, ink = around) }
             )
         }

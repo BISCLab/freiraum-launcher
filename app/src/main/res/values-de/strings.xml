@@ -1157,12 +1157,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="tile_kind_content">Inhalt</string>
     <string name="tile_kind_symbol">Symbol</string>
     <string name="tile_kind_letter">Buchstabe</string>
-    <string name="tile_symbol_title">Symbol</string>
     <string name="tile_source_catalog">Katalog</string>
     <string name="tile_source_pack">Icon-Pack</string>
     <string name="tile_no_pack">Es ist kein Icon-Pack installiert. Die Symbole aus dem Katalog gehen immer.</string>
     <string name="tile_search">Symbole suchen</string>
-    <string name="tile_more" tools:ignore="PluralsCandidate">%1$d weitere zeigen</string>
     <string name="tile_nothing_found">Nichts gefunden.</string>
     <string name="tile_surface_title">Fläche dahinter</string>
     <string name="tile_surface_color">Farbe</string>
@@ -1188,4 +1186,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_folder_row_like">wie Zeile %1$d</string>
     <string name="settings_folder_show_real">Ordner so zeigen, wie er wirklich aussieht</string>
     <string name="settings_folder_show_aids">Felder zum Hinzufügen zeigen</string>
+    <string name="tile_symbol_choose">Symbol wählen</string>
+    <string name="tile_symbol_from_catalog">Aus dem Katalog</string>
+    <string name="tile_symbol_from_pack">Aus %1$s</string>
+    <string name="tile_colors_title">Farben</string>
+    <string name="tile_label_color">Farbe des Namens darunter</string>
 </resources>

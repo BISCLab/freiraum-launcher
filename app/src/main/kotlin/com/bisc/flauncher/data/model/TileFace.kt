@@ -18,7 +18,9 @@ data class TileFace(
     val symbol: String? = null,
     val surface: TileSurface = TileSurface.AUTO,
     val surfaceColor: Int? = null,
-    val symbolColor: Int? = null
+    val symbolColor: Int? = null,
+    /** The name under the tile; null = like the other names around it. */
+    val labelColor: Int? = null
 ) {
     /** The icon pack and drawable of a picture from an icon pack, else null. */
     val packIcon: Pair<String, String>?
@@ -31,6 +33,7 @@ data class TileFace(
         put("surface", surface.name)
         surfaceColor?.let { put("surfaceColor", it) }
         symbolColor?.let { put("symbolColor", it) }
+        labelColor?.let { put("labelColor", it) }
     }.toString()
 
     companion object {
@@ -46,7 +49,8 @@ data class TileFace(
                     symbol = json.optString("symbol").ifBlank { null },
                     surface = runCatching { TileSurface.valueOf(json.optString("surface")) }.getOrDefault(TileSurface.AUTO),
                     surfaceColor = if (json.has("surfaceColor")) json.getInt("surfaceColor") else null,
-                    symbolColor = if (json.has("symbolColor")) json.getInt("symbolColor") else null
+                    symbolColor = if (json.has("symbolColor")) json.getInt("symbolColor") else null,
+                    labelColor = if (json.has("labelColor")) json.getInt("labelColor") else null
                 )
             }.getOrNull()
         }

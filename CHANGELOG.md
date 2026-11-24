@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Tile editor: the symbol is chosen on a page of its own (catalog or icon pack, search, all symbols in one grid), so the folder and category pages stay short
+- Tiles: the name below a folder or category tile can have its own color
+- Folder and category pages built alike: the preview stays fixed on top, then the name; while scrolling the preview steps back to a smaller size and the page slides softly under it
+
 ## 0.21.0
 
 - About: "BISC Lab" in the normal text color

@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -7,13 +8,18 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,22 +30,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bisc.flauncher.R
@@ -63,13 +69,16 @@ import com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark
 enum class TileBackdrop { PAGE, LIGHT, DARK }
 
 /**
- * The tile as it will look, on the real page background (or plain light or dark), with the name
- * below it like in the Dock. [extra] can sit beside it, e.g. how a category's name looks.
+ * The tile as it will look, on the real page background (or plain light or dark), with its name
+ * below it like in the Dock. It lies above the page like a card and stays in sight; while the page
+ * below is scrolled it steps back to a smaller size. [extra] can sit beside the tile, e.g. how a
+ * category's name looks.
  */
 @Composable
 internal fun TilePreviewHeader(
     name: String,
     tile: @Composable (around: Color) -> Unit,
+    labelColor: Color? = null,
     extra: (@Composable (around: Color) -> Unit)? = null,
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -82,35 +91,42 @@ internal fun TilePreviewHeader(
         TileBackdrop.DARK -> true
     }
     val around = if (dark) Color.White else Color.Black
+    val compact = LocalHeaderCompact.current
+    val height by animateDpAsState(if (compact) 104.dp else 176.dp, label = "previewHeight")
+    val tileSize by animateDpAsState(if (compact) 48.dp else 68.dp, label = "previewTile")
+    val shape = RoundedCornerShape(28.dp)
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(168.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .then(
+            .height(height)
+            .shadow(10.dp, shape)
+            .clip(shape)
+            .background(
                 when (backdrop) {
-                    TileBackdrop.PAGE -> Modifier
-                    TileBackdrop.LIGHT -> Modifier.background(Color(0xFFF2F2F4))
-                    TileBackdrop.DARK -> Modifier.background(Color(0xFF1C1C1E))
+                    TileBackdrop.PAGE -> MaterialTheme.colorScheme.surfaceContainerHighest
+                    TileBackdrop.LIGHT -> Color(0xFFF2F2F4)
+                    TileBackdrop.DARK -> Color(0xFF1C1C1E)
                 }
             )
     ) {
         if (backdrop == TileBackdrop.PAGE) BackgroundFill(global, Modifier.matchParentSize())
         Row(
-            modifier = Modifier.align(Alignment.Center).padding(top = 18.dp),
+            modifier = Modifier.align(Alignment.Center).padding(top = if (compact) 0.dp else 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(28.dp)
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(modifier = Modifier.size(64.dp)) { tile(around) }
-                Spacer(Modifier.height(6.dp))
-                Text(name, color = around, style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                Box(modifier = Modifier.size(tileSize)) { tile(around) }
+                if (!compact) {
+                    Spacer(Modifier.height(6.dp))
+                    Text(name, color = labelColor ?: around, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
             }
             extra?.invoke(around)
         }
         // Which background to check the tile on.
         Row(
-            modifier = Modifier.align(Alignment.TopEnd).padding(8.dp).clip(RoundedCornerShape(50)).background(Color.Black.copy(alpha = 0.35f)).padding(2.dp),
+            modifier = Modifier.align(Alignment.TopEnd).padding(10.dp).clip(RoundedCornerShape(50)).background(Color.Black.copy(alpha = 0.35f)).padding(2.dp),
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             listOf(
@@ -136,8 +152,8 @@ internal fun TilePreviewHeader(
 
 /**
  * Sets how a folder or a category looks as a tile, one decision after the other: what it shows,
- * where the symbol comes from and which, the surface behind it, the symbol's color. Only what
- * applies to the choice so far is shown.
+ * the symbol (chosen on a page of its own), the surface behind it, the colors of the symbol and of
+ * the name below. Only what applies to the choice so far is shown.
  */
 @Composable
 internal fun TileFaceEditor(
@@ -150,6 +166,7 @@ internal fun TileFaceEditor(
     viewModel: SettingsViewModel
 ) {
     val onSurface = MaterialTheme.colorScheme.onSurface
+    var choosingSymbol by remember { mutableStateOf(false) }
 
     // 1. What the tile shows.
     SettingsPreferenceGroup(title = stringResource(R.string.tile_kind_title)) {
@@ -164,7 +181,11 @@ internal fun TileFaceEditor(
                         .clip(RoundedCornerShape(18.dp))
                         .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                         .border(if (picked) 2.dp else 0.dp, if (picked) MaterialTheme.colorScheme.primary else Color.Transparent, RoundedCornerShape(18.dp))
-                        .clickable { onChange(sample) }
+                        .clickable {
+                            onChange(sample)
+                            // A symbol is the next decision: go straight to choosing it the first time.
+                            if (kind == TileKind.SYMBOL && face.kind != TileKind.SYMBOL && face.symbol == null) choosingSymbol = true
+                        }
                         .padding(vertical = 14.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -174,13 +195,29 @@ internal fun TileFaceEditor(
                 }
             }
         }
-        if (face.kind == TileKind.CONTENT) {
-            SettingsPreference(icon = null, title = contentSummary, onClick = null, trailing = null)
+        when (face.kind) {
+            TileKind.CONTENT -> SettingsPreference(icon = null, title = contentSummary, onClick = null, trailing = null)
+            // 2. Which symbol: one line here, the choosing on a page of its own.
+            TileKind.SYMBOL -> {
+                val packs by viewModel.iconPacks.collectAsState()
+                val pack = face.packIcon
+                SettingsPreference(
+                    icon = null,
+                    leading = {
+                        Box(modifier = Modifier.size(36.dp).clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.surfaceContainerHighest), contentAlignment = Alignment.Center) {
+                            if (pack != null) PackPicture(pack, 30.dp)
+                            else Icon(PictogramCatalog.iconFor(face.symbol) ?: Icons.Filled.Search, contentDescription = null, modifier = Modifier.size(22.dp))
+                        }
+                    },
+                    title = stringResource(R.string.tile_symbol_choose),
+                    summary = if (pack != null) stringResource(R.string.tile_symbol_from_pack, packs.find { it.packageName == pack.first }?.label ?: pack.first)
+                    else stringResource(R.string.tile_symbol_from_catalog),
+                    onClick = { choosingSymbol = true }
+                )
+            }
+            TileKind.LETTER -> Unit
         }
     }
-
-    // 2. Which symbol, from the catalog or an icon pack.
-    if (face.kind == TileKind.SYMBOL) SymbolChooser(face, onChange, viewModel)
 
     // 3. The surface behind it. A picture from an icon pack brings its own.
     val fromPack = face.kind == TileKind.SYMBOL && face.packIcon != null
@@ -210,9 +247,9 @@ internal fun TileFaceEditor(
         }
     }
 
-    // 4. The color of a pictogram or the letter; black or white unless chosen.
-    if ((face.kind == TileKind.SYMBOL && !fromPack) || face.kind == TileKind.LETTER) {
-        SettingsPreferenceGroup {
+    // 4. Colors: of a pictogram or the letter (black or white unless chosen), and of the name below.
+    SettingsPreferenceGroup(title = stringResource(R.string.tile_colors_title)) {
+        if ((face.kind == TileKind.SYMBOL && !fromPack) || face.kind == TileKind.LETTER) {
             AutomaticColorPicker(
                 title = stringResource(if (face.kind == TileKind.LETTER) R.string.tile_letter_color else R.string.tile_symbol_color),
                 custom = face.symbolColor,
@@ -221,32 +258,48 @@ internal fun TileFaceEditor(
                 ownGroup = false
             )
         }
+        AutomaticColorPicker(
+            title = stringResource(R.string.tile_label_color),
+            custom = face.labelColor,
+            automaticSeed = onSurface.toArgb(),
+            onChange = { onChange(face.copy(labelColor = it)) },
+            ownGroup = false
+        )
+    }
+
+    if (choosingSymbol) {
+        SymbolPickerDialog(face = face, onPick = { onChange(it); choosingSymbol = false }, onDismiss = { choosingSymbol = false }, viewModel = viewModel)
     }
 }
 
 private const val DEFAULT_SYMBOL = "star"
-private const val PACK_PAGE = 60
 
-/** The symbol: two sources side by side, a search, and the symbols right below. */
+/** Chooses the symbol on a page of its own: the catalog or an installed icon pack, a search, and
+ *  every symbol in a grid that fills the page. */
 @Composable
-private fun SymbolChooser(face: TileFace, onChange: (TileFace) -> Unit, viewModel: SettingsViewModel) {
+private fun SymbolPickerDialog(face: TileFace, onPick: (TileFace) -> Unit, onDismiss: () -> Unit, viewModel: SettingsViewModel) {
     val packs by viewModel.iconPacks.collectAsState()
     var fromPack by remember { mutableStateOf(face.packIcon != null) }
+    var pack by remember { mutableStateOf(face.packIcon?.first ?: packs.firstOrNull()?.packageName) }
     var query by remember { mutableStateOf("") }
+    var packIcons by remember(pack) { mutableStateOf<List<IconPackIcon>?>(null) }
+    LaunchedEffect(pack, fromPack) { if (fromPack) packIcons = pack?.let { viewModel.availableIconPackIcons(it) } }
     val accent = MaterialTheme.colorScheme.primary
     val onSurface = MaterialTheme.colorScheme.onSurface
 
-    SettingsPreferenceGroup(title = stringResource(R.string.tile_symbol_title)) {
-        Column(
-            modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
+    SettingsFixedDialog(title = stringResource(R.string.tile_symbol_choose), onDismiss = onDismiss) {
+        Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChip(selected = !fromPack, onClick = { fromPack = false }, label = { Text(stringResource(R.string.tile_source_catalog)) })
                 FilterChip(selected = fromPack, onClick = { fromPack = true }, enabled = packs.isNotEmpty(), label = { Text(stringResource(R.string.tile_source_pack)) })
             }
             if (packs.isEmpty()) {
                 Text(stringResource(R.string.tile_no_pack), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            if (fromPack && packs.size > 1) {
+                Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    packs.forEach { info -> FilterChip(selected = info.packageName == pack, onClick = { pack = info.packageName }, label = { Text(info.label) }) }
+                }
             }
             OutlinedTextField(
                 value = query,
@@ -257,72 +310,63 @@ private fun SymbolChooser(face: TileFace, onChange: (TileFace) -> Unit, viewMode
                 shape = SettingsTextFieldShape,
                 modifier = Modifier.fillMaxWidth()
             )
+        }
+        val q = query.trim().lowercase()
+        Box(modifier = Modifier.weight(1f).fillMaxWidth().padding(top = 12.dp)) {
             if (!fromPack) {
-                val q = query.trim().lowercase()
                 val icons = PictogramCatalog.icons.entries.filter { q.isEmpty() || q in it.key }
-                if (icons.isEmpty()) Text(stringResource(R.string.tile_nothing_found), style = MaterialTheme.typography.bodySmall)
-                EqualGrid(count = icons.size, columns = 6, gap = 6.dp) { index ->
-                    val (key, icon) = icons[index]
-                    val picked = face.symbol == key
-                    Box(
-                        modifier = Modifier
-                            .aspectRatio(1f)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(if (picked) accent else MaterialTheme.colorScheme.surfaceContainerHighest)
-                            .clickable { onChange(face.copy(symbol = key, surface = if (face.surface == TileSurface.NONE && face.packIcon != null) TileSurface.AUTO else face.surface)) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(icon, contentDescription = key, tint = if (picked) MaterialTheme.colorScheme.onPrimary else onSurface, modifier = Modifier.size(22.dp))
+                if (icons.isEmpty()) Text(stringResource(R.string.tile_nothing_found), style = MaterialTheme.typography.bodyMedium)
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(60.dp),
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(bottom = 16.dp)
+                ) {
+                    items(icons, key = { it.key }) { (key, icon) ->
+                        val picked = face.symbol == key
+                        Box(
+                            modifier = Modifier
+                                .aspectRatio(1f)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(if (picked) accent else MaterialTheme.colorScheme.surfaceContainerHighest)
+                                .clickable {
+                                    // Back from a picture with its own background: a surface again.
+                                    onPick(face.copy(kind = TileKind.SYMBOL, symbol = key, surface = if (face.packIcon != null && face.surface == TileSurface.NONE) TileSurface.AUTO else face.surface))
+                                },
+                            contentAlignment = Alignment.Center
+                        ) { Icon(icon, contentDescription = key, tint = if (picked) MaterialTheme.colorScheme.onPrimary else onSurface, modifier = Modifier.size(26.dp)) }
                     }
                 }
             } else {
-                PackSymbols(face, onChange, query, packs.map { it.packageName to it.label }, viewModel)
-            }
-        }
-    }
-}
-
-/** The pictures of one installed icon pack, searchable, a page at a time. */
-@Composable
-private fun PackSymbols(face: TileFace, onChange: (TileFace) -> Unit, query: String, packs: List<Pair<String, String>>, viewModel: SettingsViewModel) {
-    var pack by remember { mutableStateOf(face.packIcon?.first ?: packs.firstOrNull()?.first) }
-    var icons by remember(pack) { mutableStateOf<List<IconPackIcon>?>(null) }
-    var shown by remember(pack, query) { mutableIntStateOf(PACK_PAGE) }
-    LaunchedEffect(pack) { icons = pack?.let { viewModel.availableIconPackIcons(it) } }
-    val accent = MaterialTheme.colorScheme.primary
-
-    if (packs.size > 1) {
-        Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            packs.forEach { (pkg, label) -> FilterChip(selected = pkg == pack, onClick = { pack = pkg }, label = { Text(label) }) }
-        }
-    }
-    val all = icons
-    val currentPack = pack
-    when {
-        all == null || currentPack == null -> Text(stringResource(R.string.settings_folder_icon_pack_loading), style = MaterialTheme.typography.bodySmall)
-        else -> {
-            val q = query.trim().lowercase()
-            val matches = if (q.isEmpty()) all else all.filter { q in it.searchText }
-            if (matches.isEmpty()) Text(stringResource(R.string.tile_nothing_found), style = MaterialTheme.typography.bodySmall)
-            val page = matches.take(shown)
-            EqualGrid(count = page.size, columns = 5, gap = 6.dp) { index ->
-                val icon = page[index]
-                val picked = face.packIcon == (currentPack to icon.drawable)
-                Box(
-                    modifier = Modifier
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .border(if (picked) 2.dp else 0.dp, if (picked) accent else Color.Transparent, RoundedCornerShape(12.dp))
-                        .clickable {
-                            // A picture brings its own background: none behind it unless asked for.
-                            onChange(face.copy(symbol = TileFace.packSymbol(currentPack, icon.drawable), surface = TileSurface.NONE))
-                        },
-                    contentAlignment = Alignment.Center
-                ) { PackPicture(currentPack to icon.drawable, 44.dp, icon.drawable) }
-            }
-            if (matches.size > shown) {
-                TextButton(onClick = { shown += PACK_PAGE }, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.tile_more, matches.size - shown))
+                val all = packIcons
+                val currentPack = pack
+                when {
+                    all == null || currentPack == null -> Text(stringResource(R.string.settings_folder_icon_pack_loading), style = MaterialTheme.typography.bodyMedium)
+                    else -> {
+                        val matches = if (q.isEmpty()) all else all.filter { q in it.searchText }
+                        if (matches.isEmpty()) Text(stringResource(R.string.tile_nothing_found), style = MaterialTheme.typography.bodyMedium)
+                        LazyVerticalGrid(
+                            columns = GridCells.Adaptive(64.dp),
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(bottom = 16.dp)
+                        ) {
+                            items(matches, key = { it.drawable }) { icon ->
+                                val picked = face.packIcon == (currentPack to icon.drawable)
+                                Box(
+                                    modifier = Modifier
+                                        .aspectRatio(1f)
+                                        .clip(RoundedCornerShape(14.dp))
+                                        .border(if (picked) 2.dp else 0.dp, if (picked) accent else Color.Transparent, RoundedCornerShape(14.dp))
+                                        // A picture brings its own background: none behind it unless asked for.
+                                        .clickable { onPick(face.copy(kind = TileKind.SYMBOL, symbol = TileFace.packSymbol(currentPack, icon.drawable), surface = TileSurface.NONE)) },
+                                    contentAlignment = Alignment.Center
+                                ) { PackPicture(currentPack to icon.drawable, 48.dp, icon.drawable) }
+                            }
+                        }
+                    }
                 }
             }
         }

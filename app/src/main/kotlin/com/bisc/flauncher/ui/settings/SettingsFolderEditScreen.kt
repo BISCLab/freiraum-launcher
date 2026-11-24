@@ -161,7 +161,16 @@ fun SettingsFolderEditScreen(
             newName?.takeIf { nameChanged }?.let { viewModel.renameFolder(folderId, it) }
             face?.takeIf { faceChanged }?.let { viewModel.setFolderTileFace(folderId, it) }
         },
-        dirty = nameChanged || faceChanged
+        dirty = nameChanged || faceChanged,
+        // The closed folder as it will look, fixed on top like on a category's page.
+        header = {
+            val shownFace = face ?: folder?.face()
+            TilePreviewHeader(
+                name = edited ?: folder?.name.orEmpty(),
+                tile = { around -> FolderIcon(folder = folder, previewItems = items, modifier = Modifier.fillMaxSize(), face = shownFace, around = around) },
+                labelColor = shownFace?.labelColor?.let { Color(it) }
+            )
+        }
     ) {
         if (folder == null) return@SettingsSubScreen
 
@@ -184,10 +193,6 @@ fun SettingsFolderEditScreen(
         // How the closed folder looks as a tile, as it lies in the Dock, a box or on a page.
         val shownFace = face ?: folder.face()
         SettingsGroupLabel(stringResource(R.string.settings_category_tile_label), info = stringResource(R.string.settings_folder_tile_info))
-        TilePreviewHeader(
-            name = edited ?: folder.name,
-            tile = { around -> FolderIcon(folder = folder, previewItems = items, modifier = Modifier.fillMaxSize(), face = shownFace, around = around) }
-        )
         TileFaceEditor(
             face = shownFace,
             onChange = { face = it },

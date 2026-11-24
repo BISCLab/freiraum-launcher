@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home
 
+import com.bisc.flauncher.data.model.face
 import android.content.ComponentName
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
@@ -51,6 +52,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -484,7 +486,7 @@ private fun FolderContentCell(
                 )
                 if (showLabel) {
                     Spacer(Modifier.height(6.dp))
-                    GridLabel(childFolder?.name.orEmpty())
+                    GridLabel(childFolder?.name.orEmpty(), childFolder?.face()?.labelColor?.let { Color(it) })
                 }
             }
             GridItemType.CATEGORY -> {
@@ -492,7 +494,7 @@ private fun FolderContentCell(
                 CategoryMark(category, modifier = Modifier.size(56.dp), shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
                 if (showLabel) {
                     Spacer(Modifier.height(6.dp))
-                    GridLabel(category?.name.orEmpty())
+                    GridLabel(category?.name.orEmpty(), category?.face()?.labelColor?.let { Color(it) })
                 }
             }
             GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET, GridItemType.PAGE, GridItemType.CONTACT, GridItemType.ACTION_BUTTON -> Unit
@@ -501,8 +503,8 @@ private fun FolderContentCell(
 }
 
 @Composable
-private fun GridLabel(text: String) {
-    Text(text, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelSmall)
+private fun GridLabel(text: String, color: Color? = null) {
+    Text(text, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelSmall, color = color ?: Color.Unspecified)
 }
 
 /** Some of the Panel's widgets, drawn like the widgets in a folder. [onTouch] tells the Panel when a

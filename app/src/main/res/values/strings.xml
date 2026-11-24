@@ -1157,12 +1157,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="tile_kind_content">Contents</string>
     <string name="tile_kind_symbol">Symbol</string>
     <string name="tile_kind_letter">Letter</string>
-    <string name="tile_symbol_title">Symbol</string>
     <string name="tile_source_catalog">Catalog</string>
     <string name="tile_source_pack">Icon pack</string>
     <string name="tile_no_pack">No icon pack is installed. The catalog symbols always work.</string>
     <string name="tile_search">Search symbols</string>
-    <string name="tile_more" tools:ignore="PluralsCandidate">Show %1$d more</string>
     <string name="tile_nothing_found">Nothing found.</string>
     <string name="tile_surface_title">Surface behind it</string>
     <string name="tile_surface_color">Color</string>
@@ -1188,4 +1186,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_folder_row_like">like row %1$d</string>
     <string name="settings_folder_show_real">Show the folder as it really looks</string>
     <string name="settings_folder_show_aids">Show the fields for adding</string>
+    <string name="tile_symbol_choose">Choose a symbol</string>
+    <string name="tile_symbol_from_catalog">From the catalog</string>
+    <string name="tile_symbol_from_pack">From %1$s</string>
+    <string name="tile_colors_title">Colors</string>
+    <string name="tile_label_color">Color of the name below</string>
 </resources>
