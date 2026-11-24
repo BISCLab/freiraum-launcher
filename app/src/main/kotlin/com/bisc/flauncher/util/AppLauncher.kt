@@ -17,7 +17,8 @@ fun launchApp(context: Context, componentName: ComponentName) {
     ProfileComponents.userOf(context, componentName)?.let { user ->
         val userManager = context.getSystemService(android.os.UserManager::class.java)
         runCatching {
-            if (userManager.isQuietModeEnabled(user)) userManager.requestQuietModeEnabled(false, user)
+            // Switching a profile on from here exists from Android 9; before, the system shows its own notice.
+            if (userManager.isQuietModeEnabled(user) && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) userManager.requestQuietModeEnabled(false, user)
             else context.getSystemService(android.content.pm.LauncherApps::class.java)
                 .startMainActivity(ProfileComponents.real(componentName), user, null, launchZoomOptions(context))
         }

@@ -86,7 +86,7 @@ fun searchScore(text: String, query: String): Int {
 fun matchesWordStart(text: String, query: String): Boolean = searchScore(text, query) > NONE
 
 /** Like [matchesWordStart] for queries of several words, in any order: every word of [query] has to
- *  be found somewhere in [text] - so "linden 12" finds "Lindenstraße 12, 12345 Musterstadt". */
+ *  be found somewhere in [text] - so "klee 23" finds "Kleeberger Straße 23, 35510 Butzbach". */
 fun matchesAllWordStarts(text: String, query: String): Boolean = searchScore(text, query) > NONE
 
 /** Whether [query] (one or several words) matches [label] or any of [keywords]: every word has to

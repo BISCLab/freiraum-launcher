@@ -100,6 +100,7 @@ class ProfileAppsRepository @Inject constructor(
     /** Pauses or locks the profile ([locked] = true), or switches it on again. The system may ask
      *  for the screen lock first. */
     fun setLocked(user: UserHandle, locked: Boolean) {
-        runCatching { userManager.requestQuietModeEnabled(locked, user) }
+        // Exists from Android 9.
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) runCatching { userManager.requestQuietModeEnabled(locked, user) }
     }
 }

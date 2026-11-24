@@ -414,13 +414,14 @@ private fun LivePhone(
     dark: Boolean,
     corners: Map<com.bisc.flauncher.ui.settings.ShapePart, Int>
 ) {
-    val designDark = design?.theme?.let { it == com.bisc.flauncher.ui.theme.ThemePreference.DARK } ?: dark
     val frame = RoundedCornerShape(30.dp)
-    val box = design?.box ?: com.bisc.flauncher.data.model.ElementAppearance()
-    val accent = Color(design?.accent ?: 0xFF0758F5.toInt())
-    fun shape(part: com.bisc.flauncher.ui.settings.ShapePart, fallback: Int) =
-        com.bisc.flauncher.ui.theme.PartCornerShape(corners[part] ?: fallback, full = 16.dp)
-    androidx.compose.animation.Crossfade(targetState = Triple(design, picture, corners), animationSpec = androidx.compose.animation.core.tween(350), label = "phone") { _ ->
+    // Each side of the fade draws its own state, so the old look really fades into the new one.
+    androidx.compose.animation.Crossfade(targetState = Triple(design, picture, corners), animationSpec = androidx.compose.animation.core.tween(350), label = "phone") { (design, picture, corners) ->
+        val designDark = design?.theme?.let { it == com.bisc.flauncher.ui.theme.ThemePreference.DARK } ?: dark
+        val box = design?.box ?: com.bisc.flauncher.data.model.ElementAppearance()
+        val accent = Color(design?.accent ?: 0xFF0758F5.toInt())
+        fun shape(part: com.bisc.flauncher.ui.settings.ShapePart, fallback: Int) =
+            com.bisc.flauncher.ui.theme.PartCornerShape(corners[part] ?: fallback, full = 16.dp)
         CompositionLocalProvider(
             com.bisc.flauncher.ui.theme.LocalDesignEffects provides design?.effects,
             com.bisc.flauncher.ui.home.LocalSurfaceIsDark provides designDark
