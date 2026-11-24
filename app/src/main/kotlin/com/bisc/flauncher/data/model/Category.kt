@@ -26,7 +26,11 @@ data class Category(
     // the kind for ANDROID_KIND. Null = the rule's default.
     val ruleParam: String? = null,
     // True: the members keep the order they were put in; false: apps by name, then the rest.
-    val manualOrder: Boolean = false
+    val manualOrder: Boolean = false,
+    // How it looks as a tile, see [TileFace]; null = read from iconKey and color, see [face].
+    val tileFace: String? = null,
+    // How its name looks, a [CategoryNameStyle]; null = read from color, see [nameLook].
+    val nameStyle: String? = null
 ) {
     val smartRule: CategoryRule? get() = rule?.let { runCatching { CategoryRule.valueOf(it) }.getOrNull() }
 }
@@ -92,3 +96,27 @@ data class CategoryWidgetConfig(
         fun keyFor(row: PageRow): String = if (row.pageId == -1L) "f${row.id}" else "r${row.id}"
     }
 }
+
+/** How the category looks as a tile. Categories from before [TileFace] are read from their symbol
+ *  ("none" = the first letter) and their color (0 = an outline only). */
+fun Category.face(): TileFace = TileFace.fromJson(tileFace) ?: run {
+    val outline = color == 0
+    when (val key = iconKey) {
+        null -> TileFace(surface = if (outline) TileSurface.OUTLINE else TileSurface.AUTO)
+        "none" -> TileFace(kind = TileKind.LETTER, surface = if (outline) TileSurface.OUTLINE else TileSurface.AUTO)
+        else -> TileFace(
+            kind = TileKind.SYMBOL,
+            symbol = key,
+            surface = when {
+                key.startsWith(TileFace.PACK_PREFIX) -> TileSurface.NONE
+                outline -> TileSurface.OUTLINE
+                else -> TileSurface.AUTO
+            }
+        )
+    }
+}
+
+/** How the category's name looks; from before [nameStyle], an outline when it had no color. */
+fun Category.nameLook(): CategoryNameStyle =
+    nameStyle?.let { runCatching { CategoryNameStyle.valueOf(it) }.getOrNull() }
+        ?: if (color == 0) CategoryNameStyle.OUTLINE else CategoryNameStyle.PILL

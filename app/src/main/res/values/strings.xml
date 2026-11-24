@@ -1166,4 +1166,36 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
         <item quantity="one">This won\'t fit here anymore. Only %1$d row is free on this page. When you save, you can make a new page for it.</item>
         <item quantity="other">This won\'t fit here anymore. Only %1$d rows are free on this page. When you save, you can make a new page for it.</item>
     </plurals>
+    <string name="tile_kind_title">What does the tile show?</string>
+    <string name="tile_kind_content">Contents</string>
+    <string name="tile_kind_symbol">Symbol</string>
+    <string name="tile_kind_letter">Letter</string>
+    <string name="tile_symbol_title">Symbol</string>
+    <string name="tile_source_catalog">Catalog</string>
+    <string name="tile_source_pack">Icon pack</string>
+    <string name="tile_no_pack">No icon pack is installed. The catalog symbols always work.</string>
+    <string name="tile_search">Search symbols</string>
+    <string name="tile_more">Show %1$d more</string>
+    <string name="tile_nothing_found">Nothing found.</string>
+    <string name="tile_surface_title">Surface behind it</string>
+    <string name="tile_surface_color">Color</string>
+    <string name="tile_surface_outline">Just an outline</string>
+    <string name="tile_surface_none">None</string>
+    <string name="tile_surface_color_pick">Surface color</string>
+    <string name="tile_pack_own">The icon pack picture brings its own background.</string>
+    <string name="tile_pack_surface">A surface behind it anyway</string>
+    <string name="tile_symbol_color">Symbol color</string>
+    <string name="tile_letter_color">Letter color</string>
+    <string name="tile_preview_page">Page</string>
+    <string name="tile_preview_light">Light</string>
+    <string name="tile_preview_dark">Dark</string>
+    <string name="tile_content_category">Shows the category\'s first four apps, like a folder.</string>
+    <string name="tile_content_folder">Shows the folder\'s first four apps.</string>
+    <string name="settings_folder_tile_info">This is how the folder looks in the Dock, the Panel, element boxes and on pages.</string>
+    <string name="category_name_look_title">How the name shows</string>
+    <string name="category_name_look_info">On the Categories page, in the search, in the widget and in the App list.</string>
+    <string name="category_name_look_pill">Filled</string>
+    <string name="category_name_look_outline">Outlined</string>
+    <string name="category_name_look_text">Text only</string>
+    <string name="category_color_title">Category color</string>
 </resources>

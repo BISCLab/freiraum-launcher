@@ -38,8 +38,27 @@ data class Folder(
     val showLabelsOverrideEnabled: Boolean = false,
     val showLabels: Boolean = false,
     // Set: the folder follows this category and shows what it holds instead of its own apps.
-    val categoryId: Long? = null
+    val categoryId: Long? = null,
+    // How it looks as a tile, see [TileFace]; null = still the older iconMode fields, see [face].
+    val tileFace: String? = null
 )
+
+/** How the folder looks as a tile; folders from before [TileFace] are read from their icon mode. */
+fun Folder.face(): TileFace = TileFace.fromJson(tileFace) ?: when (iconMode) {
+    FolderIconMode.AUTO_STACK -> TileFace()
+    FolderIconMode.CUSTOM_COLOR -> TileFace(
+        kind = TileKind.SYMBOL,
+        symbol = "folder",
+        surface = TileSurface.COLOR,
+        surfaceColor = iconColor?.let { runCatching { android.graphics.Color.parseColor(it) }.getOrNull() }
+    )
+    FolderIconMode.ICON_PACK -> {
+        val pack = iconPackPackage
+        val drawable = iconPackDrawable
+        if (pack != null && drawable != null) TileFace(kind = TileKind.SYMBOL, symbol = TileFace.packSymbol(pack, drawable), surface = TileSurface.NONE)
+        else TileFace()
+    }
+}
 
 /** Most elements one folder sub-row holds - as many as fit across the folder view. */
 const val MAX_FOLDER_ROW_COLUMNS = 5

@@ -25,7 +25,7 @@ import com.bisc.flauncher.data.model.SavedMapTarget
         PinnedContact::class, ActionButton::class,
         com.bisc.flauncher.data.model.Category::class, com.bisc.flauncher.data.model.CategoryMember::class
     ],
-    version = 66,
+    version = 67,
     exportSchema = true
 )
 @TypeConverters(Converters::class)

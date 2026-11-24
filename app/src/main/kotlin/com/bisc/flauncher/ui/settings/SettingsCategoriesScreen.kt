@@ -1,5 +1,9 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.layout.fillMaxSize
+import com.bisc.flauncher.data.model.nameLook
+import com.bisc.flauncher.data.model.face
+import com.bisc.flauncher.data.model.CategoryNameStyle
 import android.content.ComponentName
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -83,16 +87,13 @@ import com.bisc.flauncher.ui.home.categoryColor
 import com.bisc.flauncher.ui.home.categoryIcon
 import com.bisc.flauncher.ui.home.inkOn
 import com.bisc.flauncher.ui.home.CATEGORY_NO_COLOR
-import com.bisc.flauncher.ui.home.CATEGORY_NO_ICON
 import com.bisc.flauncher.ui.home.hasFill
 import com.bisc.flauncher.ui.home.hasSymbol
-import com.bisc.flauncher.ui.home.face
-import com.bisc.flauncher.ui.home.packIcon
 
 /** A category's symbol on its color, as a small round badge. */
 @Composable
 internal fun CategoryBadge(category: Category?, size: androidx.compose.ui.unit.Dp = 36.dp) {
-    com.bisc.flauncher.ui.home.CategoryMark(category, iconSize = size * 0.55f, modifier = Modifier.size(size))
+    com.bisc.flauncher.ui.home.CategoryMark(category, modifier = Modifier.size(size))
 }
 
 /** Settings > Elements > Categories: every category in its order, new ones, Android's own kinds as
@@ -354,7 +355,10 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
     val categories by viewModel.categories.collectAsState()
     val resolved by viewModel.resolvedCategories.collectAsState()
     val saved = categories.find { it.id == categoryId } ?: return
-    var draft by rememberDraft(saved)
+    // Categories from before the name look and the tile had their own fields: read once into them,
+    // so the page starts from what is shown, and only a change makes it ask to save.
+    val base = remember(saved) { saved.withLookFields() }
+    var draft by rememberDraft(base)
     val members = resolved.find { it.category.id == categoryId }?.members.orEmpty()
     // What an own category holds, as a draft: kind and payload in their stored order.
     val savedMembers = members.map { it.type to it.payload }
@@ -364,8 +368,6 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
     val places by viewModel.savedMapTargets.collectAsState()
     val shortcuts by viewModel.pinnedShortcuts.collectAsState()
     val contacts by homeViewModel.pinnedContacts.collectAsState()
-    var showIconPicker by remember { mutableStateOf(false) }
-    var pickingPackIcon by remember { mutableStateOf(false) }
     var pickingApps by remember { mutableStateOf(false) }
     var pickingElements by remember { mutableStateOf(false) }
     var confirmingDelete by remember { mutableStateOf(false) }
@@ -386,9 +388,17 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
         onBack = onBack,
         onSave = {
             viewModel.updateCategory(draft)
-            if (membersChanged || draft.manualOrder != saved.manualOrder) viewModel.replaceCategoryMembers(categoryId, shownMembers.map { it.type to it.payload })
+            if (membersChanged || draft.manualOrder != base.manualOrder) viewModel.replaceCategoryMembers(categoryId, shownMembers.map { it.type to it.payload })
         },
-        dirty = draft != saved || membersChanged
+        dirty = draft != base || membersChanged,
+        // The tile and the name as they will look, always in sight while choosing.
+        header = {
+            TilePreviewHeader(
+                name = draft.name,
+                tile = { around -> com.bisc.flauncher.ui.home.CategoryMark(draft, modifier = Modifier.fillMaxSize(), shape = RoundedCornerShape(16.dp), ink = around) },
+                extra = { around -> com.bisc.flauncher.ui.home.CategoryNamePill(draft, MaterialTheme.typography.labelLarge, ink = around) }
+            )
+        }
     ) {
         SettingsPreferenceGroup {
             Box(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(16.dp)) {
@@ -402,57 +412,38 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
                 )
             }
         }
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_category_no_color),
-                summary = stringResource(R.string.settings_category_no_color_summary),
-                onClick = { draft = draft.copy(color = if (draft.hasFill) CATEGORY_NO_COLOR else null) },
-                trailing = {
-                    androidx.compose.material3.Switch(
-                        checked = !draft.hasFill,
-                        onCheckedChange = { off -> draft = draft.copy(color = if (off) CATEGORY_NO_COLOR else null) }
-                    )
-                }
+        SettingsPreferenceGroup(title = stringResource(R.string.category_color_title)) {
+            AutomaticColorPicker(
+                title = stringResource(R.string.settings_category_color),
+                custom = draft.color,
+                automaticSeed = categoryColor(draft.copy(color = null)).toArgb(),
+                onChange = { draft = draft.copy(color = it) },
+                ownGroup = false
             )
-            if (draft.hasFill) {
-                AutomaticColorPicker(
-                    title = stringResource(R.string.settings_category_color),
-                    custom = draft.color,
-                    automaticSeed = categoryColor(draft.copy(color = null)).toArgb(),
-                    onChange = { draft = draft.copy(color = it) },
-                    ownGroup = false
-                )
+        }
+        SettingsPreferenceGroup(title = stringResource(R.string.category_name_look_title), info = stringResource(R.string.category_name_look_info)) {
+            listOf(
+                CategoryNameStyle.PILL to R.string.category_name_look_pill,
+                CategoryNameStyle.OUTLINE to R.string.category_name_look_outline,
+                CategoryNameStyle.TEXT to R.string.category_name_look_text
+            ).forEach { (style, label) ->
+                RadioPreference(stringResource(label), style, draft.nameLook(), { draft = draft.copy(nameStyle = it.name) })
             }
         }
         // How it looks as a tile, like a folder's icon: only in the Dock, the Panel, boxes and folders.
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_category_tile_label), info = stringResource(R.string.settings_category_tile_info)) {
-            Box(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
-                com.bisc.flauncher.ui.home.CategoryMark(draft, iconSize = 30.dp, modifier = Modifier.size(56.dp), shape = RoundedCornerShape(16.dp))
-            }
-            RadioPreference(
-                stringResource(R.string.settings_category_face_content), com.bisc.flauncher.ui.home.CategoryFace.CONTENT, draft.face,
-                { draft = draft.copy(iconKey = null) },
-                summary = stringResource(R.string.settings_category_face_content_summary)
-            )
-            RadioPreference(
-                stringResource(R.string.settings_category_face_symbol), com.bisc.flauncher.ui.home.CategoryFace.SYMBOL, draft.face,
-                { showIconPicker = true },
-                summary = stringResource(R.string.settings_category_face_symbol_summary)
-            )
-            RadioPreference(
-                stringResource(R.string.settings_category_face_letter), com.bisc.flauncher.ui.home.CategoryFace.LETTER, draft.face,
-                { draft = draft.copy(iconKey = CATEGORY_NO_ICON) }
-            )
-            if (draft.face == com.bisc.flauncher.ui.home.CategoryFace.SYMBOL) {
-                SettingsPreference(
-                    icon = null,
-                    leading = { com.bisc.flauncher.ui.home.CategorySymbol(draft, 24.dp, MaterialTheme.colorScheme.onSurface) },
-                    title = stringResource(R.string.settings_category_pick_symbol),
-                    onClick = { showIconPicker = true }
-                )
-            }
-        }
+        SettingsGroupLabel(stringResource(R.string.settings_category_tile_label), info = stringResource(R.string.settings_category_tile_info))
+        TileFaceEditor(
+            face = draft.face(),
+            onChange = { draft = draft.copy(tileFace = it.toJson()) },
+            autoSurface = categoryColor(draft),
+            letter = draft.name,
+            content = shownMembers.take(4).map { member ->
+                if (member.type == GridItemType.APP) com.bisc.flauncher.ui.home.TileContent.App(ComponentName.unflattenFromString(member.payload))
+                else com.bisc.flauncher.ui.home.TileContent.Element(memberTypeIcon(member.type))
+            },
+            contentSummary = stringResource(R.string.tile_content_category),
+            viewModel = viewModel
+        )
         if (rule != null) RuleSettings(draft) { draft = it }
         if (rule == null && shownMembers.size > 1) {
             // Switching on keeps the order as it is shown now, ready to be dragged.
@@ -533,28 +524,6 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
         }
     }
 
-    if (showIconPicker) {
-        PictogramPickerSheet(
-            selected = draft.iconKey,
-            onSelect = { key -> draft = draft.copy(iconKey = key); showIconPicker = false },
-            onDismiss = { showIconPicker = false },
-            onIconPack = { showIconPicker = false; pickingPackIcon = true }
-        )
-    }
-    if (pickingPackIcon) {
-        val current = draft.packIcon()
-        SettingsFixedDialog(title = stringResource(R.string.settings_folder_icon_pack_choose_icon), onDismiss = { pickingPackIcon = false }) {
-            IconPackPickerContent(
-                viewModel = viewModel,
-                currentPack = current?.first,
-                currentDrawable = current?.second,
-                onPick = { pack, drawable ->
-                    draft = draft.copy(iconKey = com.bisc.flauncher.ui.home.categoryPackIconKey(pack, drawable))
-                    pickingPackIcon = false
-                }
-            )
-        }
-    }
     if (pickingApps) {
         val chosen = draftMembers.filter { it.first == GridItemType.APP }.map { it.second }.toSet()
         CategoryAppsPicker(
@@ -996,3 +965,13 @@ internal fun CategorySymbolsSwitch(place: String, summary: String, viewModel: Se
         trailing = { androidx.compose.material3.Switch(checked = on, onCheckedChange = { viewModel.setCategorySymbols(place, it) }) }
     )
 }
+
+/** This category with its look in the fields made for it: older ones kept it in the symbol and the
+ *  color (0 = an outline). Shown the same, so nothing changes until something is chosen. */
+private fun Category.withLookFields(): Category =
+    if (tileFace != null && nameStyle != null && color != CATEGORY_NO_COLOR) this
+    else copy(
+        tileFace = face().toJson(),
+        nameStyle = nameLook().name,
+        color = color.takeIf { it != CATEGORY_NO_COLOR }
+    )

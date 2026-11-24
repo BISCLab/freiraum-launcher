@@ -172,8 +172,8 @@ class MainActivity : ComponentActivity() {
                 com.bisc.flauncher.ui.home.LauncherCategories.symbolsOnPage = symbolsPage
                 com.bisc.flauncher.ui.home.LauncherCategories.symbolsInSearch = symbolsSearch
                 com.bisc.flauncher.ui.home.LauncherCategories.symbolsInAppList = symbolsAppList
-                com.bisc.flauncher.ui.home.LauncherCategories.loadPackIcon = settingsVm::loadPackIcon
-                com.bisc.flauncher.ui.home.LauncherCategories.loadAppIcon = settingsVm::loadIcon
+                com.bisc.flauncher.ui.home.TileIcons.loadPackIcon = settingsVm::loadPackIcon
+                com.bisc.flauncher.ui.home.TileIcons.loadAppIcon = settingsVm::loadIcon
             }
             val dotsOn by settingsVm.showNotificationDots.collectAsState()
             val dotPackages by notificationDots.packages.collectAsState()

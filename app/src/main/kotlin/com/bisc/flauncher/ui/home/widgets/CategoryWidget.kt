@@ -252,7 +252,7 @@ private fun CategoryTiles(shown: List<ResolvedCategory>, ink: androidx.compose.u
                                 .padding(vertical = 10.dp, horizontal = 6.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            com.bisc.flauncher.ui.home.CategoryMark(r.category, iconSize = 18.dp, modifier = Modifier.size(32.dp), ink = ink)
+                            com.bisc.flauncher.ui.home.CategoryMark(r.category, modifier = Modifier.size(32.dp), ink = ink)
                             Spacer(Modifier.size(6.dp))
                             Text(
                                 r.category.name,

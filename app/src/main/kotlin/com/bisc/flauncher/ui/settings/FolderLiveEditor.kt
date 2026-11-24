@@ -215,11 +215,11 @@ internal fun FolderItemIcon(
         }
         GridItemType.FOLDER -> {
             val sub = folders.find { it.id == item.payload.toLongOrNull() }
-            FolderIcon(folder = sub, previewItems = sub?.let { itemsByFolder[it.id] }.orEmpty(), loadIcon = loadIcon, loadPackIcon = loadPackIcon, modifier = Modifier.size(size))
+            FolderIcon(folder = sub, previewItems = sub?.let { itemsByFolder[it.id] }.orEmpty(), modifier = Modifier.size(size))
         }
         GridItemType.CATEGORY -> {
             val category = com.bisc.flauncher.ui.home.LauncherCategories.find(item.payload.toLongOrNull())?.category
-            com.bisc.flauncher.ui.home.CategoryMark(category, iconSize = size * 0.55f, modifier = Modifier.size(size), shape = RoundedCornerShape(size / 3))
+            com.bisc.flauncher.ui.home.CategoryMark(category, modifier = Modifier.size(size), shape = RoundedCornerShape(size / 3))
         }
         else -> Box(
             modifier = Modifier.size(size).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)),

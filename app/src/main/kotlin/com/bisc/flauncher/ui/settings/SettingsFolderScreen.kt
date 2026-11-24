@@ -125,7 +125,7 @@ private fun FolderTile(folder: Folder, items: List<FolderItem>, viewModel: Setti
             .padding(vertical = 16.dp, horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        FolderIcon(folder = folder, previewItems = items, loadIcon = viewModel::loadIcon, loadPackIcon = viewModel::loadPackIcon, modifier = Modifier.size(52.dp))
+        FolderIcon(folder = folder, previewItems = items, modifier = Modifier.size(52.dp))
         Spacer(Modifier.height(10.dp))
         Text(folder.name, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
         Text(

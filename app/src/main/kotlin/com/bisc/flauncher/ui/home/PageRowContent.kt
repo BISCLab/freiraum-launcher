@@ -586,7 +586,7 @@ internal fun FolderCell(
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        FolderIcon(folder = folder, previewItems = previewItems, loadIcon = loadIcon, loadPackIcon = loadPackIcon, modifier = Modifier.size(56.dp * iconSizeScale))
+        FolderIcon(folder = folder, previewItems = previewItems, modifier = Modifier.size(56.dp * iconSizeScale))
         if (showLabel) {
             Spacer(Modifier.height(8.dp))
             GridLabel(folder?.name.orEmpty(), color = labelColor)
@@ -853,8 +853,6 @@ fun PillRowEntries(
                             FolderIcon(
                                 folder = folder,
                                 previewItems = previewItems,
-                                loadIcon = loadIcon,
-                                loadPackIcon = loadPackIcon,
                                 modifier = Modifier.fillMaxSize().clickable { folderId?.let(onFolderClick) }
                             )
                         }

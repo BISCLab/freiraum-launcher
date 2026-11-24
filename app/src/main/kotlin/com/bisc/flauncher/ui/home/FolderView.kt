@@ -480,8 +480,6 @@ private fun FolderContentCell(
                 FolderIcon(
                     folder = childFolder,
                     previewItems = folderId?.let { folderItemsByFolder[it] }.orEmpty(),
-                    loadIcon = loadIcon,
-                    loadPackIcon = loadPackIcon,
                     modifier = Modifier.size(56.dp)
                 )
                 if (showLabel) {
@@ -491,7 +489,7 @@ private fun FolderContentCell(
             }
             GridItemType.CATEGORY -> {
                 val category = LauncherCategories.find(item.payload.toLongOrNull())?.category
-                CategoryMark(category, iconSize = 30.dp, modifier = Modifier.size(56.dp), shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
+                CategoryMark(category, modifier = Modifier.size(56.dp), shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
                 if (showLabel) {
                     Spacer(Modifier.height(6.dp))
                     GridLabel(category?.name.orEmpty())

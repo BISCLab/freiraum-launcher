@@ -96,7 +96,7 @@ internal fun RowEntryRow(
             GridItemType.FOLDER -> {
                 val folderId = remember(entry.payload) { entry.payload.toLongOrNull() }
                 val folder = folders.find { it.id == folderId }
-                FolderIcon(folder = folder, previewItems = folderId?.let { folderItemsByFolder[it] }.orEmpty(), loadIcon = loadIcon, modifier = Modifier.size(28.dp))
+                FolderIcon(folder = folder, previewItems = folderId?.let { folderItemsByFolder[it] }.orEmpty(), modifier = Modifier.size(28.dp))
                 Text(folder?.name.orEmpty(), modifier = Modifier.weight(1f))
             }
             GridItemType.SHORTCUT -> {
@@ -138,7 +138,7 @@ internal fun RowEntryRow(
             }
             GridItemType.CATEGORY -> {
                 val category = com.bisc.flauncher.ui.home.LauncherCategories.find(entry.payload.toLongOrNull())?.category
-                com.bisc.flauncher.ui.home.CategoryMark(category, iconSize = 16.dp, modifier = Modifier.size(28.dp))
+                com.bisc.flauncher.ui.home.CategoryMark(category, modifier = Modifier.size(28.dp))
                 Text(category?.name.orEmpty(), modifier = Modifier.weight(1f))
             }
             GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Text("", modifier = Modifier.weight(1f))
@@ -177,7 +177,7 @@ fun FolderPickerDialog(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    FolderIcon(folder = folder, previewItems = folderItemsByFolder[folder.id].orEmpty(), loadIcon = loadIcon, modifier = Modifier.size(36.dp))
+                    FolderIcon(folder = folder, previewItems = folderItemsByFolder[folder.id].orEmpty(), modifier = Modifier.size(36.dp))
                     Text(folder.name, style = MaterialTheme.typography.titleMedium)
                 }
             }

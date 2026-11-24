@@ -174,7 +174,7 @@ fun SettingsFolderEditScreen(
                     .clickable { pickingFolderIcon = true },
                 contentAlignment = Alignment.Center
             ) {
-                FolderIcon(folder = folder, previewItems = items, loadIcon = viewModel::loadIcon, loadPackIcon = viewModel::loadPackIcon, modifier = Modifier.size(56.dp))
+                FolderIcon(folder = folder, previewItems = items, modifier = Modifier.size(56.dp))
             }
             OutlinedTextField(
                 value = edited ?: folder.name,
