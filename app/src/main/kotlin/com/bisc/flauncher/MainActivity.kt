@@ -133,6 +133,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Before anything is drawn: tiles that show at once (Dock, Panel) load their pictures right away.
+        com.bisc.flauncher.ui.home.TileIcons.loadAppIcon = appIconLoader::load
+        com.bisc.flauncher.ui.home.TileIcons.loadPackIcon = appIconLoader::loadPackIcon
         // Every start is noted once, here, for as long as the launcher runs.
         val launchScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.IO)
         com.bisc.flauncher.util.AppLaunches.onLaunch = { component ->
@@ -171,8 +174,6 @@ class MainActivity : ComponentActivity() {
                 com.bisc.flauncher.ui.home.LauncherCategories.symbolsOnPage = symbolsPage
                 com.bisc.flauncher.ui.home.LauncherCategories.symbolsInSearch = symbolsSearch
                 com.bisc.flauncher.ui.home.LauncherCategories.symbolsInAppList = symbolsAppList
-                com.bisc.flauncher.ui.home.TileIcons.loadPackIcon = settingsVm::loadPackIcon
-                com.bisc.flauncher.ui.home.TileIcons.loadAppIcon = settingsVm::loadIcon
             }
             val dotsOn by settingsVm.showNotificationDots.collectAsState()
             val dotPackages by notificationDots.packages.collectAsState()
