@@ -1,5 +1,6 @@
 package com.bisc.flauncher.data.model
 
+import androidx.core.graphics.toColorInt
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -50,7 +51,7 @@ fun Folder.face(): TileFace = TileFace.fromJson(tileFace) ?: when (iconMode) {
         kind = TileKind.SYMBOL,
         symbol = "folder",
         surface = TileSurface.COLOR,
-        surfaceColor = iconColor?.let { runCatching { android.graphics.Color.parseColor(it) }.getOrNull() }
+        surfaceColor = iconColor?.let { runCatching { it.toColorInt() }.getOrNull() }
     )
     FolderIconMode.ICON_PACK -> {
         val pack = iconPackPackage

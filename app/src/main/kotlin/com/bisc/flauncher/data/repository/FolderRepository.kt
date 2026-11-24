@@ -63,33 +63,6 @@ class FolderRepository @Inject constructor(
         folderDao.get(id)?.let { folderDao.update(it.copy(name = newName)) }
     }
 
-    suspend fun setFolderIconById(
-        id: Long,
-        mode: FolderIconMode,
-        color: String? = null,
-        packPackage: String? = null,
-        packDrawable: String? = null
-    ) {
-        folderDao.get(id)?.let { setFolderIcon(it, mode, color, packPackage, packDrawable) }
-    }
-
-    suspend fun setFolderIcon(
-        folder: Folder,
-        mode: FolderIconMode,
-        color: String? = null,
-        packPackage: String? = null,
-        packDrawable: String? = null
-    ) {
-        folderDao.update(
-            folder.copy(
-                iconMode = mode,
-                iconColor = if (mode == FolderIconMode.CUSTOM_COLOR) color else null,
-                iconPackPackage = if (mode == FolderIconMode.ICON_PACK) packPackage else null,
-                iconPackDrawable = if (mode == FolderIconMode.ICON_PACK) packDrawable else null
-            )
-        )
-    }
-
     suspend fun setFolderAppearanceOverrideEnabledById(id: Long, enabled: Boolean) {
         folderDao.get(id)?.let { folderDao.update(it.copy(appearanceOverrideEnabled = enabled)) }
     }

@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.drawWithContent
 import com.bisc.flauncher.ui.accessibleOutline
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.GridView
@@ -233,8 +235,9 @@ private fun SettingsSearchResults(query: String, fromRoute: String?, onOpen: (St
             com.bisc.flauncher.util.matchesLabelOrKeywords(context.getString(it.labelRes), it.keywords, query)
         }.sortedByDescending { com.bisc.flauncher.util.labelOrKeywordsScore(context.getString(it.labelRes), it.keywords, query) }
     }
+    val scroll = rememberScrollState()
     Column(
-        modifier = Modifier.widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().imePadding().verticalScroll(rememberScrollState()).padding(16.dp),
+        modifier = Modifier.widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).fillMaxWidth().imePadding().fadeWhenMoreBelow(scroll).verticalScroll(scroll).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         when {
@@ -260,6 +263,27 @@ private fun SettingsSearchResults(query: String, fromRoute: String?, onOpen: (St
         }
     }
 }
+
+/** While more lies below, the bottom of a list fades out instead of being cut off, so it is clear
+ *  that it scrolls on. At the end the last entry shows whole. */
+internal fun Modifier.fadeWhenMoreBelow(scroll: androidx.compose.foundation.ScrollState, height: androidx.compose.ui.unit.Dp = 72.dp): Modifier = this
+    .graphicsLayer { compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen }
+    .drawWithContent {
+        drawContent()
+        if (scroll.canScrollForward) {
+            val h = height.toPx().coerceAtMost(size.height)
+            drawRect(
+                brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                    listOf(androidx.compose.ui.graphics.Color.Black, androidx.compose.ui.graphics.Color.Transparent),
+                    startY = size.height - h,
+                    endY = size.height
+                ),
+                topLeft = androidx.compose.ui.geometry.Offset(0f, size.height - h),
+                size = androidx.compose.ui.geometry.Size(size.width, h),
+                blendMode = androidx.compose.ui.graphics.BlendMode.DstIn
+            )
+        }
+    }
 
 /** The area a settings route belongs to, shown under a search match. */
 @Composable

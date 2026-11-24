@@ -4,6 +4,12 @@
 
 - About: "BISC Lab" in the normal text color
 - Sheets that slide up from below open in full and use most of the screen height, so lists like the symbols show whole without scrolling
+- Folders and categories share one tile editor (folder or category > As a tile): what the tile shows (contents, a symbol or the letter), the symbol from the catalog or an icon pack, the surface behind it and the symbol's color; with a preview on your page background, light or dark
+- Folders can now use symbols from the catalog too
+- Categories: their color and how their name shows (filled, outlined or text only) are set on their own
+- Folders: the row list shows every row there is, including those that follow the last one set; tapping a row lights it up in the folder
+- Folders: the fields for adding are dashed, and the eye shows the folder as it really opens
+- Settings search: a long list fades out at the bottom while there is more below
 
 ## 0.20.0
 

@@ -1519,10 +1519,6 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { folderRepository.renameFolder(folder, newName) }
     }
 
-    fun setFolderIcon(folder: Folder, mode: FolderIconMode, color: String? = null, packPackage: String? = null, packDrawable: String? = null) {
-        viewModelScope.launch { folderRepository.setFolderIcon(folder, mode, color, packPackage, packDrawable) }
-    }
-
     fun loadPackIcon(iconPackPackage: String, drawableName: String): ImageBitmap? =
         appIconLoader.loadPackIcon(iconPackPackage, drawableName)
 

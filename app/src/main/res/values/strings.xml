@@ -3,7 +3,6 @@
     <string name="app_name">Freiraum Launcher</string>
 
 
-    <string name="folder_icon_auto">Use app preview as icon</string>
     <string name="folder_item_move">Move</string>
     <string name="folder_item_remove">Remove</string>
     <string name="folder_move_hint">Choose a position</string>
@@ -225,7 +224,6 @@
     <string name="settings_folder_delete">Delete folder</string>
     <string name="settings_folder_delete_confirm_message">The folder and everything in it are deleted for good.</string>
     <string name="settings_folder_widget_app_widget">App widget</string>
-    <string name="settings_folder_icon_pack_label">Icon pack</string>
     <string name="settings_folder_icon_pack_choose_icon">Choose icon</string>
     <string name="settings_folder_icon_pack_none_installed">No icon packs installed</string>
     <string name="settings_folder_icon_pack_loading">Loading…</string>
@@ -767,7 +765,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_hub_app_list_behavior">Edge, what is shown, its own search</string>
     <string name="settings_hub_app_grid_appearance">Page, grid, search field</string>
     <string name="settings_hub_app_grid_behavior">Search field, keyboard, folders</string>
-    <string name="settings_folder_icon_tap_hint">Tap the icon to change it</string>
     <string name="settings_folder_live_hint">This is how the folder looks when open. Tap something to change or move it. You only see the dashed fields for adding here, not in the folder itself. The eye at the top right shows it without them.</string>
     <string name="settings_folder_add_content">App or element</string>
     <string name="settings_folder_add_widget">Widget</string>
@@ -1134,9 +1131,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_category_manual_order">Own order</string>
     <string name="settings_category_manual_order_on">Drag the items below into your order</string>
     <string name="settings_category_manual_order_off">Apps by name, then the rest</string>
-    <string name="settings_category_no_icon">No symbol</string>
-    <string name="settings_category_no_color">No color</string>
-    <string name="settings_category_no_color_summary">Just an outline around it</string>
     <string name="widget_categories_mode_rows">Several stacked</string>
     <string name="widget_categories_mode_rows_summary">Each category with its apps, one below the other. You scroll through.</string>
     <string name="welcome_widgets_categories">Your categories with their apps. With tabs, stacked or as small tiles.</string>
@@ -1149,15 +1143,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_categories_colors_tile">Colors and symbols</string>
     <string name="settings_categories_behavior_search">Categories page: Behavior</string>
     <string name="settings_categories_symbols">Show symbols</string>
-    <string name="settings_category_icon_pack">From an icon pack</string>
     <string name="settings_category_tile_label">As a tile</string>
     <string name="settings_category_tile_info">This is how the category looks in the Dock, the Panel, element boxes and folders. Everywhere else it shows its name.</string>
-    <string name="settings_category_face_content">Contents</string>
-    <string name="settings_category_face_content_summary">The first four apps, like a folder</string>
-    <string name="settings_category_face_symbol">Symbol</string>
-    <string name="settings_category_face_symbol_summary">A symbol or a picture from an icon pack</string>
-    <string name="settings_category_face_letter">First letter</string>
-    <string name="settings_category_pick_symbol">Choose a symbol</string>
     <string name="settings_category_symbols_page_summary">In chips and cards, for categories with a symbol</string>
     <string name="settings_category_symbols_search_summary">In front of found categories that have a symbol</string>
     <string name="settings_category_symbols_applist_summary">In the category chips above the list</string>
@@ -1175,7 +1162,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="tile_source_pack">Icon pack</string>
     <string name="tile_no_pack">No icon pack is installed. The catalog symbols always work.</string>
     <string name="tile_search">Search symbols</string>
-    <string name="tile_more">Show %1$d more</string>
+    <string name="tile_more" tools:ignore="PluralsCandidate">Show %1$d more</string>
     <string name="tile_nothing_found">Nothing found.</string>
     <string name="tile_surface_title">Surface behind it</string>
     <string name="tile_surface_color">Color</string>

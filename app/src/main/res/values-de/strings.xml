@@ -3,7 +3,6 @@
     <string name="app_name">Freiraum Launcher</string>
 
 
-    <string name="folder_icon_auto">App-Vorschau als Symbol verwenden</string>
     <string name="folder_item_move">Verschieben</string>
     <string name="folder_item_remove">Entfernen</string>
     <string name="folder_move_hint">Position wählen</string>
@@ -234,7 +233,6 @@
     <string name="settings_folder_delete">Ordner löschen</string>
     <string name="settings_folder_delete_confirm_message">Der Ordner und alles darin werden für immer gelöscht.</string>
     <string name="settings_folder_widget_app_widget">App-Widget</string>
-    <string name="settings_folder_icon_pack_label">Icon-Pack</string>
     <string name="settings_folder_icon_pack_choose_icon">Symbol auswählen</string>
     <string name="settings_folder_icon_pack_none_installed">Keine Icon-Packs installiert</string>
     <string name="settings_folder_icon_pack_loading">Lädt…</string>
@@ -767,7 +765,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_hub_app_list_behavior">Rand, was angezeigt wird, eigene Suche</string>
     <string name="settings_hub_app_grid_appearance">Seite, Raster, Suchfeld</string>
     <string name="settings_hub_app_grid_behavior">Suchfeld, Tastatur, Ordner</string>
-    <string name="settings_folder_icon_tap_hint">Symbol antippen, um es zu ändern</string>
     <string name="settings_folder_live_hint">So sieht der Ordner offen aus. Tipp auf etwas, um es zu ändern oder zu verschieben. Die gestrichelten Felder zum Hinzufügen siehst du nur hier, im Ordner selbst nicht. Mit dem Auge oben rechts siehst du ihn ohne sie.</string>
     <string name="settings_folder_add_content">App oder Element</string>
     <string name="settings_folder_add_widget">Widget</string>
@@ -1134,9 +1131,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_category_manual_order">Eigene Reihenfolge</string>
     <string name="settings_category_manual_order_on">Zieh die Einträge unten in deine Reihenfolge</string>
     <string name="settings_category_manual_order_off">Apps nach Namen, dann der Rest</string>
-    <string name="settings_category_no_icon">Kein Symbol</string>
-    <string name="settings_category_no_color">Ohne Farbe</string>
-    <string name="settings_category_no_color_summary">Nur ein Rand drumherum</string>
     <string name="widget_categories_mode_rows">Mehrere untereinander</string>
     <string name="widget_categories_mode_rows_summary">Jede Kategorie mit ihren Apps, eine unter der anderen. Du scrollst durch.</string>
     <string name="welcome_widgets_categories">Deine Kategorien mit ihren Apps. Mit Reitern, untereinander oder als kleine Kacheln.</string>
@@ -1149,15 +1143,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_categories_colors_tile">Farben und Symbole</string>
     <string name="settings_categories_behavior_search">Kategorien-Seite: Verhalten</string>
     <string name="settings_categories_symbols">Symbole zeigen</string>
-    <string name="settings_category_icon_pack">Aus Icon-Pack</string>
     <string name="settings_category_tile_label">Als Kachel</string>
     <string name="settings_category_tile_info">So sieht die Kategorie im Dock, im Panel, in Element-Boxen und in Ordnern aus. Überall sonst steht ihr Name.</string>
-    <string name="settings_category_face_content">Inhalt</string>
-    <string name="settings_category_face_content_summary">Die ersten vier Apps, wie bei einem Ordner</string>
-    <string name="settings_category_face_symbol">Symbol</string>
-    <string name="settings_category_face_symbol_summary">Ein Symbol oder ein Bild aus einem Icon-Pack</string>
-    <string name="settings_category_face_letter">Anfangsbuchstabe</string>
-    <string name="settings_category_pick_symbol">Symbol wählen</string>
     <string name="settings_category_symbols_page_summary">In Chips und Karten, bei Kategorien mit Symbol</string>
     <string name="settings_category_symbols_search_summary">Vor dem Namen gefundener Kategorien, wenn sie ein Symbol haben</string>
     <string name="settings_category_symbols_applist_summary">In den Kategorie-Chips über der Liste</string>
@@ -1175,7 +1162,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="tile_source_pack">Icon-Pack</string>
     <string name="tile_no_pack">Es ist kein Icon-Pack installiert. Die Symbole aus dem Katalog gehen immer.</string>
     <string name="tile_search">Symbole suchen</string>
-    <string name="tile_more">%1$d weitere zeigen</string>
+    <string name="tile_more" tools:ignore="PluralsCandidate">%1$d weitere zeigen</string>
     <string name="tile_nothing_found">Nichts gefunden.</string>
     <string name="tile_surface_title">Fläche dahinter</string>
     <string name="tile_surface_color">Farbe</string>

@@ -339,18 +339,6 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch(kotlinx.coroutines.NonCancellable) { folderRepository.renameFolderById(folderId, newName) }
     }
 
-    fun setFolderIcon(
-        folderId: Long,
-        mode: com.bisc.flauncher.data.model.FolderIconMode,
-        color: String? = null,
-        packPackage: String? = null,
-        packDrawable: String? = null
-    ) {
-        viewModelScope.launch(kotlinx.coroutines.NonCancellable) {
-            folderRepository.setFolderIconById(folderId, mode, color, packPackage, packDrawable)
-        }
-    }
-
     fun deleteFolder(folder: com.bisc.flauncher.data.model.Folder) {
         viewModelScope.launch { folderRepository.deleteFolder(folder) }
     }

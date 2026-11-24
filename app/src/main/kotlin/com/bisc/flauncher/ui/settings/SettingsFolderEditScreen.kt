@@ -91,10 +91,6 @@ import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-private val PRESET_COLORS = listOf(
-    "#FF4F378B", "#FFB3261E", "#FF386A20", "#FF9A5D00", "#FF00658F", "#FF6B5C00"
-)
-
 /** Edit page for a single folder. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
