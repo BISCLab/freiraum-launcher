@@ -136,7 +136,7 @@ internal fun CategoryCell(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.labelSmall.copy(color = category?.face()?.labelColor?.let { Color(it) } ?: labelColor).forAppName()
+                style = MaterialTheme.typography.labelSmall.copy(color = labelColor).forAppName()
             )
         }
     }

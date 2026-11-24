@@ -78,8 +78,10 @@ enum class TileBackdrop { PAGE, LIGHT, DARK }
 internal fun TilePreviewHeader(
     name: String,
     tile: @Composable (around: Color) -> Unit,
-    labelColor: Color? = null,
     extra: (@Composable (around: Color) -> Unit)? = null,
+    /** Small words over the tile and over [extra], the same as the sections below that set them. */
+    tileCaption: String? = null,
+    extraCaption: String? = null,
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
     val global by homeViewModel.globalBackground.collectAsState()
@@ -116,13 +118,19 @@ internal fun TilePreviewHeader(
             horizontalArrangement = Arrangement.spacedBy(28.dp)
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                if (tileCaption != null && !compact) PreviewCaption(tileCaption, around)
                 Box(modifier = Modifier.size(tileSize)) { tile(around) }
                 if (!compact) {
                     Spacer(Modifier.height(6.dp))
-                    Text(name, color = labelColor ?: around, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(name, color = around, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
-            extra?.invoke(around)
+            if (extra != null) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    if (extraCaption != null && !compact) PreviewCaption(extraCaption, around)
+                    extra(around)
+                }
+            }
         }
         // Which background to check the tile on.
         Row(
@@ -146,6 +154,37 @@ internal fun TilePreviewHeader(
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 )
             }
+        }
+    }
+}
+
+/** A small word over a part of the preview, naming the section that sets it. */
+@Composable
+private fun PreviewCaption(text: String, around: Color) {
+    Text(
+        text.uppercase(),
+        color = around.copy(alpha = 0.75f),
+        style = MaterialTheme.typography.labelSmall,
+        modifier = Modifier
+            .padding(bottom = 6.dp)
+            .clip(RoundedCornerShape(50))
+            .background(around.copy(alpha = 0.12f))
+            .padding(horizontal = 8.dp, vertical = 2.dp)
+    )
+}
+
+/** The start of one part of a page: a symbol, its name, and where what it sets is seen. */
+@Composable
+internal fun SectionBanner(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, where: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 12.dp, start = 4.dp, end = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        AreaSymbol(icon, size = 40.dp)
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.titleLarge)
+            Text(where, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -247,9 +286,9 @@ internal fun TileFaceEditor(
         }
     }
 
-    // 4. Colors: of a pictogram or the letter (black or white unless chosen), and of the name below.
-    SettingsPreferenceGroup(title = stringResource(R.string.tile_colors_title)) {
-        if ((face.kind == TileKind.SYMBOL && !fromPack) || face.kind == TileKind.LETTER) {
+    // 4. The color of a pictogram or the letter: black or white unless chosen.
+    if ((face.kind == TileKind.SYMBOL && !fromPack) || face.kind == TileKind.LETTER) {
+        SettingsPreferenceGroup {
             AutomaticColorPicker(
                 title = stringResource(if (face.kind == TileKind.LETTER) R.string.tile_letter_color else R.string.tile_symbol_color),
                 custom = face.symbolColor,
@@ -258,13 +297,6 @@ internal fun TileFaceEditor(
                 ownGroup = false
             )
         }
-        AutomaticColorPicker(
-            title = stringResource(R.string.tile_label_color),
-            custom = face.labelColor,
-            automaticSeed = onSurface.toArgb(),
-            onChange = { onChange(face.copy(labelColor = it)) },
-            ownGroup = false
-        )
     }
 
     if (choosingSymbol) {

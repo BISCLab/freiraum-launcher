@@ -1189,6 +1189,12 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="tile_symbol_choose">Symbol wählen</string>
     <string name="tile_symbol_from_catalog">Aus dem Katalog</string>
     <string name="tile_symbol_from_pack">Aus %1$s</string>
-    <string name="tile_colors_title">Farben</string>
-    <string name="tile_label_color">Farbe des Namens darunter</string>
+    <string name="section_as_name">Als Name</string>
+    <string name="section_content">Inhalt</string>
+    <string name="section_content_own">Was in der Kategorie ist und in welcher Reihenfolge.</string>
+    <string name="section_content_smart">Füllt sich selbst nach ihrer Regel.</string>
+    <string name="section_folder_content_where">So sieht der Ordner aus, wenn er offen ist.</string>
+    <string name="category_color_info">Gilt für den Namen und für die Kachel.</string>
+    <string name="preview_caption_tile">Kachel</string>
+    <string name="preview_caption_name">Name</string>
 </resources>

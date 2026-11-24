@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Tiles: the name below a folder or category follows the place it lies in again; the extra color setting for it is gone
+- Category page in three named parts, As a name, As a tile and Contents, each saying where it shows; the preview labels its parts Tile and Name the same way
+- Folder page: As a tile and What's inside as named parts, like on a category's page
+
 ## 0.21.1
 
 - Tile editor: the symbol is chosen on a page of its own (catalog or icon pack, search, all symbols in one grid), so the folder and category pages stay short

@@ -27,6 +27,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Label
+import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Apps
@@ -396,8 +398,9 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
             TilePreviewHeader(
                 name = draft.name,
                 tile = { around -> com.bisc.flauncher.ui.home.CategoryMark(draft, modifier = Modifier.fillMaxSize(), shape = RoundedCornerShape(16.dp), ink = around) },
-                labelColor = draft.face().labelColor?.let { androidx.compose.ui.graphics.Color(it) },
-                extra = { around -> com.bisc.flauncher.ui.home.CategoryNamePill(draft, MaterialTheme.typography.labelLarge, ink = around) }
+                extra = { around -> com.bisc.flauncher.ui.home.CategoryNamePill(draft, MaterialTheme.typography.labelLarge, ink = around) },
+                tileCaption = stringResource(R.string.preview_caption_tile),
+                extraCaption = stringResource(R.string.preview_caption_name)
             )
         }
     ) {
@@ -413,7 +416,7 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
                 )
             }
         }
-        SettingsPreferenceGroup(title = stringResource(R.string.category_color_title)) {
+        SettingsPreferenceGroup(title = stringResource(R.string.category_color_title), info = stringResource(R.string.category_color_info)) {
             AutomaticColorPicker(
                 title = stringResource(R.string.settings_category_color),
                 custom = draft.color,
@@ -422,7 +425,8 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
                 ownGroup = false
             )
         }
-        SettingsPreferenceGroup(title = stringResource(R.string.category_name_look_title), info = stringResource(R.string.category_name_look_info)) {
+        SectionBanner(Icons.AutoMirrored.Filled.Label, stringResource(R.string.section_as_name), stringResource(R.string.category_name_look_info))
+        SettingsPreferenceGroup(title = stringResource(R.string.category_name_look_title)) {
             listOf(
                 CategoryNameStyle.PILL to R.string.category_name_look_pill,
                 CategoryNameStyle.OUTLINE to R.string.category_name_look_outline,
@@ -432,7 +436,7 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
             }
         }
         // How it looks as a tile, like a folder's icon: only in the Dock, the Panel, boxes and folders.
-        SettingsGroupLabel(stringResource(R.string.settings_category_tile_label), info = stringResource(R.string.settings_category_tile_info))
+        SectionBanner(Icons.Filled.Apps, stringResource(R.string.settings_category_tile_label), stringResource(R.string.settings_category_tile_info))
         TileFaceEditor(
             face = draft.face(),
             onChange = { draft = draft.copy(tileFace = it.toJson()) },
@@ -444,6 +448,12 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
             },
             contentSummary = stringResource(R.string.tile_content_category),
             viewModel = viewModel
+        )
+        // What it holds: by a rule, or picked by hand, and in which order.
+        SectionBanner(
+            Icons.Filled.Inventory2,
+            stringResource(R.string.section_content),
+            stringResource(if (rule != null) R.string.section_content_smart else R.string.section_content_own)
         )
         if (rule != null) RuleSettings(draft) { draft = it }
         if (rule == null && shownMembers.size > 1) {

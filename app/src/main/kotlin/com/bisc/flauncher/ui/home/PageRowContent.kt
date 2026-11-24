@@ -590,7 +590,7 @@ internal fun FolderCell(
         FolderIcon(folder = folder, previewItems = previewItems, modifier = Modifier.size(56.dp * iconSizeScale))
         if (showLabel) {
             Spacer(Modifier.height(8.dp))
-            GridLabel(folder?.name.orEmpty(), color = folder?.face()?.labelColor?.let { Color(it) } ?: labelColor)
+            GridLabel(folder?.name.orEmpty(), color = labelColor)
         }
     }
 }
