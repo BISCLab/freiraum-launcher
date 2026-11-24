@@ -53,7 +53,7 @@ import com.bisc.flauncher.ui.theme.current
 @Composable
 fun settingsTwoPane(): Boolean {
     val configuration = LocalConfiguration.current
-    return configuration.smallestScreenWidthDp >= 600 && configuration.screenWidthDp >= 840
+    return configuration.smallestScreenWidthDp >= 600 && com.bisc.flauncher.ui.windowWidth() >= 840.dp
 }
 
 private val SIDE_RAIL_WIDTH = 280.dp

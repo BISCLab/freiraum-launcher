@@ -262,7 +262,7 @@ class AppIconLoader @Inject constructor(
         canvas.clipPath(path)
         val dark = themedDark
         val monochrome = if (dark != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) (drawable as? AdaptiveIconDrawable)?.monochrome else null
-        if (dark != null && monochrome != null) {
+        if (dark != null && monochrome != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             // Themed icon: the app's one-color icon on a system-tinted background, like the system launcher.
             val bg = context.getColor(if (dark) android.R.color.system_neutral1_800 else android.R.color.system_accent1_100)
             val fg = context.getColor(if (dark) android.R.color.system_accent1_100 else android.R.color.system_accent1_700)

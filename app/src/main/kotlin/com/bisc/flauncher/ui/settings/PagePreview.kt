@@ -46,7 +46,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
@@ -113,8 +112,8 @@ fun PagePreview(
     val rootView = androidx.compose.ui.platform.LocalView.current.rootView
     // Held upright, like the page is counted (see PageGrid): the same page whichever way the device
     // is turned while the settings are open.
-    val rawHeight = with(density) { rootView.height.toDp() }.takeIf { it > 0.dp } ?: LocalConfiguration.current.screenHeightDp.dp
-    val rawWidth = with(density) { rootView.width.toDp() }.takeIf { it > 0.dp } ?: LocalConfiguration.current.screenWidthDp.dp
+    val rawHeight = with(density) { rootView.height.toDp() }.takeIf { it > 0.dp } ?: com.bisc.flauncher.ui.windowHeight()
+    val rawWidth = with(density) { rootView.width.toDp() }.takeIf { it > 0.dp } ?: com.bisc.flauncher.ui.windowWidth()
     val screenHeight = maxOf(rawHeight, rawWidth)
     val screenWidth = minOf(rawHeight, rawWidth)
     val shownDock = dock?.takeIf { it.enabled && pageId !in withoutDockPanel.first }

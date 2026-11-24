@@ -610,13 +610,17 @@ private fun conditionLabel(context: Context, code: Int?, fallback: String): Stri
 private fun formatClock(context: Context, millis: Long): String =
     DateFormat.getTimeFormat(context).format(java.util.Date(millis))
 
+/** Intent.CATEGORY_APP_WEATHER, written out: the constant is from Android 13, the category itself
+ *  works on every version a weather app declares it on. */
+private const val CATEGORY_APP_WEATHER = "android.intent.category.APP_WEATHER"
+
 private fun openWeatherApp(context: Context): (() -> Unit)? {
-    val probe = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_APP_WEATHER)
+    val probe = Intent(Intent.ACTION_MAIN).addCategory(CATEGORY_APP_WEATHER)
     val info = context.packageManager.resolveActivity(probe, 0)?.activityInfo ?: return null
     return {
         runCatching {
             context.startActivity(
-                Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_APP_WEATHER)
+                Intent(Intent.ACTION_MAIN).addCategory(CATEGORY_APP_WEATHER)
                     .setComponent(ComponentName(info.packageName, info.name))
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             )

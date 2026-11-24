@@ -55,6 +55,8 @@ private val PIECE_GAP = 3.dp
  */
 @Composable
 fun ChoicePanel(title: String, options: List<ChoiceOption>, onDismiss: () -> Unit, footer: (@Composable () -> Unit)? = null) {
+    // Read out here: inside, the dialog's own small window would answer.
+    val screenHeight = com.bisc.flauncher.ui.windowHeight()
     Dialog(onDismissRequest = onDismiss) {
         val appear = remember { Animatable(0f) }
         LaunchedEffect(Unit) { appear.animateTo(1f, tween(180)) }
@@ -75,7 +77,7 @@ fun ChoicePanel(title: String, options: List<ChoiceOption>, onDismiss: () -> Uni
             Column(
                 modifier = Modifier
                     // As tall as the screen allows, so most lists fit without scrolling.
-                    .heightIn(max = (androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp * 0.85f - 140f).coerceAtLeast(300f).dp)
+                    .heightIn(max = (screenHeight * 0.85f - 140.dp).coerceAtLeast(300.dp))
                     .clip(RoundedCornerShape(22.dp))
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(PIECE_GAP)

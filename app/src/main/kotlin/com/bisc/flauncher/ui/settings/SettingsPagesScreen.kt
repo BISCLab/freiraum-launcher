@@ -269,7 +269,7 @@ private const val SCREEN_ASPECT_RATIO = 0.47f
 /** Low screens (tablets held sideways): a page tile stays at most 40 % of the screen height tall. */
 @Composable
 private fun carouselTileMaxWidth(): androidx.compose.ui.unit.Dp =
-    (androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp * 0.4f * SCREEN_ASPECT_RATIO).dp
+    com.bisc.flauncher.ui.windowHeight() * 0.4f * SCREEN_ASPECT_RATIO
 private val CAROUSEL_OUTER_PADDING = 16.dp
 private val CAROUSEL_SPACING = 12.dp
 /** How far the carousel scrolls per frame while a dragged page is held at its edge. */

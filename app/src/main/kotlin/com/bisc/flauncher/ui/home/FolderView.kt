@@ -52,7 +52,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -85,7 +84,7 @@ private val FOLDER_CELL_LABEL_HEIGHT = 22.dp
 
 @Composable
 private fun folderDockFootprint(): androidx.compose.ui.unit.Dp {
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val screenWidth = com.bisc.flauncher.ui.windowWidth()
     return DockDimens.scaled((screenWidth - DockDimens.horizontalMargin * 2).coerceAtLeast(0.dp))
         .let { it.barHeight + DockDimens.topMargin + DockDimens.bottomMargin }
 }
@@ -188,7 +187,7 @@ fun FolderView(
         if (to != item.orderIndex) onMoveItemToSlot(item, to)
     }
 
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val screenWidth = com.bisc.flauncher.ui.windowWidth()
     val dockPillWidth = DockDimens.scaled((screenWidth - DockDimens.horizontalMargin * 2).coerceAtLeast(0.dp)).pillWidth
 
     // The card never scrolls: it grows upward up to just below the status bar. It normally keeps one
