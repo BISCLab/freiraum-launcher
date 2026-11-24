@@ -1,0 +1,6 @@
+- Kategorien stehen mit Namen da; das Symbol ist nur noch ihr Gesicht als Kachel (Dock, Panel, Boxen, Ordner)
+- Als Kachel: Inhalt wie bei Ordnern, Symbol oder Anfangsbuchstabe
+- Symbole vor Namen pro Ort einschaltbar
+- Symbole aus Icon-Packs
+- Behoben: Überblenden der Vorschau in der Einführung
+- Viele kleine Aufräumarbeiten im Code

@@ -1,0 +1,6 @@
+- Categories show by name; the symbol is only their face as a tile (Dock, Panel, boxes, folders)
+- As a tile: contents like a folder, a symbol or the first letter
+- Symbols in front of names can be switched on per place
+- Symbols from icon packs
+- Fixed: the welcome tour preview fades properly
+- Lots of small code cleanup
