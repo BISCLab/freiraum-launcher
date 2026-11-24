@@ -40,14 +40,14 @@ fun SystemWidgetPickerSheet(
     val context = LocalContext.current
     val packageManager = context.packageManager
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true), onDismissRequest = onDismiss) {
         if (providers.isEmpty()) {
             Box(modifier = Modifier.fillMaxWidth().heightIn(min = 120.dp), contentAlignment = Alignment.Center) {
                 Text(stringResource(R.string.system_widget_picker_empty))
             }
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxWidth().heightIn(max = 480.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(max = com.bisc.flauncher.ui.sheetMaxHeight()),
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
                 items(providers, key = { it.provider.flattenToString() }) { provider ->

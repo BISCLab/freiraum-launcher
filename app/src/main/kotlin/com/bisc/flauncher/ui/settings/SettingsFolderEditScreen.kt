@@ -559,7 +559,7 @@ fun SettingsFolderEditScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun FolderWidgetKindSheet(onKindSelected: (String) -> Unit, onMoreSelected: () -> Unit, onDismiss: () -> Unit) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true), onDismissRequest = onDismiss) {
         androidx.compose.foundation.layout.Column(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -608,7 +608,7 @@ internal fun FolderWidgetSizeSheet(
     onDismiss: () -> Unit,
     onRemove: (() -> Unit)? = null
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true), onDismissRequest = onDismiss) {
         // The preview scrolls when it's taller than the sheet; the buttons below always stay reachable.
         androidx.compose.foundation.layout.Column(
             modifier = Modifier

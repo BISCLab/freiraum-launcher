@@ -55,7 +55,7 @@ fun ContactActionsSheet(
     val context = LocalContext.current
     val number = contact.phoneNumbers.firstOrNull()?.number
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true), onDismissRequest = onDismiss) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 ContactPhotoIcon(contactId = contact.id, photoUri = contact.photoUri, loadPhoto = loadPhoto, size = 56.dp)

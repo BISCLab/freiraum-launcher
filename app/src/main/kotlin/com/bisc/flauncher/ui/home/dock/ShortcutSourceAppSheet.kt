@@ -31,9 +31,9 @@ fun ShortcutSourceAppSheet(
     onAppSelected: (AppInfo) -> Unit,
     onDismiss: () -> Unit
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true), onDismissRequest = onDismiss) {
         LazyColumn(
-            modifier = Modifier.fillMaxWidth().heightIn(max = 480.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(max = com.bisc.flauncher.ui.sheetMaxHeight()),
             contentPadding = PaddingValues(bottom = 24.dp)
         ) {
             items(apps, key = { it.componentName.flattenToString() }) { app ->

@@ -32,7 +32,7 @@ import com.bisc.flauncher.ui.home.PictogramCatalog
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PictogramPickerSheet(selected: String?, onSelect: (String) -> Unit, onDismiss: () -> Unit, noneKey: String? = null, onIconPack: (() -> Unit)? = null) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true), onDismissRequest = onDismiss) {
         Text(
             stringResource(R.string.settings_pictogram_picker_title),
             style = MaterialTheme.typography.titleMedium,
@@ -42,7 +42,7 @@ fun PictogramPickerSheet(selected: String?, onSelect: (String) -> Unit, onDismis
             columns = GridCells.Fixed(5),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.fillMaxWidth().heightIn(max = 420.dp).padding(16.dp)
+            modifier = Modifier.fillMaxWidth().heightIn(max = com.bisc.flauncher.ui.sheetMaxHeight()).padding(16.dp)
         ) {
             // A picture from an installed icon pack, where the caller allows it.
             if (onIconPack != null) {

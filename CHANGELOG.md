@@ -3,6 +3,7 @@
 ## Unreleased
 
 - About: "BISC Lab" in the normal text color
+- Sheets that slide up from below open in full and use most of the screen height, so lists like the symbols show whole without scrolling
 
 ## 0.20.0
 

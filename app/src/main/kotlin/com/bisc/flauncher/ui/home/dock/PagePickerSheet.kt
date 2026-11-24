@@ -28,8 +28,8 @@ import com.bisc.flauncher.ui.theme.noRippleClickable
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PagePickerSheet(pages: List<LauncherPage>, onPageSelected: (LauncherPage) -> Unit, onDismiss: () -> Unit) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 480.dp)) {
+    ModalBottomSheet(sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true), onDismissRequest = onDismiss) {
+        LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = com.bisc.flauncher.ui.sheetMaxHeight())) {
             items(pages, key = { it.id }) { page ->
                 val glyph = page.iconGlyph?.let { runCatching { PageIconGlyph.valueOf(it) }.getOrNull() } ?: PageIconGlyph.forPageKind(page.kind)
                 val bg = page.iconBackgroundColor?.let { Color(it) } ?: pageDefaultColor(page, glyph)

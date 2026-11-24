@@ -545,7 +545,7 @@ private fun GhostTile(width: androidx.compose.ui.unit.Dp, onClick: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PageTemplatePickerSheet(onBlankPageSelected: () -> Unit, onDismiss: () -> Unit) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true), onDismissRequest = onDismiss) {
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
             SettingsPreferenceGroup(title = stringResource(R.string.settings_pages_add_template_label)) {
                 SettingsPreference(

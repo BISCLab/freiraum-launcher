@@ -377,7 +377,7 @@ internal fun AddElementChooserSheet(
         onAddActionButtonClick?.let { SettingsTile(Icons.Filled.Bolt, stringResource(R.string.settings_add_kind_action), onClick = it) },
         onAddCategory?.let { SettingsTile(Icons.AutoMirrored.Filled.Label, stringResource(R.string.settings_add_kind_category), onClick = { pickingCategory = true }) }
     )
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true), onDismissRequest = onDismiss) {
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
             Text(stringResource(R.string.settings_add_element_title), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 4.dp, bottom = 14.dp))
             SettingsTileGrid(tiles = tiles, columns = 3)

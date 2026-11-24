@@ -12,3 +12,8 @@ fun windowWidth(): Dp = with(LocalDensity.current) { LocalWindowInfo.current.con
 /** The height of the window the launcher is drawn in. */
 @Composable
 fun windowHeight(): Dp = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
+
+/** How tall the content of a sheet that slides up from below may get: most of the screen, so short
+ *  lists like the symbols show whole instead of scrolling. */
+@Composable
+fun sheetMaxHeight(): Dp = (windowHeight() * 0.85f - androidx.compose.ui.unit.Dp(96f)).coerceAtLeast(androidx.compose.ui.unit.Dp(320f))

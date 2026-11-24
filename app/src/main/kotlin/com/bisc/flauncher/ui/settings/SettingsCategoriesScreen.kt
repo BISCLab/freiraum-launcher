@@ -749,8 +749,8 @@ private fun CategoryElementsSheet(
     onDismiss: () -> Unit
 ) {
     val inCategory = remember(members) { members.map { it.type to it.payload }.toSet() }
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(modifier = Modifier.fillMaxWidth().heightIn(max = 560.dp).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
+    ModalBottomSheet(sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true), onDismissRequest = onDismiss) {
+        Column(modifier = Modifier.fillMaxWidth().heightIn(max = com.bisc.flauncher.ui.sheetMaxHeight()).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
             Text(stringResource(R.string.settings_category_pick_elements), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 4.dp, bottom = 12.dp))
             val sections = listOf(
                 Triple(R.string.settings_add_kind_link, GridItemType.WEBSITE, websites.map { it.id.toString() to it.label }),
@@ -792,8 +792,8 @@ fun CategoryPickerSheet(
     onCreate: ((String) -> Unit)? = null
 ) {
     var creating by remember { mutableStateOf(false) }
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(modifier = Modifier.fillMaxWidth().heightIn(max = 520.dp).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
+    ModalBottomSheet(sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true), onDismissRequest = onDismiss) {
+        Column(modifier = Modifier.fillMaxWidth().heightIn(max = com.bisc.flauncher.ui.sheetMaxHeight()).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
             Text(stringResource(R.string.settings_categories_pick_title), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 4.dp, bottom = 12.dp))
             if (categories.isEmpty() && onCreate == null) {
                 Text(stringResource(R.string.settings_categories_picker_empty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -835,7 +835,7 @@ fun ElementCategoriesDialog(
         onDismissRequest = onDismiss,
         title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         text = {
-            Column(modifier = Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState())) {
+            Column(modifier = Modifier.heightIn(max = com.bisc.flauncher.ui.sheetMaxHeight()).verticalScroll(rememberScrollState())) {
                 if (own.isEmpty()) {
                     Text(stringResource(R.string.settings_categories_empty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }

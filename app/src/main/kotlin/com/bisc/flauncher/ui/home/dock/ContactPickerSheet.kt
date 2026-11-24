@@ -31,7 +31,7 @@ fun ContactPickerSheet(
     onSelected: (ContactInfo) -> Unit,
     onDismiss: () -> Unit
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true), onDismissRequest = onDismiss) {
         if (contacts == null) {
             Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -42,7 +42,7 @@ fun ContactPickerSheet(
             }
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxWidth().heightIn(max = 480.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(max = com.bisc.flauncher.ui.sheetMaxHeight()),
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
                 items(contacts, key = { it.id }) { contact ->

@@ -269,9 +269,9 @@ internal fun AddRowSheet(
     onElementBoxSelected: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true), onDismissRequest = onDismiss) {
         Column(
-            modifier = Modifier.fillMaxWidth().heightIn(max = 640.dp).verticalScroll(rememberScrollState()).padding(16.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(max = com.bisc.flauncher.ui.sheetMaxHeight()).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             listOf(WidgetKind.CLOCK, WidgetKind.MUSIC, WidgetKind.WEATHER, WidgetKind.NOTES, WidgetKind.CATEGORIES, WidgetKind.SPACER).forEach { kind ->

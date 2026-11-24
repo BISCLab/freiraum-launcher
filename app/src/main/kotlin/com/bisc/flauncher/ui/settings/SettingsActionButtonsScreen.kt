@@ -117,10 +117,10 @@ internal fun actionButtonActionIcon(type: ActionButtonActionType) = when (type) 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActionButtonPickerSheet(buttons: List<ActionButton>, onSelect: (ActionButton) -> Unit, onDismiss: () -> Unit) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true), onDismissRequest = onDismiss) {
         androidx.compose.foundation.layout.Column(
             modifier = Modifier.fillMaxWidth()
-                .heightIn(max = 480.dp)
+                .heightIn(max = com.bisc.flauncher.ui.sheetMaxHeight())
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
@@ -285,10 +285,10 @@ fun SettingsActionButtonDetailScreen(buttonId: Long, navController: NavControlle
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AndroidSettingPickerSheet(onSelect: (SettingsShortcut) -> Unit, onDismiss: () -> Unit) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true), onDismissRequest = onDismiss) {
         androidx.compose.foundation.layout.Column(
             modifier = Modifier.fillMaxWidth()
-                .heightIn(max = 480.dp)
+                .heightIn(max = com.bisc.flauncher.ui.sheetMaxHeight())
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
