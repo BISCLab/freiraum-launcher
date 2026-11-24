@@ -1201,7 +1201,17 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_categories_colors_tile">Farben und Symbole</string>
     <string name="settings_categories_behavior_search">Kategorien-Seite: Verhalten</string>
     <string name="settings_categories_symbols">Symbole zeigen</string>
-    <string name="settings_categories_symbols_summary">Gilt für alle Kategorien. Aus: nur der Name, auf Kacheln der erste Buchstabe.</string>
-    <string name="settings_categories_symbols_off_hint">Symbole sind für alle Kategorien aus</string>
     <string name="settings_category_icon_pack">Aus Icon-Pack</string>
+    <string name="settings_category_tile_label">Als Kachel</string>
+    <string name="settings_category_tile_info">So sieht die Kategorie im Dock, im Panel, in Element-Boxen und in Ordnern aus. Überall sonst steht ihr Name.</string>
+    <string name="settings_category_face_content">Inhalt</string>
+    <string name="settings_category_face_content_summary">Die ersten vier Apps, wie bei einem Ordner</string>
+    <string name="settings_category_face_symbol">Symbol</string>
+    <string name="settings_category_face_symbol_summary">Ein Symbol oder ein Bild aus einem Icon-Pack</string>
+    <string name="settings_category_face_letter">Anfangsbuchstabe</string>
+    <string name="settings_category_pick_symbol">Symbol wählen</string>
+    <string name="settings_category_symbols_page_summary">In Chips und Karten, bei Kategorien mit Symbol</string>
+    <string name="settings_category_symbols_search_summary">Vor dem Namen gefundener Kategorien, wenn sie ein Symbol haben</string>
+    <string name="settings_category_symbols_applist_summary">In den Kategorie-Chips über der Liste</string>
+    <string name="settings_category_symbols_widget_summary">In Chips und Überschriften, bei Kategorien mit Symbol</string>
 </resources>

@@ -86,6 +86,7 @@ import com.bisc.flauncher.ui.home.CATEGORY_NO_COLOR
 import com.bisc.flauncher.ui.home.CATEGORY_NO_ICON
 import com.bisc.flauncher.ui.home.hasFill
 import com.bisc.flauncher.ui.home.hasSymbol
+import com.bisc.flauncher.ui.home.face
 import com.bisc.flauncher.ui.home.packIcon
 
 /** A category's symbol on its color, as a small round badge. */
@@ -146,16 +147,6 @@ fun SettingsCategoriesScreen(navController: NavController, onBack: () -> Unit, v
                     }
                 }
             }
-        }
-        val showSymbols by viewModel.categoriesShowSymbols.collectAsState()
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_categories_symbols),
-                summary = stringResource(R.string.settings_categories_symbols_summary),
-                onClick = { viewModel.setCategoriesShowSymbols(!showSymbols) },
-                trailing = { androidx.compose.material3.Switch(checked = showSymbols, onCheckedChange = viewModel::setCategoriesShowSymbols) }
-            )
         }
         SettingsPreferenceGroup {
             SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_categories_new), onClick = { creating = true }, trailing = null)
@@ -400,33 +391,18 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
         dirty = draft != saved || membersChanged
     ) {
         SettingsPreferenceGroup {
-            Row(
-                modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Box(modifier = Modifier.clickable { showIconPicker = true }) { CategoryBadge(draft, 48.dp) }
+            Box(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(16.dp)) {
                 OutlinedTextField(
                     value = draft.name,
                     onValueChange = { draft = draft.copy(name = it) },
                     label = { Text(stringResource(R.string.settings_category_name)) },
                     singleLine = true,
                     shape = SettingsTextFieldShape,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
-            SettingsPreference(
-                icon = null,
-                leading = if (draft.hasSymbol) ({ com.bisc.flauncher.ui.home.CategorySymbol(draft, 24.dp, MaterialTheme.colorScheme.onSurface) }) else null,
-                title = stringResource(R.string.settings_element_icon_label),
-                summary = when {
-                    !LauncherCategoriesSymbols() -> stringResource(R.string.settings_categories_symbols_off_hint)
-                    !draft.hasSymbol -> stringResource(R.string.settings_category_no_icon)
-                    else -> null
-                },
-                onClick = { showIconPicker = true },
-                trailing = null
-            )
+        }
+        SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_category_no_color),
@@ -446,6 +422,34 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
                     automaticSeed = categoryColor(draft.copy(color = null)).toArgb(),
                     onChange = { draft = draft.copy(color = it) },
                     ownGroup = false
+                )
+            }
+        }
+        // How it looks as a tile, like a folder's icon: only in the Dock, the Panel, boxes and folders.
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_category_tile_label), info = stringResource(R.string.settings_category_tile_info)) {
+            Box(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
+                com.bisc.flauncher.ui.home.CategoryMark(draft, iconSize = 30.dp, modifier = Modifier.size(56.dp), shape = RoundedCornerShape(16.dp))
+            }
+            RadioPreference(
+                stringResource(R.string.settings_category_face_content), com.bisc.flauncher.ui.home.CategoryFace.CONTENT, draft.face,
+                { draft = draft.copy(iconKey = null) },
+                summary = stringResource(R.string.settings_category_face_content_summary)
+            )
+            RadioPreference(
+                stringResource(R.string.settings_category_face_symbol), com.bisc.flauncher.ui.home.CategoryFace.SYMBOL, draft.face,
+                { showIconPicker = true },
+                summary = stringResource(R.string.settings_category_face_symbol_summary)
+            )
+            RadioPreference(
+                stringResource(R.string.settings_category_face_letter), com.bisc.flauncher.ui.home.CategoryFace.LETTER, draft.face,
+                { draft = draft.copy(iconKey = CATEGORY_NO_ICON) }
+            )
+            if (draft.face == com.bisc.flauncher.ui.home.CategoryFace.SYMBOL) {
+                SettingsPreference(
+                    icon = null,
+                    leading = { com.bisc.flauncher.ui.home.CategorySymbol(draft, 24.dp, MaterialTheme.colorScheme.onSurface) },
+                    title = stringResource(R.string.settings_category_pick_symbol),
+                    onClick = { showIconPicker = true }
                 )
             }
         }
@@ -532,7 +536,6 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
     if (showIconPicker) {
         PictogramPickerSheet(
             selected = draft.iconKey,
-            noneKey = CATEGORY_NO_ICON,
             onSelect = { key -> draft = draft.copy(iconKey = key); showIconPicker = false },
             onDismiss = { showIconPicker = false },
             onIconPack = { showIconPicker = false; pickingPackIcon = true }
@@ -880,6 +883,15 @@ internal fun CategoryWidgetSettings(
         RadioPreference(stringResource(R.string.widget_categories_mode_rows), com.bisc.flauncher.data.model.CategoryWidgetMode.ROWS, config.mode, { set(config.copy(mode = it)) }, summary = stringResource(R.string.widget_categories_mode_rows_summary))
         RadioPreference(stringResource(R.string.widget_categories_mode_single), com.bisc.flauncher.data.model.CategoryWidgetMode.SINGLE, config.mode, { set(config.copy(mode = it, ids = config.ids.take(1))) }, summary = stringResource(R.string.widget_categories_mode_single_summary))
         RadioPreference(stringResource(R.string.widget_categories_mode_tiles), com.bisc.flauncher.data.model.CategoryWidgetMode.TILES, config.mode, { set(config.copy(mode = it)) }, summary = stringResource(R.string.widget_categories_mode_tiles_summary))
+        if (config.mode != com.bisc.flauncher.data.model.CategoryWidgetMode.TILES) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_categories_symbols),
+                summary = stringResource(R.string.settings_category_symbols_widget_summary),
+                onClick = { set(config.copy(symbols = !config.symbols)) },
+                trailing = { androidx.compose.material3.Switch(checked = config.symbols, onCheckedChange = { set(config.copy(symbols = it)) }) }
+            )
+        }
         if (config.mode == com.bisc.flauncher.data.model.CategoryWidgetMode.TABS) {
             SettingsPreference(
                 icon = null,
@@ -947,7 +959,7 @@ internal fun AppCategoryChips(app: AppInfo, viewModel: SettingsViewModel) {
                     selected = inIt,
                     onClick = { viewModel.setCategoryMember(r.category.id, GridItemType.APP, payload, !inIt) },
                     label = { Text(r.category.name) },
-                    leadingIcon = if (r.category.hasSymbol) ({ com.bisc.flauncher.ui.home.CategorySymbol(r.category, 18.dp, categoryColor(r.category)) }) else null
+                    leadingIcon = null
                 )
             }
             androidx.compose.material3.AssistChip(
@@ -968,5 +980,19 @@ internal fun AppCategoryChips(app: AppInfo, viewModel: SettingsViewModel) {
     }
 }
 
-/** Whether category symbols are shown at all (the switch under Elements > Categories). */
-private fun LauncherCategoriesSymbols(): Boolean = com.bisc.flauncher.ui.home.LauncherCategories.showSymbols
+/** "Show symbols" for one place that shows categories by name. */
+@Composable
+internal fun CategorySymbolsSwitch(place: String, summary: String, viewModel: SettingsViewModel) {
+    val on by when (place) {
+        "page" -> viewModel.categorySymbolsPage
+        "search" -> viewModel.categorySymbolsSearch
+        else -> viewModel.categorySymbolsAppList
+    }.collectAsState()
+    SettingsPreference(
+        icon = null,
+        title = stringResource(R.string.settings_categories_symbols),
+        summary = summary,
+        onClick = { viewModel.setCategorySymbols(place, !on) },
+        trailing = { androidx.compose.material3.Switch(checked = on, onCheckedChange = { viewModel.setCategorySymbols(place, it) }) }
+    )
+}

@@ -19,6 +19,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Shortcut
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -53,8 +57,13 @@ object LauncherCategories {
     /** A design's colors for categories without their own, see [categoryColor]. */
     var palette by mutableStateOf<List<Int>>(emptyList())
 
-    /** Symbols shown at all; off = names alone, tiles with their first letter. */
-    var showSymbols by mutableStateOf(true)
+    /** Whether the places that show categories by name put the symbol in front (off by default). */
+    var symbolsOnPage by mutableStateOf(false)
+    var symbolsInSearch by mutableStateOf(false)
+    var symbolsInAppList by mutableStateOf(false)
+
+    /** Loads an app's icon, for tiles that show what a category holds. */
+    var loadAppIcon: (android.content.ComponentName) -> androidx.compose.ui.graphics.ImageBitmap? = { null }
 
     /** Loads a picture from an icon pack, for symbols taken from one. */
     var loadPackIcon: (String, String) -> androidx.compose.ui.graphics.ImageBitmap? = { _, _ -> null }
@@ -73,11 +82,24 @@ object LauncherCategories {
 /** Stored as a category's color: no fill, an outline instead. */
 const val CATEGORY_NO_COLOR = 0
 
-/** Stored as a category's symbol: none, the name alone. */
+/** Stored as a category's symbol: no symbol, the tile shows the first letter. */
 const val CATEGORY_NO_ICON = "none"
 
+/** How a category looks as a tile (Dock, Panel, element boxes, folders), like a folder's icon:
+ *  what it holds in small (no symbol stored), its symbol, or its first letter. */
+enum class CategoryFace { CONTENT, SYMBOL, LETTER }
+
+val Category?.face: CategoryFace get() = when (this?.iconKey) {
+    null -> CategoryFace.CONTENT
+    CATEGORY_NO_ICON -> CategoryFace.LETTER
+    else -> CategoryFace.SYMBOL
+}
+
 val Category?.hasFill: Boolean get() = this?.color != CATEGORY_NO_COLOR
-val Category?.hasSymbol: Boolean get() = LauncherCategories.showSymbols && this?.iconKey != CATEGORY_NO_ICON
+
+/** Has a symbol of its own; where a category is shown by name, it is put in front only where that
+ *  place asks for it. */
+val Category?.hasSymbol: Boolean get() = face == CategoryFace.SYMBOL
 
 /** A symbol from an icon pack is stored as its key with this in front: "pack:<package>|<drawable>". */
 const val CATEGORY_PACK_PREFIX = "pack:"
@@ -167,7 +189,8 @@ internal fun CategoryPillIcon(category: Category?, modifier: Modifier = Modifier
     )
 }
 
-/** A category's sign: its symbol (or first letter) on its color, or in an outline without one. */
+/** A category as a tile: what it holds, its symbol or its first letter, on its color or in an
+ *  outline without one. */
 @Composable
 fun CategoryMark(
     category: Category?,
@@ -184,11 +207,13 @@ fun CategoryMark(
         modifier = modifier.clip(shape).then(if (filled) Modifier.background(accent) else Modifier.border(1.5.dp, ink.copy(alpha = 0.6f), shape)),
         contentAlignment = Alignment.Center
     ) {
-        if (category.hasSymbol) {
-            // A picture from an icon pack fills more of the tile, like an app icon.
-            CategorySymbol(category, if (category.packIcon() != null) iconSize * 1.4f else iconSize, tint, contentDescription)
-        } else {
-            Text(
+        val members = if (category.face == CategoryFace.CONTENT) LauncherCategories.find(category?.id)?.members.orEmpty().take(4) else emptyList()
+        when {
+            category.face == CategoryFace.SYMBOL ->
+                // A picture from an icon pack fills more of the tile, like an app icon.
+                CategorySymbol(category, if (category.packIcon() != null) iconSize * 1.4f else iconSize, tint, contentDescription)
+            members.isNotEmpty() -> CategoryContentGrid(members, cell = iconSize * 0.7f, gap = iconSize * 0.1f, tint = tint)
+            else -> Text(
                 category?.name?.trim()?.take(1)?.uppercase().orEmpty(),
                 color = tint,
                 fontSize = (iconSize.value * 0.8f).sp,
@@ -199,14 +224,50 @@ fun CategoryMark(
     }
 }
 
-/** A category's name in a pill of its color, its symbol in front; outlined without a color. */
+/** What a category holds, up to four, in two by two: app icons, and symbols for the other kinds. */
+@Composable
+private fun CategoryContentGrid(members: List<com.bisc.flauncher.data.model.CategoryMember>, cell: Dp, gap: Dp, tint: Color) {
+    Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(gap)) {
+        members.chunked(2).forEach { line ->
+            Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(gap)) {
+                line.forEach { member ->
+                    Box(modifier = Modifier.size(cell), contentAlignment = Alignment.Center) {
+                        if (member.type == com.bisc.flauncher.data.model.GridItemType.APP) {
+                            val component = androidx.compose.runtime.remember(member.payload) { android.content.ComponentName.unflattenFromString(member.payload) }
+                            rememberAppIcon(component, LauncherCategories.loadAppIcon)?.let {
+                                androidx.compose.foundation.Image(it, contentDescription = null, modifier = Modifier.size(cell))
+                            }
+                        } else {
+                            Icon(
+                                when (member.type) {
+                                    com.bisc.flauncher.data.model.GridItemType.WEBSITE -> Icons.Filled.Language
+                                    com.bisc.flauncher.data.model.GridItemType.MAP_TARGET -> Icons.Filled.Place
+                                    com.bisc.flauncher.data.model.GridItemType.CONTACT -> Icons.Filled.Person
+                                    else -> Icons.AutoMirrored.Filled.Shortcut
+                                },
+                                contentDescription = null,
+                                tint = tint,
+                                modifier = Modifier.size(cell * 0.8f)
+                            )
+                        }
+                    }
+                }
+                if (line.size < 2) Spacer(Modifier.size(cell))
+            }
+        }
+    }
+}
+
+/** A category's name in a pill of its color, outlined without a color; its symbol in front only
+ *  where [showSymbol] asks for it and it has one. */
 @Composable
 fun CategoryNamePill(
     category: Category,
     textStyle: TextStyle,
     modifier: Modifier = Modifier,
     ink: Color = LocalContentColor.current,
-    iconSize: Dp = 18.dp
+    iconSize: Dp = 18.dp,
+    showSymbol: Boolean = false
 ) {
     val filled = category.hasFill
     val accent = categoryColor(category)
@@ -218,7 +279,7 @@ fun CategoryNamePill(
             .padding(horizontal = PILL_PADDING, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (category.hasSymbol) {
+        if (showSymbol && category.hasSymbol) {
             CategorySymbol(category, iconSize, tint)
             Spacer(Modifier.size(8.dp))
         }

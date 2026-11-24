@@ -357,11 +357,12 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[CATEGORIES_VIEW_KEY] = view }
     }
 
-    /** Whether categories show their symbols anywhere; off = the name alone (a tile: its first letter). */
-    val categoriesShowSymbols: Flow<Boolean> = dataStore.data.map { it[CATEGORIES_SHOW_SYMBOLS_KEY] ?: true }
+    /** Whether a place that shows categories by name ("page", "search", "app_list") puts their
+     *  symbols in front. Off by default: a symbol is a category's face as a tile. */
+    fun categorySymbolsIn(place: String): Flow<Boolean> = dataStore.data.map { it[booleanPreferencesKey("category_symbols_$place")] ?: false }
 
-    suspend fun setCategoriesShowSymbols(show: Boolean) {
-        dataStore.edit { it[CATEGORIES_SHOW_SYMBOLS_KEY] = show }
+    suspend fun setCategorySymbolsIn(place: String, show: Boolean) {
+        dataStore.edit { it[booleanPreferencesKey("category_symbols_$place")] = show }
     }
 
     val categoriesShowSearch: Flow<Boolean> = dataStore.data.map { it[CATEGORIES_SHOW_SEARCH_KEY] ?: true }
@@ -1391,7 +1392,6 @@ class SettingsRepository @Inject constructor(
         private val CATEGORY_WIDGETS_KEY = stringPreferencesKey("category_widgets")
         private val CATEGORY_PALETTE_KEY = stringPreferencesKey("category_palette")
         private val CATEGORIES_SHOW_SEARCH_KEY = booleanPreferencesKey("categories_show_search")
-        private val CATEGORIES_SHOW_SYMBOLS_KEY = booleanPreferencesKey("categories_show_symbols")
         private val CATEGORIES_CARD_ROWS_KEY = intPreferencesKey("categories_card_rows")
         private val LAUNCH_TRACKING_SINCE_KEY = longPreferencesKey("launch_tracking_since")
         private val LOCK_PORTRAIT_KEY = booleanPreferencesKey("lock_portrait")

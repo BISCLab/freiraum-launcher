@@ -169,7 +169,8 @@ internal fun CategoryChip(
     selected: Boolean,
     look: ElementAppearance,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showSymbol: Boolean = false
 ) {
     val colors = resolveElementColors(look)
     val accent = categoryColor(category)
@@ -186,10 +187,12 @@ internal fun CategoryChip(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        if (category == null) {
-            Icon(androidx.compose.material.icons.Icons.Filled.Apps, contentDescription = null, tint = ink, modifier = Modifier.size(18.dp))
-        } else if (category.hasSymbol) {
-            CategorySymbol(category, 18.dp, if (selected) ink else accent)
+        if (showSymbol) {
+            if (category == null) {
+                Icon(androidx.compose.material.icons.Icons.Filled.Apps, contentDescription = null, tint = ink, modifier = Modifier.size(18.dp))
+            } else if (category.hasSymbol) {
+                CategorySymbol(category, 18.dp, if (selected) ink else accent)
+            }
         }
         Text(label, color = ink, style = MaterialTheme.typography.labelLarge, maxLines = 1)
         if (count != null) {
@@ -230,7 +233,7 @@ internal fun CategoryCard(
 private fun CategoryCardHead(resolved: ResolvedCategory, expandable: Boolean, expanded: Boolean, onToggle: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
         Box(modifier = Modifier.weight(1f)) {
-            CategoryNamePill(resolved.category, MaterialTheme.typography.titleMedium)
+            CategoryNamePill(resolved.category, MaterialTheme.typography.titleMedium, showSymbol = LauncherCategories.symbolsOnPage)
         }
         Text(
             resolved.members.size.toString(),
@@ -336,7 +339,8 @@ fun HomeCategoriesPage(
                         count = null,
                         selected = filter.isEmpty() && !tabs,
                         look = look,
-                        onClick = { viewModel.toggleCategoryFilter(LauncherCategories.ALL) }
+                        onClick = { viewModel.toggleCategoryFilter(LauncherCategories.ALL) },
+                        showSymbol = LauncherCategories.symbolsOnPage
                     )
                 }
                 items(resolved, key = { it.category.id }) { r ->
@@ -350,7 +354,8 @@ fun HomeCategoriesPage(
                         onClick = {
                             if (tabs) scope.launch { pagerState.animateScrollToPage(index) }
                             else viewModel.toggleCategoryFilter(r.category.id)
-                        }
+                        },
+                        showSymbol = LauncherCategories.symbolsOnPage
                     )
                 }
             }
@@ -480,12 +485,13 @@ internal fun AppListCategoryChips(selected: Long?, onSelect: (Long?) -> Unit, su
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item(key = "all") {
-            CategoryChip(null, stringResource(R.string.categories_all), null, selected == null, look, onClick = { onSelect(null) })
+            CategoryChip(null, stringResource(R.string.categories_all), null, selected == null, look, onClick = { onSelect(null) }, showSymbol = LauncherCategories.symbolsInAppList)
         }
         items(withApps, key = { it.category.id }) { r ->
             CategoryChip(
                 r.category, r.category.name, r.members.count { it.type == GridItemType.APP }, selected == r.category.id, look,
-                onClick = { onSelect(if (selected == r.category.id) null else r.category.id) }
+                onClick = { onSelect(if (selected == r.category.id) null else r.category.id) },
+                showSymbol = LauncherCategories.symbolsInAppList
             )
         }
     }

@@ -1201,7 +1201,17 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_categories_colors_tile">Colors and symbols</string>
     <string name="settings_categories_behavior_search">Categories page: Behavior</string>
     <string name="settings_categories_symbols">Show symbols</string>
-    <string name="settings_categories_symbols_summary">For all categories. Off: just the name, tiles show the first letter.</string>
-    <string name="settings_categories_symbols_off_hint">Symbols are off for all categories</string>
     <string name="settings_category_icon_pack">From an icon pack</string>
+    <string name="settings_category_tile_label">As a tile</string>
+    <string name="settings_category_tile_info">This is how the category looks in the Dock, the Panel, element boxes and folders. Everywhere else it shows its name.</string>
+    <string name="settings_category_face_content">Contents</string>
+    <string name="settings_category_face_content_summary">The first four apps, like a folder</string>
+    <string name="settings_category_face_symbol">Symbol</string>
+    <string name="settings_category_face_symbol_summary">A symbol or a picture from an icon pack</string>
+    <string name="settings_category_face_letter">First letter</string>
+    <string name="settings_category_pick_symbol">Choose a symbol</string>
+    <string name="settings_category_symbols_page_summary">In chips and cards, for categories with a symbol</string>
+    <string name="settings_category_symbols_search_summary">In front of found categories that have a symbol</string>
+    <string name="settings_category_symbols_applist_summary">In the category chips above the list</string>
+    <string name="settings_category_symbols_widget_summary">In chips and headings, for categories with a symbol</string>
 </resources>

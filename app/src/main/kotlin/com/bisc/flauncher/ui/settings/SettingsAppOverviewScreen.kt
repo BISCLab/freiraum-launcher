@@ -64,6 +64,9 @@ fun SettingsAppOverviewAppearanceHubScreen(navController: NavController, onBack:
             // Four in one line where there are four, else three.
             columns = if (partTiles.size == 4) 4 else 3
         )
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_pages_categories)) {
+            CategorySymbolsSwitch("app_list", stringResource(R.string.settings_category_symbols_applist_summary), viewModel)
+        }
     }
 }
 

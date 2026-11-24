@@ -600,7 +600,7 @@ private fun CategoryHitRow(hit: CategoryHit, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(modifier = Modifier.weight(1f)) {
-            com.bisc.flauncher.ui.home.CategoryNamePill(hit.category, MaterialTheme.typography.titleMedium)
+            com.bisc.flauncher.ui.home.CategoryNamePill(hit.category, MaterialTheme.typography.titleMedium, showSymbol = com.bisc.flauncher.ui.home.LauncherCategories.symbolsInSearch)
         }
         Text(hit.count.toString(), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(start = 12.dp))
     }

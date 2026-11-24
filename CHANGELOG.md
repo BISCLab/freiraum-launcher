@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Categories: one switch shows or hides the symbols of all categories (Elements > Categories)
+- Categories show by name, without a symbol; the symbol is only their face as a tile (Dock, Panel, element boxes, folders). As a tile a category shows what it holds like a folder, its symbol or its first letter (category > As a tile)
+- Symbols in front of category names can be switched on per place: Categories page, text search, App list chips and each Categories widget
 - A category's symbol can come from an installed icon pack, like folder icons
 
 ## 0.19.2

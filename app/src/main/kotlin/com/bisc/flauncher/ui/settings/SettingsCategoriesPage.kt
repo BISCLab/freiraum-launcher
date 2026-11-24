@@ -38,7 +38,7 @@ fun SettingsCategoriesPageScreen(navController: NavController, onBack: () -> Uni
 
 /** How the page looks: the page itself, and the colors and symbols of the categories. */
 @Composable
-fun SettingsCategoriesAppearanceScreen(navController: NavController, onBack: () -> Unit) {
+fun SettingsCategoriesAppearanceScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val onNavigate: (String) -> Unit = { navController.navigate(categoriesPageRoute(it)) }
     SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
         // Tap a part of the miniature to edit it; the tiles below are the second way in.
@@ -50,6 +50,9 @@ fun SettingsCategoriesAppearanceScreen(navController: NavController, onBack: () 
                 SettingsTile(Icons.Filled.Palette, stringResource(R.string.settings_categories_colors_tile)) { onNavigate("manage") }
             )
         )
+        SettingsPreferenceGroup {
+            CategorySymbolsSwitch("page", stringResource(R.string.settings_category_symbols_page_summary), viewModel)
+        }
     }
 }
 

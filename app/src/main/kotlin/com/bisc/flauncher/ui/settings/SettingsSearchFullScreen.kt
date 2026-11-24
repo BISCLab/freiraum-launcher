@@ -649,6 +649,9 @@ fun SettingsSearchElementScreen(
                         trailing = { Switch(checked = resultsEdgeToEdge, onCheckedChange = viewModel::setSearchResultsEdgeToEdge) }
                     )
                 }
+                SettingsPreferenceGroup(title = stringResource(R.string.settings_pages_categories)) {
+                    CategorySymbolsSwitch("search", stringResource(R.string.settings_category_symbols_search_summary), viewModel)
+                }
             }
         },
         custom = when (element) {

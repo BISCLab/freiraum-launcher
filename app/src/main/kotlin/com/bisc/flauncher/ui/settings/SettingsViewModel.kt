@@ -702,10 +702,12 @@ class SettingsViewModel @Inject constructor(
 
     // ---- Categories ----
 
-    val categoriesShowSymbols: StateFlow<Boolean> = repository.categoriesShowSymbols.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val categorySymbolsPage: StateFlow<Boolean> = repository.categorySymbolsIn("page").stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val categorySymbolsSearch: StateFlow<Boolean> = repository.categorySymbolsIn("search").stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val categorySymbolsAppList: StateFlow<Boolean> = repository.categorySymbolsIn("app_list").stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    fun setCategoriesShowSymbols(show: Boolean) {
-        viewModelScope.launch { repository.setCategoriesShowSymbols(show) }
+    fun setCategorySymbols(place: String, show: Boolean) {
+        viewModelScope.launch { repository.setCategorySymbolsIn(place, show) }
     }
 
     val categoryPalette: StateFlow<List<Int>> = repository.categoryPalette.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())

@@ -97,10 +97,10 @@ fun CategoryWidget(
         }
         when (config.mode) {
             CategoryWidgetMode.TILES -> CategoryTiles(shown, ink)
-            CategoryWidgetMode.ROWS -> CategoryRows(shown, ink, Modifier.weight(1f), viewModel)
+            CategoryWidgetMode.ROWS -> CategoryRows(shown, ink, Modifier.weight(1f), viewModel, config.symbols)
             CategoryWidgetMode.SINGLE -> {
                 val r = shown.first()
-                CategoryHead(r, ink)
+                CategoryHead(r, ink, config.symbols)
                 MembersArea(r, ink, Modifier.weight(1f), viewModel)
             }
             CategoryWidgetMode.TABS -> {
@@ -123,7 +123,8 @@ fun CategoryWidget(
                                     count = null,
                                     selected = pagerState.currentPage == index,
                                     look = ElementAppearance(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE, contentColor = ink.toArgb()),
-                                    onClick = { scope.launch { pagerState.animateScrollToPage(index, animationSpec = slide) } }
+                                    onClick = { scope.launch { pagerState.animateScrollToPage(index, animationSpec = slide) } },
+                                    showSymbol = config.symbols
                                 )
                             }
                         }
@@ -131,7 +132,7 @@ fun CategoryWidget(
                             snapshotFlow { pagerState.currentPage }.collect { chipsState.animateScrollToItem(it) }
                         }
                     } else {
-                        Box(modifier = Modifier.weight(1f)) { CategoryHead(shown[pagerState.currentPage.coerceIn(0, shown.lastIndex)], ink) }
+                        Box(modifier = Modifier.weight(1f)) { CategoryHead(shown[pagerState.currentPage.coerceIn(0, shown.lastIndex)], ink, config.symbols) }
                     }
                     if (row.pagingButtons && shown.size > 1) {
                         PagingButton(
@@ -159,14 +160,15 @@ fun CategoryWidget(
 
 /** A category's symbol and name; a tap opens it on the Categories page. */
 @Composable
-private fun CategoryHead(r: ResolvedCategory, ink: androidx.compose.ui.graphics.Color) {
+private fun CategoryHead(r: ResolvedCategory, ink: androidx.compose.ui.graphics.Color, symbols: Boolean) {
     Box(modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
         com.bisc.flauncher.ui.home.CategoryNamePill(
             r.category,
             MaterialTheme.typography.labelLarge,
             modifier = Modifier.clickable { LauncherCategories.open(r.category.id) },
             ink = ink,
-            iconSize = 16.dp
+            iconSize = 16.dp,
+                                showSymbol = symbols
         )
     }
 }
@@ -189,7 +191,7 @@ private fun MembersArea(r: ResolvedCategory, ink: androidx.compose.ui.graphics.C
 /** Several categories one below the other, each with its name and its grid. A fling stops at the
  *  start of a category, so none is left cut in half at the top. */
 @Composable
-private fun CategoryRows(shown: List<ResolvedCategory>, ink: androidx.compose.ui.graphics.Color, modifier: Modifier, viewModel: HomeViewModel) {
+private fun CategoryRows(shown: List<ResolvedCategory>, ink: androidx.compose.ui.graphics.Color, modifier: Modifier, viewModel: HomeViewModel, symbols: Boolean) {
     val listState = rememberLazyListState()
     BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
         val columns = categoryColumns(maxWidth)
@@ -208,7 +210,8 @@ private fun CategoryRows(shown: List<ResolvedCategory>, ink: androidx.compose.ui
                                 MaterialTheme.typography.labelLarge,
                                 modifier = Modifier.clickable { LauncherCategories.open(r.category.id) },
                                 ink = ink,
-                                iconSize = 16.dp
+                                iconSize = 16.dp,
+                                showSymbol = symbols
                             )
                         }
                         Text(

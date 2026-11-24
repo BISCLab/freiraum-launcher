@@ -66,12 +66,15 @@ enum class CategoryWidgetMode { SINGLE, TABS, ROWS, TILES }
 data class CategoryWidgetConfig(
     val mode: CategoryWidgetMode = CategoryWidgetMode.TABS,
     val ids: List<Long> = emptyList(),
-    val chips: Boolean = true
+    val chips: Boolean = true,
+    /** Symbols in front of the names in chips and heads; the tiles show each category's face anyway. */
+    val symbols: Boolean = false
 ) {
     fun toJson(): org.json.JSONObject = org.json.JSONObject()
         .put("mode", mode.name)
         .put("ids", org.json.JSONArray(ids))
         .put("chips", chips)
+        .put("symbols", symbols)
 
     companion object {
         fun fromJson(json: org.json.JSONObject?): CategoryWidgetConfig {
@@ -80,7 +83,8 @@ data class CategoryWidgetConfig(
             return CategoryWidgetConfig(
                 mode = runCatching { CategoryWidgetMode.valueOf(json.optString("mode")) }.getOrDefault(CategoryWidgetMode.TABS),
                 ids = ids,
-                chips = json.optBoolean("chips", true)
+                chips = json.optBoolean("chips", true),
+                symbols = json.optBoolean("symbols", false)
             )
         }
 
