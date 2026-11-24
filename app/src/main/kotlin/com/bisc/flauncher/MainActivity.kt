@@ -27,7 +27,6 @@ import com.bisc.flauncher.ui.settings.SettingsAppearanceScreen
 import com.bisc.flauncher.ui.settings.SettingsAppsScreen
 import com.bisc.flauncher.ui.settings.SettingsPermissionsScreen
 import com.bisc.flauncher.ui.settings.SettingsFolderEditScreen
-import com.bisc.flauncher.ui.settings.SettingsFolderIconScreen
 import com.bisc.flauncher.ui.settings.SettingsFolderScreen
 import com.bisc.flauncher.ui.settings.SettingsGesturesScreen
 import com.bisc.flauncher.ui.settings.SettingsListScreen
@@ -716,13 +715,6 @@ class MainActivity : ComponentActivity() {
                             val folderId = backStackEntry.arguments?.getLong("folderId") ?: return@settingsComposable
                             val itemId = backStackEntry.arguments?.getLong("itemId") ?: return@settingsComposable
                             com.bisc.flauncher.ui.settings.SettingsFolderWidgetEditScreen(folderId = folderId, itemId = itemId, navController = navController, onBack = { navController.popBackStack() })
-                        }
-                        settingsComposable(
-                            "settings/folder/{folderId}/icon",
-                            arguments = listOf(navArgument("folderId") { type = NavType.LongType })
-                        ) { backStackEntry ->
-                            val folderId = backStackEntry.arguments?.getLong("folderId") ?: return@settingsComposable
-                            SettingsFolderIconScreen(folderId = folderId, navController = navController, onBack = { navController.popBackStack() })
                         }
                         settingsComposable("settings/elements") {
                             com.bisc.flauncher.ui.settings.SettingsElementsScreen(navController = navController, onBack = { navController.popBackStack() })

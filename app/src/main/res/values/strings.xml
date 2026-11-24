@@ -768,12 +768,12 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_hub_app_grid_appearance">Page, grid, search field</string>
     <string name="settings_hub_app_grid_behavior">Search field, keyboard, folders</string>
     <string name="settings_folder_icon_tap_hint">Tap the icon to change it</string>
-    <string name="settings_folder_live_hint">This is how the folder looks when open. Tap something to change or move it. The empty tile adds something.</string>
+    <string name="settings_folder_live_hint">This is how the folder looks when open. Tap something to change or move it. You only see the dashed fields for adding here, not in the folder itself. The eye at the top right shows it without them.</string>
     <string name="settings_folder_add_content">App or element</string>
     <string name="settings_folder_add_widget">Widget</string>
     <string name="settings_folder_position">Position</string>
     <string name="settings_folder_rows_label">Rows</string>
-    <string name="settings_folder_rows_info">How many apps fit side by side in a row. Widgets are always as wide as the folder.</string>
+    <string name="settings_folder_rows_info">This many apps stand in a row. What no longer fits moves to the next row, with the same number as the last one. Widgets are always as wide as the folder.</string>
     <string name="settings_folder_intro">A folder gathers apps, places, links and widgets behind one icon. Tap a folder to set it up, or make a new one.</string>
     <string name="settings_folder_creator_empty">Pick apps below. You can add widgets and more right after.</string>
     <string name="settings_category_symbol">Symbol</string>
@@ -875,7 +875,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_hub_bar_look_contents">Fill, text, opacity, border, corners</string>
     <string name="settings_panel_content_title">Content</string>
     <string name="settings_hub_panel_content_what">Widgets on top, below them apps, folders, links and more</string>
-    <string name="settings_folder_content_label">Content</string>
+    <string name="settings_folder_content_label">What\'s inside</string>
     <string name="welcome_elements_title">Elements</string>
     <string name="welcome_elements_text">Everything you can tap is an element. You set it up once and then place it anywhere.</string>
     <string name="welcome_element_apps">Apps</string>
@@ -1198,4 +1198,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="category_name_look_outline">Outlined</string>
     <string name="category_name_look_text">Text only</string>
     <string name="category_color_title">Category color</string>
+    <string name="settings_folder_row_like">like row %1$d</string>
+    <string name="settings_folder_show_real">Show the folder as it really looks</string>
+    <string name="settings_folder_show_aids">Show the fields for adding</string>
 </resources>

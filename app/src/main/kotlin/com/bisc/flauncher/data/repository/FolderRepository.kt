@@ -54,6 +54,11 @@ class FolderRepository @Inject constructor(
         folderDao.get(id)?.let { folderDao.update(it.copy(categoryId = categoryId)) }
     }
 
+    /** How the folder looks as a tile, see [com.bisc.flauncher.data.model.TileFace]. */
+    suspend fun setFolderTileFace(id: Long, face: com.bisc.flauncher.data.model.TileFace) {
+        folderDao.get(id)?.let { folderDao.update(it.copy(tileFace = face.toJson())) }
+    }
+
     suspend fun renameFolderById(id: Long, newName: String) {
         folderDao.get(id)?.let { folderDao.update(it.copy(name = newName)) }
     }

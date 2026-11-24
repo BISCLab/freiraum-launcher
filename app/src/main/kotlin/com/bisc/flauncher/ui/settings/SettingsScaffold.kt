@@ -184,7 +184,6 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
             val folderId = entry.arguments?.getLong("folderId")
             folders.find { it.id == folderId }?.name ?: stringResource(R.string.settings_folder_edit_title)
         }
-        "settings/folder/{folderId}/icon" -> stringResource(R.string.settings_folder_icon_pack_choose_icon)
         "settings/elements" -> stringResource(R.string.settings_section_elements)
         "settings/elements/addresses" -> stringResource(R.string.settings_elements_addresses_title)
         "settings/elements/addresses/{targetId}" -> {

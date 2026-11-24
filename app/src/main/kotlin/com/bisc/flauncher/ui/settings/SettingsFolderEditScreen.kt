@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.data.model.face
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.core.graphics.toColorInt
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.Image
@@ -128,12 +130,14 @@ fun SettingsFolderEditScreen(
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
     var showAddChooser by remember { mutableStateOf(false) }
     var pendingRemoval by remember { mutableStateOf<com.bisc.flauncher.data.model.FolderItem?>(null) }
-    var pickingFolderIcon by remember { mutableStateOf(false) }
     var appearanceOpen by remember { mutableStateOf(false) }
     var showWidgetKindPicker by remember { mutableStateOf(false) }
     var sizingWidgetKind by remember { mutableStateOf<String?>(null) }
     var sizingWidgetSpanY by remember { androidx.compose.runtime.mutableIntStateOf(1) }
     var selectedId by remember(folderId) { mutableStateOf<Long?>(null) }
+    // A row tapped in the row list lights up in the folder for a moment.
+    var highlightRow by remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(highlightRow) { if (highlightRow != null) { kotlinx.coroutines.delay(1400); highlightRow = null } }
     val systemWidgetPickerForFolder by homeViewModel.systemWidgetPickerOpenForFolder.collectAsState()
     val pendingBindIntent by homeViewModel.pendingBindIntent.collectAsState()
     val pendingConfigureIntent by homeViewModel.pendingConfigureIntent.collectAsState()
@@ -149,12 +153,19 @@ fun SettingsFolderEditScreen(
 
     val newName = edited?.trim()
     val nameChanged = folder != null && !newName.isNullOrBlank() && newName != folder.name
+    // Name and tile are a draft, written with Save; what the folder holds changes right away.
+    val savedFace = folder?.face()
+    var face by rememberDraft(savedFace)
+    val faceChanged = face != null && face != savedFace
     SettingsSubScreen(
         title = stringResource(R.string.settings_folder_edit_title),
         navController = navController,
         onBack = onBack,
-        onSave = { newName?.takeIf { nameChanged }?.let { viewModel.renameFolder(folderId, it) } },
-        dirty = nameChanged
+        onSave = {
+            newName?.takeIf { nameChanged }?.let { viewModel.renameFolder(folderId, it) }
+            face?.takeIf { faceChanged }?.let { viewModel.setFolderTileFace(folderId, it) }
+        },
+        dirty = nameChanged || faceChanged
     ) {
         if (folder == null) return@SettingsSubScreen
 
@@ -165,27 +176,31 @@ fun SettingsFolderEditScreen(
         val showLabels = if (folder.showLabelsOverrideEnabled) folder.showLabels else globalShowLabels
         val rowShape = folder.rows()
 
-        // Its icon and name side by side, like the folder sits on a page.
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(18.dp))
-                    .clickable { pickingFolderIcon = true },
-                contentAlignment = Alignment.Center
-            ) {
-                FolderIcon(folder = folder, previewItems = items, modifier = Modifier.size(56.dp))
-            }
-            OutlinedTextField(
-                value = edited ?: folder.name,
-                onValueChange = { edited = it },
-                label = { Text(stringResource(R.string.settings_folder_name_label)) },
-                supportingText = { Text(stringResource(R.string.settings_folder_icon_tap_hint)) },
-                singleLine = true,
-                shape = SettingsTextFieldShape,
-                modifier = Modifier.weight(1f)
-            )
-        }
+        OutlinedTextField(
+            value = edited ?: folder.name,
+            onValueChange = { edited = it },
+            label = { Text(stringResource(R.string.settings_folder_name_label)) },
+            singleLine = true,
+            shape = SettingsTextFieldShape,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        // How the closed folder looks as a tile, as it lies in the Dock, a box or on a page.
+        val shownFace = face ?: folder.face()
+        SettingsGroupLabel(stringResource(R.string.settings_category_tile_label), info = stringResource(R.string.settings_folder_tile_info))
+        TilePreviewHeader(
+            name = edited ?: folder.name,
+            tile = { around -> FolderIcon(folder = folder, previewItems = items, modifier = Modifier.fillMaxSize(), face = shownFace, around = around) }
+        )
+        TileFaceEditor(
+            face = shownFace,
+            onChange = { face = it },
+            autoSurface = com.bisc.flauncher.ui.home.FolderAutoSurface,
+            letter = edited ?: folder.name,
+            content = items.filter { it.type == GridItemType.APP }.take(4).map { com.bisc.flauncher.ui.home.TileContent.App(android.content.ComponentName.unflattenFromString(it.payload)) },
+            contentSummary = stringResource(R.string.tile_content_folder),
+            viewModel = viewModel
+        )
 
         // The folder itself, live: tap a part to work on it, the empty tile adds something.
         SettingsGroupLabel(stringResource(R.string.settings_folder_content_label))
@@ -206,7 +221,8 @@ fun SettingsFolderEditScreen(
                     folders, savedMapTargets, pinnedWebsites, emptyList(), emptyList(), viewModel::resolveLabel
                 )
             },
-            itemIcon = { item, size -> FolderItemIcon(item, size, folders, itemsByFolder, viewModel::loadIcon, viewModel::loadPackIcon) }
+            itemIcon = { item, size -> FolderItemIcon(item, size, folders, itemsByFolder, viewModel::loadIcon, viewModel::loadPackIcon) },
+            highlightRow = highlightRow
         )
         Text(
             stringResource(R.string.settings_folder_live_hint),
@@ -266,7 +282,12 @@ fun SettingsFolderEditScreen(
             title = stringResource(R.string.settings_folder_rows_label),
             info = stringResource(R.string.settings_folder_rows_info)
         ) {
-            FolderRowsEditor(rowShape, com.bisc.flauncher.data.model.MAX_FOLDER_ROW_COLUMNS) { viewModel.setFolderRowColumns(folderId, it) }
+            FolderRowsEditor(
+                rowShape = rowShape,
+                maxColumns = com.bisc.flauncher.data.model.MAX_FOLDER_ROW_COLUMNS,
+                actualRows = com.bisc.flauncher.ui.home.folderSlotRows(iconItems, rowShape, keepEmptyRows = true).size,
+                onFocusRow = { highlightRow = it }
+            ) { viewModel.setFolderRowColumns(folderId, it) }
         }
 
         SettingsPreferenceGroup {
@@ -342,43 +363,6 @@ fun SettingsFolderEditScreen(
             }
         ) {
             ElementAppearanceSection(appearance = draft, onAppearanceChange = { draft = it }, styleGroupTitle = stringResource(R.string.settings_element_fill_label))
-        }
-    }
-
-    if (pickingFolderIcon) {
-        SettingsFixedDialog(title = stringResource(R.string.settings_app_icon_label), onDismiss = { pickingFolderIcon = false }) {
-            SettingsPreferenceGroup {
-                Row(
-                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { viewModel.setFolderIcon(folderId, FolderIconMode.AUTO_STACK); pickingFolderIcon = false }) {
-                        Icon(imageVector = Icons.Filled.Apps, contentDescription = stringResource(R.string.folder_icon_auto))
-                    }
-                    PRESET_COLORS.forEach { hex ->
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .background(Color(hex.toColorInt()), CircleShape)
-                                .combinedClickable(onClick = {
-                                    viewModel.setFolderIcon(folderId, FolderIconMode.CUSTOM_COLOR, color = hex)
-                                    pickingFolderIcon = false
-                                })
-                        )
-                    }
-                }
-            }
-            SettingsPreferenceGroup {
-                SettingsPreference(
-                    icon = Icons.Filled.Extension,
-                    title = stringResource(R.string.settings_folder_icon_pack_label),
-                    summary = if (folder?.iconMode == FolderIconMode.ICON_PACK) {
-                        iconPacks.find { it.packageName == folder.iconPackPackage }?.label ?: folder.iconPackPackage
-                    } else null,
-                    onClick = { pickingFolderIcon = false; navController.navigate("settings/folder/$folderId/icon") }
-                )
-            }
         }
     }
 
@@ -671,32 +655,7 @@ private fun folderWidgetKindLabel(kind: String): String = when (kind) {
     else -> ""
 }
 
-/** Full-screen icon picker (settings/folder/{folderId}/icon). */
-@Composable
-fun SettingsFolderIconScreen(
-    folderId: Long,
-    navController: NavController,
-    onBack: () -> Unit,
-    viewModel: SettingsViewModel = hiltViewModel()
-) {
-    val folders by viewModel.folders.collectAsState()
-    val folder = folders.find { it.id == folderId }
-    val current = folder?.takeIf { it.iconMode == FolderIconMode.ICON_PACK }
-
-    SettingsFixedScreen(title = stringResource(R.string.settings_folder_icon_pack_choose_icon), navController = navController, onBack = onBack) {
-        IconPackPickerContent(
-            viewModel = viewModel,
-            currentPack = current?.iconPackPackage,
-            currentDrawable = current?.iconPackDrawable,
-            onPick = { pack, drawable ->
-                viewModel.setFolderIcon(folderId, FolderIconMode.ICON_PACK, packPackage = pack, packDrawable = drawable)
-                onBack()
-            }
-        )
-    }
-}
-
-/** Icon-pack picker with search, shared by the folder and per-app icon screens. */
+/** Icon-pack picker with search, used for single apps and search engines. */
 @Composable
 fun ColumnScope.IconPackPickerContent(
     viewModel: SettingsViewModel,

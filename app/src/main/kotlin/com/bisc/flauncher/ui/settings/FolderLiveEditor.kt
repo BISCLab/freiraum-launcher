@@ -1,5 +1,10 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import android.content.ComponentName
@@ -88,11 +93,15 @@ internal fun FolderLivePreview(
     widgetIcon: (FolderItem) -> ImageVector,
     widgetLabel: @Composable (FolderItem) -> String,
     itemLabel: @Composable (FolderItem) -> String,
-    itemIcon: @Composable (FolderItem, Dp) -> Unit
+    itemIcon: @Composable (FolderItem, Dp) -> Unit,
+    /** A row picked in the row list below, lit up so it is clear which one it is. */
+    highlightRow: Int? = null
 ) {
     val colors = resolveElementColors(look)
     val shape = RoundedCornerShape(22.dp)
     val accent = MaterialTheme.colorScheme.primary
+    // Off: the folder exactly as it opens, without the dashed fields for adding.
+    var showAids by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(true) }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -138,7 +147,7 @@ internal fun FolderLivePreview(
             // The apps and elements at their places; every empty cell adds something there, and
             // when all are taken a further row offers more.
             val rows = com.bisc.flauncher.ui.home.folderSlotRows(gridItems, rowShape, keepEmptyRows = true).toMutableList()
-            if (rows.none { line -> line.any { it == null } }) {
+            if (showAids && rows.none { line -> line.any { it == null } }) {
                 val widths = rowShape.ifEmpty { listOf(4) }
                 rows += List(widths.getOrElse(rows.size) { widths.last() }.coerceAtLeast(1)) { null }
             }
@@ -147,7 +156,12 @@ internal fun FolderLivePreview(
             val widgetsByRow = com.bisc.flauncher.ui.home.widgetsAbove(widgets, realRows)
             rows.forEachIndexed { rowIndex, line ->
                 if (rowIndex < realRows) widgetsByRow[rowIndex].forEach { WidgetTile(it) }
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(if (rowIndex == highlightRow) accent.copy(alpha = 0.18f) else Color.Transparent)
+                ) {
                     line.forEach { item ->
                         val slot = cellIndex++
                         Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.TopCenter) {
@@ -176,16 +190,18 @@ internal fun FolderLivePreview(
                                         }
                                     }
                                 }
+                                !showAids -> Spacer(Modifier.padding(4.dp).size(LIVE_ICON))
                                 else -> {
+                                    // Dashed and in the accent color: a place to add, not something in the folder.
                                     Box(
                                         modifier = Modifier
                                             .padding(4.dp)
                                             .size(LIVE_ICON)
                                             .clip(RoundedCornerShape(12.dp))
-                                            .border(1.5.dp, colors.contentColor.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                                            .dashedOutline(accent, 12.dp)
                                             .clickable { onAdd(slot) },
                                         contentAlignment = Alignment.Center
-                                    ) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.settings_folder_add_content), tint = colors.contentColor.copy(alpha = 0.7f)) }
+                                    ) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.settings_folder_add_content), tint = accent) }
                                 }
                             }
                         }
@@ -194,7 +210,26 @@ internal fun FolderLivePreview(
             }
             widgetsByRow[realRows].forEach { WidgetTile(it) }
         }
+        IconButton(onClick = { showAids = !showAids }, modifier = Modifier.align(Alignment.TopEnd).padding(2.dp).size(36.dp)) {
+            Icon(
+                if (showAids) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                contentDescription = stringResource(if (showAids) R.string.settings_folder_show_real else R.string.settings_folder_show_aids),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
+}
+
+/** A dashed outline, the sign for "room to add here". */
+private fun Modifier.dashedOutline(color: Color, radius: Dp): Modifier = drawBehind {
+    val stroke = 1.5.dp.toPx()
+    drawRoundRect(
+        color = color,
+        topLeft = androidx.compose.ui.geometry.Offset(stroke / 2, stroke / 2),
+        size = androidx.compose.ui.geometry.Size(size.width - stroke, size.height - stroke),
+        cornerRadius = androidx.compose.ui.geometry.CornerRadius(radius.toPx()),
+        style = androidx.compose.ui.graphics.drawscope.Stroke(width = stroke, pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 4.dp.toPx())))
+    )
 }
 
 /** The icon of one app or element of a folder, at [size]. */
@@ -358,12 +393,26 @@ internal fun FolderAddButtons(onAddContent: () -> Unit, onAddWidget: () -> Unit)
 
 /** The rows of a folder: each as a line of small boxes, as many as fit side by side, with - and +. */
 @Composable
-internal fun FolderRowsEditor(rowShape: List<Int>, maxColumns: Int, maxRows: Int = Int.MAX_VALUE, newRowColumns: Int = 4, onChange: (List<Int>) -> Unit) {
+internal fun FolderRowsEditor(
+    rowShape: List<Int>,
+    maxColumns: Int,
+    maxRows: Int = Int.MAX_VALUE,
+    newRowColumns: Int = 4,
+    /** How many rows there really are, counting those that follow the last set one. */
+    actualRows: Int = rowShape.size,
+    /** A row was tapped: light it up where it is shown. */
+    onFocusRow: ((Int) -> Unit)? = null,
+    onChange: (List<Int>) -> Unit
+) {
     val scheme = MaterialTheme.colorScheme
     Column(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         rowShape.forEachIndexed { index, cols ->
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(R.string.settings_panel_row_number, index + 1), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.width(64.dp))
+                Text(
+                    stringResource(R.string.settings_panel_row_number, index + 1),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.width(64.dp).then(if (onFocusRow != null) Modifier.clickable { onFocusRow(index) } else Modifier)
+                )
                 Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     repeat(cols) { Box(Modifier.weight(1f).aspectRatio(1f).clip(RoundedCornerShape(6.dp)).background(scheme.primary.copy(alpha = 0.35f))) }
                     repeat(maxColumns - cols) { Spacer(Modifier.weight(1f)) }
@@ -373,6 +422,25 @@ internal fun FolderRowsEditor(rowShape: List<Int>, maxColumns: Int, maxRows: Int
                 IconButton(onClick = { onChange(rowShape.filterIndexed { i, _ -> i != index }) }, enabled = rowShape.size > 1, modifier = Modifier.size(36.dp)) {
                     Icon(Icons.Filled.Delete, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.a11y_remove), tint = scheme.onSurfaceVariant.copy(alpha = if (rowShape.size > 1) 1f else 0.3f), modifier = Modifier.size(18.dp))
                 }
+            }
+        }
+        // Rows that come by themselves when more is inside: like the last set one, until changed.
+        val last = rowShape.lastOrNull() ?: newRowColumns
+        for (index in rowShape.size until actualRows) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(modifier = Modifier.width(64.dp).then(if (onFocusRow != null) Modifier.clickable { onFocusRow(index) } else Modifier)) {
+                    Text(stringResource(R.string.settings_panel_row_number, index + 1), style = MaterialTheme.typography.bodyMedium, color = scheme.onSurfaceVariant)
+                    Text(stringResource(R.string.settings_folder_row_like, rowShape.size), style = MaterialTheme.typography.labelSmall, color = scheme.onSurfaceVariant)
+                }
+                Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    repeat(last) { Box(Modifier.weight(1f).aspectRatio(1f).clip(RoundedCornerShape(6.dp)).background(scheme.primary.copy(alpha = 0.15f))) }
+                    repeat(maxColumns - last) { Spacer(Modifier.weight(1f)) }
+                }
+                // Changing it makes it a row of its own, the rows before it set as they are shown.
+                val made = rowShape + List(index - rowShape.size + 1) { last }
+                StepButton(Icons.Filled.Remove, last > 1) { onChange(made.toMutableList().apply { this[index] = last - 1 }) }
+                StepButton(Icons.Filled.Add, last < maxColumns) { onChange(made.toMutableList().apply { this[index] = last + 1 }) }
+                Spacer(Modifier.size(36.dp))
             }
         }
         if (rowShape.size < maxRows) TextButton(onClick = { onChange(rowShape + newRowColumns.coerceAtMost(maxColumns)) }) {

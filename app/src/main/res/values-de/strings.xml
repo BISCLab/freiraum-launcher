@@ -768,12 +768,12 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_hub_app_grid_appearance">Seite, Raster, Suchfeld</string>
     <string name="settings_hub_app_grid_behavior">Suchfeld, Tastatur, Ordner</string>
     <string name="settings_folder_icon_tap_hint">Symbol antippen, um es zu ändern</string>
-    <string name="settings_folder_live_hint">So sieht der Ordner offen aus. Tipp auf etwas, um es zu ändern oder zu verschieben. Mit dem leeren Feld fügst du etwas hinzu.</string>
+    <string name="settings_folder_live_hint">So sieht der Ordner offen aus. Tipp auf etwas, um es zu ändern oder zu verschieben. Die gestrichelten Felder zum Hinzufügen siehst du nur hier, im Ordner selbst nicht. Mit dem Auge oben rechts siehst du ihn ohne sie.</string>
     <string name="settings_folder_add_content">App oder Element</string>
     <string name="settings_folder_add_widget">Widget</string>
     <string name="settings_folder_position">Position</string>
     <string name="settings_folder_rows_label">Zeilen</string>
-    <string name="settings_folder_rows_info">Wie viele Apps nebeneinander in eine Zeile passen. Widgets sind immer so breit wie der Ordner.</string>
+    <string name="settings_folder_rows_info">So viele Apps stehen in einer Zeile. Was nicht mehr passt, rutscht in die nächste Zeile, mit derselben Zahl wie die letzte. Widgets sind immer so breit wie der Ordner.</string>
     <string name="settings_folder_intro">In einem Ordner sammelst du Apps, Orte, Links und Widgets hinter einem Symbol. Tipp auf einen Ordner zum Einrichten oder leg einen neuen an.</string>
     <string name="settings_folder_creator_empty">Wähl unten Apps aus. Widgets und mehr kannst du gleich danach dazutun.</string>
     <string name="settings_category_symbol">Symbol</string>
@@ -875,7 +875,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_hub_bar_look_contents">Fläche, Schrift, Deckkraft, Rahmen, Ecken</string>
     <string name="settings_panel_content_title">Inhalt</string>
     <string name="settings_hub_panel_content_what">Widgets oben, darunter Apps, Ordner, Links und mehr</string>
-    <string name="settings_folder_content_label">Inhalt</string>
+    <string name="settings_folder_content_label">Was drin ist</string>
     <string name="welcome_elements_title">Elemente</string>
     <string name="welcome_elements_text">Alles, was du antippen kannst, ist ein Element. Du richtest es einmal ein und legst es dann überall hin.</string>
     <string name="welcome_element_apps">Apps</string>
@@ -1198,4 +1198,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="category_name_look_outline">Mit Rand</string>
     <string name="category_name_look_text">Nur Text</string>
     <string name="category_color_title">Farbe der Kategorie</string>
+    <string name="settings_folder_row_like">wie Zeile %1$d</string>
+    <string name="settings_folder_show_real">Ordner so zeigen, wie er wirklich aussieht</string>
+    <string name="settings_folder_show_aids">Felder zum Hinzufügen zeigen</string>
 </resources>

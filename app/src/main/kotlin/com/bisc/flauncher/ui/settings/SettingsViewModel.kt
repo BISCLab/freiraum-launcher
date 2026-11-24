@@ -330,6 +330,11 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { folderRepository.setFolderCategory(folderId, categoryId) }
     }
 
+    fun setFolderTileFace(folderId: Long, face: com.bisc.flauncher.data.model.TileFace) {
+        // Save closes the screen right away; the write must not die with it.
+        viewModelScope.launch(kotlinx.coroutines.NonCancellable) { folderRepository.setFolderTileFace(folderId, face) }
+    }
+
     fun renameFolder(folderId: Long, newName: String) {
         viewModelScope.launch(kotlinx.coroutines.NonCancellable) { folderRepository.renameFolderById(folderId, newName) }
     }
