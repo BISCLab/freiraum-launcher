@@ -871,7 +871,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_hub_bar_look_contents">Fill, text, opacity, border, corners</string>
     <string name="settings_panel_content_title">Content</string>
     <string name="settings_hub_panel_content_what">Widgets on top, below them apps, folders, links and more</string>
-    <string name="settings_folder_content_label">What\'s inside</string>
     <string name="welcome_elements_title">Elements</string>
     <string name="welcome_elements_text">Everything you can tap is an element. You set it up once and then place it anywhere.</string>
     <string name="welcome_element_apps">Apps</string>
@@ -1161,11 +1160,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="tile_no_pack">No icon pack is installed. The catalog symbols always work.</string>
     <string name="tile_search">Search symbols</string>
     <string name="tile_nothing_found">Nothing found.</string>
-    <string name="tile_surface_title">Fill, border and corners</string>
-    <string name="tile_surface_color_pick">Surface color</string>
     <string name="tile_pack_own">The icon pack picture brings its own background.</string>
     <string name="tile_symbol_color">Symbol color</string>
-    <string name="tile_letter_color">Letter color</string>
     <string name="tile_preview_light">Light</string>
     <string name="tile_preview_dark">Dark</string>
     <string name="tile_content_category">Shows the category\'s first four apps, like a folder.</string>
@@ -1189,11 +1185,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="section_content_smart">Fills itself by its rule.</string>
     <string name="section_folder_content_where">What the folder holds. Changes here apply right away, without saving.</string>
     <string name="category_color_info">Used for the name and for the tile.</string>
+    <string name="category_name_fill_info">The fill takes the category\'s color.</string>
+    <string name="folder_part_open">When open</string>
     <string name="preview_caption_tile">Tile</string>
     <string name="preview_caption_name">Name</string>
-    <string name="tile_fill">Fill</string>
-    <string name="tile_border">Border</string>
-    <string name="tile_border_color">Border color</string>
     <string name="tile_corners">Corners</string>
     <string name="tile_corners_default">Default</string>
     <string name="section_folder_open">When it is open</string>

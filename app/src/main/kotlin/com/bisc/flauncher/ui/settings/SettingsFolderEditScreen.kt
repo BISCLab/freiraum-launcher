@@ -93,13 +93,18 @@ import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/** Edit page for a single folder. */
+/** The pages of one folder: an overview with its name, then its tile, what it holds and how it
+ *  looks when open, each on their own. */
+enum class FolderPart { HUB, TILE, CONTENT, OPEN }
+
+/** Edit page for a single folder, or one part of it, see [FolderPart]. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsFolderEditScreen(
     folderId: Long,
     navController: NavController,
     onBack: () -> Unit,
+    part: FolderPart = FolderPart.HUB,
     viewModel: SettingsViewModel = hiltViewModel(),
     // Adding app widgets (picker, bind permission, configuration) runs through the same flow as on pages.
     homeViewModel: com.bisc.flauncher.ui.home.HomeViewModel = hiltViewModel()
@@ -156,23 +161,30 @@ fun SettingsFolderEditScreen(
     val savedFace = folder?.face()
     var face by rememberDraft(savedFace)
     val faceChanged = face != null && face != savedFace
+    // Name and tile wait for Save; what it holds and how it looks open change right away.
+    val drafts = part == FolderPart.HUB || part == FolderPart.TILE
     SettingsSubScreen(
-        title = stringResource(R.string.settings_folder_edit_title),
+        title = when (part) {
+            FolderPart.HUB -> folder?.name ?: stringResource(R.string.settings_folder_edit_title)
+            FolderPart.TILE -> stringResource(R.string.settings_category_tile_label)
+            FolderPart.CONTENT -> stringResource(R.string.section_content)
+            FolderPart.OPEN -> stringResource(R.string.section_folder_open)
+        },
         navController = navController,
         onBack = onBack,
-        onSave = {
+        onSave = if (drafts) ({
             newName?.takeIf { nameChanged }?.let { viewModel.renameFolder(folderId, it) }
             face?.takeIf { faceChanged }?.let { viewModel.setFolderTileFace(folderId, it) }
-        },
+        }) else null,
         dirty = nameChanged || faceChanged,
         // The closed folder as it will look, fixed on top like on a category's page.
-        header = {
+        header = if (!drafts) null else ({
             val shownFace = face ?: folder?.face()
             TilePreviewHeader(
                 name = edited ?: folder?.name.orEmpty(),
                 tile = { around -> FolderIcon(folder = folder, previewItems = items, modifier = Modifier.fillMaxSize(), face = shownFace, around = around) }
             )
-        }
+        })
     ) {
         if (folder == null) return@SettingsSubScreen
 
@@ -183,6 +195,7 @@ fun SettingsFolderEditScreen(
         val showLabels = if (folder.showLabelsOverrideEnabled) folder.showLabels else globalShowLabels
         val rowShape = folder.rows()
 
+        if (part == FolderPart.HUB) {
         OutlinedTextField(
             value = edited ?: folder.name,
             onValueChange = { edited = it },
@@ -191,10 +204,30 @@ fun SettingsFolderEditScreen(
             shape = SettingsTextFieldShape,
             modifier = Modifier.fillMaxWidth()
         )
+        val open = { sub: String -> navController.navigate("settings/folder/$folderId/$sub") }
+        SettingsTileGrid(
+            columns = 3,
+            title = stringResource(R.string.settings_parts_label),
+            tiles = listOf(
+                SettingsTile(Icons.Filled.Apps, stringResource(R.string.settings_category_tile_label)) { open("tile") },
+                SettingsTile(Icons.Filled.Inventory2, stringResource(R.string.section_content), badge = items.size.toString()) { open("content") },
+                SettingsTile(Icons.Filled.Palette, stringResource(R.string.folder_part_open)) { open("open") }
+            )
+        )
+        SettingsPreferenceGroup {
+            SettingsPreference(
+                icon = Icons.Filled.DeleteOutline,
+                title = stringResource(R.string.settings_folder_delete),
+                onClick = { confirmingDelete = true },
+                trailing = null
+            )
+        }
+        }
 
         // How the closed folder looks as a tile, as it lies in the Dock, a box or on a page.
+        if (part == FolderPart.TILE) {
         val shownFace = face ?: folder.face()
-        SectionBanner(Icons.Filled.Apps, stringResource(R.string.settings_category_tile_label), stringResource(R.string.settings_folder_tile_info))
+        PartIntro(stringResource(R.string.settings_folder_tile_info))
         TileFaceEditor(
             face = shownFace,
             onChange = { face = it },
@@ -204,11 +237,12 @@ fun SettingsFolderEditScreen(
             contentSummary = stringResource(R.string.tile_content_folder),
             viewModel = viewModel
         )
-
+        }
 
         // What it holds: first where it comes from. A folder that follows a category shows what the
         // category holds, so its own (hidden meanwhile) content is not offered to edit here.
-        SectionBanner(Icons.Filled.Inventory2, stringResource(R.string.settings_folder_content_label), stringResource(R.string.section_folder_content_where))
+        if (part == FolderPart.CONTENT) {
+        PartIntro(stringResource(R.string.section_folder_content_where))
         FolderCategoryLink(folder = folder, onChange = { viewModel.setFolderCategory(folderId, it) }, viewModel = viewModel)
         val followed = folder.categoryId?.let { id -> categories.find { it.id == id } }
         if (followed != null) {
@@ -217,7 +251,7 @@ fun SettingsFolderEditScreen(
                     icon = Icons.AutoMirrored.Filled.Label,
                     title = stringResource(R.string.folder_follows_edit, followed.name),
                     summary = stringResource(R.string.folder_follows_note),
-                    onClick = { navController.navigate("settings/elements/categories/${followed.id}") }
+                    onClick = { navController.navigate("settings/elements/categories/${followed.id}/content") }
                 )
             }
         } else {
@@ -305,9 +339,11 @@ fun SettingsFolderEditScreen(
                 onFocusRow = { highlightRow = it }
             ) { viewModel.setFolderRowColumns(folderId, it) }
         }
+        }
 
         // How it looks when open, for this folder.
-        SectionBanner(Icons.Filled.Palette, stringResource(R.string.section_folder_open), stringResource(R.string.section_folder_open_where))
+        if (part == FolderPart.OPEN) {
+        PartIntro(stringResource(R.string.section_folder_open_where))
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = null,
@@ -328,14 +364,6 @@ fun SettingsFolderEditScreen(
             onAppearanceChange = { viewModel.setFolderAppearance(folderId, it) },
             title = stringResource(R.string.settings_captions_label)
         )
-
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = Icons.Filled.DeleteOutline,
-                title = stringResource(R.string.settings_folder_delete),
-                onClick = { confirmingDelete = true },
-                trailing = null
-            )
         }
     }
 

@@ -205,22 +205,19 @@ fun CategoryNamePill(
 ) {
     val style = category.nameLook()
     val accent = categoryColor(category)
-    val tint = if (style == CategoryNameStyle.PILL) inkOn(accent) else ink
+    val tint = if (style.hasFill) inkOn(accent) else ink
     Row(
         modifier = modifier
             .clip(CircleShape)
             .then(
-                when (style) {
-                    CategoryNameStyle.PILL -> Modifier.background(accent)
-                    CategoryNameStyle.OUTLINE -> Modifier.border(1.5.dp, accent, CircleShape)
-                    CategoryNameStyle.TEXT -> Modifier
-                }
+                (if (style.hasFill) Modifier.background(accent) else Modifier)
+                    .then(if (style.hasBorder) Modifier.border(1.5.dp, if (style.hasFill) ink.copy(alpha = 0.6f) else accent, CircleShape) else Modifier)
             )
             .padding(horizontal = PILL_PADDING, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (showSymbol && category.hasSymbol) {
-            CategorySymbol(category, iconSize, if (style == CategoryNameStyle.PILL) tint else accent)
+            CategorySymbol(category, iconSize, if (style.hasFill) tint else accent)
             Spacer(Modifier.size(8.dp))
         }
         Text(category.name, style = textStyle, color = tint, maxLines = 1, overflow = TextOverflow.Ellipsis)

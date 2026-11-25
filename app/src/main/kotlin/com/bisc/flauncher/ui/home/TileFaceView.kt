@@ -80,7 +80,7 @@ fun TileFaceView(
         modifier = modifier
             .clip(tileShape)
             .then(if (fill != null) Modifier.background(fill) else Modifier)
-            .then(if (face.hasBorder) Modifier.border(1.5.dp, face.borderColor?.let { Color(it) } ?: around.copy(alpha = 0.6f), tileShape) else Modifier),
+            .then(if (face.hasBorder) Modifier.border((face.borderWidth ?: 1.5f).dp, face.borderColor?.let { Color(it) } ?: around.copy(alpha = 0.6f), tileShape) else Modifier),
         contentAlignment = Alignment.Center
     ) {
         val side = min(maxWidth, maxHeight)

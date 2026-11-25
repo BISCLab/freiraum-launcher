@@ -27,6 +27,8 @@ data class TileFace(
     val border: Boolean? = null,
     /** The border's color; null = the color of the text around it. */
     val borderColor: Int? = null,
+    /** The border's width in dp; null = 1.5. */
+    val borderWidth: Float? = null,
     /** Its own corners; null = like the other symbols around it. */
     val corners: TileCorners? = null
 ) {
@@ -46,6 +48,7 @@ data class TileFace(
         symbolColor?.let { put("symbolColor", it) }
         border?.let { put("border", it) }
         borderColor?.let { put("borderColor", it) }
+        borderWidth?.let { put("borderWidth", it.toDouble()) }
         corners?.let { put("corners", it.name) }
     }.toString()
 
@@ -65,6 +68,7 @@ data class TileFace(
                     symbolColor = if (json.has("symbolColor")) json.getInt("symbolColor") else null,
                     border = if (json.has("border")) json.getBoolean("border") else null,
                     borderColor = if (json.has("borderColor")) json.getInt("borderColor") else null,
+                    borderWidth = if (json.has("borderWidth")) json.getDouble("borderWidth").toFloat() else null,
                     corners = json.optString("corners").ifBlank { null }?.let { c -> runCatching { TileCorners.valueOf(c) }.getOrNull() }
                 )
             }.getOrNull()
@@ -74,4 +78,18 @@ data class TileFace(
 
 /** How a category's name looks where it is shown by name: in a pill of its color, in an outline,
  *  or as plain text. */
-enum class CategoryNameStyle { PILL, OUTLINE, TEXT }
+enum class CategoryNameStyle {
+    PILL, OUTLINE, TEXT, PILL_OUTLINE;
+
+    val hasFill: Boolean get() = this == PILL || this == PILL_OUTLINE
+    val hasBorder: Boolean get() = this == OUTLINE || this == PILL_OUTLINE
+
+    companion object {
+        fun of(fill: Boolean, border: Boolean): CategoryNameStyle = when {
+            fill && border -> PILL_OUTLINE
+            fill -> PILL
+            border -> OUTLINE
+            else -> TEXT
+        }
+    }
+}

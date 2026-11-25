@@ -871,7 +871,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_hub_bar_look_contents">Fläche, Schrift, Deckkraft, Rahmen, Ecken</string>
     <string name="settings_panel_content_title">Inhalt</string>
     <string name="settings_hub_panel_content_what">Widgets oben, darunter Apps, Ordner, Links und mehr</string>
-    <string name="settings_folder_content_label">Was drin ist</string>
     <string name="welcome_elements_title">Elemente</string>
     <string name="welcome_elements_text">Alles, was du antippen kannst, ist ein Element. Du richtest es einmal ein und legst es dann überall hin.</string>
     <string name="welcome_element_apps">Apps</string>
@@ -1161,11 +1160,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="tile_no_pack">Es ist kein Icon-Pack installiert. Die Symbole aus dem Katalog gehen immer.</string>
     <string name="tile_search">Symbole suchen</string>
     <string name="tile_nothing_found">Nichts gefunden.</string>
-    <string name="tile_surface_title">Fläche, Rand und Ecken</string>
-    <string name="tile_surface_color_pick">Farbe der Fläche</string>
     <string name="tile_pack_own">Das Bild aus dem Icon-Pack bringt seinen eigenen Hintergrund mit.</string>
-    <string name="tile_symbol_color">Farbe des Symbols</string>
-    <string name="tile_letter_color">Farbe des Buchstabens</string>
+    <string name="tile_symbol_color">Symbolfarbe</string>
     <string name="tile_preview_light">Hell</string>
     <string name="tile_preview_dark">Dunkel</string>
     <string name="tile_content_category">Zeigt die ersten vier Apps der Kategorie, wie ein Ordner.</string>
@@ -1189,11 +1185,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="section_content_smart">Füllt sich selbst nach ihrer Regel.</string>
     <string name="section_folder_content_where">Was der Ordner enthält. Änderungen hier gelten sofort, ohne Speichern.</string>
     <string name="category_color_info">Gilt für den Namen und für die Kachel.</string>
+    <string name="category_name_fill_info">Die Fläche hat die Farbe der Kategorie.</string>
+    <string name="folder_part_open">Offen</string>
     <string name="preview_caption_tile">Kachel</string>
     <string name="preview_caption_name">Name</string>
-    <string name="tile_fill">Füllung</string>
-    <string name="tile_border">Rand</string>
-    <string name="tile_border_color">Farbe des Rands</string>
     <string name="tile_corners">Ecken</string>
     <string name="tile_corners_default">Standard</string>
     <string name="section_folder_open">Wenn er offen ist</string>

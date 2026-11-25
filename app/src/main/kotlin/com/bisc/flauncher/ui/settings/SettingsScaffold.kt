@@ -184,6 +184,11 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
             val folderId = entry.arguments?.getLong("folderId")
             folders.find { it.id == folderId }?.name ?: stringResource(R.string.settings_folder_edit_title)
         }
+        "settings/folder/{folderId}/{part}" -> when (entry.arguments?.getString("part")) {
+            "tile" -> stringResource(R.string.settings_category_tile_label)
+            "content" -> stringResource(R.string.section_content)
+            else -> stringResource(R.string.section_folder_open)
+        }
         "settings/elements" -> stringResource(R.string.settings_section_elements)
         "settings/elements/addresses" -> stringResource(R.string.settings_elements_addresses_title)
         "settings/elements/addresses/{targetId}" -> {
@@ -204,6 +209,11 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
             val categories by viewModel.categories.collectAsState()
             val categoryId = entry.arguments?.getLong("categoryId")
             categories.find { it.id == categoryId }?.name ?: stringResource(R.string.settings_pages_categories)
+        }
+        "settings/elements/categories/{categoryId}/{part}" -> when (entry.arguments?.getString("part")) {
+            "name" -> stringResource(R.string.section_as_name)
+            "tile" -> stringResource(R.string.settings_category_tile_label)
+            else -> stringResource(R.string.section_content)
         }
         "settings/elements/actionbuttons" -> stringResource(R.string.settings_elements_actionbuttons_title)
         "settings/elements/actionbuttons/{buttonId}" -> {

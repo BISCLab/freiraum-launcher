@@ -73,6 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
+import com.bisc.flauncher.data.model.ElementFillMode
 import com.bisc.flauncher.data.model.AppInfo
 import com.bisc.flauncher.data.model.Category
 import com.bisc.flauncher.data.model.CategoryMember
@@ -349,10 +350,13 @@ internal fun NewCategoryDialog(onCreate: (String) -> Unit, onDismiss: () -> Unit
     )
 }
 
-/** One category: everything on it (name, symbol, color, rule, what it holds and in which order)
- *  is a draft, written together with Save, like the other editors in the settings. */
+/** The pages of one category: an overview with name and color, then the name's look, the tile's look
+ *  and what it holds each on their own. Every page keeps a draft, written with Save. */
+enum class CategoryPart { HUB, NAME, TILE, CONTENT }
+
+/** One category, or one part of it, see [CategoryPart]. */
 @Composable
-fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController, onBack: () -> Unit, part: CategoryPart = CategoryPart.HUB, viewModel: SettingsViewModel = hiltViewModel()) {
     val homeViewModel: HomeViewModel = hiltViewModel()
     val categories by viewModel.categories.collectAsState()
     val resolved by viewModel.resolvedCategories.collectAsState()
@@ -384,8 +388,16 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
     }
     val membersChanged = rule == null && if (draft.manualOrder) draftMembers != savedMembers else draftMembers.toSet() != savedMembers.toSet()
 
+    val partTitle = when (part) {
+        CategoryPart.NAME -> stringResource(R.string.section_as_name)
+        CategoryPart.TILE -> stringResource(R.string.settings_category_tile_label)
+        CategoryPart.CONTENT -> stringResource(R.string.section_content)
+        CategoryPart.HUB -> saved.name
+    }
+    val tilePreview: @Composable (Color) -> Unit = { around -> com.bisc.flauncher.ui.home.CategoryMark(draft, modifier = Modifier.fillMaxSize(), shape = RoundedCornerShape(16.dp), ink = around) }
+    val namePreview: @Composable (Color) -> Unit = { around -> com.bisc.flauncher.ui.home.CategoryNamePill(draft, MaterialTheme.typography.labelLarge, ink = around) }
     SettingsSubScreen(
-        title = saved.name,
+        title = partTitle,
         navController = navController,
         onBack = onBack,
         onSave = {
@@ -393,145 +405,175 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
             if (membersChanged || draft.manualOrder != base.manualOrder) viewModel.replaceCategoryMembers(categoryId, shownMembers.map { it.type to it.payload })
         },
         dirty = draft != base || membersChanged,
-        // The tile and the name as they will look, always in sight while choosing.
-        header = {
+        // What this page changes, as it will look, always in sight while choosing.
+        header = if (part == CategoryPart.CONTENT) null else ({
             TilePreviewHeader(
                 name = draft.name,
-                tile = { around -> com.bisc.flauncher.ui.home.CategoryMark(draft, modifier = Modifier.fillMaxSize(), shape = RoundedCornerShape(16.dp), ink = around) },
-                extra = { around -> com.bisc.flauncher.ui.home.CategoryNamePill(draft, MaterialTheme.typography.labelLarge, ink = around) },
+                tile = if (part == CategoryPart.NAME) null else tilePreview,
+                extra = if (part == CategoryPart.TILE) null else namePreview,
                 tileCaption = stringResource(R.string.preview_caption_tile),
                 extraCaption = stringResource(R.string.preview_caption_name)
             )
-        }
+        })
     ) {
-        SettingsPreferenceGroup {
-            Box(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(16.dp)) {
-                OutlinedTextField(
-                    value = draft.name,
-                    onValueChange = { draft = draft.copy(name = it) },
-                    label = { Text(stringResource(R.string.settings_category_name)) },
-                    singleLine = true,
-                    shape = SettingsTextFieldShape,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
-        SettingsPreferenceGroup(title = stringResource(R.string.category_color_title), info = stringResource(R.string.category_color_info)) {
-            AutomaticColorPicker(
-                title = stringResource(R.string.settings_category_color),
-                custom = draft.color,
-                automaticSeed = categoryColor(draft.copy(color = null)).toArgb(),
-                onChange = { draft = draft.copy(color = it) },
-                ownGroup = false
-            )
-        }
-        SectionBanner(Icons.AutoMirrored.Filled.Label, stringResource(R.string.section_as_name), stringResource(R.string.category_name_look_info))
-        SettingsPreferenceGroup(title = stringResource(R.string.category_name_look_title)) {
-            listOf(
-                CategoryNameStyle.PILL to R.string.category_name_look_pill,
-                CategoryNameStyle.OUTLINE to R.string.category_name_look_outline,
-                CategoryNameStyle.TEXT to R.string.category_name_look_text
-            ).forEach { (style, label) ->
-                RadioPreference(stringResource(label), style, draft.nameLook(), { draft = draft.copy(nameStyle = it.name) })
-            }
-        }
-        // How it looks as a tile, like a folder's icon: only in the Dock, the Panel, boxes and folders.
-        SectionBanner(Icons.Filled.Apps, stringResource(R.string.settings_category_tile_label), stringResource(R.string.settings_category_tile_info))
-        TileFaceEditor(
-            face = draft.face(),
-            onChange = { draft = draft.copy(tileFace = it.toJson()) },
-            autoSurface = categoryColor(draft),
-            letter = draft.name,
-            content = shownMembers.take(4).map { member ->
-                if (member.type == GridItemType.APP) com.bisc.flauncher.ui.home.TileContent.App(ComponentName.unflattenFromString(member.payload))
-                else com.bisc.flauncher.ui.home.TileContent.Element(memberTypeIcon(member.type))
-            },
-            contentSummary = stringResource(R.string.tile_content_category),
-            viewModel = viewModel
-        )
-        // What it holds: by a rule, or picked by hand, and in which order.
-        SectionBanner(
-            Icons.Filled.Inventory2,
-            stringResource(R.string.section_content),
-            stringResource(if (rule != null) R.string.section_content_smart else R.string.section_content_own)
-        )
-        if (rule != null) RuleSettings(draft) { draft = it }
-        if (rule == null && shownMembers.size > 1) {
-            // Switching on keeps the order as it is shown now, ready to be dragged.
-            val setManual = { on: Boolean ->
-                if (on) draftMembers = shownMembers.map { it.type to it.payload }
-                draft = draft.copy(manualOrder = on)
-            }
-            SettingsPreferenceGroup {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_category_manual_order),
-                    summary = stringResource(if (draft.manualOrder) R.string.settings_category_manual_order_on else R.string.settings_category_manual_order_off),
-                    onClick = { setManual(!draft.manualOrder) },
-                    trailing = { androidx.compose.material3.Switch(checked = draft.manualOrder, onCheckedChange = { setManual(it) }) }
-                )
-            }
-        }
-        Column {
-            SettingsGroupLabel(stringResource(R.string.settings_category_members, shownMembers.size))
-            val removeMember = { member: CategoryMember -> draftMembers = draftMembers - (member.type to member.payload) }
-            if (rule == null && draft.manualOrder && shownMembers.size > 1) {
-                ReorderableList(
-                    items = shownMembers,
-                    key = { "${it.type}|${it.payload}" },
-                    onReorder = { ordered -> draftMembers = ordered.map { it.type to it.payload } },
-                    itemHeight = 64.dp,
-                    dividers = true
-                ) { member ->
-                    CategoryMemberRow(
-                        member = member,
-                        apps = apps,
-                        websites = websites,
-                        places = places,
-                        contacts = contacts,
-                        loadIcon = viewModel::loadIcon,
-                        onRemove = { removeMember(member) },
-                        inList = true
+        when (part) {
+            CategoryPart.HUB -> {
+                SettingsPreferenceGroup {
+                    Box(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(16.dp)) {
+                        OutlinedTextField(
+                            value = draft.name,
+                            onValueChange = { draft = draft.copy(name = it) },
+                            label = { Text(stringResource(R.string.settings_category_name)) },
+                            singleLine = true,
+                            shape = SettingsTextFieldShape,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+                SettingsPreferenceGroup(title = stringResource(R.string.category_color_title), info = stringResource(R.string.category_color_info)) {
+                    AutomaticColorPicker(
+                        title = stringResource(R.string.settings_category_color),
+                        custom = draft.color,
+                        automaticSeed = categoryColor(draft.copy(color = null)).toArgb(),
+                        onChange = { draft = draft.copy(color = it) },
+                        ownGroup = false
                     )
                 }
-            } else if (shownMembers.isEmpty()) {
+                // Look and content each on a page of their own, so it is always clear what is changed.
+                val open = { sub: String -> navController.navigate("settings/elements/categories/$categoryId/$sub") }
+                SettingsTileGrid(
+                    columns = 3,
+                    title = stringResource(R.string.settings_parts_label),
+                    tiles = listOf(
+                        SettingsTile(Icons.AutoMirrored.Filled.Label, stringResource(R.string.section_as_name)) { open("name") },
+                        SettingsTile(Icons.Filled.Apps, stringResource(R.string.settings_category_tile_label)) { open("tile") },
+                        SettingsTile(Icons.Filled.Inventory2, stringResource(R.string.section_content), badge = shownMembers.size.toString()) { open("content") }
+                    )
+                )
                 SettingsPreferenceGroup {
+                    SettingsPreference(icon = Icons.Filled.DeleteOutline, title = stringResource(R.string.settings_category_delete), onClick = { confirmingDelete = true }, trailing = null)
+                }
+            }
+            CategoryPart.NAME -> {
+                PartIntro(stringResource(R.string.category_name_look_info))
+                // The same two choices as for every other element: a fill, and a border.
+                val look = draft.nameLook()
+                val setLook = { fill: Boolean, border: Boolean -> draft = draft.copy(nameStyle = CategoryNameStyle.of(fill, border).name) }
+                SettingsPreferenceGroup(title = stringResource(R.string.settings_element_fill_label), info = stringResource(R.string.category_name_fill_info)) {
+                    val swatch = androidx.compose.ui.graphics.SolidColor(categoryColor(draft))
+                    ElementFillMode.entries.forEach { mode ->
+                        FillModePreference(
+                            value = mode,
+                            selected = if (look.hasFill) ElementFillMode.COLOR else ElementFillMode.NONE,
+                            onSelect = { setLook(it == ElementFillMode.COLOR, look.hasBorder) },
+                            customFill = swatch
+                        )
+                    }
+                }
+                SettingsPreferenceGroup(title = stringResource(R.string.settings_element_border_label)) {
                     SettingsPreference(
                         icon = null,
-                        title = stringResource(if (rule != null) R.string.settings_category_smart_empty else R.string.settings_category_members_empty),
-                        onClick = null,
-                        trailing = null
+                        title = stringResource(R.string.settings_element_border_label),
+                        onClick = { setLook(look.hasFill, !look.hasBorder) },
+                        trailing = { androidx.compose.material3.Switch(checked = look.hasBorder, onCheckedChange = { setLook(look.hasFill, it) }) }
                     )
                 }
-            } else {
-                SettingsPreferenceGroup {
-                    shownMembers.forEach { member ->
-                        CategoryMemberRow(
-                            member = member,
-                            apps = apps,
-                            websites = websites,
-                            places = places,
-                            contacts = contacts,
-                            loadIcon = viewModel::loadIcon,
-                            onRemove = if (rule == null) ({ removeMember(member) }) else null
+            }
+            CategoryPart.TILE -> {
+                // How it looks as a tile, like a folder's icon: only in the Dock, the Panel, boxes and folders.
+                PartIntro(stringResource(R.string.settings_category_tile_info))
+                TileFaceEditor(
+                    face = draft.face(),
+                    onChange = { draft = draft.copy(tileFace = it.toJson()) },
+                    autoSurface = categoryColor(draft),
+                    letter = draft.name,
+                    content = shownMembers.take(4).map { member ->
+                        if (member.type == GridItemType.APP) com.bisc.flauncher.ui.home.TileContent.App(ComponentName.unflattenFromString(member.payload))
+                        else com.bisc.flauncher.ui.home.TileContent.Element(memberTypeIcon(member.type))
+                    },
+                    contentSummary = stringResource(R.string.tile_content_category),
+                    viewModel = viewModel
+                )
+            }
+            CategoryPart.CONTENT -> {
+                // What it holds: by a rule, or picked by hand, and in which order.
+                PartIntro(stringResource(if (rule != null) R.string.section_content_smart else R.string.section_content_own))
+                if (rule != null) RuleSettings(draft) { draft = it }
+                if (rule == null && shownMembers.size > 1) {
+                    // Switching on keeps the order as it is shown now, ready to be dragged.
+                    val setManual = { on: Boolean ->
+                        if (on) draftMembers = shownMembers.map { it.type to it.payload }
+                        draft = draft.copy(manualOrder = on)
+                    }
+                    SettingsPreferenceGroup {
+                        SettingsPreference(
+                            icon = null,
+                            title = stringResource(R.string.settings_category_manual_order),
+                            summary = stringResource(if (draft.manualOrder) R.string.settings_category_manual_order_on else R.string.settings_category_manual_order_off),
+                            onClick = { setManual(!draft.manualOrder) },
+                            trailing = { androidx.compose.material3.Switch(checked = draft.manualOrder, onCheckedChange = { setManual(it) }) }
+                        )
+                    }
+                }
+                Column {
+                    SettingsGroupLabel(stringResource(R.string.settings_category_members, shownMembers.size))
+                    val removeMember = { member: CategoryMember -> draftMembers = draftMembers - (member.type to member.payload) }
+                    if (rule == null && draft.manualOrder && shownMembers.size > 1) {
+                        ReorderableList(
+                            items = shownMembers,
+                            key = { "${it.type}|${it.payload}" },
+                            onReorder = { ordered -> draftMembers = ordered.map { it.type to it.payload } },
+                            itemHeight = 64.dp,
+                            dividers = true
+                        ) { member ->
+                            CategoryMemberRow(
+                                member = member,
+                                apps = apps,
+                                websites = websites,
+                                places = places,
+                                contacts = contacts,
+                                loadIcon = viewModel::loadIcon,
+                                onRemove = { removeMember(member) },
+                                inList = true
+                            )
+                        }
+                    } else if (shownMembers.isEmpty()) {
+                        SettingsPreferenceGroup {
+                            SettingsPreference(
+                                icon = null,
+                                title = stringResource(if (rule != null) R.string.settings_category_smart_empty else R.string.settings_category_members_empty),
+                                onClick = null,
+                                trailing = null
+                            )
+                        }
+                    } else {
+                        SettingsPreferenceGroup {
+                            shownMembers.forEach { member ->
+                                CategoryMemberRow(
+                                    member = member,
+                                    apps = apps,
+                                    websites = websites,
+                                    places = places,
+                                    contacts = contacts,
+                                    loadIcon = viewModel::loadIcon,
+                                    onRemove = if (rule == null) ({ removeMember(member) }) else null
+                                )
+                            }
+                        }
+                    }
+                }
+                if (rule == null) {
+                    SettingsPreferenceGroup {
+                        SettingsPreference(icon = Icons.Filled.Apps, title = stringResource(R.string.settings_category_pick_apps), onClick = { pickingApps = true })
+                        SettingsPreference(
+                            icon = Icons.Filled.Language,
+                            title = stringResource(R.string.settings_category_pick_elements),
+                            summary = stringResource(R.string.settings_category_pick_elements_summary),
+                            onClick = { pickingElements = true }
                         )
                     }
                 }
             }
-        }
-        if (rule == null) {
-            SettingsPreferenceGroup {
-                SettingsPreference(icon = Icons.Filled.Apps, title = stringResource(R.string.settings_category_pick_apps), onClick = { pickingApps = true })
-                SettingsPreference(
-                    icon = Icons.Filled.Language,
-                    title = stringResource(R.string.settings_category_pick_elements),
-                    summary = stringResource(R.string.settings_category_pick_elements_summary),
-                    onClick = { pickingElements = true }
-                )
-            }
-        }
-        SettingsPreferenceGroup {
-            SettingsPreference(icon = Icons.Filled.DeleteOutline, title = stringResource(R.string.settings_category_delete), onClick = { confirmingDelete = true }, trailing = null)
         }
     }
 

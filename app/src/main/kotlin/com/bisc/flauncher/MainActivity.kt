@@ -716,6 +716,14 @@ class MainActivity : ComponentActivity() {
                             SettingsFolderEditScreen(folderId = folderId, navController = navController, onBack = { navController.popBackStack() })
                         }
                         settingsComposable(
+                            "settings/folder/{folderId}/{part}",
+                            arguments = listOf(navArgument("folderId") { type = NavType.LongType }, navArgument("part") { type = NavType.StringType })
+                        ) { backStackEntry ->
+                            val folderId = backStackEntry.arguments?.getLong("folderId") ?: return@settingsComposable
+                            val part = com.bisc.flauncher.ui.settings.FolderPart.entries.find { it.name.equals(backStackEntry.arguments?.getString("part"), ignoreCase = true) } ?: return@settingsComposable
+                            SettingsFolderEditScreen(folderId = folderId, navController = navController, onBack = { navController.popBackStack() }, part = part)
+                        }
+                        settingsComposable(
                             "settings/folder/{folderId}/widget/{itemId}",
                             arguments = listOf(navArgument("folderId") { type = NavType.LongType }, navArgument("itemId") { type = NavType.LongType })
                         ) { backStackEntry ->
@@ -755,6 +763,14 @@ class MainActivity : ComponentActivity() {
                         ) { backStackEntry ->
                             val categoryId = backStackEntry.arguments?.getLong("categoryId") ?: return@settingsComposable
                             com.bisc.flauncher.ui.settings.SettingsCategoryDetailScreen(categoryId = categoryId, navController = navController, onBack = { navController.popBackStack() })
+                        }
+                        settingsComposable(
+                            "settings/elements/categories/{categoryId}/{part}",
+                            arguments = listOf(navArgument("categoryId") { type = NavType.LongType }, navArgument("part") { type = NavType.StringType })
+                        ) { backStackEntry ->
+                            val categoryId = backStackEntry.arguments?.getLong("categoryId") ?: return@settingsComposable
+                            val part = com.bisc.flauncher.ui.settings.CategoryPart.entries.find { it.name.equals(backStackEntry.arguments?.getString("part"), ignoreCase = true) } ?: return@settingsComposable
+                            com.bisc.flauncher.ui.settings.SettingsCategoryDetailScreen(categoryId = categoryId, navController = navController, onBack = { navController.popBackStack() }, part = part)
                         }
                         settingsComposable("settings/categories") {
                             com.bisc.flauncher.ui.settings.SettingsCategoriesPageScreen(navController = navController, onBack = { navController.popBackStack() })
