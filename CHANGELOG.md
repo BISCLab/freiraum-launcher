@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.23.0
+
 - Text search: the categories card no longer has its own heading, the category name sits at the top
 - Categories: the count beside a category can be switched off per place, on the Categories page, in the text search, in the App list chips and in each Categories widget
 - Categories and folders: an overview first, with the name and three tiles; the name, the tile, the content and the open folder each have their own page with a fitting preview

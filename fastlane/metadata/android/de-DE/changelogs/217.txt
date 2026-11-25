@@ -1,0 +1,5 @@
+- Kategorien und Ordner: erst ein Überblick, dann Name, Kachel, Inhalt und offener Ordner auf eigenen Seiten
+- Gleiche Begriffe wie bei allen Elementen: Fläche, Rahmen mit Stärke und Rahmenfarbe, Ecken
+- Name einer Kategorie mit Fläche und Rahmen zugleich
+- Anzahl bei Kategorien pro Ort ausschaltbar
+- Suche: Kategorien-Karte ohne eigene Überschrift

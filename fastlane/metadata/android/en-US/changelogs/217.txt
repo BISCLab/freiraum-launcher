@@ -1,0 +1,5 @@
+- Categories and folders: an overview first, then name, tile, content and open folder on their own pages
+- Same words as every element: fill, border with thickness and border color, corners
+- A category name can have a fill and a border together
+- Category counts can be switched off per place
+- Search: the categories card has no heading of its own
