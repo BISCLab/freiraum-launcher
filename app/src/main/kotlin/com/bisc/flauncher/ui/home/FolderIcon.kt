@@ -12,8 +12,9 @@ import com.bisc.flauncher.data.model.TileFace
 import com.bisc.flauncher.data.model.face
 import com.bisc.flauncher.data.model.Folder as FolderModel
 
-/** A folder's automatic surface: a calm grey behind what it holds. */
-val FolderAutoSurface = Color(0xFF8E8E93)
+/** A folder's automatic surface: the accent, like a category without its own color. */
+@Composable
+fun folderAutoSurface(): Color = androidx.compose.material3.MaterialTheme.colorScheme.primary
 
 /** A folder as a tile, as it is set under "As a tile": its first apps, a symbol or its letter. */
 @Composable
@@ -27,7 +28,7 @@ fun FolderIcon(
 ) {
     TileFaceView(
         face = face ?: folder?.face() ?: TileFace(),
-        autoSurface = FolderAutoSurface,
+        autoSurface = folderAutoSurface(),
         letter = folder?.name.orEmpty(),
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),

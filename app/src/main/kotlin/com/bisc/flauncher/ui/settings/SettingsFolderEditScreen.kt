@@ -198,7 +198,7 @@ fun SettingsFolderEditScreen(
         TileFaceEditor(
             face = shownFace,
             onChange = { face = it },
-            autoSurface = com.bisc.flauncher.ui.home.FolderAutoSurface,
+            autoSurface = com.bisc.flauncher.ui.home.folderAutoSurface(),
             letter = edited ?: folder.name,
             content = items.filter { it.type == GridItemType.APP }.take(4).map { com.bisc.flauncher.ui.home.TileContent.App(android.content.ComponentName.unflattenFromString(it.payload)) },
             contentSummary = stringResource(R.string.tile_content_folder),
