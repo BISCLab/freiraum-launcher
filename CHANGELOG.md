@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Category preview: Tile and Name on the same line, the name level with the middle of the tile, the light/dark switch below; scrolled, only the two parts stay and nothing overlaps
+
 ## 0.21.3
 
 - Tile preview: only Light and Dark, starting like the settings are shown; a tile can lie in many places, so the page background is no longer offered

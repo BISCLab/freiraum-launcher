@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.graphics.luminance
@@ -82,66 +83,64 @@ internal fun TilePreviewHeader(
     var dark by remember { mutableStateOf(settingsDark) }
     val around = if (dark) Color.White else Color.Black
     val compact = LocalHeaderCompact.current
-    val height by animateDpAsState(if (compact) 104.dp else 176.dp, label = "previewHeight")
     val tileSize by animateDpAsState(if (compact) 48.dp else 68.dp, label = "previewTile")
     val shape = RoundedCornerShape(28.dp)
-    Box(
+    val twoParts = extra != null
+    // In three lines, each the same for both halves: the words, the parts, the light/dark switch.
+    // Scrolled, only the parts stay, small.
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(height)
             .shadow(10.dp, shape)
             .clip(shape)
             .background(if (dark) Color(0xFF1C1C1E) else Color(0xFFF2F2F4))
+            .animateContentSize()
+            .padding(vertical = 14.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        val tilePart: @Composable () -> Unit = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                if (tileCaption != null && !compact) PreviewCaption(tileCaption, around)
-                Box(modifier = Modifier.size(tileSize)) { tile(around) }
-                if (!compact) {
-                    Spacer(Modifier.height(6.dp))
-                    Text(name, color = around, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        if (!compact && (tileCaption != null || extraCaption != null)) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { tileCaption?.let { PreviewCaption(it, around) } }
+                if (twoParts) {
+                    Spacer(Modifier.width(1.dp))
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { extraCaption?.let { PreviewCaption(it, around) } }
                 }
             }
         }
-        if (extra == null) {
-            Box(modifier = Modifier.align(Alignment.Center).padding(top = if (compact) 0.dp else 16.dp)) { tilePart() }
-        } else {
-            // Two parts on two equal halves with a fine line between, each in the middle of its own.
-            Row(
-                modifier = Modifier.matchParentSize().padding(top = if (compact) 0.dp else 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { tilePart() }
-                Box(
-                    modifier = Modifier
-                        .width(1.dp)
-                        .fillMaxHeight(if (compact) 0.5f else 0.6f)
-                        .background(around.copy(alpha = 0.2f))
-                )
-                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        if (extraCaption != null && !compact) PreviewCaption(extraCaption, around)
-                        extra(around)
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.TopCenter) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(modifier = Modifier.size(tileSize)) { tile(around) }
+                    if (!compact) {
+                        Spacer(Modifier.height(6.dp))
+                        Text(name, color = around, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
             }
+            if (extra != null) {
+                // A fine line between the halves, as tall as the tile.
+                Box(modifier = Modifier.width(1.dp).height(tileSize).background(around.copy(alpha = 0.2f)))
+                // The name level with the middle of the tile.
+                Box(modifier = Modifier.weight(1f).height(tileSize), contentAlignment = Alignment.Center) { extra(around) }
+            }
         }
         // Which background to check the tile on.
-        Row(
-            modifier = Modifier.align(Alignment.TopEnd).padding(10.dp).clip(RoundedCornerShape(50)).background(Color.Black.copy(alpha = 0.35f)).padding(2.dp),
+        if (!compact) Row(
+            modifier = Modifier.clip(RoundedCornerShape(50)).background(around.copy(alpha = 0.12f)).padding(2.dp),
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             listOf(false to R.string.tile_preview_light, true to R.string.tile_preview_dark).forEach { (option, label) ->
                 val picked = option == dark
                 Text(
                     stringResource(label),
-                    color = if (picked) Color.Black else Color.White,
+                    color = if (picked) (if (dark) Color.Black else Color.White) else around.copy(alpha = 0.75f),
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier
                         .clip(RoundedCornerShape(50))
-                        .background(if (picked) Color.White else Color.Transparent)
+                        .background(if (picked) around else Color.Transparent)
                         .clickable { dark = option }
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                        .padding(horizontal = 12.dp, vertical = 4.dp)
                 )
             }
         }
@@ -156,7 +155,6 @@ private fun PreviewCaption(text: String, around: Color) {
         color = around.copy(alpha = 0.75f),
         style = MaterialTheme.typography.labelSmall,
         modifier = Modifier
-            .padding(bottom = 6.dp)
             .clip(RoundedCornerShape(50))
             .background(around.copy(alpha = 0.12f))
             .padding(horizontal = 8.dp, vertical = 2.dp)
