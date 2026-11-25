@@ -1188,7 +1188,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="section_content">Inhalt</string>
     <string name="section_content_own">Was in der Kategorie ist und in welcher Reihenfolge.</string>
     <string name="section_content_smart">Füllt sich selbst nach ihrer Regel.</string>
-    <string name="section_folder_content_where">So sieht der Ordner aus, wenn er offen ist.</string>
+    <string name="section_folder_content_where">Was der Ordner enthält. Änderungen hier gelten sofort, ohne Speichern.</string>
     <string name="category_color_info">Gilt für den Namen und für die Kachel.</string>
     <string name="preview_caption_tile">Kachel</string>
     <string name="preview_caption_name">Name</string>
@@ -1197,4 +1197,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="tile_border_color">Farbe des Rands</string>
     <string name="tile_corners">Ecken</string>
     <string name="tile_corners_default">Standard</string>
+    <string name="section_folder_open">Wenn er offen ist</string>
+    <string name="section_folder_open_where">Aussehen und Beschriftungen des offenen Ordners.</string>
+    <string name="folder_follows_edit">„%1$s“ bearbeiten</string>
+    <string name="folder_follows_note">Der Ordner zeigt, was in der Kategorie ist. Seine eigenen Inhalte kommen zurück, wenn er nicht mehr folgt.</string>
 </resources>

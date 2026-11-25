@@ -179,8 +179,8 @@ internal fun SectionBanner(icon: androidx.compose.ui.graphics.vector.ImageVector
 
 /**
  * Sets how a folder or a category looks as a tile, one decision after the other: what it shows,
- * the symbol (chosen on a page of its own), the surface behind it, the colors of the symbol and of
- * the name below. Only what applies to the choice so far is shown.
+ * the symbol (chosen on a page of its own), fill, border and corners, the symbol's color. Only what
+ * applies to the choice so far is shown.
  */
 @Composable
 internal fun TileFaceEditor(
