@@ -29,9 +29,23 @@ data class TileFace(
     val borderColor: Int? = null,
     /** The border's width in dp; null = 1.5. */
     val borderWidth: Float? = null,
-    /** Its own corners; null = like the other symbols around it. */
-    val corners: TileCorners? = null
+    /** Its own corners from before they were set in percent, see [ownCornerPercent]. */
+    val corners: TileCorners? = null,
+    /** Its own corners on the same scale as every other part (100 = fully round); null = like
+     *  the app icons around it. */
+    val cornerPercent: Int? = null,
+    /** How solid the fill is, 0..1; null = fully. */
+    val surfaceAlpha: Float? = null
 ) {
+    /** Its own corners in percent, older ones read from [corners]; null = like the app icons. */
+    val ownCornerPercent: Int?
+        get() = cornerPercent ?: when (corners) {
+            TileCorners.ROUND -> 100
+            TileCorners.SOFT -> 56
+            TileCorners.SQUARE -> 16
+            null -> null
+        }
+
     val hasFill: Boolean get() = surface == TileSurface.AUTO || surface == TileSurface.COLOR
     val hasBorder: Boolean get() = border ?: (surface == TileSurface.OUTLINE)
 
@@ -50,6 +64,8 @@ data class TileFace(
         borderColor?.let { put("borderColor", it) }
         borderWidth?.let { put("borderWidth", it.toDouble()) }
         corners?.let { put("corners", it.name) }
+        cornerPercent?.let { put("cornerPercent", it) }
+        surfaceAlpha?.let { put("surfaceAlpha", it.toDouble()) }
     }.toString()
 
     companion object {
@@ -69,27 +85,20 @@ data class TileFace(
                     border = if (json.has("border")) json.getBoolean("border") else null,
                     borderColor = if (json.has("borderColor")) json.getInt("borderColor") else null,
                     borderWidth = if (json.has("borderWidth")) json.getDouble("borderWidth").toFloat() else null,
-                    corners = json.optString("corners").ifBlank { null }?.let { c -> runCatching { TileCorners.valueOf(c) }.getOrNull() }
+                    corners = json.optString("corners").ifBlank { null }?.let { c -> runCatching { TileCorners.valueOf(c) }.getOrNull() },
+                    cornerPercent = if (json.has("cornerPercent")) json.getInt("cornerPercent") else null,
+                    surfaceAlpha = if (json.has("surfaceAlpha")) json.getDouble("surfaceAlpha").toFloat() else null
                 )
             }.getOrNull()
         }
     }
 }
 
-/** How a category's name looks where it is shown by name: in a pill of its color, in an outline,
- *  or as plain text. */
+/** How a category's label looked before it was stored as a [TileFace]: in a pill of its color, in
+ *  an outline, as plain text, or both. */
 enum class CategoryNameStyle {
     PILL, OUTLINE, TEXT, PILL_OUTLINE;
 
     val hasFill: Boolean get() = this == PILL || this == PILL_OUTLINE
     val hasBorder: Boolean get() = this == OUTLINE || this == PILL_OUTLINE
-
-    companion object {
-        fun of(fill: Boolean, border: Boolean): CategoryNameStyle = when {
-            fill && border -> PILL_OUTLINE
-            fill -> PILL
-            border -> OUTLINE
-            else -> TEXT
-        }
-    }
 }

@@ -1,9 +1,8 @@
 package com.bisc.flauncher.ui.settings
 
 import androidx.compose.foundation.layout.fillMaxSize
-import com.bisc.flauncher.data.model.nameLook
+import com.bisc.flauncher.data.model.labelFace
 import com.bisc.flauncher.data.model.face
-import com.bisc.flauncher.data.model.CategoryNameStyle
 import android.content.ComponentName
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -67,6 +66,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -350,9 +350,10 @@ internal fun NewCategoryDialog(onCreate: (String) -> Unit, onDismiss: () -> Unit
     )
 }
 
-/** The pages of one category: an overview with name and color, then the name's look, the tile's look
- *  and what it holds each on their own. Every page keeps a draft, written with Save. */
-enum class CategoryPart { HUB, NAME, TILE, CONTENT }
+/** The pages of one category: an overview with name and color, then how it looks as a tile, how its
+ *  label looks, and which apps and elements it holds, each on their own. Every page keeps a draft,
+ *  written with Save. */
+enum class CategoryPart { HUB, TILE, LABEL, CONTENT }
 
 /** One category, or one part of it, see [CategoryPart]. */
 @Composable
@@ -389,12 +390,13 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
     val membersChanged = rule == null && if (draft.manualOrder) draftMembers != savedMembers else draftMembers.toSet() != savedMembers.toSet()
 
     val partTitle = when (part) {
-        CategoryPart.NAME -> stringResource(R.string.section_as_name)
+        CategoryPart.LABEL -> stringResource(R.string.section_as_name)
         CategoryPart.TILE -> stringResource(R.string.settings_category_tile_label)
         CategoryPart.CONTENT -> stringResource(R.string.section_content)
         CategoryPart.HUB -> saved.name
     }
     val tilePreview: @Composable (Color) -> Unit = { around -> com.bisc.flauncher.ui.home.CategoryMark(draft, modifier = Modifier.fillMaxSize(), shape = RoundedCornerShape(16.dp), ink = around) }
+    val open = { sub: String -> navController.navigate("settings/elements/categories/$categoryId/$sub") }
     val namePreview: @Composable (Color) -> Unit = { around -> com.bisc.flauncher.ui.home.CategoryNamePill(draft, MaterialTheme.typography.labelLarge, ink = around) }
     SettingsSubScreen(
         title = partTitle,
@@ -405,14 +407,17 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
             if (membersChanged || draft.manualOrder != base.manualOrder) viewModel.replaceCategoryMembers(categoryId, shownMembers.map { it.type to it.payload })
         },
         dirty = draft != base || membersChanged,
-        // What this page changes, as it will look, always in sight while choosing.
+        // What this page changes, as it will look, always in sight while choosing. On the overview a
+        // tap on the tile or the label opens where it is set.
         header = if (part == CategoryPart.CONTENT) null else ({
             TilePreviewHeader(
                 name = draft.name,
-                tile = if (part == CategoryPart.NAME) null else tilePreview,
+                tile = if (part == CategoryPart.LABEL) null else tilePreview,
                 extra = if (part == CategoryPart.TILE) null else namePreview,
                 tileCaption = stringResource(R.string.preview_caption_tile),
-                extraCaption = stringResource(R.string.preview_caption_name)
+                extraCaption = stringResource(R.string.preview_caption_name),
+                onTileClick = if (part == CategoryPart.HUB) ({ open("tile") }) else null,
+                onExtraClick = if (part == CategoryPart.HUB) ({ open("label") }) else null
             )
         })
     ) {
@@ -439,45 +444,38 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
                         ownGroup = false
                     )
                 }
-                // Look and content each on a page of their own, so it is always clear what is changed.
-                val open = { sub: String -> navController.navigate("settings/elements/categories/$categoryId/$sub") }
-                SettingsTileGrid(
-                    columns = 3,
-                    title = stringResource(R.string.settings_parts_label),
-                    tiles = listOf(
-                        SettingsTile(Icons.AutoMirrored.Filled.Label, stringResource(R.string.section_as_name)) { open("name") },
-                        SettingsTile(Icons.Filled.Apps, stringResource(R.string.settings_category_tile_label)) { open("tile") },
-                        SettingsTile(Icons.Filled.Inventory2, stringResource(R.string.section_content), badge = shownMembers.size.toString()) { open("content") }
-                    )
-                )
+                // Each way it is shown, and what it holds, on a page of its own: every row shows what it sets.
+                SettingsPreferenceGroup {
+                    PartLinkRow(
+                        title = stringResource(R.string.settings_category_tile_label),
+                        summary = stringResource(R.string.hub_tile_category),
+                        onClick = { open("tile") }
+                    ) { com.bisc.flauncher.ui.home.CategoryMark(draft, modifier = Modifier.size(40.dp), shape = RoundedCornerShape(12.dp), ink = MaterialTheme.colorScheme.onSurface) }
+                    PartLinkRow(
+                        title = stringResource(R.string.section_as_name),
+                        summary = stringResource(R.string.hub_label_category),
+                        onClick = { open("label") }
+                    ) { com.bisc.flauncher.ui.home.CategoryNamePill(draft, MaterialTheme.typography.labelSmall, ink = MaterialTheme.colorScheme.onSurface) }
+                    PartLinkRow(
+                        title = stringResource(R.string.section_content),
+                        summary = if (rule != null) stringResource(R.string.hub_content_smart, shownMembers.size)
+                        else pluralStringResource(R.plurals.hub_content_count, shownMembers.size, shownMembers.size),
+                        onClick = { open("content") }
+                    ) { CountBubble(shownMembers.size) }
+                }
                 SettingsPreferenceGroup {
                     SettingsPreference(icon = Icons.Filled.DeleteOutline, title = stringResource(R.string.settings_category_delete), onClick = { confirmingDelete = true }, trailing = null)
                 }
             }
-            CategoryPart.NAME -> {
+            CategoryPart.LABEL -> {
                 PartIntro(stringResource(R.string.category_name_look_info))
-                // The same two choices as for every other element: a fill, and a border.
-                val look = draft.nameLook()
-                val setLook = { fill: Boolean, border: Boolean -> draft = draft.copy(nameStyle = CategoryNameStyle.of(fill, border).name) }
-                SettingsPreferenceGroup(title = stringResource(R.string.settings_element_fill_label), info = stringResource(R.string.category_name_fill_info)) {
-                    val swatch = androidx.compose.ui.graphics.SolidColor(categoryColor(draft))
-                    ElementFillMode.entries.forEach { mode ->
-                        FillModePreference(
-                            value = mode,
-                            selected = if (look.hasFill) ElementFillMode.COLOR else ElementFillMode.NONE,
-                            onSelect = { setLook(it == ElementFillMode.COLOR, look.hasBorder) },
-                            customFill = swatch
-                        )
-                    }
-                }
-                SettingsPreferenceGroup(title = stringResource(R.string.settings_element_border_label)) {
-                    SettingsPreference(
-                        icon = null,
-                        title = stringResource(R.string.settings_element_border_label),
-                        onClick = { setLook(look.hasFill, !look.hasBorder) },
-                        trailing = { androidx.compose.material3.Switch(checked = look.hasBorder, onCheckedChange = { setLook(look.hasFill, it) }) }
-                    )
-                }
+                SurfaceLookSection(
+                    face = draft.labelFace(),
+                    onChange = { draft = draft.copy(nameStyle = it.toJson()) },
+                    autoSurface = categoryColor(draft),
+                    inkLabel = stringResource(R.string.settings_element_text_color_label),
+                    cornersFollowApps = false
+                )
             }
             CategoryPart.TILE -> {
                 // How it looks as a tile, like a folder's icon: only in the Dock, the Panel, boxes and folders.
@@ -1047,9 +1045,9 @@ internal fun CategorySymbolsSwitch(place: String, summary: String, viewModel: Se
 /** This category with its look in the fields made for it: older ones kept it in the symbol and the
  *  color (0 = an outline). Shown the same, so nothing changes until something is chosen. */
 private fun Category.withLookFields(): Category =
-    if (tileFace != null && nameStyle != null && color != CATEGORY_NO_COLOR) this
+    if (tileFace != null && nameStyle?.startsWith("{") == true && color != CATEGORY_NO_COLOR) this
     else copy(
         tileFace = face().toJson(),
-        nameStyle = nameLook().name,
+        nameStyle = labelFace().toJson(),
         color = color.takeIf { it != CATEGORY_NO_COLOR }
     )

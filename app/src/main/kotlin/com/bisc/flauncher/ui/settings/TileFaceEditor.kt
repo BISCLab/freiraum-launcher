@@ -28,6 +28,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -78,7 +79,10 @@ internal fun TilePreviewHeader(
     extra: (@Composable (around: Color) -> Unit)? = null,
     /** Small words over the tile and over [extra], the same as the sections below that set them. */
     tileCaption: String? = null,
-    extraCaption: String? = null
+    extraCaption: String? = null,
+    /** Opens where the tile, or [extra], is set; null = not a way in. */
+    onTileClick: (() -> Unit)? = null,
+    onExtraClick: (() -> Unit)? = null
 ) {
     // Starts like the settings themselves are shown, light or dark.
     val settingsDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
@@ -114,7 +118,10 @@ internal fun TilePreviewHeader(
         }
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
             if (tile != null) Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.TopCenter) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clip(RoundedCornerShape(16.dp)).then(if (onTileClick != null) Modifier.clickable(onClick = onTileClick) else Modifier).padding(4.dp)
+                ) {
                     Box(modifier = Modifier.size(tileSize)) { tile(around) }
                     if (!compact) {
                         Spacer(Modifier.height(6.dp))
@@ -126,7 +133,9 @@ internal fun TilePreviewHeader(
                 // A fine line between the halves, as tall as the tile.
                 if (tile != null) Box(modifier = Modifier.width(1.dp).height(tileSize).background(around.copy(alpha = 0.2f)))
                 // The name level with the middle of the tile.
-                Box(modifier = Modifier.weight(1f).height(tileSize), contentAlignment = Alignment.Center) { extra(around) }
+                Box(modifier = Modifier.weight(1f).height(tileSize + 8.dp), contentAlignment = Alignment.Center) {
+                    Box(modifier = Modifier.clip(RoundedCornerShape(16.dp)).then(if (onExtraClick != null) Modifier.clickable(onClick = onExtraClick) else Modifier).padding(4.dp)) { extra(around) }
+                }
             }
         }
         // Which background to check the tile on.
@@ -163,6 +172,28 @@ private fun PreviewCaption(text: String, around: Color) {
             .background(around.copy(alpha = 0.12f))
             .padding(horizontal = 8.dp, vertical = 2.dp)
     )
+}
+
+/** A row on an overview that opens one part's page; [preview] shows that part as it is now. */
+@Composable
+internal fun PartLinkRow(title: String, summary: String, onClick: () -> Unit, preview: @Composable () -> Unit) {
+    SettingsPreference(
+        icon = null,
+        leading = { Box(modifier = Modifier.width(76.dp), contentAlignment = Alignment.Center) { preview() } },
+        title = title,
+        summary = summary,
+        onClick = onClick,
+        trailing = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+    )
+}
+
+/** How many things are in something, as a small round number. */
+@Composable
+internal fun CountBubble(count: Int) {
+    Box(
+        modifier = Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.primaryContainer),
+        contentAlignment = Alignment.Center
+    ) { Text(count.toString(), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onPrimaryContainer) }
 }
 
 /** The first line of a part's own page: where what it sets is seen. */
@@ -261,30 +292,87 @@ internal fun TileFaceEditor(
         }
     }
 
-    // 3. Fill, border and corners in the same words and controls as every other element.
+    // 3. How it looks, in the same words, order and controls as every other element.
     val fromPack = face.kind == TileKind.SYMBOL && face.packIcon != null
-    SettingsPreferenceGroup(title = stringResource(R.string.settings_element_fill_label), info = if (fromPack) stringResource(R.string.tile_pack_own) else null) {
-        // Every change writes the border too, so tiles from before keep theirs.
-        val setFill = { on: Boolean -> onChange(face.copy(surface = if (on) (if (face.surfaceColor != null) TileSurface.COLOR else TileSurface.AUTO) else TileSurface.NONE, border = face.hasBorder)) }
-        val fillMode = if (face.hasFill) ElementFillMode.COLOR else ElementFillMode.NONE
+    SurfaceLookSection(
+        face = face,
+        onChange = onChange,
+        autoSurface = autoSurface,
+        inkLabel = when {
+            face.kind == TileKind.LETTER -> stringResource(R.string.settings_element_text_color_label)
+            face.kind == TileKind.SYMBOL && !fromPack -> stringResource(R.string.tile_symbol_color)
+            else -> null
+        },
+        cornersFollowApps = true,
+        fillInfo = if (fromPack) stringResource(R.string.tile_pack_own) else null
+    )
+
+    if (choosingSymbol) {
+        SymbolPickerDialog(face = face, onPick = { onChange(it); choosingSymbol = false }, onDismiss = { choosingSymbol = false }, viewModel = viewModel)
+    }
+}
+
+private const val DEFAULT_SYMBOL = "star"
+
+/**
+ * Fill, opacity, border and corners of a tile or a label, in the same words, order and controls as
+ * the look of every other element: Fill (None or Color, then the color of what is on it), Opacity,
+ * Border (switch, thickness, border color), Corner rounding.
+ */
+@Composable
+internal fun SurfaceLookSection(
+    face: TileFace,
+    onChange: (TileFace) -> Unit,
+    autoSurface: Color,
+    /** "Symbol color" or "Text color"; null = nothing to color (a picture from an icon pack). */
+    inkLabel: String?,
+    /** True: the corners can follow the app icons around it, as tiles do; false: always its own,
+     *  [defaultCorner] until set. */
+    cornersFollowApps: Boolean,
+    defaultCorner: Int = 100,
+    fillInfo: String? = null
+) {
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    // Tiles from before the border had its own switch keep theirs through every change.
+    val set = { f: TileFace -> onChange(if (f.border == null) f.copy(border = face.hasBorder) else f) }
+
+    SettingsPreferenceGroup(title = stringResource(R.string.settings_element_fill_label), info = fillInfo) {
+        val setFill = { on: Boolean -> set(face.copy(surface = if (on) (if (face.surfaceColor != null) TileSurface.COLOR else TileSurface.AUTO) else TileSurface.NONE)) }
         val swatch = androidx.compose.ui.graphics.SolidColor(face.surfaceColor?.takeIf { face.surface == TileSurface.COLOR }?.let { Color(it) } ?: autoSurface)
         ElementFillMode.entries.forEach { mode ->
-            FillModePreference(value = mode, selected = fillMode, onSelect = { setFill(it == ElementFillMode.COLOR) }, customFill = swatch)
+            FillModePreference(value = mode, selected = if (face.hasFill) ElementFillMode.COLOR else ElementFillMode.NONE, onSelect = { setFill(it == ElementFillMode.COLOR) }, customFill = swatch)
         }
         if (face.hasFill) {
             AutomaticColorPicker(
                 title = stringResource(R.string.settings_background_source_color),
                 custom = face.surfaceColor.takeIf { face.surface == TileSurface.COLOR },
                 automaticSeed = autoSurface.toArgb(),
-                onChange = { color -> onChange(face.copy(surface = if (color == null) TileSurface.AUTO else TileSurface.COLOR, surfaceColor = color, border = face.hasBorder)) },
+                onChange = { color -> set(face.copy(surface = if (color == null) TileSurface.AUTO else TileSurface.COLOR, surfaceColor = color)) },
+                ownGroup = false
+            )
+        }
+        if (inkLabel != null) {
+            AutomaticColorPicker(
+                title = inkLabel,
+                custom = face.symbolColor,
+                automaticSeed = face.copy(symbolColor = null).inkOn(autoSurface, onSurface).toArgb(),
+                onChange = { set(face.copy(symbolColor = it)) },
                 ownGroup = false
             )
         }
     }
-    SettingsPreferenceGroup(title = stringResource(R.string.settings_element_border_label)) {
-        val setBorder = { on: Boolean ->
-            onChange(face.copy(border = on, surface = if (face.surface == TileSurface.OUTLINE) TileSurface.NONE else face.surface))
+    if (face.hasFill) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_background_opacity_label)) {
+            ExpandableSlider(
+                value = face.surfaceAlpha ?: 1f,
+                onSettled = { set(face.copy(surfaceAlpha = ((it * 20f).roundToInt() / 20f).takeIf { a -> a < 1f })) },
+                valueRange = 0f..1f,
+                valueLabel = { stringResource(R.string.settings_background_opacity_value, (it * 100).roundToInt()) }
+            )
         }
+    }
+    SettingsPreferenceGroup(title = stringResource(R.string.settings_element_border_label)) {
+        val setBorder = { on: Boolean -> onChange(face.copy(border = on, surface = if (face.surface == TileSurface.OUTLINE) TileSurface.NONE else face.surface)) }
         SettingsPreference(
             icon = null,
             title = stringResource(R.string.settings_element_border_label),
@@ -307,56 +395,20 @@ internal fun TileFaceEditor(
             )
         }
     }
-    SettingsPreferenceGroup(title = stringResource(R.string.tile_corners)) {
-        CornerChoice(face, onChange, autoSurface, letter, content, defaultSymbol)
-    }
-
-    // 4. The color of a pictogram or the letter: black or white unless chosen.
-    if ((face.kind == TileKind.SYMBOL && !fromPack) || face.kind == TileKind.LETTER) {
-        SettingsPreferenceGroup {
-            AutomaticColorPicker(
-                title = stringResource(if (face.kind == TileKind.LETTER) R.string.settings_element_text_color_label else R.string.tile_symbol_color),
-                custom = face.symbolColor,
-                automaticSeed = face.copy(symbolColor = null).inkOn(autoSurface, onSurface).toArgb(),
-                onChange = { onChange(face.copy(symbolColor = it)) },
-                ownGroup = false
+    SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
+        val own = face.ownCornerPercent
+        if (cornersFollowApps) {
+            val setFollow = { follow: Boolean -> set(face.copy(corners = null, cornerPercent = if (follow) null else own ?: 56)) }
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.tile_corners_like_apps),
+                summary = stringResource(R.string.tile_corners_like_apps_summary),
+                onClick = { setFollow(own != null) },
+                trailing = { Switch(checked = own == null, onCheckedChange = { setFollow(it) }) }
             )
         }
-    }
-
-    if (choosingSymbol) {
-        SymbolPickerDialog(face = face, onPick = { onChange(it); choosingSymbol = false }, onDismiss = { choosingSymbol = false }, viewModel = viewModel)
-    }
-}
-
-private const val DEFAULT_SYMBOL = "star"
-
-/** The tile's corners as four small tiles, the first one "like the others around". */
-@Composable
-private fun CornerChoice(face: TileFace, onChange: (TileFace) -> Unit, autoSurface: Color, letter: String, content: List<TileContent>, defaultSymbol: androidx.compose.ui.graphics.vector.ImageVector?) {
-    val options = listOf(
-        null to R.string.tile_corners_default,
-        com.bisc.flauncher.data.model.TileCorners.ROUND to R.string.welcome_shape_round,
-        com.bisc.flauncher.data.model.TileCorners.SOFT to R.string.welcome_shape_soft,
-        com.bisc.flauncher.data.model.TileCorners.SQUARE to R.string.welcome_shape_square
-    )
-    Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        EqualGrid(count = options.size, columns = 4, gap = 8.dp) { index ->
-            val (corners, label) = options[index]
-            val picked = face.corners == corners
-            Column(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                    .border(if (picked) 2.dp else 0.dp, if (picked) MaterialTheme.colorScheme.primary else Color.Transparent, RoundedCornerShape(14.dp))
-                    .clickable { onChange(face.copy(corners = corners, border = face.hasBorder)) }
-                    .padding(vertical = 10.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                TileFaceView(face.copy(corners = corners), autoSurface, letter, modifier = Modifier.size(32.dp), around = MaterialTheme.colorScheme.onSurface, content = content, shape = RoundedCornerShape(10.dp), defaultSymbol = defaultSymbol)
-                Text(stringResource(label), style = MaterialTheme.typography.labelMedium, maxLines = 1)
-            }
+        if (own != null || !cornersFollowApps) {
+            CornerPercentPicker(percent = own ?: defaultCorner, onChange = { set(face.copy(corners = null, cornerPercent = it)) })
         }
     }
 }

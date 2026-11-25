@@ -38,13 +38,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bisc.flauncher.data.model.Category
-import com.bisc.flauncher.data.model.CategoryNameStyle
 import com.bisc.flauncher.data.model.GridItemType
 import com.bisc.flauncher.data.model.ResolvedCategory
 import com.bisc.flauncher.data.model.TileFace
 import com.bisc.flauncher.data.model.TileKind
 import com.bisc.flauncher.data.model.face
-import com.bisc.flauncher.data.model.nameLook
+import com.bisc.flauncher.data.model.labelFace
 import com.bisc.flauncher.data.repository.CategoryRepository
 import com.bisc.flauncher.ui.forAppName
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -192,8 +191,8 @@ fun CategoryMark(
     )
 }
 
-/** A category's name as it is set under "Name": in a pill of its color, in an outline of its
- *  color, or as plain text; its symbol in front only where [showSymbol] asks for it and it has one. */
+/** A category's label as it is set under "Label": its name on a fill, in a border, with its own
+ *  corners; its symbol in front only where [showSymbol] asks for it and it has one. */
 @Composable
 fun CategoryNamePill(
     category: Category,
@@ -203,21 +202,24 @@ fun CategoryNamePill(
     iconSize: Dp = 18.dp,
     showSymbol: Boolean = false
 ) {
-    val style = category.nameLook()
+    val face = category.labelFace()
     val accent = categoryColor(category)
-    val tint = if (style.hasFill) inkOn(accent) else ink
+    val fill = face.surfaceFill(accent)
+    val tint = face.symbolColor?.let { Color(it) } ?: fill?.let { inkOn(it) } ?: ink
+    val shape = com.bisc.flauncher.ui.theme.PartCornerShape(face.ownCornerPercent ?: 100)
     Row(
         modifier = modifier
-            .clip(CircleShape)
+            .clip(shape)
+            .then(if (fill != null) Modifier.background(fill.copy(alpha = fill.alpha * (face.surfaceAlpha ?: 1f))) else Modifier)
             .then(
-                (if (style.hasFill) Modifier.background(accent) else Modifier)
-                    .then(if (style.hasBorder) Modifier.border(1.5.dp, if (style.hasFill) ink.copy(alpha = 0.6f) else accent, CircleShape) else Modifier)
+                if (face.hasBorder) Modifier.border((face.borderWidth ?: 1.5f).dp, face.borderColor?.let { Color(it) } ?: if (fill != null) ink.copy(alpha = 0.6f) else accent, shape)
+                else Modifier
             )
             .padding(horizontal = PILL_PADDING, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (showSymbol && category.hasSymbol) {
-            CategorySymbol(category, iconSize, if (style.hasFill) tint else accent)
+            CategorySymbol(category, iconSize, if (fill != null || face.symbolColor != null) tint else accent)
             Spacer(Modifier.size(8.dp))
         }
         Text(category.name, style = textStyle, color = tint, maxLines = 1, overflow = TextOverflow.Ellipsis)

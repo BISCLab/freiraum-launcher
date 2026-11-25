@@ -1141,8 +1141,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_categories_colors_tile">Farben und Symbole</string>
     <string name="settings_categories_behavior_search">Kategorien-Seite: Verhalten</string>
     <string name="settings_categories_symbols">Symbole zeigen</string>
-    <string name="settings_category_tile_label">Als Kachel</string>
-    <string name="settings_category_tile_info">So sieht die Kategorie im Dock, im Panel, in Element-Boxen und in Ordnern aus. Überall sonst steht ihr Name.</string>
+    <string name="settings_category_tile_label">Kachel</string>
+    <string name="settings_category_tile_info">So sieht die Kategorie im Dock, im Panel, in Element-Boxen und in Ordnern aus. Überall sonst steht ihr Etikett.</string>
     <string name="settings_category_symbols_page_summary">In Chips und Karten, bei Kategorien mit Symbol</string>
     <string name="settings_category_symbols_search_summary">Vor dem Namen gefundener Kategorien, wenn sie ein Symbol haben</string>
     <string name="settings_category_symbols_applist_summary">In den Kategorie-Chips über der Liste</string>
@@ -1152,7 +1152,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
         <item quantity="other">Das passt hier nicht mehr hin. Auf dieser Seite sind nur noch %1$d Zeilen frei. Beim Speichern kannst du dafür eine neue Seite anlegen.</item>
     </plurals>
     <string name="tile_kind_title">Was zeigt die Kachel?</string>
-    <string name="tile_kind_content">Inhalt</string>
+    <string name="tile_kind_content">Apps darin</string>
     <string name="tile_kind_symbol">Symbol</string>
     <string name="tile_kind_letter">Buchstabe</string>
     <string name="tile_source_catalog">Katalog</string>
@@ -1167,11 +1167,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="tile_content_category">Zeigt die ersten vier Apps der Kategorie, wie ein Ordner.</string>
     <string name="tile_content_folder">Zeigt die ersten vier Apps des Ordners.</string>
     <string name="settings_folder_tile_info">So sieht der Ordner im Dock, im Panel, in Element-Boxen und auf Seiten aus.</string>
-    <string name="category_name_look_title">So steht der Name da</string>
-    <string name="category_name_look_info">Auf der Kategorien-Seite, in der Suche, im Widget und in der App-Liste.</string>
-    <string name="category_name_look_pill">Gefüllt</string>
-    <string name="category_name_look_outline">Mit Rand</string>
-    <string name="category_name_look_text">Nur Text</string>
+    <string name="category_name_look_info">So steht die Kategorie auf der Kategorien-Seite, in der Suche, im Widget und in der App-Liste.</string>
     <string name="category_color_title">Farbe der Kategorie</string>
     <string name="settings_folder_row_like">wie Zeile %1$d</string>
     <string name="settings_folder_show_real">Ordner so zeigen, wie er wirklich aussieht</string>
@@ -1179,22 +1175,33 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="tile_symbol_choose">Symbol wählen</string>
     <string name="tile_symbol_from_catalog">Aus dem Katalog</string>
     <string name="tile_symbol_from_pack">Aus %1$s</string>
-    <string name="section_as_name">Als Name</string>
-    <string name="section_content">Inhalt</string>
+    <string name="section_as_name">Etikett</string>
+    <string name="section_content">Apps und Elemente</string>
     <string name="section_content_own">Was in der Kategorie ist und in welcher Reihenfolge.</string>
     <string name="section_content_smart">Füllt sich selbst nach ihrer Regel.</string>
     <string name="section_folder_content_where">Was der Ordner enthält. Änderungen hier gelten sofort, ohne Speichern.</string>
-    <string name="category_color_info">Gilt für den Namen und für die Kachel.</string>
-    <string name="category_name_fill_info">Die Fläche hat die Farbe der Kategorie.</string>
-    <string name="folder_part_open">Offen</string>
+    <string name="category_color_info">Kachel und Etikett nutzen diese Farbe, solange sie keine eigene haben.</string>
     <string name="preview_caption_tile">Kachel</string>
-    <string name="preview_caption_name">Name</string>
-    <string name="tile_corners">Ecken</string>
-    <string name="tile_corners_default">Standard</string>
-    <string name="section_folder_open">Wenn er offen ist</string>
-    <string name="section_folder_open_where">Aussehen und Beschriftungen des offenen Ordners.</string>
+    <string name="preview_caption_name">Etikett</string>
+    <string name="section_folder_open">Geöffneter Ordner</string>
+    <string name="section_folder_open_where">So sieht der Ordner aus, wenn du ihn antippst.</string>
     <string name="folder_follows_edit">„%1$s“ bearbeiten</string>
     <string name="folder_follows_note">Der Ordner zeigt, was in der Kategorie ist. Seine eigenen Inhalte kommen zurück, wenn er nicht mehr folgt.</string>
     <string name="element_tile_info">So sieht es im Dock, im Panel, in Element-Boxen und in Ordnern aus.</string>
     <string name="settings_categories_counts">Anzahl zeigen</string>
+    <string name="preview_caption_open">Geöffnet</string>
+    <string name="hub_tile_category">Im Dock, im Panel, in Boxen und Ordnern</string>
+    <string name="hub_label_category">Auf der Kategorien-Seite, in der Suche und in der App-Liste</string>
+    <string name="hub_tile_folder">Im Dock, im Panel, in Boxen und auf Seiten</string>
+    <string name="hub_content_smart">Füllt sich selbst, %1$d drin</string>
+    <string name="hub_content_follows">Zeigt die Kategorie „%1$s“</string>
+    <string name="hub_open_folder_like_all">Fläche, Rahmen, Beschriftung. Wie alle Ordner</string>
+    <string name="hub_open_folder_own">Fläche, Rahmen, Beschriftung. Eigenes Aussehen</string>
+    <string name="folder_corners_all">Gleich für alle Ordner. Tipp, um sie zu ändern.</string>
+    <string name="tile_corners_like_apps">Wie die App-Symbole</string>
+    <string name="tile_corners_like_apps_summary">Passt sich der Form der Apps daneben an.</string>
+    <plurals name="hub_content_count">
+        <item quantity="one">%d drin</item>
+        <item quantity="other">%d drin</item>
+    </plurals>
 </resources>

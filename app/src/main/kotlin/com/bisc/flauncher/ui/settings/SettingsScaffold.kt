@@ -211,7 +211,7 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
             categories.find { it.id == categoryId }?.name ?: stringResource(R.string.settings_pages_categories)
         }
         "settings/elements/categories/{categoryId}/{part}" -> when (entry.arguments?.getString("part")) {
-            "name" -> stringResource(R.string.section_as_name)
+            "label" -> stringResource(R.string.section_as_name)
             "tile" -> stringResource(R.string.settings_category_tile_label)
             else -> stringResource(R.string.section_content)
         }

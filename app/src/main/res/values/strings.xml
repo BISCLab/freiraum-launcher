@@ -1141,8 +1141,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_categories_colors_tile">Colors and symbols</string>
     <string name="settings_categories_behavior_search">Categories page: Behavior</string>
     <string name="settings_categories_symbols">Show symbols</string>
-    <string name="settings_category_tile_label">As a tile</string>
-    <string name="settings_category_tile_info">This is how the category looks in the Dock, the Panel, element boxes and folders. Everywhere else it shows its name.</string>
+    <string name="settings_category_tile_label">Tile</string>
+    <string name="settings_category_tile_info">This is how the category looks in the Dock, the Panel, element boxes and folders. Everywhere else it shows its label.</string>
     <string name="settings_category_symbols_page_summary">In chips and cards, for categories with a symbol</string>
     <string name="settings_category_symbols_search_summary">In front of found categories that have a symbol</string>
     <string name="settings_category_symbols_applist_summary">In the category chips above the list</string>
@@ -1152,7 +1152,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
         <item quantity="other">This won\'t fit here anymore. Only %1$d rows are free on this page. When you save, you can make a new page for it.</item>
     </plurals>
     <string name="tile_kind_title">What does the tile show?</string>
-    <string name="tile_kind_content">Contents</string>
+    <string name="tile_kind_content">Apps inside</string>
     <string name="tile_kind_symbol">Symbol</string>
     <string name="tile_kind_letter">Letter</string>
     <string name="tile_source_catalog">Catalog</string>
@@ -1167,11 +1167,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="tile_content_category">Shows the category\'s first four apps, like a folder.</string>
     <string name="tile_content_folder">Shows the folder\'s first four apps.</string>
     <string name="settings_folder_tile_info">This is how the folder looks in the Dock, the Panel, element boxes and on pages.</string>
-    <string name="category_name_look_title">How the name shows</string>
-    <string name="category_name_look_info">On the Categories page, in the search, in the widget and in the App list.</string>
-    <string name="category_name_look_pill">Filled</string>
-    <string name="category_name_look_outline">Outlined</string>
-    <string name="category_name_look_text">Text only</string>
+    <string name="category_name_look_info">This is how the category shows on the Categories page, in the search, in the widget and in the App list.</string>
     <string name="category_color_title">Category color</string>
     <string name="settings_folder_row_like">like row %1$d</string>
     <string name="settings_folder_show_real">Show the folder as it really looks</string>
@@ -1179,22 +1175,33 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="tile_symbol_choose">Choose a symbol</string>
     <string name="tile_symbol_from_catalog">From the catalog</string>
     <string name="tile_symbol_from_pack">From %1$s</string>
-    <string name="section_as_name">As a name</string>
-    <string name="section_content">Contents</string>
+    <string name="section_as_name">Label</string>
+    <string name="section_content">Apps and elements</string>
     <string name="section_content_own">What is in the category, and in which order.</string>
     <string name="section_content_smart">Fills itself by its rule.</string>
     <string name="section_folder_content_where">What the folder holds. Changes here apply right away, without saving.</string>
-    <string name="category_color_info">Used for the name and for the tile.</string>
-    <string name="category_name_fill_info">The fill takes the category\'s color.</string>
-    <string name="folder_part_open">When open</string>
+    <string name="category_color_info">The tile and the label use this color unless they have their own.</string>
     <string name="preview_caption_tile">Tile</string>
-    <string name="preview_caption_name">Name</string>
-    <string name="tile_corners">Corners</string>
-    <string name="tile_corners_default">Default</string>
-    <string name="section_folder_open">When it is open</string>
-    <string name="section_folder_open_where">Look and captions of the open folder.</string>
+    <string name="preview_caption_name">Label</string>
+    <string name="section_folder_open">Opened folder</string>
+    <string name="section_folder_open_where">This is how the folder looks once you tap it.</string>
     <string name="folder_follows_edit">Edit “%1$s”</string>
     <string name="folder_follows_note">The folder shows what the category holds. Its own content comes back when it stops following.</string>
     <string name="element_tile_info">This is how it looks in the Dock, the Panel, element boxes and folders.</string>
     <string name="settings_categories_counts">Show how many</string>
+    <string name="preview_caption_open">Opened</string>
+    <string name="hub_tile_category">In the Dock, the Panel, boxes and folders</string>
+    <string name="hub_label_category">On the Categories page, in the search and in the App list</string>
+    <string name="hub_tile_folder">In the Dock, the Panel, boxes and on pages</string>
+    <string name="hub_content_smart">Fills itself, %1$d inside</string>
+    <string name="hub_content_follows">Shows the category “%1$s”</string>
+    <string name="hub_open_folder_like_all">Fill, border, captions. Like all folders</string>
+    <string name="hub_open_folder_own">Fill, border, captions. Its own look</string>
+    <string name="folder_corners_all">The same for all folders. Tap to change it.</string>
+    <string name="tile_corners_like_apps">Like the app icons</string>
+    <string name="tile_corners_like_apps_summary">Takes the shape of the apps next to it.</string>
+    <plurals name="hub_content_count">
+        <item quantity="one">%d inside</item>
+        <item quantity="other">%d inside</item>
+    </plurals>
 </resources>

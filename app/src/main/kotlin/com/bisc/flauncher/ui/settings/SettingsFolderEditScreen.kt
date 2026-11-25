@@ -12,7 +12,10 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -93,8 +96,8 @@ import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/** The pages of one folder: an overview with its name, then its tile, what it holds and how it
- *  looks when open, each on their own. */
+/** The pages of one folder: an overview with its name, then how it looks as a tile, which apps and
+ *  elements it holds, and how it looks once opened, each on their own. */
 enum class FolderPart { HUB, TILE, CONTENT, OPEN }
 
 /** Edit page for a single folder, or one part of it, see [FolderPart]. */
@@ -134,7 +137,6 @@ fun SettingsFolderEditScreen(
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
     var showAddChooser by remember { mutableStateOf(false) }
     var pendingRemoval by remember { mutableStateOf<com.bisc.flauncher.data.model.FolderItem?>(null) }
-    var appearanceOpen by remember { mutableStateOf(false) }
     var showWidgetKindPicker by remember { mutableStateOf(false) }
     var sizingWidgetKind by remember { mutableStateOf<String?>(null) }
     var sizingWidgetSpanY by remember { androidx.compose.runtime.mutableIntStateOf(1) }
@@ -157,12 +159,24 @@ fun SettingsFolderEditScreen(
 
     val newName = edited?.trim()
     val nameChanged = folder != null && !newName.isNullOrBlank() && newName != folder.name
-    // Name and tile are a draft, written with Save; what the folder holds changes right away.
+    // Name, tile and the opened look are drafts, written with Save; what the folder holds changes
+    // right away, so a system widget can be set up at once.
     val savedFace = folder?.face()
     var face by rememberDraft(savedFace)
     val faceChanged = face != null && face != savedFace
-    // Name and tile wait for Save; what it holds and how it looks open change right away.
-    val drafts = part == FolderPart.HUB || part == FolderPart.TILE
+    // Fill and border of the opened folder are kept apart (each can follow all folders on its own),
+    // but edited together, with the captions.
+    val savedContent = if (folder?.appearanceOverrideEnabled == true) folder.contentAppearance() else globalCardAppearance
+    val savedBorder = if (folder?.borderOverrideEnabled == true) folder.borderAppearance() else globalCardAppearance
+    val savedLook = savedContent.copy(borderEnabled = savedBorder.borderEnabled, borderColor = savedBorder.borderColor, borderWidth = savedBorder.borderWidth)
+    var lookDraft by rememberDraft(savedLook)
+    val savedShowLabels = if (folder?.showLabelsOverrideEnabled == true) folder.showLabels else globalShowLabels
+    var showLabelsDraft by rememberDraft(savedShowLabels)
+    val folderCorner by viewModel.folderCornerPercent.collectAsState()
+    val ownLook = folder?.appearanceOverrideEnabled == true || folder?.borderOverrideEnabled == true
+    val lookChanged = part == FolderPart.OPEN && (lookDraft != savedLook || showLabelsDraft != savedShowLabels)
+    val drafts = part != FolderPart.CONTENT
+    val open = { sub: String -> navController.navigate("settings/folder/$folderId/$sub") }
     SettingsSubScreen(
         title = when (part) {
             FolderPart.HUB -> folder?.name ?: stringResource(R.string.settings_folder_edit_title)
@@ -175,16 +189,53 @@ fun SettingsFolderEditScreen(
         onSave = if (drafts) ({
             newName?.takeIf { nameChanged }?.let { viewModel.renameFolder(folderId, it) }
             face?.takeIf { faceChanged }?.let { viewModel.setFolderTileFace(folderId, it) }
+            if (lookChanged) {
+                val d = lookDraft
+                val fillChanged = d.fillMode != savedLook.fillMode || d.fill != savedLook.fill || d.opacity != savedLook.opacity || d.contentColor != savedLook.contentColor
+                val borderChanged = d.borderEnabled != savedLook.borderEnabled || d.borderColor != savedLook.borderColor || d.borderWidth != savedLook.borderWidth
+                if (fillChanged) viewModel.setFolderAppearance(folderId, d)
+                if (borderChanged) viewModel.setFolderBorderAppearance(folderId, d)
+                if (showLabelsDraft != savedShowLabels) viewModel.setFolderItemsShowLabels(folderId, showLabelsDraft)
+            }
         }) else null,
-        dirty = nameChanged || faceChanged,
-        // The closed folder as it will look, fixed on top like on a category's page.
-        header = if (!drafts) null else ({
-            val shownFace = face ?: folder?.face()
-            TilePreviewHeader(
-                name = edited ?: folder?.name.orEmpty(),
-                tile = { around -> FolderIcon(folder = folder, previewItems = items, modifier = Modifier.fillMaxSize(), face = shownFace, around = around) }
-            )
-        })
+        dirty = nameChanged || faceChanged || lookChanged,
+        // What this page changes, as it will look. On the overview the closed and the opened folder
+        // side by side, each a way to where it is set.
+        header = when (part) {
+            FolderPart.CONTENT -> null
+            FolderPart.OPEN -> ({
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    LookSample(LookSampleKind.FOLDER, lookDraft, folderCorner)
+                    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            stringResource(if (ownLook) R.string.settings_look_custom else R.string.settings_folder_look_like_all),
+                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                            color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (ownLook) AutoResetChip(
+                            onClick = {
+                                viewModel.setFolderAppearanceOverrideEnabled(folderId, false)
+                                viewModel.setFolderBorderOverrideEnabled(folderId, false)
+                            },
+                            label = stringResource(R.string.settings_folder_look_reset)
+                        )
+                    }
+                }
+            })
+            else -> ({
+                val shownFace = face ?: folder?.face()
+                TilePreviewHeader(
+                    name = edited ?: folder?.name.orEmpty(),
+                    tile = { around -> FolderIcon(folder = folder, previewItems = items, modifier = Modifier.fillMaxSize(), face = shownFace, around = around) },
+                    extra = if (part == FolderPart.HUB) ({ around -> FolderOpenMini(savedLook, folderCorner, around) }) else null,
+                    tileCaption = if (part == FolderPart.HUB) stringResource(R.string.preview_caption_tile) else null,
+                    extraCaption = stringResource(R.string.preview_caption_open),
+                    onTileClick = if (part == FolderPart.HUB) ({ open("tile") }) else null,
+                    onExtraClick = if (part == FolderPart.HUB) ({ open("open") }) else null
+                )
+            })
+        }
     ) {
         if (folder == null) return@SettingsSubScreen
 
@@ -204,16 +255,26 @@ fun SettingsFolderEditScreen(
             shape = SettingsTextFieldShape,
             modifier = Modifier.fillMaxWidth()
         )
-        val open = { sub: String -> navController.navigate("settings/folder/$folderId/$sub") }
-        SettingsTileGrid(
-            columns = 3,
-            title = stringResource(R.string.settings_parts_label),
-            tiles = listOf(
-                SettingsTile(Icons.Filled.Apps, stringResource(R.string.settings_category_tile_label)) { open("tile") },
-                SettingsTile(Icons.Filled.Inventory2, stringResource(R.string.section_content), badge = items.size.toString()) { open("content") },
-                SettingsTile(Icons.Filled.Palette, stringResource(R.string.folder_part_open)) { open("open") }
-            )
-        )
+        // How it lies closed, what is in it, and how it looks opened: each row shows what it sets.
+        val followed = folder.categoryId?.let { id -> categories.find { it.id == id } }
+        SettingsPreferenceGroup {
+            PartLinkRow(
+                title = stringResource(R.string.settings_category_tile_label),
+                summary = stringResource(R.string.hub_tile_folder),
+                onClick = { open("tile") }
+            ) { FolderIcon(folder = folder, previewItems = items, modifier = Modifier.size(40.dp), face = face ?: folder.face(), around = androidx.compose.material3.MaterialTheme.colorScheme.onSurface) }
+            PartLinkRow(
+                title = stringResource(R.string.section_content),
+                summary = if (followed != null) stringResource(R.string.hub_content_follows, followed.name)
+                else androidx.compose.ui.res.pluralStringResource(R.plurals.hub_content_count, items.size, items.size),
+                onClick = { open("content") }
+            ) { CountBubble(items.size) }
+            PartLinkRow(
+                title = stringResource(R.string.section_folder_open),
+                summary = stringResource(if (ownLook) R.string.hub_open_folder_own else R.string.hub_open_folder_like_all),
+                onClick = { open("open") }
+            ) { FolderOpenMini(savedLook, folderCorner, androidx.compose.material3.MaterialTheme.colorScheme.onSurface, small = true) }
+        }
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = Icons.Filled.DeleteOutline,
@@ -244,14 +305,14 @@ fun SettingsFolderEditScreen(
         if (part == FolderPart.CONTENT) {
         PartIntro(stringResource(R.string.section_folder_content_where))
         FolderCategoryLink(folder = folder, onChange = { viewModel.setFolderCategory(folderId, it) }, viewModel = viewModel)
-        val followed = folder.categoryId?.let { id -> categories.find { it.id == id } }
-        if (followed != null) {
+        val followedCategory = folder.categoryId?.let { id -> categories.find { it.id == id } }
+        if (followedCategory != null) {
             SettingsPreferenceGroup {
                 SettingsPreference(
                     icon = Icons.AutoMirrored.Filled.Label,
-                    title = stringResource(R.string.folder_follows_edit, followed.name),
+                    title = stringResource(R.string.folder_follows_edit, followedCategory.name),
                     summary = stringResource(R.string.folder_follows_note),
-                    onClick = { navController.navigate("settings/elements/categories/${followed.id}/content") }
+                    onClick = { navController.navigate("settings/elements/categories/${followedCategory.id}/content") }
                 )
             }
         } else {
@@ -344,71 +405,24 @@ fun SettingsFolderEditScreen(
         // How it looks when open, for this folder.
         if (part == FolderPart.OPEN) {
         PartIntro(stringResource(R.string.section_folder_open_where))
-        SettingsPreferenceGroup {
+        // The same blocks as every other element: fill, opacity, border, corner rounding, captions.
+        ElementAppearanceSection(appearance = lookDraft, onAppearanceChange = { lookDraft = it }, styleGroupTitle = stringResource(R.string.settings_element_fill_label))
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
             SettingsPreference(
                 icon = null,
-                title = stringResource(R.string.settings_home_appearance_title),
-                summary = stringResource(
-                    if (folder.appearanceOverrideEnabled || folder.borderOverrideEnabled) R.string.settings_folder_look_own
-                    else R.string.settings_folder_look_like_all
-                ),
-                onClick = { appearanceOpen = true },
-                trailing = null
+                title = stringResource(R.string.settings_corner_radius_value, folderCorner),
+                summary = stringResource(R.string.folder_corners_all),
+                onClick = { navController.navigate("settings/folder/global") },
+                trailing = { androidx.compose.material3.Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) }
             )
         }
-        // Captions belong with the items, like the Dock's and Panel's own.
         CaptionsSection(
-            showLabels = showLabels,
-            onShowLabelsChange = { viewModel.setFolderItemsShowLabels(folderId, it) },
-            appearance = content,
-            onAppearanceChange = { viewModel.setFolderAppearance(folderId, it) },
+            showLabels = showLabelsDraft,
+            onShowLabelsChange = { showLabelsDraft = it },
+            appearance = lookDraft,
+            onAppearanceChange = { lookDraft = it },
             title = stringResource(R.string.settings_captions_label)
         )
-        }
-    }
-
-    if (appearanceOpen) {
-        // Fill and border are kept apart (each can follow all folders on its own), but edited together.
-        val content = if (folder?.appearanceOverrideEnabled == true) folder.contentAppearance() else globalCardAppearance
-        val border = if (folder?.borderOverrideEnabled == true) folder.borderAppearance() else globalCardAppearance
-        val saved = content.copy(borderEnabled = border.borderEnabled, borderColor = border.borderColor, borderWidth = border.borderWidth)
-        var draft by rememberDraft(saved)
-        val folderCorner by viewModel.folderCornerPercent.collectAsState()
-        SettingsEditPage(
-            title = stringResource(R.string.settings_home_appearance_title),
-            onDismiss = { appearanceOpen = false },
-            onSave = {
-                val fillChanged = draft.fillMode != saved.fillMode || draft.fill != saved.fill || draft.opacity != saved.opacity || draft.contentColor != saved.contentColor
-                val borderChanged = draft.borderEnabled != saved.borderEnabled || draft.borderColor != saved.borderColor || draft.borderWidth != saved.borderWidth
-                if (fillChanged) viewModel.setFolderAppearance(folderId, draft)
-                if (borderChanged) viewModel.setFolderBorderAppearance(folderId, draft)
-            },
-            dirty = draft != saved,
-            // Like every look page: the folder in small stays in sight, with its state right under it.
-            header = {
-                androidx.compose.foundation.layout.Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    LookSample(LookSampleKind.FOLDER, draft, folderCorner)
-                    val own = folder?.appearanceOverrideEnabled == true || folder?.borderOverrideEnabled == true
-                    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            stringResource(if (own) R.string.settings_look_custom else R.string.settings_folder_look_like_all),
-                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                            color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.weight(1f)
-                        )
-                        if (own) AutoResetChip(
-                            onClick = {
-                                viewModel.setFolderAppearanceOverrideEnabled(folderId, false)
-                                viewModel.setFolderBorderOverrideEnabled(folderId, false)
-                                appearanceOpen = false
-                            },
-                            label = stringResource(R.string.settings_folder_look_reset)
-                        )
-                    }
-                }
-            }
-        ) {
-            ElementAppearanceSection(appearance = draft, onAppearanceChange = { draft = it }, styleGroupTitle = stringResource(R.string.settings_element_fill_label))
         }
     }
 
@@ -865,5 +879,29 @@ private fun FolderCategoryLink(folder: com.bisc.flauncher.data.model.Folder, onC
             selectedId = folder.categoryId,
             onCreate = { name -> viewModel.addCategory(name) { id -> onChange(id) }; picking = false }
         )
+    }
+}
+
+/** The opened folder in small: its card with two rows of apps, in its fill, border and corners. */
+@Composable
+internal fun FolderOpenMini(look: com.bisc.flauncher.data.model.ElementAppearance, cornerPercent: Int, around: androidx.compose.ui.graphics.Color, small: Boolean = false) {
+    val colors = com.bisc.flauncher.ui.home.dock.resolveElementColors(look, around.luminance() > 0.5f)
+    val shape = com.bisc.flauncher.ui.theme.PartCornerShape(cornerPercent, full = if (small) 10.dp else 16.dp)
+    val dot = if (small) 5.dp else 9.dp
+    androidx.compose.foundation.layout.Box(
+        modifier = Modifier
+            .size(if (small) 56.dp else 96.dp, if (small) 34.dp else 58.dp)
+            .clip(shape)
+            .background(colors.background, alpha = colors.backgroundAlpha)
+            .then(if (look.borderEnabled) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(dot * 0.6f)) {
+            repeat(2) {
+                Row(horizontalArrangement = Arrangement.spacedBy(dot * 0.6f)) {
+                    repeat(4) { androidx.compose.foundation.layout.Box(Modifier.size(dot).clip(androidx.compose.foundation.shape.RoundedCornerShape(dot / 3)).background(colors.contentColor.copy(alpha = 0.4f))) }
+                }
+            }
+        }
     }
 }

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Category and folder pages: the overview shows the tile next to the label or the opened folder; tap either to change it. Below, one row per page (Tile, Label, Apps and elements, Opened folder), each with a small preview of what it sets
+- Clearer names: "Label" for a category's name pill, "Apps and elements" for what is inside, "Opened folder" for how a folder looks once tapped
+- Tiles and labels have the same look settings as every other element: Fill with its color and the symbol or text color, Opacity, Border with thickness and color, Corner rounding in percent with your own value
+- A tile's corners can follow the app icons next to it or be set on their own
+- The opened folder's look is set right on its page, with the captions, and saved together
+
 ## 0.23.0
 
 - Text search: the categories card no longer has its own heading, the category name sits at the top

@@ -29,7 +29,7 @@ data class Category(
     val manualOrder: Boolean = false,
     // How it looks as a tile, see [TileFace]; null = read from iconKey and color, see [face].
     val tileFace: String? = null,
-    // How its name looks, a [CategoryNameStyle]; null = read from color, see [nameLook].
+    // How its label looks, a [TileFace] (older ones a [CategoryNameStyle]); see [labelFace].
     val nameStyle: String? = null
 ) {
     val smartRule: CategoryRule? get() = rule?.let { runCatching { CategoryRule.valueOf(it) }.getOrNull() }
@@ -120,7 +120,11 @@ fun Category.face(): TileFace = TileFace.fromJson(tileFace) ?: run {
     }
 }
 
-/** How the category's name looks; from before [nameStyle], an outline when it had no color. */
-fun Category.nameLook(): CategoryNameStyle =
-    nameStyle?.let { runCatching { CategoryNameStyle.valueOf(it) }.getOrNull() }
+/** How the category's label (its name in a pill) looks, with the same fill, opacity, border and
+ *  corners as everything else. Older ones read from their style, or from the color (0 = outline). */
+fun Category.labelFace(): TileFace {
+    nameStyle?.takeIf { it.startsWith("{") }?.let { TileFace.fromJson(it) }?.let { return it }
+    val style = nameStyle?.let { runCatching { CategoryNameStyle.valueOf(it) }.getOrNull() }
         ?: if (color == 0) CategoryNameStyle.OUTLINE else CategoryNameStyle.PILL
+    return TileFace(kind = TileKind.LETTER, surface = if (style.hasFill) TileSurface.AUTO else TileSurface.NONE, border = style.hasBorder)
+}

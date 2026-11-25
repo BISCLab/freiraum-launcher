@@ -75,11 +75,11 @@ fun TileFaceView(
 ) {
     val fill = face.surfaceFill(autoSurface)
     val tint = face.inkOn(autoSurface, around)
-    val tileShape = face.corners?.let { cornerShape(it) } ?: shape
+    val tileShape = face.ownCornerPercent?.let { tileCornerShape(it) } ?: shape
     BoxWithConstraints(
         modifier = modifier
             .clip(tileShape)
-            .then(if (fill != null) Modifier.background(fill) else Modifier)
+            .then(if (fill != null) Modifier.background(fill.copy(alpha = fill.alpha * (face.surfaceAlpha ?: 1f))) else Modifier)
             .then(if (face.hasBorder) Modifier.border((face.borderWidth ?: 1.5f).dp, face.borderColor?.let { Color(it) } ?: around.copy(alpha = 0.6f), tileShape) else Modifier),
         contentAlignment = Alignment.Center
     ) {
@@ -104,12 +104,8 @@ fun TileFaceView(
     }
 }
 
-/** The shape of a tile's own corners. */
-fun cornerShape(corners: com.bisc.flauncher.data.model.TileCorners): Shape = when (corners) {
-    com.bisc.flauncher.data.model.TileCorners.ROUND -> RoundedCornerShape(50)
-    com.bisc.flauncher.data.model.TileCorners.SOFT -> RoundedCornerShape(28)
-    com.bisc.flauncher.data.model.TileCorners.SQUARE -> RoundedCornerShape(8)
-}
+/** A tile's own corners: 100 is fully round, whatever the tile's size. */
+fun tileCornerShape(percent: Int): Shape = RoundedCornerShape(percent.coerceIn(0, 100) / 2)
 
 /** One thing a tile holds: an app (its icon) or another element (a small symbol). */
 sealed interface TileContent {
