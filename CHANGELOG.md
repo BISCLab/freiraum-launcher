@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Categories page with tabs: the category starts at the top instead of in the middle of the page
+- Categories page: "Cards" and "List" are now one layout, "Below each other", with rows per card 1, 2, 3 or All; the list from before becomes All
+- Categories page settings on one page instead of Appearance and Behavior: Layout, What is shown (search field, symbols, counts), then the page itself and the categories
+- Settings search: under the quick access tiles, a wide strip leads to Info with the version
 - Category and folder pages: the overview shows the tile next to the label or the opened folder; tap either to change it. Below, one row per page (Tile, Label, Apps and elements, Opened folder), each with a small preview of what it sets
 - Clearer names: "Label" for a category's name pill, "Apps and elements" for what is inside, "Opened folder" for how a folder looks once tapped
 - Tiles and labels have the same look settings as every other element: Fill with its color and the symbol or text color, Opacity, Border with thickness and color, Corner rounding in percent with your own value

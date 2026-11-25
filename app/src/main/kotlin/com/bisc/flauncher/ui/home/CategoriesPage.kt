@@ -385,10 +385,11 @@ fun HomeCategoriesPage(
                             }
                         }
                     }
-                    tabs -> HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+                    // Each tab from the top, not in the middle of the page.
+                    tabs -> HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.Top) { page ->
                         val r = resolved[page]
                         val members = r.members.filter(::matches)
-                        LazyColumn(contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp)) {
+                        LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp)) {
                             item {
                                 CategoryCard(look, corner) {
                                     CategoryCardHead(r, expandable = false, expanded = true, onToggle = {})
@@ -402,7 +403,8 @@ fun HomeCategoriesPage(
                         }
                     }
                     else -> {
-                        val list = view == "LIST"
+                        // 0 rows per card: every card shows all it holds.
+                        val list = cardRows == 0
                         val searching = query.isNotBlank()
                         LazyColumn(
                             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),

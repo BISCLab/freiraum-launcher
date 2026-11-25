@@ -241,17 +241,17 @@ fun CategoriesPreview(onNavigate: (String) -> Unit, home: HomeViewModel = hiltVi
             }
             if (showSearch) {
                 Box(
-                    modifier = Modifier.fillMaxWidth().height(14.dp).look(automaticRailAppearance(dark), dark, CircleShape).clickable { onNavigate("behavior") },
+                    modifier = Modifier.fillMaxWidth().height(14.dp).look(automaticRailAppearance(dark), dark, CircleShape).clickable { onNavigate("layout") },
                     contentAlignment = Alignment.CenterStart
                 ) {
                     Icon(Icons.Filled.Search, contentDescription = null, tint = ink.copy(alpha = 0.6f), modifier = Modifier.padding(start = 5.dp).size(8.dp))
                 }
             }
-            // Cards: a few with their first rows; tabs: one card, a page per category; list: all open.
-            val cards = when (view) { "TABS" -> 1; "LIST" -> 3; else -> 2 }
-            val rowsPerCard = when (view) { "TABS" -> 5; "LIST" -> 2; else -> cardRows }
+            // Below each other: cards with their first rows (all of them at 0); tabs: one card.
+            val cards = if (view == "TABS") 1 else 2
+            val rowsPerCard = when { view == "TABS" -> 5; cardRows == 0 -> 3; else -> cardRows }
             Column(
-                modifier = Modifier.weight(1f).fillMaxWidth().clickable { onNavigate("behavior") },
+                modifier = Modifier.weight(1f).fillMaxWidth().clickable { onNavigate("layout") },
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 repeat(cards) { c ->

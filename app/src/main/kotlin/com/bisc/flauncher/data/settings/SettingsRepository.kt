@@ -349,12 +349,15 @@ class SettingsRepository @Inject constructor(
         }
     }
 
-    /** The Categories page: how it shows them (cards, tabs or a list), its search field, and how
-     *  many rows of a card show before "Show all". */
-    val categoriesView: Flow<String> = dataStore.data.map { it[CATEGORIES_VIEW_KEY] ?: "CARDS" }
+    /** The Categories page: below each other as cards, or as tabs; its search field, and how many
+     *  rows of a card show before "Show all" (0 = all). The list from before is cards showing all. */
+    val categoriesView: Flow<String> = dataStore.data.map { (it[CATEGORIES_VIEW_KEY] ?: "CARDS").let { v -> if (v == "LIST") "CARDS" else v } }
 
     suspend fun setCategoriesView(view: String) {
-        dataStore.edit { it[CATEGORIES_VIEW_KEY] = view }
+        dataStore.edit {
+            if (it[CATEGORIES_VIEW_KEY] == "LIST") it[CATEGORIES_CARD_ROWS_KEY] = 0
+            it[CATEGORIES_VIEW_KEY] = view
+        }
     }
 
     /** Whether a place that shows categories by name ("page", "search", "app_list") puts their
@@ -378,10 +381,13 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[CATEGORIES_SHOW_SEARCH_KEY] = show }
     }
 
-    val categoriesCardRows: Flow<Int> = dataStore.data.map { (it[CATEGORIES_CARD_ROWS_KEY] ?: 2).coerceIn(1, 3) }
+    val categoriesCardRows: Flow<Int> = dataStore.data.map { if (it[CATEGORIES_VIEW_KEY] == "LIST") 0 else (it[CATEGORIES_CARD_ROWS_KEY] ?: 2).coerceIn(0, 3) }
 
     suspend fun setCategoriesCardRows(rows: Int) {
-        dataStore.edit { it[CATEGORIES_CARD_ROWS_KEY] = rows.coerceIn(1, 3) }
+        dataStore.edit {
+            it[CATEGORIES_CARD_ROWS_KEY] = rows.coerceIn(0, 3)
+            if (it[CATEGORIES_VIEW_KEY] == "LIST") it[CATEGORIES_VIEW_KEY] = "CARDS"
+        }
     }
 
     /** Colors a design gives to categories without one of their own; empty = the accent. */

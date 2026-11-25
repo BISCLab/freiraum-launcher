@@ -23,6 +23,18 @@ import androidx.compose.material.icons.filled.ViewDay
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.draw.clip
+import com.bisc.flauncher.ui.accessibleOutline
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -179,4 +191,42 @@ internal fun SettingsQuickAccessGrid(fromRoute: String?, onOpen: (String) -> Uni
             SettingsTile(target.icon, stringResource(target.labelRes), area = com.bisc.flauncher.ui.theme.settingsAreaFor(target.pattern)) { onOpen(target.route) }
         }
     )
+    InfoStrip(onClick = { onOpen("settings/about") })
+}
+
+/** A strip as wide as the three tiles above it, to the app's info: its symbol, name and version. */
+@Composable
+private fun InfoStrip(onClick: () -> Unit) {
+    val shape = SettingsCardShape
+    val context = LocalContext.current
+    val version = remember { runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull().orEmpty() }
+    androidx.compose.foundation.layout.Row(
+        modifier = androidx.compose.ui.Modifier
+            .padding(top = 10.dp)
+            .fillMaxWidth()
+            .clip(shape)
+            .background(
+                androidx.compose.ui.graphics.Brush.horizontalGradient(
+                    listOf(MaterialTheme.colorScheme.surfaceContainer, MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f))
+                )
+            )
+            .accessibleOutline(shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(14.dp)
+    ) {
+        AreaSymbol(Icons.Filled.Info, com.bisc.flauncher.ui.theme.SettingsArea.NEUTRAL, 40.dp)
+        androidx.compose.foundation.layout.Column(modifier = androidx.compose.ui.Modifier.weight(1f)) {
+            Text(stringResource(R.string.about_title), style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(R.string.settings_quick_info_strip, stringResource(R.string.app_name), version),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+            )
+        }
+        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
 }

@@ -1070,14 +1070,12 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_categories_manage_summary">Make, sort, fill</string>
     <string name="settings_categories_view">Layout</string>
     <string name="settings_categories_view_info">All categories always sit at the top as chips. Tap one to see only that one. Tap several to see them together.</string>
-    <string name="settings_categories_view_cards">Cards</string>
-    <string name="settings_categories_view_cards_summary">Each category as a card with its first apps</string>
+    <string name="settings_categories_view_cards">Below each other</string>
+    <string name="settings_categories_view_cards_summary">Each category as a card, to scroll through</string>
     <string name="settings_categories_view_tabs">Tabs</string>
-    <string name="settings_categories_view_tabs_summary">One category per page, swipe sideways</string>
-    <string name="settings_categories_view_list">List</string>
-    <string name="settings_categories_view_list_summary">All categories one below the other, fully open</string>
+    <string name="settings_categories_view_tabs_summary">One category at a time, swipe sideways</string>
     <string name="settings_categories_card_rows">Rows per card</string>
-    <string name="settings_categories_card_rows_info">This many rows show on a card before you open it with “Show all”.</string>
+    <string name="settings_categories_card_rows_info">This many rows show on a card. "Show all" shows the rest.</string>
     <string name="settings_categories_search_field">Search field</string>
     <string name="settings_categories_search_field_summary">Searches in the chosen categories</string>
     <string name="settings_add_kind_category">Category</string>
@@ -1136,10 +1134,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_categories_pick_title">Choose a category</string>
     <string name="settings_gesture_one_finger">With one finger</string>
     <string name="settings_page_categories_description">All categories on one page. Tap them as chips at the top and see what is in them below. You open the page with a gesture, an action button or from the Dock.</string>
-    <string name="settings_hub_categories_appearance">Page, colors and symbols</string>
-    <string name="settings_hub_categories_behavior">View, search field, categories</string>
-    <string name="settings_categories_colors_tile">Colors and symbols</string>
-    <string name="settings_categories_behavior_search">Categories page: Behavior</string>
+    <string name="settings_categories_behavior_search">Categories page: layout</string>
     <string name="settings_categories_symbols">Show symbols</string>
     <string name="settings_category_tile_label">Tile</string>
     <string name="settings_category_tile_info">This is how the category looks in the Dock, the Panel, element boxes and folders. Everywhere else it shows its label.</string>
@@ -1204,4 +1199,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
         <item quantity="one">%d inside</item>
         <item quantity="other">%d inside</item>
     </plurals>
+    <string name="settings_categories_card_rows_all">All</string>
+    <string name="settings_categories_shown_label">What is shown</string>
+    <string name="settings_categories_page_part_summary">Name, background and status bar</string>
+    <string name="settings_quick_info_strip">%1$s %2$s · Source code, license, privacy</string>
 </resources>

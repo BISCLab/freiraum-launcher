@@ -775,14 +775,8 @@ class MainActivity : ComponentActivity() {
                         settingsComposable("settings/categories") {
                             com.bisc.flauncher.ui.settings.SettingsCategoriesPageScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
-                        settingsComposable("settings/categories/appearance") {
-                            com.bisc.flauncher.ui.settings.SettingsCategoriesAppearanceScreen(navController = navController, onBack = { navController.popBackStack() })
-                        }
                         settingsComposable("settings/categories/page") {
                             com.bisc.flauncher.ui.settings.SettingsCategoriesPagePartScreen(navController = navController, onBack = { navController.popBackStack() })
-                        }
-                        settingsComposable("settings/categories/behavior") {
-                            com.bisc.flauncher.ui.settings.SettingsCategoriesBehaviorScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         settingsComposable("settings/elements/actionbuttons") {
                             com.bisc.flauncher.ui.settings.SettingsActionButtonsScreen(navController = navController, onBack = { navController.popBackStack() })
