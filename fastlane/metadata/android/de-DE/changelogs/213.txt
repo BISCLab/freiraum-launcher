@@ -1,0 +1,4 @@
+- Kategorie-Seite in klaren Teilen: Als Name, Als Kachel, Inhalt
+- Vorschau beschriftet Kachel und Name
+- Ordner-Seite mit denselben Überschriften
+- Der Name unter einer Kachel richtet sich wieder nach dem Ort

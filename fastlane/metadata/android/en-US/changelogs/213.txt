@@ -1,0 +1,4 @@
+- Category page in clear parts: As a name, As a tile, Contents
+- The preview labels the tile and the name
+- Folder page with the same headings
+- The name below a tile follows its place again
