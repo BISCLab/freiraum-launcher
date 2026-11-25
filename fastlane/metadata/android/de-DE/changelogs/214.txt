@@ -1,0 +1,2 @@
+- Kachel-Vorschau nur noch Hell oder Dunkel
+- Kategorie-Vorschau: Kachel und Name auf zwei Hälften mit feinem Strich dazwischen

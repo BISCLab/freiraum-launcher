@@ -1,0 +1,2 @@
+- Tile preview only Light or Dark
+- Category preview: tile and name on two halves with a fine line between

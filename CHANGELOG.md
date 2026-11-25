@@ -2,7 +2,10 @@
 
 ## Unreleased
 
+## 0.21.3
+
 - Tile preview: only Light and Dark, starting like the settings are shown; a tile can lie in many places, so the page background is no longer offered
+- Category preview: tile and name on two equal halves with a fine line between
 
 ## 0.21.2
 

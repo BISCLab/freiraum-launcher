@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
@@ -91,11 +93,7 @@ internal fun TilePreviewHeader(
             .clip(shape)
             .background(if (dark) Color(0xFF1C1C1E) else Color(0xFFF2F2F4))
     ) {
-        Row(
-            modifier = Modifier.align(Alignment.Center).padding(top = if (compact) 0.dp else 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(28.dp)
-        ) {
+        val tilePart: @Composable () -> Unit = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 if (tileCaption != null && !compact) PreviewCaption(tileCaption, around)
                 Box(modifier = Modifier.size(tileSize)) { tile(around) }
@@ -104,10 +102,27 @@ internal fun TilePreviewHeader(
                     Text(name, color = around, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
-            if (extra != null) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    if (extraCaption != null && !compact) PreviewCaption(extraCaption, around)
-                    extra(around)
+        }
+        if (extra == null) {
+            Box(modifier = Modifier.align(Alignment.Center).padding(top = if (compact) 0.dp else 16.dp)) { tilePart() }
+        } else {
+            // Two parts on two equal halves with a fine line between, each in the middle of its own.
+            Row(
+                modifier = Modifier.matchParentSize().padding(top = if (compact) 0.dp else 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { tilePart() }
+                Box(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .fillMaxHeight(if (compact) 0.5f else 0.6f)
+                        .background(around.copy(alpha = 0.2f))
+                )
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        if (extraCaption != null && !compact) PreviewCaption(extraCaption, around)
+                        extra(around)
+                    }
                 }
             }
         }
