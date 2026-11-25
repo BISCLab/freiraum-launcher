@@ -1,0 +1,1 @@
+- Kategorie-Vorschau neu geordnet: Kachel und Name auf einer Linie, Hell/Dunkel darunter, beim Scrollen ohne Überschneidungen

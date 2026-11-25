@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.21.4
+
 - Category preview: Tile and Name on the same line, the name level with the middle of the tile, the light/dark switch below; scrolled, only the two parts stay and nothing overlaps
 
 ## 0.21.3

@@ -1,0 +1,1 @@
+- Category preview rearranged: tile and name on one line, light/dark below, no overlaps while scrolling
