@@ -1,0 +1,3 @@
+- Ordner folgen keiner Kategorie mehr, sie zeigen wieder ihre eigenen Inhalte
+- Ordner-Übersicht: Kachel, Geöffneter Ordner, dann Apps und Elemente
+- Kategorien als Kacheln wie die Ordner, mit Plus für eine neue, Reihenfolge auf eigener Seite
