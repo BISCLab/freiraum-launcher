@@ -73,6 +73,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.BoxWithConstraints
 import com.bisc.flauncher.data.model.ElementFillMode
 import com.bisc.flauncher.data.model.AppInfo
 import com.bisc.flauncher.data.model.Category
@@ -99,8 +102,9 @@ internal fun CategoryBadge(category: Category?, size: androidx.compose.ui.unit.D
     com.bisc.flauncher.ui.home.CategoryMark(category, modifier = Modifier.size(size))
 }
 
-/** Settings > Elements > Categories: every category in its order, new ones, Android's own kinds as
- *  ready-made offers and the smart categories that fill themselves. */
+/** Settings > Elements > Categories: every category as a tile like the folders, a plus to make a new
+ *  one first; their order on a page of its own; Android's own kinds as ready-made offers and the
+ *  smart categories that fill themselves. */
 @Composable
 fun SettingsCategoriesScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val categories by viewModel.categories.collectAsState()
@@ -111,6 +115,7 @@ fun SettingsCategoriesScreen(navController: NavController, onBack: () -> Unit, v
     val usedRules = remember(categories) { categories.mapNotNull { it.smartRule }.toSet() }
     val freeRules = CategoryRepository.READY_RULES.filter { it !in usedRules }
     var makingRule by remember { mutableStateOf(false) }
+    var ordering by remember { mutableStateOf(false) }
 
     SettingsSubScreen(title = stringResource(R.string.settings_pages_categories), navController = navController, onBack = onBack) {
         Text(
@@ -119,47 +124,45 @@ fun SettingsCategoriesScreen(navController: NavController, onBack: () -> Unit, v
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 4.dp)
         )
-        Column {
-            SettingsGroupLabel(stringResource(R.string.settings_categories_yours), info = stringResource(R.string.settings_categories_yours_info))
-            if (categories.isEmpty()) {
-                SettingsPreferenceGroup {
-                    SettingsPreference(icon = null, title = stringResource(R.string.settings_categories_empty), onClick = null, trailing = null)
-                }
-            } else {
-                ReorderableList(
-                    items = categories,
-                    key = { it.id },
-                    onReorder = viewModel::reorderCategories,
-                    itemHeight = 72.dp,
-                    dividers = true
-                ) { category ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth().clickable { navController.navigate("settings/elements/categories/${category.id}") },
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(14.dp)
-                    ) {
-                        CategoryBadge(category)
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(category.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            Text(
-                                if (category.smartRule != null) stringResource(R.string.settings_categories_smart_count, counts[category.id] ?: 0)
-                                else stringResource(R.string.settings_categories_count, counts[category.id] ?: 0),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            }
-        }
         SettingsPreferenceGroup {
-            SettingsPreference(icon = Icons.Filled.Add, title = stringResource(R.string.settings_categories_new), onClick = { creating = true }, trailing = null)
             SettingsPreference(
                 icon = Icons.Filled.ViewModule,
                 title = stringResource(R.string.settings_categories_page),
                 summary = stringResource(R.string.settings_categories_page_summary),
                 onClick = { navController.navigate("settings/categories") }
             )
+            if (categories.size > 1) {
+                SettingsPreference(
+                    icon = Icons.AutoMirrored.Filled.Sort,
+                    title = stringResource(R.string.settings_categories_order),
+                    summary = stringResource(R.string.settings_categories_order_summary),
+                    onClick = { ordering = true }
+                )
+            }
+        }
+        // Like the folders: a plus first, then every category as a tile, in their order.
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            SettingsGroupLabel(stringResource(R.string.settings_categories_yours), info = stringResource(R.string.settings_categories_yours_info))
+            val tiles: List<Category?> = listOf<Category?>(null) + categories
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val gap = 12.dp
+                val tileWidth = (maxWidth - gap * 2) / 3
+                Column(verticalArrangement = Arrangement.spacedBy(gap)) {
+                    tiles.chunked(3).forEach { row ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
+                            row.forEach { category ->
+                                if (category == null) {
+                                    NewItemTile(stringResource(R.string.settings_categories_new), Modifier.width(tileWidth)) { creating = true }
+                                } else {
+                                    CategoryTile(category, counts[category.id] ?: 0, Modifier.width(tileWidth)) {
+                                        navController.navigate("settings/elements/categories/${category.id}")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         if (suggestions.isNotEmpty()) {
             SettingsPreferenceGroup(title = stringResource(R.string.settings_categories_android), info = stringResource(R.string.settings_categories_android_info)) {
@@ -194,6 +197,24 @@ fun SettingsCategoriesScreen(navController: NavController, onBack: () -> Unit, v
         }
     }
 
+    if (ordering) {
+        // The order of the chips and cards: dragged by the handle, written with Save.
+        var draft by rememberDraft(categories)
+        SettingsEditPage(
+            title = stringResource(R.string.settings_categories_order),
+            onDismiss = { ordering = false },
+            onSave = { viewModel.reorderCategories(draft) },
+            dirty = draft.map { it.id } != categories.map { it.id }
+        ) {
+            ReorderableList(items = draft, key = { it.id }, onReorder = { draft = it }, itemHeight = 64.dp, dividers = true) { category ->
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    CategoryBadge(category)
+                    Text(category.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+        }
+    }
+
     if (makingRule) {
         NewRuleDialog(
             onCreate = { name, rule ->
@@ -212,6 +233,32 @@ fun SettingsCategoriesScreen(navController: NavController, onBack: () -> Unit, v
                 viewModel.addCategory(name) { id -> navController.navigate("settings/elements/categories/$id") }
             },
             onDismiss = { creating = false }
+        )
+    }
+}
+
+/** One category in the overview: its tile, its name, how much is in it. */
+@Composable
+private fun CategoryTile(category: Category, count: Int, modifier: Modifier, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(22.dp)
+    Column(
+        modifier = modifier
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .clickable(onClick = onClick)
+            .padding(vertical = 16.dp, horizontal = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        com.bisc.flauncher.ui.home.CategoryMark(category, modifier = Modifier.size(52.dp), shape = RoundedCornerShape(16.dp), ink = MaterialTheme.colorScheme.onSurface)
+        Spacer(Modifier.height(10.dp))
+        Text(category.name, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        Text(
+            if (category.smartRule != null) stringResource(R.string.settings_categories_tile_smart, count)
+            else androidx.compose.ui.res.pluralStringResource(R.plurals.hub_content_count, count, count),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
     }
 }

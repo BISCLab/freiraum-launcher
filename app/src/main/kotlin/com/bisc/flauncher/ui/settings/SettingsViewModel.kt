@@ -326,10 +326,6 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { folderRepository.removeFolderItem(item) }
     }
 
-    fun setFolderCategory(folderId: Long, categoryId: Long?) {
-        viewModelScope.launch { folderRepository.setFolderCategory(folderId, categoryId) }
-    }
-
     fun setFolderTileFace(folderId: Long, face: com.bisc.flauncher.data.model.TileFace) {
         // Save closes the screen right away; the write must not die with it.
         viewModelScope.launch(kotlinx.coroutines.NonCancellable) { folderRepository.setFolderTileFace(folderId, face) }

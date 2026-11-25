@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Folders no longer follow a category; a folder that did shows its own content again
+- Folder overview: Tile, Opened folder, then Apps and elements last, like for categories
+- Your categories as tiles like the folders, a plus first to make a new one; their order on a page of its own
 ## 0.24.0
 
 - Categories page with tabs: the category starts at the top instead of in the middle of the page

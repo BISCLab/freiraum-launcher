@@ -719,22 +719,10 @@ class HomeViewModel @Inject constructor(
     val folders: StateFlow<List<Folder>> =
         folderRepository.folders.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    /** Each folder's items. A folder that follows a category shows the category's elements in its
-     *  grid instead of its own (its widgets stay); those cells are made up here and can't be moved. */
+    /** Each folder's items. */
     val folderItemsByFolder: StateFlow<Map<Long, List<FolderItem>>> =
-        combine(folderRepository.folderItems, folders, resolvedCategories) { items, folderList, resolved ->
-            val own = items.groupBy { it.folderId }
-            val linked = folderList.filter { it.categoryId != null }
-            if (linked.isEmpty()) own
-            else own + linked.associate { folder ->
-                val members = resolved.find { it.category.id == folder.categoryId }?.members.orEmpty()
-                    .filter { it.type in FOLDER_CATEGORY_TYPES }
-                val widgets = own[folder.id].orEmpty().filter { it.type == GridItemType.WIDGET || it.type == GridItemType.SYSTEM_WIDGET }
-                folder.id to widgets + members.mapIndexed { index, m ->
-                    FolderItem(id = -(folder.id * 100_000L + index + 1), folderId = folder.id, type = m.type, payload = m.payload, orderIndex = index)
-                }
-            }
-        }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+        folderRepository.folderItems.map { items -> items.groupBy { it.folderId } }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
     private val _openFolderPath = MutableStateFlow<List<Long>>(emptyList())
     val openFolderPath: StateFlow<List<Long>> = _openFolderPath.asStateFlow()
@@ -1573,4 +1561,3 @@ private fun siteAddress(url: String): String =
     runCatching { url.trim().toUri().host }.getOrNull()?.removePrefix("www.") ?: url
 
 /** What a folder that follows a category can show: contacts have no cell in folders. */
-private val FOLDER_CATEGORY_TYPES = setOf(GridItemType.APP, GridItemType.SHORTCUT, GridItemType.MAP_TARGET, GridItemType.WEBSITE)

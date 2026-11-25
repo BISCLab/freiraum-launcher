@@ -1035,10 +1035,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_pages_categories">Kategorien</string>
     <string name="settings_categories_intro">Kategorien sind wie Etiketten. Eine App kann in mehreren stecken. So findest du schnell, was zusammengehört.</string>
     <string name="settings_categories_yours">Deine Kategorien</string>
-    <string name="settings_categories_yours_info">Tipp auf eine Kategorie, um sie zu bearbeiten. Am Griff ziehen ändert die Reihenfolge.</string>
+    <string name="settings_categories_yours_info">Tipp auf eine Kategorie, um sie zu bearbeiten. Mit dem Plus legst du eine neue an.</string>
     <string name="settings_categories_empty">Noch keine Kategorien.</string>
     <string name="settings_categories_count">Einträge: %1$d</string>
-    <string name="settings_categories_smart_count" tools:ignore="PluralsCandidate">Füllt sich selbst · gerade %1$d</string>
     <string name="settings_categories_new">Neue Kategorie</string>
     <string name="settings_categories_page">Seite Kategorien</string>
     <string name="settings_categories_page_summary">Wie die Seite aussieht und was sie zeigt</string>
@@ -1101,12 +1100,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="widget_categories_all">Alle</string>
     <string name="settings_search_include_labels">Kategorien</string>
     <string name="settings_gesture_action_category">Kategorie öffnen</string>
-    <string name="settings_folder_category_label">Folgt einer Kategorie</string>
-    <string name="settings_folder_category_info">Dann füllt sich der Ordner von selbst mit allem aus der Kategorie. Deine eigenen Apps im Ordner bleiben gespeichert und kommen zurück, wenn du das wieder ausschaltest. Widgets bleiben im Ordner.</string>
-    <string name="settings_folder_category_none">Keine Kategorie</string>
-    <string name="settings_folder_category_on">Der Ordner zeigt, was in der Kategorie ist</string>
-    <string name="settings_folder_category_off">Tipp hier, um eine zu wählen</string>
-    <string name="settings_folder_category_unlink">Nicht mehr folgen</string>
     <string name="settings_app_categories_info">Tipp eine Kategorie an, um die App hineinzulegen oder herauszunehmen. Das gilt sofort.</string>
     <string name="settings_app_list_category_chips">Kategorien als Filter</string>
     <string name="settings_app_list_category_chips_info">Oben in der App-Liste stehen deine Kategorien. Tipp eine an, dann siehst du nur ihre Apps.</string>
@@ -1180,8 +1173,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="preview_caption_name">Etikett</string>
     <string name="section_folder_open">Geöffneter Ordner</string>
     <string name="section_folder_open_where">So sieht der Ordner aus, wenn du ihn antippst.</string>
-    <string name="folder_follows_edit">„%1$s“ bearbeiten</string>
-    <string name="folder_follows_note">Der Ordner zeigt, was in der Kategorie ist. Seine eigenen Inhalte kommen zurück, wenn er nicht mehr folgt.</string>
     <string name="element_tile_info">So sieht es im Dock, im Panel, in Element-Boxen und in Ordnern aus.</string>
     <string name="settings_categories_counts">Anzahl zeigen</string>
     <string name="preview_caption_open">Geöffnet</string>
@@ -1189,7 +1180,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="hub_label_category">Auf der Kategorien-Seite, in der Suche und in der App-Liste</string>
     <string name="hub_tile_folder">Im Dock, im Panel, in Boxen und auf Seiten</string>
     <string name="hub_content_smart">Füllt sich selbst, %1$d drin</string>
-    <string name="hub_content_follows">Zeigt die Kategorie „%1$s“</string>
     <string name="hub_open_folder_like_all">Fläche, Rahmen, Beschriftung. Wie alle Ordner</string>
     <string name="hub_open_folder_own">Fläche, Rahmen, Beschriftung. Eigenes Aussehen</string>
     <string name="folder_corners_all">Gleich für alle Ordner. Tipp, um sie zu ändern.</string>
@@ -1203,4 +1193,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_categories_shown_label">Was zu sehen ist</string>
     <string name="settings_categories_page_part_summary">Name, Hintergrund und Statusleiste</string>
     <string name="settings_quick_info_strip">%1$s %2$s · Quellcode, Lizenz, Datenschutz</string>
+    <string name="settings_categories_order">Reihenfolge</string>
+    <string name="settings_categories_order_summary">So stehen die Kategorien auf der Seite, in der Suche und in der App-Liste</string>
+    <string name="settings_categories_tile_smart">Automatisch, %1$d</string>
 </resources>

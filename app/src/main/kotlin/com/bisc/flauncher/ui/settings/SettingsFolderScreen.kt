@@ -82,7 +82,7 @@ fun SettingsFolderScreen(navController: NavController, onBack: () -> Unit, viewM
                     Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
                         row.forEach { folder ->
                             if (folder == null) {
-                                NewFolderTile(Modifier.width(tileWidth)) { showCreateDialog = true }
+                                NewItemTile(stringResource(R.string.settings_folder_create), Modifier.width(tileWidth)) { showCreateDialog = true }
                             } else {
                                 FolderTile(
                                     folder = folder,
@@ -139,8 +139,9 @@ private fun FolderTile(folder: Folder, items: List<FolderItem>, viewModel: Setti
     }
 }
 
+/** The first tile of an overview of tiles: a plus, to make a new one. */
 @Composable
-private fun NewFolderTile(modifier: Modifier, onClick: () -> Unit) {
+internal fun NewItemTile(label: String, modifier: Modifier, onClick: () -> Unit) {
     val shape = RoundedCornerShape(22.dp)
     Column(
         modifier = modifier
@@ -155,7 +156,7 @@ private fun NewFolderTile(modifier: Modifier, onClick: () -> Unit) {
             contentAlignment = Alignment.Center
         ) { Icon(Icons.Filled.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary) }
         Spacer(Modifier.height(10.dp))
-        Text(stringResource(R.string.settings_folder_create), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, maxLines = 1, textAlign = TextAlign.Center)
+        Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
         Text(" ", style = MaterialTheme.typography.labelSmall)
     }
 }

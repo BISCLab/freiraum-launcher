@@ -1035,10 +1035,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_pages_categories">Categories</string>
     <string name="settings_categories_intro">Categories are like labels. An app can be in several. That way you quickly find what belongs together.</string>
     <string name="settings_categories_yours">Your categories</string>
-    <string name="settings_categories_yours_info">Tap a category to edit it. Drag the handle to change the order.</string>
+    <string name="settings_categories_yours_info">Tap a category to edit it. The plus makes a new one.</string>
     <string name="settings_categories_empty">No categories yet.</string>
     <string name="settings_categories_count">Items: %1$d</string>
-    <string name="settings_categories_smart_count" tools:ignore="PluralsCandidate">Fills itself · %1$d right now</string>
     <string name="settings_categories_new">New category</string>
     <string name="settings_categories_page">Categories page</string>
     <string name="settings_categories_page_summary">How the page looks and what it shows</string>
@@ -1101,12 +1100,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="widget_categories_all">All</string>
     <string name="settings_search_include_labels">Categories</string>
     <string name="settings_gesture_action_category">Open a category</string>
-    <string name="settings_folder_category_label">Follows a category</string>
-    <string name="settings_folder_category_info">Then the folder fills itself with everything in the category. Your own apps in the folder stay saved and come back when you turn this off again. Widgets stay in the folder.</string>
-    <string name="settings_folder_category_none">No category</string>
-    <string name="settings_folder_category_on">The folder shows what is in the category</string>
-    <string name="settings_folder_category_off">Tap here to pick one</string>
-    <string name="settings_folder_category_unlink">Stop following</string>
     <string name="settings_app_categories_info">Tap a category to put the app in or take it out. It applies right away.</string>
     <string name="settings_app_list_category_chips">Categories as filters</string>
     <string name="settings_app_list_category_chips_info">Your categories sit at the top of the App list. Tap one to see only its apps.</string>
@@ -1180,8 +1173,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="preview_caption_name">Label</string>
     <string name="section_folder_open">Opened folder</string>
     <string name="section_folder_open_where">This is how the folder looks once you tap it.</string>
-    <string name="folder_follows_edit">Edit “%1$s”</string>
-    <string name="folder_follows_note">The folder shows what the category holds. Its own content comes back when it stops following.</string>
     <string name="element_tile_info">This is how it looks in the Dock, the Panel, element boxes and folders.</string>
     <string name="settings_categories_counts">Show how many</string>
     <string name="preview_caption_open">Opened</string>
@@ -1189,7 +1180,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="hub_label_category">On the Categories page, in the search and in the App list</string>
     <string name="hub_tile_folder">In the Dock, the Panel, boxes and on pages</string>
     <string name="hub_content_smart">Fills itself, %1$d inside</string>
-    <string name="hub_content_follows">Shows the category “%1$s”</string>
     <string name="hub_open_folder_like_all">Fill, border, captions. Like all folders</string>
     <string name="hub_open_folder_own">Fill, border, captions. Its own look</string>
     <string name="folder_corners_all">The same for all folders. Tap to change it.</string>
@@ -1203,4 +1193,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_categories_shown_label">What is shown</string>
     <string name="settings_categories_page_part_summary">Name, background and status bar</string>
     <string name="settings_quick_info_strip">%1$s %2$s · Source code, license, privacy</string>
+    <string name="settings_categories_order">Order</string>
+    <string name="settings_categories_order_summary">How the categories line up on the page, in the search and in the App list</string>
+    <string name="settings_categories_tile_smart">Automatic, %1$d</string>
 </resources>

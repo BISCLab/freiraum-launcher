@@ -255,8 +255,7 @@ fun SettingsFolderEditScreen(
             shape = SettingsTextFieldShape,
             modifier = Modifier.fillMaxWidth()
         )
-        // How it lies closed, what is in it, and how it looks opened: each row shows what it sets.
-        val followed = folder.categoryId?.let { id -> categories.find { it.id == id } }
+        // How it lies closed, how it looks opened, and what is in it: each row shows what it sets.
         SettingsPreferenceGroup {
             PartLinkRow(
                 title = stringResource(R.string.settings_category_tile_label),
@@ -264,16 +263,15 @@ fun SettingsFolderEditScreen(
                 onClick = { open("tile") }
             ) { FolderIcon(folder = folder, previewItems = items, modifier = Modifier.size(40.dp), face = face ?: folder.face(), around = androidx.compose.material3.MaterialTheme.colorScheme.onSurface) }
             PartLinkRow(
-                title = stringResource(R.string.section_content),
-                summary = if (followed != null) stringResource(R.string.hub_content_follows, followed.name)
-                else androidx.compose.ui.res.pluralStringResource(R.plurals.hub_content_count, items.size, items.size),
-                onClick = { open("content") }
-            ) { CountBubble(items.size) }
-            PartLinkRow(
                 title = stringResource(R.string.section_folder_open),
                 summary = stringResource(if (ownLook) R.string.hub_open_folder_own else R.string.hub_open_folder_like_all),
                 onClick = { open("open") }
             ) { FolderOpenMini(savedLook, folderCorner, androidx.compose.material3.MaterialTheme.colorScheme.onSurface, small = true) }
+            PartLinkRow(
+                title = stringResource(R.string.section_content),
+                summary = androidx.compose.ui.res.pluralStringResource(R.plurals.hub_content_count, items.size, items.size),
+                onClick = { open("content") }
+            ) { CountBubble(items.size) }
         }
         SettingsPreferenceGroup {
             SettingsPreference(
@@ -300,94 +298,80 @@ fun SettingsFolderEditScreen(
         )
         }
 
-        // What it holds: first where it comes from. A folder that follows a category shows what the
-        // category holds, so its own (hidden meanwhile) content is not offered to edit here.
+        // What it holds, live: tap a part to work on it, the empty tile adds something.
         if (part == FolderPart.CONTENT) {
         PartIntro(stringResource(R.string.section_folder_content_where))
-        FolderCategoryLink(folder = folder, onChange = { viewModel.setFolderCategory(folderId, it) }, viewModel = viewModel)
-        val followedCategory = folder.categoryId?.let { id -> categories.find { it.id == id } }
-        if (followedCategory != null) {
-            SettingsPreferenceGroup {
-                SettingsPreference(
-                    icon = Icons.AutoMirrored.Filled.Label,
-                    title = stringResource(R.string.folder_follows_edit, followedCategory.name),
-                    summary = stringResource(R.string.folder_follows_note),
-                    onClick = { navController.navigate("settings/elements/categories/${followedCategory.id}/content") }
+        // The folder itself, live: tap a part to work on it, the empty tile adds something.
+        FolderLivePreview(
+            look = look,
+            widgets = widgetItems,
+            gridItems = iconItems,
+            rowShape = rowShape,
+            showLabels = showLabels,
+            selectedId = selectedId,
+            onSelect = { selectedId = if (selectedId == it.id) null else it.id },
+            onAdd = { slot -> viewModel.reserveFolderSlot(folderId, slot); showAddChooser = true },
+            widgetIcon = ::folderWidgetIcon,
+            widgetLabel = { folderWidgetLabel(it, homeViewModel) },
+            itemLabel = { item ->
+                com.bisc.flauncher.ui.home.entryLabel(
+                    RowEntry(id = item.id, pageRowId = 0L, orderIndex = item.orderIndex, type = item.type, payload = item.payload),
+                    folders, savedMapTargets, pinnedWebsites, emptyList(), emptyList(), viewModel::resolveLabel
                 )
-            }
-        } else {
-            // The folder itself, live: tap a part to work on it, the empty tile adds something.
-            FolderLivePreview(
-                look = look,
-                widgets = widgetItems,
-                gridItems = iconItems,
-                rowShape = rowShape,
-                showLabels = showLabels,
-                selectedId = selectedId,
-                onSelect = { selectedId = if (selectedId == it.id) null else it.id },
-                onAdd = { slot -> viewModel.reserveFolderSlot(folderId, slot); showAddChooser = true },
-                widgetIcon = ::folderWidgetIcon,
-                widgetLabel = { folderWidgetLabel(it, homeViewModel) },
-                itemLabel = { item ->
-                    com.bisc.flauncher.ui.home.entryLabel(
-                        RowEntry(id = item.id, pageRowId = 0L, orderIndex = item.orderIndex, type = item.type, payload = item.payload),
-                        folders, savedMapTargets, pinnedWebsites, emptyList(), emptyList(), viewModel::resolveLabel
-                    )
-                },
-                itemIcon = { item, size -> FolderItemIcon(item, size, folders, itemsByFolder, viewModel::loadIcon, viewModel::loadPackIcon) },
-                highlightRow = highlightRow
-            )
-            Text(
-                stringResource(R.string.settings_folder_live_hint),
-                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 4.dp)
-            )
+            },
+            itemIcon = { item, size -> FolderItemIcon(item, size, folders, itemsByFolder, viewModel::loadIcon, viewModel::loadPackIcon) },
+            highlightRow = highlightRow
+        )
+        Text(
+            stringResource(R.string.settings_folder_live_hint),
+            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+            color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 4.dp)
+        )
 
-            val selected = items.find { it.id == selectedId }
-            if (selected != null) {
-                val isWidget = selected.isWidget()
-                val siblings = if (isWidget) widgetItems else iconItems
-                val position = siblings.indexOfFirst { it.id == selected.id }
-                val cellCount = com.bisc.flauncher.ui.home.folderSlotRows(iconItems, rowShape, keepEmptyRows = true).sumOf { it.size } + rowShape.ifEmpty { listOf(4) }.last()
-                val widgetRowCount = com.bisc.flauncher.ui.home.folderSlotRows(iconItems, rowShape, keepEmptyRows = true).size
-                val isBuiltIn = selected.type == GridItemType.WIDGET
-                val minSpan = if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.minSpan(selected.payload) else 1
-                val maxSpan = if (isWidget) maxOf(
-                    minOf(
-                        if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.maxSpan(selected.payload) else MAX_FOLDER_APP_WIDGET_SPAN,
-                        com.bisc.flauncher.ui.home.folderWidgetMaxSpan(folder, items, selected, showLabels)
-                    ),
-                    selected.spanY,
-                    minSpan
-                ) else 1
-                FolderSelectionBar(
-                    title = if (isWidget) folderWidgetLabel(selected, homeViewModel) else com.bisc.flauncher.ui.home.entryLabel(
-                        RowEntry(id = selected.id, pageRowId = 0L, orderIndex = selected.orderIndex, type = selected.type, payload = selected.payload),
-                        folders, savedMapTargets, pinnedWebsites, emptyList(), emptyList(), viewModel::resolveLabel
-                    ),
-                    isWidget = isWidget,
-                    span = selected.spanY,
-                    canGrow = selected.spanY < maxSpan,
-                    canShrink = selected.spanY > minSpan,
-                    onSpan = { viewModel.updateFolderItem(selected.copy(spanY = it)) },
-                    // Widgets swap with their neighbour; apps and elements step through the cells, empty ones too.
-                    canMoveBack = if (isWidget) com.bisc.flauncher.ui.home.canMoveWidget(widgetItems, selected, -1, widgetRowCount) else selected.orderIndex > 0,
-                    canMoveOn = if (isWidget) com.bisc.flauncher.ui.home.canMoveWidget(widgetItems, selected, 1, widgetRowCount) else selected.orderIndex < cellCount - 1,
-                    onMove = { delta ->
-                        if (isWidget) {
-                            homeViewModel.saveFolderItems(com.bisc.flauncher.ui.home.moveWidgetStep(widgetItems, selected, delta, widgetRowCount))
-                        } else {
-                            viewModel.moveFolderItemToSlot(selected, selected.orderIndex + delta)
-                        }
-                    },
-                    onOpenSettings = if (isWidget) ({ navController.navigate("settings/folder/$folderId/widget/${selected.id}") }) else null,
-                    onRemove = { pendingRemoval = selected },
-                    onClose = { selectedId = null }
-                )
-            }
-            FolderAddButtons(onAddContent = { viewModel.reserveFolderSlot(folderId, null); showAddChooser = true }, onAddWidget = { showWidgetKindPicker = true })
+        val selected = items.find { it.id == selectedId }
+        if (selected != null) {
+            val isWidget = selected.isWidget()
+            val siblings = if (isWidget) widgetItems else iconItems
+            val position = siblings.indexOfFirst { it.id == selected.id }
+            val cellCount = com.bisc.flauncher.ui.home.folderSlotRows(iconItems, rowShape, keepEmptyRows = true).sumOf { it.size } + rowShape.ifEmpty { listOf(4) }.last()
+            val widgetRowCount = com.bisc.flauncher.ui.home.folderSlotRows(iconItems, rowShape, keepEmptyRows = true).size
+            val isBuiltIn = selected.type == GridItemType.WIDGET
+            val minSpan = if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.minSpan(selected.payload) else 1
+            val maxSpan = if (isWidget) maxOf(
+                minOf(
+                    if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.maxSpan(selected.payload) else MAX_FOLDER_APP_WIDGET_SPAN,
+                    com.bisc.flauncher.ui.home.folderWidgetMaxSpan(folder, items, selected, showLabels)
+                ),
+                selected.spanY,
+                minSpan
+            ) else 1
+            FolderSelectionBar(
+                title = if (isWidget) folderWidgetLabel(selected, homeViewModel) else com.bisc.flauncher.ui.home.entryLabel(
+                    RowEntry(id = selected.id, pageRowId = 0L, orderIndex = selected.orderIndex, type = selected.type, payload = selected.payload),
+                    folders, savedMapTargets, pinnedWebsites, emptyList(), emptyList(), viewModel::resolveLabel
+                ),
+                isWidget = isWidget,
+                span = selected.spanY,
+                canGrow = selected.spanY < maxSpan,
+                canShrink = selected.spanY > minSpan,
+                onSpan = { viewModel.updateFolderItem(selected.copy(spanY = it)) },
+                // Widgets swap with their neighbour; apps and elements step through the cells, empty ones too.
+                canMoveBack = if (isWidget) com.bisc.flauncher.ui.home.canMoveWidget(widgetItems, selected, -1, widgetRowCount) else selected.orderIndex > 0,
+                canMoveOn = if (isWidget) com.bisc.flauncher.ui.home.canMoveWidget(widgetItems, selected, 1, widgetRowCount) else selected.orderIndex < cellCount - 1,
+                onMove = { delta ->
+                    if (isWidget) {
+                        homeViewModel.saveFolderItems(com.bisc.flauncher.ui.home.moveWidgetStep(widgetItems, selected, delta, widgetRowCount))
+                    } else {
+                        viewModel.moveFolderItemToSlot(selected, selected.orderIndex + delta)
+                    }
+                },
+                onOpenSettings = if (isWidget) ({ navController.navigate("settings/folder/$folderId/widget/${selected.id}") }) else null,
+                onRemove = { pendingRemoval = selected },
+                onClose = { selectedId = null }
+            )
         }
+        FolderAddButtons(onAddContent = { viewModel.reserveFolderSlot(folderId, null); showAddChooser = true }, onAddWidget = { showWidgetKindPicker = true })
 
         SettingsPreferenceGroup(
             title = stringResource(R.string.settings_folder_rows_label),
@@ -852,35 +836,6 @@ fun SettingsFolderWidgetEditScreen(
     )
 }
 
-
-/** Lets a folder follow a category: it then fills itself with what the category holds. */
-@Composable
-private fun FolderCategoryLink(folder: com.bisc.flauncher.data.model.Folder, onChange: (Long?) -> Unit, viewModel: SettingsViewModel) {
-    val categories by viewModel.categories.collectAsState()
-    var picking by remember { mutableStateOf(false) }
-    val linked = categories.find { it.id == folder.categoryId }
-    SettingsPreferenceGroup(title = stringResource(R.string.settings_folder_category_label), info = stringResource(R.string.settings_folder_category_info)) {
-        SettingsPreference(
-            icon = null,
-            leading = if (linked != null) ({ CategoryBadge(linked, 32.dp) }) else null,
-            title = linked?.name ?: stringResource(R.string.settings_folder_category_none),
-            summary = stringResource(if (linked != null) R.string.settings_folder_category_on else R.string.settings_folder_category_off),
-            onClick = { picking = true }
-        )
-        if (linked != null) {
-            SettingsPreference(icon = null, title = stringResource(R.string.settings_folder_category_unlink), onClick = { onChange(null) }, trailing = null)
-        }
-    }
-    if (picking) {
-        CategoryPickerSheet(
-            categories = categories,
-            onSelect = { onChange(it.id); picking = false },
-            onDismiss = { picking = false },
-            selectedId = folder.categoryId,
-            onCreate = { name -> viewModel.addCategory(name) { id -> onChange(id) }; picking = false }
-        )
-    }
-}
 
 /** The opened folder in small: its card with two rows of apps, in its fill, border and corners. */
 @Composable
