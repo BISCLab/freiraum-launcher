@@ -73,16 +73,12 @@ fun TileFaceView(
 ) {
     val fill = face.surfaceFill(autoSurface)
     val tint = face.inkOn(autoSurface, around)
+    val tileShape = face.corners?.let { cornerShape(it) } ?: shape
     BoxWithConstraints(
         modifier = modifier
-            .clip(shape)
-            .then(
-                when {
-                    fill != null -> Modifier.background(fill)
-                    face.surface == TileSurface.OUTLINE -> Modifier.border(1.5.dp, around.copy(alpha = 0.6f), shape)
-                    else -> Modifier
-                }
-            ),
+            .clip(tileShape)
+            .then(if (fill != null) Modifier.background(fill) else Modifier)
+            .then(if (face.hasBorder) Modifier.border(1.5.dp, face.borderColor?.let { Color(it) } ?: around.copy(alpha = 0.6f), tileShape) else Modifier),
         contentAlignment = Alignment.Center
     ) {
         val side = min(maxWidth, maxHeight)
@@ -90,7 +86,7 @@ fun TileFaceView(
         when {
             face.kind == TileKind.SYMBOL && pack != null ->
                 // A picture from an icon pack brings its own look; alone it fills the tile like an app icon.
-                PackPicture(pack, if (fill == null && face.surface != TileSurface.OUTLINE) side else side * 0.7f, contentDescription)
+                PackPicture(pack, if (fill == null && !face.hasBorder) side else side * 0.7f, contentDescription)
             face.kind == TileKind.SYMBOL ->
                 Icon(PictogramCatalog.iconFor(face.symbol) ?: Icons.AutoMirrored.Filled.Label, contentDescription, tint = tint, modifier = Modifier.size(side * 0.54f))
             face.kind == TileKind.CONTENT && content.isNotEmpty() ->
@@ -104,6 +100,13 @@ fun TileFaceView(
             )
         }
     }
+}
+
+/** The shape of a tile's own corners. */
+fun cornerShape(corners: com.bisc.flauncher.data.model.TileCorners): Shape = when (corners) {
+    com.bisc.flauncher.data.model.TileCorners.ROUND -> RoundedCornerShape(50)
+    com.bisc.flauncher.data.model.TileCorners.SOFT -> RoundedCornerShape(28)
+    com.bisc.flauncher.data.model.TileCorners.SQUARE -> RoundedCornerShape(8)
 }
 
 /** One thing a tile holds: an app (its icon) or another element (a small symbol). */

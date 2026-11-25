@@ -1162,13 +1162,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="tile_no_pack">Es ist kein Icon-Pack installiert. Die Symbole aus dem Katalog gehen immer.</string>
     <string name="tile_search">Symbole suchen</string>
     <string name="tile_nothing_found">Nichts gefunden.</string>
-    <string name="tile_surface_title">Fläche dahinter</string>
-    <string name="tile_surface_color">Farbe</string>
-    <string name="tile_surface_outline">Nur ein Rand</string>
-    <string name="tile_surface_none">Keine</string>
+    <string name="tile_surface_title">Fläche, Rand und Ecken</string>
     <string name="tile_surface_color_pick">Farbe der Fläche</string>
     <string name="tile_pack_own">Das Bild aus dem Icon-Pack bringt seinen eigenen Hintergrund mit.</string>
-    <string name="tile_pack_surface">Trotzdem eine Fläche dahinter</string>
     <string name="tile_symbol_color">Farbe des Symbols</string>
     <string name="tile_letter_color">Farbe des Buchstabens</string>
     <string name="tile_preview_light">Hell</string>
@@ -1196,4 +1192,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="category_color_info">Gilt für den Namen und für die Kachel.</string>
     <string name="preview_caption_tile">Kachel</string>
     <string name="preview_caption_name">Name</string>
+    <string name="tile_fill">Füllung</string>
+    <string name="tile_border">Rand</string>
+    <string name="tile_border_color">Farbe des Rands</string>
+    <string name="tile_corners">Ecken</string>
+    <string name="tile_corners_default">Standard</string>
 </resources>

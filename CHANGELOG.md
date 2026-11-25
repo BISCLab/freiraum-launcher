@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Tiles of folders and categories: fill and border can be switched on each on their own, each with its own color, and the corners can be round, soft or square (default: like the symbols around)
+
 ## 0.21.4
 
 - Category preview: Tile and Name on the same line, the name level with the middle of the tile, the light/dark switch below; scrolled, only the two parts stay and nothing overlaps

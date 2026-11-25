@@ -1162,13 +1162,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="tile_no_pack">No icon pack is installed. The catalog symbols always work.</string>
     <string name="tile_search">Search symbols</string>
     <string name="tile_nothing_found">Nothing found.</string>
-    <string name="tile_surface_title">Surface behind it</string>
-    <string name="tile_surface_color">Color</string>
-    <string name="tile_surface_outline">Just an outline</string>
-    <string name="tile_surface_none">None</string>
+    <string name="tile_surface_title">Fill, border and corners</string>
     <string name="tile_surface_color_pick">Surface color</string>
     <string name="tile_pack_own">The icon pack picture brings its own background.</string>
-    <string name="tile_pack_surface">A surface behind it anyway</string>
     <string name="tile_symbol_color">Symbol color</string>
     <string name="tile_letter_color">Letter color</string>
     <string name="tile_preview_light">Light</string>
@@ -1196,4 +1192,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="category_color_info">Used for the name and for the tile.</string>
     <string name="preview_caption_tile">Tile</string>
     <string name="preview_caption_name">Name</string>
+    <string name="tile_fill">Fill</string>
+    <string name="tile_border">Border</string>
+    <string name="tile_border_color">Border color</string>
+    <string name="tile_corners">Corners</string>
+    <string name="tile_corners_default">Default</string>
 </resources>

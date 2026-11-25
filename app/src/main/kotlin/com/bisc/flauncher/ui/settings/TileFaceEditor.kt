@@ -246,32 +246,45 @@ internal fun TileFaceEditor(
         }
     }
 
-    // 3. The surface behind it. A picture from an icon pack brings its own.
+    // 3. Fill, border and corners, each on its own; their colors only show once switched on.
     val fromPack = face.kind == TileKind.SYMBOL && face.packIcon != null
-    SettingsPreferenceGroup(title = stringResource(R.string.tile_surface_title)) {
-        if (fromPack) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.tile_pack_surface),
-                summary = stringResource(R.string.tile_pack_own),
-                onClick = { onChange(face.copy(surface = if (face.surface == TileSurface.NONE) TileSurface.AUTO else TileSurface.NONE)) },
-                trailing = { Switch(checked = face.surface != TileSurface.NONE, onCheckedChange = { on -> onChange(face.copy(surface = if (on) TileSurface.AUTO else TileSurface.NONE)) }) }
-            )
-        } else {
-            val colored = face.surface == TileSurface.AUTO || face.surface == TileSurface.COLOR
-            RadioPreference(stringResource(R.string.tile_surface_color), true, colored, { onChange(face.copy(surface = if (face.surfaceColor != null) TileSurface.COLOR else TileSurface.AUTO)) })
-            RadioPreference(stringResource(R.string.tile_surface_outline), TileSurface.OUTLINE, face.surface, { onChange(face.copy(surface = it)) })
-            RadioPreference(stringResource(R.string.tile_surface_none), TileSurface.NONE, face.surface, { onChange(face.copy(surface = it)) })
-        }
-        if (face.surface == TileSurface.AUTO || face.surface == TileSurface.COLOR) {
+    SettingsPreferenceGroup(title = stringResource(R.string.tile_surface_title), info = if (fromPack) stringResource(R.string.tile_pack_own) else null) {
+        // Every change writes the border too, so tiles from before keep theirs.
+        val setFill = { on: Boolean -> onChange(face.copy(surface = if (on) (if (face.surfaceColor != null) TileSurface.COLOR else TileSurface.AUTO) else TileSurface.NONE, border = face.hasBorder)) }
+        SettingsPreference(
+            icon = null,
+            title = stringResource(R.string.tile_fill),
+            onClick = { setFill(!face.hasFill) },
+            trailing = { Switch(checked = face.hasFill, onCheckedChange = { setFill(it) }) }
+        )
+        if (face.hasFill) {
             AutomaticColorPicker(
                 title = stringResource(R.string.tile_surface_color_pick),
                 custom = face.surfaceColor.takeIf { face.surface == TileSurface.COLOR },
                 automaticSeed = autoSurface.toArgb(),
-                onChange = { color -> onChange(face.copy(surface = if (color == null) TileSurface.AUTO else TileSurface.COLOR, surfaceColor = color)) },
+                onChange = { color -> onChange(face.copy(surface = if (color == null) TileSurface.AUTO else TileSurface.COLOR, surfaceColor = color, border = face.hasBorder)) },
                 ownGroup = false
             )
         }
+        val setBorder = { on: Boolean ->
+            onChange(face.copy(border = on, surface = if (face.surface == TileSurface.OUTLINE) TileSurface.NONE else face.surface))
+        }
+        SettingsPreference(
+            icon = null,
+            title = stringResource(R.string.tile_border),
+            onClick = { setBorder(!face.hasBorder) },
+            trailing = { Switch(checked = face.hasBorder, onCheckedChange = { setBorder(it) }) }
+        )
+        if (face.hasBorder) {
+            AutomaticColorPicker(
+                title = stringResource(R.string.tile_border_color),
+                custom = face.borderColor,
+                automaticSeed = onSurface.copy(alpha = 0.6f).toArgb(),
+                onChange = { onChange(face.copy(borderColor = it, border = true)) },
+                ownGroup = false
+            )
+        }
+        CornerChoice(face, onChange, autoSurface, letter, content)
     }
 
     // 4. The color of a pictogram or the letter: black or white unless chosen.
@@ -293,6 +306,37 @@ internal fun TileFaceEditor(
 }
 
 private const val DEFAULT_SYMBOL = "star"
+
+/** The tile's corners as four small tiles, the first one "like the others around". */
+@Composable
+private fun CornerChoice(face: TileFace, onChange: (TileFace) -> Unit, autoSurface: Color, letter: String, content: List<TileContent>) {
+    val options = listOf(
+        null to R.string.tile_corners_default,
+        com.bisc.flauncher.data.model.TileCorners.ROUND to R.string.welcome_shape_round,
+        com.bisc.flauncher.data.model.TileCorners.SOFT to R.string.welcome_shape_soft,
+        com.bisc.flauncher.data.model.TileCorners.SQUARE to R.string.welcome_shape_square
+    )
+    Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(stringResource(R.string.tile_corners), style = MaterialTheme.typography.bodyLarge)
+        EqualGrid(count = options.size, columns = 4, gap = 8.dp) { index ->
+            val (corners, label) = options[index]
+            val picked = face.corners == corners
+            Column(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                    .border(if (picked) 2.dp else 0.dp, if (picked) MaterialTheme.colorScheme.primary else Color.Transparent, RoundedCornerShape(14.dp))
+                    .clickable { onChange(face.copy(corners = corners, border = face.hasBorder)) }
+                    .padding(vertical = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                TileFaceView(face.copy(corners = corners), autoSurface, letter, modifier = Modifier.size(32.dp), around = MaterialTheme.colorScheme.onSurface, content = content, shape = RoundedCornerShape(10.dp))
+                Text(stringResource(label), style = MaterialTheme.typography.labelMedium, maxLines = 1)
+            }
+        }
+    }
+}
 
 /** Chooses the symbol on a page of its own: the catalog or an installed icon pack, a search, and
  *  every symbol in a grid that fills the page. */
@@ -381,7 +425,7 @@ private fun SymbolPickerDialog(face: TileFace, onPick: (TileFace) -> Unit, onDis
                                         .clip(RoundedCornerShape(14.dp))
                                         .border(if (picked) 2.dp else 0.dp, if (picked) accent else Color.Transparent, RoundedCornerShape(14.dp))
                                         // A picture brings its own background: none behind it unless asked for.
-                                        .clickable { onPick(face.copy(kind = TileKind.SYMBOL, symbol = TileFace.packSymbol(currentPack, icon.drawable), surface = TileSurface.NONE)) },
+                                        .clickable { onPick(face.copy(kind = TileKind.SYMBOL, symbol = TileFace.packSymbol(currentPack, icon.drawable), surface = TileSurface.NONE, border = false)) },
                                     contentAlignment = Alignment.Center
                                 ) { PackPicture(currentPack to icon.drawable, 48.dp, icon.drawable) }
                             }

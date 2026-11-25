@@ -5,8 +5,12 @@ import org.json.JSONObject
 /** What a tile (a folder or a category lying in the Dock, the Panel, a box or a folder) shows. */
 enum class TileKind { CONTENT, SYMBOL, LETTER }
 
-/** What lies behind it: the automatic color, a chosen one, only an outline, or nothing. */
+/** The fill behind it: the automatic color, a chosen one, or none. OUTLINE is from before the
+ *  border had its own switch: no fill, a border. */
 enum class TileSurface { AUTO, COLOR, OUTLINE, NONE }
+
+/** The tile's corners when it has its own: fully round, soft or nearly square. */
+enum class TileCorners { ROUND, SOFT, SQUARE }
 
 /**
  * How a folder or a category looks as a tile, the same for both: what it shows, the symbol (a
@@ -18,8 +22,17 @@ data class TileFace(
     val symbol: String? = null,
     val surface: TileSurface = TileSurface.AUTO,
     val surfaceColor: Int? = null,
-    val symbolColor: Int? = null
+    val symbolColor: Int? = null,
+    /** A border around it; null = as older tiles had it (only with OUTLINE). */
+    val border: Boolean? = null,
+    /** The border's color; null = the color of the text around it. */
+    val borderColor: Int? = null,
+    /** Its own corners; null = like the other symbols around it. */
+    val corners: TileCorners? = null
 ) {
+    val hasFill: Boolean get() = surface == TileSurface.AUTO || surface == TileSurface.COLOR
+    val hasBorder: Boolean get() = border ?: (surface == TileSurface.OUTLINE)
+
     /** The icon pack and drawable of a picture from an icon pack, else null. */
     val packIcon: Pair<String, String>?
         get() = symbol?.takeIf { it.startsWith(PACK_PREFIX) }?.removePrefix(PACK_PREFIX)
@@ -31,6 +44,9 @@ data class TileFace(
         put("surface", surface.name)
         surfaceColor?.let { put("surfaceColor", it) }
         symbolColor?.let { put("symbolColor", it) }
+        border?.let { put("border", it) }
+        borderColor?.let { put("borderColor", it) }
+        corners?.let { put("corners", it.name) }
     }.toString()
 
     companion object {
@@ -46,7 +62,10 @@ data class TileFace(
                     symbol = json.optString("symbol").ifBlank { null },
                     surface = runCatching { TileSurface.valueOf(json.optString("surface")) }.getOrDefault(TileSurface.AUTO),
                     surfaceColor = if (json.has("surfaceColor")) json.getInt("surfaceColor") else null,
-                    symbolColor = if (json.has("symbolColor")) json.getInt("symbolColor") else null
+                    symbolColor = if (json.has("symbolColor")) json.getInt("symbolColor") else null,
+                    border = if (json.has("border")) json.getBoolean("border") else null,
+                    borderColor = if (json.has("borderColor")) json.getInt("borderColor") else null,
+                    corners = json.optString("corners").ifBlank { null }?.let { c -> runCatching { TileCorners.valueOf(c) }.getOrNull() }
                 )
             }.getOrNull()
         }
