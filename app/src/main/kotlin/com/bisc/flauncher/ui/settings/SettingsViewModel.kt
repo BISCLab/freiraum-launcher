@@ -703,6 +703,14 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setCategorySymbolsIn(place, show) }
     }
 
+    val categoryCountsPage: StateFlow<Boolean> = repository.categoryCountsIn("page").stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val categoryCountsSearch: StateFlow<Boolean> = repository.categoryCountsIn("search").stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val categoryCountsAppList: StateFlow<Boolean> = repository.categoryCountsIn("app_list").stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    fun setCategoryCounts(place: String, show: Boolean) {
+        viewModelScope.launch { repository.setCategoryCountsIn(place, show) }
+    }
+
     val categoryPalette: StateFlow<List<Int>> = repository.categoryPalette.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val categories: StateFlow<List<com.bisc.flauncher.data.model.Category>> =

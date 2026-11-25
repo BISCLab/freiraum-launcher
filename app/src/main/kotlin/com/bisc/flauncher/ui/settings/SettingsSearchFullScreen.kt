@@ -653,6 +653,7 @@ fun SettingsSearchElementScreen(
                 }
                 SettingsPreferenceGroup(title = stringResource(R.string.settings_pages_categories)) {
                     CategorySymbolsSwitch("search", stringResource(R.string.settings_category_symbols_search_summary), viewModel)
+                    CategoryCountsSwitch("search", viewModel)
                 }
             }
         },

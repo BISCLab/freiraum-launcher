@@ -365,6 +365,13 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[booleanPreferencesKey("category_symbols_$place")] = show }
     }
 
+    /** Whether a place that shows categories by name shows how much is in them. On by default. */
+    fun categoryCountsIn(place: String): Flow<Boolean> = dataStore.data.map { it[booleanPreferencesKey("category_counts_$place")] ?: true }
+
+    suspend fun setCategoryCountsIn(place: String, show: Boolean) {
+        dataStore.edit { it[booleanPreferencesKey("category_counts_$place")] = show }
+    }
+
     val categoriesShowSearch: Flow<Boolean> = dataStore.data.map { it[CATEGORIES_SHOW_SEARCH_KEY] ?: true }
 
     suspend fun setCategoriesShowSearch(show: Boolean) {

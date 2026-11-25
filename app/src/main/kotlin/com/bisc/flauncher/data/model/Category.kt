@@ -72,13 +72,16 @@ data class CategoryWidgetConfig(
     val ids: List<Long> = emptyList(),
     val chips: Boolean = true,
     /** Symbols in front of the names in chips and heads; the tiles show each category's face anyway. */
-    val symbols: Boolean = false
+    val symbols: Boolean = false,
+    /** How much is in a category, beside its name or under its tile. */
+    val counts: Boolean = true
 ) {
     fun toJson(): org.json.JSONObject = org.json.JSONObject()
         .put("mode", mode.name)
         .put("ids", org.json.JSONArray(ids))
         .put("chips", chips)
         .put("symbols", symbols)
+        .put("counts", counts)
 
     companion object {
         fun fromJson(json: org.json.JSONObject?): CategoryWidgetConfig {
@@ -88,7 +91,8 @@ data class CategoryWidgetConfig(
                 mode = runCatching { CategoryWidgetMode.valueOf(json.optString("mode")) }.getOrDefault(CategoryWidgetMode.TABS),
                 ids = ids,
                 chips = json.optBoolean("chips", true),
-                symbols = json.optBoolean("symbols", false)
+                symbols = json.optBoolean("symbols", false),
+                counts = json.optBoolean("counts", true)
             )
         }
 

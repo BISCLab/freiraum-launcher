@@ -872,6 +872,15 @@ internal fun CategoryWidgetSettings(
                 trailing = { androidx.compose.material3.Switch(checked = config.symbols, onCheckedChange = { set(config.copy(symbols = it)) }) }
             )
         }
+        // Stacked and compact show how much is in a category.
+        if (config.mode == com.bisc.flauncher.data.model.CategoryWidgetMode.ROWS || config.mode == com.bisc.flauncher.data.model.CategoryWidgetMode.TILES) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_categories_counts),
+                onClick = { set(config.copy(counts = !config.counts)) },
+                trailing = { androidx.compose.material3.Switch(checked = config.counts, onCheckedChange = { set(config.copy(counts = it)) }) }
+            )
+        }
         if (config.mode == com.bisc.flauncher.data.model.CategoryWidgetMode.TABS) {
             SettingsPreference(
                 icon = null,
@@ -958,6 +967,22 @@ internal fun AppCategoryChips(app: AppInfo, viewModel: SettingsViewModel) {
             onDismiss = { creating = false }
         )
     }
+}
+
+/** "Show how many" for one place that shows categories by name. */
+@Composable
+internal fun CategoryCountsSwitch(place: String, viewModel: SettingsViewModel) {
+    val on by when (place) {
+        "page" -> viewModel.categoryCountsPage
+        "search" -> viewModel.categoryCountsSearch
+        else -> viewModel.categoryCountsAppList
+    }.collectAsState()
+    SettingsPreference(
+        icon = null,
+        title = stringResource(R.string.settings_categories_counts),
+        onClick = { viewModel.setCategoryCounts(place, !on) },
+        trailing = { androidx.compose.material3.Switch(checked = on, onCheckedChange = { viewModel.setCategoryCounts(place, it) }) }
+    )
 }
 
 /** "Show symbols" for one place that shows categories by name. */

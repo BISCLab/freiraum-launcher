@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Text search: the categories card no longer has its own heading, the category name sits at the top
+- Categories: the count beside a category can be switched off per place, on the Categories page, in the text search, in the App list chips and in each Categories widget
+
 ## 0.22.0
 
 - Tiles of folders and categories: fill and border can be switched on each on their own, each with its own color, and the corners can be round, soft or square (default: like the symbols around)

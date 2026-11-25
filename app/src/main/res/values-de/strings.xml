@@ -1201,4 +1201,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="folder_follows_edit">„%1$s“ bearbeiten</string>
     <string name="folder_follows_note">Der Ordner zeigt, was in der Kategorie ist. Seine eigenen Inhalte kommen zurück, wenn er nicht mehr folgt.</string>
     <string name="element_tile_info">So sieht es im Dock, im Panel, in Element-Boxen und in Ordnern aus.</string>
+    <string name="settings_categories_counts">Anzahl zeigen</string>
 </resources>

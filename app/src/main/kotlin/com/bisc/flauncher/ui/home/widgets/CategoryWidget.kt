@@ -96,8 +96,8 @@ fun CategoryWidget(
             return@WidgetCard
         }
         when (config.mode) {
-            CategoryWidgetMode.TILES -> CategoryTiles(shown, ink)
-            CategoryWidgetMode.ROWS -> CategoryRows(shown, ink, Modifier.weight(1f), viewModel, config.symbols)
+            CategoryWidgetMode.TILES -> CategoryTiles(shown, ink, config.counts)
+            CategoryWidgetMode.ROWS -> CategoryRows(shown, ink, Modifier.weight(1f), viewModel, config.symbols, config.counts)
             CategoryWidgetMode.SINGLE -> {
                 val r = shown.first()
                 CategoryHead(r, ink, config.symbols)
@@ -191,7 +191,7 @@ private fun MembersArea(r: ResolvedCategory, ink: androidx.compose.ui.graphics.C
 /** Several categories one below the other, each with its name and its grid. A fling stops at the
  *  start of a category, so none is left cut in half at the top. */
 @Composable
-private fun CategoryRows(shown: List<ResolvedCategory>, ink: androidx.compose.ui.graphics.Color, modifier: Modifier, viewModel: HomeViewModel, symbols: Boolean) {
+private fun CategoryRows(shown: List<ResolvedCategory>, ink: androidx.compose.ui.graphics.Color, modifier: Modifier, viewModel: HomeViewModel, symbols: Boolean, counts: Boolean) {
     val listState = rememberLazyListState()
     BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
         val columns = categoryColumns(maxWidth)
@@ -214,12 +214,14 @@ private fun CategoryRows(shown: List<ResolvedCategory>, ink: androidx.compose.ui
                                 showSymbol = symbols
                             )
                         }
-                        Text(
-                            r.members.size.toString(),
-                            color = ink.copy(alpha = 0.7f),
-                            style = MaterialTheme.typography.labelMedium,
-                            modifier = Modifier.padding(start = 12.dp, end = 8.dp)
-                        )
+                        if (counts) {
+                            Text(
+                                r.members.size.toString(),
+                                color = ink.copy(alpha = 0.7f),
+                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.padding(start = 12.dp, end = 8.dp)
+                            )
+                        }
                     }
                     Spacer(Modifier.size(4.dp))
                     if (r.members.isEmpty()) {
@@ -235,7 +237,7 @@ private fun CategoryRows(shown: List<ResolvedCategory>, ink: androidx.compose.ui
 
 /** The categories as small tiles with symbol, name and count. */
 @Composable
-private fun CategoryTiles(shown: List<ResolvedCategory>, ink: androidx.compose.ui.graphics.Color) {
+private fun CategoryTiles(shown: List<ResolvedCategory>, ink: androidx.compose.ui.graphics.Color, counts: Boolean) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val columns = (maxWidth / 96.dp).toInt().coerceIn(2, 6)
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -262,11 +264,13 @@ private fun CategoryTiles(shown: List<ResolvedCategory>, ink: androidx.compose.u
                                 overflow = TextOverflow.Ellipsis,
                                 textAlign = TextAlign.Center
                             )
-                            Text(
-                                r.members.size.toString(),
-                                color = (if (com.bisc.flauncher.ui.AccessibilityMode.on) inkOn(accent) else ink).copy(alpha = 0.7f),
-                                style = MaterialTheme.typography.labelSmall
-                            )
+                            if (counts) {
+                                Text(
+                                    r.members.size.toString(),
+                                    color = (if (com.bisc.flauncher.ui.AccessibilityMode.on) inkOn(accent) else ink).copy(alpha = 0.7f),
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            }
                         }
                     }
                     repeat(columns - line.size) { Spacer(Modifier.weight(1f)) }

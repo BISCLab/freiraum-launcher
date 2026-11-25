@@ -290,7 +290,6 @@ fun SearchResultsColumn(
                     SearchCategory.LABELS -> if (shownCategoryResults.isNotEmpty()) {
                         add(category.name) {
                             ResultCard(cardAppearance, order = cards[category] ?: 0, dimmed = dimmed(category), onUndim = onClearFocus) {
-                                SectionTitle(stringResource(R.string.settings_pages_categories), categoryColor(category))
                                 shownCategoryResults.forEach { hit ->
                                     CategoryHitRow(hit, onClick = { onCategoryClick(hit.category) })
                                     if (hit.apps.isNotEmpty()) {
@@ -602,6 +601,8 @@ private fun CategoryHitRow(hit: CategoryHit, onClick: () -> Unit) {
         Box(modifier = Modifier.weight(1f)) {
             com.bisc.flauncher.ui.home.CategoryNamePill(hit.category, MaterialTheme.typography.titleMedium, showSymbol = com.bisc.flauncher.ui.home.LauncherCategories.symbolsInSearch)
         }
-        Text(hit.count.toString(), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(start = 12.dp))
+        if (com.bisc.flauncher.ui.home.LauncherCategories.countsInSearch) {
+            Text(hit.count.toString(), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(start = 12.dp))
+        }
     }
 }

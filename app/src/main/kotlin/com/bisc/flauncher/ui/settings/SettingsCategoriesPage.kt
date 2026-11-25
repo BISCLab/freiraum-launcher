@@ -52,6 +52,7 @@ fun SettingsCategoriesAppearanceScreen(navController: NavController, onBack: () 
         )
         SettingsPreferenceGroup {
             CategorySymbolsSwitch("page", stringResource(R.string.settings_category_symbols_page_summary), viewModel)
+            CategoryCountsSwitch("page", viewModel)
         }
     }
 }

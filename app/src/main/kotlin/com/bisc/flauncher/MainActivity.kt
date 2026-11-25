@@ -168,12 +168,18 @@ class MainActivity : ComponentActivity() {
             val symbolsPage by settingsVm.categorySymbolsPage.collectAsState()
             val symbolsSearch by settingsVm.categorySymbolsSearch.collectAsState()
             val symbolsAppList by settingsVm.categorySymbolsAppList.collectAsState()
+            val countsPage by settingsVm.categoryCountsPage.collectAsState()
+            val countsSearch by settingsVm.categoryCountsSearch.collectAsState()
+            val countsAppList by settingsVm.categoryCountsAppList.collectAsState()
             androidx.compose.runtime.SideEffect {
                 com.bisc.flauncher.ui.home.LauncherCategories.resolved = resolvedCategories
                 com.bisc.flauncher.ui.home.LauncherCategories.palette = categoryPalette
                 com.bisc.flauncher.ui.home.LauncherCategories.symbolsOnPage = symbolsPage
                 com.bisc.flauncher.ui.home.LauncherCategories.symbolsInSearch = symbolsSearch
                 com.bisc.flauncher.ui.home.LauncherCategories.symbolsInAppList = symbolsAppList
+                com.bisc.flauncher.ui.home.LauncherCategories.countsOnPage = countsPage
+                com.bisc.flauncher.ui.home.LauncherCategories.countsInSearch = countsSearch
+                com.bisc.flauncher.ui.home.LauncherCategories.countsInAppList = countsAppList
             }
             val dotsOn by settingsVm.showNotificationDots.collectAsState()
             val dotPackages by notificationDots.packages.collectAsState()

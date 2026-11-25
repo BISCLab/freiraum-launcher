@@ -235,12 +235,14 @@ private fun CategoryCardHead(resolved: ResolvedCategory, expandable: Boolean, ex
         Box(modifier = Modifier.weight(1f)) {
             CategoryNamePill(resolved.category, MaterialTheme.typography.titleMedium, showSymbol = LauncherCategories.symbolsOnPage)
         }
-        Text(
-            resolved.members.size.toString(),
-            style = MaterialTheme.typography.labelLarge,
-            color = LocalContentColor.current.copy(alpha = 0.7f),
-            modifier = Modifier.padding(start = 12.dp, end = if (expandable) 0.dp else 8.dp)
-        )
+        if (LauncherCategories.countsOnPage) {
+            Text(
+                resolved.members.size.toString(),
+                style = MaterialTheme.typography.labelLarge,
+                color = LocalContentColor.current.copy(alpha = 0.7f),
+                modifier = Modifier.padding(start = 12.dp, end = if (expandable) 0.dp else 8.dp)
+            )
+        }
         if (expandable) {
             TextButton(onClick = onToggle) {
                 Text(stringResource(if (expanded) R.string.categories_show_less else R.string.categories_show_all), color = LocalContentColor.current)
@@ -348,7 +350,7 @@ fun HomeCategoriesPage(
                     CategoryChip(
                         category = r.category,
                         label = r.category.name,
-                        count = r.members.size,
+                        count = r.members.size.takeIf { LauncherCategories.countsOnPage },
                         selected = if (tabs) pagerState.currentPage == index else r.category.id in filter,
                         look = look,
                         onClick = {
@@ -489,7 +491,7 @@ internal fun AppListCategoryChips(selected: Long?, onSelect: (Long?) -> Unit, su
         }
         items(withApps, key = { it.category.id }) { r ->
             CategoryChip(
-                r.category, r.category.name, r.members.count { it.type == GridItemType.APP }, selected == r.category.id, look,
+                r.category, r.category.name, r.members.count { it.type == GridItemType.APP }.takeIf { LauncherCategories.countsInAppList }, selected == r.category.id, look,
                 onClick = { onSelect(if (selected == r.category.id) null else r.category.id) },
                 showSymbol = LauncherCategories.symbolsInAppList
             )

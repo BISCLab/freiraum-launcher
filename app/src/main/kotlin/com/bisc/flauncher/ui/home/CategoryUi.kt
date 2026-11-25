@@ -64,6 +64,11 @@ object LauncherCategories {
     var symbolsInSearch by mutableStateOf(false)
     var symbolsInAppList by mutableStateOf(false)
 
+    /** Whether those places show how much is in a category. */
+    var countsOnPage by mutableStateOf(true)
+    var countsInSearch by mutableStateOf(true)
+    var countsInAppList by mutableStateOf(true)
+
     private val requests = MutableSharedFlow<Long>(extraBufferCapacity = 4)
     val openRequests: SharedFlow<Long> = requests.asSharedFlow()
 

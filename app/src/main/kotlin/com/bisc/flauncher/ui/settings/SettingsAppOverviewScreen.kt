@@ -66,6 +66,7 @@ fun SettingsAppOverviewAppearanceHubScreen(navController: NavController, onBack:
         )
         SettingsPreferenceGroup(title = stringResource(R.string.settings_pages_categories)) {
             CategorySymbolsSwitch("app_list", stringResource(R.string.settings_category_symbols_applist_summary), viewModel)
+            CategoryCountsSwitch("app_list", viewModel)
         }
     }
 }
