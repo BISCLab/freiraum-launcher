@@ -1171,7 +1171,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="tile_pack_surface">A surface behind it anyway</string>
     <string name="tile_symbol_color">Symbol color</string>
     <string name="tile_letter_color">Letter color</string>
-    <string name="tile_preview_page">Page</string>
     <string name="tile_preview_light">Light</string>
     <string name="tile_preview_dark">Dark</string>
     <string name="tile_content_category">Shows the category\'s first four apps, like a folder.</string>

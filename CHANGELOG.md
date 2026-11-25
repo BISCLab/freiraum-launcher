@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Tile preview: only Light and Dark, starting like the settings are shown; a tile can lie in many places, so the page background is no longer offered
+
 ## 0.21.2
 
 - Tiles: the name below a folder or category follows the place it lies in again; the extra color setting for it is gone

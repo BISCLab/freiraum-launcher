@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -47,30 +48,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.bisc.flauncher.R
-import com.bisc.flauncher.data.model.ElementAppearance
-import com.bisc.flauncher.data.model.ElementFillMode
 import com.bisc.flauncher.data.model.IconPackIcon
 import com.bisc.flauncher.data.model.TileFace
 import com.bisc.flauncher.data.model.TileKind
 import com.bisc.flauncher.data.model.TileSurface
 import com.bisc.flauncher.ui.EqualGrid
-import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.PackPicture
 import com.bisc.flauncher.ui.home.PictogramCatalog
 import com.bisc.flauncher.ui.home.TileContent
 import com.bisc.flauncher.ui.home.TileFaceView
-import com.bisc.flauncher.ui.home.dock.BackgroundFill
 import com.bisc.flauncher.ui.home.inkOn
-import com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark
-
-/** What a tile is shown on in the preview: the real page, or plain light or dark to check both. */
-enum class TileBackdrop { PAGE, LIGHT, DARK }
 
 /**
- * The tile as it will look, on the real page background (or plain light or dark), with its name
- * below it like in the Dock. It lies above the page like a card and stays in sight; while the page
+ * The tile as it will look, on light or on dark (it can lie in many places, so both are checked),
+ * with its name below it like in the Dock. It lies above the page like a card and stays in sight; while the page
  * below is scrolled it steps back to a smaller size. [extra] can sit beside the tile, e.g. how a
  * category's name looks.
  */
@@ -81,17 +73,11 @@ internal fun TilePreviewHeader(
     extra: (@Composable (around: Color) -> Unit)? = null,
     /** Small words over the tile and over [extra], the same as the sections below that set them. */
     tileCaption: String? = null,
-    extraCaption: String? = null,
-    homeViewModel: HomeViewModel = hiltViewModel()
+    extraCaption: String? = null
 ) {
-    val global by homeViewModel.globalBackground.collectAsState()
-    var backdrop by remember { mutableStateOf(TileBackdrop.PAGE) }
-    val pageDark = rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), global)
-    val dark = when (backdrop) {
-        TileBackdrop.PAGE -> pageDark
-        TileBackdrop.LIGHT -> false
-        TileBackdrop.DARK -> true
-    }
+    // Starts like the settings themselves are shown, light or dark.
+    val settingsDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    var dark by remember { mutableStateOf(settingsDark) }
     val around = if (dark) Color.White else Color.Black
     val compact = LocalHeaderCompact.current
     val height by animateDpAsState(if (compact) 104.dp else 176.dp, label = "previewHeight")
@@ -103,15 +89,8 @@ internal fun TilePreviewHeader(
             .height(height)
             .shadow(10.dp, shape)
             .clip(shape)
-            .background(
-                when (backdrop) {
-                    TileBackdrop.PAGE -> MaterialTheme.colorScheme.surfaceContainerHighest
-                    TileBackdrop.LIGHT -> Color(0xFFF2F2F4)
-                    TileBackdrop.DARK -> Color(0xFF1C1C1E)
-                }
-            )
+            .background(if (dark) Color(0xFF1C1C1E) else Color(0xFFF2F2F4))
     ) {
-        if (backdrop == TileBackdrop.PAGE) BackgroundFill(global, Modifier.matchParentSize())
         Row(
             modifier = Modifier.align(Alignment.Center).padding(top = if (compact) 0.dp else 16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -137,12 +116,8 @@ internal fun TilePreviewHeader(
             modifier = Modifier.align(Alignment.TopEnd).padding(10.dp).clip(RoundedCornerShape(50)).background(Color.Black.copy(alpha = 0.35f)).padding(2.dp),
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            listOf(
-                TileBackdrop.PAGE to R.string.tile_preview_page,
-                TileBackdrop.LIGHT to R.string.tile_preview_light,
-                TileBackdrop.DARK to R.string.tile_preview_dark
-            ).forEach { (option, label) ->
-                val picked = option == backdrop
+            listOf(false to R.string.tile_preview_light, true to R.string.tile_preview_dark).forEach { (option, label) ->
+                val picked = option == dark
                 Text(
                     stringResource(label),
                     color = if (picked) Color.Black else Color.White,
@@ -150,7 +125,7 @@ internal fun TilePreviewHeader(
                     modifier = Modifier
                         .clip(RoundedCornerShape(50))
                         .background(if (picked) Color.White else Color.Transparent)
-                        .clickable { backdrop = option }
+                        .clickable { dark = option }
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 )
             }
