@@ -190,19 +190,24 @@ internal fun TileFaceEditor(
     letter: String,
     content: List<TileContent>,
     contentSummary: String,
-    viewModel: SettingsViewModel
+    viewModel: SettingsViewModel,
+    /** The kinds offered; a link or a place holds nothing, so "contents" is left out there. */
+    kinds: List<TileKind> = TileKind.entries,
+    /** The symbol when none is chosen, e.g. a globe for a link. */
+    defaultSymbol: androidx.compose.ui.graphics.vector.ImageVector? = null
 ) {
     val onSurface = MaterialTheme.colorScheme.onSurface
     var choosingSymbol by remember { mutableStateOf(false) }
 
     // 1. What the tile shows.
     SettingsPreferenceGroup(title = stringResource(R.string.tile_kind_title)) {
-        val kinds = listOf(TileKind.CONTENT to R.string.tile_kind_content, TileKind.SYMBOL to R.string.tile_kind_symbol, TileKind.LETTER to R.string.tile_kind_letter)
+        val options = listOf(TileKind.CONTENT to R.string.tile_kind_content, TileKind.SYMBOL to R.string.tile_kind_symbol, TileKind.LETTER to R.string.tile_kind_letter)
+            .filter { it.first in kinds }
         Box(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(12.dp)) {
-            EqualGrid(count = kinds.size, columns = 3) { index ->
-                val (kind, label) = kinds[index]
+            EqualGrid(count = options.size, columns = options.size) { index ->
+                val (kind, label) = options[index]
                 val picked = face.kind == kind
-                val sample = face.copy(kind = kind, symbol = if (kind == TileKind.SYMBOL) face.symbol ?: DEFAULT_SYMBOL else face.symbol)
+                val sample = face.copy(kind = kind, symbol = if (kind == TileKind.SYMBOL) face.symbol ?: (if (defaultSymbol != null) null else DEFAULT_SYMBOL) else face.symbol)
                 Column(
                     modifier = Modifier
                         .clip(RoundedCornerShape(18.dp))
@@ -211,13 +216,13 @@ internal fun TileFaceEditor(
                         .clickable {
                             onChange(sample)
                             // A symbol is the next decision: go straight to choosing it the first time.
-                            if (kind == TileKind.SYMBOL && face.kind != TileKind.SYMBOL && face.symbol == null) choosingSymbol = true
+                            if (kind == TileKind.SYMBOL && face.kind != TileKind.SYMBOL && face.symbol == null && defaultSymbol == null) choosingSymbol = true
                         }
                         .padding(vertical = 14.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    TileFaceView(sample, autoSurface, letter, modifier = Modifier.size(44.dp), around = onSurface, content = content)
+                    TileFaceView(sample, autoSurface, letter, modifier = Modifier.size(44.dp), around = onSurface, content = content, defaultSymbol = defaultSymbol)
                     Text(stringResource(label), style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center)
                 }
             }
@@ -233,7 +238,7 @@ internal fun TileFaceEditor(
                     leading = {
                         Box(modifier = Modifier.size(36.dp).clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.surfaceContainerHighest), contentAlignment = Alignment.Center) {
                             if (pack != null) PackPicture(pack, 30.dp)
-                            else Icon(PictogramCatalog.iconFor(face.symbol) ?: Icons.Filled.Search, contentDescription = null, modifier = Modifier.size(22.dp))
+                            else Icon(PictogramCatalog.iconFor(face.symbol) ?: defaultSymbol ?: Icons.Filled.Search, contentDescription = null, modifier = Modifier.size(22.dp))
                         }
                     },
                     title = stringResource(R.string.tile_symbol_choose),
@@ -284,7 +289,7 @@ internal fun TileFaceEditor(
                 ownGroup = false
             )
         }
-        CornerChoice(face, onChange, autoSurface, letter, content)
+        CornerChoice(face, onChange, autoSurface, letter, content, defaultSymbol)
     }
 
     // 4. The color of a pictogram or the letter: black or white unless chosen.
@@ -309,7 +314,7 @@ private const val DEFAULT_SYMBOL = "star"
 
 /** The tile's corners as four small tiles, the first one "like the others around". */
 @Composable
-private fun CornerChoice(face: TileFace, onChange: (TileFace) -> Unit, autoSurface: Color, letter: String, content: List<TileContent>) {
+private fun CornerChoice(face: TileFace, onChange: (TileFace) -> Unit, autoSurface: Color, letter: String, content: List<TileContent>, defaultSymbol: androidx.compose.ui.graphics.vector.ImageVector?) {
     val options = listOf(
         null to R.string.tile_corners_default,
         com.bisc.flauncher.data.model.TileCorners.ROUND to R.string.welcome_shape_round,
@@ -331,7 +336,7 @@ private fun CornerChoice(face: TileFace, onChange: (TileFace) -> Unit, autoSurfa
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                TileFaceView(face.copy(corners = corners), autoSurface, letter, modifier = Modifier.size(32.dp), around = MaterialTheme.colorScheme.onSurface, content = content, shape = RoundedCornerShape(10.dp))
+                TileFaceView(face.copy(corners = corners), autoSurface, letter, modifier = Modifier.size(32.dp), around = MaterialTheme.colorScheme.onSurface, content = content, shape = RoundedCornerShape(10.dp), defaultSymbol = defaultSymbol)
                 Text(stringResource(label), style = MaterialTheme.typography.labelMedium, maxLines = 1)
             }
         }

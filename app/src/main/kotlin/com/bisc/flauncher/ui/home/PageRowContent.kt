@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.home
 
+import com.bisc.flauncher.data.model.TileKind
+import com.bisc.flauncher.data.model.TileFace
 import com.bisc.flauncher.data.model.face
 import com.bisc.flauncher.ui.forAppName
 import android.content.ComponentName
@@ -433,6 +435,15 @@ fun GridEntries(
 /** Clip shape for the cell types whose background box is drawn directly in Compose rather than
  *  baked into a cached bitmap - see [LocalIconShape]'s doc comment for why those need this instead
  *  of just picking up the shape for free the way app icons do. */
+/** An action button's symbol when it has none of its own: what it does. */
+internal fun actionButtonDefaultIcon(type: com.bisc.flauncher.data.model.ActionButtonActionType?) = when (type) {
+    com.bisc.flauncher.data.model.ActionButtonActionType.PANEL -> Icons.Filled.Dashboard
+    com.bisc.flauncher.data.model.ActionButtonActionType.DOCK -> Icons.Filled.Apps
+    com.bisc.flauncher.data.model.ActionButtonActionType.ANDROID_SETTING -> Icons.Filled.Settings
+    com.bisc.flauncher.data.model.ActionButtonActionType.LAUNCHER_SETTINGS -> Icons.Filled.Tune
+    else -> Icons.Filled.ViewCarousel
+}
+
 private fun elementCellShape(iconShape: IconShape): Shape = when (iconShape) {
     IconShape.CIRCLE -> CircleShape
     IconShape.ROUNDED_SQUARE -> RoundedCornerShape(16.dp)
@@ -519,9 +530,6 @@ private fun ShortcutCell(payload: String, onClick: () -> Unit, showLabel: Boolea
 @Composable
 private fun MapTargetCell(target: SavedMapTarget?, showLabel: Boolean = true, labelColor: Color = Color.White, iconSizeScale: Float = 1f, onClickOverride: (() -> Unit)? = null) {
     val context = LocalContext.current
-    val background = target?.backgroundColor?.let { Color(it) } ?: UNSET_APP_SLOT_COLOR
-    val tint = target?.iconColor?.let { Color(it) } ?: Color.White
-    val icon = PictogramCatalog.iconFor(target?.iconKey) ?: Icons.Filled.Place
     Column(
         modifier = Modifier
             .clickable(enabled = onClickOverride != null || target != null) {
@@ -530,12 +538,10 @@ private fun MapTargetCell(target: SavedMapTarget?, showLabel: Boolean = true, la
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier.size(56.dp * iconSizeScale).clip(elementCellShape(LocalIconShape.current)).background(background),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = Modifier.size(30.dp * iconSizeScale))
-        }
+        TileFaceView(
+            target?.face() ?: TileFace(kind = TileKind.SYMBOL), UNSET_APP_SLOT_COLOR, target?.label.orEmpty(),
+            modifier = Modifier.size(56.dp * iconSizeScale), shape = elementCellShape(LocalIconShape.current), around = labelColor, defaultSymbol = Icons.Filled.Place
+        )
         if (showLabel) {
             Spacer(Modifier.height(8.dp))
             GridLabel(target?.label.orEmpty(), color = labelColor)
@@ -546,9 +552,6 @@ private fun MapTargetCell(target: SavedMapTarget?, showLabel: Boolean = true, la
 @Composable
 private fun WebsiteCell(website: PinnedWebsite?, showLabel: Boolean = true, labelColor: Color = Color.White, iconSizeScale: Float = 1f, onClickOverride: (() -> Unit)? = null) {
     val context = LocalContext.current
-    val background = website?.backgroundColor?.let { Color(it) } ?: UNSET_APP_SLOT_COLOR
-    val tint = website?.iconColor?.let { Color(it) } ?: Color.White
-    val icon = PictogramCatalog.iconFor(website?.iconKey) ?: Icons.Filled.Language
     Column(
         modifier = Modifier
             .clickable(enabled = onClickOverride != null || website != null) {
@@ -557,12 +560,10 @@ private fun WebsiteCell(website: PinnedWebsite?, showLabel: Boolean = true, labe
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier.size(56.dp * iconSizeScale).clip(elementCellShape(LocalIconShape.current)).background(background),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = Modifier.size(30.dp * iconSizeScale))
-        }
+        TileFaceView(
+            website?.face() ?: TileFace(kind = TileKind.SYMBOL), UNSET_APP_SLOT_COLOR, website?.label.orEmpty(),
+            modifier = Modifier.size(56.dp * iconSizeScale), shape = elementCellShape(LocalIconShape.current), around = labelColor, defaultSymbol = Icons.Filled.Language
+        )
         if (showLabel) {
             Spacer(Modifier.height(8.dp))
             GridLabel(website?.label.orEmpty(), color = labelColor)
@@ -662,27 +663,16 @@ private fun ActionButtonCell(
     labelColor: Color = Color.White,
     iconSizeScale: Float = 1f
 ) {
-    val background = button?.backgroundColor?.let { Color(it) } ?: UNSET_APP_SLOT_COLOR
-    val tint = button?.iconColor?.let { Color(it) } ?: Color.White
-    val icon = PictogramCatalog.iconFor(button?.iconKey) ?: when (button?.actionType) {
-        com.bisc.flauncher.data.model.ActionButtonActionType.PANEL -> Icons.Filled.Dashboard
-        com.bisc.flauncher.data.model.ActionButtonActionType.DOCK -> Icons.Filled.Apps
-        com.bisc.flauncher.data.model.ActionButtonActionType.ANDROID_SETTING -> Icons.Filled.Settings
-        com.bisc.flauncher.data.model.ActionButtonActionType.LAUNCHER_SETTINGS -> Icons.Filled.Tune
-        else -> Icons.Filled.ViewCarousel
-    }
     Column(
         modifier = Modifier
             .clickable(enabled = button != null, onClick = onClick)
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier.size(56.dp * iconSizeScale).clip(elementCellShape(LocalIconShape.current)).background(background),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = Modifier.size(30.dp * iconSizeScale))
-        }
+        TileFaceView(
+            button?.face() ?: TileFace(kind = TileKind.SYMBOL), UNSET_APP_SLOT_COLOR, button?.label.orEmpty(),
+            modifier = Modifier.size(56.dp * iconSizeScale), shape = elementCellShape(LocalIconShape.current), around = labelColor, defaultSymbol = actionButtonDefaultIcon(button?.actionType)
+        )
         if (showLabel) {
             Spacer(Modifier.height(8.dp))
             GridLabel(button?.label.orEmpty(), color = labelColor)
@@ -920,20 +910,12 @@ fun PillRowEntries(
                         GridItemType.ACTION_BUTTON -> {
                             val buttonId = remember(entry.payload) { entry.payload.toLongOrNull() }
                             val button = actionButtons.find { it.id == buttonId }
-                            val background = button?.backgroundColor?.let { Color(it) } ?: UNSET_APP_SLOT_COLOR
-                            val tint = button?.iconColor?.let { Color(it) } ?: Color.White
-                            val icon = PictogramCatalog.iconFor(button?.iconKey) ?: when (button?.actionType) {
-                                com.bisc.flauncher.data.model.ActionButtonActionType.PANEL -> Icons.Filled.Dashboard
-                                com.bisc.flauncher.data.model.ActionButtonActionType.DOCK -> Icons.Filled.Apps
-                                com.bisc.flauncher.data.model.ActionButtonActionType.ANDROID_SETTING -> Icons.Filled.Settings
-                                com.bisc.flauncher.data.model.ActionButtonActionType.LAUNCHER_SETTINGS -> Icons.Filled.Tune
-                                else -> Icons.Filled.ViewCarousel
-                            }
-                            Box(
-                                modifier = Modifier.fillMaxSize().background(background)
-                                    .clickable(enabled = button != null) { button?.let(onActionButtonClick) },
-                                contentAlignment = Alignment.Center
-                            ) { Icon(imageVector = icon, contentDescription = null, tint = tint) }
+                            TileFaceView(
+                                button?.face() ?: TileFace(kind = TileKind.SYMBOL), UNSET_APP_SLOT_COLOR, button?.label.orEmpty(),
+                                modifier = Modifier.fillMaxSize().clickable(enabled = button != null) { button?.let(onActionButtonClick) },
+                                shape = androidx.compose.ui.graphics.RectangleShape,
+                                defaultSymbol = actionButtonDefaultIcon(button?.actionType)
+                            )
                         }
                         GridItemType.CATEGORY -> CategoryPillIcon(LauncherCategories.find(entry.payload.toLongOrNull())?.category, Modifier.fillMaxSize())
                         GridItemType.WIDGET, GridItemType.SYSTEM_WIDGET -> Unit

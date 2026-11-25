@@ -114,7 +114,6 @@
     <string name="settings_icon_shape_circle">Circle</string>
     <string name="settings_icon_size_label">Icon size</string>
     <string name="settings_icon_size_value">%1$d%%</string>
-    <string name="settings_pictogram_picker_title">Choose an icon</string>
     <string name="settings_element_icon_label">Icon</string>
 
     <string name="settings_app_overview_alignment_label">Edge</string>
@@ -1201,4 +1200,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="section_folder_open_where">Look and captions of the open folder.</string>
     <string name="folder_follows_edit">Edit “%1$s”</string>
     <string name="folder_follows_note">The folder shows what the category holds. Its own content comes back when it stops following.</string>
+    <string name="element_tile_info">This is how it looks in the Dock, the Panel, element boxes and folders.</string>
 </resources>

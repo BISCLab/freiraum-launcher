@@ -1,5 +1,9 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.data.model.face
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -74,10 +78,22 @@ fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBa
     val urlValid = com.bisc.flauncher.util.linkAddress(website.url) != null
     val browsableApps by viewModel.labeledApps.collectAsState()
     var showAppPicker by remember { mutableStateOf(false) }
-    var showIconPicker by remember { mutableStateOf(false) }
     var confirmingDelete by remember { mutableStateOf(false) }
 
-    SettingsSubScreen(title = saved.label, navController = navController, onBack = onBack, onSave = { viewModel.updateWebsite(website) }, dirty = website != saved && urlValid) {
+    SettingsSubScreen(title = saved.label, navController = navController, onBack = onBack, onSave = { viewModel.updateWebsite(website) }, dirty = website != saved && urlValid,
+        // The tile as it will look, fixed on top like on a folder's or a category's page.
+        header = {
+            TilePreviewHeader(
+                name = website.label,
+                tile = { around ->
+                    com.bisc.flauncher.ui.home.TileFaceView(
+                        website.face(), com.bisc.flauncher.ui.home.dock.UNSET_APP_SLOT_COLOR, website.label,
+                        modifier = Modifier.fillMaxSize(), shape = RoundedCornerShape(16.dp), around = around, defaultSymbol = Icons.Filled.Language
+                    )
+                }
+            )
+        }
+    ) {
         SettingsPreferenceGroup {
             OutlinedTextField(
                 value = website.label,
@@ -107,28 +123,18 @@ fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBa
                 } else null
             )
         }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_colors_label)) {
-            SettingsPreference(
-                icon = com.bisc.flauncher.ui.home.PictogramCatalog.iconFor(website.iconKey) ?: Icons.Filled.Language,
-                title = stringResource(R.string.settings_element_icon_label),
-                onClick = { showIconPicker = true },
-                trailing = null
-            )
-            AutomaticColorPicker(
-                title = stringResource(R.string.settings_section_global_background),
-                custom = website.backgroundColor,
-                automaticSeed = android.graphics.Color.DKGRAY,
-                onChange = { website = website.copy(backgroundColor = it) },
-                ownGroup = false
-            )
-            AutomaticColorPicker(
-                title = stringResource(R.string.settings_element_text_color_label),
-                custom = website.iconColor,
-                automaticSeed = android.graphics.Color.WHITE,
-                onChange = { website = website.copy(iconColor = it) },
-                ownGroup = false
-            )
-        }
+        SectionBanner(Icons.Filled.Apps, stringResource(R.string.settings_category_tile_label), stringResource(R.string.element_tile_info))
+        TileFaceEditor(
+            face = website.face(),
+            onChange = { website = website.copy(tileFace = it.toJson()) },
+            autoSurface = com.bisc.flauncher.ui.home.dock.UNSET_APP_SLOT_COLOR,
+            letter = website.label,
+            content = emptyList(),
+            contentSummary = "",
+            viewModel = viewModel,
+            kinds = listOf(com.bisc.flauncher.data.model.TileKind.SYMBOL, com.bisc.flauncher.data.model.TileKind.LETTER),
+            defaultSymbol = Icons.Filled.Language
+        )
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = Icons.Filled.DeleteOutline,
@@ -137,14 +143,6 @@ fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBa
                 trailing = null
             )
         }
-    }
-
-    if (showIconPicker) {
-        PictogramPickerSheet(
-            selected = website.iconKey,
-            onSelect = { key -> website = website.copy(iconKey = key); showIconPicker = false },
-            onDismiss = { showIconPicker = false }
-        )
     }
 
     if (showAppPicker) {

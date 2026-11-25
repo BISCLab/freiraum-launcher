@@ -6,6 +6,7 @@
 - Folder page: what it holds starts with where it comes from; a folder that follows a category no longer offers its hidden own content, but a way to that category
 - Folder page: the open folder's look and captions are a part of their own, When it is open; content changes are marked as applying right away
 - Folders without their own fill take the accent color instead of grey, like categories
+- Links, places and action buttons use the same tile editor as folders and categories: symbol or letter, symbol from the catalog or an icon pack, fill, border, corners and symbol color, with a fixed preview on top
 
 ## 0.21.4
 

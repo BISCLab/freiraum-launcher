@@ -26,5 +26,17 @@ data class ActionButton(
     val iconKey: String? = null,
     // Null means "adaptive black/white", the same default every other Element icon uses.
     val backgroundColor: Int? = null,
-    val iconColor: Int? = null
+    val iconColor: Int? = null,
+    // How it looks as a tile, see [TileFace]; null = from iconKey and the colors, see [face].
+    val tileFace: String? = null
 )
+
+/** How it looks as a tile; from before [TileFace], read from its symbol and colors. */
+fun ActionButton.face(): TileFace = TileFace.fromJson(tileFace) ?: TileFace(
+    kind = TileKind.SYMBOL,
+    symbol = iconKey,
+    surface = if (backgroundColor != null) TileSurface.COLOR else TileSurface.AUTO,
+    surfaceColor = backgroundColor,
+    symbolColor = iconColor
+)
+

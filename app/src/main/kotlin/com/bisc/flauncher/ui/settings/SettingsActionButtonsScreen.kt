@@ -1,5 +1,8 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.data.model.face
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -153,10 +156,22 @@ fun SettingsActionButtonDetailScreen(buttonId: Long, navController: NavControlle
     val allPages by viewModel.allPages.collectAsState()
     var showPagePicker by remember { mutableStateOf(false) }
     var showSettingPicker by remember { mutableStateOf(false) }
-    var showIconPicker by remember { mutableStateOf(false) }
     var confirmingDelete by remember { mutableStateOf(false) }
 
-    SettingsSubScreen(title = saved.label, navController = navController, onBack = onBack, onSave = { viewModel.updateActionButton(button) }, dirty = button != saved) {
+    SettingsSubScreen(title = saved.label, navController = navController, onBack = onBack, onSave = { viewModel.updateActionButton(button) }, dirty = button != saved,
+        // The tile as it will look, fixed on top like on a folder's or a category's page.
+        header = {
+            TilePreviewHeader(
+                name = button.label,
+                tile = { around ->
+                    com.bisc.flauncher.ui.home.TileFaceView(
+                        button.face(), com.bisc.flauncher.ui.home.dock.UNSET_APP_SLOT_COLOR, button.label,
+                        modifier = Modifier.fillMaxSize(), shape = RoundedCornerShape(16.dp), around = around, defaultSymbol = actionButtonActionIcon(button.actionType)
+                    )
+                }
+            )
+        }
+    ) {
         SettingsPreferenceGroup {
             OutlinedTextField(
                 value = button.label,
@@ -216,28 +231,18 @@ fun SettingsActionButtonDetailScreen(buttonId: Long, navController: NavControlle
                 { button = button.copy(actionType = it, actionPageId = null) }
             )
         }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_colors_label)) {
-            SettingsPreference(
-                icon = com.bisc.flauncher.ui.home.PictogramCatalog.iconFor(button.iconKey) ?: actionButtonActionIcon(button.actionType),
-                title = stringResource(R.string.settings_element_icon_label),
-                onClick = { showIconPicker = true },
-                trailing = null
-            )
-            AutomaticColorPicker(
-                title = stringResource(R.string.settings_section_global_background),
-                custom = button.backgroundColor,
-                automaticSeed = android.graphics.Color.DKGRAY,
-                onChange = { button = button.copy(backgroundColor = it) },
-                ownGroup = false
-            )
-            AutomaticColorPicker(
-                title = stringResource(R.string.settings_element_text_color_label),
-                custom = button.iconColor,
-                automaticSeed = android.graphics.Color.WHITE,
-                onChange = { button = button.copy(iconColor = it) },
-                ownGroup = false
-            )
-        }
+        SectionBanner(Icons.Filled.Apps, stringResource(R.string.settings_category_tile_label), stringResource(R.string.element_tile_info))
+        TileFaceEditor(
+            face = button.face(),
+            onChange = { button = button.copy(tileFace = it.toJson()) },
+            autoSurface = com.bisc.flauncher.ui.home.dock.UNSET_APP_SLOT_COLOR,
+            letter = button.label,
+            content = emptyList(),
+            contentSummary = "",
+            viewModel = viewModel,
+            kinds = listOf(com.bisc.flauncher.data.model.TileKind.SYMBOL, com.bisc.flauncher.data.model.TileKind.LETTER),
+            defaultSymbol = actionButtonActionIcon(button.actionType)
+        )
         SettingsPreferenceGroup {
             SettingsPreference(
                 icon = Icons.Filled.DeleteOutline,
@@ -260,14 +265,6 @@ fun SettingsActionButtonDetailScreen(buttonId: Long, navController: NavControlle
         AndroidSettingPickerSheet(
             onSelect = { shortcut -> button = button.copy(androidSettingAction = shortcut.action); showSettingPicker = false },
             onDismiss = { showSettingPicker = false }
-        )
-    }
-
-    if (showIconPicker) {
-        PictogramPickerSheet(
-            selected = button.iconKey,
-            onSelect = { key -> button = button.copy(iconKey = key); showIconPicker = false },
-            onDismiss = { showIconPicker = false }
         )
     }
 

@@ -176,6 +176,15 @@ private val MIGRATION_66_67 = object : Migration(66, 67) {
     }
 }
 
+/** Links, places and action buttons keep their look as a tile like folders and categories. */
+private val MIGRATION_67_68 = object : Migration(67, 68) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE pinned_websites ADD COLUMN tileFace TEXT")
+        db.execSQL("ALTER TABLE saved_map_targets ADD COLUMN tileFace TEXT")
+        db.execSQL("ALTER TABLE action_buttons ADD COLUMN tileFace TEXT")
+    }
+}
+
 private val MIGRATION_63_64 = object : Migration(63, 64) {
     override fun migrate(db: SupportSQLiteDatabase) {
         val rows = mutableListOf<Triple<Long, Long, String>>()
@@ -207,7 +216,7 @@ object AppModule {
             .addMigrations(
                 MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33,
                 MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36, MIGRATION_36_37, MIGRATION_60_61, MIGRATION_61_62,
-                MIGRATION_62_63, MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67
+                MIGRATION_62_63, MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67, MIGRATION_67_68
             )
             // Only a last resort now for jumps with no migration path above (e.g. a much older install
             // skipping several versions at once, or a version older than 27). Every future version bump

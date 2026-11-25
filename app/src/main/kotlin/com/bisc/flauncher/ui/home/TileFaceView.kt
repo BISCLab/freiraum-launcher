@@ -69,7 +69,9 @@ fun TileFaceView(
     around: Color = Color.White,
     /** What the tile holds, at most four; empty shows the letter instead. */
     content: List<TileContent> = emptyList(),
-    contentDescription: String? = null
+    contentDescription: String? = null,
+    /** The symbol when none is set, e.g. a globe for a link. */
+    defaultSymbol: androidx.compose.ui.graphics.vector.ImageVector? = null
 ) {
     val fill = face.surfaceFill(autoSurface)
     val tint = face.inkOn(autoSurface, around)
@@ -88,7 +90,7 @@ fun TileFaceView(
                 // A picture from an icon pack brings its own look; alone it fills the tile like an app icon.
                 PackPicture(pack, if (fill == null && !face.hasBorder) side else side * 0.7f, contentDescription)
             face.kind == TileKind.SYMBOL ->
-                Icon(PictogramCatalog.iconFor(face.symbol) ?: Icons.AutoMirrored.Filled.Label, contentDescription, tint = tint, modifier = Modifier.size(side * 0.54f))
+                Icon(PictogramCatalog.iconFor(face.symbol) ?: defaultSymbol ?: Icons.AutoMirrored.Filled.Label, contentDescription, tint = tint, modifier = Modifier.size(side * 0.54f))
             face.kind == TileKind.CONTENT && content.isNotEmpty() ->
                 TileContentGrid(content.take(4), cell = side * 0.36f, gap = side * 0.06f, tint = tint)
             else -> Text(
