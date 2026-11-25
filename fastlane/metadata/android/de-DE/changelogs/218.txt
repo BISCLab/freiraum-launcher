@@ -1,0 +1,4 @@
+- Kategorien und Ordner: Übersicht mit Vorschau zum Antippen, klare Namen: Kachel, Etikett, Apps und Elemente, Geöffneter Ordner
+- Kachel und Etikett mit denselben Einstellungen wie alle Elemente: Fläche, Deckkraft, Rahmen, Eckenrundung in Prozent
+- Kategorien-Seite: Reiter beginnen oben, Anordnung Untereinander oder Reiter mit Reihen pro Karte, alles auf einer Einstellungsseite
+- Einstellungssuche: Streifen zur Info unter Schnell zu

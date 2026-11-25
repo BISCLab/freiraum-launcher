@@ -1,0 +1,4 @@
+- Categories and folders: overview with a preview to tap, clear names: Tile, Label, Apps and elements, Opened folder
+- Tile and label have the same settings as every element: fill, opacity, border, corner rounding in percent
+- Categories page: tabs start at the top, layout Below each other or Tabs with rows per card, all on one settings page
+- Settings search: a strip to Info under quick access

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.24.0
+
 - Categories page with tabs: the category starts at the top instead of in the middle of the page
 - Categories page: "Cards" and "List" are now one layout, "Below each other", with rows per card 1, 2, 3 or All; the list from before becomes All
 - Categories page settings on one page instead of Appearance and Behavior: Layout, What is shown (search field, symbols, counts), then the page itself and the categories
