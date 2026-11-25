@@ -1,0 +1,5 @@
+- Links, Orte und Aktionsbuttons mit dem Kachel-Editor: Symbol oder Buchstabe, Katalog oder Icon-Pack, Füllung, Rand, Ecken
+- Kacheln: Füllung, Rand und Ecken je für sich einstellbar
+- Ordner ohne eigene Füllung in der Akzentfarbe
+- Ordner-Seite klarer: erst woher der Inhalt kommt, eigener Teil für das offene Aussehen
+- Kategorie-Seite in klaren Teilen

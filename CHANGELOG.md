@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.22.0
+
 - Tiles of folders and categories: fill and border can be switched on each on their own, each with its own color, and the corners can be round, soft or square (default: like the symbols around)
 - Folder page: what it holds starts with where it comes from; a folder that follows a category no longer offers its hidden own content, but a way to that category
 - Folder page: the open folder's look and captions are a part of their own, When it is open; content changes are marked as applying right away

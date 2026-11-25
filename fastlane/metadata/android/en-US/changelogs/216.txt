@@ -1,0 +1,5 @@
+- Links, places and action buttons use the tile editor: symbol or letter, catalog or icon pack, fill, border, corners
+- Tiles: fill, border and corners each set on their own
+- Folders without their own fill use the accent color
+- Folder page clearer: where content comes from first, its own part for the open look
+- Category page in clear parts
