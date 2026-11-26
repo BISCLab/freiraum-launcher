@@ -221,7 +221,7 @@ internal fun FolderLivePreview(
 }
 
 /** A dashed outline, the sign for "room to add here". */
-private fun Modifier.dashedOutline(color: Color, radius: Dp): Modifier = drawBehind {
+internal fun Modifier.dashedOutline(color: Color, radius: Dp): Modifier = drawBehind {
     val stroke = 1.5.dp.toPx()
     drawRoundRect(
         color = color,
@@ -377,16 +377,27 @@ private fun StepButton(icon: ImageVector, enabled: Boolean, onClick: () -> Unit)
 /** The two ways to add something, as two large buttons. */
 @Composable
 internal fun FolderAddButtons(onAddContent: () -> Unit, onAddWidget: () -> Unit) {
+    AddButtons(
+        Icons.Filled.Apps to stringResource(R.string.settings_folder_add_content), onAddContent,
+        Icons.Filled.Widgets to stringResource(R.string.settings_folder_add_widget), onAddWidget
+    )
+}
+
+/** Two buttons side by side to add something, the same under a folder and a category. */
+@Composable
+internal fun AddButtons(
+    first: Pair<androidx.compose.ui.graphics.vector.ImageVector, String>,
+    onFirst: () -> Unit,
+    second: Pair<androidx.compose.ui.graphics.vector.ImageVector, String>,
+    onSecond: () -> Unit
+) {
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-        FilledTonalButton(onClick = onAddContent, modifier = Modifier.weight(1f).height(52.dp)) {
-            Icon(Icons.Filled.Apps, contentDescription = null, modifier = Modifier.size(18.dp))
-            Spacer(Modifier.width(8.dp))
-            Text(stringResource(R.string.settings_folder_add_content), maxLines = 1)
-        }
-        FilledTonalButton(onClick = onAddWidget, modifier = Modifier.weight(1f).height(52.dp)) {
-            Icon(Icons.Filled.Widgets, contentDescription = null, modifier = Modifier.size(18.dp))
-            Spacer(Modifier.width(8.dp))
-            Text(stringResource(R.string.settings_folder_add_widget), maxLines = 1)
+        listOf(first to onFirst, second to onSecond).forEach { (button, onClick) ->
+            FilledTonalButton(onClick = onClick, modifier = Modifier.weight(1f).height(52.dp)) {
+                Icon(button.first, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(button.second, maxLines = 1)
+            }
         }
     }
 }

@@ -37,7 +37,7 @@ fun SettingsCategoriesPageScreen(navController: NavController, onBack: () -> Uni
     // The layout is on this page already; only the page and the categories have pages of their own.
     val onNavigate: (String) -> Unit = { sub -> if (sub != "layout") navController.navigate(categoriesPageRoute(sub)) }
 
-    SettingsSubScreen(title = stringResource(R.string.settings_pages_categories), navController = navController, onBack = onBack) {
+    SettingsSubScreen(title = stringResource(R.string.settings_categories_page), navController = navController, onBack = onBack) {
         CategoriesPreview(onNavigate = onNavigate)
         Text(
             stringResource(R.string.settings_page_categories_description),

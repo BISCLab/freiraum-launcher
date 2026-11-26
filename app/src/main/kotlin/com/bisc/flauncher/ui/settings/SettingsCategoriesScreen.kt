@@ -73,6 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -234,6 +235,44 @@ fun SettingsCategoriesScreen(navController: NavController, onBack: () -> Unit, v
             },
             onDismiss = { creating = false }
         )
+    }
+}
+
+/** The category as a card, the way the Categories page shows it, from what is set right now. A tap
+ *  on an app here does not open it; the dashed field below the apps adds more. */
+@Composable
+private fun CategoryLiveCard(category: Category, members: List<CategoryMember>, home: HomeViewModel, onAdd: (() -> Unit)?) {
+    val boxLook by home.categoryBoxLook.collectAsState()
+    val (look, corner) = boxLook
+    val labelColor = com.bisc.flauncher.ui.home.dock.resolveElementColors(look).contentColor
+    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val columns = com.bisc.flauncher.ui.home.categoryColumns(maxWidth - 56.dp)
+        com.bisc.flauncher.ui.home.CategoryCard(look, corner) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
+                Box(modifier = Modifier.weight(1f)) { com.bisc.flauncher.ui.home.CategoryNamePill(category, MaterialTheme.typography.titleMedium) }
+                Text(members.size.toString(), style = MaterialTheme.typography.labelLarge, color = labelColor.copy(alpha = 0.7f), modifier = Modifier.padding(horizontal = 8.dp))
+            }
+            Box {
+                if (members.isEmpty()) Text(stringResource(R.string.categories_nothing), modifier = Modifier.padding(12.dp), color = labelColor)
+                else com.bisc.flauncher.ui.home.CategoryMemberGrid(members, columns, labelColor, viewModel = home)
+                // Only a picture here: nothing opens from it.
+                Box(Modifier.matchParentSize().clickable(indication = null, interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }) {})
+            }
+            if (onAdd != null) {
+                Box(
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .dashedOutline(labelColor.copy(alpha = 0.5f), 14.dp)
+                        .clickable(onClick = onAdd),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.settings_category_pick_apps), tint = labelColor.copy(alpha = 0.7f))
+                }
+            }
+        }
     }
 }
 
@@ -442,6 +481,20 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
         CategoryPart.CONTENT -> stringResource(R.string.section_content)
         CategoryPart.HUB -> saved.name
     }
+    val saveAll = {
+        if (draft != base) viewModel.updateCategory(draft)
+        if (membersChanged || draft.manualOrder != base.manualOrder) viewModel.replaceCategoryMembers(categoryId, shownMembers.map { it.type to it.payload })
+    }
+    // What it holds changes right away, like a folder's: every change is written at once, typing in a
+    // rule a moment later, and whatever is still open when the page is left.
+    if (part == CategoryPart.CONTENT) {
+        LaunchedEffect(draft, draftMembers) {
+            if (draft.ruleParam != base.ruleParam) kotlinx.coroutines.delay(500)
+            saveAll()
+        }
+        val latestSave by androidx.compose.runtime.rememberUpdatedState(saveAll)
+        androidx.compose.runtime.DisposableEffect(Unit) { onDispose { latestSave() } }
+    }
     val tilePreview: @Composable (Color) -> Unit = { around -> com.bisc.flauncher.ui.home.CategoryMark(draft, modifier = Modifier.fillMaxSize(), shape = RoundedCornerShape(16.dp), ink = around) }
     val open = { sub: String -> navController.navigate("settings/elements/categories/$categoryId/$sub") }
     val namePreview: @Composable (Color) -> Unit = { around -> com.bisc.flauncher.ui.home.CategoryNamePill(draft, MaterialTheme.typography.labelLarge, ink = around) }
@@ -449,11 +502,8 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
         title = partTitle,
         navController = navController,
         onBack = onBack,
-        onSave = {
-            viewModel.updateCategory(draft)
-            if (membersChanged || draft.manualOrder != base.manualOrder) viewModel.replaceCategoryMembers(categoryId, shownMembers.map { it.type to it.payload })
-        },
-        dirty = draft != base || membersChanged,
+        onSave = if (part == CategoryPart.CONTENT) null else saveAll,
+        dirty = part != CategoryPart.CONTENT && (draft != base || membersChanged),
         // What this page changes, as it will look, always in sight while choosing. On the overview a
         // tap on the tile or the label opens where it is set.
         header = if (part == CategoryPart.CONTENT) null else ({
@@ -505,7 +555,7 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
                     ) { com.bisc.flauncher.ui.home.CategoryNamePill(draft, MaterialTheme.typography.labelSmall, ink = MaterialTheme.colorScheme.onSurface) }
                     PartLinkRow(
                         title = stringResource(R.string.section_content),
-                        summary = if (rule != null) stringResource(R.string.hub_content_smart, shownMembers.size)
+                        summary = if (rule != null) stringResource(R.string.hub_content_smart, pluralStringResource(R.plurals.hub_content_count, shownMembers.size, shownMembers.size))
                         else pluralStringResource(R.plurals.hub_content_count, shownMembers.size, shownMembers.size),
                         onClick = { open("content") }
                     ) { CountBubble(shownMembers.size) }
@@ -543,6 +593,13 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
             CategoryPart.CONTENT -> {
                 // What it holds: by a rule, or picked by hand, and in which order.
                 PartIntro(stringResource(if (rule != null) R.string.section_content_smart else R.string.section_content_own))
+                CategoryLiveCard(draft, shownMembers, homeViewModel, onAdd = if (rule == null) ({ pickingApps = true }) else null)
+                if (rule == null) {
+                    AddButtons(
+                        Icons.Filled.Apps to stringResource(R.string.settings_category_pick_apps), { pickingApps = true },
+                        Icons.Filled.Language to stringResource(R.string.settings_category_pick_elements), { pickingElements = true }
+                    )
+                }
                 if (rule != null) RuleSettings(draft) { draft = it }
                 if (rule == null && shownMembers.size > 1) {
                     // Switching on keeps the order as it is shown now, ready to be dragged.
@@ -605,17 +662,6 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
                                 )
                             }
                         }
-                    }
-                }
-                if (rule == null) {
-                    SettingsPreferenceGroup {
-                        SettingsPreference(icon = Icons.Filled.Apps, title = stringResource(R.string.settings_category_pick_apps), onClick = { pickingApps = true })
-                        SettingsPreference(
-                            icon = Icons.Filled.Language,
-                            title = stringResource(R.string.settings_category_pick_elements),
-                            summary = stringResource(R.string.settings_category_pick_elements_summary),
-                            onClick = { pickingElements = true }
-                        )
                     }
                 }
             }
@@ -818,7 +864,8 @@ private fun CategoryElementsSheet(
     val inCategory = remember(members) { members.map { it.type to it.payload }.toSet() }
     ModalBottomSheet(sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true), onDismissRequest = onDismiss) {
         Column(modifier = Modifier.fillMaxWidth().heightIn(max = com.bisc.flauncher.ui.sheetMaxHeight()).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
-            Text(stringResource(R.string.settings_category_pick_elements), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 4.dp, bottom = 12.dp))
+            Text(stringResource(R.string.settings_category_pick_elements_title), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 4.dp, bottom = 12.dp))
+            Text(stringResource(R.string.settings_category_pick_elements_summary), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 4.dp, bottom = 12.dp))
             val sections = listOf(
                 Triple(R.string.settings_add_kind_link, GridItemType.WEBSITE, websites.map { it.id.toString() to it.label }),
                 Triple(R.string.settings_add_kind_place, GridItemType.MAP_TARGET, places.map { it.id.toString() to it.label }),
