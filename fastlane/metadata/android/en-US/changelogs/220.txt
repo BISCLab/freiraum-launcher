@@ -1,0 +1,1 @@
+- Settings: with four or more options the buttons sit below the name, nothing breaks mid-word anymore
