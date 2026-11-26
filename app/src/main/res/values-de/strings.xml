@@ -1140,7 +1140,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
         <item quantity="other">Das passt hier nicht mehr hin. Auf dieser Seite sind nur noch %1$d Zeilen frei. Beim Speichern kannst du dafür eine neue Seite anlegen.</item>
     </plurals>
     <string name="tile_kind_title">Was zeigt die Kachel?</string>
-    <string name="tile_kind_content">Apps darin</string>
+    <string name="tile_kind_content">Inhalt</string>
     <string name="tile_kind_symbol">Symbol</string>
     <string name="tile_kind_letter">Buchstabe</string>
     <string name="tile_source_catalog">Katalog</string>

@@ -1140,7 +1140,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
         <item quantity="other">This won\'t fit here anymore. Only %1$d rows are free on this page. When you save, you can make a new page for it.</item>
     </plurals>
     <string name="tile_kind_title">What does the tile show?</string>
-    <string name="tile_kind_content">Apps inside</string>
+    <string name="tile_kind_content">Contents</string>
     <string name="tile_kind_symbol">Symbol</string>
     <string name="tile_kind_letter">Letter</string>
     <string name="tile_source_catalog">Catalog</string>

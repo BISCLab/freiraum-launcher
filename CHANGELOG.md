@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Tile: the choice that shows the first apps is called "Contents" again
+
 ## 0.25.1
 
 - Settings: a choice with four or more options puts them below its name, so names like "Rows per card" no longer break
