@@ -1,0 +1,5 @@
+- App list, App grid and Text search: one settings page each with clearly named groups and an Appearance grid
+- Categories: tile overview with a plus, contents like folders, changes apply right away
+- All folders: one page; every folder can have its own corners
+- Tile and label: fill None, Automatic or Color, also as a gradient
+- One wording across all settings

@@ -1,0 +1,5 @@
+- App-Liste, App-Raster und Textsuche: je eine Einstellungsseite mit klar benannten Gruppen und einem Aussehen-Raster
+- Kategorien: Kachelübersicht mit Plus, Inhalt wie bei Ordnern, Änderungen gelten sofort
+- Alle Ordner: eine Seite; jeder Ordner kann eigene Ecken haben
+- Kachel und Etikett: Fläche Ohne, Automatisch oder Farbe, auch mit Farbverlauf
+- Einheitliche Begriffe in allen Einstellungen

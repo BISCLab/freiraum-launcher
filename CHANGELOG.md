@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.26.0
+
 - App list, App grid and Text search settings on one page each instead of Appearance and Behavior: the page in small, then clearly named groups, and at the end "Appearance" with a tile for every part, the page first
 - App list: the category labels' symbol and count switches sit right under the switch that shows the labels
 - Text search: "What is found" (the table of result kinds) has its own page, reached from the main page
