@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Settings: a choice with four or more options puts them below its name, so names like "Rows per card" no longer break
+
 ## 0.25.0
 
 - Folders no longer follow a category; a folder that did shows its own content again

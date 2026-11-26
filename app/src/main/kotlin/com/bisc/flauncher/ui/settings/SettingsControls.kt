@@ -649,6 +649,24 @@ fun IconShapePreference(
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun <T> SettingsChoiceRow(title: String, options: List<Pair<T, String>>, selected: T, onSelect: (T) -> Unit, info: String? = null) {
+    // Four or more options leave no room for the title beside them: then they go below it, full width.
+    if (options.size >= 4) {
+        Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer)) {
+            SettingsPreference(icon = null, title = title, info = info, onClick = null, trailing = null)
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
+                options.forEachIndexed { index, (value, label) ->
+                    SegmentedButton(
+                        selected = value == selected,
+                        onClick = { onSelect(value) },
+                        shape = SegmentedButtonDefaults.itemShape(index, options.size),
+                        icon = {},
+                        label = { Text(label, maxLines = 1, softWrap = false) }
+                    )
+                }
+            }
+        }
+        return
+    }
     SettingsPreference(
         icon = null,
         title = title,
