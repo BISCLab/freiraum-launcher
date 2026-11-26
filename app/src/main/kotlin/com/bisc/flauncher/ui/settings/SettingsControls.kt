@@ -286,6 +286,25 @@ fun elementFillModeLabel(mode: ElementFillMode): String = when (mode) {
     ElementFillMode.COLOR -> stringResource(R.string.element_fill_mode_color)
 }
 
+/** One choice of a fill in the look of [FillModePreference]: a round sample, null = no fill. */
+@Composable
+fun FillChoiceRow(title: String, sample: Brush?, selected: Boolean, onClick: () -> Unit) {
+    SettingsPreference(
+        icon = null,
+        title = title,
+        onClick = onClick,
+        leading = {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .then(if (sample != null) Modifier.background(sample, CircleShape) else Modifier)
+                    .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+            )
+        },
+        trailing = { SelectedMark(selected) }
+    )
+}
+
 /** Radio row for an [ElementFillMode] with a fill preview. */
 @Composable
 fun FillModePreference(

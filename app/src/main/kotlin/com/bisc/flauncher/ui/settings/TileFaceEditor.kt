@@ -53,6 +53,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.bisc.flauncher.R
+import com.bisc.flauncher.data.model.asBrush
 import com.bisc.flauncher.data.model.ElementFillMode
 import kotlin.math.roundToInt
 import com.bisc.flauncher.data.model.IconPackIcon
@@ -333,23 +334,23 @@ internal fun SurfaceLookSection(
     fillInfo: String? = null
 ) {
     val onSurface = MaterialTheme.colorScheme.onSurface
+    var editingFill by remember { mutableStateOf(false) }
     // Tiles from before the border had its own switch keep theirs through every change.
     val set = { f: TileFace -> onChange(if (f.border == null) f.copy(border = face.hasBorder) else f) }
 
     SettingsPreferenceGroup(title = stringResource(R.string.settings_element_fill_label), info = fillInfo) {
-        val setFill = { on: Boolean -> set(face.copy(surface = if (on) (if (face.surfaceColor != null) TileSurface.COLOR else TileSurface.AUTO) else TileSurface.NONE)) }
-        val swatch = androidx.compose.ui.graphics.SolidColor(face.surfaceColor?.takeIf { face.surface == TileSurface.COLOR }?.let { Color(it) } ?: autoSurface)
-        ElementFillMode.entries.forEach { mode ->
-            FillModePreference(value = mode, selected = if (face.hasFill) ElementFillMode.COLOR else ElementFillMode.NONE, onSelect = { setFill(it == ElementFillMode.COLOR) }, customFill = swatch)
+        // Like every element's fill, with "Automatic" between: the category's or the accent color.
+        FillChoiceRow(stringResource(R.string.element_fill_mode_none), null, !face.hasFill) { set(face.copy(surface = TileSurface.NONE)) }
+        FillChoiceRow(stringResource(R.string.settings_element_color_auto_hint), androidx.compose.ui.graphics.SolidColor(autoSurface), face.surface == TileSurface.AUTO) {
+            set(face.copy(surface = TileSurface.AUTO))
         }
-        if (face.hasFill) {
-            AutomaticColorPicker(
-                title = stringResource(R.string.settings_background_source_color),
-                custom = face.surfaceColor.takeIf { face.surface == TileSurface.COLOR },
-                automaticSeed = autoSurface.toArgb(),
-                onChange = { color -> set(face.copy(surface = if (color == null) TileSurface.AUTO else TileSurface.COLOR, surfaceColor = color)) },
-                ownGroup = false
-            )
+        FillChoiceRow(
+            stringResource(R.string.element_fill_mode_color),
+            face.colorFill(autoSurface.toArgb()).asBrush(),
+            face.surface == TileSurface.COLOR
+        ) {
+            if (face.surface != TileSurface.COLOR) set(face.withFill(face.colorFill(autoSurface.toArgb())))
+            editingFill = true
         }
         if (inkLabel != null) {
             AutomaticColorPicker(
@@ -393,6 +394,19 @@ internal fun SurfaceLookSection(
                 onChange = { onChange(face.copy(borderColor = it, border = true)) },
                 ownGroup = false
             )
+        }
+    }
+    if (editingFill) {
+        // The same editor as every element's fill: one color or a gradient.
+        val savedFill = face.colorFill(autoSurface.toArgb())
+        var draft by rememberDraft(savedFill)
+        SettingsEditPage(
+            title = stringResource(R.string.settings_background_source_color),
+            onDismiss = { editingFill = false },
+            onSave = { set(face.withFill(draft)) },
+            dirty = draft != savedFill
+        ) {
+            ColorFillPickerContent(fill = draft, onFillChange = { draft = it }, modifier = Modifier.fillMaxWidth())
         }
     }
     SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {

@@ -43,6 +43,25 @@ object TileIcons {
 }
 
 /** The color a tile's surface really has, or null when it has none (an outline or nothing). */
+/** What the fill is painted with: the automatic color, the own color or gradient, or nothing. */
+fun TileFace.surfaceBrush(auto: Color): androidx.compose.ui.graphics.Brush? = when (surface) {
+    TileSurface.AUTO -> androidx.compose.ui.graphics.SolidColor(auto)
+    TileSurface.COLOR -> {
+        val first = surfaceColor?.let { Color(it) } ?: auto
+        val second = surfaceColor2?.let { Color(it) }
+        when {
+            second == null -> androidx.compose.ui.graphics.SolidColor(first)
+            gradientDirection == com.bisc.flauncher.data.model.GradientDirection.LEFT_TO_RIGHT -> androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(first, second))
+            else -> androidx.compose.ui.graphics.Brush.verticalGradient(listOf(first, second))
+        }
+    }
+    TileSurface.OUTLINE, TileSurface.NONE -> null
+}
+
+/** The fill painted behind a tile or a label, as solid as set. */
+fun Modifier.tileSurface(face: TileFace, auto: Color): Modifier =
+    face.surfaceBrush(auto)?.let { background(it, alpha = face.surfaceAlpha ?: 1f) } ?: this
+
 fun TileFace.surfaceFill(auto: Color): Color? = when (surface) {
     TileSurface.AUTO -> auto
     TileSurface.COLOR -> surfaceColor?.let { Color(it) } ?: auto
@@ -79,7 +98,7 @@ fun TileFaceView(
     BoxWithConstraints(
         modifier = modifier
             .clip(tileShape)
-            .then(if (fill != null) Modifier.background(fill.copy(alpha = fill.alpha * (face.surfaceAlpha ?: 1f))) else Modifier)
+            .tileSurface(face, autoSurface)
             .then(if (face.hasBorder) Modifier.border((face.borderWidth ?: 1.5f).dp, face.borderColor?.let { Color(it) } ?: around.copy(alpha = 0.6f), tileShape) else Modifier),
         contentAlignment = Alignment.Center
     ) {

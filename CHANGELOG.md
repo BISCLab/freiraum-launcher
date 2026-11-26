@@ -10,6 +10,7 @@
 - The category widget's kinds are named like the page: Tabs, Below each other, One category, Tiles
 - Tile: the choice that shows the first apps is called "Contents" again
 - A folder can have its own corner rounding when opened, or keep the one of all folders
+- Tile and label fill like every element: None, Automatic or Color; a tap on Color opens the fill editor with one color or a gradient
 
 ## 0.25.1
 

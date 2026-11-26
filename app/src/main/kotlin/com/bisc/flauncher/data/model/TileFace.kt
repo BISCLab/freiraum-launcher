@@ -35,8 +35,27 @@ data class TileFace(
      *  the app icons around it. */
     val cornerPercent: Int? = null,
     /** How solid the fill is, 0..1; null = fully. */
-    val surfaceAlpha: Float? = null
+    val surfaceAlpha: Float? = null,
+    /** With [surfaceColor], a gradient's second color and its direction; null = one color. */
+    val surfaceColor2: Int? = null,
+    val gradientDirection: GradientDirection? = null
 ) {
+    /** The own fill as a [ColorFill], [auto] when none is chosen yet. */
+    fun colorFill(auto: Int): ColorFill = ColorFill(
+        mode = if (surfaceColor2 != null) FillMode.GRADIENT else FillMode.SOLID,
+        color = surfaceColor ?: auto,
+        secondaryColor = surfaceColor2 ?: android.graphics.Color.BLACK,
+        direction = gradientDirection ?: GradientDirection.TOP_TO_BOTTOM
+    )
+
+    /** This face with [fill] as its own fill. */
+    fun withFill(fill: ColorFill): TileFace = copy(
+        surface = TileSurface.COLOR,
+        surfaceColor = fill.color,
+        surfaceColor2 = fill.secondaryColor.takeIf { fill.mode == FillMode.GRADIENT },
+        gradientDirection = fill.direction.takeIf { fill.mode == FillMode.GRADIENT }
+    )
+
     /** Its own corners in percent, older ones read from [corners]; null = like the app icons. */
     val ownCornerPercent: Int?
         get() = cornerPercent ?: when (corners) {
@@ -66,6 +85,8 @@ data class TileFace(
         corners?.let { put("corners", it.name) }
         cornerPercent?.let { put("cornerPercent", it) }
         surfaceAlpha?.let { put("surfaceAlpha", it.toDouble()) }
+        surfaceColor2?.let { put("surfaceColor2", it) }
+        gradientDirection?.let { put("gradientDirection", it.name) }
     }.toString()
 
     companion object {
@@ -87,7 +108,9 @@ data class TileFace(
                     borderWidth = if (json.has("borderWidth")) json.getDouble("borderWidth").toFloat() else null,
                     corners = json.optString("corners").ifBlank { null }?.let { c -> runCatching { TileCorners.valueOf(c) }.getOrNull() },
                     cornerPercent = if (json.has("cornerPercent")) json.getInt("cornerPercent") else null,
-                    surfaceAlpha = if (json.has("surfaceAlpha")) json.getDouble("surfaceAlpha").toFloat() else null
+                    surfaceAlpha = if (json.has("surfaceAlpha")) json.getDouble("surfaceAlpha").toFloat() else null,
+                    surfaceColor2 = if (json.has("surfaceColor2")) json.getInt("surfaceColor2") else null,
+                    gradientDirection = json.optString("gradientDirection").ifBlank { null }?.let { d -> runCatching { GradientDirection.valueOf(d) }.getOrNull() }
                 )
             }.getOrNull()
         }

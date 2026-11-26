@@ -193,7 +193,7 @@ internal fun CategoryChip(
             .clip(shape)
             .then(
                 when {
-                    face != null -> if (labelFill != null) Modifier.background(labelFill.copy(alpha = labelFill.alpha * (face.surfaceAlpha ?: 1f))) else Modifier
+                    face != null -> Modifier.tileSurface(face, accent)
                     selected -> Modifier.background(accent)
                     else -> Modifier.background(colors.background, alpha = colors.backgroundAlpha)
                 }

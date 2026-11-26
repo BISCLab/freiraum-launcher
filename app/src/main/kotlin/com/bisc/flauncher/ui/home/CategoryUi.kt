@@ -210,7 +210,7 @@ fun CategoryNamePill(
     Row(
         modifier = modifier
             .clip(shape)
-            .then(if (fill != null) Modifier.background(fill.copy(alpha = fill.alpha * (face.surfaceAlpha ?: 1f))) else Modifier)
+            .tileSurface(face, accent)
             .then(
                 if (face.hasBorder) Modifier.border((face.borderWidth ?: 1.5f).dp, face.borderColor?.let { Color(it) } ?: if (fill != null) ink.copy(alpha = 0.6f) else accent, shape)
                 else Modifier
