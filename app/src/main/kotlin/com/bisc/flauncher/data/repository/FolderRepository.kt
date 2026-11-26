@@ -51,6 +51,10 @@ class FolderRepository @Inject constructor(
     suspend fun unlinkCategory(categoryId: Long) = folderDao.unlinkCategory(categoryId)
 
     /** How the folder looks as a tile, see [com.bisc.flauncher.data.model.TileFace]. */
+    suspend fun setFolderCornerPercent(id: Long, percent: Int?) {
+        folderDao.get(id)?.let { folderDao.update(it.copy(cornerPercent = percent)) }
+    }
+
     suspend fun setFolderTileFace(id: Long, face: com.bisc.flauncher.data.model.TileFace) {
         folderDao.get(id)?.let { folderDao.update(it.copy(tileFace = face.toJson())) }
     }

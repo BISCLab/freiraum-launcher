@@ -1181,7 +1181,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="hub_content_smart">Automatisch · %1$s</string>
     <string name="hub_open_folder_like_all">Fläche, Rahmen, Beschriftung. Wie alle Ordner</string>
     <string name="hub_open_folder_own">Fläche, Rahmen, Beschriftung. Eigenes Aussehen</string>
-    <string name="folder_corners_all">Gleich für alle Ordner. Tipp, um sie zu ändern.</string>
     <string name="tile_corners_like_apps">Wie die App-Icons</string>
     <string name="tile_corners_like_apps_summary">Passt sich der Form der App-Icons daneben an.</string>
     <plurals name="hub_content_count">
@@ -1198,4 +1197,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_category_pick_elements_title">Elemente hinzufügen</string>
     <string name="settings_folder_global_intro">So sieht jeder Ordner aus, der kein eigenes Aussehen hat.</string>
     <string name="settings_folder_while_open">Während ein Ordner offen ist</string>
+    <string name="folder_corners_like_all_summary">So rund wie bei „Alle Ordner“: %1$d %%</string>
 </resources>

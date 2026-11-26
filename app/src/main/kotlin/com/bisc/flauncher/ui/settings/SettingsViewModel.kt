@@ -326,6 +326,11 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { folderRepository.removeFolderItem(item) }
     }
 
+    /** A folder's own corners when opened; null = like all folders. */
+    fun setFolderOwnCorner(folderId: Long, percent: Int?) {
+        viewModelScope.launch(kotlinx.coroutines.NonCancellable) { folderRepository.setFolderCornerPercent(folderId, percent) }
+    }
+
     fun setFolderTileFace(folderId: Long, face: com.bisc.flauncher.data.model.TileFace) {
         // Save closes the screen right away; the write must not die with it.
         viewModelScope.launch(kotlinx.coroutines.NonCancellable) { folderRepository.setFolderTileFace(folderId, face) }

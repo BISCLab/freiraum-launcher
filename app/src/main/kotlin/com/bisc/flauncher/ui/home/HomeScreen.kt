@@ -1353,7 +1353,7 @@ private fun HomeFolderOverlay(
             onFolderClick = { item -> item.payload.toLongOrNull()?.let(viewModel::openFolder) },
             onRemoveItem = viewModel::removeFromFolder,
             onMoveItemToSlot = viewModel::moveFolderItemToSlot,
-            cornerPercent = folderCorner,
+            cornerPercent = folder.cornerPercent ?: folderCorner,
             onBack = viewModel::closeFolder,
             cardAppearance = folder.effectiveAppearance(folderCardAppearance),
             onExecuteAction = { action -> viewModel.executeAction(action, context, openPageById, openSettingsFromGesture) },

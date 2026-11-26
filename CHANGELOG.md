@@ -9,6 +9,7 @@
 - Folder tiles in the settings show "Own look" when a folder has one
 - The category widget's kinds are named like the page: Tabs, Below each other, One category, Tiles
 - Tile: the choice that shows the first apps is called "Contents" again
+- A folder can have its own corner rounding when opened, or keep the one of all folders
 
 ## 0.25.1
 

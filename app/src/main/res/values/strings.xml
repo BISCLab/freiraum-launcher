@@ -1181,7 +1181,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="hub_content_smart">Automatic · %1$s</string>
     <string name="hub_open_folder_like_all">Fill, border, captions. Like all folders</string>
     <string name="hub_open_folder_own">Fill, border, captions. Its own look</string>
-    <string name="folder_corners_all">The same for all folders. Tap to change it.</string>
     <string name="tile_corners_like_apps">Like the app icons</string>
     <string name="tile_corners_like_apps_summary">Takes the shape of the apps next to it.</string>
     <plurals name="hub_content_count">
@@ -1198,4 +1197,5 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_category_pick_elements_title">Add elements</string>
     <string name="settings_folder_global_intro">How every folder looks that has no look of its own.</string>
     <string name="settings_folder_while_open">While a folder is open</string>
+    <string name="folder_corners_like_all_summary">As round as under \"All folders\": %1$d%%</string>
 </resources>

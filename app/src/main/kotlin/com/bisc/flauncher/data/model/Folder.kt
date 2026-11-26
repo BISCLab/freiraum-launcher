@@ -41,7 +41,9 @@ data class Folder(
     // Set: the folder follows this category and shows what it holds instead of its own apps.
     val categoryId: Long? = null,
     // How it looks as a tile, see [TileFace]; null = still the older iconMode fields, see [face].
-    val tileFace: String? = null
+    val tileFace: String? = null,
+    // How round it is once opened, 0..100; null = like all folders.
+    val cornerPercent: Int? = null
 )
 
 /** How the folder looks as a tile; folders from before [TileFace] are read from their icon mode. */

@@ -173,8 +173,10 @@ fun SettingsFolderEditScreen(
     val savedShowLabels = if (folder?.showLabelsOverrideEnabled == true) folder.showLabels else globalShowLabels
     var showLabelsDraft by rememberDraft(savedShowLabels)
     val folderCorner by viewModel.folderCornerPercent.collectAsState()
-    val ownLook = folder?.appearanceOverrideEnabled == true || folder?.borderOverrideEnabled == true
-    val lookChanged = part == FolderPart.OPEN && (lookDraft != savedLook || showLabelsDraft != savedShowLabels)
+    var cornerDraft by rememberDraft(folder?.cornerPercent)
+    val shownCorner = cornerDraft ?: folderCorner
+    val ownLook = folder?.appearanceOverrideEnabled == true || folder?.borderOverrideEnabled == true || folder?.cornerPercent != null
+    val lookChanged = part == FolderPart.OPEN && (lookDraft != savedLook || showLabelsDraft != savedShowLabels || cornerDraft != folder?.cornerPercent)
     val drafts = part != FolderPart.CONTENT
     val open = { sub: String -> navController.navigate("settings/folder/$folderId/$sub") }
     SettingsSubScreen(
@@ -196,6 +198,7 @@ fun SettingsFolderEditScreen(
                 if (fillChanged) viewModel.setFolderAppearance(folderId, d)
                 if (borderChanged) viewModel.setFolderBorderAppearance(folderId, d)
                 if (showLabelsDraft != savedShowLabels) viewModel.setFolderItemsShowLabels(folderId, showLabelsDraft)
+                if (cornerDraft != folder?.cornerPercent) viewModel.setFolderOwnCorner(folderId, cornerDraft)
             }
         }) else null,
         dirty = nameChanged || faceChanged || lookChanged,
@@ -205,7 +208,7 @@ fun SettingsFolderEditScreen(
             FolderPart.CONTENT -> null
             FolderPart.OPEN -> ({
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    LookSample(LookSampleKind.FOLDER, lookDraft, folderCorner)
+                    LookSample(LookSampleKind.FOLDER, lookDraft, shownCorner)
                     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             stringResource(if (ownLook) R.string.settings_look_custom else R.string.settings_folder_look_like_all),
@@ -217,6 +220,7 @@ fun SettingsFolderEditScreen(
                             onClick = {
                                 viewModel.setFolderAppearanceOverrideEnabled(folderId, false)
                                 viewModel.setFolderBorderOverrideEnabled(folderId, false)
+                                viewModel.setFolderOwnCorner(folderId, null)
                             },
                             label = stringResource(R.string.settings_folder_look_reset)
                         )
@@ -228,7 +232,7 @@ fun SettingsFolderEditScreen(
                 TilePreviewHeader(
                     name = edited ?: folder?.name.orEmpty(),
                     tile = { around -> FolderIcon(folder = folder, previewItems = items, modifier = Modifier.fillMaxSize(), face = shownFace, around = around) },
-                    extra = if (part == FolderPart.HUB) ({ around -> FolderOpenMini(savedLook, folderCorner, around) }) else null,
+                    extra = if (part == FolderPart.HUB) ({ around -> FolderOpenMini(savedLook, folder?.cornerPercent ?: folderCorner, around) }) else null,
                     tileCaption = if (part == FolderPart.HUB) stringResource(R.string.preview_caption_tile) else null,
                     extraCaption = stringResource(R.string.preview_caption_open),
                     onTileClick = if (part == FolderPart.HUB) ({ open("tile") }) else null,
@@ -266,7 +270,7 @@ fun SettingsFolderEditScreen(
                 title = stringResource(R.string.section_folder_open),
                 summary = stringResource(if (ownLook) R.string.hub_open_folder_own else R.string.hub_open_folder_like_all),
                 onClick = { open("open") }
-            ) { FolderOpenMini(savedLook, folderCorner, androidx.compose.material3.MaterialTheme.colorScheme.onSurface, small = true) }
+            ) { FolderOpenMini(savedLook, folder.cornerPercent ?: folderCorner, androidx.compose.material3.MaterialTheme.colorScheme.onSurface, small = true) }
             PartLinkRow(
                 title = stringResource(R.string.section_content),
                 summary = androidx.compose.ui.res.pluralStringResource(R.plurals.hub_content_count, items.size, items.size),
@@ -391,14 +395,17 @@ fun SettingsFolderEditScreen(
         PartIntro(stringResource(R.string.section_folder_open_where))
         // The same blocks as every other element: fill, opacity, border, corner rounding, captions.
         ElementAppearanceSection(appearance = lookDraft, onAppearanceChange = { lookDraft = it }, styleGroupTitle = stringResource(R.string.settings_element_fill_label))
+        // Like all folders, or its own: the same switch as the tile's "Like the app icons".
         SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
+            val setLikeAll = { likeAll: Boolean -> cornerDraft = if (likeAll) null else folderCorner }
             SettingsPreference(
                 icon = null,
-                title = stringResource(R.string.settings_corner_radius_value, folderCorner),
-                summary = stringResource(R.string.folder_corners_all),
-                onClick = { navController.navigate("settings/folder/global") },
-                trailing = { androidx.compose.material3.Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) }
+                title = stringResource(R.string.settings_folder_look_like_all),
+                summary = stringResource(R.string.folder_corners_like_all_summary, folderCorner),
+                onClick = { setLikeAll(cornerDraft != null) },
+                trailing = { androidx.compose.material3.Switch(checked = cornerDraft == null, onCheckedChange = { setLikeAll(it) }) }
             )
+            cornerDraft?.let { own -> CornerPercentPicker(percent = own, onChange = { cornerDraft = it }) }
         }
         CaptionsSection(
             showLabels = showLabelsDraft,
