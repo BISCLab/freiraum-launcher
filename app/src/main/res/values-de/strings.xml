@@ -51,8 +51,8 @@
     <string name="search_filter_web">Web</string>
     <string name="search_filter_maps">Karten</string>
     <string name="search_filter_shortcuts">Verknüpfungen</string>
-    <string name="search_show_all">Alle anzeigen</string>
-    <string name="search_show_less">Weniger anzeigen</string>
+    <string name="search_show_all">Alle zeigen</string>
+    <string name="search_show_less">Weniger zeigen</string>
     <string name="search_command_maps">Auf der Karte nach „%1$s“ suchen</string>
 
     <string name="settings_shortcut_wifi">WLAN</string>
@@ -139,7 +139,7 @@
     <string name="settings_element_color_auto_hint">Automatisch</string>
     <string name="settings_element_text_color_label">Schriftfarbe</string>
     <string name="settings_element_border_label">Rahmen</string>
-    <string name="settings_element_show_labels_label">Beschriftung anzeigen</string>
+    <string name="settings_element_show_labels_label">Beschriftung zeigen</string>
     <string name="settings_captions_label">Beschriftung</string>
 
     <string name="settings_section_elements">Apps &amp; Elemente</string>
@@ -353,7 +353,7 @@
     <string name="settings_clock_date_format_label">Datumsformat</string>
     <string name="settings_clock_date_format_placeholder">EEEE, dd.MM.yyyy</string>
     <string name="settings_clock_date_format_summary">Leer lassen für das übliche Format, zum Beispiel „Montag, 26.10.2026“. Oder ein eigenes Muster wie „EEEE, dd.MM.yyyy“ oder „d. MMM“.</string>
-    <string name="settings_clock_show_next_alarm">Nächsten Alarm anzeigen</string>
+    <string name="settings_clock_show_next_alarm">Nächsten Alarm zeigen</string>
     <string name="settings_clock_show_next_alarm_summary">Dein nächster Wecker steht unter dem Datum.</string>
 
     <string name="settings_element_box_edit_title">Element-Box bearbeiten</string>
@@ -373,7 +373,7 @@
     <string name="settings_map_country_hint">Land</string>
     <string name="settings_statusbar_label">Statusleiste</string>
     <string name="settings_tips_label">Tipps</string>
-    <string name="settings_tips_show">Tipps anzeigen</string>
+    <string name="settings_tips_show">Tipps zeigen</string>
     <string name="settings_save">Speichern</string>
     <string name="settings_all_saved">Alles gespeichert</string>
     <string name="settings_accessibility_label">Bedienungshilfen</string>
@@ -404,8 +404,8 @@
     <string name="settings_statusbar_confirm_hide_message">Die Statusleiste verschwindet dann überall auf einmal, egal wie sie gerade eingestellt ist.</string>
     <string name="settings_corner_radius_value">%1$d%%</string>
     <string name="settings_statusbar_hide_page">Statusleiste ausblenden</string>
-    <string name="settings_folder_hide_status_bar">Statusleiste in Ordnern ausblenden</string>
-    <string name="settings_folder_hide_dock">Dock in Ordnern ausblenden</string>
+    <string name="settings_folder_hide_status_bar">Statusleiste ausblenden</string>
+    <string name="settings_folder_hide_dock">Dock ausblenden</string>
     <string name="settings_folder_hide_dock_summary">Ist das aus, bleibt das Dock sichtbar, solange ein Ordner offen ist.</string>
 
     <string name="settings_folder_creator_title">Neuer Ordner</string>
@@ -581,7 +581,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="widget_page_next">Weiter</string>
     <string name="widget_page_previous">Zurück</string>
     <string name="settings_widget_paging_title">Pfeiltasten in Widgets</string>
-    <string name="settings_widget_paging_summary">Symbol, Deckkraft, Füllung, Rahmen und Ecken</string>
+    <string name="settings_widget_paging_summary">Symbol, Deckkraft, Fläche, Rahmen und Ecken</string>
     <string name="settings_widget_paging_mode">Blättern per</string>
     <string name="settings_widget_paging_gesture">Wischen</string>
     <string name="settings_widget_paging_buttons">Pfeiltasten</string>
@@ -1079,7 +1079,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_add_kind_category">Kategorie</string>
     <string name="categories_all">Alle</string>
     <string name="categories_show_all">Alle zeigen</string>
-    <string name="categories_show_less">Weniger</string>
+    <string name="categories_show_less">Weniger zeigen</string>
     <string name="categories_nothing">Hier ist nichts drin.</string>
     <string name="categories_page_empty">Du hast noch keine Kategorien.</string>
     <string name="categories_page_make">Kategorien anlegen</string>

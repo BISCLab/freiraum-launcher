@@ -403,8 +403,8 @@
     <string name="settings_statusbar_confirm_hide_message">The status bar then disappears everywhere at once, no matter how each screen is set now.</string>
     <string name="settings_corner_radius_value">%1$d%%</string>
     <string name="settings_statusbar_hide_page">Hide status bar</string>
-    <string name="settings_folder_hide_status_bar">Hide status bar in folders</string>
-    <string name="settings_folder_hide_dock">Hide dock in folders</string>
+    <string name="settings_folder_hide_status_bar">Hide status bar</string>
+    <string name="settings_folder_hide_dock">Hide Dock</string>
     <string name="settings_folder_hide_dock_summary">When off, the Dock stays visible while a folder is open.</string>
 
     <string name="settings_folder_creator_title">New folder</string>
@@ -1079,7 +1079,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_add_kind_category">Category</string>
     <string name="categories_all">All</string>
     <string name="categories_show_all">Show all</string>
-    <string name="categories_show_less">Less</string>
+    <string name="categories_show_less">Show less</string>
     <string name="categories_nothing">Nothing in here.</string>
     <string name="categories_page_empty">You have no categories yet.</string>
     <string name="categories_page_make">Make categories</string>
