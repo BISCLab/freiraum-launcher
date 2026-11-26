@@ -35,37 +35,100 @@ import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.search.automaticRailAppearance
 import kotlin.math.roundToInt
 
-/** The App grid page's settings: same structure as the app list's (Appearance, Behavior). */
+/**
+ * The App grid on one page: the grid in small, where its search field is and what it does, which
+ * folders it shows, and how each part looks. The grid itself (direction, columns, icon size,
+ * captions) has its own page, opened from the small grid or its tile.
+ */
 @Composable
-fun SettingsAppGridScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
-    AppearanceBehaviorHub(
-        title = stringResource(R.string.settings_pages_app_grid),
-        intro = stringResource(R.string.settings_page_app_grid_description),
-        appearanceContents = stringResource(R.string.settings_hub_app_grid_appearance),
-        behaviorContents = stringResource(R.string.settings_hub_app_grid_behavior),
-        navController = navController,
-        onBack = onBack,
-        onNavigate = onNavigate,
-        preview = { AppGridPreview(onNavigate = onNavigate) }
-    )
-}
-
-@Composable
-fun SettingsAppGridAppearanceHubScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsAppGridScreen(
+    navController: NavController,
+    onBack: () -> Unit,
+    onNavigate: (String) -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel(),
+    homeViewModel: HomeViewModel = hiltViewModel()
+) {
     val position by viewModel.appGridBarPosition.collectAsState()
-    SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
-        // Tap a part of the miniature to edit it; the tiles below are the second way in.
-        AppGridPreview(onNavigate = onNavigate)
-        val partTiles = listOfNotNull(
+    val opensTextSearch by viewModel.appGridBarOpensTextSearch.collectAsState()
+    val keyboardAutoOpen by viewModel.appGridKeyboardAutoOpen.collectAsState()
+    val folderIds by viewModel.appGridFolderIds.collectAsState()
+    val alphabetical by viewModel.appGridFoldersAlphabetical.collectAsState()
+    val hideFolderApps by viewModel.appGridHideFolderApps.collectAsState()
+    val folders by homeViewModel.folders.collectAsState()
+
+    SettingsSubScreen(title = stringResource(R.string.settings_pages_app_grid), navController = navController, onBack = onBack) {
+        PageSettingsIntro(stringResource(R.string.settings_page_app_grid_description)) { AppGridPreview(onNavigate = onNavigate) }
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_app_grid_search_field)) {
+            SettingsChoiceRow(
+                title = stringResource(R.string.settings_search_bar_position_label),
+                options = listOf(
+                    AppGridBarPosition.TOP to stringResource(R.string.settings_app_grid_bar_top),
+                    AppGridBarPosition.BOTTOM to stringResource(R.string.settings_app_grid_bar_bottom),
+                    AppGridBarPosition.NONE to stringResource(R.string.settings_app_grid_bar_none)
+                ),
+                selected = position,
+                onSelect = viewModel::setAppGridBarPosition
+            )
+            if (position != AppGridBarPosition.NONE) {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_app_grid_bar_text_search),
+                    info = stringResource(R.string.settings_app_grid_bar_text_search_info),
+                    onClick = { viewModel.setAppGridBarOpensTextSearch(!opensTextSearch) },
+                    trailing = { Switch(checked = opensTextSearch, onCheckedChange = viewModel::setAppGridBarOpensTextSearch) }
+                )
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_app_grid_keyboard),
+                    info = stringResource(R.string.settings_app_grid_keyboard_info),
+                    enabled = !opensTextSearch,
+                    onClick = { viewModel.setAppGridKeyboardAutoOpen(!keyboardAutoOpen) },
+                    trailing = {
+                        Switch(checked = keyboardAutoOpen && !opensTextSearch, enabled = !opensTextSearch, onCheckedChange = viewModel::setAppGridKeyboardAutoOpen)
+                    }
+                )
+            }
+        }
+        SettingsPreferenceGroup(
+            title = stringResource(R.string.settings_app_grid_folders),
+            info = stringResource(R.string.settings_app_grid_folders_info)
+        ) {
+            if (folders.isEmpty()) {
+                SettingsPreference(icon = null, title = stringResource(R.string.settings_app_grid_folders_empty), onClick = null, trailing = null, enabled = false)
+            }
+            folders.forEach { folder ->
+                val shown = folder.id in folderIds
+                val toggle = { on: Boolean ->
+                    val ids = if (on) folderIds + folder.id else folderIds - folder.id
+                    // Kept in the order of the folders list.
+                    viewModel.setAppGridFolderIds(folders.map { it.id }.filter { it in ids })
+                }
+                SettingsPreference(
+                    icon = null,
+                    title = folder.name,
+                    onClick = { toggle(!shown) },
+                    trailing = { Switch(checked = shown, onCheckedChange = { toggle(it) }) }
+                )
+            }
+        }
+        if (folderIds.isNotEmpty()) {
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_app_grid_folders_placement)) {
+                RadioPreference(stringResource(R.string.settings_app_grid_folders_top), false, alphabetical, viewModel::setAppGridFoldersAlphabetical)
+                RadioPreference(stringResource(R.string.settings_app_grid_folders_alphabetical), true, alphabetical, viewModel::setAppGridFoldersAlphabetical)
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_app_grid_hide_folder_apps),
+                    onClick = { viewModel.setAppGridHideFolderApps(!hideFolderApps) },
+                    trailing = { Switch(checked = hideFolderApps, onCheckedChange = viewModel::setAppGridHideFolderApps) }
+                )
+            }
+        }
+        PageLookTiles(
+            listOfNotNull(
                 SettingsTile(androidx.compose.material.icons.Icons.Filled.Wallpaper, stringResource(R.string.settings_search_page_label)) { onNavigate("page") },
                 SettingsTile(androidx.compose.material.icons.Icons.Filled.GridView, stringResource(R.string.settings_app_grid_grid_label)) { onNavigate("grid") },
                 if (position != AppGridBarPosition.NONE) SettingsTile(androidx.compose.material.icons.Icons.Filled.Search, stringResource(R.string.settings_app_grid_search_field)) { onNavigate("search_field") } else null
             )
-        SettingsTileGrid(
-            title = stringResource(R.string.settings_parts_label),
-            tiles = partTiles,
-            // Four in one line where there are four, else three.
-            columns = if (partTiles.size == 4) 4 else 3
         )
     }
 }
@@ -208,94 +271,4 @@ fun SettingsAppGridSearchFieldScreen(
         custom = own != null,
         onResetLook = viewModel::resetAppGridBarAppearance
     )
-}
-
-/** Search field position and behavior, and which folders the grid shows. */
-@Composable
-fun SettingsAppGridBehaviorScreen(
-    navController: NavController,
-    onBack: () -> Unit,
-    viewModel: SettingsViewModel = hiltViewModel(),
-    homeViewModel: HomeViewModel = hiltViewModel()
-) {
-    val position by viewModel.appGridBarPosition.collectAsState()
-    val opensTextSearch by viewModel.appGridBarOpensTextSearch.collectAsState()
-    val keyboardAutoOpen by viewModel.appGridKeyboardAutoOpen.collectAsState()
-    val folderIds by viewModel.appGridFolderIds.collectAsState()
-    val alphabetical by viewModel.appGridFoldersAlphabetical.collectAsState()
-    val hideFolderApps by viewModel.appGridHideFolderApps.collectAsState()
-    val folders by homeViewModel.folders.collectAsState()
-
-    SettingsSubScreen(title = stringResource(R.string.settings_search_behavior_label), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_app_grid_search_field)) {
-            SettingsChoiceRow(
-                title = stringResource(R.string.settings_search_bar_position_label),
-                options = listOf(
-                    AppGridBarPosition.TOP to stringResource(R.string.settings_app_grid_bar_top),
-                    AppGridBarPosition.BOTTOM to stringResource(R.string.settings_app_grid_bar_bottom),
-                    AppGridBarPosition.NONE to stringResource(R.string.settings_app_grid_bar_none)
-                ),
-                selected = position,
-                onSelect = viewModel::setAppGridBarPosition
-            )
-        }
-        if (position != AppGridBarPosition.NONE) {
-            SettingsPreferenceGroup {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_app_grid_bar_text_search),
-                    info = stringResource(R.string.settings_app_grid_bar_text_search_info),
-                    onClick = { viewModel.setAppGridBarOpensTextSearch(!opensTextSearch) },
-                    trailing = { Switch(checked = opensTextSearch, onCheckedChange = viewModel::setAppGridBarOpensTextSearch) }
-                )
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_app_grid_keyboard),
-                    info = stringResource(R.string.settings_app_grid_keyboard_info),
-                    enabled = !opensTextSearch,
-                    onClick = { viewModel.setAppGridKeyboardAutoOpen(!keyboardAutoOpen) },
-                    trailing = {
-                        Switch(checked = keyboardAutoOpen && !opensTextSearch, enabled = !opensTextSearch, onCheckedChange = viewModel::setAppGridKeyboardAutoOpen)
-                    }
-                )
-            }
-        }
-
-        SettingsPreferenceGroup(
-            title = stringResource(R.string.settings_app_grid_folders),
-            info = stringResource(R.string.settings_app_grid_folders_info)
-        ) {
-            if (folders.isEmpty()) {
-                SettingsPreference(icon = null, title = stringResource(R.string.settings_app_grid_folders_empty), onClick = null, trailing = null, enabled = false)
-            }
-            folders.forEach { folder ->
-                val shown = folder.id in folderIds
-                val toggle = { on: Boolean ->
-                    val ids = if (on) folderIds + folder.id else folderIds - folder.id
-                    // Kept in the order of the folders list.
-                    viewModel.setAppGridFolderIds(folders.map { it.id }.filter { it in ids })
-                }
-                SettingsPreference(
-                    icon = null,
-                    title = folder.name,
-                    onClick = { toggle(!shown) },
-                    trailing = { Switch(checked = shown, onCheckedChange = { toggle(it) }) }
-                )
-            }
-        }
-        if (folderIds.isNotEmpty()) {
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_app_grid_folders_placement)) {
-                RadioPreference(stringResource(R.string.settings_app_grid_folders_top), false, alphabetical, viewModel::setAppGridFoldersAlphabetical)
-                RadioPreference(stringResource(R.string.settings_app_grid_folders_alphabetical), true, alphabetical, viewModel::setAppGridFoldersAlphabetical)
-            }
-            SettingsPreferenceGroup {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_app_grid_hide_folder_apps),
-                    onClick = { viewModel.setAppGridHideFolderApps(!hideFolderApps) },
-                    trailing = { Switch(checked = hideFolderApps, onCheckedChange = viewModel::setAppGridHideFolderApps) }
-                )
-            }
-        }
-    }
 }

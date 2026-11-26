@@ -267,7 +267,7 @@
     <string name="settings_section_app_overview">App-Liste</string>
     <string name="settings_pages_home">Startbildschirm</string>
     <string name="settings_home_appearance_title">Aussehen</string>
-    <string name="settings_home_appearance_subtitle">Hintergrund, Statusleiste</string>
+    <string name="settings_home_appearance_subtitle">Name, Hintergrund und Statusleiste</string>
     <string name="settings_home_layout_title">Aufbau</string>
     <string name="settings_home_layout_subtitle">Panel, Widgets, Dock</string>
     <string name="settings_home_panel_label">Panel</string>
@@ -422,7 +422,6 @@
     <string name="settings_search_keyboard_auto_open">Tastatur automatisch öffnen</string>
     <string name="settings_search_page_label">Seite</string>
     <string name="settings_search_keyboard_label">Tastaturblende</string>
-    <string name="settings_search_behavior_label">Verhalten</string>
     <string name="settings_search_results_label">Ergebniskästen</string>
     <string name="settings_search_keyboard_cap_label">Tastaturblende</string>
     <string name="settings_search_keyboard_cap_info">Ein schmaler Rand direkt über der Tastatur. Hat er die Farbe deiner Tastatur, bekommt sie oben runde Ecken.</string>
@@ -748,7 +747,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_folder_look_own">Eigenes Aussehen</string>
     <string name="settings_folder_look_like_all">Wie alle Ordner</string>
     <string name="settings_folder_look_reset">Aussehen wie alle Ordner</string>
-    <string name="settings_parts_label">Teile</string>
+    <string name="settings_parts_label">Alles auf einmal</string>
     <string name="settings_colors_all">Farben aller Teile</string>
     <string name="settings_colors_intro">Wähl Farben für alles, oder tipp ein Teil in der Tabelle an und gib ihm eigene Farben. Die kleinen Bildschirme zeigen dir das Ergebnis.</string>
     <string name="settings_colors_light">Hell</string>
@@ -757,12 +756,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_colors_accent">Akzent</string>
     <string name="settings_folder_widget_height">Höhe</string>
     <string name="settings_page_search_description">Ein Feld für alles: Apps, Kontakte, Orte, Links, Einstellungen und mehr. Was nicht auf dem Handy ist, geht weiter an Suchmaschine, Karten oder KI-App.</string>
-    <string name="settings_hub_search_appearance">Seite, Suchfeld, Kategorienleiste, Ergebnisse, Tastaturblende</string>
-    <string name="settings_hub_search_behavior">Aufbau, Kategorien und ihre Reihenfolge, Suchmaschinen, KI-Apps, Favoriten</string>
-    <string name="settings_hub_app_list_appearance">Seite, Buchstaben, A–Z-Leiste, Suchbutton, Suchfeld</string>
-    <string name="settings_hub_app_list_behavior">Ausrichtung, was angezeigt wird, eigene Suche</string>
-    <string name="settings_hub_app_grid_appearance">Seite, Raster, Suchfeld</string>
-    <string name="settings_hub_app_grid_behavior">Suchfeld, Tastatur, Ordner</string>
     <string name="settings_folder_live_hint">So sieht der Ordner offen aus. Tipp auf etwas, um es zu ändern oder zu verschieben. Die gestrichelten Felder zum Hinzufügen siehst du nur hier, im Ordner selbst nicht. Mit dem Auge oben rechts siehst du ihn ohne sie.</string>
     <string name="settings_folder_add_content">App oder Element</string>
     <string name="settings_folder_add_widget">Widget</string>
@@ -1198,4 +1191,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_folder_global_intro">So sieht jeder Ordner aus, der kein eigenes Aussehen hat.</string>
     <string name="settings_folder_while_open">Während ein Ordner offen ist</string>
     <string name="folder_corners_like_all_summary">So rund wie bei „Alle Ordner“: %1$d %%</string>
+    <string name="settings_search_found_label">Ergebnisse</string>
+    <string name="settings_search_found_title">Was gefunden wird</string>
+    <string name="settings_search_found_summary">Welche Arten von Ergebnissen es gibt, ihre Reihenfolge und ob sie in der Leiste stehen</string>
 </resources>

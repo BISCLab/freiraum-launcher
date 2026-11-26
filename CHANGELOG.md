@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- App list, App grid and Text search settings on one page each instead of Appearance and Behavior: the page in small, then clearly named groups, and at the end "Appearance" with a tile for every part, the page first
+- App list: the category labels' symbol and count switches sit right under the switch that shows the labels
+- Text search: "What is found" (the table of result kinds) has its own page, reached from the main page
+- Home and every page: "Page" instead of "Appearance" for name, background and status bar, like everywhere else
+- Settings > Appearance: "All at once" instead of "Parts" over colors, corners and menus
 - Settings speak one language: "Categories page" for the page, "Contents" for what is inside, "items" for counts, "Automatic categories", "Rows per card", "Captions" in the App grid, "Alignment" in the App list, "icon" for app pictures and "symbol" for pictograms, "Button", and "Show" on every switch
 - Category contents work like a folder's: the category as a live card on top with a dashed field to add, the same two add buttons, and every change applies right away
 - All folders: one page in the same order as a single opened folder (fill, opacity, border, corner rounding, captions), then the status bar and Dock while a folder is open

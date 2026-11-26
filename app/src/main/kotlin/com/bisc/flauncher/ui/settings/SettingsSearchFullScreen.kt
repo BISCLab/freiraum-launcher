@@ -72,32 +72,73 @@ import com.bisc.flauncher.ui.home.search.icon
 import com.bisc.flauncher.ui.home.search.shownIcon
 import com.bisc.flauncher.ui.home.search.settingsLabelRes
 
-/** Text search settings hub: everything about how it looks under Appearance, everything about
- *  what it searches and where results open under Behavior. The custom in-app keyboard was
- *  removed - search always uses the system keyboard now, see [com.bisc.flauncher.ui.home.search.SearchInputBar]. */
+/**
+ * The Text search on one page: the search in small, how it is built (where the field and the rail
+ * are), the keyboard, what is found (a page of its own, it is a table), and how each part looks.
+ * The custom in-app keyboard was removed - search always uses the system keyboard now, see
+ * [com.bisc.flauncher.ui.home.search.SearchInputBar].
+ */
 @Composable
-fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
-    AppearanceBehaviorHub(
-        title = stringResource(R.string.settings_section_search_full),
-        intro = stringResource(R.string.settings_page_search_description),
-        appearanceContents = stringResource(R.string.settings_hub_search_appearance),
-        behaviorContents = stringResource(R.string.settings_hub_search_behavior),
-        navController = navController,
-        onBack = onBack,
-        onNavigate = onNavigate,
-        preview = { SearchPreview(onNavigate = onNavigate) }
-    )
-}
-
-/** Appearance hub: the page itself, then each of its elements. */
-@Composable
-fun SettingsSearchAppearanceScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsSearchFullScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val railShown by viewModel.searchBarShowCategories.collectAsState()
     val railLeft by viewModel.searchCategoryRailLeft.collectAsState()
-    SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
-        // Tap a part of the miniature to edit it; the tiles below are the second way in.
-        SearchPreview(onNavigate = onNavigate)
-        val partTiles = listOf(
+    val barAtBottom by viewModel.searchBarAtBottom.collectAsState()
+    val keyboardAutoOpen by viewModel.searchKeyboardAutoOpen.collectAsState()
+    val noLearning by viewModel.searchKeyboardNoLearning.collectAsState()
+    SettingsSubScreen(title = stringResource(R.string.settings_section_search_full), navController = navController, onBack = onBack) {
+        PageSettingsIntro(stringResource(R.string.settings_page_search_description)) { SearchPreview(onNavigate = onNavigate) }
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_search_layout_label)) {
+            SettingsChoiceRow(
+                title = stringResource(R.string.settings_app_grid_search_field),
+                options = listOf(false to stringResource(R.string.settings_app_grid_bar_top), true to stringResource(R.string.settings_app_grid_bar_bottom)),
+                selected = barAtBottom,
+                onSelect = viewModel::setSearchBarAtBottom,
+                info = stringResource(R.string.settings_search_field_position_info)
+            )
+            // The whole rail: switched off, no category has a place in it.
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_search_rail_show),
+                summary = stringResource(if (railShown) R.string.settings_search_categories_rail_on else R.string.settings_search_categories_rail_off),
+                info = stringResource(R.string.settings_search_rail_info),
+                onClick = { viewModel.setSearchBarShowCategories(!railShown) },
+                trailing = { Switch(checked = railShown, onCheckedChange = viewModel::setSearchBarShowCategories) }
+            )
+            if (railShown) {
+                SettingsChoiceRow(
+                    title = stringResource(R.string.settings_search_rail_side),
+                    options = listOf(true to stringResource(R.string.settings_search_rail_left), false to stringResource(R.string.settings_search_rail_right)),
+                    selected = railLeft,
+                    onSelect = viewModel::setSearchCategoryRailLeft
+                )
+            }
+        }
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_search_keyboard_group)) {
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_search_keyboard_auto_open),
+                info = stringResource(R.string.settings_search_keyboard_auto_open_summary),
+                onClick = { viewModel.setSearchKeyboardAutoOpen(!keyboardAutoOpen) },
+                trailing = { Switch(checked = keyboardAutoOpen, onCheckedChange = viewModel::setSearchKeyboardAutoOpen) }
+            )
+            SettingsPreference(
+                icon = null,
+                title = stringResource(R.string.settings_keyboard_no_learning),
+                summary = stringResource(R.string.settings_keyboard_no_learning_summary),
+                onClick = { viewModel.setSearchKeyboardNoLearning(!noLearning) },
+                trailing = { Switch(checked = noLearning, onCheckedChange = viewModel::setSearchKeyboardNoLearning) }
+            )
+        }
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_search_found_label)) {
+            SettingsPreference(
+                icon = Icons.Filled.ViewAgenda,
+                title = stringResource(R.string.settings_search_found_title),
+                summary = stringResource(R.string.settings_search_found_summary),
+                onClick = { onNavigate("behavior") }
+            )
+        }
+        PageLookTiles(
+            listOf(
                 SettingsTile(Icons.Filled.Wallpaper, stringResource(R.string.settings_search_page_label)) { onNavigate("page") },
                 SettingsTile(Icons.Filled.Search, stringResource(R.string.settings_app_grid_search_field)) { onNavigate(SearchElement.FIELD.route) },
                 SettingsTile(Icons.AutoMirrored.Filled.ViewSidebar, stringResource(R.string.settings_search_rail_label),
@@ -106,11 +147,6 @@ fun SettingsSearchAppearanceScreen(navController: NavController, onBack: () -> U
                 SettingsTile(Icons.AutoMirrored.Filled.Chat, stringResource(R.string.settings_search_bubble_label)) { onNavigate(SearchElement.BUBBLE.route) },
                 SettingsTile(Icons.Filled.Keyboard, stringResource(R.string.settings_search_keyboard_label)) { onNavigate("keyboard") }
             )
-        SettingsTileGrid(
-            title = stringResource(R.string.settings_parts_label),
-            tiles = partTiles,
-            // Four in one line where there are four, else three.
-            columns = if (partTiles.size == 4) 4 else 3
         )
     }
 }
@@ -209,12 +245,8 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
     val modes by viewModel.searchCategoryModes.collectAsState()
     val railShown by viewModel.searchBarShowCategories.collectAsState()
     val categoryColors by viewModel.categoryColors.collectAsState()
-    val barAtBottom by viewModel.searchBarAtBottom.collectAsState()
-    val keyboardAutoOpen by viewModel.searchKeyboardAutoOpen.collectAsState()
-    val noLearning by viewModel.searchKeyboardNoLearning.collectAsState()
-    val railLeft by viewModel.searchCategoryRailLeft.collectAsState()
     var pickingColorFor by remember { mutableStateOf<SearchCategory?>(null) }
-    SettingsSubScreen(title = stringResource(R.string.settings_search_behavior_label), navController = navController, onBack = onBack) {
+    SettingsSubScreen(title = stringResource(R.string.settings_search_found_title), navController = navController, onBack = onBack) {
         // The first time: what the table below does, until it is understood.
         val hints = remember { context.getSharedPreferences("settings_hints", android.content.Context.MODE_PRIVATE) }
         var tableUnderstood by remember { mutableStateOf(hints.getBoolean("search_table", false)) }
@@ -234,50 +266,6 @@ fun SettingsSearchBehaviorScreen(navController: NavController, onBack: () -> Uni
                 }
             }
         }
-        // Where things are and what shows; how they look is on the Appearance side.
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_search_layout_label)) {
-            SettingsChoiceRow(
-                title = stringResource(R.string.settings_app_grid_search_field),
-                options = listOf(false to stringResource(R.string.settings_app_grid_bar_top), true to stringResource(R.string.settings_app_grid_bar_bottom)),
-                selected = barAtBottom,
-                onSelect = viewModel::setSearchBarAtBottom,
-                info = stringResource(R.string.settings_search_field_position_info)
-            )
-            // The whole rail: switched off, no category has a place in it.
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_rail_show),
-                summary = stringResource(if (railShown) R.string.settings_search_categories_rail_on else R.string.settings_search_categories_rail_off),
-                info = stringResource(R.string.settings_search_rail_info),
-                onClick = { viewModel.setSearchBarShowCategories(!railShown) },
-                trailing = { Switch(checked = railShown, onCheckedChange = viewModel::setSearchBarShowCategories) }
-            )
-            if (railShown) {
-                SettingsChoiceRow(
-                    title = stringResource(R.string.settings_search_rail_side),
-                    options = listOf(true to stringResource(R.string.settings_search_rail_left), false to stringResource(R.string.settings_search_rail_right)),
-                    selected = railLeft,
-                    onSelect = viewModel::setSearchCategoryRailLeft
-                )
-            }
-        }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_search_keyboard_group)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_search_keyboard_auto_open),
-                info = stringResource(R.string.settings_search_keyboard_auto_open_summary),
-                onClick = { viewModel.setSearchKeyboardAutoOpen(!keyboardAutoOpen) },
-                trailing = { Switch(checked = keyboardAutoOpen, onCheckedChange = viewModel::setSearchKeyboardAutoOpen) }
-            )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_keyboard_no_learning),
-                summary = stringResource(R.string.settings_keyboard_no_learning_summary),
-                onClick = { viewModel.setSearchKeyboardNoLearning(!noLearning) },
-                trailing = { Switch(checked = noLearning, onCheckedChange = viewModel::setSearchKeyboardNoLearning) }
-            )
-        }
-
         Column {
             SettingsGroupLabel(stringResource(R.string.settings_search_categories_label), info = stringResource(R.string.settings_search_categories_info))
             // What the two columns do, on its own above the table.

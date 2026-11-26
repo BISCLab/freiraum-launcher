@@ -27,63 +27,23 @@ import com.bisc.flauncher.data.model.LauncherPageKind
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.search.automaticRailAppearance
 
-/** App list hub - same split as Text search: everything about how it looks under Appearance,
- *  everything about how it works under Behavior. */
+/**
+ * The App list on one page: the list in small, which side its controls are on, what is shown, and
+ * how each part looks. The same order as every page: arrangement, what is shown, look.
+ */
 @Composable
-fun SettingsAppOverviewScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
-    AppearanceBehaviorHub(
-        title = stringResource(R.string.settings_section_app_overview),
-        intro = stringResource(R.string.settings_page_app_overview_description),
-        appearanceContents = stringResource(R.string.settings_hub_app_list_appearance),
-        behaviorContents = stringResource(R.string.settings_hub_app_list_behavior),
-        navController = navController,
-        onBack = onBack,
-        onNavigate = onNavigate,
-        preview = { AppListPreview(onNavigate = onNavigate) }
-    )
-}
-
-/** Appearance hub: the page itself, then each of its elements. Its accents follow the global one. */
-@Composable
-fun SettingsAppOverviewAppearanceHubScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val showSearchButton by viewModel.appListShowSearchButton.collectAsState()
-    val ownSearch by viewModel.appListOwnSearch.collectAsState()
-    SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
-        // Tap a part of the miniature to edit it; the tiles below are the second way in.
-        AppListPreview(onNavigate = onNavigate)
-        val partTiles = listOfNotNull(
-                SettingsTile(androidx.compose.material.icons.Icons.Filled.Wallpaper, stringResource(R.string.settings_search_page_label)) { onNavigate("page") },
-                SettingsTile(androidx.compose.material.icons.Icons.Filled.SortByAlpha, stringResource(R.string.settings_part_letters_short)) { onNavigate("section_letters") },
-                SettingsTile(androidx.compose.material.icons.Icons.Filled.FontDownload, stringResource(R.string.settings_app_overview_az_index_label)) { onNavigate("az_index") },
-                SettingsTile(androidx.compose.material.icons.Icons.Filled.Search, stringResource(R.string.settings_app_list_search_button)) { onNavigate("search_button") },
-                if (showSearchButton && ownSearch) SettingsTile(androidx.compose.material.icons.Icons.Filled.TextFields, stringResource(R.string.settings_app_grid_search_field)) { onNavigate("search_field") } else null
-            )
-        SettingsTileGrid(
-            title = stringResource(R.string.settings_parts_label),
-            tiles = partTiles,
-            // Four in one line where there are four, else three.
-            columns = if (partTiles.size == 4) 4 else 3
-        )
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_pages_categories)) {
-            CategorySymbolsSwitch("app_list", stringResource(R.string.settings_category_symbols_applist_summary), viewModel)
-            CategoryCountsSwitch("app_list", viewModel)
-        }
-    }
-}
-
-/** Behavior: which side the list's controls sit on, and which of them are shown at all. */
-@Composable
-fun SettingsAppOverviewBehaviorScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsAppOverviewScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val showAzIndex by viewModel.appListShowAzIndex.collectAsState()
     val showSearchButton by viewModel.appListShowSearchButton.collectAsState()
     val ownSearch by viewModel.appListOwnSearch.collectAsState()
     val categoryChips by viewModel.appListCategoryChips.collectAsState()
     val handedness by viewModel.appOverviewHandedness.collectAsState()
-    SettingsSubScreen(title = stringResource(R.string.settings_search_behavior_label), navController = navController, onBack = onBack) {
+    SettingsSubScreen(title = stringResource(R.string.settings_section_app_overview), navController = navController, onBack = onBack) {
+        PageSettingsIntro(stringResource(R.string.settings_page_app_overview_description)) { AppListPreview(onNavigate = onNavigate) }
         SettingsPreferenceGroup(title = stringResource(R.string.settings_app_overview_alignment_label)) {
             HandednessPreviews(selected = handedness, onSelect = viewModel::setAppOverviewHandedness)
         }
-        SettingsPreferenceGroup {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_categories_shown_label)) {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_app_overview_az_index_label),
@@ -105,6 +65,9 @@ fun SettingsAppOverviewBehaviorScreen(navController: NavController, onBack: () -
                 onClick = { viewModel.setAppListOwnSearch(!ownSearch) },
                 trailing = { Switch(checked = ownSearch, enabled = showSearchButton, onCheckedChange = viewModel::setAppListOwnSearch) }
             )
+        }
+        // The categories above the list, with what each of them shows.
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_pages_categories)) {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_app_list_category_chips),
@@ -112,7 +75,20 @@ fun SettingsAppOverviewBehaviorScreen(navController: NavController, onBack: () -
                 onClick = { viewModel.setAppListCategoryChips(!categoryChips) },
                 trailing = { Switch(checked = categoryChips, onCheckedChange = viewModel::setAppListCategoryChips) }
             )
+            if (categoryChips) {
+                CategorySymbolsSwitch("app_list", stringResource(R.string.settings_category_symbols_applist_summary), viewModel)
+                CategoryCountsSwitch("app_list", viewModel)
+            }
         }
+        PageLookTiles(
+            listOfNotNull(
+                SettingsTile(androidx.compose.material.icons.Icons.Filled.Wallpaper, stringResource(R.string.settings_search_page_label)) { onNavigate("page") },
+                SettingsTile(androidx.compose.material.icons.Icons.Filled.SortByAlpha, stringResource(R.string.settings_part_letters_short)) { onNavigate("section_letters") },
+                if (showAzIndex) SettingsTile(androidx.compose.material.icons.Icons.Filled.FontDownload, stringResource(R.string.settings_app_overview_az_index_label)) { onNavigate("az_index") } else null,
+                if (showSearchButton) SettingsTile(androidx.compose.material.icons.Icons.Filled.Search, stringResource(R.string.settings_app_list_search_button)) { onNavigate("search_button") } else null,
+                if (showSearchButton && ownSearch) SettingsTile(androidx.compose.material.icons.Icons.Filled.TextFields, stringResource(R.string.settings_app_grid_search_field)) { onNavigate("search_field") } else null
+            )
+        )
     }
 }
 

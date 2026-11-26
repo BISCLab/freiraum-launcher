@@ -27,35 +27,29 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
 
-/** The start of a page with two sides (Text search, App list, App grid): what the page is, then two
- *  large cards - Appearance (how it looks) and Behavior (what it does) - each saying what's inside. */
+/** The first lines of a page's settings: the page in small (a tap on a part opens where it is set)
+ *  and what the page is for. */
 @Composable
-internal fun AppearanceBehaviorHub(
-    title: String,
-    intro: String,
-    appearanceContents: String,
-    behaviorContents: String,
-    navController: NavController,
-    onBack: () -> Unit,
-    onNavigate: (String) -> Unit,
-    /** The page in miniature; a tap on a part opens it. */
-    preview: (@Composable () -> Unit)? = null
-) {
-    SettingsSubScreen(title = title, navController = navController, onBack = onBack) {
-        preview?.invoke()
-        Text(
-            intro,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 4.dp)
-        )
-        SettingsTileGrid(
-            tiles = listOf(
-                SettingsTile(Icons.Filled.Palette, stringResource(R.string.settings_home_appearance_title), appearanceContents) { onNavigate("appearance") },
-                SettingsTile(Icons.Filled.Tune, stringResource(R.string.settings_search_behavior_label), behaviorContents) { onNavigate("behavior") }
-            )
-        )
-    }
+internal fun PageSettingsIntro(intro: String, preview: @Composable () -> Unit) {
+    preview()
+    Text(
+        intro,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(horizontal = 4.dp)
+    )
+}
+
+/** The last group of a page's settings: how its parts look, each a tile to its own page, the page
+ *  itself first. The same on every page. */
+@Composable
+internal fun PageLookTiles(tiles: List<SettingsTile>) {
+    SettingsTileGrid(
+        title = stringResource(R.string.settings_home_appearance_title),
+        tiles = tiles,
+        // Four in one line where there are four, else three.
+        columns = if (tiles.size == 4) 4 else 3
+    )
 }
 
 @Composable

@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ViewAgenda
 import androidx.compose.foundation.layout.Row
@@ -64,7 +65,7 @@ fun SettingsHomeScreenHub(pageId: Long, navController: NavController, onBack: ()
         PagePreview(pageId = pageId, isHome = true, navController = navController)
         SettingsTileGrid(
             tiles = listOf(
-                SettingsTile(Icons.Filled.Palette, stringResource(R.string.settings_home_appearance_title), stringResource(R.string.settings_home_appearance_subtitle)) { onNavigate("appearance") },
+                SettingsTile(androidx.compose.material.icons.Icons.Filled.Wallpaper, stringResource(R.string.settings_search_page_label), stringResource(R.string.settings_home_appearance_subtitle)) { onNavigate("appearance") },
                 SettingsTile(Icons.Filled.ViewAgenda, stringResource(R.string.settings_home_layout_title), stringResource(R.string.settings_home_layout_subtitle)) { onNavigate("layout") }
             )
         )
@@ -84,7 +85,7 @@ fun SettingsPageAppearanceScreen(pageId: Long, navController: NavController, onB
     val globalBackground by viewModel.globalBackground.collectAsState()
 
     // The same three groups as on the App list, App grid and Text search pages.
-    SettingsSubScreen(title = stringResource(R.string.settings_home_appearance_title), navController = navController, onBack = onBack) {
+    SettingsSubScreen(title = stringResource(R.string.settings_search_page_label), navController = navController, onBack = onBack) {
         pages.find { it.id == pageId }?.let { page ->
             SettingsPreferenceGroup {
                 PageIdentityRows(
