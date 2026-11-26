@@ -82,7 +82,7 @@ fun SettingsFolderScreen(navController: NavController, onBack: () -> Unit, viewM
                     Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
                         row.forEach { folder ->
                             if (folder == null) {
-                                NewItemTile(stringResource(R.string.settings_folder_create), Modifier.width(tileWidth)) { showCreateDialog = true }
+                                NewItemTile(stringResource(R.string.settings_folder_create), Modifier.width(tileWidth), lines = 2) { showCreateDialog = true }
                             } else {
                                 FolderTile(
                                     folder = folder,
@@ -136,12 +136,21 @@ private fun FolderTile(folder: Folder, items: List<FolderItem>, viewModel: Setti
             maxLines = 1,
             textAlign = TextAlign.Center
         )
+        // What is set for this folder alone, so it shows at a glance.
+        Text(
+            if (folder.appearanceOverrideEnabled || folder.borderOverrideEnabled) stringResource(R.string.settings_folder_look_own) else " ",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
 /** The first tile of an overview of tiles: a plus, to make a new one. */
 @Composable
-internal fun NewItemTile(label: String, modifier: Modifier, onClick: () -> Unit) {
+internal fun NewItemTile(label: String, modifier: Modifier, lines: Int = 1, onClick: () -> Unit) {
     val shape = RoundedCornerShape(22.dp)
     Column(
         modifier = modifier
@@ -157,6 +166,7 @@ internal fun NewItemTile(label: String, modifier: Modifier, onClick: () -> Unit)
         ) { Icon(Icons.Filled.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary) }
         Spacer(Modifier.height(10.dp))
         Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
-        Text(" ", style = MaterialTheme.typography.labelSmall)
+        // As tall as the tiles beside it.
+        repeat(lines) { Text(" ", style = MaterialTheme.typography.labelSmall) }
     }
 }

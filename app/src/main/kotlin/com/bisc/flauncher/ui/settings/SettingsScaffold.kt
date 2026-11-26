@@ -175,7 +175,6 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
         "settings/appearance/animations" -> stringResource(R.string.settings_motion_label)
         "settings/folder" -> stringResource(R.string.settings_section_folder)
         "settings/folder/global" -> stringResource(R.string.settings_folder_global_label)
-        "settings/folder/global/visibility" -> stringResource(R.string.settings_folder_visibility_label)
         "settings/folder/{folderId}" -> {
             val viewModel: SettingsViewModel = hiltViewModel(entry)
             val folders by viewModel.folders.collectAsState()

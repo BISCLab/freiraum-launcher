@@ -224,8 +224,7 @@
 
     <string name="settings_section_folder">Ordner</string>
     <string name="settings_folder_title">Ordner</string>
-    <string name="settings_folder_global_label">Vorlage für alle Ordner</string>
-    <string name="settings_folder_visibility_label">Sichtbarkeit</string>
+    <string name="settings_folder_global_label">Alle Ordner</string>
     <string name="settings_folder_create">Ordner erstellen</string>
     <string name="settings_folder_edit_title">Ordner bearbeiten</string>
     <string name="settings_folder_name_label">Name</string>
@@ -1197,4 +1196,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_categories_order_summary">So stehen die Kategorien auf der Seite, in der Suche und in der App-Liste</string>
     <string name="settings_categories_tile_smart">Automatisch · %1$d</string>
     <string name="settings_category_pick_elements_title">Elemente hinzufügen</string>
+    <string name="settings_folder_global_intro">So sieht jeder Ordner aus, der kein eigenes Aussehen hat.</string>
+    <string name="settings_folder_while_open">Während ein Ordner offen ist</string>
 </resources>

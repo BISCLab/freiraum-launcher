@@ -53,6 +53,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
+import com.bisc.flauncher.data.model.labelFace
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -174,14 +176,35 @@ internal fun CategoryChip(
 ) {
     val colors = resolveElementColors(look)
     val accent = categoryColor(category)
-    val shape = androidx.compose.foundation.shape.CircleShape
-    val ink = if (selected) inkOn(accent) else colors.contentColor
+    // A category shows as its label, as set under "Label"; not chosen ones a little faded. "All" has
+    // no label of its own and keeps the look of the elements around it.
+    val face = category?.labelFace()
+    val labelFill = face?.surfaceFill(accent)
+    val shape = if (face != null) com.bisc.flauncher.ui.theme.PartCornerShape(face.ownCornerPercent ?: 100) else androidx.compose.foundation.shape.CircleShape
+    val ink = when {
+        face != null -> face.symbolColor?.let { Color(it) } ?: labelFill?.let { inkOn(it) } ?: colors.contentColor
+        selected -> inkOn(accent)
+        else -> colors.contentColor
+    }
     Row(
         modifier = modifier
             .heightIn(min = 40.dp)
+            .then(if (face != null && !selected) Modifier.alpha(0.55f) else Modifier)
             .clip(shape)
-            .then(if (selected) Modifier.background(accent) else Modifier.background(colors.background, alpha = colors.backgroundAlpha))
-            .then(if (colors.showBorder && !selected) Modifier.border(colors.borderWidth, colors.borderColor, shape) else Modifier)
+            .then(
+                when {
+                    face != null -> if (labelFill != null) Modifier.background(labelFill.copy(alpha = labelFill.alpha * (face.surfaceAlpha ?: 1f))) else Modifier
+                    selected -> Modifier.background(accent)
+                    else -> Modifier.background(colors.background, alpha = colors.backgroundAlpha)
+                }
+            )
+            .then(
+                when {
+                    face != null -> if (face.hasBorder) Modifier.border((face.borderWidth ?: 1.5f).dp, face.borderColor?.let { Color(it) } ?: if (labelFill != null) ink.copy(alpha = 0.6f) else accent, shape) else Modifier
+                    colors.showBorder && !selected -> Modifier.border(colors.borderWidth, colors.borderColor, shape)
+                    else -> Modifier
+                }
+            )
             .clickable(onClick = onClick)
             .padding(start = 12.dp, end = 14.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -191,7 +214,7 @@ internal fun CategoryChip(
             if (category == null) {
                 Icon(androidx.compose.material.icons.Icons.Filled.Apps, contentDescription = null, tint = ink, modifier = Modifier.size(18.dp))
             } else if (category.hasSymbol) {
-                CategorySymbol(category, 18.dp, if (selected) ink else accent)
+                CategorySymbol(category, 18.dp, if (labelFill != null || face?.symbolColor != null) ink else accent)
             }
         }
         Text(label, color = ink, style = MaterialTheme.typography.labelLarge, maxLines = 1)

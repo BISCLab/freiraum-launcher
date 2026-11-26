@@ -1,7 +1,5 @@
 package com.bisc.flauncher.ui.settings
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -12,65 +10,63 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
 
-/** The folder-wide appearance/border/visibility presets shared by every folder - a hub mirroring
- *  the Dock's own Appearance/Border/Visibility split (see SettingsDockScreen.kt), rather than one
- *  long flat screen. An individual folder can still override Appearance and Border independently
- *  for itself (see SettingsFolderEditScreen). */
+/**
+ * How every folder without a look of its own looks once opened, in the same order as a single
+ * folder's "Opened folder": fill, opacity, border, corner rounding, captions; then what happens
+ * around a folder while it is open. Everything is a draft, written with Save.
+ */
 @Composable
-fun SettingsFolderGlobalScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val saved by viewModel.folderCardAppearance.collectAsState()
-    val corner by viewModel.folderCornerPercent.collectAsState()
-    ElementLookScreen(
+fun SettingsFolderGlobalScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+    val savedLook by viewModel.folderCardAppearance.collectAsState()
+    val savedCorner by viewModel.folderCornerPercent.collectAsState()
+    val savedLabels by viewModel.folderShowLabels.collectAsState()
+    val savedHideStatusBar by viewModel.folderHideStatusBar.collectAsState()
+    val savedHideDock by viewModel.folderHideDock.collectAsState()
+    var look by rememberDraft(savedLook)
+    var corner by rememberDraft(savedCorner)
+    var labels by rememberDraft(savedLabels)
+    var hideStatusBar by rememberDraft(savedHideStatusBar)
+    var hideDock by rememberDraft(savedHideDock)
+
+    SettingsSubScreen(
         title = stringResource(R.string.settings_folder_global_label),
         navController = navController,
         onBack = onBack,
-        saved = saved,
-        savedCorner = corner,
-        onSave = { look, newCorner ->
-            if (look != saved) viewModel.setFolderCardAppearance(look)
-            if (newCorner != null && newCorner != corner) viewModel.setFolderCornerPercent(newCorner)
+        onSave = {
+            if (look != savedLook) viewModel.setFolderCardAppearance(look)
+            if (corner != savedCorner) viewModel.setFolderCornerPercent(corner)
+            if (labels != savedLabels) viewModel.setFolderShowLabels(labels)
+            if (hideStatusBar != savedHideStatusBar) viewModel.setFolderHideStatusBar(hideStatusBar)
+            if (hideDock != savedHideDock) viewModel.setFolderHideDock(hideDock)
         },
-        kind = LookSampleKind.FOLDER,
-        links = {
-            SettingsPreferenceGroup {
-                SettingsPreference(
-                    icon = Icons.Filled.Visibility,
-                    title = stringResource(R.string.settings_folder_visibility_label),
-                    onClick = { onNavigate("visibility") }
-                )
-            }
+        dirty = look != savedLook || corner != savedCorner || labels != savedLabels || hideStatusBar != savedHideStatusBar || hideDock != savedHideDock,
+        header = { LookSample(LookSampleKind.FOLDER, look, corner) }
+    ) {
+        PartIntro(stringResource(R.string.settings_folder_global_intro))
+        ElementAppearanceSection(appearance = look, onAppearanceChange = { look = it }, styleGroupTitle = stringResource(R.string.settings_element_fill_label))
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
+            ExpandablePercentSlider(percent = corner, onSettled = { corner = it })
         }
-    )
-}
-
-@Composable
-fun SettingsFolderGlobalVisibilityScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val hideStatusBar by viewModel.folderHideStatusBar.collectAsState()
-    val hideDock by viewModel.folderHideDock.collectAsState()
-    val showLabels by viewModel.folderShowLabels.collectAsState()
-    val cardAppearance by viewModel.folderCardAppearance.collectAsState()
-    SettingsSubScreen(title = stringResource(R.string.settings_folder_visibility_label), navController = navController, onBack = onBack) {
-        // Everything about what's shown while a folder is open, in one card: its items' captions
-        // (each folder can override this right under its own items), status bar and dock.
-        SettingsPreferenceGroup {
-            CaptionsRows(
-                showLabels = showLabels,
-                onShowLabelsChange = viewModel::setFolderShowLabels,
-                appearance = cardAppearance,
-                onAppearanceChange = viewModel::setFolderCardAppearance
-            )
+        CaptionsSection(
+            showLabels = labels,
+            onShowLabelsChange = { labels = it },
+            appearance = look,
+            onAppearanceChange = { look = it },
+            title = stringResource(R.string.settings_captions_label)
+        )
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_folder_while_open)) {
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_folder_hide_status_bar),
-                onClick = { viewModel.setFolderHideStatusBar(!hideStatusBar) },
-                trailing = { Switch(checked = hideStatusBar, onCheckedChange = viewModel::setFolderHideStatusBar) }
+                onClick = { hideStatusBar = !hideStatusBar },
+                trailing = { Switch(checked = hideStatusBar, onCheckedChange = { hideStatusBar = it }) }
             )
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_folder_hide_dock),
                 info = stringResource(R.string.settings_folder_hide_dock_summary),
-                onClick = { viewModel.setFolderHideDock(!hideDock) },
-                trailing = { Switch(checked = hideDock, onCheckedChange = viewModel::setFolderHideDock) }
+                onClick = { hideDock = !hideDock },
+                trailing = { Switch(checked = hideDock, onCheckedChange = { hideDock = it }) }
             )
         }
     }

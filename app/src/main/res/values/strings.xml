@@ -215,8 +215,7 @@
 
     <string name="settings_section_folder">Folder</string>
 <string name="settings_folder_title">Folder</string>
-    <string name="settings_folder_global_label">Template for all folders</string>
-    <string name="settings_folder_visibility_label">Visibility</string>
+    <string name="settings_folder_global_label">All folders</string>
     <string name="settings_folder_create">Create folder</string>
     <string name="settings_folder_edit_title">Edit folder</string>
     <string name="settings_folder_name_label">Name</string>
@@ -1197,4 +1196,6 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="settings_categories_order_summary">How the categories line up on the page, in the search and in the App list</string>
     <string name="settings_categories_tile_smart">Automatic · %1$d</string>
     <string name="settings_category_pick_elements_title">Add elements</string>
+    <string name="settings_folder_global_intro">How every folder looks that has no look of its own.</string>
+    <string name="settings_folder_while_open">While a folder is open</string>
 </resources>
