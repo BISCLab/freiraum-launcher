@@ -1,0 +1,3 @@
+- App-Liste: Einstellungen als Kartenstapel. Bildschirm zeigt die Liste aus ihren echten Teilen mit Nummern, Elemente listet alle Teile, Anpassen zeigt die Optionen des gewählten Teils
+- Farbe und Verlauf öffnen sich in der Karte, jede Änderung ist sofort im Nachbau zu sehen
+- Ein Speichern für alles

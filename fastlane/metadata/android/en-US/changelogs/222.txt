@@ -1,0 +1,3 @@
+- App list: settings as a card stack. Screen shows the list from its real parts with numbers, Elements lists every part, Adjust holds the chosen part's options
+- Color and gradient open inside the card, every change shows in the replica at once
+- One Save for everything
