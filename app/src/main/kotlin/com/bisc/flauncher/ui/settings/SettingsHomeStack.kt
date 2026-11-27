@@ -80,13 +80,16 @@ fun SettingsHomeStackScreen(
     val savedPanel = rows.find { it.type == PageRowType.PANEL }
     val savedOthers = rows.filter { it.type != PageRowType.SEARCH_BAR && it.type != PageRowType.PANEL }
 
-    // Panel and Dock each as one whole row, so their changes never write over each other.
-    val panel = draft.field("panel", savedPanel) { it?.let(home::saveRow) }
-    val dock = draft.field("dock", savedDock) { it?.let(home::saveRow) }
+    // Only what the stack itself changes is kept, and put onto the row as it is stored at Save, so
+    // a change made meanwhile on a page of its own (the Panel's rows, the Dock's elements) stays.
+    val panelEdit = draft.field("panel", savedPanel?.edit()) { e -> if (e != null && savedPanel != null) home.saveRow(savedPanel.with(e)) }
+    val dockEdit = draft.field("dock", savedDock?.edit()) { e -> if (e != null && savedDock != null) home.saveRow(savedDock.with(e)) }
+    val panel = savedPanel?.let { r -> panelEdit.value?.let { r.with(it) } ?: r }
+    val dock = savedDock?.let { r -> dockEdit.value?.let { r.with(it) } ?: r }
     val order = draft.field("order", savedOthers.map { it.id }) { ids ->
-        // The Panel and Dock rows go along as the draft has them, so this write keeps their changes.
+        // Panel and Dock go along with their changes, so this write keeps them.
         val ordered = ids.mapNotNull { id -> savedOthers.find { it.id == id } } + savedOthers.filter { it.id !in ids }
-        home.reorderRows(ordered + listOfNotNull(dock.value, panel.value))
+        home.reorderRows(ordered + listOfNotNull(dock, panel))
     }
     // Rows added elsewhere meanwhile come last.
     val others = order.value.mapNotNull { id -> savedOthers.find { it.id == id } } + savedOthers.filter { it.id !in order.value }
@@ -147,7 +150,7 @@ fun SettingsHomeStackScreen(
                 }
             }
         })
-        panel.value?.let { row ->
+        panel?.let { row ->
             add(StackElement(
                 id = "panel", number = 1,
                 title = stringResource(R.string.settings_home_panel_label),
@@ -158,12 +161,12 @@ fun SettingsHomeStackScreen(
                 anchor = Offset(0.92f, 1f),
                 sample = { LookSample(LookSampleKind.PANEL, row.appearance(), row.cornerRadiusPercent) }
             ) {
-                StackShowSwitch(stringResource(R.string.stack_show), row.enabled, { panel.value = row.copy(enabled = it) })
+                StackShowSwitch(stringResource(R.string.stack_show), row.enabled, { panelEdit.value = row.copy(enabled = it).edit() })
                 StackDimmed(!row.enabled) {
                     SettingsPreferenceGroup {
                         LinkRow(stringResource(R.string.settings_panel_content_title), stringResource(R.string.settings_hub_panel_content_what), "settings/pages/$pageId/home/panel/elements")
                     }
-                    RowLook(row) { panel.value = it }
+                    RowLook(row) { panelEdit.value = it.edit() }
                 }
             })
         }
@@ -203,7 +206,7 @@ fun SettingsHomeStackScreen(
                 }
             })
         }
-        dock.value?.let { row ->
+        dock?.let { row ->
             add(StackElement(
                 id = "dock", number = others.size + 2,
                 title = stringResource(R.string.settings_home_dock_label),
@@ -213,17 +216,17 @@ fun SettingsHomeStackScreen(
                 anchor = Offset(0.92f, 0f),
                 sample = { LookSample(LookSampleKind.DOCK, row.appearance(), row.cornerRadiusPercent) }
             ) {
-                StackShowSwitch(stringResource(R.string.stack_show), row.enabled, { dock.value = row.copy(enabled = it) })
+                StackShowSwitch(stringResource(R.string.stack_show), row.enabled, { dockEdit.value = row.copy(enabled = it).edit() })
                 StackDimmed(!row.enabled) {
                     SettingsPreferenceGroup {
                         LinkRow(stringResource(R.string.settings_dock_elements_title), null, "settings/pages/$pageId/home/layout/dock/elements")
                     }
                     SettingsPreferenceGroup(title = stringResource(R.string.settings_dock_visibility_label)) {
                         DockVisibilityMode.entries.forEach { mode ->
-                            RadioPreference(dockVisibilityModeLabel(mode), mode, row.dockVisibilityMode, onSelect = { dock.value = row.copy(dockVisibilityMode = it) })
+                            RadioPreference(dockVisibilityModeLabel(mode), mode, row.dockVisibilityMode, onSelect = { dockEdit.value = row.copy(dockVisibilityMode = it).edit() })
                         }
                     }
-                    RowLook(row) { dock.value = it }
+                    RowLook(row) { dockEdit.value = it.edit() }
                 }
             })
         }
@@ -236,7 +239,7 @@ fun SettingsHomeStackScreen(
             onBack = onBack,
             draft = draft,
             elements = elements,
-            states = if (panel.value != null) listOf("normal" to stringResource(R.string.stack_state_normal), PANEL to stringResource(R.string.stack_state_panel)) else emptyList(),
+            states = if (panel != null) listOf("normal" to stringResource(R.string.stack_state_normal), PANEL to stringResource(R.string.stack_state_panel)) else emptyList(),
             startElement = startElement
         ) { state, _ ->
             HomeReplica(
@@ -245,14 +248,21 @@ fun SettingsHomeStackScreen(
                 page = page,
                 dark = dark,
                 rows = others,
-                panel = panel.value?.takeIf { state == PANEL },
-                dock = dock.value
+                panel = panel?.takeIf { state == PANEL },
+                dock = dock
             )
         }
     }
 }
 
 private const val PANEL = "panel"
+
+/** What the stack changes on the Panel and Dock rows. */
+private data class RowEdit(val enabled: Boolean, val look: ElementAppearance, val corner: Int, val visibility: DockVisibilityMode)
+
+private fun PageRow.edit() = RowEdit(enabled, appearance(), cornerRadiusPercent, dockVisibilityMode)
+
+private fun PageRow.with(e: RowEdit): PageRow = withAppearance(e.look).copy(enabled = e.enabled, cornerRadiusPercent = e.corner, dockVisibilityMode = e.visibility)
 
 /** The Home page as on the home screen, from its own parts: the rows, the Dock at the bottom and,
  *  while open, the Panel from the top. Every part is drawn, also the ones switched off. */
