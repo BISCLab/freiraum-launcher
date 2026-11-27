@@ -1,6 +1,7 @@
 package com.bisc.flauncher.ui.home
 
 import com.bisc.flauncher.ui.stackElement
+import com.bisc.flauncher.ui.stackElement
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -254,12 +255,12 @@ internal fun CategoryCard(
 
 /** The head of a category card: symbol, name, count, and the button that opens or closes it. */
 @Composable
-private fun CategoryCardHead(resolved: ResolvedCategory, expandable: Boolean, expanded: Boolean, onToggle: () -> Unit) {
+private fun CategoryCardHead(resolved: ResolvedCategory, expandable: Boolean, expanded: Boolean, onToggle: () -> Unit, symbols: Boolean, counts: Boolean) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
         Box(modifier = Modifier.weight(1f)) {
-            CategoryNamePill(resolved.category, MaterialTheme.typography.titleMedium, showSymbol = LauncherCategories.symbolsOnPage)
+            CategoryNamePill(resolved.category, MaterialTheme.typography.titleMedium, showSymbol = symbols)
         }
-        if (LauncherCategories.countsOnPage) {
+        if (counts) {
             Text(
                 resolved.members.size.toString(),
                 style = MaterialTheme.typography.labelLarge,
@@ -275,6 +276,17 @@ private fun CategoryCardHead(resolved: ResolvedCategory, expandable: Boolean, ex
     }
 }
 
+/** The page's settings as the settings replica shows them, instead of the stored ones. */
+class CategoriesPagePreview(
+    val view: String,
+    val showSearch: Boolean,
+    val cardRows: Int,
+    val symbols: Boolean,
+    val counts: Boolean,
+    /** Room for the status bar on top. */
+    val top: androidx.compose.ui.unit.Dp
+)
+
 /**
  * The Categories page: all categories as chips on top (several can be chosen, their contents show
  * together), below them every category as a card, as tabs or as a list, and a search field that
@@ -286,15 +298,21 @@ fun HomeCategoriesPage(
     hideStatusBar: Boolean,
     surfaceDark: Boolean,
     iconSizeScale: Float,
-    onManage: () -> Unit
+    onManage: () -> Unit,
+    preview: CategoriesPagePreview? = null
 ) {
     val resolved by viewModel.resolvedCategories.collectAsState()
     val rawFilter by viewModel.categoryFilter.collectAsState()
     // A category deleted meanwhile no longer counts as chosen.
-    val filter = remember(rawFilter, resolved) { rawFilter.filter { id -> resolved.any { it.category.id == id } }.toSet() }
-    val view by viewModel.categoriesView.collectAsState()
-    val showSearch by viewModel.categoriesShowSearch.collectAsState()
-    val cardRows by viewModel.categoriesCardRows.collectAsState()
+    val filter = if (preview != null) emptySet() else remember(rawFilter, resolved) { rawFilter.filter { id -> resolved.any { it.category.id == id } }.toSet() }
+    val storedView by viewModel.categoriesView.collectAsState()
+    val storedShowSearch by viewModel.categoriesShowSearch.collectAsState()
+    val storedCardRows by viewModel.categoriesCardRows.collectAsState()
+    val view = preview?.view ?: storedView
+    val showSearch = preview?.showSearch ?: storedShowSearch
+    val cardRows = preview?.cardRows ?: storedCardRows
+    val symbols = preview?.symbols ?: LauncherCategories.symbolsOnPage
+    val counts = preview?.counts ?: LauncherCategories.countsOnPage
     val boxLook by viewModel.categoryBoxLook.collectAsState()
     val (look, corner) = boxLook
     val fieldCorner by viewModel.searchFieldCornerRadiusPercent.collectAsState()
@@ -303,14 +321,20 @@ fun HomeCategoriesPage(
     val labelColor = resolveElementColors(look).contentColor
     val pageInk = if (surfaceDark) Color.White else Color.Black
     // Leaving for an app closes the page, like the app grid does after a start.
-    androidx.lifecycle.compose.LifecycleEventEffect(androidx.lifecycle.Lifecycle.Event.ON_STOP) { viewModel.closeCategories() }
+    if (preview == null) androidx.lifecycle.compose.LifecycleEventEffect(androidx.lifecycle.Lifecycle.Event.ON_STOP) { viewModel.closeCategories() }
 
     fun matches(member: CategoryMember): Boolean = query.isBlank() || labeler(member).contains(query.trim(), ignoreCase = true)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .then(if (hideStatusBar) Modifier.windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top)) else Modifier.statusBarsPadding())
+            .then(
+                when {
+                    preview != null -> Modifier.padding(top = preview.top)
+                    hideStatusBar -> Modifier.windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top))
+                    else -> Modifier.statusBarsPadding()
+                }
+            )
             // Above the keyboard while searching, above the navigation bar otherwise.
             .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
             .padding(top = 12.dp),
@@ -353,7 +377,7 @@ fun HomeCategoriesPage(
             // adds or takes away a category from what is shown.
             LazyRow(
                 state = chipsState,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().stackElement("chips"),
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -366,7 +390,7 @@ fun HomeCategoriesPage(
                         selected = filter.isEmpty() && !tabs,
                         look = look,
                         onClick = { viewModel.toggleCategoryFilter(LauncherCategories.ALL) },
-                        showSymbol = LauncherCategories.symbolsOnPage
+                        showSymbol = symbols
                     )
                 }
                 items(resolved, key = { it.category.id }) { r ->
@@ -374,14 +398,14 @@ fun HomeCategoriesPage(
                     CategoryChip(
                         category = r.category,
                         label = r.category.name,
-                        count = r.members.size.takeIf { LauncherCategories.countsOnPage },
+                        count = r.members.size.takeIf { counts },
                         selected = if (tabs) pagerState.currentPage == index else r.category.id in filter,
                         look = look,
                         onClick = {
                             if (tabs) scope.launch { pagerState.animateScrollToPage(index) }
                             else viewModel.toggleCategoryFilter(r.category.id)
                         },
-                        showSymbol = LauncherCategories.symbolsOnPage
+                        showSymbol = symbols
                     )
                 }
             }
@@ -391,7 +415,7 @@ fun HomeCategoriesPage(
                 }
             }
             Spacer(Modifier.height(12.dp))
-            BoxWithConstraints(modifier = Modifier.fillMaxWidth().weight(1f)) {
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth().weight(1f).stackElement("cards")) {
                 val columns = categoryColumns(maxWidth - 56.dp)
                 val chosen = if (tabs) emptyList() else resolved.filter { it.category.id in filter }
                 when {
@@ -416,7 +440,7 @@ fun HomeCategoriesPage(
                         LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp)) {
                             item {
                                 CategoryCard(look, corner) {
-                                    CategoryCardHead(r, expandable = false, expanded = true, onToggle = {})
+                                    CategoryCardHead(r, expandable = false, expanded = true, onToggle = {}, symbols = symbols, counts = counts)
                                     if (members.isEmpty()) {
                                         Text(stringResource(R.string.categories_nothing), modifier = Modifier.padding(12.dp), color = labelColor)
                                     } else {
@@ -444,7 +468,7 @@ fun HomeCategoriesPage(
                                 val limit = columns * cardRows
                                 val open = list || searching || expanded
                                 CategoryCard(look, corner, animateSize = true) {
-                                    CategoryCardHead(r, expandable = !list && !searching && members.size > limit, expanded = expanded, onToggle = { expanded = !expanded })
+                                    CategoryCardHead(r, expandable = !list && !searching && members.size > limit, expanded = expanded, onToggle = { expanded = !expanded }, symbols = symbols, counts = counts)
                                     if (members.isEmpty()) {
                                         Text(stringResource(R.string.categories_nothing), modifier = Modifier.padding(12.dp), color = labelColor)
                                     } else {

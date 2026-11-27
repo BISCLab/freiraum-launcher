@@ -1,121 +1,169 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Label
-import androidx.compose.material.icons.filled.Wallpaper
-import androidx.compose.material3.Switch
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.Modifier
-import androidx.compose.material3.Text
-import androidx.compose.material3.MaterialTheme
+import com.bisc.flauncher.data.model.ElementAppearance
+import com.bisc.flauncher.data.model.ElementFillMode
 import com.bisc.flauncher.data.model.LauncherPageKind
+import com.bisc.flauncher.ui.home.CategoriesPagePreview
 import com.bisc.flauncher.ui.home.HomeViewModel
-
-/** Where a part of the Categories page settings leads: its own sub page, or the categories themselves. */
-internal fun categoriesPageRoute(sub: String): String =
-    if (sub == "manage") "settings/elements/categories" else "settings/categories/$sub"
+import com.bisc.flauncher.ui.home.LocalAppIconLoader
+import com.bisc.flauncher.ui.home.LocalSurfaceIsDark
+import com.bisc.flauncher.ui.home.dock.BackgroundFill
+import com.bisc.flauncher.ui.home.dock.resolveElementColors
+import com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark
 
 /**
- * The Categories page on one page: the page in small (a tap on the chips opens the categories, on
- * the backdrop the page itself), then how the categories are laid out, what is shown on top and
- * with each name, and the ways to the page and to the categories.
+ * The Categories page's settings as a card stack: the page built from its real parts with a number
+ * on each, the list of parts, and the options of the chosen one. Everything is a draft until Save.
  */
 @Composable
-fun SettingsCategoriesPageScreen(navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel(), settings: SettingsViewModel = hiltViewModel()) {
-    val view by viewModel.categoriesView.collectAsState()
-    val showSearch by viewModel.categoriesShowSearch.collectAsState()
-    val cardRows by viewModel.categoriesCardRows.collectAsState()
-    // The layout is on this page already; only the page and the categories have pages of their own.
-    val onNavigate: (String) -> Unit = { sub -> if (sub != "layout") navController.navigate(categoriesPageRoute(sub)) }
+fun SettingsCategoriesPageScreen(
+    navController: NavController,
+    onBack: () -> Unit,
+    startElement: String? = null,
+    home: HomeViewModel = hiltViewModel(),
+    settings: SettingsViewModel = hiltViewModel()
+) {
+    val draft: StackDraft = viewModel()
+    val pageId by home.categoriesPageId.collectAsState()
+    val page = rememberPageDraft(draft, home, pageId ?: -1L)
 
-    SettingsSubScreen(title = stringResource(R.string.settings_categories_page), navController = navController, onBack = onBack) {
-        CategoriesPreview(onNavigate = onNavigate)
-        Text(
-            stringResource(R.string.settings_page_categories_description),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 4.dp)
-        )
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_categories_view), info = stringResource(R.string.settings_categories_view_info)) {
-            RadioPreference(stringResource(R.string.settings_categories_view_cards), "CARDS", view, viewModel::setCategoriesView, summary = stringResource(R.string.settings_categories_view_cards_summary))
-            RadioPreference(stringResource(R.string.settings_categories_view_tabs), "TABS", view, viewModel::setCategoriesView, summary = stringResource(R.string.settings_categories_view_tabs_summary))
-            if (view != "TABS") {
-                SettingsChoiceRow(
-                    title = stringResource(R.string.settings_categories_card_rows),
-                    options = listOf(1 to "1", 2 to "2", 3 to "3", 0 to stringResource(R.string.settings_categories_card_rows_all)),
-                    selected = cardRows,
-                    onSelect = viewModel::setCategoriesCardRows,
-                    info = stringResource(R.string.settings_categories_card_rows_info)
-                )
-            }
-        }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_categories_shown_label)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_categories_search_field),
-                summary = stringResource(R.string.settings_categories_search_field_summary),
-                onClick = { viewModel.setCategoriesShowSearch(!showSearch) },
-                trailing = { Switch(checked = showSearch, onCheckedChange = viewModel::setCategoriesShowSearch) }
-            )
-            CategorySymbolsSwitch("page", stringResource(R.string.settings_category_symbols_page_summary), settings)
-            CategoryCountsSwitch("page", settings)
-        }
+    val view = draft.field("view", home.categoriesView.collectAsState().value, home::setCategoriesView)
+    val cardRows = draft.field("card_rows", home.categoriesCardRows.collectAsState().value, home::setCategoriesCardRows)
+    val showSearch = draft.field("search", home.categoriesShowSearch.collectAsState().value, home::setCategoriesShowSearch)
+    val symbols = draft.field("symbols", settings.categorySymbolsPage.collectAsState().value) { settings.setCategorySymbols("page", it) }
+    val counts = draft.field("counts", settings.categoryCountsPage.collectAsState().value) { settings.setCategoryCounts("page", it) }
+
+    val dark = rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), page.shown)
+    val off = stringResource(R.string.stack_summary_off)
+    val tabs = view.value == "TABS"
+
+    @Composable
+    fun ManageLink() {
         SettingsPreferenceGroup {
             SettingsPreference(
-                icon = Icons.Filled.Wallpaper,
-                title = stringResource(R.string.settings_search_page_label),
-                summary = stringResource(R.string.settings_categories_page_part_summary),
-                onClick = { onNavigate("page") }
-            )
-            SettingsPreference(
-                icon = Icons.AutoMirrored.Filled.Label,
+                icon = null,
                 title = stringResource(R.string.settings_categories_manage),
                 summary = stringResource(R.string.settings_categories_manage_summary),
-                onClick = { onNavigate("manage") }
+                onClick = { navController.navigate("settings/elements/categories") },
+                trailing = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) }
             )
         }
     }
-}
 
-/** The page itself: name and icon, background and status bar, like the App grid's page screen. */
-@Composable
-fun SettingsCategoriesPagePartScreen(navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val pageId by viewModel.categoriesPageId.collectAsState()
-    val id = pageId ?: return
-    val hideStatusBar by remember(id) { viewModel.pageHideStatusBar(id) }.collectAsState(initial = false)
-    val override by remember(id) { viewModel.pageBackgroundOverride(id) }.collectAsState(initial = null)
-    val globalShade by remember(id) { viewModel.pageGlobalShade(id) }.collectAsState(initial = null)
-    val globalBackground by viewModel.globalBackground.collectAsState()
+    val elements = listOf(
+        StackElement(
+            id = "page", number = 0,
+            title = stringResource(R.string.settings_search_page_label),
+            summary = stringResource(R.string.stack_page_summary_plain),
+            draftKeys = page.keys
+        ) {
+            PageStackOptions(page, LauncherPageKind.CATEGORIES, navController, home)
+        },
+        StackElement(
+            id = "chips", number = 1,
+            title = stringResource(R.string.stack_el_category_labels),
+            draftKeys = listOf("symbols", "counts"),
+            anchor = Offset(0.5f, 0.5f)
+        ) {
+            SettingsPreferenceGroup {
+                DraftSwitchRow(stringResource(R.string.settings_categories_symbols), symbols.value, { symbols.value = it }, summary = stringResource(R.string.settings_category_symbols_page_summary))
+                DraftSwitchRow(stringResource(R.string.settings_categories_counts), counts.value, { counts.value = it })
+            }
+            SettingsPreferenceGroup {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.stack_chips_look_link),
+                    summary = stringResource(R.string.stack_chips_look_note),
+                    onClick = { navController.navigate("settings/elements/categories") },
+                    trailing = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) }
+                )
+            }
+        },
+        StackElement(
+            id = "search_field", number = 2,
+            title = stringResource(R.string.settings_categories_search_field),
+            summary = if (showSearch.value) null else off,
+            shown = showSearch.value,
+            draftKeys = listOf("search"),
+            anchor = Offset(0.08f, 0f)
+        ) {
+            StackShowSwitch(stringResource(R.string.stack_show), showSearch.value, { showSearch.value = it }, summary = stringResource(R.string.settings_categories_search_field_summary))
+        },
+        StackElement(
+            id = "cards", number = 3,
+            title = stringResource(R.string.stack_el_category_content),
+            summary = stringResource(if (tabs) R.string.settings_categories_view_tabs else R.string.settings_categories_view_cards),
+            draftKeys = listOf("view", "card_rows"),
+            anchor = Offset(0.92f, 0.04f)
+        ) {
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_categories_view), info = stringResource(R.string.settings_categories_view_info)) {
+                RadioPreference(stringResource(R.string.settings_categories_view_cards), "CARDS", view.value, onSelect = { view.value = it }, summary = stringResource(R.string.settings_categories_view_cards_summary))
+                RadioPreference(stringResource(R.string.settings_categories_view_tabs), "TABS", view.value, onSelect = { view.value = it }, summary = stringResource(R.string.settings_categories_view_tabs_summary))
+                if (!tabs) {
+                    SettingsChoiceRow(
+                        title = stringResource(R.string.settings_categories_card_rows),
+                        options = listOf(1 to "1", 2 to "2", 3 to "3", 0 to stringResource(R.string.settings_categories_card_rows_all)),
+                        selected = cardRows.value,
+                        onSelect = { cardRows.value = it },
+                        info = stringResource(R.string.settings_categories_card_rows_info)
+                    )
+                }
+            }
+            ManageLink()
+        }
+    )
 
-    SettingsSubScreen(title = stringResource(R.string.settings_search_page_label), navController = navController, onBack = onBack) {
-        UtilityPageIdentityGroup(kind = LauncherPageKind.CATEGORIES, navController = navController, viewModel = viewModel)
-        BackgroundOverrideSection(
-            override = override,
-            global = globalBackground,
-            onUseGlobal = { viewModel.clearPageBackgroundConfig(id) },
-            onCustomColor = { viewModel.setPageBackgroundConfig(id, it) },
-            imageKey = "page_$id",
-            globalShade = globalShade,
-            onGlobalShadeChange = { viewModel.setPageGlobalShade(id, it) },
-            groupTitle = stringResource(R.string.settings_section_global_background),
-            onEditGlobal = { navController.navigate("settings/appearance/background") }
-        )
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_statusbar_label)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_statusbar_hide_page),
-                onClick = { viewModel.setPageHideStatusBar(id, !hideStatusBar) },
-                trailing = { Switch(checked = hideStatusBar, onCheckedChange = { viewModel.setPageHideStatusBar(id, it) }) }
-            )
+    val iconScale by home.iconSizeScale.collectAsState()
+    CompositionLocalProvider(LocalSurfaceIsDark provides dark) {
+        SettingsCardStackScreen(
+            title = stringResource(R.string.settings_categories_page),
+            navController = navController,
+            onBack = onBack,
+            draft = draft,
+            elements = elements,
+            startElement = startElement
+        ) { _, _ ->
+            val ink = resolveElementColors(ElementAppearance(fillMode = ElementFillMode.NONE), dark).contentColor
+            val statusTop = replicaStatusHeight()
+            CompositionLocalProvider(LocalAppIconLoader provides home.iconLoader, LocalContentColor provides ink) {
+                Box(Modifier.fillMaxSize()) {
+                    BackgroundFill(page.shown, Modifier.fillMaxSize())
+                    com.bisc.flauncher.ui.home.HomeCategoriesPage(
+                        viewModel = home,
+                        hideStatusBar = page.hideStatus.value,
+                        surfaceDark = dark,
+                        iconSizeScale = iconScale,
+                        onManage = {},
+                        // The field is always drawn; switched off it comes out faint.
+                        preview = CategoriesPagePreview(
+                            view = view.value,
+                            showSearch = true,
+                            cardRows = cardRows.value,
+                            symbols = symbols.value,
+                            counts = counts.value,
+                            top = if (page.hideStatus.value) androidx.compose.ui.unit.Dp(0f) else statusTop
+                        )
+                    )
+                    if (!page.hideStatus.value) StatusBarSketch(statusTop, ink)
+                }
+            }
         }
     }
 }
