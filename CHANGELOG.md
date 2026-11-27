@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Pages: three blocks with the same spacing. Carousel (the start page marked with a house, endless swiping in the same card), Function pages as tiles that show how each opens, and Gestures with how many are in use; the page map is gone
+- "Open with": tap it on a function page's tile, or in its own settings, to pick the gesture that opens it; a gesture that does something else asks first
+- Group titles can carry a short line that always shows
+
 ## 0.30.0
 
 - Places, links and action buttons as a card stack: the element and its Symbol, shown at its real size, with where it is used

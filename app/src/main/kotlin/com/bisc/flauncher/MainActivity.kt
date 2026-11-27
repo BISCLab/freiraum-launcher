@@ -570,6 +570,12 @@ class MainActivity : ComponentActivity() {
                             SettingsGesturesScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         settingsComposable(
+                            "settings/gestures/{gesture}",
+                            arguments = listOf(navArgument("gesture") { type = NavType.StringType })
+                        ) { backStackEntry ->
+                            SettingsGesturesScreen(navController = navController, onBack = { navController.popBackStack() }, startElement = "g_" + backStackEntry.arguments?.getString("gesture").orEmpty())
+                        }
+                        settingsComposable(
                             "settings/apps/edit/{component}",
                             arguments = listOf(navArgument("component") { type = NavType.StringType })
                         ) { backStackEntry ->

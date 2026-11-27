@@ -94,6 +94,7 @@ internal fun ColumnScope.PageStackOptions(
         DraftSwitchRow(stringResource(R.string.settings_statusbar_hide_page), page.hideStatus.value, { page.hideStatus.value = it })
     }
     if (kind != null) {
+        OpenWithGroup(kind, home, navController)
         SettingsGroupLabel(stringResource(R.string.stack_name_label))
         UtilityPageIdentityGroup(kind = kind, navController = navController, viewModel = home)
     }

@@ -147,6 +147,7 @@ fun SettingsSearchFullScreen(
                     onReset = if (textColor.value != null) ({ textColor.value = null }) else null
                 )
             }
+            OpenWithGroup(LauncherPageKind.SEARCH, home, navController)
             SettingsGroupLabel(stringResource(R.string.stack_name_label))
             UtilityPageIdentityGroup(kind = LauncherPageKind.SEARCH, navController = navController, viewModel = home)
         },

@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -82,7 +84,6 @@ fun SettingsPagesScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val allPages by viewModel.allPages.collectAsState()
-    val gestureActions by viewModel.gestureActions.collectAsState()
     val carouselEndless by viewModel.carouselEndless.collectAsState()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -90,9 +91,6 @@ fun SettingsPagesScreen(
     val rowsPages = remember(allPages) { allPages.filter { it.kind == LauncherPageKind.ROWS }.sortedBy { it.orderIndex } }
     val otherPages = remember(allPages) { allPages.filter { it.kind != LauncherPageKind.ROWS }.sortedBy { it.orderIndex } }
 
-    fun gestureForPage(pageId: Long): HomeGesture? = HomeGesture.entries.firstOrNull { gesture ->
-        gestureActions[gesture]?.type == GestureActionType.PAGE && gestureActions[gesture]?.payload?.toLongOrNull() == pageId
-    }
 
     var pickingTemplateForDirection by remember { mutableStateOf<PageDirection?>(null) }
 
@@ -105,20 +103,17 @@ fun SettingsPagesScreen(
     }
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_pages), navController = navController, onBack = onBack) {
-        SettingsGroupLabel(stringResource(R.string.pages_map_title))
-        PagesMap(rowsPages, otherPages, allPages, viewModel, onOpenPage)
-        SettingsGroupLabel(stringResource(R.string.settings_pages_carousel_label), info = stringResource(R.string.pages_swipe_info))
-        // Icon and name live in each page's own Appearance screen (see PageIdentityRows), removal at
-        // the bottom of its settings screen.
-        PagesCarousel(
-            pages = rowsPages,
-            gestureFor = ::gestureForPage,
-            onTileClick = onOpenPage,
-            onReorder = viewModel::reorderRowsPages,
-            onAddLeft = { addPage(PageDirection.LEFT) },
-            onAddRight = { addPage(PageDirection.RIGHT) }
-        )
-        SettingsPreferenceGroup {
+        // The pages to swipe, the start page marked; the endless switch belongs to them.
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_pages_carousel_label), subtitle = stringResource(R.string.pages_swipe_info)) {
+            androidx.compose.foundation.layout.Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer)) {
+                PagesCarousel(
+                    pages = rowsPages,
+                    onTileClick = onOpenPage,
+                    onReorder = viewModel::reorderRowsPages,
+                    onAddLeft = { addPage(PageDirection.LEFT) },
+                    onAddRight = { addPage(PageDirection.RIGHT) }
+                )
+            }
             SettingsPreference(
                 icon = null,
                 title = stringResource(R.string.settings_pages_carousel_endless),
@@ -128,20 +123,18 @@ fun SettingsPagesScreen(
                 trailing = { Switch(checked = carouselEndless, onCheckedChange = viewModel::setCarouselEndless) }
             )
         }
-
-        // App list and Text search don't swipe - set apart in their own row of the same tiles.
-        // Their icon and name live in their own Appearance → Page screen.
-        SettingsGroupLabel(stringResource(R.string.settings_pages_other_label), info = stringResource(R.string.pages_open_info))
-        OpenPagesList(otherPages, allPages, viewModel, onOpenPage, onGestures = { navController.navigate("settings/gestures") })
-
-        // Gestures live here, not as their own top-level entry - they're page/navigation behavior.
-        // They're the only place a gesture is assigned; the page tiles above just show it.
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_pages_behavior_label)) {
+        // The function pages, each with how it opens.
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_pages_other_label), subtitle = stringResource(R.string.pages_open_info)) {
+            FunctionPagesGrid(otherPages, allPages, viewModel, navController, onOpenPage)
+        }
+        val inUse = rememberGesturesInUse(viewModel)
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_section_gestures)) {
             SettingsPreference(
                 icon = Icons.Filled.Gesture,
-                title = stringResource(R.string.settings_section_gestures),
-                summary = stringResource(R.string.settings_card_gestures_subtitle),
-                onClick = { navController.navigate("settings/gestures") }
+                title = stringResource(R.string.pages_all_gestures),
+                summary = stringResource(R.string.pages_gestures_in_use, inUse, HomeGesture.entries.size),
+                onClick = { navController.navigate("settings/gestures") },
+                trailing = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) }
             )
         }
     }
@@ -278,7 +271,6 @@ private const val AUTO_SCROLL_STEP_PX = 14f
 @Composable
 private fun PagesCarousel(
     pages: List<LauncherPage>,
-    gestureFor: (Long) -> HomeGesture?,
     onTileClick: (LauncherPage) -> Unit,
     onReorder: (List<Long>) -> Unit,
     onAddLeft: () -> Unit,
@@ -379,7 +371,6 @@ private fun PagesCarousel(
                     pages = order,
                     width = tileWidth,
                     onClick = { onTileClick(page) },
-                    gesture = gestureFor(page.id),
                     modifier = Modifier
                         .then(if (dragging) Modifier else Modifier.animateItem())
                         .zIndex(if (dragging) 1f else 0f)
@@ -419,44 +410,13 @@ private fun PagesCarousel(
     }
 }
 
-/** The function pages as tiles in one row, never cut off at the edge. */
-@Composable
-private fun UtilityPagesRow(
-    pages: List<LauncherPage>,
-    allPages: List<LauncherPage>,
-    gestureFor: (Long) -> HomeGesture?,
-    onTileClick: (LauncherPage) -> Unit
-) {
-    androidx.compose.foundation.layout.BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        // Up to three tiles are as big as the carousel's; more share the width, all the same size.
-        val count = pages.size.coerceAtLeast(3)
-        val tileWidth = minOf((maxWidth - CAROUSEL_OUTER_PADDING * 2 - CAROUSEL_SPACING * (count - 1)) / count, carouselTileMaxWidth())
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = CAROUSEL_OUTER_PADDING, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(CAROUSEL_SPACING, Alignment.CenterHorizontally)
-        ) {
-            pages.forEach { page ->
-                PageTile(
-                    page = page,
-                    pages = allPages,
-                    width = tileWidth,
-                    onClick = { onTileClick(page) },
-                    gesture = gestureFor(page.id)
-                )
-            }
-        }
-    }
-}
-
 @Composable
 private fun PageTile(
     page: LauncherPage,
     pages: List<LauncherPage>,
     width: androidx.compose.ui.unit.Dp,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    /** The gesture that opens this page, shown as a small badge in the tile's corner. */
-    gesture: HomeGesture? = null
+    modifier: Modifier = Modifier
 ) {
     val label = pageLabel(page, pages)
     val glyph = page.iconGlyph?.let { runCatching { PageIconGlyph.valueOf(it) }.getOrNull() } ?: PageIconGlyph.forPageKind(page.kind)
@@ -479,22 +439,20 @@ private fun PageTile(
                 contentAlignment = Alignment.Center
             ) {
                 PageIconGlyphImage(glyph = glyph, tint = tint, modifier = Modifier.size(width * 0.4f))
-                if (gesture != null) {
-                    Box(
+                // The start page: a house and "Start", so the middle shows without words.
+                if (page.isHome) {
+                    Row(
                         modifier = Modifier
-                            .align(Alignment.TopEnd)
+                            .align(Alignment.TopStart)
                             .padding(8.dp)
-                            .size(28.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surface),
-                        contentAlignment = Alignment.Center
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Icon(
-                            gestureIcon(gesture),
-                            contentDescription = gestureLabel(gesture),
-                            tint = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.size(18.dp)
-                        )
+                        Icon(Icons.Filled.Home, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(14.dp))
+                        Text(stringResource(R.string.pages_start_badge), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
                     }
                 }
             }

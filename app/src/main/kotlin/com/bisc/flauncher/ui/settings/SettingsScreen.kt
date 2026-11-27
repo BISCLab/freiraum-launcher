@@ -349,10 +349,10 @@ private fun settingsAreaIcon(route: String): ImageVector {
  *  inline - this is the shared spot for a group's explanatory text, so a group's rows generally
  *  shouldn't also carry their own [SettingsPreference.info] (see that param's doc). */
 @Composable
-fun SettingsPreferenceGroup(title: String? = null, info: String? = null, content: @Composable ColumnScope.() -> Unit) {
+fun SettingsPreferenceGroup(title: String? = null, info: String? = null, subtitle: String? = null, content: @Composable ColumnScope.() -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
         if (title != null) {
-            SettingsGroupLabel(title, info = info)
+            SettingsGroupLabel(title, info = info, subtitle = subtitle)
         }
         Column(
             modifier = Modifier.accessibleOutline(SettingsCardShape).clip(SettingsCardShape),
@@ -368,7 +368,7 @@ val LocalShowSettingsTips = compositionLocalOf { false }
 /** The small secondary-colored label [SettingsPreferenceGroup] renders above its own card, with an
  *  optional expandable [info] text next to it (hidden while tips are off, see [LocalShowSettingsTips]). */
 @Composable
-fun SettingsGroupLabel(title: String, info: String? = null) {
+fun SettingsGroupLabel(title: String, info: String? = null, subtitle: String? = null) {
     @Suppress("NAME_SHADOWING") val info = info.takeIf { LocalShowSettingsTips.current }
     var infoOpen by rememberSaveable { mutableStateOf(false) }
     Column(modifier = Modifier.padding(bottom = 8.dp)) {
@@ -389,6 +389,15 @@ fun SettingsGroupLabel(title: String, info: String? = null) {
                     )
                 }
             }
+        }
+        // A short line that always shows, unlike the tip behind "?".
+        if (subtitle != null) {
+            Text(
+                subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+            )
         }
         if (info != null) {
             AnimatedVisibility(visible = infoOpen) {

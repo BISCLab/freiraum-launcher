@@ -67,7 +67,7 @@ import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
  * takes is shown faint with the reason. Everything is a draft until Save.
  */
 @Composable
-fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, startElement: String? = null, viewModel: SettingsViewModel = hiltViewModel()) {
     val home: com.bisc.flauncher.ui.home.HomeViewModel = hiltViewModel()
     val stack: StackDraft = androidx.lifecycle.viewmodel.compose.viewModel()
     val saved by viewModel.gestureActions.collectAsState()
@@ -169,7 +169,7 @@ fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, vie
             onBack = onBack,
             draft = stack,
             elements = elements,
-            startElement = null
+            startElement = startElement
         ) { _, _ ->
             val ink = if (dark) Color.White else Color.Black
             val statusTop = replicaStatusHeight()

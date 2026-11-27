@@ -159,6 +159,7 @@ private fun settingsCrumbLabel(entry: NavBackStackEntry): String {
         "settings/app_overview/az_index" -> stringResource(R.string.settings_section_app_overview)
         "settings/permissions" -> stringResource(R.string.settings_section_permissions)
         "settings/gestures" -> stringResource(R.string.settings_section_gestures)
+        "settings/gestures/{gesture}" -> stringResource(R.string.settings_section_gestures)
         "settings/apps" -> stringResource(R.string.settings_section_manage_apps)
         "settings/apps/edit/{component}" -> stringResource(R.string.settings_manage_apps_edit_title)
         "settings/appearance/icons" -> stringResource(R.string.settings_icons_label)
