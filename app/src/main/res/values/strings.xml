@@ -1206,6 +1206,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="stack_show">Show</string>
     <string name="stack_page_summary">Alignment, background, status bar, name</string>
     <string name="stack_page_summary_plain">Background, status bar, name</string>
+    <string name="gestures_page_summary">Where the gestures work</string>
+    <string name="gestures_intro">The gestures work on the start page. Tap a gesture to choose what it does.</string>
+    <string name="gestures_pages_link">How your pages connect</string>
+    <string name="gestures_change_target">Tap to change</string>
     <string name="pages_map_title">Page map</string>
     <string name="pages_map_hint">A swipe down opens what is above, a swipe up what is below. Tap a page to set it up.</string>
     <string name="pages_way_symbol">Through a symbol</string>

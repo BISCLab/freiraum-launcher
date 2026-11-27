@@ -1206,6 +1206,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="stack_show">Zeigen</string>
     <string name="stack_page_summary">Ausrichtung, Hintergrund, Statusleiste, Name</string>
     <string name="stack_page_summary_plain">Hintergrund, Statusleiste, Name</string>
+    <string name="gestures_page_summary">Wo die Gesten wirken</string>
+    <string name="gestures_intro">Die Gesten wirken auf der Startseite. Tipp auf eine Geste, um festzulegen, was sie tut.</string>
+    <string name="gestures_pages_link">Wie deine Seiten zusammenhängen</string>
+    <string name="gestures_change_target">Tippen zum Ändern</string>
     <string name="pages_map_title">Seitenkarte</string>
     <string name="pages_map_hint">Oben öffnet Wischen nach unten, unten Wischen nach oben. Tipp auf eine Seite, um sie einzustellen.</string>
     <string name="pages_way_symbol">Über ein Symbol</string>

@@ -1,5 +1,10 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import com.bisc.flauncher.ui.stackElement
 import android.content.ComponentName
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -56,11 +61,214 @@ import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.PagePickerSheet
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
-/** One row per [HomeGesture], each bindable to any [GestureActionType]. */
+/**
+ * The gestures as a card stack: the start page with every gesture where it happens, numbered;
+ * ⓪ the start page, then one part per gesture with what it does. A gesture the Dock or the Panel
+ * takes is shown faint with the reason. Everything is a draft until Save.
+ */
 @Composable
 fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    SettingsSubScreen(title = stringResource(R.string.settings_section_gestures), navController = navController, onBack = onBack) {
-        EditableGesturePhone(viewModel)
+    val home: com.bisc.flauncher.ui.home.HomeViewModel = hiltViewModel()
+    val stack: StackDraft = androidx.lifecycle.viewmodel.compose.viewModel()
+    val saved by viewModel.gestureActions.collectAsState()
+    val labeledApps by viewModel.labeledApps.collectAsState()
+    val allPages by viewModel.allPages.collectAsState()
+    val categories by viewModel.categories.collectAsState()
+    val homeDockRow by viewModel.homeDockRow.collectAsState()
+    val homePanelRow by viewModel.homePanelRow.collectAsState()
+    val shortcutAppPickerOpen by viewModel.shortcutAppPickerOpen.collectAsState()
+    val shortcutPickerForApp by viewModel.shortcutPickerForApp.collectAsState()
+    val availableShortcuts by viewModel.availableShortcuts.collectAsState()
+    var pickingAppFor by remember { mutableStateOf<HomeGesture?>(null) }
+    var pickingPageFor by remember { mutableStateOf<HomeGesture?>(null) }
+    var pickingCategoryFor by remember { mutableStateOf<HomeGesture?>(null) }
+    var pendingShortcutGesture by remember { mutableStateOf<HomeGesture?>(null) }
+
+    val actions = HomeGesture.entries.associateWith { g ->
+        stack.field("g_${g.name}", saved[g] ?: GestureAction.NONE) { viewModel.setGestureAction(g, it) }
+    }
+    val dockReason = stringResource(R.string.settings_gesture_locked_by_dock)
+    val panelReason = stringResource(R.string.settings_gesture_locked_by_panel)
+    fun locked(g: HomeGesture): String? = when {
+        g == HomeGesture.SWIPE_UP && homeDockRow?.enabled == true && homeDockRow?.dockVisibilityMode == DockVisibilityMode.MANUAL -> dockReason
+        g == HomeGesture.SWIPE_DOWN && homePanelRow?.enabled == true -> panelReason
+        else -> null
+    }
+    fun pick(g: HomeGesture, type: GestureActionType) {
+        when (type) {
+            GestureActionType.APP -> pickingAppFor = g
+            GestureActionType.SHORTCUT -> { pendingShortcutGesture = g; viewModel.openShortcutAppPicker() }
+            GestureActionType.PAGE -> pickingPageFor = g
+            GestureActionType.CATEGORY -> pickingCategoryFor = g
+            else -> actions.getValue(g).value = GestureAction(type)
+        }
+    }
+    val summaries = HomeGesture.entries.associateWith { g -> gestureActionSummary(actions.getValue(g).value, allPages, labeledApps) }
+
+    val elements = buildList {
+        add(StackElement(
+            id = "page", number = 0,
+            title = stringResource(R.string.settings_pages_home),
+            summary = stringResource(R.string.gestures_page_summary)
+        ) {
+            PartIntro(stringResource(R.string.gestures_intro))
+            SettingsPreferenceGroup {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_section_pages),
+                    summary = stringResource(R.string.gestures_pages_link),
+                    onClick = { navController.navigate("settings/pages") },
+                    trailing = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) }
+                )
+            }
+        })
+        HomeGesture.entries.forEachIndexed { i, g ->
+            val reason = locked(g)
+            val field = actions.getValue(g)
+            add(StackElement(
+                id = "g_${g.name}", number = i + 1,
+                title = gestureLabel(g),
+                summary = reason ?: summaries.getValue(g),
+                shown = reason == null,
+                draftKeys = listOf("g_${g.name}"),
+                anchor = Offset(0.5f, 0f)
+            ) {
+                if (reason != null) PartIntro(reason)
+                StackDimmed(reason != null) {
+                    SettingsPreferenceGroup(title = stringResource(R.string.settings_gesture_action_title)) {
+                        GestureActionType.entries.forEach { type ->
+                            RadioPreference(gestureActionTypeLabel(type), type, field.value.type, onSelect = { if (reason == null) pick(g, it) })
+                        }
+                    }
+                    val type = field.value.type
+                    if (type == GestureActionType.APP || type == GestureActionType.PAGE || type == GestureActionType.CATEGORY || type == GestureActionType.SHORTCUT) {
+                        SettingsPreferenceGroup {
+                            SettingsPreference(
+                                icon = null,
+                                title = summaries.getValue(g),
+                                summary = stringResource(R.string.gestures_change_target),
+                                onClick = { if (reason == null) pick(g, type) },
+                                trailing = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) }
+                            )
+                        }
+                    }
+                }
+            })
+        }
+    }
+
+    val pages by home.pages.collectAsState()
+    val homeId = pages.find { it.isHome }?.id ?: -1L
+    val global by home.globalBackground.collectAsState()
+    val background by remember(homeId) { home.pageBackgroundConfig(homeId) }.collectAsState(initial = global)
+    val dark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(com.bisc.flauncher.data.model.ElementAppearance(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE), background)
+    androidx.compose.runtime.CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalSurfaceIsDark provides dark) {
+        SettingsCardStackScreen(
+            title = stringResource(R.string.settings_section_gestures),
+            navController = navController,
+            onBack = onBack,
+            draft = stack,
+            elements = elements,
+            startElement = null
+        ) { _, _ ->
+            val ink = if (dark) Color.White else Color.Black
+            val statusTop = replicaStatusHeight()
+            Box(Modifier.fillMaxSize()) {
+                com.bisc.flauncher.ui.home.dock.BackgroundFill(background, Modifier.fillMaxSize())
+                // Where each gesture happens: down at the top, taps and pinch in the middle, up at the bottom;
+                // one finger on the left, two on the right.
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(start = 20.dp, end = 20.dp, top = statusTop + 24.dp, bottom = 48.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    @Composable
+                    fun Zone(g: HomeGesture, icon: androidx.compose.ui.graphics.vector.ImageVector, modifier: Modifier) {
+                        GestureZone(g, icon, summaries.getValue(g), ink, modifier.stackElement("g_${g.name}"))
+                    }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Zone(HomeGesture.SWIPE_DOWN, Icons.Filled.ArrowDownward, Modifier.weight(1f))
+                        Zone(HomeGesture.TWO_FINGER_SWIPE_DOWN, Icons.Filled.SwipeDown, Modifier.weight(1f))
+                    }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            Zone(HomeGesture.DOUBLE_TAP, Icons.Filled.TouchApp, Modifier.fillMaxWidth())
+                            Zone(HomeGesture.LONG_PRESS, Icons.Filled.Timer, Modifier.fillMaxWidth())
+                        }
+                        Zone(HomeGesture.PINCH_IN, Icons.Filled.Pinch, Modifier.weight(1f))
+                    }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Zone(HomeGesture.SWIPE_UP, Icons.Filled.ArrowUpward, Modifier.weight(1f))
+                        Zone(HomeGesture.TWO_FINGER_SWIPE_UP, Icons.Filled.SwipeUp, Modifier.weight(1f))
+                    }
+                }
+                StatusBarSketch(statusTop, ink)
+            }
+        }
+    }
+
+    pickingCategoryFor?.let { g ->
+        CategoryPickerSheet(
+            categories = categories,
+            onSelect = { category -> actions.getValue(g).value = GestureAction(GestureActionType.CATEGORY, category.id.toString()); pickingCategoryFor = null },
+            onDismiss = { pickingCategoryFor = null },
+            onCreate = { name ->
+                viewModel.addCategory(name) { id -> actions.getValue(g).value = GestureAction(GestureActionType.CATEGORY, id.toString()) }
+                pickingCategoryFor = null
+            }
+        )
+    }
+    pickingAppFor?.let { g ->
+        ShortcutSourceAppSheet(
+            apps = labeledApps,
+            loadIcon = viewModel::loadIcon,
+            onAppSelected = { app -> actions.getValue(g).value = GestureAction(GestureActionType.APP, app.componentName.flattenToString()); pickingAppFor = null },
+            onDismiss = { pickingAppFor = null }
+        )
+    }
+    pickingPageFor?.let { g ->
+        PagePickerSheet(
+            pages = allPages,
+            onPageSelected = { page -> actions.getValue(g).value = GestureAction(GestureActionType.PAGE, page.id.toString()); pickingPageFor = null },
+            onDismiss = { pickingPageFor = null }
+        )
+    }
+    if (shortcutAppPickerOpen) {
+        ShortcutSourceAppSheet(
+            apps = com.bisc.flauncher.util.ProfileComponents.ownOnly(labeledApps),
+            loadIcon = viewModel::loadIcon,
+            onAppSelected = viewModel::selectShortcutSourceApp,
+            onDismiss = viewModel::dismissShortcutAppPicker
+        )
+    }
+    shortcutPickerForApp?.let { app ->
+        AppShortcutPickerDialog(
+            appLabel = app.label,
+            shortcuts = availableShortcuts,
+            loadIcon = viewModel::loadShortcutIcon,
+            onShortcutSelected = { info ->
+                pendingShortcutGesture?.let { g -> actions.getValue(g).value = GestureAction(GestureActionType.SHORTCUT, "${info.`package`}|${info.id}") }
+                pendingShortcutGesture = null
+                viewModel.dismissShortcutPicker()
+            },
+            onDismiss = { pendingShortcutGesture = null; viewModel.dismissShortcutPicker() }
+        )
+    }
+}
+
+/** One gesture on the start page replica: its symbol, its name and what it does. */
+@Composable
+private fun GestureZone(gesture: HomeGesture, icon: androidx.compose.ui.graphics.vector.ImageVector, summary: String, ink: Color, modifier: Modifier) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(24.dp))
+            .background(ink.copy(alpha = 0.12f))
+            .border(1.5.dp, ink.copy(alpha = 0.35f), RoundedCornerShape(24.dp))
+            .padding(horizontal = 14.dp, vertical = 18.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(icon, contentDescription = null, tint = ink, modifier = Modifier.size(36.dp))
+        Text(gestureLabel(gesture), color = ink, style = MaterialTheme.typography.titleMedium, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.padding(top = 6.dp))
+        Text(summary, color = ink.copy(alpha = 0.8f), style = MaterialTheme.typography.bodyLarge, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
     }
 }
 
