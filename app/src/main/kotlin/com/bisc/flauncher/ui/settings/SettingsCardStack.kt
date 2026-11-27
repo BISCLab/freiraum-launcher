@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
@@ -9,6 +11,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -105,6 +108,12 @@ class StackElement(
     val onResetLook: () -> Unit = {},
     /** Said instead of "Automatic" while [ownLook] is false, e.g. "Like all folders". */
     val autoLabel: String? = null,
+    /** In lists of many (apps, folders): its own picture instead of the number. */
+    val leading: (@Composable () -> Unit)? = null,
+    /** A heading over it in the list, shown where it changes from the one before. */
+    val section: String? = null,
+    /** False = not in the list right now (a search hides it), but still there to choose. */
+    val inList: Boolean = true,
     /** The part in small on top of its options; null = none. */
     val sample: (@Composable () -> Unit)? = null,
     val options: @Composable ColumnScope.() -> Unit
@@ -125,7 +134,7 @@ internal fun stackNumberColor(number: Int): Color = NumberColors[number.mod(Numb
 class StackDraft : ViewModel() {
     private val edits = mutableStateMapOf<String, Any?>()
     private val savers = HashMap<String, (Any?) -> Unit>()
-    private var together: (() -> Unit)? = null
+    private val together = LinkedHashMap<String, () -> Unit>()
 
     val dirty: Boolean get() = edits.isNotEmpty()
     fun changed(keys: List<String>): Boolean = keys.any { it in edits }
@@ -137,11 +146,14 @@ class StackDraft : ViewModel() {
 
     /** For values that are stored as one thing (a category): runs at Save, after the single savers,
      *  while the draft still holds every change. */
-    fun saveTogether(block: () -> Unit) { together = block }
+    fun saveTogether(block: () -> Unit) { together[""] = block }
+
+    /** Like [saveTogether], one of many (each category in a list of them). */
+    fun saveTogether(id: String, block: () -> Unit) { together[id] = block }
 
     fun save() {
         edits.toMap().forEach { (key, value) -> savers[key]?.invoke(value) }
-        together?.invoke()
+        together.values.toList().forEach { it() }
         edits.clear()
     }
 }
@@ -223,9 +235,13 @@ fun SettingsCardStackScreen(
     states: List<Pair<String, String>> = emptyList(),
     /** Opened from outside on one part: its options first. */
     startElement: String? = null,
+    /** The card shown first when no part is asked for; a long list starts on Elements. */
+    firstCard: StackCard = StackCard.SCREEN,
+    /** On top of the list: a search, a way to make a new one. */
+    listHeader: (@Composable () -> Unit)? = null,
     replica: @Composable (state: String?, markers: StackMarkers) -> Unit
 ) {
-    var card by rememberSaveable { mutableStateOf(if (startElement != null) StackCard.ADJUST else StackCard.SCREEN) }
+    var card by rememberSaveable { mutableStateOf(if (startElement != null) StackCard.ADJUST else firstCard) }
     var selectedId by rememberSaveable { mutableStateOf(startElement ?: elements.first().id) }
     var stateId by rememberSaveable { mutableStateOf(elements.find { it.id == startElement }?.state) }
     val selected = elements.find { it.id == selectedId } ?: elements.first()
@@ -270,10 +286,10 @@ fun SettingsCardStackScreen(
                     onState = { stateId = it },
                     markers = markers,
                     onChoose = choose,
-                    replica = { replica(stateId, markers) }
+                    replica = { androidx.compose.runtime.CompositionLocalProvider(LocalStackSelected provides selected.id) { replica(stateId, markers) } }
                 )
             }
-            val list = @Composable { ElementsCard(elements, selected, onChoose = choose) }
+            val list = @Composable { ElementsCard(elements, selected, draft, listHeader, onChoose = choose) }
             val adjust = @Composable {
                 androidx.compose.runtime.CompositionLocalProvider(LocalStackSubPageHost provides host) {
                     AdjustCard(selected, changed = draft.changed(selected.draftKeys), host = host)
@@ -614,46 +630,125 @@ private fun Rect.inflate(by: Float) = Rect(left - by, top - by, right + by, bott
 // ---- Card 2: the list of parts ----
 
 @Composable
-private fun ElementsCard(elements: List<StackElement>, selected: StackElement, onChoose: (StackElement) -> Unit) {
-    Column(
+private fun ElementsCard(elements: List<StackElement>, selected: StackElement, draft: StackDraft, header: (@Composable () -> Unit)?, onChoose: (StackElement) -> Unit) {
+    val shown = elements.filter { it.inList }
+    androidx.compose.foundation.lazy.LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .verticalScroll(rememberScrollState())
-            .padding(10.dp),
+            .background(MaterialTheme.colorScheme.surfaceContainerLow),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(10.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Text(
-            stringResource(R.string.stack_elements_intro),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
-        )
-        elements.forEach { e ->
-            val chosen = e === selected
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(if (chosen) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainer)
-                    .clickable(onClick = { onChoose(e) })
-                    .padding(horizontal = 12.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                NumberBadge(e.number, 28.dp)
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        e.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = if (e.shown) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    e.summary?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-                }
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        item(key = "intro") {
+            if (header != null) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(bottom = 4.dp)) { header() }
+            } else {
+                Text(
+                    stringResource(R.string.stack_elements_intro),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
+                )
             }
         }
+        shown.forEachIndexed { i, e ->
+            val section = e.section
+            if (section != null && section != shown.getOrNull(i - 1)?.section) {
+                item(key = "section_$section") {
+                    Text(
+                        section,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.padding(start = 8.dp, top = 12.dp, bottom = 4.dp)
+                    )
+                }
+            }
+            item(key = e.id) {
+                val chosen = e === selected
+                val changed = draft.changed(e.draftKeys)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(if (chosen) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainer)
+                        .clickable(onClick = { onChoose(e) })
+                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    val lead = e.leading
+                    if (lead != null) Box(Modifier.size(36.dp), contentAlignment = Alignment.Center) { lead() }
+                    else NumberBadge(e.number, 28.dp, dot = changed)
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            e.title,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = if (e.shown) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        e.summary?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    }
+                    // A changed one in a list of pictures: the dot sits here.
+                    if (lead != null && changed) Box(Modifier.size(9.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+    }
+}
+
+/** The part shown in the replica right now, for replicas that draw only the chosen one. */
+val LocalStackSelected = staticCompositionLocalOf { "" }
+
+/** Tabs inside one part's options, for parts with several sides (a folder: folder, icon, window,
+ *  contents). [start] picks the first one shown. */
+@Composable
+internal fun ColumnScope.StackTabs(tabs: List<Pair<String, @Composable ColumnScope.() -> Unit>>, start: Int = 0) {
+    var tab by rememberSaveable { mutableStateOf(start.coerceIn(0, tabs.lastIndex)) }
+    Row(
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        tabs.forEachIndexed { i, (label, _) ->
+            FilterChip(selected = tab == i, onClick = { tab = i }, label = { Text(label, maxLines = 1) })
+        }
+    }
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(20.dp)) { tabs[tab].second(this) }
+}
+
+/** A search field on top of a long list. */
+@Composable
+internal fun StackSearchField(query: String, onQuery: (String) -> Unit, hint: String) {
+    androidx.compose.material3.OutlinedTextField(
+        value = query,
+        onValueChange = onQuery,
+        placeholder = { Text(hint) },
+        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+        singleLine = true,
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+/** A row that makes a new one, on top of a list. */
+@Composable
+internal fun StackAddRow(label: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        Box(Modifier.size(36.dp), contentAlignment = Alignment.Center) {
+            Icon(Icons.Filled.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        }
+        Text(label, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
     }
 }
 
@@ -715,7 +810,8 @@ private fun AdjustCard(element: StackElement, changed: Boolean, host: StackSubPa
 private fun AdjustHead(element: StackElement, changed: Boolean) {
     Column(Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 12.dp, bottom = 4.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            NumberBadge(element.number, 28.dp, dot = changed)
+            val lead = element.leading
+            if (lead != null) Box(Modifier.size(36.dp), contentAlignment = Alignment.Center) { lead() } else NumberBadge(element.number, 28.dp, dot = changed)
             Text(element.title, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
         }
         element.sample?.invoke()

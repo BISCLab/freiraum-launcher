@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.layout.ColumnScope
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.async
 import android.content.ComponentName
@@ -48,83 +49,106 @@ import com.bisc.flauncher.data.settings.IconShape
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/** App icons for every app at once: a live preview of real apps on top, then the shape as picture
- *  tiles, the size, and the icon packs as cards with three of their icons. Each app can still get
- *  its own in its own settings. */
+/** What is set for all apps, as a draft in a stack: shape, size, pack, themed icons and dots. */
+internal class AllAppsDraft(
+    val shape: DraftField<IconShape>,
+    val size: DraftField<Int>,
+    val pack: DraftField<String?>,
+    val themed: DraftField<Boolean>,
+    val dots: DraftField<Boolean>
+) {
+    val keys = listOf("all:shape", "all:size", "all:pack", "all:themed", "all:dots")
+}
+
 @Composable
-fun SettingsAppsGlobalScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val iconShape by viewModel.iconShape.collectAsState()
-    val iconSizePercent by viewModel.iconSizePercent.collectAsState()
-    val activeIconPack by viewModel.activeIconPack.collectAsState()
-    val iconPacks by viewModel.iconPacks.collectAsState()
+internal fun rememberAllAppsDraft(draft: StackDraft, viewModel: SettingsViewModel): AllAppsDraft = AllAppsDraft(
+    shape = draft.field("all:shape", viewModel.iconShape.collectAsState().value, viewModel::setIconShape),
+    size = draft.field("all:size", viewModel.iconSizePercent.collectAsState().value, viewModel::setIconSizePercent),
+    pack = draft.field("all:pack", viewModel.activeIconPack.collectAsState().value, viewModel::selectIconPack),
+    themed = draft.field("all:themed", viewModel.themedIcons.collectAsState().value, viewModel::setThemedIcons),
+    dots = draft.field("all:dots", viewModel.showNotificationDots.collectAsState().value, viewModel::setShowNotificationDots)
+)
+
+/** A few well-known apps first, so the samples look familiar. */
+@Composable
+internal fun rememberIconSamples(viewModel: SettingsViewModel): List<AppInfo> {
     val apps by viewModel.labeledApps.collectAsState()
-    // Well-known apps first, so the samples look familiar.
-    val samples = remember(apps) {
+    return remember(apps) {
         val preferred = listOf("com.android.chrome", "com.google.android.dialer", "com.google.android.apps.messaging", "com.google.android.GoogleCamera", "com.google.android.apps.maps", "com.android.settings")
         val own = apps.filter { !com.bisc.flauncher.util.ProfileComponents.isProfile(it.componentName) }
         (own.filter { it.componentName.packageName in preferred } + own.sortedBy { it.label.lowercase() }).distinct().take(5)
     }
+}
 
-    SettingsSubScreen(title = stringResource(R.string.settings_icons_label), navController = navController, onBack = onBack) {
-        IconsPreview(samples, iconSizePercent, iconShape, activeIconPack, viewModel)
+/** The samples as the stack's replica shows them: real apps in the shape, size and pack of the draft. */
+@Composable
+internal fun AllAppsSample(all: AllAppsDraft, viewModel: SettingsViewModel) {
+    IconsPreview(rememberIconSamples(viewModel), all.size.value, all.shape.value, all.pack.value, viewModel)
+}
 
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_shape_label)) {
-            Row(modifier = Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                listOf(
-                    IconShape.ROUNDED_SQUARE to R.string.settings_icon_shape_rounded_square,
-                    IconShape.CIRCLE to R.string.settings_icon_shape_circle
-                ).forEach { (shape, label) ->
-                    ShapeTile(
-                        label = stringResource(label),
-                        shape = shape,
-                        iconPack = activeIconPack,
-                        viewModel = viewModel,
-                        sample = samples.firstOrNull(),
-                        selected = iconShape == shape,
-                        onClick = { viewModel.setIconShape(shape) },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
-        }
-
-        // Themed icons exist from Android 13 on.
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            val themed by viewModel.themedIcons.collectAsState()
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_themed_icons_label)) {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_themed_icons),
-                    summary = stringResource(R.string.settings_themed_icons_summary),
-                    onClick = { viewModel.setThemedIcons(!themed) },
-                    trailing = { androidx.compose.material3.Switch(checked = themed, onCheckedChange = viewModel::setThemedIcons) }
+/** ⓪ "All apps": shape, themed icons, dots, size and icon pack for every app without its own. */
+@Composable
+internal fun ColumnScope.AllAppsOptions(all: AllAppsDraft, viewModel: SettingsViewModel) {
+    val iconPacks by viewModel.iconPacks.collectAsState()
+    val samples = rememberIconSamples(viewModel)
+    val context = LocalContext.current
+    SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_shape_label)) {
+        Row(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            listOf(
+                IconShape.ROUNDED_SQUARE to R.string.settings_icon_shape_rounded_square,
+                IconShape.CIRCLE to R.string.settings_icon_shape_circle
+            ).forEach { (shape, label) ->
+                ShapeTile(
+                    label = stringResource(label),
+                    shape = shape,
+                    iconPack = all.pack.value,
+                    viewModel = viewModel,
+                    sample = samples.firstOrNull(),
+                    selected = all.shape.value == shape,
+                    onClick = { all.shape.value = shape },
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
-
-        NotificationDotsGroup(viewModel)
-
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_size_label)) {
-            ExpandableIconSizeSlider(percent = iconSizePercent, onSettled = viewModel::setIconSizePercent)
+    }
+    // Themed icons exist from Android 13 on.
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+        SettingsPreferenceGroup(title = stringResource(R.string.settings_themed_icons_label)) {
+            DraftSwitchRow(stringResource(R.string.settings_themed_icons), all.themed.value, { all.themed.value = it }, summary = stringResource(R.string.settings_themed_icons_summary))
         }
-
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_section_icon_pack)) {
-            val cards = listOf<IconPackInfo?>(null) + iconPacks
-            Column(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                cards.chunked(2).forEach { row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        row.forEach { pack ->
-                            PackCard(
-                                pack = pack,
-                                samples = samples.take(3),
-                                selected = activeIconPack == pack?.packageName,
-                                onClick = { viewModel.selectIconPack(pack?.packageName) },
-                                viewModel = viewModel,
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                        if (row.size == 1) Spacer(Modifier.weight(1f))
+    }
+    var tick by remember { androidx.compose.runtime.mutableIntStateOf(0) }
+    // Checked again whenever the page comes back, e.g. after granting access in the system.
+    androidx.lifecycle.compose.LifecycleResumeEffect(Unit) { tick++; onPauseOrDispose { } }
+    val access = tick.let { androidx.core.app.NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName) }
+    SettingsPreferenceGroup(title = stringResource(R.string.settings_dots_label), info = stringResource(R.string.settings_dots_info)) {
+        DraftSwitchRow(
+            stringResource(R.string.settings_dots_show), all.dots.value, { all.dots.value = it },
+            summary = if (all.dots.value && !access) stringResource(R.string.settings_dots_no_access) else null
+        )
+        if (all.dots.value && !access) {
+            SettingsPreference(icon = null, title = stringResource(R.string.settings_dots_grant), onClick = { com.bisc.flauncher.util.openNotificationAccessSettings(context) })
+        }
+    }
+    SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_size_label)) {
+        ExpandableIconSizeSlider(percent = all.size.value, onSettled = { all.size.value = it })
+    }
+    SettingsPreferenceGroup(title = stringResource(R.string.settings_section_icon_pack)) {
+        val cards = listOf<IconPackInfo?>(null) + iconPacks
+        Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            cards.chunked(2).forEach { row ->
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    row.forEach { pack ->
+                        PackCard(
+                            pack = pack,
+                            samples = samples.take(3),
+                            selected = all.pack.value == pack?.packageName,
+                            onClick = { all.pack.value = pack?.packageName },
+                            viewModel = viewModel,
+                            modifier = Modifier.weight(1f)
+                        )
                     }
+                    if (row.size == 1) Spacer(Modifier.weight(1f))
                 }
             }
         }

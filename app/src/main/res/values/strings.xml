@@ -1206,6 +1206,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="stack_show">Show</string>
     <string name="stack_page_summary">Alignment, background, status bar, name</string>
     <string name="stack_page_summary_plain">Background, status bar, name</string>
+    <string name="stack_all_apps">All apps</string>
+    <string name="stack_all_apps_summary">Shape, size and icon pack for all</string>
     <string name="pages_start_badge">Start</string>
     <string name="pages_all_gestures">All gestures</string>
     <string name="pages_gestures_in_use">%1$d of %2$d in use</string>

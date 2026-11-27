@@ -1206,6 +1206,8 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="stack_show">Zeigen</string>
     <string name="stack_page_summary">Ausrichtung, Hintergrund, Statusleiste, Name</string>
     <string name="stack_page_summary_plain">Hintergrund, Statusleiste, Name</string>
+    <string name="stack_all_apps">Alle Apps</string>
+    <string name="stack_all_apps_summary">Form, Größe und Icon-Paket für alle</string>
     <string name="pages_start_badge">Start</string>
     <string name="pages_all_gestures">Alle Gesten</string>
     <string name="pages_gestures_in_use">%1$d von %2$d belegt</string>

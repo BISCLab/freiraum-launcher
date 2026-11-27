@@ -1,5 +1,9 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.ui.graphics.Color
+import com.bisc.flauncher.ui.stackElement
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.automirrored.filled.List
@@ -69,256 +73,181 @@ private fun groupItemShape(index: Int, count: Int): Shape {
     }
 }
 
-/** Every installed app in one place: a link to the shared icon presets up top, then the apps themselves. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SettingsAppsScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val apps by viewModel.labeledApps.collectAsState()
-    val overrides by viewModel.appOverrides.collectAsState()
-    var filter by rememberSaveable { mutableStateOf("") }
-    val iconPacks by viewModel.iconPacks.collectAsState()
-    val activeIconPack by viewModel.activeIconPack.collectAsState()
-
-    val searching = filter.isNotBlank()
-    val filteredApps = remember(apps, filter) {
-        if (filter.isBlank()) apps else apps.filter { it.label.contains(filter, ignoreCase = true) }
-    }
-    val customizedApps = remember(filteredApps, overrides, searching) {
-        if (searching) emptyList() else filteredApps.filter { overrides[it.componentName.flattenToString()] != null }
-    }
-    val remainingApps = remember(filteredApps, customizedApps, searching) {
-        if (searching) filteredApps else filteredApps - customizedApps.toSet()
-    }
-
-    CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalAppIconLoader provides viewModel.iconLoader) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                windowInsets = settingsTopBarInsets(),
-                title = { Text(stringResource(R.string.settings_section_manage_apps)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = androidx.compose.ui.res.stringResource(com.bisc.flauncher.R.string.settings_back))
-                    }
-                }
-            )
-        },
-        bottomBar = { SettingsBreadcrumbBar(navController) }
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding).wrapContentWidth(Alignment.CenterHorizontally).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            // Icon pack, shape and size for all apps live under Appearance, but many look for them
-            // here first, so a way there sits on top.
-            item {
-                SettingsPreferenceGroup {
-                    SettingsPreference(
-                        icon = Icons.Filled.Palette,
-                        title = stringResource(R.string.settings_icons_label),
-                        summary = stringResource(
-                            R.string.settings_apps_icons_link_summary,
-                            iconPacks.firstOrNull { it.packageName == activeIconPack }?.label ?: stringResource(R.string.settings_icon_pack_default)
-                        ),
-                        onClick = { navController.navigate("settings/appearance/icons") }
-                    )
-                }
-            }
-            item { Spacer24() }
-            if (customizedApps.isNotEmpty()) {
-                item { SettingsGroupLabel(stringResource(R.string.settings_manage_apps_customized_label)) }
-                itemsIndexed(customizedApps, key = { _, app -> app.componentName.flattenToString() }) { index, app ->
-                    AppOverrideRow(
-                        app = app,
-                        override = overrides[app.componentName.flattenToString()],
-                        loadIcon = viewModel::loadIcon,
-                        shape = groupItemShape(index, customizedApps.size),
-                        onClick = { navController.navigate("settings/apps/edit/" + android.net.Uri.encode(app.componentName.flattenToString())) }
-                    )
-                }
-                item { Spacer24() }
-            }
-
-            item {
-                SettingsGroupLabel(
-                    if (searching) {
-                        stringResource(R.string.settings_manage_apps_results_label, remainingApps.size)
-                    } else {
-                        stringResource(R.string.settings_manage_apps_all_label, remainingApps.size)
-                    }
-                )
-            }
-
-            item {
-                OutlinedTextField(
-                    value = filter,
-                    onValueChange = { filter = it },
-                    placeholder = { Text(stringResource(R.string.settings_manage_apps_search_hint)) },
-                    singleLine = true,
-                    shape = SettingsTextFieldShape,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-                )
-            }
-            if (remainingApps.isEmpty()) {
-                item {
-                    Text(
-                        stringResource(R.string.settings_manage_apps_empty),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            } else {
-                itemsIndexed(remainingApps, key = { _, app -> "all_" + app.componentName.flattenToString() }) { index, app ->
-                    AppOverrideRow(
-                        app = app,
-                        override = overrides[app.componentName.flattenToString()],
-                        loadIcon = viewModel::loadIcon,
-                        shape = groupItemShape(index, remainingApps.size),
-                        onClick = { navController.navigate("settings/apps/edit/" + android.net.Uri.encode(app.componentName.flattenToString())) }
-                    )
-                }
-            }
-        }
-    }
-    }
-
-
-}
-
-@Composable
-private fun Spacer24() {
-    Box(modifier = Modifier.height(22.dp))
-}
-
-@Composable
-private fun AppOverrideRow(
-    app: AppInfo,
-    override: AppOverride?,
-    loadIcon: (ComponentName) -> ImageBitmap?,
-    shape: Shape,
-    onClick: () -> Unit
-) {
-    val bitmap = com.bisc.flauncher.ui.home.rememberAppIcon(app.componentName, loadIcon)
-    val hiddenSummary = when {
-        override?.hiddenFromAppList == true && override.hiddenFromSearch == true -> stringResource(R.string.settings_manage_apps_hidden_summary)
-        override?.hiddenFromAppList == true -> stringResource(R.string.settings_manage_apps_hidden_from_list_summary)
-        override?.hiddenFromSearch == true -> stringResource(R.string.settings_manage_apps_hidden_from_search_summary)
-        else -> null
-    }
-    val summary = when {
-        hiddenSummary != null && !override?.customLabel.isNullOrBlank() ->
-            hiddenSummary + " · " + stringResource(R.string.settings_manage_apps_renamed_summary, override?.customLabel.orEmpty())
-        hiddenSummary != null -> hiddenSummary
-        !override?.customLabel.isNullOrBlank() -> stringResource(R.string.settings_manage_apps_renamed_summary, override?.customLabel.orEmpty())
-        else -> null
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainer, shape)
-            .noRippleClickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (bitmap != null) {
-            Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.size(32.dp))
-        } else {
-            Box(modifier = Modifier.size(32.dp))
-        }
-        Column(modifier = Modifier.padding(start = 16.dp).weight(1f)) {
-            Text(app.label, style = MaterialTheme.typography.titleMedium)
-            if (summary != null) {
-                Text(summary, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        }
-    }
-}
-
-/** What the app stack changes besides the symbol: name, where it shows and the search code. */
-private data class AppEdit(
+/** What the stack changes on one app; stored together as its override. */
+private data class AppDraft(
     val label: String,
     val hiddenFromAppList: Boolean,
     val hiddenFromSearch: Boolean,
     val hiddenFromAppGrid: Boolean,
     val revealMode: RevealMode,
-    val revealCode: String
+    val revealCode: String,
+    val shape: IconShape?,
+    val size: Int?
 )
 
+private fun AppOverride.draft() = AppDraft(customLabel.orEmpty(), hiddenFromAppList, hiddenFromSearch, hiddenFromAppGrid, revealMode, revealCode.orEmpty(), iconShape, iconSizePercent)
+
+private fun appKey(app: AppInfo) = "app:" + app.componentName.flattenToString()
+
 /**
- * One app as a card stack: ⓪ the app (name, categories, where it shows, a search code, where it is
- * placed) and ① its icon (picture, shape, size). The replica shows the icon at its real size.
- * Everything but a picture from an icon pack is a draft until Save.
+ * Every app in one card stack: ⓪ "All apps" (shape, size, pack for all), then the apps, the ones
+ * with something of their own first, with a search on top. A tap on an app shows its options in
+ * two tabs, the app and its icon. Several apps can be changed and saved at once.
  */
 @Composable
-private fun AppStack(app: AppInfo, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel) {
+fun SettingsAppsScreen(
+    navController: NavController,
+    onBack: () -> Unit,
+    @Suppress("UNUSED_PARAMETER") onNavigate: (String) -> Unit = {},
+    startElement: String? = null,
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
     val home: com.bisc.flauncher.ui.home.HomeViewModel = hiltViewModel()
     val stack: StackDraft = androidx.lifecycle.viewmodel.compose.viewModel()
-    val key = app.componentName.flattenToString()
+    val apps by viewModel.labeledApps.collectAsState()
     val overrides by viewModel.appOverrides.collectAsState()
-    val override = overrides[key] ?: AppOverride(key)
-    val globalIconSizePercent by viewModel.iconSizePercent.collectAsState()
-    val edit = stack.field(
-        "app",
-        AppEdit(override.customLabel.orEmpty(), override.hiddenFromAppList, override.hiddenFromSearch, override.hiddenFromAppGrid, override.revealMode, override.revealCode.orEmpty())
-    ) {}
-    val shape = stack.field("shape", override.iconShape) {}
-    val size = stack.field("size", override.iconSizePercent) {}
-    val e = edit.value
-    stack.saveTogether {
-        viewModel.saveAppOverride(
-            app.componentName,
-            e.label,
-            e.hiddenFromAppList,
-            e.hiddenFromSearch,
-            // A code that is switched on but empty would leave the app unfindable: then it stays findable by name.
-            if (e.revealCode.isBlank()) RevealMode.NONE else e.revealMode,
-            e.revealCode.trim(),
-            shape.value,
-            size.value,
-            e.hiddenFromAppGrid
-        )
+    var filter by rememberSaveable { mutableStateOf("") }
+    val all = rememberAllAppsDraft(stack, viewModel)
+    val customized = stringResource(R.string.settings_manage_apps_customized_label)
+    val allLabel = stringResource(R.string.stack_all_apps)
+    val ordered = remember(apps, overrides) {
+        val (own, rest) = apps.partition { overrides[it.componentName.flattenToString()] != null }
+        own.map { it to true } + rest.map { it to false }
     }
-    var pickingIcon by remember { mutableStateOf(false) }
-    val usages = rememberUsages(com.bisc.flauncher.data.model.GridItemType.APP, key, home)
-    val globalShape by viewModel.iconShape.collectAsState()
-    val activePack by viewModel.activeIconPack.collectAsState()
-    val ownIcon = override.iconPackDrawable != null
-    val ownPreview = com.bisc.flauncher.ui.home.rememberAppIcon(app.componentName, viewModel::loadIcon)
 
-    /** This app's icon in [iconShape], drawn as the launcher draws it. */
-    @Composable
-    fun ShapePicture(iconShape: IconShape, modifier: Modifier) {
-        val bitmap by androidx.compose.runtime.produceState<androidx.compose.ui.graphics.ImageBitmap?>(null, iconShape, activePack, ownIcon) {
-            value = if (ownIcon) null else kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                runCatching { viewModel.iconLoader.render(app.componentName, iconShape, activePack) }.getOrNull()
+    val elements = buildList {
+        add(StackElement(
+            id = "all", number = 0,
+            title = stringResource(R.string.stack_all_apps),
+            summary = stringResource(R.string.stack_all_apps_summary),
+            draftKeys = all.keys,
+            sample = { AllAppsSample(all, viewModel) }
+        ) { AllAppsOptions(all, viewModel) })
+        ordered.forEachIndexed { i, (app, own) ->
+            val key = app.componentName.flattenToString()
+            val override = overrides[key]
+            add(StackElement(
+                id = appKey(app), number = i + 1,
+                title = override?.customLabel?.takeIf { it.isNotBlank() } ?: app.label,
+                summary = appSummary(override),
+                section = if (filter.isBlank()) (if (own) customized else allLabel) else null,
+                inList = filter.isBlank() || app.label.contains(filter, ignoreCase = true) || override?.customLabel?.contains(filter, ignoreCase = true) == true,
+                draftKeys = listOf(appKey(app)),
+                anchor = androidx.compose.ui.geometry.Offset(1f, 0f),
+                leading = {
+                    val bitmap = com.bisc.flauncher.ui.home.rememberAppIcon(app.componentName, viewModel::loadIcon)
+                    if (bitmap != null) Image(bitmap, contentDescription = null, modifier = Modifier.size(32.dp))
+                }
+            ) { AppEditor(app, override ?: AppOverride(key), stack, all, navController, home, viewModel) })
+        }
+    }
+
+    val pages by home.pages.collectAsState()
+    val homeId = pages.find { it.isHome }?.id ?: -1L
+    val global by home.globalBackground.collectAsState()
+    val background by remember(homeId) { home.pageBackgroundConfig(homeId) }.collectAsState(initial = global)
+    val dark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(com.bisc.flauncher.data.model.ElementAppearance(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE), background)
+    CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalAppIconLoader provides viewModel.iconLoader, com.bisc.flauncher.ui.home.LocalSurfaceIsDark provides dark) {
+        SettingsCardStackScreen(
+            title = stringResource(R.string.settings_section_manage_apps),
+            navController = navController,
+            onBack = onBack,
+            draft = stack,
+            elements = elements,
+            startElement = startElement,
+            firstCard = StackCard.ELEMENTS,
+            listHeader = { StackSearchField(filter, { filter = it }, stringResource(R.string.settings_manage_apps_search_hint)) }
+        ) { _, _ ->
+            val selected = LocalStackSelected.current
+            val ink = if (dark) Color.White else Color.Black
+            val statusTop = replicaStatusHeight()
+            Box(Modifier.fillMaxSize()) {
+                com.bisc.flauncher.ui.home.dock.BackgroundFill(background, Modifier.fillMaxSize())
+                val app = apps.find { appKey(it) == selected }
+                Column(
+                    modifier = Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (app == null) {
+                        // All apps: a row of real ones in the drafted shape, size and pack.
+                        Box(Modifier.fillMaxWidth().stackElement("all")) { AllAppsSample(all, viewModel) }
+                    } else {
+                        val key = app.componentName.flattenToString()
+                        val d = DraftField(stack, appKey(app), (overrides[key] ?: AppOverride(key)).draft()).value
+                        val iconScale by home.iconSizeScale.collectAsState()
+                        Box(Modifier.stackElement(appKey(app))) {
+                            AppShapeIcon(app, d.shape ?: all.shape.value, overrides[key]?.iconPackDrawable != null, all.pack.value, viewModel, Modifier.size(56.dp * iconScale * ((d.size ?: all.size.value) / 100f)))
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        Text(d.label.ifBlank { app.label }, color = ink, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                    }
+                }
+                StatusBarSketch(statusTop, ink)
             }
         }
-        (if (ownIcon) ownPreview else bitmap)?.let { Image(it, contentDescription = null, modifier = modifier) }
     }
+}
 
-    ElementStackScreen(
-        title = e.label.ifBlank { app.label },
-        navController = navController,
-        onBack = onBack,
-        startElement = null,
-        draft = stack,
-        home = home,
-        partTitle = stringResource(R.string.stack_el_app),
-        partSummary = app.label,
-        partKeys = listOf("app"),
-        symbolTitle = stringResource(R.string.stack_el_app_symbol),
-        symbolKeys = listOf("shape", "size"),
-        name = e.label.ifBlank { app.label },
-        symbol = { s, _ ->
-            val scale = (size.value ?: globalIconSizePercent) / 100f
-            Box(Modifier.size(s * scale)) { ShapePicture(shape.value ?: globalShape, Modifier.fillMaxSize()) }
-        },
-        partOptions = {
+/** What the list says under an app: hidden where, renamed. */
+@Composable
+private fun appSummary(override: AppOverride?): String? {
+    val hidden = when {
+        override?.hiddenFromAppList == true && override.hiddenFromSearch -> stringResource(R.string.settings_manage_apps_hidden_summary)
+        override?.hiddenFromAppList == true -> stringResource(R.string.settings_manage_apps_hidden_from_list_summary)
+        override?.hiddenFromSearch == true -> stringResource(R.string.settings_manage_apps_hidden_from_search_summary)
+        else -> null
+    }
+    val renamed = override?.customLabel?.takeIf { it.isNotBlank() }?.let { stringResource(R.string.settings_manage_apps_renamed_summary, it) }
+    return listOfNotNull(hidden, renamed).joinToString(" · ").ifBlank { null }
+}
+
+/** This app's icon in [shape], drawn as the launcher draws it; its own pack icon stays as it is. */
+@Composable
+private fun AppShapeIcon(app: AppInfo, shape: IconShape, ownIcon: Boolean, pack: String?, viewModel: SettingsViewModel, modifier: Modifier) {
+    val own = com.bisc.flauncher.ui.home.rememberAppIcon(app.componentName, viewModel::loadIcon)
+    val bitmap by androidx.compose.runtime.produceState<androidx.compose.ui.graphics.ImageBitmap?>(null, shape, pack, ownIcon) {
+        value = if (ownIcon) null else kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            runCatching { viewModel.iconLoader.render(app.componentName, shape, pack) }.getOrNull()
+        }
+    }
+    (if (ownIcon) own else bitmap ?: own)?.let { Image(it, contentDescription = null, modifier = modifier) }
+}
+
+/** One app's options in two tabs: the app (name, categories, where it shows, a search code,
+ *  where it is placed) and its icon (picture, shape, size). */
+@Composable
+private fun ColumnScope.AppEditor(
+    app: AppInfo,
+    override: AppOverride,
+    stack: StackDraft,
+    all: AllAppsDraft,
+    navController: NavController,
+    home: com.bisc.flauncher.ui.home.HomeViewModel,
+    viewModel: SettingsViewModel
+) {
+    val field = stack.field(appKey(app), override.draft()) { d ->
+        viewModel.saveAppOverride(
+            app.componentName,
+            d.label,
+            d.hiddenFromAppList,
+            d.hiddenFromSearch,
+            // A code that is switched on but empty would leave the app unfindable: then it stays findable by name.
+            if (d.revealCode.isBlank()) RevealMode.NONE else d.revealMode,
+            d.revealCode.trim(),
+            d.shape,
+            d.size,
+            d.hiddenFromAppGrid
+        )
+    }
+    val e = field.value
+    var pickingIcon by remember { mutableStateOf(false) }
+    val usages = rememberUsages(com.bisc.flauncher.data.model.GridItemType.APP, app.componentName.flattenToString(), home)
+    val ownIcon = override.iconPackDrawable != null
+    StackTabs(listOf(
+        stringResource(R.string.stack_el_app) to {
             OutlinedTextField(
                 value = e.label,
-                onValueChange = { edit.value = e.copy(label = it) },
+                onValueChange = { field.value = e.copy(label = it) },
                 label = { Text(stringResource(R.string.settings_manage_apps_name_label)) },
                 placeholder = { Text(app.label) },
                 singleLine = true,
@@ -332,13 +261,13 @@ private fun AppStack(app: AppInfo, navController: NavController, onBack: () -> U
                 info = stringResource(R.string.settings_manage_apps_visibility_app_list_description),
                 toggles = true,
                 choices = listOf(
-                    PictureChoice(stringResource(R.string.settings_manage_apps_visibility_app_list_label), !e.hiddenFromAppList, { edit.value = e.copy(hiddenFromAppList = !e.hiddenFromAppList) }, dimWhenOff = true) {
+                    PictureChoice(stringResource(R.string.settings_manage_apps_visibility_app_list_label), !e.hiddenFromAppList, { field.value = e.copy(hiddenFromAppList = !e.hiddenFromAppList) }, dimWhenOff = true) {
                         Icon(Icons.AutoMirrored.Filled.List, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(32.dp))
                     },
-                    PictureChoice(stringResource(R.string.settings_manage_apps_visibility_app_grid_label), !e.hiddenFromAppGrid, { edit.value = e.copy(hiddenFromAppGrid = !e.hiddenFromAppGrid) }, dimWhenOff = true) {
+                    PictureChoice(stringResource(R.string.settings_manage_apps_visibility_app_grid_label), !e.hiddenFromAppGrid, { field.value = e.copy(hiddenFromAppGrid = !e.hiddenFromAppGrid) }, dimWhenOff = true) {
                         Icon(Icons.Filled.GridView, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(32.dp))
                     },
-                    PictureChoice(stringResource(R.string.settings_manage_apps_visibility_search_label), !e.hiddenFromSearch, { edit.value = e.copy(hiddenFromSearch = !e.hiddenFromSearch) }, dimWhenOff = true) {
+                    PictureChoice(stringResource(R.string.settings_manage_apps_visibility_search_label), !e.hiddenFromSearch, { field.value = e.copy(hiddenFromSearch = !e.hiddenFromSearch) }, dimWhenOff = true) {
                         Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(32.dp))
                     }
                 )
@@ -353,9 +282,9 @@ private fun AppStack(app: AppInfo, navController: NavController, onBack: () -> U
                 )
                 RevealSearchCodeCard(
                     enabled = e.revealMode == RevealMode.SEARCH_CODE,
-                    onEnabledChange = { edit.value = e.copy(revealMode = if (it) RevealMode.SEARCH_CODE else RevealMode.NONE) },
+                    onEnabledChange = { field.value = e.copy(revealMode = if (it) RevealMode.SEARCH_CODE else RevealMode.NONE) },
                     code = e.revealCode,
-                    onCodeChange = { edit.value = e.copy(revealCode = it) }
+                    onCodeChange = { field.value = e.copy(revealCode = it) }
                 )
             } else {
                 Text(
@@ -367,31 +296,34 @@ private fun AppStack(app: AppInfo, navController: NavController, onBack: () -> U
             }
             UsagesGroup(usages, navController)
         },
-        symbolOptions = {
+        stringResource(R.string.stack_el_app_symbol) to {
             SettingsPreferenceGroup {
+                val preview = com.bisc.flauncher.ui.home.rememberAppIcon(app.componentName, viewModel::loadIcon)
                 SettingsPreference(
                     icon = null,
                     title = stringResource(R.string.settings_app_icon_label),
                     summary = if (override.iconPackDrawable != null) override.iconPackDrawable.replace('_', ' ')
                     else stringResource(R.string.settings_app_icon_default),
                     onClick = { pickingIcon = true },
-                    trailing = { if (ownPreview != null) Image(bitmap = ownPreview, contentDescription = null, modifier = Modifier.size(36.dp)) }
+                    trailing = { if (preview != null) Image(bitmap = preview, contentDescription = null, modifier = Modifier.size(36.dp)) }
                 )
             }
             PictureChoiceGrid(
                 title = stringResource(R.string.settings_icon_shape_label),
                 choices = listOf(
-                    PictureChoice(stringResource(R.string.settings_app_shape_like_all), shape.value == null, { shape.value = null }) { ShapePicture(globalShape, Modifier.fillMaxSize(0.62f)) },
-                    PictureChoice(stringResource(R.string.settings_icon_shape_rounded_square), shape.value == IconShape.ROUNDED_SQUARE, { shape.value = IconShape.ROUNDED_SQUARE }) { ShapePicture(IconShape.ROUNDED_SQUARE, Modifier.fillMaxSize(0.62f)) },
-                    PictureChoice(stringResource(R.string.settings_icon_shape_circle), shape.value == IconShape.CIRCLE, { shape.value = IconShape.CIRCLE }) { ShapePicture(IconShape.CIRCLE, Modifier.fillMaxSize(0.62f)) }
+                    PictureChoice(stringResource(R.string.settings_app_shape_like_all), e.shape == null, { field.value = e.copy(shape = null) }) {
+                        AppShapeIcon(app, all.shape.value, ownIcon, all.pack.value, viewModel, Modifier.fillMaxSize(0.62f))
+                    },
+                    PictureChoice(stringResource(R.string.settings_icon_shape_rounded_square), e.shape == IconShape.ROUNDED_SQUARE, { field.value = e.copy(shape = IconShape.ROUNDED_SQUARE) }) {
+                        AppShapeIcon(app, IconShape.ROUNDED_SQUARE, ownIcon, all.pack.value, viewModel, Modifier.fillMaxSize(0.62f))
+                    },
+                    PictureChoice(stringResource(R.string.settings_icon_shape_circle), e.shape == IconShape.CIRCLE, { field.value = e.copy(shape = IconShape.CIRCLE) }) {
+                        AppShapeIcon(app, IconShape.CIRCLE, ownIcon, all.pack.value, viewModel, Modifier.fillMaxSize(0.62f))
+                    }
                 )
             )
             SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_size_label)) {
-                ExpandableOptionalIconSizeSlider(
-                    percent = size.value,
-                    globalDefault = globalIconSizePercent,
-                    onSettled = { size.value = it }
-                )
+                ExpandableOptionalIconSizeSlider(percent = e.size, globalDefault = all.size.value, onSettled = { field.value = e.copy(size = it) })
             }
             Text(
                 stringResource(R.string.settings_icon_size_dock_note),
@@ -400,7 +332,7 @@ private fun AppStack(app: AppInfo, navController: NavController, onBack: () -> U
                 modifier = Modifier.padding(horizontal = 4.dp)
             )
         }
-    )
+    ))
 
     if (pickingIcon) {
         SettingsFixedDialog(
@@ -411,14 +343,8 @@ private fun AppStack(app: AppInfo, navController: NavController, onBack: () -> U
                 viewModel = viewModel,
                 currentPack = override.iconPackPackage,
                 currentDrawable = override.iconPackDrawable,
-                onPick = { pack, drawable ->
-                    viewModel.setAppIcon(app.componentName, pack, drawable)
-                    pickingIcon = false
-                },
-                onReset = {
-                    viewModel.setAppIcon(app.componentName, null, null)
-                    pickingIcon = false
-                }
+                onPick = { pack, drawable -> viewModel.setAppIcon(app.componentName, pack, drawable); pickingIcon = false },
+                onReset = { viewModel.setAppIcon(app.componentName, null, null); pickingIcon = false }
             )
         }
     }
@@ -466,9 +392,5 @@ private fun RevealSearchCodeCard(enabled: Boolean, onEnabledChange: (Boolean) ->
 /** One app's page on its own, opened from the app's long-press menu; leaving it goes back there. */
 @Composable
 fun SettingsAppEditRoute(component: String, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val apps by viewModel.labeledApps.collectAsState()
-    val app = apps.firstOrNull { it.componentName.flattenToString() == component } ?: return
-    CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalAppIconLoader provides viewModel.iconLoader) {
-        AppStack(app, navController, onBack, viewModel)
-    }
+    SettingsAppsScreen(navController = navController, onBack = onBack, startElement = "app:$component", viewModel = viewModel)
 }

@@ -590,7 +590,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         settingsComposable("settings/appearance/icons") {
-                            com.bisc.flauncher.ui.settings.SettingsAppsGlobalScreen(navController = navController, onBack = { navController.popBackStack() })
+                            SettingsAppsScreen(navController = navController, onBack = { navController.popBackStack() }, startElement = "all")
                         }
                         settingsComposable("settings/about") {
                             com.bisc.flauncher.ui.settings.SettingsAboutScreen(navController = navController, onBack = { navController.popBackStack() })
