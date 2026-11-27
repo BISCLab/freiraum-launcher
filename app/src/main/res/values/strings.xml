@@ -276,7 +276,7 @@
     <string name="settings_pages_search">Text search</string>
     <string name="settings_pages_page">Page %1$d</string>
     <string name="settings_pages_add">Add page</string>
-    <string name="settings_pages_carousel_label">Carousel</string>
+    <string name="settings_pages_carousel_label">To swipe</string>
     <string name="settings_music_sources">Music sources</string>
     <string name="settings_music_sources_all">All apps</string>
     <string name="settings_music_sources_info">The music widget only shows and controls what plays in these apps. If you check none, every app counts, browsers and video apps too.</string>
@@ -289,7 +289,7 @@
     </plurals>
     <string name="settings_pages_carousel_endless">Endless carousel</string>
     <string name="settings_pages_carousel_endless_info">After the last page comes the first one again, round in a circle.</string>
-    <string name="settings_pages_other_label">Utility pages</string>
+    <string name="settings_pages_other_label">To open</string>
     <string name="settings_pages_behavior_label">Behavior</string>
     <string name="settings_pages_add_template_label">Start from</string>
     <string name="settings_pages_add_template_blank">Blank page</string>
@@ -1206,6 +1206,13 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="stack_show">Show</string>
     <string name="stack_page_summary">Alignment, background, status bar, name</string>
     <string name="stack_page_summary_plain">Background, status bar, name</string>
+    <string name="pages_map_title">Page map</string>
+    <string name="pages_map_hint">A swipe down opens what is above, a swipe up what is below. Tap a page to set it up.</string>
+    <string name="pages_way_symbol">Through a symbol</string>
+    <string name="pages_way_none">Not reachable yet</string>
+    <string name="pages_way_set_gesture">Set a gesture</string>
+    <string name="pages_swipe_info">You swipe through these pages sideways.</string>
+    <string name="pages_open_info">These pages open over everything, with a gesture or through a symbol.</string>
     <string name="stack_el_address">Address</string>
     <string name="stack_el_link">Link</string>
     <string name="stack_el_action_button">Action button</string>

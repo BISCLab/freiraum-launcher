@@ -105,7 +105,9 @@ fun SettingsPagesScreen(
     }
 
     SettingsSubScreen(title = stringResource(R.string.settings_section_pages), navController = navController, onBack = onBack) {
-        SettingsGroupLabel(stringResource(R.string.settings_pages_carousel_label))
+        SettingsGroupLabel(stringResource(R.string.pages_map_title))
+        PagesMap(rowsPages, otherPages, allPages, viewModel, onOpenPage)
+        SettingsGroupLabel(stringResource(R.string.settings_pages_carousel_label), info = stringResource(R.string.pages_swipe_info))
         // Icon and name live in each page's own Appearance screen (see PageIdentityRows), removal at
         // the bottom of its settings screen.
         PagesCarousel(
@@ -129,13 +131,8 @@ fun SettingsPagesScreen(
 
         // App list and Text search don't swipe - set apart in their own row of the same tiles.
         // Their icon and name live in their own Appearance → Page screen.
-        SettingsGroupLabel(stringResource(R.string.settings_pages_other_label))
-        UtilityPagesRow(
-            pages = otherPages,
-            allPages = allPages,
-            gestureFor = ::gestureForPage,
-            onTileClick = onOpenPage
-        )
+        SettingsGroupLabel(stringResource(R.string.settings_pages_other_label), info = stringResource(R.string.pages_open_info))
+        OpenPagesList(otherPages, allPages, viewModel, onOpenPage, onGestures = { navController.navigate("settings/gestures") })
 
         // Gestures live here, not as their own top-level entry - they're page/navigation behavior.
         // They're the only place a gesture is assigned; the page tiles above just show it.

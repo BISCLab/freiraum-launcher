@@ -277,7 +277,7 @@
     <string name="settings_pages_search">Textsuche</string>
     <string name="settings_pages_page">Seite %1$d</string>
     <string name="settings_pages_add">Seite hinzufügen</string>
-    <string name="settings_pages_carousel_label">Karussell</string>
+    <string name="settings_pages_carousel_label">Zum Wischen</string>
     <string name="settings_music_sources">Musikquellen</string>
     <string name="settings_music_sources_all">Alle Apps</string>
     <string name="settings_music_sources_info">Das Musik-Widget zeigt und steuert nur, was in diesen Apps läuft. Hakst du keine an, zählt jede App, auch Browser und Video-Apps.</string>
@@ -290,7 +290,7 @@
     </plurals>
     <string name="settings_pages_carousel_endless">Endlos-Karussell</string>
     <string name="settings_pages_carousel_endless_info">Nach der letzten Seite kommt wieder die erste, wie im Kreis.</string>
-    <string name="settings_pages_other_label">Funktionsseiten</string>
+    <string name="settings_pages_other_label">Zum Öffnen</string>
     <string name="settings_pages_behavior_label">Verhalten</string>
     <string name="settings_pages_add_template_label">Ausgangspunkt</string>
     <string name="settings_pages_add_template_blank">Leere Seite</string>
@@ -1206,6 +1206,13 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="stack_show">Zeigen</string>
     <string name="stack_page_summary">Ausrichtung, Hintergrund, Statusleiste, Name</string>
     <string name="stack_page_summary_plain">Hintergrund, Statusleiste, Name</string>
+    <string name="pages_map_title">Seitenkarte</string>
+    <string name="pages_map_hint">Oben öffnet Wischen nach unten, unten Wischen nach oben. Tipp auf eine Seite, um sie einzustellen.</string>
+    <string name="pages_way_symbol">Über ein Symbol</string>
+    <string name="pages_way_none">Noch nicht erreichbar</string>
+    <string name="pages_way_set_gesture">Geste festlegen</string>
+    <string name="pages_swipe_info">Diese Seiten wischst du seitlich durch.</string>
+    <string name="pages_open_info">Diese Seiten öffnen sich über allem, mit einer Geste oder über ein Symbol.</string>
     <string name="stack_el_address">Adresse</string>
     <string name="stack_el_link">Link</string>
     <string name="stack_el_action_button">Aktionsbutton</string>
