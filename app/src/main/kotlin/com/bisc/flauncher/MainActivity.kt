@@ -574,7 +574,7 @@ class MainActivity : ComponentActivity() {
                             arguments = listOf(navArgument("component") { type = NavType.StringType })
                         ) { backStackEntry ->
                             val component = backStackEntry.arguments?.getString("component") ?: return@settingsComposable
-                            com.bisc.flauncher.ui.settings.SettingsAppEditRoute(component = component, onBack = { navController.popBackStack() })
+                            com.bisc.flauncher.ui.settings.SettingsAppEditRoute(component = component, navController = navController, onBack = { navController.popBackStack() })
                         }
                         settingsComposable("settings/apps") {
                             SettingsAppsScreen(
