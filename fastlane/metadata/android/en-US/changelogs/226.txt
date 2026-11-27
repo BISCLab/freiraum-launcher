@@ -1,0 +1,3 @@
+- Pages rebuilt: Carousel, Function pages and Gestures in three blocks built the same way
+- Every function page shows how it opens; "Open with" sets the gesture with one tap
+- The start page carries a house and "Start" in the carousel

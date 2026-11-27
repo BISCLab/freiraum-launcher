@@ -1,0 +1,3 @@
+- Seiten neu: Karussell, Funktionsseiten und Gesten in drei gleich gebauten Blöcken
+- Jede Funktionsseite zeigt, wie sie aufgeht; "Öffnen mit" legt die Geste mit einem Tipp fest
+- Die Startseite trägt im Karussell ein Haus mit "Start"
