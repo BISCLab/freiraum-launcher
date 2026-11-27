@@ -1206,6 +1206,14 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="stack_show">Show</string>
     <string name="stack_page_summary">Alignment, background, status bar, name</string>
     <string name="stack_page_summary_plain">Background, status bar, name</string>
+    <string name="stack_page_summary_home">Background, status bar, rows, name</string>
+    <string name="stack_state_panel">Panel open</string>
+    <string name="stack_summary_only_panel">Only with the Panel open</string>
+    <string name="stack_rows_label">Rows</string>
+    <string name="stack_rows_manage">Add and arrange rows</string>
+    <string name="stack_row_position_value">%1$d of %2$d</string>
+    <string name="stack_row_edit">Edit row</string>
+    <string name="stack_row_edit_summary">Contents, size and look</string>
     <string name="stack_page_summary_search">Background, text color, status bar, name</string>
     <string name="stack_bubble_note">The bubble shows while your finger runs along the category rail.</string>
     <string name="stack_summary_only_keyboard">Only with the keyboard open</string>

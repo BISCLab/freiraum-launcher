@@ -59,42 +59,6 @@ import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
-/** The Dock: how it looks, with a live preview, and the way to its visibility and elements. */
-@Composable
-fun SettingsDockScreen(pageId: Long, navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val row = rememberDockRow(pageId, viewModel) ?: return
-    val entriesByRow by viewModel.rowEntriesByRow.collectAsState()
-    val count = entriesByRow[row.id].orEmpty().size
-    SettingsSubScreen(title = stringResource(R.string.settings_home_dock_label), navController = navController, onBack = onBack) {
-        LookSample(LookSampleKind.DOCK, row.appearance(), row.cornerRadiusPercent)
-        SettingsTileGrid(
-            columns = 3,
-            tiles = listOf(
-                SettingsTile(Icons.Filled.GridView, stringResource(R.string.settings_dock_elements_title),
-                    badge = androidx.compose.ui.res.pluralStringResource(R.plurals.settings_hub_elements_count, count, count)) { onNavigate("elements") },
-                SettingsTile(Icons.Filled.Visibility, stringResource(R.string.settings_dock_visibility_label),
-                    badge = dockVisibilityModeLabel(row.dockVisibilityMode)) { onNavigate("visibility") },
-                SettingsTile(Icons.Filled.Palette, stringResource(R.string.settings_home_appearance_title)) { onNavigate("look") }
-            )
-        )
-    }
-}
-
-/** The Dock's look: fill, text, opacity, border and corners. */
-@Composable
-fun SettingsDockLookScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val saved = rememberDockRow(pageId, viewModel) ?: return
-    ElementLookScreen(
-        title = stringResource(R.string.settings_home_dock_label),
-        navController = navController,
-        onBack = onBack,
-        saved = saved.appearance(),
-        savedCorner = saved.cornerRadiusPercent,
-        onSave = { look, corner -> viewModel.saveRow(saved.withAppearance(look).copy(cornerRadiusPercent = corner ?: saved.cornerRadiusPercent)) },
-        kind = LookSampleKind.DOCK
-    )
-}
-
 /** Finds the Home page's own pinned dock row, wherever it's needed across the 4 Dock sub-screens - 
  *  always present once seeded (see PageContentRepository.ensureSeeded), so a null here only means
  *  the data hasn't loaded yet; the caller falls back to an empty screen for that one frame. */
@@ -102,18 +66,6 @@ fun SettingsDockLookScreen(pageId: Long, navController: NavController, onBack: (
 private fun rememberDockRow(pageId: Long, viewModel: HomeViewModel): PageRow? {
     val rowsByPage by viewModel.rowsByPage.collectAsState()
     return rowsByPage[pageId]?.find { it.type == PageRowType.SEARCH_BAR }
-}
-
-@Composable
-fun SettingsDockVisibilityScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val row = rememberDockRow(pageId, viewModel) ?: return
-    SettingsSubScreen(title = stringResource(R.string.settings_dock_visibility_label), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup {
-            DockVisibilityMode.entries.forEach { mode ->
-                RadioPreference(dockVisibilityModeLabel(mode), mode, row.dockVisibilityMode, { viewModel.setRowDockVisibilityMode(row, it) })
-            }
-        }
-    }
 }
 
 /** The Dock's own grid editor - the Dock is a mirrored Panel, so this mirrors

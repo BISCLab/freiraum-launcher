@@ -55,23 +55,6 @@ import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
 import com.bisc.flauncher.ui.home.dock.AppShortcutPickerDialog
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
-/** Entry point for the Home page's own settings - split into [SettingsPageAppearanceScreen] (the
- *  page's background/status-bar) and [SettingsHomeLayoutScreen] (what's actually placed on it),
- *  instead of one long flat screen like every other page still uses (see [SettingsPageRowsScreen]). */
-@Composable
-fun SettingsHomeScreenHub(pageId: Long, navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit) {
-    SettingsSubScreen(title = stringResource(R.string.settings_pages_home), navController = navController, onBack = onBack) {
-        // Tap a part of the miniature (background, Panel, a row, the Dock) to edit it.
-        PagePreview(pageId = pageId, isHome = true, navController = navController)
-        SettingsTileGrid(
-            tiles = listOf(
-                SettingsTile(androidx.compose.material.icons.Icons.Filled.Wallpaper, stringResource(R.string.settings_search_page_label), stringResource(R.string.settings_home_appearance_subtitle)) { onNavigate("appearance") },
-                SettingsTile(Icons.Filled.ViewAgenda, stringResource(R.string.settings_home_layout_title), stringResource(R.string.settings_home_layout_subtitle)) { onNavigate("layout") }
-            )
-        )
-    }
-}
-
 /** A carousel page's own Appearance screen (Home and every other page alike): its icon and name,
  *  then its background and status-bar switch - all one card. "Hide status bar" sits right below
  *  Background here, not nested inside the Background detail page, which is one level further in
@@ -272,47 +255,6 @@ fun SettingsHomeLayoutScreen(
         )
     }
 
-}
-
-/** The Favorites "Panel"'s own settings hub - Background/Border/Elements, same shape as the Dock's
- *  own hub; the enable switch itself lives inline in [SettingsHomeLayoutScreen]'s list, not here,
- *  matching the Dock bookend's own split. */
-@Composable
-fun SettingsHomePanelScreen(pageId: Long, navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val row = rememberPanelRow(pageId, viewModel) ?: return
-    val entriesByRow by viewModel.rowEntriesByRow.collectAsState()
-    val widgets by viewModel.panelWidgets.collectAsState()
-    val count = entriesByRow[row.id].orEmpty().size
-    SettingsSubScreen(title = stringResource(R.string.settings_home_panel_label), navController = navController, onBack = onBack) {
-        LookSample(LookSampleKind.PANEL, row.appearance(), row.cornerRadiusPercent)
-        SettingsTileGrid(
-            tiles = listOf(
-                SettingsTile(
-                    Icons.Filled.GridView,
-                    stringResource(R.string.settings_panel_content_title),
-                    stringResource(R.string.settings_hub_panel_content_what),
-                    badge = androidx.compose.ui.res.pluralStringResource(R.plurals.settings_hub_elements_count, count, count) + " · " +
-                        androidx.compose.ui.res.pluralStringResource(R.plurals.settings_hub_widgets_count, widgets.size, widgets.size)
-                ) { onNavigate("elements") },
-                SettingsTile(Icons.Filled.Palette, stringResource(R.string.settings_home_appearance_title), stringResource(R.string.settings_hub_bar_look_contents)) { onNavigate("look") }
-            )
-        )
-    }
-}
-
-/** The Panel's look: fill, text, opacity, border and corners. */
-@Composable
-fun SettingsHomePanelLookScreen(pageId: Long, navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val saved = rememberPanelRow(pageId, viewModel) ?: return
-    ElementLookScreen(
-        title = stringResource(R.string.settings_home_panel_label),
-        navController = navController,
-        onBack = onBack,
-        saved = saved.appearance(),
-        savedCorner = saved.cornerRadiusPercent,
-        onSave = { look, corner -> viewModel.saveRow(saved.withAppearance(look).copy(cornerRadiusPercent = corner ?: saved.cornerRadiusPercent)) },
-        kind = LookSampleKind.PANEL
-    )
 }
 
 /** Finds the Home page's own pinned Panel row - mirrors [SettingsDockScreen.kt]'s rememberDockRow,

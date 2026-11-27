@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home
 
+import com.bisc.flauncher.ui.stackElement
 import androidx.compose.ui.unit.dp
 import android.content.ComponentName
 import androidx.compose.foundation.layout.Arrangement
@@ -90,6 +91,7 @@ fun PageRowsColumn(
     ) {
         rows.forEach { row ->
             key(row.id) {
+                androidx.compose.foundation.layout.Box(Modifier.stackElement("row_${row.id}")) {
                 PageRowContent(
                     row = row,
                     entries = entriesByRow[row.id].orEmpty(),
@@ -108,6 +110,7 @@ fun PageRowsColumn(
                     iconShape = iconShape,
                     iconSizeScale = iconSizeScale
                 )
+                }
             }
         }
     }
