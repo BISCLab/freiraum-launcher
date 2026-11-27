@@ -1,0 +1,3 @@
+- Apps, Adressen, Links und Aktionsbuttons als Kartenstapel: das Element und sein Symbol, mit "Wo es vorkommt"
+- Seiten: Seitenkarte oben, "Zum Wischen" und "Zum Öffnen", bei jeder Seite steht, wie man sie öffnet
+- Gesten als Kartenstapel: die Startseite mit allen Gesten an ihrer Stelle

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.30.0
+
 - Places, links and action buttons as a card stack: the element and its Symbol, shown at its real size, with where it is used
 - Apps as a card stack too: App (name, categories, where it shows, search code, where it is used) and App icon (picture, shape, size)
 - Pages: a page map on top shows how everything connects; "To swipe" and "To open" instead of carousel and function pages; every page to open says how it opens, or offers to set a gesture

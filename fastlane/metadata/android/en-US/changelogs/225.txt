@@ -1,0 +1,3 @@
+- Apps, places, links and action buttons as card stacks: the element and its symbol, with where it is used
+- Pages: a page map on top, "To swipe" and "To open", every page says how it opens
+- Gestures as a card stack: the start page with every gesture where it happens
