@@ -1206,6 +1206,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="stack_show">Zeigen</string>
     <string name="stack_page_summary">Ausrichtung, Hintergrund, Statusleiste, Name</string>
     <string name="stack_page_summary_plain">Hintergrund, Statusleiste, Name</string>
+    <string name="stack_page_summary_search">Hintergrund, Textfarbe, Statusleiste, Name</string>
+    <string name="stack_bubble_note">Die Sprechblase erscheint, wenn du mit dem Finger über die Kategorie-Leiste fährst.</string>
+    <string name="stack_summary_only_keyboard">Nur mit offener Tastatur</string>
+    <string name="stack_state_keyboard">Tastatur offen</string>
     <string name="stack_el_category_labels">Kategorien-Etiketten</string>
     <string name="stack_el_category_content">Inhalt</string>
     <string name="stack_chips_look_note">Wie jede Kategorie aussieht, stellst du bei der Kategorie selbst ein.</string>

@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.search
 
+import com.bisc.flauncher.ui.stackElement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -104,6 +105,7 @@ fun SearchInputBar(
         Row(
             modifier = Modifier
                 .padding(start = sideMargin, end = sideMargin, top = if (atBottom) 0.dp else 8.dp, bottom = if (atBottom) 16.dp else 0.dp)
+                .stackElement("search_field")
                 .fillMaxWidth()
                 .height(FIELD_HEIGHT)
                 .designGlow(fieldShape, "search")

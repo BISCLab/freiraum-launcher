@@ -4,6 +4,8 @@
 
 - App grid settings as a card stack like the App list: page, search field, grid and folders, with the grid built from its real parts
 - Categories page settings as a card stack: page, labels, search field and contents
+- Text search settings as a card stack: page, search field, category rail, results, bubble and keyboard; "Keyboard open" shows the keyboard with its strip
+- The breadcrumbs of a card stack show only the page name
 
 ## 0.27.0
 

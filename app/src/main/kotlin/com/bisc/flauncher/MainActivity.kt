@@ -361,27 +361,13 @@ class MainActivity : ComponentActivity() {
                             com.bisc.flauncher.ui.settings.SettingsGlobalBackgroundScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         settingsComposable("settings/search") {
-                            SettingsSearchFullScreen(
-                                navController = navController,
-                                onBack = { navController.popBackStack() },
-                                onNavigate = { sub -> navController.navigate("settings/search/$sub") }
-                            )
+                            SettingsSearchFullScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
-                        com.bisc.flauncher.ui.settings.SearchElement.entries.forEach { element ->
-                            settingsComposable("settings/search/${element.route}") {
-                                com.bisc.flauncher.ui.settings.SettingsSearchElementScreen(
-                                    element = element,
-                                    navController = navController,
-                                    onBack = { navController.popBackStack() },
-                                    onNavigate = { sub -> navController.navigate("settings/search/${element.route}/$sub") }
-                                )
+                        // Ways in from the settings search and shortcuts: the stack, opened on that part.
+                        listOf("page" to "page", "field" to "search_field", "rail" to "rail", "results" to "results", "bubble" to "bubble", "keyboard" to "keyboard").forEach { (route, element) ->
+                            settingsComposable("settings/search/$route") {
+                                SettingsSearchFullScreen(navController = navController, onBack = { navController.popBackStack() }, startElement = element)
                             }
-                        }
-                        settingsComposable("settings/search/page") {
-                            com.bisc.flauncher.ui.settings.SettingsSearchPageScreen(navController = navController, onBack = { navController.popBackStack() })
-                        }
-                        settingsComposable("settings/search/keyboard") {
-                            com.bisc.flauncher.ui.settings.SettingsSearchKeyboardScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         settingsComposable("settings/search/favorites") {
                             com.bisc.flauncher.ui.settings.SettingsSearchFavoritesScreen(navController = navController, onBack = { navController.popBackStack() })

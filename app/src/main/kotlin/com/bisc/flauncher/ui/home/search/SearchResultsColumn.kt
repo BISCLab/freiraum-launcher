@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.search
 
+import com.bisc.flauncher.ui.stackElement
 import com.bisc.flauncher.ui.forAppName
 import com.bisc.flauncher.ui.home.rememberAppIcon
 import android.content.ComponentName
@@ -415,7 +416,7 @@ private fun ResultCard(appearance: ElementAppearance, order: Int = 0, dimmed: Bo
         appearance = appearance,
         shape = LocalResultCardShape.current,
         effectTarget = "cards",
-        modifier = Modifier.fillMaxWidth().graphicsLayer {
+        modifier = Modifier.fillMaxWidth().stackElement("results", rank = order).graphicsLayer {
             val p = arrival(order)
             // Fades without a layer of its own, so a 3D shadow below the card shows from the start.
             compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.ModulateAlpha

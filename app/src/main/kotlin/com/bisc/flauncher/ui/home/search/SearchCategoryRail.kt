@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.search
 
+import com.bisc.flauncher.ui.stackElement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -122,7 +123,7 @@ fun SearchCategoryRail(
     val centers = remember(categories) { FloatArray(categories.size) }
 
     val density = LocalDensity.current
-    BoxWithConstraints(modifier = modifier.fillMaxHeight().width(SEARCH_RAIL_WIDTH), contentAlignment = Alignment.TopCenter) {
+    BoxWithConstraints(modifier = modifier.fillMaxHeight().width(SEARCH_RAIL_WIDTH).stackElement("rail"), contentAlignment = Alignment.TopCenter) {
         val areaPx = constraints.maxHeight.toFloat()
         val gapPx = with(density) { edgeGap.toPx() }
         val keyboardMode = room?.keyboardMode == true

@@ -43,7 +43,8 @@ import com.bisc.flauncher.ui.home.HomeViewModel
 
 /** What every page has as ⓪: its own background (or the shared one with its shade) and the status bar. */
 class PageDraft(
-    val id: Long,
+    /** Where a picked picture is kept. */
+    val imageKey: String,
     val background: DraftField<BackgroundConfig?>,
     val shade: DraftField<Float?>,
     val hideStatus: DraftField<Boolean>,
@@ -62,7 +63,7 @@ fun rememberPageDraft(draft: StackDraft, home: HomeViewModel, id: Long): PageDra
     }
     val shade = draft.field<Float?>("shade", remember(id) { home.pageGlobalShade(id) }.collectAsState(initial = null).value) { it?.let { s -> home.setPageGlobalShade(id, s) } }
     val global by home.globalBackground.collectAsState()
-    return PageDraft(id, background, shade, hideStatus, global)
+    return PageDraft("page_$id", background, shade, hideStatus, global)
 }
 
 /**
@@ -83,7 +84,7 @@ internal fun ColumnScope.PageStackOptions(
         global = page.global,
         onUseGlobal = { page.background.value = null },
         onCustomColor = { page.background.value = it },
-        imageKey = "page_${page.id}",
+        imageKey = page.imageKey,
         globalShade = page.shade.value,
         onGlobalShadeChange = { page.shade.value = it },
         groupTitle = stringResource(R.string.settings_section_global_background),
