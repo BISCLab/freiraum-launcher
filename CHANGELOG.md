@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Folders as a card stack: the folder closed and opened, built from its real parts; Folder, Folder icon, Folder window and Contents, one Save
+- The folder window says "Like all folders" or "Own look" with a reset, and leads to "All folders"
+- All folders as a card stack too, the replica opens your first folder in that look; corners as percent tiles
+- Categories as a card stack: the Categories page with the category's label and card, and its icon; Category, Category icon, Label and Card, one Save
+- A category's card is edited like a folder: tap an item, then move or remove it
+- Folders and categories show where they are used (Dock, Panel, a row, the App grid, another folder), each a way there
+- Categories overview: the categories as a list you sort by dragging; "New category" offers empty, suggested by Android, or with a rule
+
 ## 0.28.0
 
 - App grid settings as a card stack like the App list: page, search field, grid and folders, with the grid built from its real parts

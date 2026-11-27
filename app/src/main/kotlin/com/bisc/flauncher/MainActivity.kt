@@ -687,8 +687,14 @@ class MainActivity : ComponentActivity() {
                             arguments = listOf(navArgument("categoryId") { type = NavType.LongType }, navArgument("part") { type = NavType.StringType })
                         ) { backStackEntry ->
                             val categoryId = backStackEntry.arguments?.getLong("categoryId") ?: return@settingsComposable
-                            val part = com.bisc.flauncher.ui.settings.CategoryPart.entries.find { it.name.equals(backStackEntry.arguments?.getString("part"), ignoreCase = true) } ?: return@settingsComposable
-                            com.bisc.flauncher.ui.settings.SettingsCategoryDetailScreen(categoryId = categoryId, navController = navController, onBack = { navController.popBackStack() }, part = part)
+                            // The old pages of a category: its stack, opened on that part.
+                            val element = when (backStackEntry.arguments?.getString("part")?.lowercase()) {
+                                "tile" -> "icon"
+                                "label" -> "label"
+                                "content" -> "card"
+                                else -> "category"
+                            }
+                            com.bisc.flauncher.ui.settings.SettingsCategoryDetailScreen(categoryId = categoryId, navController = navController, onBack = { navController.popBackStack() }, startElement = element)
                         }
                         settingsComposable("settings/categories") {
                             com.bisc.flauncher.ui.settings.SettingsCategoriesPageScreen(navController = navController, onBack = { navController.popBackStack() })
