@@ -1,6 +1,7 @@
 package com.bisc.flauncher.ui.home.search
 
 import com.bisc.flauncher.ui.forAppName
+import com.bisc.flauncher.ui.stackElement
 import com.bisc.flauncher.ui.home.notificationDot
 import androidx.compose.foundation.layout.widthIn
 import android.content.ComponentName
@@ -152,19 +153,21 @@ fun AppGridContent(
                     labelColor = labelColor,
                     onClick = { onAppClick(entry.app) }
                 )
-                is GridEntry.FolderEntry -> FolderCell(
-                    folder = entry.folder,
-                    previewItems = folderItemsByFolder[entry.folder.id].orEmpty(),
-                    loadIcon = loadIcon,
-                    loadPackIcon = loadPackIcon,
-                    onClick = { onFolderClick(entry.folder.id) },
-                    showLabel = showLabels,
-                    labelColor = labelColor,
-                    iconSizeScale = globalIconScale * gridIconScale
-                )
+                is GridEntry.FolderEntry -> Box(Modifier.stackElement("folders", rank = folders.indexOf(entry.folder))) {
+                    FolderCell(
+                        folder = entry.folder,
+                        previewItems = folderItemsByFolder[entry.folder.id].orEmpty(),
+                        loadIcon = loadIcon,
+                        loadPackIcon = loadPackIcon,
+                        onClick = { onFolderClick(entry.folder.id) },
+                        showLabel = showLabels,
+                        labelColor = labelColor,
+                        iconSizeScale = globalIconScale * gridIconScale
+                    )
+                }
             }
         }
-        BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
+        BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth().stackElement("grid")) {
             // The column setting is meant for a phone; a wider screen gets proportionally more.
             val effectiveColumns = maxOf(columns, (columns * (maxWidth / com.bisc.flauncher.ui.PhoneReferenceWidth)).toInt())
             if (horizontal) {

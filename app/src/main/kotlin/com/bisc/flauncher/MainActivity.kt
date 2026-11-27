@@ -589,20 +589,12 @@ class MainActivity : ComponentActivity() {
                             com.bisc.flauncher.ui.settings.SettingsWidgetPagingScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
                         settingsComposable("settings/app_grid") {
-                            com.bisc.flauncher.ui.settings.SettingsAppGridScreen(
-                                navController = navController,
-                                onBack = { navController.popBackStack() },
-                                onNavigate = { sub -> navController.navigate("settings/app_grid/$sub") }
-                            )
+                            com.bisc.flauncher.ui.settings.SettingsAppGridScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
-                        settingsComposable("settings/app_grid/page") {
-                            com.bisc.flauncher.ui.settings.SettingsAppGridPageScreen(navController = navController, onBack = { navController.popBackStack() })
-                        }
-                        settingsComposable("settings/app_grid/grid") {
-                            com.bisc.flauncher.ui.settings.SettingsAppGridGridScreen(navController = navController, onBack = { navController.popBackStack() })
-                        }
-                        settingsComposable("settings/app_grid/search_field") {
-                            com.bisc.flauncher.ui.settings.SettingsAppGridSearchFieldScreen(navController = navController, onBack = { navController.popBackStack() })
+                        listOf("page", "grid", "search_field").forEach { element ->
+                            settingsComposable("settings/app_grid/$element") {
+                                com.bisc.flauncher.ui.settings.SettingsAppGridScreen(navController = navController, onBack = { navController.popBackStack() }, startElement = element)
+                            }
                         }
                         settingsComposable("settings/permissions") {
                             SettingsPermissionsScreen(navController = navController, onBack = { navController.popBackStack() })

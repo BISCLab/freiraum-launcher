@@ -1205,6 +1205,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="stack_summary_only_searching">Nur beim Suchen</string>
     <string name="stack_show">Zeigen</string>
     <string name="stack_page_summary">Ausrichtung, Hintergrund, Statusleiste, Name</string>
+    <string name="stack_page_summary_plain">Hintergrund, Statusleiste, Name</string>
     <string name="stack_el_category_labels">Kategorien-Etiketten</string>
     <string name="stack_chips_look_note">Wie jede Kategorie aussieht, stellst du bei der Kategorie selbst ein.</string>
     <string name="stack_chips_look_link">Zu den Kategorien</string>

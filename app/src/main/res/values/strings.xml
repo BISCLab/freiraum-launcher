@@ -1205,6 +1205,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="stack_summary_only_searching">Only while searching</string>
     <string name="stack_show">Show</string>
     <string name="stack_page_summary">Alignment, background, status bar, name</string>
+    <string name="stack_page_summary_plain">Background, status bar, name</string>
     <string name="stack_el_category_labels">Category labels</string>
     <string name="stack_chips_look_note">How each category looks is set at the category itself.</string>
     <string name="stack_chips_look_link">Go to categories</string>

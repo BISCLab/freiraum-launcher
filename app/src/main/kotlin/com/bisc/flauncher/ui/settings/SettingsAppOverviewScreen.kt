@@ -94,15 +94,10 @@ fun SettingsAppOverviewScreen(
     }
     val textFieldCorner by viewModel.searchFieldCornerRadiusPercent.collectAsState()
     val fieldCorner = draft.field("field_corner", viewModel.appListFieldCornerPercent.collectAsState().value ?: textFieldCorner ?: defaultCorner, viewModel::setAppListFieldCornerPercent)
-    val hideStatus = draft.field("status", remember(id) { home.pageHideStatusBar(id) }.collectAsState(initial = false).value) { home.setPageHideStatusBar(id, it) }
-    val background = draft.field<BackgroundConfig?>("background", remember(id) { home.pageBackgroundOverride(id) }.collectAsState(initial = null).value) {
-        if (it == null) home.clearPageBackgroundConfig(id) else home.setPageBackgroundConfig(id, it)
-    }
-    val shade = draft.field<Float?>("shade", remember(id) { home.pageGlobalShade(id) }.collectAsState(initial = null).value) { it?.let { s -> home.setPageGlobalShade(id, s) } }
+    val page = rememberPageDraft(draft, home, id)
 
     // ---- What follows from it ----
-    val global by home.globalBackground.collectAsState()
-    val pageBackground = background.value ?: global.copy(shade = shade.value ?: global.shade)
+    val pageBackground = page.shown
     val dark = rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), pageBackground)
     val left = handedness.value == Handedness.LEFT
     val rail = railLook.value ?: automaticRailAppearance(dark)
@@ -120,32 +115,13 @@ fun SettingsAppOverviewScreen(
             id = "page", number = 0,
             title = stringResource(R.string.settings_search_page_label),
             summary = stringResource(R.string.stack_page_summary),
-            draftKeys = listOf("handedness", "background", "shade", "status")
+            draftKeys = listOf("handedness") + page.keys
         ) {
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_app_overview_alignment_label)) {
-                HandednessPreviews(selected = handedness.value, onSelect = { handedness.value = it })
+            PageStackOptions(page, LauncherPageKind.APP_LIST, navController, home) {
+                SettingsPreferenceGroup(title = stringResource(R.string.settings_app_overview_alignment_label)) {
+                    HandednessPreviews(selected = handedness.value, onSelect = { handedness.value = it })
+                }
             }
-            BackgroundOverrideSection(
-                override = background.value,
-                global = global,
-                onUseGlobal = { background.value = null },
-                onCustomColor = { background.value = it },
-                imageKey = "page_$id",
-                globalShade = shade.value,
-                onGlobalShadeChange = { shade.value = it },
-                groupTitle = stringResource(R.string.settings_section_global_background),
-                onEditGlobal = { navController.navigate("settings/appearance/background") }
-            )
-            SettingsPreferenceGroup(title = stringResource(R.string.settings_statusbar_label)) {
-                SettingsPreference(
-                    icon = null,
-                    title = stringResource(R.string.settings_statusbar_hide_page),
-                    onClick = { hideStatus.value = !hideStatus.value },
-                    trailing = { Switch(checked = hideStatus.value, onCheckedChange = { hideStatus.value = it }) }
-                )
-            }
-            SettingsGroupLabel(stringResource(R.string.stack_name_label))
-            UtilityPageIdentityGroup(kind = LauncherPageKind.APP_LIST, navController = navController, viewModel = home)
         },
         StackElement(
             id = "category_labels", number = 1,
@@ -266,7 +242,7 @@ fun SettingsAppOverviewScreen(
                     apps = remember(apps) { apps.take(18) },
                     background = pageBackground,
                     dark = dark,
-                    hideStatus = hideStatus.value,
+                    hideStatus = page.hideStatus.value,
                     handedness = handedness.value,
                     chipSymbols = chipSymbols.value,
                     chipCounts = chipCounts.value,
@@ -286,19 +262,6 @@ fun SettingsAppOverviewScreen(
 }
 
 private const val SEARCHING = "search"
-
-/** A switch row bound to a draft value. */
-@Composable
-internal fun DraftSwitchRow(title: String, checked: Boolean, onChange: (Boolean) -> Unit, info: String? = null, enabled: Boolean = true) {
-    SettingsPreference(
-        icon = null,
-        title = title,
-        info = info,
-        enabled = enabled,
-        onClick = { onChange(!checked) },
-        trailing = { Switch(checked = checked, enabled = enabled, onCheckedChange = onChange) }
-    )
-}
 
 /**
  * The App list as on the home screen, from its own parts, at full screen size: the status bar, the
@@ -325,8 +288,7 @@ private fun AppListReplica(
     accent: Int,
     loadIcon: (android.content.ComponentName) -> androidx.compose.ui.graphics.ImageBitmap?
 ) {
-    val density = LocalDensity.current
-    val statusTop = with(density) { WindowInsets.statusBars.getTop(this).toDp() }.coerceAtLeast(24.dp)
+    val statusTop = replicaStatusHeight()
     val ink = resolveElementColors(ElementAppearance(fillMode = ElementFillMode.NONE), dark).contentColor
     val hasCategories = com.bisc.flauncher.ui.home.LauncherCategories.resolved.isNotEmpty()
     Box(Modifier.fillMaxSize()) {
@@ -383,41 +345,5 @@ private fun AppListReplica(
             )
         }
         if (!hideStatus) StatusBarSketch(statusTop, ink)
-    }
-}
-
-/** The status bar in plain shapes: the time on the left, signal and battery on the right. */
-@Composable
-private fun StatusBarSketch(height: Dp, ink: Color) {
-    Row(
-        modifier = Modifier.fillMaxWidth().height(height).padding(horizontal = 20.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text("12:30", color = ink, style = MaterialTheme.typography.labelLarge)
-        Spacer(Modifier.weight(1f))
-        Box(Modifier.size(14.dp).clip(RoundedCornerShape(3.dp)).background(ink.copy(alpha = 0.8f)))
-        Spacer(Modifier.width(6.dp))
-        Box(Modifier.width(22.dp).height(11.dp).clip(RoundedCornerShape(3.dp)).background(ink.copy(alpha = 0.8f)))
-    }
-}
-
-/** A keyboard in plain shapes, where the real one opens while searching. */
-@Composable
-private fun KeyboardSketch() {
-    val base = MaterialTheme.colorScheme.surfaceContainerHigh
-    val key = MaterialTheme.colorScheme.surfaceContainerHighest
-    Column(
-        modifier = Modifier.fillMaxWidth().background(base).padding(horizontal = 6.dp, vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        listOf(10, 9, 9, 5).forEach { count ->
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)) {
-                repeat(count) { i ->
-                    val wide = count == 5 && i == 2
-                    Box(Modifier.width(if (wide) 150.dp else 30.dp).height(44.dp).clip(RoundedCornerShape(8.dp)).background(key))
-                }
-            }
-        }
-        Spacer(Modifier.height(24.dp))
     }
 }

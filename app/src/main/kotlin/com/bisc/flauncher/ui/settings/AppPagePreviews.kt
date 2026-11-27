@@ -85,60 +85,6 @@ private fun Modifier.look(look: ElementAppearance, dark: Boolean, shape: android
         .then(if (look.borderEnabled) Modifier.border(colors.borderWidth / 2, colors.borderColor, shape) else Modifier)
 }
 
-/** The App grid in small: its icons in the set columns, the search field where it sits, and the
- *  page dots when it pages sideways. Tap a part to open its settings. */
-@Composable
-fun AppGridPreview(onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel(), home: HomeViewModel = hiltViewModel()) {
-    val pageId by home.appGridPageId.collectAsState()
-    val background = rememberPageBackground(pageId, home)
-    val dark = rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), background)
-    val columns by viewModel.appGridColumns.collectAsState()
-    val position by viewModel.appGridBarPosition.collectAsState()
-    val barOwn by viewModel.appGridBarAppearance.collectAsState()
-    val horizontal by viewModel.appGridHorizontal.collectAsState()
-    val pageDots by viewModel.appGridPageDots.collectAsState()
-    val showLabels by viewModel.appGridShowLabels.collectAsState()
-    val bar = barOwn ?: automaticRailAppearance(dark)
-    val ink = resolveElementColors(ElementAppearance(fillMode = ElementFillMode.NONE), dark).contentColor
-
-    PreviewPhone(background, onPage = { onNavigate("page") }) {
-        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            @Composable
-            fun Field() {
-                Box(
-                    modifier = Modifier.fillMaxWidth().height(16.dp).look(bar, dark, CircleShape).clickable { onNavigate("search_field") },
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Icon(Icons.Filled.Search, contentDescription = null, tint = resolveElementColors(bar, dark).contentColor, modifier = Modifier.padding(start = 5.dp).size(9.dp))
-                }
-            }
-            if (position == AppGridBarPosition.TOP) Field()
-            Column(
-                modifier = Modifier.weight(1f).fillMaxWidth().clickable { onNavigate("grid") },
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                repeat(5) {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        repeat(columns) {
-                            Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                                Box(Modifier.size(16.dp).clip(RoundedCornerShape(5.dp)).background(ink.copy(alpha = 0.35f)))
-                                if (showLabels) Box(Modifier.padding(top = 3.dp).width(12.dp).height(3.dp).clip(CircleShape).background(ink.copy(alpha = 0.2f)))
-                            }
-                        }
-                    }
-                }
-            }
-            if (horizontal && pageDots) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(3.dp, Alignment.CenterHorizontally)) {
-                    repeat(3) { i -> Box(Modifier.size(width = if (i == 0) 9.dp else 4.dp, height = 4.dp).clip(CircleShape).background(ink.copy(alpha = if (i == 0) 0.8f else 0.35f))) }
-                }
-            }
-            if (position == AppGridBarPosition.BOTTOM) Field()
-            Spacer(Modifier.height(2.dp))
-        }
-    }
-}
-
 /** The Categories page in small, from the live settings: the chips of the real categories, the
  *  search field when it is shown, and the cards, tabs or list below. Tap a part to open its settings. */
 @Composable
