@@ -1194,4 +1194,20 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="settings_search_found_label">Ergebnisse</string>
     <string name="settings_search_found_title">Was gefunden wird</string>
     <string name="settings_search_found_summary">Welche Arten von Ergebnissen es gibt, ihre Reihenfolge und ob sie in der Leiste stehen</string>
+    <string name="stack_card_screen">Bildschirm</string>
+    <string name="stack_card_elements">Elemente</string>
+    <string name="stack_card_adjust">Anpassen</string>
+    <string name="stack_open_card">%1$s öffnen</string>
+    <string name="stack_elements_intro">Tipp auf ein Element, um es anzupassen.</string>
+    <string name="stack_state_normal">Normal</string>
+    <string name="stack_state_searching">Beim Suchen</string>
+    <string name="stack_summary_off">Aus</string>
+    <string name="stack_summary_only_searching">Nur beim Suchen</string>
+    <string name="stack_show">Zeigen</string>
+    <string name="stack_page_summary">Ausrichtung, Hintergrund, Statusleiste, Name</string>
+    <string name="stack_el_category_labels">Kategorien-Etiketten</string>
+    <string name="stack_chips_look_note">Wie jede Kategorie aussieht, stellst du bei der Kategorie selbst ein.</string>
+    <string name="stack_chips_look_link">Zu den Kategorien</string>
+    <string name="stack_field_needs_own_search">Das Suchfeld erscheint, wenn der Suchbutton die eigene App-Suche öffnet.</string>
+    <string name="stack_name_label">Name und Symbol</string>
 </resources>

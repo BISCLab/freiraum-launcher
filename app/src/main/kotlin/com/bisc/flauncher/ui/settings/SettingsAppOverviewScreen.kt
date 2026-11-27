@@ -1,244 +1,423 @@
 package com.bisc.flauncher.ui.settings
 
-import androidx.compose.material.icons.filled.TextFields
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.FontDownload
-import androidx.compose.material.icons.filled.SortByAlpha
-import androidx.compose.material.icons.filled.Wallpaper
+import androidx.compose.foundation.background
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
+import com.bisc.flauncher.data.model.AppInfo
 import com.bisc.flauncher.data.model.BackgroundConfig
 import com.bisc.flauncher.data.model.ElementAppearance
 import com.bisc.flauncher.data.model.ElementFillMode
 import com.bisc.flauncher.data.model.LauncherPageKind
+import com.bisc.flauncher.data.settings.Handedness
 import com.bisc.flauncher.ui.home.HomeViewModel
+import com.bisc.flauncher.ui.home.LocalAppIconLoader
+import com.bisc.flauncher.ui.home.LocalSurfaceIsDark
+import com.bisc.flauncher.ui.home.dock.BackgroundFill
+import com.bisc.flauncher.ui.home.dock.resolveElementColors
 import com.bisc.flauncher.ui.home.search.automaticRailAppearance
+import com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark
 
 /**
- * The App list on one page: the list in small, which side its controls are on, what is shown, and
- * how each part looks. The same order as every page: arrangement, what is shown, look.
+ * The App list's settings as a card stack: the list built from its real parts with a number on
+ * each, the list of parts, and the options of the chosen one. Everything is a draft until Save.
+ * [startElement] opens one part's options first (from the settings search or a shortcut).
  */
 @Composable
-fun SettingsAppOverviewScreen(navController: NavController, onBack: () -> Unit, onNavigate: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val showAzIndex by viewModel.appListShowAzIndex.collectAsState()
-    val showSearchButton by viewModel.appListShowSearchButton.collectAsState()
-    val ownSearch by viewModel.appListOwnSearch.collectAsState()
-    val categoryChips by viewModel.appListCategoryChips.collectAsState()
-    val handedness by viewModel.appOverviewHandedness.collectAsState()
-    SettingsSubScreen(title = stringResource(R.string.settings_section_app_overview), navController = navController, onBack = onBack) {
-        PageSettingsIntro(stringResource(R.string.settings_page_app_overview_description)) { AppListPreview(onNavigate = onNavigate) }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_app_overview_alignment_label)) {
-            HandednessPreviews(selected = handedness, onSelect = viewModel::setAppOverviewHandedness)
-        }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_categories_shown_label)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_app_overview_az_index_label),
-                onClick = { viewModel.setAppListShowAzIndex(!showAzIndex) },
-                trailing = { Switch(checked = showAzIndex, onCheckedChange = viewModel::setAppListShowAzIndex) }
+fun SettingsAppOverviewScreen(
+    navController: NavController,
+    onBack: () -> Unit,
+    startElement: String? = null,
+    viewModel: SettingsViewModel = hiltViewModel(),
+    home: HomeViewModel = hiltViewModel()
+) {
+    val draft: StackDraft = viewModel()
+    val pageId by home.appOverviewPageId.collectAsState()
+    val id = pageId ?: -1L
+
+    // ---- What is stored, and the draft over it ----
+    val handedness = draft.field("handedness", viewModel.appOverviewHandedness.collectAsState().value, viewModel::setAppOverviewHandedness)
+    val showAz = draft.field("az", viewModel.appListShowAzIndex.collectAsState().value, viewModel::setAppListShowAzIndex)
+    val showButton = draft.field("button", viewModel.appListShowSearchButton.collectAsState().value, viewModel::setAppListShowSearchButton)
+    val ownSearch = draft.field("own_search", viewModel.appListOwnSearch.collectAsState().value, viewModel::setAppListOwnSearch)
+    val chips = draft.field("chips", viewModel.appListCategoryChips.collectAsState().value, viewModel::setAppListCategoryChips)
+    val chipSymbols = draft.field("chip_symbols", viewModel.categorySymbolsAppList.collectAsState().value) { viewModel.setCategorySymbols("app_list", it) }
+    val chipCounts = draft.field("chip_counts", viewModel.categoryCountsAppList.collectAsState().value) { viewModel.setCategoryCounts("app_list", it) }
+    val letterLook = draft.field("letter_look", viewModel.appListHeaderLetterAppearance.collectAsState().value, viewModel::setAppListHeaderLetterAppearance)
+    val defaultCorner by viewModel.defaultCornerRadiusPercent.collectAsState()
+    val railLook = draft.field<ElementAppearance?>("rail_look", viewModel.appListRailAppearance.collectAsState().value) {
+        if (it == null) viewModel.resetAppListRailAppearance() else viewModel.setAppListRailAppearance(it)
+    }
+    val railCorner = draft.field("rail_corner", viewModel.alphabetRailCornerPercent.collectAsState().value ?: defaultCorner, viewModel::setAlphabetRailCornerPercent)
+    val buttonLook = draft.field<ElementAppearance?>("button_look", viewModel.appListSearchButtonAppearance.collectAsState().value) {
+        if (it == null) viewModel.resetAppListSearchButtonAppearance() else viewModel.setAppListSearchButtonAppearance(it)
+    }
+    val buttonCorner = draft.field("button_corner", viewModel.appListSearchButtonCornerPercent.collectAsState().value ?: defaultCorner, viewModel::setAppListSearchButtonCornerPercent)
+    val fieldLook = draft.field<ElementAppearance?>("field_look", viewModel.appListSearchFieldAppearance.collectAsState().value) {
+        if (it == null) viewModel.resetAppListSearchFieldAppearance() else viewModel.setAppListSearchFieldAppearance(it)
+    }
+    val textFieldCorner by viewModel.searchFieldCornerRadiusPercent.collectAsState()
+    val fieldCorner = draft.field("field_corner", viewModel.appListFieldCornerPercent.collectAsState().value ?: textFieldCorner ?: defaultCorner, viewModel::setAppListFieldCornerPercent)
+    val hideStatus = draft.field("status", remember(id) { home.pageHideStatusBar(id) }.collectAsState(initial = false).value) { home.setPageHideStatusBar(id, it) }
+    val background = draft.field<BackgroundConfig?>("background", remember(id) { home.pageBackgroundOverride(id) }.collectAsState(initial = null).value) {
+        if (it == null) home.clearPageBackgroundConfig(id) else home.setPageBackgroundConfig(id, it)
+    }
+    val shade = draft.field<Float?>("shade", remember(id) { home.pageGlobalShade(id) }.collectAsState(initial = null).value) { it?.let { s -> home.setPageGlobalShade(id, s) } }
+
+    // ---- What follows from it ----
+    val global by home.globalBackground.collectAsState()
+    val pageBackground = background.value ?: global.copy(shade = shade.value ?: global.shade)
+    val dark = rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), pageBackground)
+    val left = handedness.value == Handedness.LEFT
+    val rail = railLook.value ?: automaticRailAppearance(dark)
+    val button = buttonLook.value ?: automaticRailAppearance(dark)
+    val field = fieldLook.value ?: automaticRailAppearance(dark)
+    val fieldShown = showButton.value && ownSearch.value
+
+    val off = stringResource(R.string.stack_summary_off)
+    val automatic = stringResource(R.string.settings_element_color_auto_hint)
+    val own = stringResource(R.string.settings_look_custom)
+    fun lookSummary(shown: Boolean, look: ElementAppearance?) = if (!shown) off else if (look != null) own else automatic
+
+    val elements = listOf(
+        StackElement(
+            id = "page", number = 0,
+            title = stringResource(R.string.settings_search_page_label),
+            summary = stringResource(R.string.stack_page_summary),
+            draftKeys = listOf("handedness", "background", "shade", "status")
+        ) {
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_app_overview_alignment_label)) {
+                HandednessPreviews(selected = handedness.value, onSelect = { handedness.value = it })
+            }
+            BackgroundOverrideSection(
+                override = background.value,
+                global = global,
+                onUseGlobal = { background.value = null },
+                onCustomColor = { background.value = it },
+                imageKey = "page_$id",
+                globalShade = shade.value,
+                onGlobalShadeChange = { shade.value = it },
+                groupTitle = stringResource(R.string.settings_section_global_background),
+                onEditGlobal = { navController.navigate("settings/appearance/background") }
             )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_app_list_search_button),
-                info = stringResource(R.string.settings_app_list_search_button_summary),
-                onClick = { viewModel.setAppListShowSearchButton(!showSearchButton) },
-                trailing = { Switch(checked = showSearchButton, onCheckedChange = viewModel::setAppListShowSearchButton) }
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_statusbar_label)) {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.settings_statusbar_hide_page),
+                    onClick = { hideStatus.value = !hideStatus.value },
+                    trailing = { Switch(checked = hideStatus.value, onCheckedChange = { hideStatus.value = it }) }
+                )
+            }
+            SettingsGroupLabel(stringResource(R.string.stack_name_label))
+            UtilityPageIdentityGroup(kind = LauncherPageKind.APP_LIST, navController = navController, viewModel = home)
+        },
+        StackElement(
+            id = "category_labels", number = 1,
+            title = stringResource(R.string.stack_el_category_labels),
+            summary = if (chips.value) null else off,
+            shown = chips.value,
+            draftKeys = listOf("chips", "chip_symbols", "chip_counts"),
+            anchor = Offset(0.5f, 0.5f)
+        ) {
+            StackShowSwitch(stringResource(R.string.stack_show), chips.value, { chips.value = it }, summary = stringResource(R.string.settings_app_list_category_chips_info))
+            StackDimmed(!chips.value) {
+                SettingsPreferenceGroup {
+                    DraftSwitchRow(stringResource(R.string.settings_categories_symbols), chipSymbols.value, { chipSymbols.value = it })
+                    DraftSwitchRow(stringResource(R.string.settings_categories_counts), chipCounts.value, { chipCounts.value = it })
+                }
+                SettingsPreferenceGroup {
+                    SettingsPreference(
+                        icon = null,
+                        title = stringResource(R.string.stack_chips_look_link),
+                        summary = stringResource(R.string.stack_chips_look_note),
+                        onClick = { navController.navigate("settings/elements/categories") },
+                        trailing = { androidx.compose.material3.Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) }
+                    )
+                }
+            }
+        },
+        StackElement(
+            id = "letters", number = 2,
+            title = stringResource(R.string.settings_part_letters_short),
+            draftKeys = listOf("letter_look"),
+            anchor = if (left) Offset(-0.7f, 0.5f) else Offset(1.7f, 0.5f),
+            sample = { LookSample(LookSampleKind.LETTER, letterLook.value, 100, dark) }
+        ) {
+            ElementAppearanceSection(letterLook.value, { letterLook.value = it }, stringResource(R.string.settings_element_fill_label))
+        },
+        StackElement(
+            id = "az_index", number = 3,
+            title = stringResource(R.string.settings_app_overview_az_index_label),
+            summary = lookSummary(showAz.value, railLook.value),
+            shown = showAz.value,
+            draftKeys = listOf("az", "rail_look", "rail_corner"),
+            anchor = if (left) Offset(1f, 0.5f) else Offset(0f, 0.5f),
+            ownLook = railLook.value != null,
+            onResetLook = { railLook.value = null },
+            sample = { LookSample(LookSampleKind.AZ_INDEX, rail, railCorner.value, dark) }
+        ) {
+            StackShowSwitch(stringResource(R.string.stack_show), showAz.value, { showAz.value = it })
+            StackDimmed(!showAz.value) {
+                ElementAppearanceSection(rail, { railLook.value = it }, stringResource(R.string.settings_element_fill_label))
+                SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
+                    CornerPercentPicker(percent = railCorner.value, onChange = { railCorner.value = it })
+                }
+            }
+        },
+        StackElement(
+            id = "search_button", number = 4,
+            title = stringResource(R.string.settings_app_list_search_button),
+            summary = lookSummary(showButton.value, buttonLook.value),
+            shown = showButton.value,
+            draftKeys = listOf("button", "own_search", "button_look", "button_corner"),
+            anchor = if (left) Offset(1f, 0f) else Offset(0f, 0f),
+            ownLook = buttonLook.value != null,
+            onResetLook = { buttonLook.value = null },
+            sample = { LookSample(LookSampleKind.SEARCH_BUTTON, button, buttonCorner.value, dark) }
+        ) {
+            StackShowSwitch(stringResource(R.string.stack_show), showButton.value, { showButton.value = it }, summary = stringResource(R.string.settings_app_list_search_button_summary))
+            StackDimmed(!showButton.value) {
+                SettingsPreferenceGroup {
+                    DraftSwitchRow(stringResource(R.string.settings_app_list_own_search), ownSearch.value, { ownSearch.value = it }, info = stringResource(R.string.settings_app_list_own_search_info))
+                }
+                ElementAppearanceSection(button, { buttonLook.value = it }, stringResource(R.string.settings_element_fill_label))
+                SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
+                    CornerPercentPicker(percent = buttonCorner.value, onChange = { buttonCorner.value = it })
+                }
+            }
+        },
+        StackElement(
+            id = "search_field", number = 5,
+            title = stringResource(R.string.settings_app_grid_search_field),
+            summary = if (fieldShown) stringResource(R.string.stack_summary_only_searching) else off,
+            shown = fieldShown,
+            state = SEARCHING,
+            draftKeys = listOf("own_search", "field_look", "field_corner"),
+            anchor = Offset(0.08f, 0f),
+            ownLook = fieldLook.value != null,
+            onResetLook = { fieldLook.value = null },
+            sample = { LookSample(LookSampleKind.FIELD, field, fieldCorner.value, dark) }
+        ) {
+            StackShowSwitch(
+                stringResource(R.string.settings_app_list_own_search), ownSearch.value, { ownSearch.value = it },
+                summary = stringResource(R.string.stack_field_needs_own_search),
+                enabled = showButton.value
             )
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_app_list_own_search),
-                info = stringResource(R.string.settings_app_list_own_search_info),
-                enabled = showSearchButton,
-                onClick = { viewModel.setAppListOwnSearch(!ownSearch) },
-                trailing = { Switch(checked = ownSearch, enabled = showSearchButton, onCheckedChange = viewModel::setAppListOwnSearch) }
-            )
-        }
-        // The categories above the list, with what each of them shows.
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_pages_categories)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_app_list_category_chips),
-                info = stringResource(R.string.settings_app_list_category_chips_info),
-                onClick = { viewModel.setAppListCategoryChips(!categoryChips) },
-                trailing = { Switch(checked = categoryChips, onCheckedChange = viewModel::setAppListCategoryChips) }
-            )
-            if (categoryChips) {
-                CategorySymbolsSwitch("app_list", stringResource(R.string.settings_category_symbols_applist_summary), viewModel)
-                CategoryCountsSwitch("app_list", viewModel)
+            StackDimmed(!fieldShown) {
+                ElementAppearanceSection(field, { fieldLook.value = it }, stringResource(R.string.settings_element_fill_label))
+                SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
+                    CornerPercentPicker(percent = fieldCorner.value, onChange = { fieldCorner.value = it })
+                }
             }
         }
-        PageLookTiles(
-            listOfNotNull(
-                SettingsTile(androidx.compose.material.icons.Icons.Filled.Wallpaper, stringResource(R.string.settings_search_page_label)) { onNavigate("page") },
-                SettingsTile(androidx.compose.material.icons.Icons.Filled.SortByAlpha, stringResource(R.string.settings_part_letters_short)) { onNavigate("section_letters") },
-                if (showAzIndex) SettingsTile(androidx.compose.material.icons.Icons.Filled.FontDownload, stringResource(R.string.settings_app_overview_az_index_label)) { onNavigate("az_index") } else null,
-                if (showSearchButton) SettingsTile(androidx.compose.material.icons.Icons.Filled.Search, stringResource(R.string.settings_app_list_search_button)) { onNavigate("search_button") } else null,
-                if (showSearchButton && ownSearch) SettingsTile(androidx.compose.material.icons.Icons.Filled.TextFields, stringResource(R.string.settings_app_grid_search_field)) { onNavigate("search_field") } else null
-            )
-        )
-    }
-}
-
-/** The floating search button's own look. Independent of the A-Z rail: until set here it has the
- *  automatic look for the page's brightness. */
-@Composable
-fun SettingsAppOverviewSearchButtonScreen(
-    navController: NavController,
-    onBack: () -> Unit,
-    viewModel: SettingsViewModel = hiltViewModel(),
-    homeViewModel: HomeViewModel = hiltViewModel()
-) {
-    val own by viewModel.appListSearchButtonAppearance.collectAsState()
-    val corner by viewModel.appListSearchButtonCornerPercent.collectAsState()
-    val surfaceIsDark = appListPageDark(homeViewModel)
-    // Keyed on the stored value only: the automatic look is re-derived once the page background
-    // has loaded, and that must not wipe what is being edited.
-    val saved = remember(own) { own ?: automaticRailAppearance(surfaceIsDark) }
-    val defaultCorner by viewModel.defaultCornerRadiusPercent.collectAsState()
-    ElementLookScreen(
-        title = stringResource(R.string.settings_app_list_search_button),
-        navController = navController,
-        onBack = onBack,
-        saved = saved,
-        savedCorner = corner ?: defaultCorner,
-        onSave = { look, newCorner -> viewModel.setAppListSearchButtonAppearance(look); newCorner?.let(viewModel::setAppListSearchButtonCornerPercent) },
-        kind = LookSampleKind.SEARCH_BUTTON,
-        backdropDark = surfaceIsDark,
-        custom = own != null,
-        onResetLook = viewModel::resetAppListSearchButtonAppearance,
     )
-}
 
-/** Whether the App list page is dark, from its background. */
-@Composable
-private fun appListPageDark(homeViewModel: HomeViewModel): Boolean {
-    val pageId by homeViewModel.appOverviewPageId.collectAsState()
-    val pageBackground by remember(pageId) { homeViewModel.pageBackgroundConfig(pageId ?: -1L) }.collectAsState(initial = BackgroundConfig())
-    return com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), pageBackground)
-}
-
-/** The app-list page itself: its own background and status-bar switch - same pairing as
- *  [SettingsPageAppearanceScreen]. */
-@Composable
-fun SettingsAppOverviewPageScreen(navController: NavController, onBack: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
-    val pageId by viewModel.appOverviewPageId.collectAsState()
-    val id = pageId ?: return
-    val hideStatusBar by remember(id) { viewModel.pageHideStatusBar(id) }.collectAsState(initial = false)
-    val override by remember(id) { viewModel.pageBackgroundOverride(id) }.collectAsState(initial = null)
-    val globalShade by remember(id) { viewModel.pageGlobalShade(id) }.collectAsState(initial = null)
-    val globalBackground by viewModel.globalBackground.collectAsState()
-
-    SettingsSubScreen(title = stringResource(R.string.settings_search_page_label), navController = navController, onBack = onBack) {
-        UtilityPageIdentityGroup(kind = LauncherPageKind.APP_LIST, navController = navController, viewModel = viewModel)
-        BackgroundOverrideSection(
-            override = override,
-            global = globalBackground,
-            onUseGlobal = { viewModel.clearPageBackgroundConfig(id) },
-            onCustomColor = { viewModel.setPageBackgroundConfig(id, it) },
-            imageKey = "page_$id",
-            globalShade = globalShade,
-            onGlobalShadeChange = { viewModel.setPageGlobalShade(id, it) },
-            groupTitle = stringResource(R.string.settings_section_global_background),
-            onEditGlobal = { navController.navigate("settings/appearance/background") }
-        )
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_statusbar_label)) {
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_statusbar_hide_page),
-                onClick = { viewModel.setPageHideStatusBar(id, !hideStatusBar) },
-                trailing = { Switch(checked = hideStatusBar, onCheckedChange = { viewModel.setPageHideStatusBar(id, it) }) }
-            )
+    val apps by home.browsableApps.collectAsState()
+    val accent by home.appListAccentColor.collectAsState()
+    CompositionLocalProvider(LocalSurfaceIsDark provides dark) {
+        SettingsCardStackScreen(
+            title = stringResource(R.string.settings_section_app_overview),
+            navController = navController,
+            onBack = onBack,
+            draft = draft,
+            elements = elements,
+            states = listOf("normal" to stringResource(R.string.stack_state_normal), SEARCHING to stringResource(R.string.stack_state_searching)),
+            startElement = startElement
+        ) { state, _ ->
+            CompositionLocalProvider(LocalAppIconLoader provides home.iconLoader) {
+                AppListReplica(
+                    searching = state == SEARCHING,
+                    apps = remember(apps) { apps.take(18) },
+                    background = pageBackground,
+                    dark = dark,
+                    hideStatus = hideStatus.value,
+                    handedness = handedness.value,
+                    chipSymbols = chipSymbols.value,
+                    chipCounts = chipCounts.value,
+                    letterLook = letterLook.value,
+                    railLook = railLook.value,
+                    railCorner = railCorner.value,
+                    button = button,
+                    buttonCorner = buttonCorner.value,
+                    field = field,
+                    fieldCorner = fieldCorner.value,
+                    accent = accent,
+                    loadIcon = home::loadIcon
+                )
+            }
         }
     }
 }
 
-/** The letter-group header circles (e.g. "A", "B", "C" above each section). */
+private const val SEARCHING = "search"
+
+/** A switch row bound to a draft value. */
 @Composable
-fun SettingsAppOverviewSectionLettersScreen(
-    navController: NavController,
-    onBack: () -> Unit,
-    viewModel: SettingsViewModel = hiltViewModel(),
-    homeViewModel: HomeViewModel = hiltViewModel()
-) {
-    val saved by viewModel.appListHeaderLetterAppearance.collectAsState()
-    ElementLookScreen(
-        title = surfaceLabel(R.string.settings_layer_surface_section_letter),
-        navController = navController,
-        onBack = onBack,
-        saved = saved,
-        savedCorner = null,
-        onSave = { look, _ -> viewModel.setAppListHeaderLetterAppearance(look) },
-        kind = LookSampleKind.LETTER,
-        backdropDark = appListPageDark(homeViewModel)
+internal fun DraftSwitchRow(title: String, checked: Boolean, onChange: (Boolean) -> Unit, info: String? = null, enabled: Boolean = true) {
+    SettingsPreference(
+        icon = null,
+        title = title,
+        info = info,
+        enabled = enabled,
+        onClick = { onChange(!checked) },
+        trailing = { Switch(checked = checked, enabled = enabled, onCheckedChange = onChange) }
     )
 }
 
-/** The fast-scroll rail; its box and its letters are one look (see
- *  [com.bisc.flauncher.ui.home.search.AlphabetIndex]). Only the rail follows it, nothing else. */
+/**
+ * The App list as on the home screen, from its own parts, at full screen size: the status bar, the
+ * category labels, the list with its letters and rail, and the search button; while searching the
+ * field and a keyboard instead. Every part is drawn, also the ones switched off (they come out faint).
+ */
 @Composable
-fun SettingsAppOverviewAzIndexScreen(
-    navController: NavController,
-    onBack: () -> Unit,
-    viewModel: SettingsViewModel = hiltViewModel(),
-    homeViewModel: HomeViewModel = hiltViewModel()
+private fun AppListReplica(
+    searching: Boolean,
+    apps: List<AppInfo>,
+    background: BackgroundConfig,
+    dark: Boolean,
+    hideStatus: Boolean,
+    handedness: Handedness,
+    chipSymbols: Boolean,
+    chipCounts: Boolean,
+    letterLook: ElementAppearance,
+    railLook: ElementAppearance?,
+    railCorner: Int,
+    button: ElementAppearance,
+    buttonCorner: Int,
+    field: ElementAppearance,
+    fieldCorner: Int,
+    accent: Int,
+    loadIcon: (android.content.ComponentName) -> androidx.compose.ui.graphics.ImageBitmap?
 ) {
-    val railAppearance by viewModel.appListRailAppearance.collectAsState()
-    val corner by viewModel.alphabetRailCornerPercent.collectAsState()
-    val surfaceIsDark = appListPageDark(homeViewModel)
-    val saved = remember(railAppearance) { railAppearance ?: automaticRailAppearance(surfaceIsDark) }
-    val defaultCorner by viewModel.defaultCornerRadiusPercent.collectAsState()
-    ElementLookScreen(
-        title = stringResource(R.string.settings_app_overview_az_index_label),
-        navController = navController,
-        onBack = onBack,
-        saved = saved,
-        savedCorner = corner ?: defaultCorner,
-        onSave = { look, newCorner -> viewModel.setAppListRailAppearance(look); newCorner?.let(viewModel::setAlphabetRailCornerPercent) },
-        kind = LookSampleKind.AZ_INDEX,
-        backdropDark = surfaceIsDark,
-        custom = railAppearance != null,
-        onResetLook = viewModel::resetAppListRailAppearance
-    )
+    val density = LocalDensity.current
+    val statusTop = with(density) { WindowInsets.statusBars.getTop(this).toDp() }.coerceAtLeast(24.dp)
+    val ink = resolveElementColors(ElementAppearance(fillMode = ElementFillMode.NONE), dark).contentColor
+    val hasCategories = com.bisc.flauncher.ui.home.LauncherCategories.resolved.isNotEmpty()
+    Box(Modifier.fillMaxSize()) {
+        BackgroundFill(background, Modifier.fillMaxSize())
+        CompositionLocalProvider(LocalContentColor provides ink) {
+            Column(Modifier.fillMaxSize()) {
+                if (!searching && hasCategories) {
+                    com.bisc.flauncher.ui.home.AppListCategoryChips(
+                        selected = null,
+                        onSelect = {},
+                        surfaceDark = dark,
+                        showSymbols = chipSymbols,
+                        showCounts = chipCounts,
+                        modifier = Modifier.padding(top = statusTop + 12.dp)
+                    )
+                }
+                com.bisc.flauncher.ui.home.search.AppOverviewContent(
+                    showSearchButton = !searching,
+                    allApps = apps,
+                    showAzIndex = true,
+                    headerLetterAppearance = letterLook,
+                    pageBackground = background,
+                    railAppearance = railLook,
+                    accentColor = accent,
+                    handedness = handedness,
+                    cornerRadiusPercent = railCorner,
+                    loadIcon = loadIcon,
+                    onAppClick = {},
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(top = if (!searching && hasCategories) 4.dp else statusTop + 16.dp)
+                )
+                if (searching) {
+                    com.bisc.flauncher.ui.home.search.AppSearchField(
+                        query = "",
+                        onQueryChange = {},
+                        onSubmit = {},
+                        appearance = field,
+                        cornerRadiusPercent = fieldCorner,
+                        autoOpen = false,
+                        modifier = Modifier.align(Alignment.CenterHorizontally).widthIn(max = com.bisc.flauncher.ui.MaxContentWidth).padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 16.dp)
+                    )
+                    KeyboardSketch()
+                }
+            }
+        }
+        if (!searching) {
+            com.bisc.flauncher.ui.home.search.AppOverviewSearchButton(
+                onClick = {},
+                handedness = handedness,
+                cornerRadiusPercent = buttonCorner,
+                appearance = button
+            )
+        }
+        if (!hideStatus) StatusBarSketch(statusTop, ink)
+    }
 }
 
-/** The app list's own search field. Independent of the button and the rail: until set here it has
- *  the automatic look for the page's brightness. */
+/** The status bar in plain shapes: the time on the left, signal and battery on the right. */
 @Composable
-fun SettingsAppOverviewSearchFieldScreen(
-    navController: NavController,
-    onBack: () -> Unit,
-    viewModel: SettingsViewModel = hiltViewModel(),
-    homeViewModel: HomeViewModel = hiltViewModel()
-) {
-    val own by viewModel.appListSearchFieldAppearance.collectAsState()
-    val corner by viewModel.appListFieldCornerPercent.collectAsState()
-    val fieldCorner by viewModel.searchFieldCornerRadiusPercent.collectAsState()
-    val surfaceIsDark = appListPageDark(homeViewModel)
-    val saved = remember(own) { own ?: automaticRailAppearance(surfaceIsDark) }
-    val defaultCorner by viewModel.defaultCornerRadiusPercent.collectAsState()
-    ElementLookScreen(
-        title = stringResource(R.string.settings_app_grid_search_field),
-        navController = navController,
-        onBack = onBack,
-        saved = saved,
-        savedCorner = corner ?: fieldCorner ?: defaultCorner,
-        onSave = { look, newCorner -> viewModel.setAppListSearchFieldAppearance(look); newCorner?.let(viewModel::setAppListFieldCornerPercent) },
-        kind = LookSampleKind.FIELD,
-        backdropDark = surfaceIsDark,
-        custom = own != null,
-        onResetLook = viewModel::resetAppListSearchFieldAppearance
-    )
+private fun StatusBarSketch(height: Dp, ink: Color) {
+    Row(
+        modifier = Modifier.fillMaxWidth().height(height).padding(horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text("12:30", color = ink, style = MaterialTheme.typography.labelLarge)
+        Spacer(Modifier.weight(1f))
+        Box(Modifier.size(14.dp).clip(RoundedCornerShape(3.dp)).background(ink.copy(alpha = 0.8f)))
+        Spacer(Modifier.width(6.dp))
+        Box(Modifier.width(22.dp).height(11.dp).clip(RoundedCornerShape(3.dp)).background(ink.copy(alpha = 0.8f)))
+    }
+}
+
+/** A keyboard in plain shapes, where the real one opens while searching. */
+@Composable
+private fun KeyboardSketch() {
+    val base = MaterialTheme.colorScheme.surfaceContainerHigh
+    val key = MaterialTheme.colorScheme.surfaceContainerHighest
+    Column(
+        modifier = Modifier.fillMaxWidth().background(base).padding(horizontal = 6.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        listOf(10, 9, 9, 5).forEach { count ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)) {
+                repeat(count) { i ->
+                    val wide = count == 5 && i == 2
+                    Box(Modifier.width(if (wide) 150.dp else 30.dp).height(44.dp).clip(RoundedCornerShape(8.dp)).background(key))
+                }
+            }
+        }
+        Spacer(Modifier.height(24.dp))
+    }
 }

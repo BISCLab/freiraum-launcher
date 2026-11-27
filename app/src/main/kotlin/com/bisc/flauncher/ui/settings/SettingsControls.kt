@@ -511,6 +511,11 @@ fun SettingsEditPage(
     footer: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    // Inside a page's card stack it opens in the Adjust card, so the replica stays a tap away.
+    LocalStackSubPageHost.current?.let { host ->
+        HostedEditPage(host, title, onDismiss, onSave, dirty, header, content)
+        return
+    }
     var confirmLeave by remember { mutableStateOf(false) }
     val guardedDismiss = { if (onSave != null && dirty) confirmLeave = true else onDismiss() }
     if (confirmLeave) {

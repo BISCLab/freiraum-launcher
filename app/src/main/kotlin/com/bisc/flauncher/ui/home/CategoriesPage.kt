@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home
 
+import com.bisc.flauncher.ui.stackElement
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -499,7 +500,14 @@ internal fun categoryApps(categoryId: Long?, apps: List<com.bisc.flauncher.data.
 
 /** Category chips over the App list: one picked shows only its apps, "All" shows them all again. */
 @Composable
-internal fun AppListCategoryChips(selected: Long?, onSelect: (Long?) -> Unit, surfaceDark: Boolean, modifier: Modifier = Modifier) {
+internal fun AppListCategoryChips(
+    selected: Long?,
+    onSelect: (Long?) -> Unit,
+    surfaceDark: Boolean,
+    modifier: Modifier = Modifier,
+    showSymbols: Boolean = LauncherCategories.symbolsInAppList,
+    showCounts: Boolean = LauncherCategories.countsInAppList
+) {
     val look = ElementAppearance(
         fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE,
         borderEnabled = true,
@@ -507,18 +515,18 @@ internal fun AppListCategoryChips(selected: Long?, onSelect: (Long?) -> Unit, su
     )
     val withApps = LauncherCategories.resolved.filter { r -> r.members.any { it.type == GridItemType.APP } }
     LazyRow(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().then(Modifier.stackElement("category_labels")),
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item(key = "all") {
-            CategoryChip(null, stringResource(R.string.categories_all), null, selected == null, look, onClick = { onSelect(null) }, showSymbol = LauncherCategories.symbolsInAppList)
+            CategoryChip(null, stringResource(R.string.categories_all), null, selected == null, look, onClick = { onSelect(null) }, showSymbol = showSymbols)
         }
         items(withApps, key = { it.category.id }) { r ->
             CategoryChip(
-                r.category, r.category.name, r.members.count { it.type == GridItemType.APP }.takeIf { LauncherCategories.countsInAppList }, selected == r.category.id, look,
+                r.category, r.category.name, r.members.count { it.type == GridItemType.APP }.takeIf { showCounts }, selected == r.category.id, look,
                 onClick = { onSelect(if (selected == r.category.id) null else r.category.id) },
-                showSymbol = LauncherCategories.symbolsInAppList
+                showSymbol = showSymbols
             )
         }
     }

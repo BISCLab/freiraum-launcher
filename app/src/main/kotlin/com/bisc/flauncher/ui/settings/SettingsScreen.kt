@@ -538,6 +538,8 @@ fun SettingsSubScreen(
     dirty: Boolean = false,
     /** Stays on top while the content below scrolls, e.g. a live preview of what is edited. */
     header: (@Composable () -> Unit)? = null,
+    /** False = the content fills the page and scrolls by itself, e.g. a card stack. */
+    scrollable: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
     // Every way out (back gesture, the arrow, a breadcrumb) goes through this: with unsaved changes
@@ -575,6 +577,10 @@ fun SettingsSubScreen(
             }
         }
     ) { padding ->
+        if (!scrollable) {
+            Column(modifier = Modifier.padding(padding).fillMaxSize().imePadding().padding(vertical = 8.dp), content = content)
+            return@Scaffold
+        }
         val scroll = rememberScrollState()
         // Scrolled away from the top: a fixed preview steps back to a smaller size.
         val compact by remember { androidx.compose.runtime.derivedStateOf { scroll.value > 40 } }

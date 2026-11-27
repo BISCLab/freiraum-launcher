@@ -568,26 +568,13 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         settingsComposable("settings/app_overview") {
-                            com.bisc.flauncher.ui.settings.SettingsAppOverviewScreen(
-                                navController = navController,
-                                onBack = { navController.popBackStack() },
-                                onNavigate = { sub -> navController.navigate("settings/app_overview/$sub") }
-                            )
+                            com.bisc.flauncher.ui.settings.SettingsAppOverviewScreen(navController = navController, onBack = { navController.popBackStack() })
                         }
-                        settingsComposable("settings/app_overview/page") {
-                            com.bisc.flauncher.ui.settings.SettingsAppOverviewPageScreen(navController = navController, onBack = { navController.popBackStack() })
-                        }
-                        settingsComposable("settings/app_overview/search_button") {
-                            com.bisc.flauncher.ui.settings.SettingsAppOverviewSearchButtonScreen(navController = navController, onBack = { navController.popBackStack() })
-                        }
-                        settingsComposable("settings/app_overview/search_field") {
-                            com.bisc.flauncher.ui.settings.SettingsAppOverviewSearchFieldScreen(navController = navController, onBack = { navController.popBackStack() })
-                        }
-                        settingsComposable("settings/app_overview/section_letters") {
-                            com.bisc.flauncher.ui.settings.SettingsAppOverviewSectionLettersScreen(navController = navController, onBack = { navController.popBackStack() })
-                        }
-                        settingsComposable("settings/app_overview/az_index") {
-                            com.bisc.flauncher.ui.settings.SettingsAppOverviewAzIndexScreen(navController = navController, onBack = { navController.popBackStack() })
+                        // Ways in from the settings search and shortcuts: the stack, opened on that part.
+                        listOf("page" to "page", "search_button" to "search_button", "search_field" to "search_field", "section_letters" to "letters", "az_index" to "az_index").forEach { (route, element) ->
+                            settingsComposable("settings/app_overview/$route") {
+                                com.bisc.flauncher.ui.settings.SettingsAppOverviewScreen(navController = navController, onBack = { navController.popBackStack() }, startElement = element)
+                            }
                         }
                         settingsComposable("settings/extensions") {
                             com.bisc.flauncher.ui.settings.SettingsExtensionsScreen(navController = navController, onBack = { navController.popBackStack() })

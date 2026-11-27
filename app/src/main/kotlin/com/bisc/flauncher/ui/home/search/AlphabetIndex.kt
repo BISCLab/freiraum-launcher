@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.search
 
+import com.bisc.flauncher.ui.stackElement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -103,6 +104,7 @@ fun AlphabetIndex(
                     )
                     .width(RAIL_BAR_WIDTH)
                     .fillMaxHeight()
+                    .stackElement("az_index")
                     .then(Modifier.designGlow(RoundedCornerShape(railBarCorner), "rail"))
                     .clip(RoundedCornerShape(railBarCorner))
                     .background(railColors.box, alpha = railColors.boxAlpha)

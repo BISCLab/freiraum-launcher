@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- App list settings as a card stack: Screen shows the list built from its real parts with a number on each (parts switched off come out faint, "While searching" shows the field and keyboard), Elements lists every part, Adjust holds the chosen part's options in a fixed order; color editors open inside the card, and one Save keeps everything
+
 ## 0.26.0
 
 - App list, App grid and Text search settings on one page each instead of Appearance and Behavior: the page in small, then clearly named groups, and at the end "Appearance" with a tile for every part, the page first

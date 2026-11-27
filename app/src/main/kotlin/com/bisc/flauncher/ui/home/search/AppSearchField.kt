@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.search
 
+import com.bisc.flauncher.ui.stackElement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -64,6 +65,7 @@ fun AppSearchField(
     val textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.contentColor)
     Box(
         modifier = modifier
+            .stackElement("search_field")
             .fillMaxWidth()
             .height(FIELD_HEIGHT)
             .then(Modifier.designGlow(shape, "search"))

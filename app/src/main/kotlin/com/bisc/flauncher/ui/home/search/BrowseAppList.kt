@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home.search
 
+import com.bisc.flauncher.ui.stackElement
 import com.bisc.flauncher.ui.forAppName
 import com.bisc.flauncher.ui.home.notificationDot
 import androidx.compose.runtime.collectAsState
@@ -351,6 +352,7 @@ private fun LetterCircle(letter: Char, appearance: ElementAppearance) {
     val letterBorderColor = if (ownFill || appearance.borderColor != null) colors.borderColor else listContent.copy(alpha = 0.3f)
     Box(
         modifier = Modifier
+            .stackElement("letters", rank = letter.code)
             .size(HEADER_CIRCLE_SIZE)
             .then(Modifier.designGlow(CircleShape, "buttons"))
             .clip(CircleShape)
