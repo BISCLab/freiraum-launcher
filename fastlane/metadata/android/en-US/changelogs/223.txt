@@ -1,0 +1,3 @@
+- App grid, Categories page, Text search and Home page: settings as a card stack like the App list
+- Text search: "Keyboard open" shows the keyboard with its strip, Home page: "Panel open" shows the Panel
+- Breadcrumbs show only the page name

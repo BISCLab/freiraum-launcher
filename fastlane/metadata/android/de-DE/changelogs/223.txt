@@ -1,0 +1,3 @@
+- App-Raster, Kategorien-Seite, Textsuche und Startseite: Einstellungen als Kartenstapel wie bei der App-Liste
+- Textsuche: "Tastatur offen" zeigt die Tastatur mit Blende, Startseite: "Panel offen" zeigt das Panel
+- Die Brotkrumen zeigen nur noch den Seitennamen
