@@ -149,121 +149,103 @@ fun ActionButtonPickerSheet(buttons: List<ActionButton>, onSelect: (ActionButton
 /** Detail/edit screen for one [ActionButton], reached by id - see [SettingsAddressDetailScreen] for
  *  the same pattern applied to addresses. */
 @Composable
-fun SettingsActionButtonDetailScreen(buttonId: Long, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsActionButtonDetailScreen(buttonId: Long, navController: NavController, onBack: () -> Unit, startElement: String? = null, viewModel: SettingsViewModel = hiltViewModel()) {
+    val home: com.bisc.flauncher.ui.home.HomeViewModel = hiltViewModel()
+    val stack: StackDraft = androidx.lifecycle.viewmodel.compose.viewModel()
     val buttons by viewModel.actionButtons.collectAsState()
     val saved = buttons.find { it.id == buttonId } ?: return
-    var button by rememberDraft(saved)
+    val item = stack.field("item", saved.copy(tileFace = null)) {}
+    val face = stack.field("face", saved.tileFace) {}
+    val button = item.value.copy(tileFace = face.value)
+    stack.saveTogether { if (button != saved) viewModel.updateActionButton(button) }
     val allPages by viewModel.allPages.collectAsState()
     var showPagePicker by remember { mutableStateOf(false) }
     var showSettingPicker by remember { mutableStateOf(false) }
     var confirmingDelete by remember { mutableStateOf(false) }
+    val usages = rememberUsages(com.bisc.flauncher.data.model.GridItemType.ACTION_BUTTON, buttonId.toString(), home)
+    fun set(change: (ActionButton) -> ActionButton) { item.value = change(item.value) }
 
-    SettingsSubScreen(title = saved.label, navController = navController, onBack = onBack, onSave = { viewModel.updateActionButton(button) }, dirty = button != saved,
-        // The tile as it will look, fixed on top like on a folder's or a category's page.
-        header = {
-            TilePreviewHeader(
-                name = button.label,
-                tile = { around ->
-                    com.bisc.flauncher.ui.home.TileFaceView(
-                        button.face(), com.bisc.flauncher.ui.home.dock.UNSET_APP_SLOT_COLOR, button.label,
-                        modifier = Modifier.fillMaxSize(), shape = RoundedCornerShape(16.dp), around = around, defaultSymbol = actionButtonActionIcon(button.actionType)
+    ElementStackScreen(
+        title = button.label.ifBlank { saved.label },
+        navController = navController,
+        onBack = onBack,
+        startElement = startElement,
+        draft = stack,
+        home = home,
+        partTitle = stringResource(R.string.stack_el_action_button),
+        partSummary = null,
+        partKeys = listOf("item"),
+        symbolTitle = stringResource(R.string.stack_el_symbol),
+        symbolKeys = listOf("face"),
+        name = button.label,
+        symbol = { size, ink -> ElementTile(button.face(), button.label, size, ink, actionButtonActionIcon(button.actionType)) },
+        partOptions = {
+            SettingsPreferenceGroup {
+                OutlinedTextField(
+                    value = button.label,
+                    onValueChange = { v -> set { it.copy(label = v) } },
+                    label = { Text(stringResource(R.string.settings_elements_actionbutton_name_hint)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_actionbutton_action_label)) {
+                RadioPreference(stringResource(R.string.settings_elements_actionbutton_action_panel), ActionButtonActionType.PANEL, button.actionType, { t -> set { it.copy(actionType = t, actionPageId = null) } })
+                RadioPreference(stringResource(R.string.settings_elements_actionbutton_action_dock), ActionButtonActionType.DOCK, button.actionType, { t -> set { it.copy(actionType = t, actionPageId = null) } })
+                RadioPreference(stringResource(R.string.settings_elements_actionbutton_action_page), ActionButtonActionType.PAGE, button.actionType, { t -> set { it.copy(actionType = t) } })
+                if (button.actionType == ActionButtonActionType.PAGE) {
+                    val targetPage = allPages.find { it.id == button.actionPageId }
+                    SettingsPreference(
+                        icon = null,
+                        title = targetPage?.let { pageLabel(it, allPages) } ?: stringResource(R.string.settings_elements_actionbutton_pick_page),
+                        onClick = { showPagePicker = true },
+                        trailing = null
                     )
                 }
-            )
-        }
-    ) {
-        SettingsPreferenceGroup {
-            OutlinedTextField(
-                value = button.label,
-                onValueChange = { button = button.copy(label = it) },
-                label = { Text(stringResource(R.string.settings_elements_actionbutton_name_hint)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-        }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_actionbutton_action_label)) {
-            RadioPreference(
-                stringResource(R.string.settings_elements_actionbutton_action_panel),
-                ActionButtonActionType.PANEL,
-                button.actionType,
-                { button = button.copy(actionType = it, actionPageId = null) }
-            )
-            RadioPreference(
-                stringResource(R.string.settings_elements_actionbutton_action_dock),
-                ActionButtonActionType.DOCK,
-                button.actionType,
-                { button = button.copy(actionType = it, actionPageId = null) }
-            )
-            RadioPreference(
-                stringResource(R.string.settings_elements_actionbutton_action_page),
-                ActionButtonActionType.PAGE,
-                button.actionType,
-                { button = button.copy(actionType = it) }
-            )
-            if (button.actionType == ActionButtonActionType.PAGE) {
-                val targetPage = allPages.find { it.id == button.actionPageId }
-                SettingsPreference(
-                    icon = null,
-                    title = targetPage?.let { pageLabel(it, allPages) } ?: stringResource(R.string.settings_elements_actionbutton_pick_page),
-                    onClick = { showPagePicker = true },
-                    trailing = null
-                )
+                RadioPreference(stringResource(R.string.settings_elements_actionbutton_action_setting), ActionButtonActionType.ANDROID_SETTING, button.actionType, { t -> set { it.copy(actionType = t, actionPageId = null) } })
+                if (button.actionType == ActionButtonActionType.ANDROID_SETTING) {
+                    val targetShortcut = SettingsShortcuts.all.find { it.action == button.androidSettingAction }
+                    SettingsPreference(
+                        icon = null,
+                        title = targetShortcut?.let { stringResource(it.labelRes) } ?: stringResource(R.string.settings_elements_actionbutton_pick_setting),
+                        onClick = { showSettingPicker = true },
+                        trailing = null
+                    )
+                }
+                RadioPreference(stringResource(R.string.settings_elements_actionbutton_action_launcher_settings), ActionButtonActionType.LAUNCHER_SETTINGS, button.actionType, { t -> set { it.copy(actionType = t, actionPageId = null) } })
             }
-            RadioPreference(
-                stringResource(R.string.settings_elements_actionbutton_action_setting),
-                ActionButtonActionType.ANDROID_SETTING,
-                button.actionType,
-                { button = button.copy(actionType = it, actionPageId = null) }
-            )
-            if (button.actionType == ActionButtonActionType.ANDROID_SETTING) {
-                val targetShortcut = SettingsShortcuts.all.find { it.action == button.androidSettingAction }
-                SettingsPreference(
-                    icon = null,
-                    title = targetShortcut?.let { stringResource(it.labelRes) } ?: stringResource(R.string.settings_elements_actionbutton_pick_setting),
-                    onClick = { showSettingPicker = true },
-                    trailing = null
-                )
+            UsagesGroup(usages, navController)
+            SettingsPreferenceGroup {
+                SettingsPreference(icon = Icons.Filled.DeleteOutline, title = stringResource(R.string.settings_elements_delete_actionbutton), onClick = { confirmingDelete = true }, trailing = null)
             }
-            RadioPreference(
-                stringResource(R.string.settings_elements_actionbutton_action_launcher_settings),
-                ActionButtonActionType.LAUNCHER_SETTINGS,
-                button.actionType,
-                { button = button.copy(actionType = it, actionPageId = null) }
+        },
+        symbolOptions = {
+            PartIntro(stringResource(R.string.element_tile_info))
+            TileFaceEditor(
+                face = button.face(),
+                onChange = { face.value = it.toJson() },
+                autoSurface = com.bisc.flauncher.ui.home.dock.UNSET_APP_SLOT_COLOR,
+                letter = button.label,
+                content = emptyList(),
+                contentSummary = "",
+                viewModel = viewModel,
+                kinds = listOf(com.bisc.flauncher.data.model.TileKind.SYMBOL, com.bisc.flauncher.data.model.TileKind.LETTER),
+                defaultSymbol = actionButtonActionIcon(button.actionType)
             )
         }
-        SectionBanner(Icons.Filled.Apps, stringResource(R.string.settings_category_tile_label), stringResource(R.string.element_tile_info))
-        TileFaceEditor(
-            face = button.face(),
-            onChange = { button = button.copy(tileFace = it.toJson()) },
-            autoSurface = com.bisc.flauncher.ui.home.dock.UNSET_APP_SLOT_COLOR,
-            letter = button.label,
-            content = emptyList(),
-            contentSummary = "",
-            viewModel = viewModel,
-            kinds = listOf(com.bisc.flauncher.data.model.TileKind.SYMBOL, com.bisc.flauncher.data.model.TileKind.LETTER),
-            defaultSymbol = actionButtonActionIcon(button.actionType)
-        )
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = Icons.Filled.DeleteOutline,
-                title = stringResource(R.string.settings_elements_delete_actionbutton),
-                onClick = { confirmingDelete = true },
-                trailing = null
-            )
-        }
-    }
+    )
 
     if (showPagePicker) {
         PagePickerSheet(
             pages = allPages,
-            onPageSelected = { page -> button = button.copy(actionPageId = page.id); showPagePicker = false },
+            onPageSelected = { page -> set { it.copy(actionPageId = page.id) }; showPagePicker = false },
             onDismiss = { showPagePicker = false }
         )
     }
 
     if (showSettingPicker) {
         AndroidSettingPickerSheet(
-            onSelect = { shortcut -> button = button.copy(androidSettingAction = shortcut.action); showSettingPicker = false },
+            onSelect = { shortcut -> set { it.copy(androidSettingAction = shortcut.action) }; showSettingPicker = false },
             onDismiss = { showSettingPicker = false }
         )
     }
@@ -271,7 +253,7 @@ fun SettingsActionButtonDetailScreen(buttonId: Long, navController: NavControlle
     if (confirmingDelete) {
         ConfirmRemoveDialog(
             label = button.label,
-            onConfirm = { viewModel.removeActionButton(button); confirmingDelete = false; onBack() },
+            onConfirm = { viewModel.removeActionButton(saved); confirmingDelete = false; onBack() },
             onDismiss = { confirmingDelete = false }
         )
     }

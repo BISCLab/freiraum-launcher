@@ -74,81 +74,88 @@ fun SettingsAddressesScreen(navController: NavController, onBack: () -> Unit, vi
  *  "hold only the id, re-derive the live item every recomposition" convention as the rest of
  *  Settings (e.g. [SettingsPageRowsScreen]). */
 @Composable
-fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, onBack: () -> Unit, startElement: String? = null, viewModel: SettingsViewModel = hiltViewModel()) {
+    val home: com.bisc.flauncher.ui.home.HomeViewModel = hiltViewModel()
+    val stack: StackDraft = androidx.lifecycle.viewmodel.compose.viewModel()
     val targets by viewModel.savedMapTargets.collectAsState()
     val saved = targets.find { it.id == targetId } ?: return
-    var target by rememberDraft(saved)
+    // What it is, and its symbol, each a value of its own; written together as one place.
+    val item = stack.field("item", saved.copy(tileFace = null)) {}
+    val face = stack.field("face", saved.tileFace) {}
+    val target = item.value.copy(tileFace = face.value)
+    stack.saveTogether { if (target != saved) viewModel.updateMapTarget(target) }
     val browsableApps by viewModel.labeledApps.collectAsState()
     var showAppPicker by remember { mutableStateOf(false) }
     var confirmingDelete by remember { mutableStateOf(false) }
+    val usages = rememberUsages(com.bisc.flauncher.data.model.GridItemType.MAP_TARGET, targetId.toString(), home)
 
-    SettingsSubScreen(title = saved.label, navController = navController, onBack = onBack, onSave = { viewModel.updateMapTarget(target) }, dirty = target != saved,
-        // The tile as it will look, fixed on top like on a folder's or a category's page.
-        header = {
-            TilePreviewHeader(
-                name = target.label,
-                tile = { around ->
-                    com.bisc.flauncher.ui.home.TileFaceView(
-                        target.face(), com.bisc.flauncher.ui.home.dock.UNSET_APP_SLOT_COLOR, target.label,
-                        modifier = Modifier.fillMaxSize(), shape = RoundedCornerShape(16.dp), around = around, defaultSymbol = Icons.Filled.Place
-                    )
-                }
+    ElementStackScreen(
+        title = target.label.ifBlank { saved.label },
+        navController = navController,
+        onBack = onBack,
+        startElement = startElement,
+        draft = stack,
+        home = home,
+        partTitle = stringResource(R.string.stack_el_address),
+        partSummary = target.address.takeIf { it.isNotBlank() },
+        partKeys = listOf("item"),
+        symbolTitle = stringResource(R.string.stack_el_symbol),
+        symbolKeys = listOf("face"),
+        name = target.label,
+        symbol = { size, ink -> ElementTile(target.face(), target.label, size, ink, Icons.Filled.Place) },
+        partOptions = {
+            SettingsPreferenceGroup {
+                OutlinedTextField(
+                    value = target.label,
+                    onValueChange = { item.value = item.value.copy(label = it) },
+                    label = { Text(stringResource(R.string.sidebar_maps_label_hint)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+                OutlinedTextField(
+                    value = target.address,
+                    onValueChange = { item.value = item.value.copy(address = it) },
+                    label = { Text(stringResource(R.string.settings_elements_address_hint)) },
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_navigation_app_label)) {
+                val appLabel = target.navigationApp?.let { pkg -> browsableApps.find { it.componentName.packageName == pkg }?.label }
+                SettingsPreference(
+                    icon = null,
+                    title = appLabel ?: stringResource(R.string.settings_elements_app_default),
+                    onClick = { showAppPicker = true },
+                    trailing = if (target.navigationApp != null) {
+                        { TextButton(onClick = { item.value = item.value.copy(navigationApp = null) }) { Text(stringResource(R.string.settings_elements_use_default)) } }
+                    } else null
+                )
+            }
+            UsagesGroup(usages, navController)
+            SettingsPreferenceGroup {
+                SettingsPreference(icon = Icons.Filled.DeleteOutline, title = stringResource(R.string.settings_elements_delete_address), onClick = { confirmingDelete = true }, trailing = null)
+            }
+        },
+        symbolOptions = {
+            PartIntro(stringResource(R.string.element_tile_info))
+            TileFaceEditor(
+                face = target.face(),
+                onChange = { face.value = it.toJson() },
+                autoSurface = com.bisc.flauncher.ui.home.dock.UNSET_APP_SLOT_COLOR,
+                letter = target.label,
+                content = emptyList(),
+                contentSummary = "",
+                viewModel = viewModel,
+                kinds = listOf(com.bisc.flauncher.data.model.TileKind.SYMBOL, com.bisc.flauncher.data.model.TileKind.LETTER),
+                defaultSymbol = Icons.Filled.Place
             )
         }
-    ) {
-        SettingsPreferenceGroup {
-            OutlinedTextField(
-                value = target.label,
-                onValueChange = { target = target.copy(label = it) },
-                label = { Text(stringResource(R.string.sidebar_maps_label_hint)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-            OutlinedTextField(
-                value = target.address,
-                onValueChange = { target = target.copy(address = it) },
-                label = { Text(stringResource(R.string.settings_elements_address_hint)) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-        }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_navigation_app_label)) {
-            val appLabel = target.navigationApp?.let { pkg -> browsableApps.find { it.componentName.packageName == pkg }?.label }
-            SettingsPreference(
-                icon = null,
-                title = appLabel ?: stringResource(R.string.settings_elements_app_default),
-                onClick = { showAppPicker = true },
-                trailing = if (target.navigationApp != null) {
-                    { TextButton(onClick = { target = target.copy(navigationApp = null) }) { Text(stringResource(R.string.settings_elements_use_default)) } }
-                } else null
-            )
-        }
-        SectionBanner(Icons.Filled.Apps, stringResource(R.string.settings_category_tile_label), stringResource(R.string.element_tile_info))
-        TileFaceEditor(
-            face = target.face(),
-            onChange = { target = target.copy(tileFace = it.toJson()) },
-            autoSurface = com.bisc.flauncher.ui.home.dock.UNSET_APP_SLOT_COLOR,
-            letter = target.label,
-            content = emptyList(),
-            contentSummary = "",
-            viewModel = viewModel,
-            kinds = listOf(com.bisc.flauncher.data.model.TileKind.SYMBOL, com.bisc.flauncher.data.model.TileKind.LETTER),
-            defaultSymbol = Icons.Filled.Place
-        )
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = Icons.Filled.DeleteOutline,
-                title = stringResource(R.string.settings_elements_delete_address),
-                onClick = { confirmingDelete = true },
-                trailing = null
-            )
-        }
-    }
+    )
 
     if (showAppPicker) {
         ShortcutSourceAppSheet(
             apps = browsableApps,
             loadIcon = viewModel::loadIcon,
-            onAppSelected = { app -> target = target.copy(navigationApp = app.componentName.packageName); showAppPicker = false },
+            onAppSelected = { app -> item.value = item.value.copy(navigationApp = app.componentName.packageName); showAppPicker = false },
             onDismiss = { showAppPicker = false }
         )
     }
@@ -156,7 +163,7 @@ fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, on
     if (confirmingDelete) {
         ConfirmRemoveDialog(
             label = target.label,
-            onConfirm = { viewModel.removeMapTarget(target); confirmingDelete = false; onBack() },
+            onConfirm = { viewModel.removeMapTarget(saved); confirmingDelete = false; onBack() },
             onDismiss = { confirmingDelete = false }
         )
     }

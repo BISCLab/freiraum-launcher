@@ -71,85 +71,92 @@ fun SettingsLinksScreen(navController: NavController, onBack: () -> Unit, viewMo
 /** Detail/edit screen for one [PinnedWebsite], reached by id - see [SettingsAddressDetailScreen]
  *  for the same pattern applied to addresses. */
 @Composable
-fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBack: () -> Unit, startElement: String? = null, viewModel: SettingsViewModel = hiltViewModel()) {
+    val home: com.bisc.flauncher.ui.home.HomeViewModel = hiltViewModel()
+    val stack: StackDraft = androidx.lifecycle.viewmodel.compose.viewModel()
     val websites by viewModel.pinnedWebsites.collectAsState()
     val saved = websites.find { it.id == websiteId } ?: return
-    var website by rememberDraft(saved)
+    val item = stack.field("item", saved.copy(tileFace = null)) {}
+    val face = stack.field("face", saved.tileFace) {}
+    val website = item.value.copy(tileFace = face.value)
     val urlValid = com.bisc.flauncher.util.linkAddress(website.url) != null
+    // A wrong address is not written; the field says what is wrong.
+    stack.saveTogether { if (website != saved && urlValid) viewModel.updateWebsite(website) }
     val browsableApps by viewModel.labeledApps.collectAsState()
     var showAppPicker by remember { mutableStateOf(false) }
     var confirmingDelete by remember { mutableStateOf(false) }
+    val usages = rememberUsages(com.bisc.flauncher.data.model.GridItemType.WEBSITE, websiteId.toString(), home)
 
-    SettingsSubScreen(title = saved.label, navController = navController, onBack = onBack, onSave = { viewModel.updateWebsite(website) }, dirty = website != saved && urlValid,
-        // The tile as it will look, fixed on top like on a folder's or a category's page.
-        header = {
-            TilePreviewHeader(
-                name = website.label,
-                tile = { around ->
-                    com.bisc.flauncher.ui.home.TileFaceView(
-                        website.face(), com.bisc.flauncher.ui.home.dock.UNSET_APP_SLOT_COLOR, website.label,
-                        modifier = Modifier.fillMaxSize(), shape = RoundedCornerShape(16.dp), around = around, defaultSymbol = Icons.Filled.Language
-                    )
-                }
+    ElementStackScreen(
+        title = website.label.ifBlank { saved.label },
+        navController = navController,
+        onBack = onBack,
+        startElement = startElement,
+        draft = stack,
+        home = home,
+        partTitle = stringResource(R.string.stack_el_link),
+        partSummary = website.url.takeIf { it.isNotBlank() },
+        partKeys = listOf("item"),
+        symbolTitle = stringResource(R.string.stack_el_symbol),
+        symbolKeys = listOf("face"),
+        name = website.label,
+        symbol = { size, ink -> ElementTile(website.face(), website.label, size, ink, Icons.Filled.Language) },
+        partOptions = {
+            SettingsPreferenceGroup {
+                OutlinedTextField(
+                    value = website.label,
+                    onValueChange = { item.value = item.value.copy(label = it) },
+                    label = { Text(stringResource(R.string.sidebar_website_label_hint)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+                OutlinedTextField(
+                    value = website.url,
+                    onValueChange = { item.value = item.value.copy(url = it) },
+                    label = { Text(stringResource(R.string.sidebar_website_url_hint)) },
+                    isError = !urlValid,
+                    supportingText = if (!urlValid) ({ Text(stringResource(R.string.link_address_invalid)) }) else null,
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_browser_app_label)) {
+                val appLabel = website.browserApp?.let { pkg -> browsableApps.find { it.componentName.packageName == pkg }?.label }
+                SettingsPreference(
+                    icon = null,
+                    title = appLabel ?: stringResource(R.string.settings_elements_app_default),
+                    onClick = { showAppPicker = true },
+                    trailing = if (website.browserApp != null) {
+                        { TextButton(onClick = { item.value = item.value.copy(browserApp = null) }) { Text(stringResource(R.string.settings_elements_use_default)) } }
+                    } else null
+                )
+            }
+            UsagesGroup(usages, navController)
+            SettingsPreferenceGroup {
+                SettingsPreference(icon = Icons.Filled.DeleteOutline, title = stringResource(R.string.settings_elements_delete_link), onClick = { confirmingDelete = true }, trailing = null)
+            }
+        },
+        symbolOptions = {
+            PartIntro(stringResource(R.string.element_tile_info))
+            TileFaceEditor(
+                face = website.face(),
+                onChange = { face.value = it.toJson() },
+                autoSurface = com.bisc.flauncher.ui.home.dock.UNSET_APP_SLOT_COLOR,
+                letter = website.label,
+                content = emptyList(),
+                contentSummary = "",
+                viewModel = viewModel,
+                kinds = listOf(com.bisc.flauncher.data.model.TileKind.SYMBOL, com.bisc.flauncher.data.model.TileKind.LETTER),
+                defaultSymbol = Icons.Filled.Language
             )
         }
-    ) {
-        SettingsPreferenceGroup {
-            OutlinedTextField(
-                value = website.label,
-                onValueChange = { website = website.copy(label = it) },
-                label = { Text(stringResource(R.string.sidebar_website_label_hint)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-            OutlinedTextField(
-                value = website.url,
-                onValueChange = { website = website.copy(url = it) },
-                label = { Text(stringResource(R.string.sidebar_website_url_hint)) },
-                isError = !urlValid,
-                supportingText = if (!urlValid) ({ Text(stringResource(R.string.link_address_invalid)) }) else null,
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-        }
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_browser_app_label)) {
-            val appLabel = website.browserApp?.let { pkg -> browsableApps.find { it.componentName.packageName == pkg }?.label }
-            SettingsPreference(
-                icon = null,
-                title = appLabel ?: stringResource(R.string.settings_elements_app_default),
-                onClick = { showAppPicker = true },
-                trailing = if (website.browserApp != null) {
-                    { TextButton(onClick = { website = website.copy(browserApp = null) }) { Text(stringResource(R.string.settings_elements_use_default)) } }
-                } else null
-            )
-        }
-        SectionBanner(Icons.Filled.Apps, stringResource(R.string.settings_category_tile_label), stringResource(R.string.element_tile_info))
-        TileFaceEditor(
-            face = website.face(),
-            onChange = { website = website.copy(tileFace = it.toJson()) },
-            autoSurface = com.bisc.flauncher.ui.home.dock.UNSET_APP_SLOT_COLOR,
-            letter = website.label,
-            content = emptyList(),
-            contentSummary = "",
-            viewModel = viewModel,
-            kinds = listOf(com.bisc.flauncher.data.model.TileKind.SYMBOL, com.bisc.flauncher.data.model.TileKind.LETTER),
-            defaultSymbol = Icons.Filled.Language
-        )
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = Icons.Filled.DeleteOutline,
-                title = stringResource(R.string.settings_elements_delete_link),
-                onClick = { confirmingDelete = true },
-                trailing = null
-            )
-        }
-    }
+    )
 
     if (showAppPicker) {
         ShortcutSourceAppSheet(
             apps = browsableApps,
             loadIcon = viewModel::loadIcon,
-            onAppSelected = { app -> website = website.copy(browserApp = app.componentName.packageName); showAppPicker = false },
+            onAppSelected = { app -> item.value = item.value.copy(browserApp = app.componentName.packageName); showAppPicker = false },
             onDismiss = { showAppPicker = false }
         )
     }
@@ -157,7 +164,7 @@ fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBa
     if (confirmingDelete) {
         ConfirmRemoveDialog(
             label = website.label,
-            onConfirm = { viewModel.removeWebsite(website); confirmingDelete = false; onBack() },
+            onConfirm = { viewModel.removeWebsite(saved); confirmingDelete = false; onBack() },
             onDismiss = { confirmingDelete = false }
         )
     }

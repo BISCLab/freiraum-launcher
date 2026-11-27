@@ -1206,6 +1206,12 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="stack_show">Show</string>
     <string name="stack_page_summary">Alignment, background, status bar, name</string>
     <string name="stack_page_summary_plain">Background, status bar, name</string>
+    <string name="stack_el_address">Address</string>
+    <string name="stack_el_link">Link</string>
+    <string name="stack_el_action_button">Action button</string>
+    <string name="stack_el_symbol">Symbol</string>
+    <string name="stack_el_app">App</string>
+    <string name="stack_el_app_symbol">App icon</string>
     <string name="stack_el_folder_icon">Folder icon</string>
     <string name="stack_el_folder_window">Folder window</string>
     <string name="stack_state_closed">Closed</string>
