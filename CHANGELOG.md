@@ -3,6 +3,7 @@
 ## Unreleased
 
 - App grid settings as a card stack like the App list: page, search field, grid and folders, with the grid built from its real parts
+- Categories page settings as a card stack: page, labels, search field and contents
 
 ## 0.27.0
 
