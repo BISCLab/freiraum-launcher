@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.home
 
+import com.bisc.flauncher.ui.stackElement
 import com.bisc.flauncher.data.model.face
 import android.content.ComponentName
 import androidx.activity.compose.BackHandler
@@ -164,12 +165,14 @@ fun FolderView(
     onExecuteAction: (com.bisc.flauncher.data.model.GestureAction) -> Unit = {},
     /** Opens a widget's own settings (long press on it, then Edit). */
     onEditWidget: (FolderItem) -> Unit = {},
+    /** False in the settings replica, where back belongs to the settings. */
+    handlesBack: Boolean = true,
 ) {
     // A pending removal asks first; picking "move" instead switches into reorder mode below.
     var pendingRemoval by remember(folder.id) { mutableStateOf<FolderItem?>(null) }
     var menuForItemId by remember(folder.id) { mutableStateOf<Long?>(null) }
     var movingItemId by remember(folder.id) { mutableStateOf<Long?>(null) }
-    BackHandler(onBack = if (movingItemId != null) ({ movingItemId = null }) else onBack)
+    BackHandler(enabled = handlesBack, onBack = if (movingItemId != null) ({ movingItemId = null }) else onBack)
 
     // Status bar *or* camera cutout, whichever is taller.
     val topInset = maxOf(
@@ -202,9 +205,10 @@ fun FolderView(
             effectTarget = "folders",
             modifier = Modifier
                 .width(dockPillWidth)
+                .stackElement("window")
                 .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {}
         ) {
-            Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Column(modifier = Modifier.fillMaxWidth().padding(16.dp).stackElement("content")) {
                 @Composable
                 fun WidgetFor(widgetItem: FolderItem) {
                     key("widget_${widgetItem.id}") {

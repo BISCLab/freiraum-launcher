@@ -103,6 +103,8 @@ class StackElement(
     /** "Automatic" or "Own look" with a reset under the sample; null = neither. */
     val ownLook: Boolean? = null,
     val onResetLook: () -> Unit = {},
+    /** Said instead of "Automatic" while [ownLook] is false, e.g. "Like all folders". */
+    val autoLabel: String? = null,
     /** The part in small on top of its options; null = none. */
     val sample: (@Composable () -> Unit)? = null,
     val options: @Composable ColumnScope.() -> Unit
@@ -123,6 +125,7 @@ internal fun stackNumberColor(number: Int): Color = NumberColors[number.mod(Numb
 class StackDraft : ViewModel() {
     private val edits = mutableStateMapOf<String, Any?>()
     private val savers = HashMap<String, (Any?) -> Unit>()
+    private var together: (() -> Unit)? = null
 
     val dirty: Boolean get() = edits.isNotEmpty()
     fun changed(keys: List<String>): Boolean = keys.any { it in edits }
@@ -132,8 +135,13 @@ class StackDraft : ViewModel() {
     internal fun <T> put(key: String, saved: T, value: T) { if (value == saved) edits.remove(key) else edits[key] = value }
     internal fun register(key: String, save: (Any?) -> Unit) { savers[key] = save }
 
+    /** For values that are stored as one thing (a category): runs at Save, after the single savers,
+     *  while the draft still holds every change. */
+    fun saveTogether(block: () -> Unit) { together = block }
+
     fun save() {
         edits.toMap().forEach { (key, value) -> savers[key]?.invoke(value) }
+        together?.invoke()
         edits.clear()
     }
 }
@@ -714,7 +722,7 @@ private fun AdjustHead(element: StackElement, changed: Boolean) {
         element.ownLook?.let { own ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    stringResource(if (own) R.string.settings_look_custom else R.string.settings_look_automatic),
+                    if (own) stringResource(R.string.settings_look_custom) else element.autoLabel ?: stringResource(R.string.settings_look_automatic),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f)

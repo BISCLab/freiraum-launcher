@@ -632,8 +632,14 @@ class MainActivity : ComponentActivity() {
                             arguments = listOf(navArgument("folderId") { type = NavType.LongType }, navArgument("part") { type = NavType.StringType })
                         ) { backStackEntry ->
                             val folderId = backStackEntry.arguments?.getLong("folderId") ?: return@settingsComposable
-                            val part = com.bisc.flauncher.ui.settings.FolderPart.entries.find { it.name.equals(backStackEntry.arguments?.getString("part"), ignoreCase = true) } ?: return@settingsComposable
-                            SettingsFolderEditScreen(folderId = folderId, navController = navController, onBack = { navController.popBackStack() }, part = part)
+                            // The old pages of a folder: its stack, opened on that part.
+                            val element = when (backStackEntry.arguments?.getString("part")?.lowercase()) {
+                                "tile" -> "icon"
+                                "open" -> "window"
+                                "content" -> "content"
+                                else -> "folder"
+                            }
+                            SettingsFolderEditScreen(folderId = folderId, navController = navController, onBack = { navController.popBackStack() }, startElement = element)
                         }
                         settingsComposable(
                             "settings/folder/{folderId}/widget/{itemId}",

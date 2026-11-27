@@ -115,13 +115,16 @@ internal fun CategoryMemberGrid(
     labelColor: Color,
     iconSizeScale: Float = 1f,
     showLabels: Boolean = true,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    /** Settings only: a tap picks a member instead of opening it. */
+    onPick: ((CategoryMember) -> Unit)? = null,
+    picked: CategoryMember? = null
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val websites by viewModel.pinnedWebsites.collectAsState()
     val places by viewModel.savedMapTargets.collectAsState()
     val contacts by viewModel.pinnedContacts.collectAsState()
-    val entries = remember(members, websites, places, contacts) {
+    val shown = remember(members, websites, places, contacts) {
         members.filter { m ->
             when (m.type) {
                 GridItemType.WEBSITE -> websites.any { it.id == m.payload.toLongOrNull() }
@@ -129,8 +132,10 @@ internal fun CategoryMemberGrid(
                 GridItemType.CONTACT -> contacts.any { it.contactId == m.payload.toLongOrNull() }
                 else -> true
             }
-        }.mapIndexed { index, m -> RowEntry(id = -(index + 1L), pageRowId = -1L, orderIndex = index, type = m.type, payload = m.payload) }
+        }
     }
+    val entries = remember(shown) { shown.mapIndexed { index, m -> RowEntry(id = -(index + 1L), pageRowId = -1L, orderIndex = index, type = m.type, payload = m.payload) } }
+    val pickedIndex = picked?.let { p -> shown.indexOfFirst { it.type == p.type && it.payload == p.payload } }?.takeIf { it >= 0 }
     CompositionLocalProvider(LocalAppIconLoader provides viewModel.iconLoader) {
         GridEntries(
             entries = entries,
@@ -158,7 +163,9 @@ internal fun CategoryMemberGrid(
             },
             showLabels = showLabels,
             labelColor = labelColor,
-            iconSizeScale = iconSizeScale
+            iconSizeScale = iconSizeScale,
+            onEditEntry = onPick?.let { pick -> { entry: RowEntry -> shown.getOrNull(entry.orderIndex)?.let(pick) } },
+            selectedEntryId = pickedIndex?.let { -(it + 1L) }
         )
     }
 }

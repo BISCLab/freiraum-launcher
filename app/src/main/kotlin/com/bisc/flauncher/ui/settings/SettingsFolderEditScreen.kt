@@ -1,5 +1,8 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.CompositionLocalProvider
+import com.bisc.flauncher.ui.stackElement
 import com.bisc.flauncher.data.model.face
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.core.graphics.toColorInt
@@ -96,29 +99,35 @@ import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/** The pages of one folder: an overview with its name, then how it looks as a tile, which apps and
- *  elements it holds, and how it looks once opened, each on their own. */
-enum class FolderPart { HUB, TILE, CONTENT, OPEN }
+/** What a folder's stack changes on its window: its own look or that of all folders, the corners
+ *  and the captions. Stored together, so a reset keeps the rest. */
+private data class WindowEdit(val own: Boolean, val look: com.bisc.flauncher.data.model.ElementAppearance, val corner: Int?, val labels: Boolean)
 
-/** Edit page for a single folder, or one part of it, see [FolderPart]. */
+private const val OPEN = "open"
+
+/**
+ * One folder as a card stack: the folder closed and opened, built from its real parts, with
+ * ⓪ the folder, ① its icon, ② its window and ③ what it holds. Name, icon and window are a draft
+ * until Save; what it holds changes right away, so a widget can be set up at once.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsFolderEditScreen(
     folderId: Long,
     navController: NavController,
     onBack: () -> Unit,
-    part: FolderPart = FolderPart.HUB,
+    startElement: String? = null,
     viewModel: SettingsViewModel = hiltViewModel(),
     // Adding app widgets (picker, bind permission, configuration) runs through the same flow as on pages.
     homeViewModel: com.bisc.flauncher.ui.home.HomeViewModel = hiltViewModel()
 ) {
+    val draft: StackDraft = androidx.lifecycle.viewmodel.compose.viewModel()
     val folders by viewModel.folders.collectAsState()
-    val categories by viewModel.categories.collectAsState()
     val folderItems by viewModel.folderItems.collectAsState()
-    val iconPacks by viewModel.iconPacks.collectAsState()
     val globalCardAppearance by viewModel.folderCardAppearance.collectAsState()
-    val folder = folders.find { it.id == folderId }
-    var edited by rememberSaveable(folderId) { mutableStateOf<String?>(null) }
+    val globalShowLabels by viewModel.folderShowLabels.collectAsState()
+    val folderCorner by viewModel.folderCornerPercent.collectAsState()
+    val folder = folders.find { it.id == folderId } ?: return
     var confirmingDelete by remember { mutableStateOf(false) }
 
     val itemsByFolder = remember(folderItems) { folderItems.groupBy { it.folderId } }
@@ -155,265 +164,274 @@ fun SettingsFolderEditScreen(
     ) { result -> homeViewModel.onSystemWidgetConfigureResult(result.resultCode == android.app.Activity.RESULT_OK) }
     LaunchedEffect(pendingBindIntent) { pendingBindIntent?.let { bindWidgetLauncher.launch(it) } }
     LaunchedEffect(pendingConfigureIntent) { pendingConfigureIntent?.let { configureWidgetLauncher.launch(it) } }
-    val globalShowLabels by viewModel.folderShowLabels.collectAsState()
 
-    val newName = edited?.trim()
-    val nameChanged = folder != null && !newName.isNullOrBlank() && newName != folder.name
-    // Name, tile and the opened look are drafts, written with Save; what the folder holds changes
-    // right away, so a system widget can be set up at once.
-    val savedFace = folder?.face()
-    var face by rememberDraft(savedFace)
-    val faceChanged = face != null && face != savedFace
-    // Fill and border of the opened folder are kept apart (each can follow all folders on its own),
-    // but edited together, with the captions.
-    val savedContent = if (folder?.appearanceOverrideEnabled == true) folder.contentAppearance() else globalCardAppearance
-    val savedBorder = if (folder?.borderOverrideEnabled == true) folder.borderAppearance() else globalCardAppearance
+    // ---- The draft ----
+    val name = draft.field("name", folder.name) { if (it.isNotBlank()) viewModel.renameFolder(folderId, it.trim()) }
+    val face = draft.field("face", folder.face()) { viewModel.setFolderTileFace(folderId, it) }
+    // Fill and border of the window are kept apart (each can follow all folders on its own).
+    val savedContent = if (folder.appearanceOverrideEnabled) folder.contentAppearance() else globalCardAppearance
+    val savedBorder = if (folder.borderOverrideEnabled) folder.borderAppearance() else globalCardAppearance
     val savedLook = savedContent.copy(borderEnabled = savedBorder.borderEnabled, borderColor = savedBorder.borderColor, borderWidth = savedBorder.borderWidth)
-    var lookDraft by rememberDraft(savedLook)
-    val savedShowLabels = if (folder?.showLabelsOverrideEnabled == true) folder.showLabels else globalShowLabels
-    var showLabelsDraft by rememberDraft(savedShowLabels)
-    val folderCorner by viewModel.folderCornerPercent.collectAsState()
-    var cornerDraft by rememberDraft(folder?.cornerPercent)
-    val shownCorner = cornerDraft ?: folderCorner
-    val ownLook = folder?.appearanceOverrideEnabled == true || folder?.borderOverrideEnabled == true || folder?.cornerPercent != null
-    val lookChanged = part == FolderPart.OPEN && (lookDraft != savedLook || showLabelsDraft != savedShowLabels || cornerDraft != folder?.cornerPercent)
-    val drafts = part != FolderPart.CONTENT
-    val open = { sub: String -> navController.navigate("settings/folder/$folderId/$sub") }
-    SettingsSubScreen(
-        title = when (part) {
-            FolderPart.HUB -> folder?.name ?: stringResource(R.string.settings_folder_edit_title)
-            FolderPart.TILE -> stringResource(R.string.settings_category_tile_label)
-            FolderPart.CONTENT -> stringResource(R.string.section_content)
-            FolderPart.OPEN -> stringResource(R.string.section_folder_open)
-        },
-        navController = navController,
-        onBack = onBack,
-        onSave = if (drafts) ({
-            newName?.takeIf { nameChanged }?.let { viewModel.renameFolder(folderId, it) }
-            face?.takeIf { faceChanged }?.let { viewModel.setFolderTileFace(folderId, it) }
-            if (lookChanged) {
-                val d = lookDraft
-                val fillChanged = d.fillMode != savedLook.fillMode || d.fill != savedLook.fill || d.opacity != savedLook.opacity || d.contentColor != savedLook.contentColor
-                val borderChanged = d.borderEnabled != savedLook.borderEnabled || d.borderColor != savedLook.borderColor || d.borderWidth != savedLook.borderWidth
-                if (fillChanged) viewModel.setFolderAppearance(folderId, d)
-                if (borderChanged) viewModel.setFolderBorderAppearance(folderId, d)
-                if (showLabelsDraft != savedShowLabels) viewModel.setFolderItemsShowLabels(folderId, showLabelsDraft)
-                if (cornerDraft != folder?.cornerPercent) viewModel.setFolderOwnCorner(folderId, cornerDraft)
-            }
-        }) else null,
-        dirty = nameChanged || faceChanged || lookChanged,
-        // What this page changes, as it will look. On the overview the closed and the opened folder
-        // side by side, each a way to where it is set.
-        header = when (part) {
-            FolderPart.CONTENT -> null
-            FolderPart.OPEN -> ({
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    LookSample(LookSampleKind.FOLDER, lookDraft, shownCorner)
-                    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            stringResource(if (ownLook) R.string.settings_look_custom else R.string.settings_folder_look_like_all),
-                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                            color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.weight(1f)
-                        )
-                        if (ownLook) AutoResetChip(
-                            onClick = {
-                                viewModel.setFolderAppearanceOverrideEnabled(folderId, false)
-                                viewModel.setFolderBorderOverrideEnabled(folderId, false)
-                                viewModel.setFolderOwnCorner(folderId, null)
-                            },
-                            label = stringResource(R.string.settings_folder_look_reset)
-                        )
-                    }
-                }
-            })
-            else -> ({
-                val shownFace = face ?: folder?.face()
-                TilePreviewHeader(
-                    name = edited ?: folder?.name.orEmpty(),
-                    tile = { around -> FolderIcon(folder = folder, previewItems = items, modifier = Modifier.fillMaxSize(), face = shownFace, around = around) },
-                    extra = if (part == FolderPart.HUB) ({ around -> FolderOpenMini(savedLook, folder?.cornerPercent ?: folderCorner, around) }) else null,
-                    tileCaption = if (part == FolderPart.HUB) stringResource(R.string.preview_caption_tile) else null,
-                    extraCaption = stringResource(R.string.preview_caption_open),
-                    onTileClick = if (part == FolderPart.HUB) ({ open("tile") }) else null,
-                    onExtraClick = if (part == FolderPart.HUB) ({ open("open") }) else null
-                )
-            })
+    val savedShowLabels = if (folder.showLabelsOverrideEnabled) folder.showLabels else globalShowLabels
+    val savedOwn = folder.appearanceOverrideEnabled || folder.borderOverrideEnabled || folder.cornerPercent != null
+    val window = draft.field("window", WindowEdit(savedOwn, savedLook, folder.cornerPercent, savedShowLabels)) { e ->
+        if (!e.own) {
+            if (folder.appearanceOverrideEnabled) viewModel.setFolderAppearanceOverrideEnabled(folderId, false)
+            if (folder.borderOverrideEnabled) viewModel.setFolderBorderOverrideEnabled(folderId, false)
+            if (folder.cornerPercent != null) viewModel.setFolderOwnCorner(folderId, null)
+        } else {
+            val d = e.look
+            val fillChanged = d.fillMode != savedLook.fillMode || d.fill != savedLook.fill || d.opacity != savedLook.opacity || d.contentColor != savedLook.contentColor
+            val borderChanged = d.borderEnabled != savedLook.borderEnabled || d.borderColor != savedLook.borderColor || d.borderWidth != savedLook.borderWidth
+            if (fillChanged) viewModel.setFolderAppearance(folderId, d)
+            if (borderChanged) viewModel.setFolderBorderAppearance(folderId, d)
+            if (e.corner != folder.cornerPercent) viewModel.setFolderOwnCorner(folderId, e.corner)
         }
-    ) {
-        if (folder == null) return@SettingsSubScreen
+        if (e.labels != savedShowLabels) viewModel.setFolderItemsShowLabels(folderId, e.labels)
+    }
+    val win = window.value
+    val shownCorner = win.corner ?: folderCorner
 
-        val (widgetItems, iconItems) = items.partition { it.isWidget() }
-        val content = if (folder.appearanceOverrideEnabled) folder.contentAppearance() else globalCardAppearance
-        val border = if (folder.borderOverrideEnabled) folder.borderAppearance() else globalCardAppearance
-        val look = content.copy(borderEnabled = border.borderEnabled, borderColor = border.borderColor, borderWidth = border.borderWidth)
-        val showLabels = if (folder.showLabelsOverrideEnabled) folder.showLabels else globalShowLabels
-        val rowShape = folder.rows()
+    val (widgetItems, iconItems) = items.partition { it.isWidget() }
+    val look = win.look
+    val showLabels = win.labels
+    val rowShape = folder.rows()
+    val countText = androidx.compose.ui.res.pluralStringResource(R.plurals.hub_content_count, items.size, items.size)
+    val usages = rememberUsages(GridItemType.FOLDER, folderId.toString(), homeViewModel)
 
-        if (part == FolderPart.HUB) {
-        OutlinedTextField(
-            value = edited ?: folder.name,
-            onValueChange = { edited = it },
-            label = { Text(stringResource(R.string.settings_folder_name_label)) },
-            singleLine = true,
-            shape = SettingsTextFieldShape,
-            modifier = Modifier.fillMaxWidth()
-        )
-        // How it lies closed, how it looks opened, and what is in it: each row shows what it sets.
-        SettingsPreferenceGroup {
-            PartLinkRow(
-                title = stringResource(R.string.settings_category_tile_label),
-                summary = stringResource(R.string.hub_tile_folder),
-                onClick = { open("tile") }
-            ) { FolderIcon(folder = folder, previewItems = items, modifier = Modifier.size(40.dp), face = face ?: folder.face(), around = androidx.compose.material3.MaterialTheme.colorScheme.onSurface) }
-            PartLinkRow(
-                title = stringResource(R.string.section_folder_open),
-                summary = stringResource(if (ownLook) R.string.hub_open_folder_own else R.string.hub_open_folder_like_all),
-                onClick = { open("open") }
-            ) { FolderOpenMini(savedLook, folder.cornerPercent ?: folderCorner, androidx.compose.material3.MaterialTheme.colorScheme.onSurface, small = true) }
-            PartLinkRow(
-                title = stringResource(R.string.section_content),
-                summary = androidx.compose.ui.res.pluralStringResource(R.plurals.hub_content_count, items.size, items.size),
-                onClick = { open("content") }
-            ) { CountBubble(items.size) }
-        }
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = Icons.Filled.DeleteOutline,
-                title = stringResource(R.string.settings_folder_delete),
-                onClick = { confirmingDelete = true },
-                trailing = null
-            )
-        }
-        }
-
-        // How the closed folder looks as a tile, as it lies in the Dock, a box or on a page.
-        if (part == FolderPart.TILE) {
-        val shownFace = face ?: folder.face()
-        PartIntro(stringResource(R.string.settings_folder_tile_info))
-        TileFaceEditor(
-            face = shownFace,
-            onChange = { face = it },
-            autoSurface = com.bisc.flauncher.ui.home.folderAutoSurface(),
-            letter = edited ?: folder.name,
-            content = items.filter { it.type == GridItemType.APP }.take(4).map { com.bisc.flauncher.ui.home.TileContent.App(android.content.ComponentName.unflattenFromString(it.payload)) },
-            contentSummary = stringResource(R.string.tile_content_folder),
-            viewModel = viewModel
-        )
-        }
-
-        // What it holds, live: tap a part to work on it, the empty tile adds something.
-        if (part == FolderPart.CONTENT) {
-        PartIntro(stringResource(R.string.section_folder_content_where))
-        // The folder itself, live: tap a part to work on it, the empty tile adds something.
-        FolderLivePreview(
-            look = look,
-            widgets = widgetItems,
-            gridItems = iconItems,
-            rowShape = rowShape,
-            showLabels = showLabels,
-            selectedId = selectedId,
-            onSelect = { selectedId = if (selectedId == it.id) null else it.id },
-            onAdd = { slot -> viewModel.reserveFolderSlot(folderId, slot); showAddChooser = true },
-            widgetIcon = ::folderWidgetIcon,
-            widgetLabel = { folderWidgetLabel(it, homeViewModel) },
-            itemLabel = { item ->
-                com.bisc.flauncher.ui.home.entryLabel(
-                    RowEntry(id = item.id, pageRowId = 0L, orderIndex = item.orderIndex, type = item.type, payload = item.payload),
-                    folders, savedMapTargets, pinnedWebsites, emptyList(), emptyList(), viewModel::resolveLabel
-                )
-            },
-            itemIcon = { item, size -> FolderItemIcon(item, size, folders, itemsByFolder, viewModel::loadIcon, viewModel::loadPackIcon) },
-            highlightRow = highlightRow
-        )
-        Text(
-            stringResource(R.string.settings_folder_live_hint),
-            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-            color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 4.dp)
-        )
-
-        val selected = items.find { it.id == selectedId }
-        if (selected != null) {
-            val isWidget = selected.isWidget()
-            val siblings = if (isWidget) widgetItems else iconItems
-            val position = siblings.indexOfFirst { it.id == selected.id }
-            val cellCount = com.bisc.flauncher.ui.home.folderSlotRows(iconItems, rowShape, keepEmptyRows = true).sumOf { it.size } + rowShape.ifEmpty { listOf(4) }.last()
-            val widgetRowCount = com.bisc.flauncher.ui.home.folderSlotRows(iconItems, rowShape, keepEmptyRows = true).size
-            val isBuiltIn = selected.type == GridItemType.WIDGET
-            val minSpan = if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.minSpan(selected.payload) else 1
-            val maxSpan = if (isWidget) maxOf(
-                minOf(
-                    if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.maxSpan(selected.payload) else MAX_FOLDER_APP_WIDGET_SPAN,
-                    com.bisc.flauncher.ui.home.folderWidgetMaxSpan(folder, items, selected, showLabels)
-                ),
-                selected.spanY,
-                minSpan
-            ) else 1
-            FolderSelectionBar(
-                title = if (isWidget) folderWidgetLabel(selected, homeViewModel) else com.bisc.flauncher.ui.home.entryLabel(
-                    RowEntry(id = selected.id, pageRowId = 0L, orderIndex = selected.orderIndex, type = selected.type, payload = selected.payload),
-                    folders, savedMapTargets, pinnedWebsites, emptyList(), emptyList(), viewModel::resolveLabel
-                ),
-                isWidget = isWidget,
-                span = selected.spanY,
-                canGrow = selected.spanY < maxSpan,
-                canShrink = selected.spanY > minSpan,
-                onSpan = { viewModel.updateFolderItem(selected.copy(spanY = it)) },
-                // Widgets swap with their neighbour; apps and elements step through the cells, empty ones too.
-                canMoveBack = if (isWidget) com.bisc.flauncher.ui.home.canMoveWidget(widgetItems, selected, -1, widgetRowCount) else selected.orderIndex > 0,
-                canMoveOn = if (isWidget) com.bisc.flauncher.ui.home.canMoveWidget(widgetItems, selected, 1, widgetRowCount) else selected.orderIndex < cellCount - 1,
-                onMove = { delta ->
-                    if (isWidget) {
-                        homeViewModel.saveFolderItems(com.bisc.flauncher.ui.home.moveWidgetStep(widgetItems, selected, delta, widgetRowCount))
-                    } else {
-                        viewModel.moveFolderItemToSlot(selected, selected.orderIndex + delta)
-                    }
-                },
-                onOpenSettings = if (isWidget) ({ navController.navigate("settings/folder/$folderId/widget/${selected.id}") }) else null,
-                onRemove = { pendingRemoval = selected },
-                onClose = { selectedId = null }
-            )
-        }
-        FolderAddButtons(onAddContent = { viewModel.reserveFolderSlot(folderId, null); showAddChooser = true }, onAddWidget = { showWidgetKindPicker = true })
-
-        SettingsPreferenceGroup(
-            title = stringResource(R.string.settings_folder_rows_label),
-            info = stringResource(R.string.settings_folder_rows_info)
+    val elements = listOf(
+        StackElement(
+            id = "folder", number = 0,
+            title = name.value.ifBlank { folder.name },
+            summary = countText,
+            draftKeys = listOf("name")
         ) {
-            FolderRowsEditor(
-                rowShape = rowShape,
-                maxColumns = com.bisc.flauncher.data.model.MAX_FOLDER_ROW_COLUMNS,
-                actualRows = com.bisc.flauncher.ui.home.folderSlotRows(iconItems, rowShape, keepEmptyRows = true).size,
-                onFocusRow = { highlightRow = it }
-            ) { viewModel.setFolderRowColumns(folderId, it) }
-        }
-        }
-
-        // How it looks when open, for this folder.
-        if (part == FolderPart.OPEN) {
-        PartIntro(stringResource(R.string.section_folder_open_where))
-        // The same blocks as every other element: fill, opacity, border, corner rounding, captions.
-        ElementAppearanceSection(appearance = lookDraft, onAppearanceChange = { lookDraft = it }, styleGroupTitle = stringResource(R.string.settings_element_fill_label))
-        // Like all folders, or its own: the same switch as the tile's "Like the app icons".
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
-            val setLikeAll = { likeAll: Boolean -> cornerDraft = if (likeAll) null else folderCorner }
-            SettingsPreference(
-                icon = null,
-                title = stringResource(R.string.settings_folder_look_like_all),
-                summary = stringResource(R.string.folder_corners_like_all_summary, folderCorner),
-                onClick = { setLikeAll(cornerDraft != null) },
-                trailing = { androidx.compose.material3.Switch(checked = cornerDraft == null, onCheckedChange = { setLikeAll(it) }) }
+            OutlinedTextField(
+                value = name.value,
+                onValueChange = { name.value = it },
+                label = { Text(stringResource(R.string.settings_folder_name_label)) },
+                singleLine = true,
+                shape = SettingsTextFieldShape,
+                modifier = Modifier.fillMaxWidth()
             )
-            cornerDraft?.let { own -> CornerPercentPicker(percent = own, onChange = { cornerDraft = it }) }
+            UsagesGroup(usages, navController)
+            SettingsPreferenceGroup {
+                SettingsPreference(icon = Icons.Filled.DeleteOutline, title = stringResource(R.string.settings_folder_delete), onClick = { confirmingDelete = true }, trailing = null)
+            }
+        },
+        StackElement(
+            id = "icon", number = 1,
+            title = stringResource(R.string.stack_el_folder_icon),
+            summary = stringResource(R.string.hub_tile_folder),
+            draftKeys = listOf("face"),
+            anchor = androidx.compose.ui.geometry.Offset(1f, 0f),
+            sample = {
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    FolderIcon(folder = folder, previewItems = items, modifier = Modifier.size(72.dp), face = face.value, around = MaterialTheme.colorScheme.onSurface)
+                }
+            }
+        ) {
+            PartIntro(stringResource(R.string.settings_folder_tile_info))
+            TileFaceEditor(
+                face = face.value,
+                onChange = { face.value = it },
+                autoSurface = com.bisc.flauncher.ui.home.folderAutoSurface(),
+                letter = name.value,
+                content = items.filter { it.type == GridItemType.APP }.take(4).map { com.bisc.flauncher.ui.home.TileContent.App(android.content.ComponentName.unflattenFromString(it.payload)) },
+                contentSummary = stringResource(R.string.tile_content_folder),
+                viewModel = viewModel
+            )
+        },
+        StackElement(
+            id = "window", number = 2,
+            title = stringResource(R.string.stack_el_folder_window),
+            summary = stringResource(if (win.own) R.string.hub_open_folder_own else R.string.hub_open_folder_like_all),
+            state = OPEN,
+            draftKeys = listOf("window"),
+            anchor = androidx.compose.ui.geometry.Offset(0f, 0f),
+            ownLook = win.own,
+            autoLabel = stringResource(R.string.settings_folder_look_like_all),
+            onResetLook = { window.value = win.copy(own = false, look = globalCardAppearance, corner = null) },
+            sample = { LookSample(LookSampleKind.FOLDER, look, shownCorner) }
+        ) {
+            SettingsPreferenceGroup {
+                SettingsPreference(
+                    icon = null,
+                    title = stringResource(R.string.stack_all_folders_link),
+                    summary = stringResource(R.string.stack_all_folders_summary),
+                    onClick = { navController.navigate("settings/folder/global") },
+                    trailing = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) }
+                )
+            }
+            ElementAppearanceSection(appearance = look, onAppearanceChange = { window.value = win.copy(own = true, look = it) }, styleGroupTitle = stringResource(R.string.settings_element_fill_label))
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_widgets_corner_shape_label)) {
+                CornerPercentPicker(percent = shownCorner, onChange = { window.value = win.copy(own = true, corner = it) })
+            }
+            CaptionsSection(
+                showLabels = showLabels,
+                onShowLabelsChange = { window.value = win.copy(labels = it) },
+                appearance = look,
+                onAppearanceChange = { window.value = win.copy(own = true, look = it) },
+                title = stringResource(R.string.settings_captions_label)
+            )
+        },
+        StackElement(
+            id = "content", number = 3,
+            title = stringResource(R.string.section_content),
+            summary = countText,
+            state = OPEN,
+            anchor = androidx.compose.ui.geometry.Offset(1f, 0f)
+        ) {
+            PartIntro(stringResource(R.string.section_folder_content_where))
+            // The folder itself, live: tap a part to work on it, the empty tile adds something.
+            FolderLivePreview(
+                look = look,
+                widgets = widgetItems,
+                gridItems = iconItems,
+                rowShape = rowShape,
+                showLabels = showLabels,
+                selectedId = selectedId,
+                onSelect = { selectedId = if (selectedId == it.id) null else it.id },
+                onAdd = { slot -> viewModel.reserveFolderSlot(folderId, slot); showAddChooser = true },
+                widgetIcon = ::folderWidgetIcon,
+                widgetLabel = { folderWidgetLabel(it, homeViewModel) },
+                itemLabel = { item ->
+                    com.bisc.flauncher.ui.home.entryLabel(
+                        RowEntry(id = item.id, pageRowId = 0L, orderIndex = item.orderIndex, type = item.type, payload = item.payload),
+                        folders, savedMapTargets, pinnedWebsites, emptyList(), emptyList(), viewModel::resolveLabel
+                    )
+                },
+                itemIcon = { item, size -> FolderItemIcon(item, size, folders, itemsByFolder, viewModel::loadIcon, viewModel::loadPackIcon) },
+                highlightRow = highlightRow
+            )
+            Text(
+                stringResource(R.string.settings_folder_live_hint),
+                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+
+            val selected = items.find { it.id == selectedId }
+            if (selected != null) {
+                val isWidget = selected.isWidget()
+                val siblings = if (isWidget) widgetItems else iconItems
+                val position = siblings.indexOfFirst { it.id == selected.id }
+                val cellCount = com.bisc.flauncher.ui.home.folderSlotRows(iconItems, rowShape, keepEmptyRows = true).sumOf { it.size } + rowShape.ifEmpty { listOf(4) }.last()
+                val widgetRowCount = com.bisc.flauncher.ui.home.folderSlotRows(iconItems, rowShape, keepEmptyRows = true).size
+                val isBuiltIn = selected.type == GridItemType.WIDGET
+                val minSpan = if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.minSpan(selected.payload) else 1
+                val maxSpan = if (isWidget) maxOf(
+                    minOf(
+                        if (isBuiltIn) com.bisc.flauncher.data.model.WidgetKind.maxSpan(selected.payload) else MAX_FOLDER_APP_WIDGET_SPAN,
+                        com.bisc.flauncher.ui.home.folderWidgetMaxSpan(folder, items, selected, showLabels)
+                    ),
+                    selected.spanY,
+                    minSpan
+                ) else 1
+                FolderSelectionBar(
+                    title = if (isWidget) folderWidgetLabel(selected, homeViewModel) else com.bisc.flauncher.ui.home.entryLabel(
+                        RowEntry(id = selected.id, pageRowId = 0L, orderIndex = selected.orderIndex, type = selected.type, payload = selected.payload),
+                        folders, savedMapTargets, pinnedWebsites, emptyList(), emptyList(), viewModel::resolveLabel
+                    ),
+                    isWidget = isWidget,
+                    span = selected.spanY,
+                    canGrow = selected.spanY < maxSpan,
+                    canShrink = selected.spanY > minSpan,
+                    onSpan = { viewModel.updateFolderItem(selected.copy(spanY = it)) },
+                    // Widgets swap with their neighbour; apps and elements step through the cells, empty ones too.
+                    canMoveBack = if (isWidget) com.bisc.flauncher.ui.home.canMoveWidget(widgetItems, selected, -1, widgetRowCount) else selected.orderIndex > 0,
+                    canMoveOn = if (isWidget) com.bisc.flauncher.ui.home.canMoveWidget(widgetItems, selected, 1, widgetRowCount) else selected.orderIndex < cellCount - 1,
+                    onMove = { delta ->
+                        if (isWidget) {
+                            homeViewModel.saveFolderItems(com.bisc.flauncher.ui.home.moveWidgetStep(widgetItems, selected, delta, widgetRowCount))
+                        } else {
+                            viewModel.moveFolderItemToSlot(selected, selected.orderIndex + delta)
+                        }
+                    },
+                    onOpenSettings = if (isWidget) ({ navController.navigate("settings/folder/$folderId/widget/${selected.id}") }) else null,
+                    onRemove = { pendingRemoval = selected },
+                    onClose = { selectedId = null }
+                )
+            }
+            FolderAddButtons(onAddContent = { viewModel.reserveFolderSlot(folderId, null); showAddChooser = true }, onAddWidget = { showWidgetKindPicker = true })
+
+            SettingsPreferenceGroup(
+                title = stringResource(R.string.settings_folder_rows_label),
+                info = stringResource(R.string.settings_folder_rows_info)
+            ) {
+                FolderRowsEditor(
+                    rowShape = rowShape,
+                    maxColumns = com.bisc.flauncher.data.model.MAX_FOLDER_ROW_COLUMNS,
+                    actualRows = com.bisc.flauncher.ui.home.folderSlotRows(iconItems, rowShape, keepEmptyRows = true).size,
+                    onFocusRow = { highlightRow = it }
+                ) { viewModel.setFolderRowColumns(folderId, it) }
+            }
         }
-        CaptionsSection(
-            showLabels = showLabelsDraft,
-            onShowLabelsChange = { showLabelsDraft = it },
-            appearance = lookDraft,
-            onAppearanceChange = { lookDraft = it },
-            title = stringResource(R.string.settings_captions_label)
-        )
+    )
+
+    val global by homeViewModel.globalBackground.collectAsState()
+    val homeItems by homeViewModel.folderItemsByFolder.collectAsState()
+    val iconScale by homeViewModel.iconSizeScale.collectAsState()
+    val dark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(com.bisc.flauncher.data.model.ElementAppearance(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE), global)
+    val ink = if (dark) Color.White else Color.Black
+    CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalSurfaceIsDark provides dark) {
+        SettingsCardStackScreen(
+            title = name.value.ifBlank { folder.name },
+            navController = navController,
+            onBack = onBack,
+            draft = draft,
+            elements = elements,
+            states = listOf("closed" to stringResource(R.string.stack_state_closed), OPEN to stringResource(R.string.stack_state_open)),
+            startElement = startElement
+        ) { state, _ ->
+            val statusTop = replicaStatusHeight()
+            CompositionLocalProvider(
+                com.bisc.flauncher.ui.home.LocalAppIconLoader provides homeViewModel.iconLoader,
+                com.bisc.flauncher.ui.home.widgets.LocalHostAppWidgets provides false
+            ) {
+                Box(Modifier.fillMaxSize()) {
+                    com.bisc.flauncher.ui.home.dock.BackgroundFill(global, Modifier.fillMaxSize())
+                    if (state == OPEN) {
+                        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.45f)))
+                        com.bisc.flauncher.ui.home.FolderView(
+                            folder = folder,
+                            items = homeItems[folderId] ?: items,
+                            folders = folders,
+                            folderItemsByFolder = homeItems,
+                            savedMapTargets = savedMapTargets,
+                            pinnedWebsites = pinnedWebsites,
+                            showLabels = showLabels,
+                            loadIcon = viewModel::loadIcon,
+                            loadPackIcon = viewModel::loadPackIcon,
+                            resolveLabel = viewModel::resolveLabel,
+                            onAppClick = {},
+                            onFolderClick = {},
+                            onRemoveItem = {},
+                            cornerPercent = shownCorner,
+                            onBack = {},
+                            cardAppearance = look,
+                            handlesBack = false
+                        )
+                    } else {
+                        // Closed, as it lies on a page: the icon at its real size with its name.
+                        Column(
+                            modifier = Modifier.align(Alignment.Center).width(96.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            FolderIcon(
+                                folder = folder,
+                                previewItems = items,
+                                modifier = Modifier.size(56.dp * iconScale).stackElement("icon"),
+                                face = face.value,
+                                around = ink
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Text(name.value, color = ink, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                        }
+                    }
+                    StatusBarSketch(statusTop, ink)
+                }
+            }
         }
     }
 
