@@ -1,0 +1,4 @@
+- Folders as a card stack: Folder, Folder icon, Folder window and Contents, closed and open in the replica
+- All folders and categories as card stacks too, categories with Category icon, Label and Card
+- Folders and categories show where they are used
+- Categories overview: sort by dragging, new category empty, suggested by Android or with a rule

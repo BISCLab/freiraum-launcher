@@ -1,0 +1,4 @@
+- Ordner als Kartenstapel: Ordner, Ordnersymbol, Ordnerfenster und Inhalt, geschlossen und geöffnet im Nachbau
+- Alle Ordner und Kategorien ebenfalls als Kartenstapel, Kategorien mit Kategoriesymbol, Etikett und Karte
+- Ordner und Kategorien zeigen, wo sie vorkommen
+- Kategorien-Übersicht: Sortieren durch Ziehen, neue Kategorie leer, als Vorschlag von Android oder mit Regel

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.29.0
+
 - Folders as a card stack: the folder closed and opened, built from its real parts; Folder, Folder icon, Folder window and Contents, one Save
 - The folder window says "Like all folders" or "Own look" with a reset, and leads to "All folders"
 - All folders as a card stack too, the replica opens your first folder in that look; corners as percent tiles
