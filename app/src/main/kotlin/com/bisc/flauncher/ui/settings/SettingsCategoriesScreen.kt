@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import com.bisc.flauncher.ui.stackElement
 import androidx.compose.foundation.layout.fillMaxSize
@@ -105,73 +106,167 @@ internal fun CategoryBadge(category: Category?, size: androidx.compose.ui.unit.D
     com.bisc.flauncher.ui.home.CategoryMark(category, modifier = Modifier.size(size))
 }
 
-/** Settings > Elements > Categories: the way to the Categories page, then every category in its
- *  order (dragged by the handle, a tap opens it) and a plus that makes a new one: empty, from
- *  Android's own kinds, or with a rule that fills it. */
+/**
+ * Every category in one card stack: ⓪ all of them (the way to the Categories page, their order,
+ * a new one), then each category with its four tabs. The replica shows the chosen one as the
+ * Categories page shows it, with its icon below. Several can be changed and saved at once.
+ */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
-fun SettingsCategoriesScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsCategoriesScreen(
+    navController: NavController,
+    onBack: () -> Unit,
+    startElement: String? = null,
+    startTab: Int = 0,
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
+    val home: HomeViewModel = hiltViewModel()
+    val stack: StackDraft = androidx.lifecycle.viewmodel.compose.viewModel()
     val categories by viewModel.categories.collectAsState()
     val resolved by viewModel.resolvedCategories.collectAsState()
     val counts = remember(resolved) { resolved.associate { it.category.id to it.members.size } }
     var choosingNew by remember { mutableStateOf(false) }
-
-    SettingsSubScreen(title = stringResource(R.string.settings_pages_categories), navController = navController, onBack = onBack) {
-        Text(
-            stringResource(R.string.settings_categories_intro),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 4.dp)
+    // A category as drafted: what the replica and the list show.
+    fun shown(c: Category): Category {
+        val base = c.withLookFields()
+        val k = categoryKey(c.id)
+        return base.copy(
+            name = DraftField(stack, "$k:name", base.name).value,
+            color = DraftField(stack, "$k:color", base.color).value,
+            tileFace = DraftField(stack, "$k:tile", base.tileFace).value,
+            nameStyle = DraftField(stack, "$k:label", base.nameStyle).value
         )
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = Icons.Filled.ViewModule,
-                title = stringResource(R.string.settings_categories_page),
-                summary = stringResource(R.string.settings_categories_page_summary),
-                onClick = { navController.navigate("settings/categories") }
-            )
-        }
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            SettingsGroupLabel(stringResource(R.string.settings_categories_yours), info = stringResource(R.string.settings_categories_yours_info))
+    }
+
+    val elements = buildList {
+        add(StackElement(
+            id = "all", number = 0,
+            title = stringResource(R.string.settings_pages_categories),
+            summary = pluralStringResource(R.plurals.hub_content_count, categories.size, categories.size)
+        ) {
+            PartIntro(stringResource(R.string.settings_categories_intro))
             SettingsPreferenceGroup {
                 SettingsPreference(
-                    icon = Icons.Filled.Add,
-                    title = stringResource(R.string.stack_new_category_title),
-                    onClick = { choosingNew = true },
-                    trailing = null
+                    icon = Icons.Filled.ViewModule,
+                    title = stringResource(R.string.settings_categories_page),
+                    summary = stringResource(R.string.settings_categories_page_summary),
+                    onClick = { navController.navigate("settings/categories") },
+                    trailing = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) }
                 )
             }
-            if (categories.isNotEmpty()) {
-                ReorderableList(items = categories, key = { it.id }, onReorder = viewModel::reorderCategories, itemHeight = 68.dp, dividers = true) { category ->
-                    val count = counts[category.id] ?: 0
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .clickable { navController.navigate("settings/elements/categories/${category.id}") }
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(14.dp)
-                    ) {
+            StackAddRow(stringResource(R.string.stack_new_category_title)) { choosingNew = true }
+            if (categories.size > 1) {
+                SettingsGroupLabel(stringResource(R.string.settings_categories_order), subtitle = stringResource(R.string.stack_categories_drag_info))
+                ReorderableList(items = categories, key = { it.id }, onReorder = viewModel::reorderCategories, itemHeight = 64.dp, dividers = true) { category ->
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                         CategoryBadge(category)
-                        Column(Modifier.weight(1f)) {
-                            Text(category.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            Text(
-                                if (category.smartRule != null) stringResource(R.string.settings_categories_tile_smart, count)
-                                else pluralStringResource(R.plurals.hub_content_count, count, count),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1
-                            )
-                        }
+                        Text(category.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
-                if (categories.size > 1) {
-                    Text(
-                        stringResource(R.string.stack_categories_drag_info),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 4.dp)
-                    )
+            }
+        })
+        categories.forEachIndexed { i, c ->
+            val d = shown(c)
+            val count = counts[c.id] ?: 0
+            add(StackElement(
+                id = categoryKey(c.id), number = i + 1,
+                title = d.name.ifBlank { c.name },
+                summary = if (c.smartRule != null) stringResource(R.string.settings_categories_tile_smart, count) else pluralStringResource(R.plurals.hub_content_count, count, count),
+                draftKeys = listOf("name", "color", "tile", "label", "rule_param", "manual", "members").map { "${categoryKey(c.id)}:$it" },
+                anchor = androidx.compose.ui.geometry.Offset(1f, 0f),
+                leading = { CategoryBadge(d, 32.dp) }
+            ) { CategoryEditor(c, stack, if (categoryKey(c.id) == startElement) startTab else 0, navController, viewModel, home) })
+        }
+    }
+
+    val pageId by home.categoriesPageId.collectAsState()
+    val background by remember(pageId) { home.pageBackgroundConfig(pageId ?: -1L) }.collectAsState(initial = com.bisc.flauncher.data.model.BackgroundConfig())
+    val dark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(com.bisc.flauncher.data.model.ElementAppearance(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE), background)
+    val boxLook by home.categoryBoxLook.collectAsState()
+    val iconScale by home.iconSizeScale.collectAsState()
+    androidx.compose.runtime.CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalSurfaceIsDark provides dark) {
+        SettingsCardStackScreen(
+            title = stringResource(R.string.settings_pages_categories),
+            navController = navController,
+            onBack = onBack,
+            draft = stack,
+            elements = elements,
+            startElement = startElement,
+            firstCard = StackCard.ELEMENTS,
+            listHeader = { StackAddRow(stringResource(R.string.stack_new_category_title)) { choosingNew = true } }
+        ) { _, _ ->
+            val ink = if (dark) Color.White else Color.Black
+            val statusTop = replicaStatusHeight()
+            val (look, corner) = boxLook
+            val chosen = categories.find { categoryKey(it.id) == LocalStackSelected.current }
+            val symbols = com.bisc.flauncher.ui.home.LauncherCategories.symbolsOnPage
+            androidx.compose.runtime.CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalAppIconLoader provides home.iconLoader) {
+                Box(Modifier.fillMaxSize()) {
+                    com.bisc.flauncher.ui.home.dock.BackgroundFill(background, Modifier.fillMaxSize())
+                    Column(Modifier.fillMaxSize().padding(top = statusTop + 12.dp)) {
+                        // The labels on top, the chosen one filled.
+                        Row(
+                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            com.bisc.flauncher.ui.home.CategoryChip(
+                                category = null, label = stringResource(R.string.categories_all), count = null, selected = chosen == null,
+                                look = look, onClick = {}, showSymbol = symbols
+                            )
+                            categories.forEach { c ->
+                                val d = shown(c)
+                                com.bisc.flauncher.ui.home.CategoryChip(
+                                    category = d, label = d.name, count = (counts[c.id] ?: 0).takeIf { com.bisc.flauncher.ui.home.LauncherCategories.countsOnPage },
+                                    selected = c == chosen, look = look, onClick = {}, showSymbol = symbols,
+                                    modifier = if (c == chosen) Modifier.stackElement(categoryKey(c.id)) else Modifier
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(12.dp))
+                        if (chosen != null) {
+                            val d = shown(chosen)
+                            val members = resolved.find { it.category.id == chosen.id }?.members.orEmpty()
+                            BoxWithConstraints(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                                val columns = com.bisc.flauncher.ui.home.categoryColumns(maxWidth - 24.dp)
+                                com.bisc.flauncher.ui.home.CategoryCard(look, corner) {
+                                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
+                                        Box(Modifier.weight(1f)) { com.bisc.flauncher.ui.home.CategoryNamePill(d, MaterialTheme.typography.titleMedium, showSymbol = symbols) }
+                                    }
+                                    val labelColor = com.bisc.flauncher.ui.home.dock.resolveElementColors(look).contentColor
+                                    if (members.isEmpty()) Text(stringResource(R.string.categories_nothing), modifier = Modifier.padding(12.dp), color = labelColor)
+                                    else com.bisc.flauncher.ui.home.CategoryMemberGrid(members.take(columns * 3), columns, labelColor, iconScale, viewModel = home)
+                                }
+                            }
+                            Spacer(Modifier.weight(1f))
+                            // As it lies in a Dock or a box: the icon at its real size with its name.
+                            Column(
+                                modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 48.dp).width(96.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                com.bisc.flauncher.ui.home.CategoryMark(d, modifier = Modifier.size(56.dp * iconScale), shape = RoundedCornerShape(16.dp), ink = ink)
+                                Spacer(Modifier.height(8.dp))
+                                Text(d.name, color = ink, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            }
+                        } else {
+                            // All of them as icons, as they would lie in a Dock or a box.
+                            androidx.compose.foundation.layout.FlowRow(
+                                modifier = Modifier.fillMaxWidth().padding(top = 36.dp, start = 12.dp, end = 12.dp),
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                verticalArrangement = Arrangement.spacedBy(24.dp),
+                                maxItemsInEachRow = 4
+                            ) {
+                                categories.take(16).forEach { c ->
+                                    val d = shown(c)
+                                    Column(Modifier.width(96.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                                        com.bisc.flauncher.ui.home.CategoryMark(d, modifier = Modifier.size(56.dp * iconScale).stackElement(categoryKey(c.id)), shape = RoundedCornerShape(16.dp), ink = ink)
+                                        Spacer(Modifier.height(8.dp))
+                                        Text(d.name, color = ink, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    StatusBarSketch(statusTop, ink)
                 }
             }
         }
@@ -184,6 +279,18 @@ fun SettingsCategoriesScreen(navController: NavController, onBack: () -> Unit, v
             onDismiss = { choosingNew = false }
         )
     }
+}
+
+/** One category, the way in from outside: the stack, opened on it and on the tab asked for. */
+@Composable
+fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController, onBack: () -> Unit, startElement: String? = null) {
+    val tab = when (startElement) {
+        "icon" -> 1
+        "label" -> 2
+        "card" -> 3
+        else -> 0
+    }
+    SettingsCategoriesScreen(navController, onBack, startElement = categoryKey(categoryId), startTab = tab)
 }
 
 /** The three ways to a new category, in one sheet: empty, a kind Android already knows, or a rule. */
@@ -490,18 +597,24 @@ internal fun NewCategoryDialog(onCreate: (String) -> Unit, onDismiss: () -> Unit
     )
 }
 
+internal fun categoryKey(id: Long) = "cat:$id"
+
 /**
- * One category as a card stack: the Categories page with this category's label and card, and its
- * icon as it lies in a Dock or a box, built from the real parts. ⓪ the category, ① its icon,
- * ② its label, ③ its card with what it holds. Everything is a draft until Save.
+ * One category's options in a stack, in four tabs: the category (name, color, where it is used),
+ * its icon, its label and its card with what it holds. Stored together as one category at Save.
  */
 @Composable
-fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController, onBack: () -> Unit, startElement: String? = null, viewModel: SettingsViewModel = hiltViewModel()) {
-    val homeViewModel: HomeViewModel = hiltViewModel()
-    val stack: StackDraft = androidx.lifecycle.viewmodel.compose.viewModel()
-    val categories by viewModel.categories.collectAsState()
+internal fun androidx.compose.foundation.layout.ColumnScope.CategoryEditor(
+    saved: Category,
+    stack: StackDraft,
+    startTab: Int,
+    navController: NavController,
+    viewModel: SettingsViewModel,
+    homeViewModel: HomeViewModel
+) {
+    val categoryId = saved.id
+    val key = categoryKey(categoryId)
     val resolved by viewModel.resolvedCategories.collectAsState()
-    val saved = categories.find { it.id == categoryId } ?: return
     // Categories from before the name look and the tile had their own fields: read once into them,
     // so the page starts from what is shown, and only a change makes it ask to save.
     val base = remember(saved) { saved.withLookFields() }
@@ -509,13 +622,13 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
     val savedMembers = members.map { it.type to it.payload }
 
     // One value per part, so each shows its own dot; stored together, as one category.
-    val name = stack.field("name", base.name) {}
-    val color = stack.field("color", base.color) {}
-    val tile = stack.field("tile", base.tileFace) {}
-    val label = stack.field("label", base.nameStyle) {}
-    val ruleParam = stack.field("rule_param", base.ruleParam) {}
-    val manual = stack.field("manual", base.manualOrder) {}
-    val draftMembers = stack.field("members", savedMembers) {}
+    val name = stack.field("$key:name", base.name) {}
+    val color = stack.field("$key:color", base.color) {}
+    val tile = stack.field("$key:tile", base.tileFace) {}
+    val label = stack.field("$key:label", base.nameStyle) {}
+    val ruleParam = stack.field("$key:rule_param", base.ruleParam) {}
+    val manual = stack.field("$key:manual", base.manualOrder) {}
+    val draftMembers = stack.field("$key:members", savedMembers) {}
     val draft = base.copy(name = name.value, color = color.value, tileFace = tile.value, nameStyle = label.value, ruleParam = ruleParam.value, manualOrder = manual.value)
 
     val apps by viewModel.labeledApps.collectAsState()
@@ -537,7 +650,7 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
         ordered.mapIndexed { index, (type, payload) -> CategoryMember(categoryId = categoryId, type = type, payload = payload, orderIndex = index) }
     }
     val membersChanged = rule == null && if (draft.manualOrder) draftMembers.value != savedMembers else draftMembers.value.toSet() != savedMembers.toSet()
-    stack.saveTogether {
+    stack.saveTogether(key) {
         if (draft.name.isNotBlank() && draft != base) viewModel.updateCategory(draft)
         if (membersChanged || draft.manualOrder != base.manualOrder) viewModel.replaceCategoryMembers(categoryId, shownMembers.map { it.type to it.payload })
     }
@@ -564,13 +677,8 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
         manual.value = true
     }
 
-    val elements = listOf(
-        StackElement(
-            id = "category", number = 0,
-            title = draft.name.ifBlank { saved.name },
-            summary = countText,
-            draftKeys = listOf("name", "color")
-        ) {
+    StackTabs(listOf(
+        stringResource(R.string.stack_el_category) to {
             SettingsPreferenceGroup {
                 Box(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(16.dp)) {
                     OutlinedTextField(
@@ -597,18 +705,7 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
                 SettingsPreference(icon = Icons.Filled.DeleteOutline, title = stringResource(R.string.settings_category_delete), onClick = { confirmingDelete = true }, trailing = null)
             }
         },
-        StackElement(
-            id = "icon", number = 1,
-            title = stringResource(R.string.stack_el_category_icon),
-            summary = stringResource(R.string.hub_tile_category),
-            draftKeys = listOf("tile"),
-            anchor = androidx.compose.ui.geometry.Offset(1f, 0f),
-            sample = {
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    com.bisc.flauncher.ui.home.CategoryMark(draft, modifier = Modifier.size(72.dp), shape = RoundedCornerShape(20.dp), ink = MaterialTheme.colorScheme.onSurface)
-                }
-            }
-        ) {
+        stringResource(R.string.stack_el_category_icon) to {
             PartIntro(stringResource(R.string.settings_category_tile_info))
             TileFaceEditor(
                 face = draft.face(),
@@ -623,18 +720,7 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
                 viewModel = viewModel
             )
         },
-        StackElement(
-            id = "label", number = 2,
-            title = stringResource(R.string.stack_el_category_label),
-            summary = stringResource(R.string.hub_label_category),
-            draftKeys = listOf("label"),
-            anchor = androidx.compose.ui.geometry.Offset(1f, 0f),
-            sample = {
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    com.bisc.flauncher.ui.home.CategoryNamePill(draft, MaterialTheme.typography.titleMedium, ink = MaterialTheme.colorScheme.onSurface)
-                }
-            }
-        ) {
+        stringResource(R.string.stack_el_category_label) to {
             PartIntro(stringResource(R.string.category_name_look_info))
             SurfaceLookSection(
                 face = draft.labelFace(),
@@ -644,13 +730,7 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
                 cornersFollowApps = false
             )
         },
-        StackElement(
-            id = "card", number = 3,
-            title = stringResource(R.string.stack_el_category_card),
-            summary = countText,
-            draftKeys = listOf("rule_param", "manual", "members"),
-            anchor = androidx.compose.ui.geometry.Offset(1f, 0f)
-        ) {
+        stringResource(R.string.stack_el_category_card) to {
             PartIntro(stringResource(if (rule != null) R.string.section_content_smart else R.string.section_content_own))
             CategoryLiveCard(
                 draft, shownMembers, homeViewModel,
@@ -702,81 +782,7 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
                 }
             }
         }
-    )
-
-    // ---- The replica: the Categories page with this category chosen, and its icon below ----
-    val pageId by homeViewModel.categoriesPageId.collectAsState()
-    val background by remember(pageId) { homeViewModel.pageBackgroundConfig(pageId ?: -1L) }.collectAsState(initial = com.bisc.flauncher.data.model.BackgroundConfig())
-    val dark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(com.bisc.flauncher.data.model.ElementAppearance(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE), background)
-    val boxLook by homeViewModel.categoryBoxLook.collectAsState()
-    val iconScale by homeViewModel.iconSizeScale.collectAsState()
-    val others = categories.filter { it.id != categoryId }.take(2)
-    androidx.compose.runtime.CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalSurfaceIsDark provides dark) {
-        SettingsCardStackScreen(
-            title = draft.name.ifBlank { saved.name },
-            navController = navController,
-            onBack = onBack,
-            draft = stack,
-            elements = elements,
-            startElement = startElement
-        ) { _, _ ->
-            val ink = if (dark) Color.White else Color.Black
-            val statusTop = replicaStatusHeight()
-            val (look, corner) = boxLook
-            androidx.compose.runtime.CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalAppIconLoader provides homeViewModel.iconLoader) {
-                Box(Modifier.fillMaxSize()) {
-                    com.bisc.flauncher.ui.home.dock.BackgroundFill(background, Modifier.fillMaxSize())
-                    Column(Modifier.fillMaxSize().padding(top = statusTop + 12.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            com.bisc.flauncher.ui.home.CategoryChip(
-                                category = null, label = stringResource(R.string.categories_all), count = null, selected = false,
-                                look = look, onClick = {}, showSymbol = com.bisc.flauncher.ui.home.LauncherCategories.symbolsOnPage
-                            )
-                            com.bisc.flauncher.ui.home.CategoryChip(
-                                category = draft, label = draft.name, count = shownMembers.size.takeIf { com.bisc.flauncher.ui.home.LauncherCategories.countsOnPage },
-                                selected = true, look = look, onClick = {}, showSymbol = com.bisc.flauncher.ui.home.LauncherCategories.symbolsOnPage,
-                                modifier = Modifier.stackElement("label")
-                            )
-                            others.forEach { c ->
-                                com.bisc.flauncher.ui.home.CategoryChip(
-                                    category = c, label = c.name, count = null, selected = false,
-                                    look = look, onClick = {}, showSymbol = com.bisc.flauncher.ui.home.LauncherCategories.symbolsOnPage
-                                )
-                            }
-                        }
-                        Spacer(Modifier.height(12.dp))
-                        BoxWithConstraints(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                            val columns = com.bisc.flauncher.ui.home.categoryColumns(maxWidth - 24.dp)
-                            com.bisc.flauncher.ui.home.CategoryCard(look, corner, modifier = Modifier.stackElement("card")) {
-                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
-                                    Box(Modifier.weight(1f)) {
-                                        com.bisc.flauncher.ui.home.CategoryNamePill(draft, MaterialTheme.typography.titleMedium, showSymbol = com.bisc.flauncher.ui.home.LauncherCategories.symbolsOnPage)
-                                    }
-                                }
-                                val labelColor = com.bisc.flauncher.ui.home.dock.resolveElementColors(look).contentColor
-                                if (shownMembers.isEmpty()) Text(stringResource(R.string.categories_nothing), modifier = Modifier.padding(12.dp), color = labelColor)
-                                else com.bisc.flauncher.ui.home.CategoryMemberGrid(shownMembers.take(columns * 3), columns, labelColor, iconScale, viewModel = homeViewModel)
-                            }
-                        }
-                        Spacer(Modifier.weight(1f))
-                        // As it lies in a Dock or a box: the icon at its real size with its name.
-                        Column(
-                            modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 48.dp).width(96.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            com.bisc.flauncher.ui.home.CategoryMark(draft, modifier = Modifier.size(56.dp * iconScale).stackElement("icon"), shape = RoundedCornerShape(16.dp), ink = ink)
-                            Spacer(Modifier.height(8.dp))
-                            Text(draft.name, color = ink, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        }
-                    }
-                    StatusBarSketch(statusTop, ink)
-                }
-            }
-        }
-    }
+    ), start = startTab)
 
     if (pickingApps) {
         val chosen = draftMembers.value.filter { it.first == GridItemType.APP }.map { it.second }.toSet()
@@ -814,7 +820,7 @@ fun SettingsCategoryDetailScreen(categoryId: Long, navController: NavController,
     if (confirmingDelete) {
         ConfirmRemoveDialog(
             label = saved.name,
-            onConfirm = { viewModel.deleteCategory(saved); confirmingDelete = false; onBack() },
+            onConfirm = { viewModel.deleteCategory(saved); confirmingDelete = false },
             onDismiss = { confirmingDelete = false }
         )
     }

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Apps, folders, categories, places, links and action buttons each in one card stack: the list is the card Elements, so there is no list page and no page per element any more
+- Apps: ⓪ All apps holds shape, size, icon pack, themed icons and dots for all; a search on top, then the apps with something of their own, then all; each app in the tabs App and App icon
+- Folders: ⓪ All folders holds the window every folder follows and what goes away while one is open; each folder in the tabs Folder, Folder icon, Folder window and Contents
+- Categories: ⓪ holds the way to the Categories page, the order and a new category; each category in the tabs Category, Category icon, Label and Card
+- Places, links and action buttons: ⓪ shows all their symbols with a number each; each one in two tabs, the element and its Symbol
+- Several elements can be changed one after another and saved at once; a changed one carries a dot in the list
+
 ## 0.31.0
 
 - Pages: three blocks with the same spacing. Carousel (the start page marked with a house, endless swiping in the same card), Function pages as tiles that show how each opens, and Gestures with how many are in use; the page map is gone
