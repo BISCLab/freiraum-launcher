@@ -154,6 +154,8 @@ class StackDraft : ViewModel() {
     fun save() {
         edits.toMap().forEach { (key, value) -> savers[key]?.invoke(value) }
         together.values.toList().forEach { it() }
+        // Written once: an editor still open registers again, one closed has nothing left to write.
+        together.clear()
         edits.clear()
     }
 }

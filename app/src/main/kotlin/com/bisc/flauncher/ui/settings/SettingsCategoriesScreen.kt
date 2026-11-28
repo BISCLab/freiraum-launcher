@@ -651,7 +651,18 @@ internal fun androidx.compose.foundation.layout.ColumnScope.CategoryEditor(
     }
     val membersChanged = rule == null && if (draft.manualOrder) draftMembers.value != savedMembers else draftMembers.value.toSet() != savedMembers.toSet()
     stack.saveTogether(key) {
-        if (draft.name.isNotBlank() && draft != base) viewModel.updateCategory(draft)
+        // From the category as stored now (its place may have moved meanwhile), with only what changed here.
+        val now = viewModel.categories.value.find { it.id == categoryId }?.withLookFields() ?: return@saveTogether
+        fun <T> pick(field: DraftField<T>, stored: T): T = if (stack.changed(listOf(field.key))) field.value else stored
+        val written = now.copy(
+            name = pick(name, now.name),
+            color = pick(color, now.color),
+            tileFace = pick(tile, now.tileFace),
+            nameStyle = pick(label, now.nameStyle),
+            ruleParam = pick(ruleParam, now.ruleParam),
+            manualOrder = pick(manual, now.manualOrder)
+        )
+        if (written.name.isNotBlank() && written != now) viewModel.updateCategory(written)
         if (membersChanged || draft.manualOrder != base.manualOrder) viewModel.replaceCategoryMembers(categoryId, shownMembers.map { it.type to it.payload })
     }
 
