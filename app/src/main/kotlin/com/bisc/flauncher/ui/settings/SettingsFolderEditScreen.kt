@@ -101,33 +101,39 @@ import kotlinx.coroutines.withContext
 
 /** What a folder's stack changes on its window: its own look or that of all folders, the corners
  *  and the captions. Stored together, so a reset keeps the rest. */
-private data class WindowEdit(val own: Boolean, val look: com.bisc.flauncher.data.model.ElementAppearance, val corner: Int?, val labels: Boolean)
+internal data class WindowEdit(val own: Boolean, val look: com.bisc.flauncher.data.model.ElementAppearance, val corner: Int?, val labels: Boolean)
 
-private const val OPEN = "open"
+internal fun folderKey(id: Long) = "folder:$id"
+
+/** The window as stored: its own fill, border and corners, or those of all folders. */
+internal fun com.bisc.flauncher.data.model.Folder.windowEdit(allLook: com.bisc.flauncher.data.model.ElementAppearance, allLabels: Boolean): WindowEdit {
+    val content = if (appearanceOverrideEnabled) contentAppearance() else allLook
+    val border = if (borderOverrideEnabled) borderAppearance() else allLook
+    val look = content.copy(borderEnabled = border.borderEnabled, borderColor = border.borderColor, borderWidth = border.borderWidth)
+    return WindowEdit(appearanceOverrideEnabled || borderOverrideEnabled || cornerPercent != null, look, cornerPercent, if (showLabelsOverrideEnabled) showLabels else allLabels)
+}
 
 /**
- * One folder as a card stack: the folder closed and opened, built from its real parts, with
- * ⓪ the folder, ① its icon, ② its window and ③ what it holds. Name, icon and window are a draft
- * until Save; what it holds changes right away, so a widget can be set up at once.
+ * One folder's options in a stack, in four tabs: the folder (name, where it is used), its icon, its
+ * window and what it holds. Name, icon and window are a draft until Save; what it holds changes
+ * right away, so a widget can be set up at once.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsFolderEditScreen(
-    folderId: Long,
+internal fun ColumnScope.FolderEditor(
+    folder: com.bisc.flauncher.data.model.Folder,
+    draft: StackDraft,
+    all: FolderTemplateDraft,
+    startTab: Int,
     navController: NavController,
-    onBack: () -> Unit,
-    startElement: String? = null,
-    viewModel: SettingsViewModel = hiltViewModel(),
-    // Adding app widgets (picker, bind permission, configuration) runs through the same flow as on pages.
-    homeViewModel: com.bisc.flauncher.ui.home.HomeViewModel = hiltViewModel()
+    viewModel: SettingsViewModel,
+    homeViewModel: com.bisc.flauncher.ui.home.HomeViewModel
 ) {
-    val draft: StackDraft = androidx.lifecycle.viewmodel.compose.viewModel()
+    val folderId = folder.id
     val folders by viewModel.folders.collectAsState()
     val folderItems by viewModel.folderItems.collectAsState()
     val globalCardAppearance by viewModel.folderCardAppearance.collectAsState()
     val globalShowLabels by viewModel.folderShowLabels.collectAsState()
-    val folderCorner by viewModel.folderCornerPercent.collectAsState()
-    val folder = folders.find { it.id == folderId } ?: return
     var confirmingDelete by remember { mutableStateOf(false) }
 
     val itemsByFolder = remember(folderItems) { folderItems.groupBy { it.folderId } }
@@ -166,15 +172,15 @@ fun SettingsFolderEditScreen(
     LaunchedEffect(pendingConfigureIntent) { pendingConfigureIntent?.let { configureWidgetLauncher.launch(it) } }
 
     // ---- The draft ----
-    val name = draft.field("name", folder.name) { if (it.isNotBlank()) viewModel.renameFolder(folderId, it.trim()) }
-    val face = draft.field("face", folder.face()) { viewModel.setFolderTileFace(folderId, it) }
+    val name = draft.field(folderKey(folderId) + ":name", folder.name) { if (it.isNotBlank()) viewModel.renameFolder(folderId, it.trim()) }
+    val face = draft.field(folderKey(folderId) + ":face", folder.face()) { viewModel.setFolderTileFace(folderId, it) }
     // Fill and border of the window are kept apart (each can follow all folders on its own).
     val savedContent = if (folder.appearanceOverrideEnabled) folder.contentAppearance() else globalCardAppearance
     val savedBorder = if (folder.borderOverrideEnabled) folder.borderAppearance() else globalCardAppearance
     val savedLook = savedContent.copy(borderEnabled = savedBorder.borderEnabled, borderColor = savedBorder.borderColor, borderWidth = savedBorder.borderWidth)
     val savedShowLabels = if (folder.showLabelsOverrideEnabled) folder.showLabels else globalShowLabels
     val savedOwn = folder.appearanceOverrideEnabled || folder.borderOverrideEnabled || folder.cornerPercent != null
-    val window = draft.field("window", WindowEdit(savedOwn, savedLook, folder.cornerPercent, savedShowLabels)) { e ->
+    val window = draft.field(folderKey(folderId) + ":window", WindowEdit(savedOwn, savedLook, folder.cornerPercent, savedShowLabels)) { e ->
         if (!e.own) {
             if (folder.appearanceOverrideEnabled) viewModel.setFolderAppearanceOverrideEnabled(folderId, false)
             if (folder.borderOverrideEnabled) viewModel.setFolderBorderOverrideEnabled(folderId, false)
@@ -190,22 +196,18 @@ fun SettingsFolderEditScreen(
         if (e.labels != savedShowLabels) viewModel.setFolderItemsShowLabels(folderId, e.labels)
     }
     val win = window.value
-    val shownCorner = win.corner ?: folderCorner
+    val shownCorner = win.corner ?: all.corner.value
 
     val (widgetItems, iconItems) = items.partition { it.isWidget() }
-    val look = win.look
+    // Like all folders: the look of all folders as drafted right now.
+    val look = if (win.own) win.look else all.look.value
     val showLabels = win.labels
     val rowShape = folder.rows()
     val countText = androidx.compose.ui.res.pluralStringResource(R.plurals.hub_content_count, items.size, items.size)
     val usages = rememberUsages(GridItemType.FOLDER, folderId.toString(), homeViewModel)
 
-    val elements = listOf(
-        StackElement(
-            id = "folder", number = 0,
-            title = name.value.ifBlank { folder.name },
-            summary = countText,
-            draftKeys = listOf("name")
-        ) {
+    StackTabs(listOf(
+        stringResource(R.string.stack_el_folder) to {
             OutlinedTextField(
                 value = name.value,
                 onValueChange = { name.value = it },
@@ -219,18 +221,7 @@ fun SettingsFolderEditScreen(
                 SettingsPreference(icon = Icons.Filled.DeleteOutline, title = stringResource(R.string.settings_folder_delete), onClick = { confirmingDelete = true }, trailing = null)
             }
         },
-        StackElement(
-            id = "icon", number = 1,
-            title = stringResource(R.string.stack_el_folder_icon),
-            summary = stringResource(R.string.hub_tile_folder),
-            draftKeys = listOf("face"),
-            anchor = androidx.compose.ui.geometry.Offset(1f, 0f),
-            sample = {
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    FolderIcon(folder = folder, previewItems = items, modifier = Modifier.size(72.dp), face = face.value, around = MaterialTheme.colorScheme.onSurface)
-                }
-            }
-        ) {
+        stringResource(R.string.stack_el_folder_icon) to {
             PartIntro(stringResource(R.string.settings_folder_tile_info))
             TileFaceEditor(
                 face = face.value,
@@ -242,25 +233,15 @@ fun SettingsFolderEditScreen(
                 viewModel = viewModel
             )
         },
-        StackElement(
-            id = "window", number = 2,
-            title = stringResource(R.string.stack_el_folder_window),
-            summary = stringResource(if (win.own) R.string.hub_open_folder_own else R.string.hub_open_folder_like_all),
-            state = OPEN,
-            draftKeys = listOf("window"),
-            anchor = androidx.compose.ui.geometry.Offset(0f, 0f),
-            ownLook = win.own,
-            autoLabel = stringResource(R.string.settings_folder_look_like_all),
-            onResetLook = { window.value = win.copy(own = false, look = globalCardAppearance, corner = null) },
-            sample = { LookSample(LookSampleKind.FOLDER, look, shownCorner) }
-        ) {
+        stringResource(R.string.stack_el_folder_window) to {
+            // Like all folders or its own, with the way back.
             SettingsPreferenceGroup {
                 SettingsPreference(
                     icon = null,
-                    title = stringResource(R.string.stack_all_folders_link),
+                    title = stringResource(if (win.own) R.string.settings_look_custom else R.string.settings_folder_look_like_all),
                     summary = stringResource(R.string.stack_all_folders_summary),
-                    onClick = { navController.navigate("settings/folder/global") },
-                    trailing = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) }
+                    onClick = null,
+                    trailing = if (win.own) ({ AutoResetChip(onClick = { window.value = win.copy(own = false, look = all.look.value, corner = null) }, label = stringResource(R.string.settings_look_reset)) }) else null
                 )
             }
             ElementAppearanceSection(appearance = look, onAppearanceChange = { window.value = win.copy(own = true, look = it) }, styleGroupTitle = stringResource(R.string.settings_element_fill_label))
@@ -275,13 +256,7 @@ fun SettingsFolderEditScreen(
                 title = stringResource(R.string.settings_captions_label)
             )
         },
-        StackElement(
-            id = "content", number = 3,
-            title = stringResource(R.string.section_content),
-            summary = countText,
-            state = OPEN,
-            anchor = androidx.compose.ui.geometry.Offset(1f, 0f)
-        ) {
+        stringResource(R.string.section_content) to {
             PartIntro(stringResource(R.string.section_folder_content_where))
             // The folder itself, live: tap a part to work on it, the empty tile adds something.
             FolderLivePreview(
@@ -367,73 +342,7 @@ fun SettingsFolderEditScreen(
                 ) { viewModel.setFolderRowColumns(folderId, it) }
             }
         }
-    )
-
-    val global by homeViewModel.globalBackground.collectAsState()
-    val homeItems by homeViewModel.folderItemsByFolder.collectAsState()
-    val iconScale by homeViewModel.iconSizeScale.collectAsState()
-    val dark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(com.bisc.flauncher.data.model.ElementAppearance(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE), global)
-    val ink = if (dark) Color.White else Color.Black
-    CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalSurfaceIsDark provides dark) {
-        SettingsCardStackScreen(
-            title = name.value.ifBlank { folder.name },
-            navController = navController,
-            onBack = onBack,
-            draft = draft,
-            elements = elements,
-            states = listOf("closed" to stringResource(R.string.stack_state_closed), OPEN to stringResource(R.string.stack_state_open)),
-            startElement = startElement
-        ) { state, _ ->
-            val statusTop = replicaStatusHeight()
-            CompositionLocalProvider(
-                com.bisc.flauncher.ui.home.LocalAppIconLoader provides homeViewModel.iconLoader,
-                com.bisc.flauncher.ui.home.widgets.LocalHostAppWidgets provides false
-            ) {
-                Box(Modifier.fillMaxSize()) {
-                    com.bisc.flauncher.ui.home.dock.BackgroundFill(global, Modifier.fillMaxSize())
-                    if (state == OPEN) {
-                        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.45f)))
-                        com.bisc.flauncher.ui.home.FolderView(
-                            folder = folder,
-                            items = homeItems[folderId] ?: items,
-                            folders = folders,
-                            folderItemsByFolder = homeItems,
-                            savedMapTargets = savedMapTargets,
-                            pinnedWebsites = pinnedWebsites,
-                            showLabels = showLabels,
-                            loadIcon = viewModel::loadIcon,
-                            loadPackIcon = viewModel::loadPackIcon,
-                            resolveLabel = viewModel::resolveLabel,
-                            onAppClick = {},
-                            onFolderClick = {},
-                            onRemoveItem = {},
-                            cornerPercent = shownCorner,
-                            onBack = {},
-                            cardAppearance = look,
-                            handlesBack = false
-                        )
-                    } else {
-                        // Closed, as it lies on a page: the icon at its real size with its name.
-                        Column(
-                            modifier = Modifier.align(Alignment.Center).width(96.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            FolderIcon(
-                                folder = folder,
-                                previewItems = items,
-                                modifier = Modifier.size(56.dp * iconScale).stackElement("icon"),
-                                face = face.value,
-                                around = ink
-                            )
-                            Spacer(Modifier.height(8.dp))
-                            Text(name.value, color = ink, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-                        }
-                    }
-                    StatusBarSketch(statusTop, ink)
-                }
-            }
-        }
-    }
+    ), start = startTab)
 
     pendingRemoval?.let { item ->
         com.bisc.flauncher.ui.home.ConfirmRemoveDialog(
@@ -598,8 +507,7 @@ fun SettingsFolderEditScreen(
             confirmButton = {
                 TextButton(onClick = {
                     confirmingDelete = false
-                    folder?.let(viewModel::deleteFolder)
-                    onBack()
+                    viewModel.deleteFolder(folder)
                 }) { Text(stringResource(R.string.settings_folder_delete)) }
             },
             dismissButton = {

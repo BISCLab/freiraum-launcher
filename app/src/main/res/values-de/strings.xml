@@ -1206,6 +1206,7 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin und Dagg
     <string name="stack_show">Zeigen</string>
     <string name="stack_page_summary">Ausrichtung, Hintergrund, Statusleiste, Name</string>
     <string name="stack_page_summary_plain">Hintergrund, Statusleiste, Name</string>
+    <string name="stack_el_folder">Ordner</string>
     <string name="stack_places_intro">Orte, die du mit einem Tipp in deiner Navi-App öffnest.</string>
     <string name="stack_links_intro">Webseiten, die du mit einem Tipp öffnest.</string>
     <string name="stack_buttons_intro">Knöpfe, die das Panel, das Dock, eine Seite oder eine Einstellung öffnen.</string>
