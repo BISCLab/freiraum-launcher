@@ -118,8 +118,11 @@ internal fun PageMark(page: LauncherPage, size: androidx.compose.ui.unit.Dp) {
 private fun OpenWithChip(ways: PageWays, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val (icon, text) = waysLine(ways)
     val none = !ways.reachable
+    // Always as tall as two lines, so every chip in the grid is the same size.
+    val twoLines = with(androidx.compose.ui.platform.LocalDensity.current) { (MaterialTheme.typography.labelMedium.lineHeight * 2).toDp() }
     Row(
         modifier = modifier
+            .heightIn(min = twoLines + 16.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(if (none) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer)
             .clickable(onClick = onClick)

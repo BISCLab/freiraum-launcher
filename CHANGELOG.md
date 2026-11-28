@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Pages: the "Open with" chips on the function pages are all the same height
+
 ## 0.32.0
 
 - Apps, folders, categories, places, links and action buttons each in one card stack: the list is the card Elements, so there is no list page and no page per element any more
