@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.ui.marqueeWhenCut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -84,7 +85,7 @@ internal fun ElementCollectionScreen(
                         Column(Modifier.width(96.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(Modifier.stackElement(item.id)) { item.symbol(56.dp * iconScale, ink) }
                             Spacer(Modifier.height(8.dp))
-                            Text(item.name, color = ink, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(item.name, color = ink, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Clip, modifier = Modifier.marqueeWhenCut())
                         }
                     }
                     if (chosen != null) {

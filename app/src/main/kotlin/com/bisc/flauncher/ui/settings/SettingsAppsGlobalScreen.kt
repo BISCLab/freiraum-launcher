@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.ui.marqueeWhenCut
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.ColumnScope
 import kotlinx.coroutines.awaitAll
@@ -241,9 +242,9 @@ private fun IconsPreview(samples: List<AppInfo>, sizePercent: Int, shape: IconSh
                         app.label,
                         style = MaterialTheme.typography.labelSmall,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                        overflow = TextOverflow.Clip,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 6.dp, start = 2.dp, end = 2.dp)
+                        modifier = Modifier.padding(top = 6.dp, start = 2.dp, end = 2.dp).marqueeWhenCut()
                     )
                 }
             }
@@ -299,9 +300,9 @@ private fun PackCard(pack: IconPackInfo?, samples: List<AppInfo>, selected: Bool
             pack?.label ?: stringResource(R.string.settings_icon_pack_default),
             style = MaterialTheme.typography.labelMedium,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
+            overflow = TextOverflow.Clip,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 8.dp)
+            modifier = Modifier.padding(top = 8.dp).marqueeWhenCut()
         )
     }
 }

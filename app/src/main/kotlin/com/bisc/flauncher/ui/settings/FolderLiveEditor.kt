@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.ui.marqueeWhenCut
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.drawBehind
@@ -136,7 +137,7 @@ internal fun FolderLivePreview(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Icon(widgetIcon(widget), contentDescription = null, tint = colors.contentColor.copy(alpha = 0.8f), modifier = Modifier.size(20.dp))
-                    Text(widgetLabel(widget), color = colors.contentColor, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                    Text(widgetLabel(widget), color = colors.contentColor, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Clip, modifier = Modifier.weight(1f).marqueeWhenCut())
                     Text(
                         pluralStringResource(R.plurals.settings_widget_size_rows, widget.spanY, widget.spanY),
                         color = colors.contentColor.copy(alpha = 0.6f),
@@ -183,9 +184,9 @@ internal fun FolderLivePreview(
                                                 color = colors.contentColor,
                                                 style = MaterialTheme.typography.labelSmall,
                                                 maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis,
+                                                overflow = TextOverflow.Clip,
                                                 textAlign = TextAlign.Center,
-                                                modifier = Modifier.width(LIVE_ICON + 16.dp).padding(top = 3.dp)
+                                                modifier = Modifier.width(LIVE_ICON + 16.dp).padding(top = 3.dp).marqueeWhenCut()
                                             )
                                         }
                                     }
@@ -302,7 +303,7 @@ internal fun FolderSelectionBar(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(title, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+            Text(title, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Clip, modifier = Modifier.weight(1f).marqueeWhenCut())
             TextButton(onClick = onClose) { Text(stringResource(R.string.folder_move_done)) }
         }
         if (isWidget) {
@@ -332,7 +333,7 @@ internal fun FolderSelectionBar(
                 ) {
                     Icon(Icons.Filled.Tune, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text(stringResource(R.string.settings_entry_settings), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(stringResource(R.string.settings_entry_settings), maxLines = 1, overflow = TextOverflow.Clip, modifier = Modifier.marqueeWhenCut())
                 }
             }
             androidx.compose.material3.Button(
@@ -342,7 +343,7 @@ internal fun FolderSelectionBar(
             ) {
                 Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
-                Text(stringResource(R.string.folder_widget_remove), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(stringResource(R.string.folder_widget_remove), maxLines = 1, overflow = TextOverflow.Clip, modifier = Modifier.marqueeWhenCut())
             }
         }
     }

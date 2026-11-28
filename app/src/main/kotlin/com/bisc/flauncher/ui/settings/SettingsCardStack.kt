@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.ui.marqueeWhenCut
 import androidx.compose.ui.semantics.selected
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material.icons.filled.BrightnessMedium
@@ -461,8 +462,8 @@ private fun CardStrip(card: StackCard, selected: StackElement, onOpen: (StackCar
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 softWrap = false,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.sideways()
+                overflow = TextOverflow.Clip,
+                modifier = Modifier.sideways().marqueeWhenCut()
             )
         }
     }
@@ -757,9 +758,9 @@ private fun ElementsCard(elements: List<StackElement>, selected: StackElement, d
                             style = MaterialTheme.typography.titleMedium,
                             color = if (e.shown) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Clip, modifier = Modifier.marqueeWhenCut()
                         )
-                        e.summary?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                        e.summary?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Clip, modifier = Modifier.marqueeWhenCut()) }
                     }
                     // A changed one in a list of pictures: the dot sits here.
                     if (lead != null && changed) Box(Modifier.size(9.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
@@ -860,7 +861,7 @@ private fun AdjustCard(element: StackElement, changed: Boolean, host: StackSubPa
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_back))
-                    Text(sub.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(sub.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Clip, modifier = Modifier.marqueeWhenCut())
                 }
                 sub.header.value?.let { Box(Modifier.padding(horizontal = 12.dp)) { it() } }
                 Column(
@@ -883,7 +884,7 @@ private fun AdjustHead(element: StackElement, changed: Boolean) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             val lead = element.leading
             if (lead != null) Box(Modifier.size(36.dp), contentAlignment = Alignment.Center) { lead() } else NumberBadge(element.number, 28.dp, dot = changed)
-            Text(element.title, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+            Text(element.title, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Clip, modifier = Modifier.weight(1f).marqueeWhenCut())
         }
         element.sample?.invoke()
         element.ownLook?.let { own ->

@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.ui.marqueeWhenCut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -155,7 +156,7 @@ internal fun FunctionPagesGrid(pages: List<LauncherPage>, allPages: List<Launche
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     PageMark(page, 40.dp)
-                    Text(pageLabel(page, allPages), style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(pageLabel(page, allPages), style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Clip, modifier = Modifier.marqueeWhenCut())
                     Spacer(Modifier.weight(1f))
                     OpenWithChip(ways, onClick = { asking = page }, modifier = Modifier.fillMaxWidth())
                 }

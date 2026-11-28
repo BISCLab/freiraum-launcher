@@ -1,5 +1,7 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.ui.Modifier
+import com.bisc.flauncher.ui.marqueeWhenCut
 import androidx.core.content.edit
 import androidx.compose.material.icons.filled.Settings
 import android.content.Context
@@ -224,7 +226,7 @@ private fun InfoStrip(onClick: () -> Unit) {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
-                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                overflow = androidx.compose.ui.text.style.TextOverflow.Clip, modifier = Modifier.marqueeWhenCut()
             )
         }
         Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)

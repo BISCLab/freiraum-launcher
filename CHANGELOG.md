@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Settings: a name too long for its line runs through now and then, so it can be read in full (e.g. "System settings" in what the search finds); text that fits stays still, and nothing moves with animations off
+
 - Card stacks: four small buttons above every replica set what it stands on: the page's own background, light, dark, or like the phone; the automatic colors follow, nothing is saved
 
 - Icon shapes: besides rounded square and circle now soft square, square, teardrop and leaf, for all apps and for each app

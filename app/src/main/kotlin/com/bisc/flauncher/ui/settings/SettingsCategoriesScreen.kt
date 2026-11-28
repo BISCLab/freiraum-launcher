@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.ui.marqueeWhenCut
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import com.bisc.flauncher.ui.stackElement
@@ -160,7 +161,7 @@ fun SettingsCategoriesScreen(
                 ReorderableList(items = categories, key = { it.id }, onReorder = viewModel::reorderCategories, itemHeight = 64.dp, dividers = true) { category ->
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                         CategoryBadge(category)
-                        Text(category.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(category.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Clip, modifier = Modifier.marqueeWhenCut())
                     }
                 }
             }
@@ -245,7 +246,7 @@ fun SettingsCategoriesScreen(
                             ) {
                                 com.bisc.flauncher.ui.home.CategoryMark(d, modifier = Modifier.size(56.dp * iconScale), shape = RoundedCornerShape(16.dp), ink = ink)
                                 Spacer(Modifier.height(8.dp))
-                                Text(d.name, color = ink, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(d.name, color = ink, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Clip, modifier = Modifier.marqueeWhenCut())
                             }
                         } else {
                             // All of them as icons, as they would lie in a Dock or a box.
@@ -260,7 +261,7 @@ fun SettingsCategoriesScreen(
                                     Column(Modifier.width(96.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                                         com.bisc.flauncher.ui.home.CategoryMark(d, modifier = Modifier.size(56.dp * iconScale).stackElement(categoryKey(c.id)), shape = RoundedCornerShape(16.dp), ink = ink)
                                         Spacer(Modifier.height(8.dp))
-                                        Text(d.name, color = ink, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                        Text(d.name, color = ink, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Clip, modifier = Modifier.marqueeWhenCut())
                                     }
                                 }
                             }
@@ -451,7 +452,7 @@ private fun CategoryTile(category: Category, count: Int, modifier: Modifier, onC
     ) {
         com.bisc.flauncher.ui.home.CategoryMark(category, modifier = Modifier.size(52.dp), shape = RoundedCornerShape(16.dp), ink = MaterialTheme.colorScheme.onSurface)
         Spacer(Modifier.height(10.dp))
-        Text(category.name, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        Text(category.name, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Clip, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.marqueeWhenCut())
         Text(
             if (category.smartRule != null) stringResource(R.string.settings_categories_tile_smart, count)
             else androidx.compose.ui.res.pluralStringResource(R.plurals.hub_content_count, count, count),
@@ -880,7 +881,7 @@ private fun CategoryMemberRow(
                 else -> Icon(memberTypeIcon(member.type), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        Text(categoryMemberLabel(member, apps, websites, places, contacts), style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+        Text(categoryMemberLabel(member, apps, websites, places, contacts), style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Clip, modifier = Modifier.weight(1f).marqueeWhenCut())
         if (onRemove != null) {
             IconButton(onClick = onRemove) {
                 Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.a11y_remove), tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -967,9 +968,9 @@ internal fun CategoryAppsPicker(
                         app.label,
                         style = MaterialTheme.typography.labelSmall,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                        overflow = TextOverflow.Clip,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier.padding(top = 4.dp).marqueeWhenCut()
                     )
                 }
             }
@@ -1013,7 +1014,7 @@ private fun CategoryElementsSheet(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(memberTypeIcon(type), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 8.dp))
-                        Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f).marqueeWhenCut(), maxLines = 1, overflow = TextOverflow.Clip)
                         Checkbox(checked = checked, onCheckedChange = { onToggle(type, payload, it) })
                     }
                 }
@@ -1075,7 +1076,7 @@ fun ElementCategoriesDialog(
     val own = categories.filter { it.smartRule == null }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+        title = { Text(title, maxLines = 1, overflow = TextOverflow.Clip, modifier = Modifier.marqueeWhenCut()) },
         text = {
             Column(modifier = Modifier.heightIn(max = com.bisc.flauncher.ui.sheetMaxHeight()).verticalScroll(rememberScrollState())) {
                 if (own.isEmpty()) {
@@ -1089,7 +1090,7 @@ fun ElementCategoriesDialog(
                     ) {
                         CategoryBadge(category, 28.dp)
                         Spacer(Modifier.width(12.dp))
-                        Text(category.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(category.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f).marqueeWhenCut(), maxLines = 1, overflow = TextOverflow.Clip)
                         Checkbox(checked = checked, onCheckedChange = { onToggle(category.id, it) })
                     }
                 }

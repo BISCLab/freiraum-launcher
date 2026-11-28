@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.ui.marqueeWhenCut
 import com.bisc.flauncher.ui.home.cellShape
 import com.bisc.flauncher.ui.accessibleOutline
 import androidx.compose.foundation.layout.width
@@ -758,8 +759,8 @@ fun SettingsTileGrid(tiles: List<SettingsTile>, columns: Int = 2, title: String?
                         }
                         tile.badge?.let {
                             Text(it, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary, maxLines = 1,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                                textAlign = if (small) androidx.compose.ui.text.style.TextAlign.Center else null)
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Clip,
+                                textAlign = if (small) androidx.compose.ui.text.style.TextAlign.Center else null, modifier = Modifier.marqueeWhenCut())
                         }
                     }
                 }

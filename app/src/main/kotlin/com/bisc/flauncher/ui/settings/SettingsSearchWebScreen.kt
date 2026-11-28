@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.ui.marqueeWhenCut
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -425,13 +426,13 @@ private fun ChoiceRow(choice: CommandChoice?, subtitle: String, accent: Boolean,
             ) { Icon(Icons.Filled.Edit, contentDescription = null, modifier = Modifier.size(10.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant) }
         }
         Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
-            Text(choice?.label.orEmpty(), style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(choice?.label.orEmpty(), style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Clip, modifier = Modifier.marqueeWhenCut())
             Text(
                 subtitle,
                 style = MaterialTheme.typography.bodySmall,
                 color = if (accent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Clip, modifier = Modifier.marqueeWhenCut()
             )
         }
         onEdit?.let {

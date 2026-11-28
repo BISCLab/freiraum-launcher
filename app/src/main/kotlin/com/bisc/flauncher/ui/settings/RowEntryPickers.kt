@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.ui.marqueeWhenCut
 import android.content.ComponentName
 import androidx.compose.foundation.Image
 import androidx.compose.material.icons.filled.Check
@@ -290,9 +291,9 @@ fun FolderCreatorSheet(
                         app.label,
                         style = MaterialTheme.typography.labelSmall,
                         maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Clip,
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier.padding(top = 4.dp).marqueeWhenCut()
                     )
                 }
             }

@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.ui.marqueeWhenCut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -185,7 +186,7 @@ fun SettingsFolderScreen(
                         Column(Modifier.width(96.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             FolderIcon(folder = f, previewItems = itemsByFolder[f.id].orEmpty(), modifier = Modifier.size(56.dp * iconScale).stackElement(folderKey(f.id)), face = face(f), around = ink)
                             Spacer(Modifier.height(8.dp))
-                            Text(name(f), color = ink, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(name(f), color = ink, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Clip, modifier = Modifier.marqueeWhenCut())
                         }
                     }
                     // Opened: the chosen folder, or for all folders the first, in their look.
@@ -261,7 +262,7 @@ internal fun NewItemTile(label: String, modifier: Modifier, lines: Int = 1, onCl
             contentAlignment = Alignment.Center
         ) { Icon(Icons.Filled.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary) }
         Spacer(Modifier.height(10.dp))
-        Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+        Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Clip, textAlign = TextAlign.Center, modifier = Modifier.marqueeWhenCut())
         // As tall as the tiles beside it.
         repeat(lines) { Text(" ", style = MaterialTheme.typography.labelSmall) }
     }

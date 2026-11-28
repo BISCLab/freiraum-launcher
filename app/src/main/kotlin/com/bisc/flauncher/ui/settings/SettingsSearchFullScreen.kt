@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.ui.marqueeWhenCut
 import androidx.core.net.toUri
 import androidx.core.content.edit
 import androidx.compose.ui.semantics.contentDescription
@@ -293,25 +294,12 @@ private fun CategoryModeRow(
                 .padding(start = 10.dp, end = 4.dp, top = 2.dp, bottom = 2.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // One line; a longer name fades out at the edge and slides sideways to be read in full.
-                val nameScroll = androidx.compose.foundation.rememberScrollState()
+                // One line; a longer name runs through now and then, so it can be read in full.
                 androidx.compose.foundation.layout.Box(
                     Modifier
                         .weight(1f, fill = false)
-                        .graphicsLayer { compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen }
-                        .drawWithContent {
-                            drawContent()
-                            val fade = 28.dp.toPx().coerceAtMost(size.width / 3f)
-                            if (nameScroll.canScrollForward) drawRect(
-                                androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color.Black, Color.Transparent), startX = size.width - fade, endX = size.width),
-                                blendMode = androidx.compose.ui.graphics.BlendMode.DstIn
-                            )
-                            if (nameScroll.canScrollBackward) drawRect(
-                                androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color.Transparent, Color.Black), startX = 0f, endX = fade),
-                                blendMode = androidx.compose.ui.graphics.BlendMode.DstIn
-                            )
-                        }
-                        .horizontalScroll(nameScroll)
+                        .clip(androidx.compose.ui.graphics.RectangleShape)
+                        .marqueeWhenCut()
                 ) {
                     Text(
                         stringResource(category.settingsLabelRes),

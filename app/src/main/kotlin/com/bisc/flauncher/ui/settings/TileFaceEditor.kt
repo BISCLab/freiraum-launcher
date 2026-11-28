@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.ui.marqueeWhenCut
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.width
@@ -126,7 +127,7 @@ internal fun TilePreviewHeader(
                     Box(modifier = Modifier.size(tileSize)) { tile(around) }
                     if (!compact) {
                         Spacer(Modifier.height(6.dp))
-                        Text(name, color = around, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(name, color = around, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Clip, modifier = Modifier.marqueeWhenCut())
                     }
                 }
             }
