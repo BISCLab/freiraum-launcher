@@ -1,13 +1,9 @@
 package com.bisc.flauncher.ui.settings
 
-import com.bisc.flauncher.data.model.face
-import androidx.compose.material.icons.filled.Apps
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.OutlinedTextField
@@ -23,85 +19,99 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
+import com.bisc.flauncher.data.model.PinnedWebsite
+import com.bisc.flauncher.data.model.face
 import com.bisc.flauncher.ui.home.ConfirmRemoveDialog
+import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.dock.AddWebsiteDialog
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
-/** Global "Internetadressen" Element list (Settings -> Elements -> Links) - every [PinnedWebsite] in
- *  one place, independent of which rows/folders currently pin it. Mirrors [SettingsAddressesScreen]. */
-@Composable
-fun SettingsLinksScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val websites by viewModel.pinnedWebsites.collectAsState()
-    var showCreateDialog by remember { mutableStateOf(false) }
+private fun linkKey(id: Long) = "link:$id"
 
-    SettingsSubScreen(title = stringResource(R.string.settings_elements_links_title), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_links_title)) {
-            if (websites.isEmpty()) {
-                SettingsPreference(icon = null, title = stringResource(R.string.settings_elements_links_empty), onClick = null, trailing = null)
-            }
-            websites.sortedBy { it.label }.forEach { website ->
-                SettingsPreference(
-                    icon = Icons.Filled.Language,
-                    title = website.label,
-                    summary = website.url,
-                    onClick = { navController.navigate("settings/elements/links/${website.id}") }
-                )
-            }
-        }
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = Icons.Filled.Add,
-                title = stringResource(R.string.settings_elements_add_link),
-                onClick = { showCreateDialog = true },
-                trailing = null
-            )
+/**
+ * Every link in one card stack: ⓪ all of them with a way to add one, then each link with its
+ * options in two tabs, the link and its symbol. Several can be changed and saved at once.
+ */
+@Composable
+fun SettingsLinksScreen(navController: NavController, onBack: () -> Unit, startElement: String? = null, viewModel: SettingsViewModel = hiltViewModel()) {
+    val home: HomeViewModel = hiltViewModel()
+    val stack: StackDraft = viewModel()
+    val websites by viewModel.pinnedWebsites.collectAsState()
+    var adding by remember { mutableStateOf(false) }
+    val sorted = websites.sortedBy { it.label.lowercase() }
+    fun shown(w: PinnedWebsite): PinnedWebsite {
+        val item = DraftField(stack, linkKey(w.id) + ":item", w.copy(tileFace = null)).value
+        return item.copy(tileFace = DraftField(stack, linkKey(w.id) + ":face", w.tileFace).value)
+    }
+
+    val elements = buildList {
+        add(StackElement(
+            id = "all", number = 0,
+            title = stringResource(R.string.settings_elements_links_title),
+            summary = androidx.compose.ui.res.pluralStringResource(R.plurals.hub_content_count, websites.size, websites.size)
+        ) {
+            PartIntro(stringResource(R.string.stack_links_intro))
+            StackAddRow(stringResource(R.string.settings_elements_add_link)) { adding = true }
+        })
+        sorted.forEachIndexed { i, w ->
+            val s = shown(w)
+            add(StackElement(
+                id = linkKey(w.id), number = i + 1,
+                title = s.label,
+                summary = s.url.takeIf { it.isNotBlank() },
+                draftKeys = listOf(linkKey(w.id) + ":item", linkKey(w.id) + ":face"),
+                anchor = androidx.compose.ui.geometry.Offset(1f, 0f),
+                leading = { ElementTile(s.face(), s.label, 32.dp, androidx.compose.material3.MaterialTheme.colorScheme.onSurface, Icons.Filled.Language) }
+            ) { LinkEditor(w, stack, navController, home, viewModel) })
         }
     }
 
-    if (showCreateDialog) {
-        AddWebsiteDialog(
-            onSave = { label, url -> viewModel.addWebsite(label, url); showCreateDialog = false },
-            onDismiss = { showCreateDialog = false }
-        )
-    }
-}
-
-/** Detail/edit screen for one [PinnedWebsite], reached by id - see [SettingsAddressDetailScreen]
- *  for the same pattern applied to addresses. */
-@Composable
-fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBack: () -> Unit, startElement: String? = null, viewModel: SettingsViewModel = hiltViewModel()) {
-    val home: com.bisc.flauncher.ui.home.HomeViewModel = hiltViewModel()
-    val stack: StackDraft = androidx.lifecycle.viewmodel.compose.viewModel()
-    val websites by viewModel.pinnedWebsites.collectAsState()
-    val saved = websites.find { it.id == websiteId } ?: return
-    val item = stack.field("item", saved.copy(tileFace = null)) {}
-    val face = stack.field("face", saved.tileFace) {}
-    val website = item.value.copy(tileFace = face.value)
-    val urlValid = com.bisc.flauncher.util.linkAddress(website.url) != null
-    // A wrong address is not written; the field says what is wrong.
-    stack.saveTogether { if (website != saved && urlValid) viewModel.updateWebsite(website) }
-    val browsableApps by viewModel.labeledApps.collectAsState()
-    var showAppPicker by remember { mutableStateOf(false) }
-    var confirmingDelete by remember { mutableStateOf(false) }
-    val usages = rememberUsages(com.bisc.flauncher.data.model.GridItemType.WEBSITE, websiteId.toString(), home)
-
-    ElementStackScreen(
-        title = website.label.ifBlank { saved.label },
+    ElementCollectionScreen(
+        title = stringResource(R.string.settings_elements_links_title),
         navController = navController,
         onBack = onBack,
         startElement = startElement,
         draft = stack,
         home = home,
-        partTitle = stringResource(R.string.stack_el_link),
-        partSummary = website.url.takeIf { it.isNotBlank() },
-        partKeys = listOf("item"),
-        symbolTitle = stringResource(R.string.stack_el_symbol),
-        symbolKeys = listOf("face"),
-        name = website.label,
-        symbol = { size, ink -> ElementTile(website.face(), website.label, size, ink, Icons.Filled.Language) },
-        partOptions = {
+        elements = elements,
+        items = sorted.map { w -> val s = shown(w); CollectionItem(linkKey(w.id), s.label) { size, ink -> ElementTile(s.face(), s.label, size, ink, Icons.Filled.Language) } },
+        listHeader = { StackAddRow(stringResource(R.string.settings_elements_add_link)) { adding = true } }
+    )
+
+    if (adding) {
+        AddWebsiteDialog(
+            onSave = { label, url -> viewModel.addWebsite(label, url); adding = false },
+            onDismiss = { adding = false }
+        )
+    }
+}
+
+/** One link, the way in from outside: the stack, opened on it. */
+@Composable
+fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+    SettingsLinksScreen(navController, onBack, startElement = linkKey(websiteId), viewModel = viewModel)
+}
+
+/** A link's options: name, address and the browser it opens in, where it is used; and its symbol. */
+@Composable
+private fun ColumnScope.LinkEditor(saved: PinnedWebsite, stack: StackDraft, navController: NavController, home: HomeViewModel, viewModel: SettingsViewModel) {
+    val key = linkKey(saved.id)
+    val item = stack.field("$key:item", saved.copy(tileFace = null)) {}
+    val face = stack.field("$key:face", saved.tileFace) {}
+    val website = item.value.copy(tileFace = face.value)
+    val urlValid = com.bisc.flauncher.util.linkAddress(website.url) != null
+    // A wrong address is not written; the field says what is wrong.
+    stack.saveTogether(key) { if (website != saved && urlValid) viewModel.updateWebsite(website) }
+    val browsableApps by viewModel.labeledApps.collectAsState()
+    var showAppPicker by remember { mutableStateOf(false) }
+    var confirmingDelete by remember { mutableStateOf(false) }
+    val usages = rememberUsages(com.bisc.flauncher.data.model.GridItemType.WEBSITE, saved.id.toString(), home)
+
+    StackTabs(listOf(
+        stringResource(R.string.stack_el_link) to {
             SettingsPreferenceGroup {
                 OutlinedTextField(
                     value = website.label,
@@ -136,7 +146,7 @@ fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBa
                 SettingsPreference(icon = Icons.Filled.DeleteOutline, title = stringResource(R.string.settings_elements_delete_link), onClick = { confirmingDelete = true }, trailing = null)
             }
         },
-        symbolOptions = {
+        stringResource(R.string.stack_el_symbol) to {
             PartIntro(stringResource(R.string.element_tile_info))
             TileFaceEditor(
                 face = website.face(),
@@ -150,7 +160,7 @@ fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBa
                 defaultSymbol = Icons.Filled.Language
             )
         }
-    )
+    ))
 
     if (showAppPicker) {
         ShortcutSourceAppSheet(
@@ -160,11 +170,10 @@ fun SettingsLinkDetailScreen(websiteId: Long, navController: NavController, onBa
             onDismiss = { showAppPicker = false }
         )
     }
-
     if (confirmingDelete) {
         ConfirmRemoveDialog(
             label = website.label,
-            onConfirm = { viewModel.removeWebsite(saved); confirmingDelete = false; onBack() },
+            onConfirm = { viewModel.removeWebsite(saved); confirmingDelete = false },
             onDismiss = { confirmingDelete = false }
         )
     }

@@ -1206,6 +1206,9 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="stack_show">Show</string>
     <string name="stack_page_summary">Alignment, background, status bar, name</string>
     <string name="stack_page_summary_plain">Background, status bar, name</string>
+    <string name="stack_places_intro">Places you open in your maps app with one tap.</string>
+    <string name="stack_links_intro">Web pages you open with one tap.</string>
+    <string name="stack_buttons_intro">Buttons that open the Panel, the Dock, a page or a setting.</string>
     <string name="stack_all_apps">All apps</string>
     <string name="stack_all_apps_summary">Shape, size and icon pack for all</string>
     <string name="pages_start_badge">Start</string>

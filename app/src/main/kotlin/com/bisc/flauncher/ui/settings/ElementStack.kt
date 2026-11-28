@@ -1,12 +1,15 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -17,7 +20,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -28,42 +30,31 @@ import com.bisc.flauncher.data.model.ElementFillMode
 import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.stackElement
 
+/** One element in a [ElementCollectionScreen]: its id in the stack, its name and its symbol. */
+internal class CollectionItem(
+    val id: String,
+    val name: String,
+    val symbol: @Composable (size: Dp, ink: Color) -> Unit
+)
+
 /**
- * One element (an app, a place, a link, an action button) as a card stack: ⓪ what it is and does,
- * where it is used, and ① its symbol. The replica shows the symbol at its real size with its name,
- * as it lies on a page.
+ * A kind of element (places, links, action buttons) in one card stack: ⓪ all of them, then each
+ * with its options. The replica shows the chosen one's symbol at its real size with its name, or
+ * for ⓪ all symbols side by side, each with its number.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun ElementStackScreen(
+internal fun ElementCollectionScreen(
     title: String,
     navController: NavController,
     onBack: () -> Unit,
     startElement: String?,
     draft: StackDraft,
     home: HomeViewModel,
-    /** ⓪'s name in the list, e.g. "Address". */
-    partTitle: String,
-    partSummary: String?,
-    partKeys: List<String>,
-    symbolTitle: String,
-    symbolKeys: List<String>,
-    name: String,
-    /** The symbol at [size], drawn on a background of [ink]'s opposite. */
-    symbol: @Composable (size: Dp, ink: Color) -> Unit,
-    partOptions: @Composable ColumnScope.() -> Unit,
-    symbolOptions: @Composable ColumnScope.() -> Unit
+    elements: List<StackElement>,
+    items: List<CollectionItem>,
+    listHeader: (@Composable () -> Unit)? = null
 ) {
-    val elements = listOf(
-        StackElement(id = "element", number = 0, title = partTitle, summary = partSummary, draftKeys = partKeys, options = partOptions),
-        StackElement(
-            id = "symbol", number = 1,
-            title = symbolTitle,
-            draftKeys = symbolKeys,
-            anchor = Offset(1f, 0f),
-            sample = { Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { symbol(72.dp, MaterialTheme.colorScheme.onSurface) } },
-            options = symbolOptions
-        )
-    )
     val pages by home.pages.collectAsState()
     val homeId = pages.find { it.isHome }?.id ?: -1L
     val global by home.globalBackground.collectAsState()
@@ -77,20 +68,35 @@ internal fun ElementStackScreen(
             onBack = onBack,
             draft = draft,
             elements = elements,
-            startElement = startElement
+            startElement = startElement,
+            firstCard = StackCard.ELEMENTS,
+            listHeader = listHeader
         ) { _, _ ->
             val ink = if (dark) Color.White else Color.Black
             val statusTop = replicaStatusHeight()
+            val selected = LocalStackSelected.current
+            val chosen = items.find { it.id == selected }
             CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalAppIconLoader provides home.iconLoader) {
                 Box(Modifier.fillMaxSize()) {
                     com.bisc.flauncher.ui.home.dock.BackgroundFill(background, Modifier.fillMaxSize())
-                    Column(
-                        modifier = Modifier.align(Alignment.Center).width(96.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Box(Modifier.stackElement("symbol")) { symbol(56.dp * iconScale, ink) }
-                        Spacer(Modifier.height(8.dp))
-                        Text(name, color = ink, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    @Composable
+                    fun Cell(item: CollectionItem) {
+                        Column(Modifier.width(96.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(Modifier.stackElement(item.id)) { item.symbol(56.dp * iconScale, ink) }
+                            Spacer(Modifier.height(8.dp))
+                            Text(item.name, color = ink, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                    }
+                    if (chosen != null) {
+                        Box(Modifier.align(Alignment.Center)) { Cell(chosen) }
+                    } else {
+                        // All of them, as they would lie on a page.
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth().padding(top = statusTop + 48.dp, start = 12.dp, end = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalArrangement = Arrangement.spacedBy(24.dp),
+                            maxItemsInEachRow = 4
+                        ) { items.take(16).forEach { Cell(it) } }
                     }
                     StatusBarSketch(statusTop, ink)
                 }

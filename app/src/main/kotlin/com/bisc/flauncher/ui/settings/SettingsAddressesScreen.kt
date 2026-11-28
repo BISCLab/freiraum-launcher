@@ -1,13 +1,9 @@
 package com.bisc.flauncher.ui.settings
 
-import com.bisc.flauncher.data.model.face
-import androidx.compose.material.icons.filled.Apps
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.OutlinedTextField
@@ -23,87 +19,99 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.bisc.flauncher.R
 import com.bisc.flauncher.data.model.SavedMapTarget
+import com.bisc.flauncher.data.model.face
 import com.bisc.flauncher.ui.home.ConfirmRemoveDialog
+import com.bisc.flauncher.ui.home.HomeViewModel
 import com.bisc.flauncher.ui.home.dock.AddMapTargetDialog
 import com.bisc.flauncher.ui.home.dock.ShortcutSourceAppSheet
 
-/** Global "Adressen" Element list (Settings -> Elements -> Addresses) - every [SavedMapTarget] in
- *  one place, independent of which rows/folders currently pin it. Mirrors [SettingsFolderScreen]'s
- *  list+create-dialog+navigate-to-detail pattern. */
-@Composable
-fun SettingsAddressesScreen(navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
-    val targets by viewModel.savedMapTargets.collectAsState()
-    var showCreateDialog by remember { mutableStateOf(false) }
+private fun placeKey(id: Long) = "place:$id"
 
-    SettingsSubScreen(title = stringResource(R.string.settings_elements_addresses_title), navController = navController, onBack = onBack) {
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_elements_addresses_title)) {
-            if (targets.isEmpty()) {
-                SettingsPreference(icon = null, title = stringResource(R.string.settings_elements_addresses_empty), onClick = null, trailing = null)
-            }
-            targets.sortedBy { it.label }.forEach { target ->
-                SettingsPreference(
-                    icon = Icons.Filled.Place,
-                    title = target.label,
-                    summary = target.address.takeIf { it.isNotBlank() },
-                    onClick = { navController.navigate("settings/elements/addresses/${target.id}") }
-                )
-            }
-        }
-        SettingsPreferenceGroup {
-            SettingsPreference(
-                icon = Icons.Filled.Add,
-                title = stringResource(R.string.settings_elements_add_address),
-                onClick = { showCreateDialog = true },
-                trailing = null
-            )
+/**
+ * Every saved place in one card stack: ⓪ all of them with a way to add one, then each place with
+ * its options in two tabs, the place and its symbol. Several can be changed and saved at once.
+ */
+@Composable
+fun SettingsAddressesScreen(navController: NavController, onBack: () -> Unit, startElement: String? = null, viewModel: SettingsViewModel = hiltViewModel()) {
+    val home: HomeViewModel = hiltViewModel()
+    val stack: StackDraft = viewModel()
+    val targets by viewModel.savedMapTargets.collectAsState()
+    var adding by remember { mutableStateOf(false) }
+    val sorted = targets.sortedBy { it.label.lowercase() }
+    // What is drawn: the draft where there is one.
+    fun shown(t: SavedMapTarget): SavedMapTarget {
+        val item = DraftField(stack, placeKey(t.id) + ":item", t.copy(tileFace = null)).value
+        return item.copy(tileFace = DraftField(stack, placeKey(t.id) + ":face", t.tileFace).value)
+    }
+
+    val elements = buildList {
+        add(StackElement(
+            id = "all", number = 0,
+            title = stringResource(R.string.settings_elements_addresses_title),
+            summary = androidx.compose.ui.res.pluralStringResource(R.plurals.hub_content_count, targets.size, targets.size)
+        ) {
+            PartIntro(stringResource(R.string.stack_places_intro))
+            StackAddRow(stringResource(R.string.settings_elements_add_address)) { adding = true }
+        })
+        sorted.forEachIndexed { i, t ->
+            val s = shown(t)
+            add(StackElement(
+                id = placeKey(t.id), number = i + 1,
+                title = s.label,
+                summary = s.address.takeIf { it.isNotBlank() },
+                draftKeys = listOf(placeKey(t.id) + ":item", placeKey(t.id) + ":face"),
+                anchor = androidx.compose.ui.geometry.Offset(1f, 0f),
+                leading = { ElementTile(s.face(), s.label, 32.dp, androidx.compose.material3.MaterialTheme.colorScheme.onSurface, Icons.Filled.Place) }
+            ) { PlaceEditor(t, stack, navController, home, viewModel) })
         }
     }
 
-    if (showCreateDialog) {
-        AddMapTargetDialog(
-            onSave = { label, lat, lon, address -> viewModel.addMapTarget(label, lat, lon, address); showCreateDialog = false },
-            onDismiss = { showCreateDialog = false }
-        )
-    }
-}
-
-/** Detail/edit screen for one [SavedMapTarget], reached by id from [SettingsAddressesScreen] - same
- *  "hold only the id, re-derive the live item every recomposition" convention as the rest of
- *  Settings (e.g. [SettingsPageRowsScreen]). */
-@Composable
-fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, onBack: () -> Unit, startElement: String? = null, viewModel: SettingsViewModel = hiltViewModel()) {
-    val home: com.bisc.flauncher.ui.home.HomeViewModel = hiltViewModel()
-    val stack: StackDraft = androidx.lifecycle.viewmodel.compose.viewModel()
-    val targets by viewModel.savedMapTargets.collectAsState()
-    val saved = targets.find { it.id == targetId } ?: return
-    // What it is, and its symbol, each a value of its own; written together as one place.
-    val item = stack.field("item", saved.copy(tileFace = null)) {}
-    val face = stack.field("face", saved.tileFace) {}
-    val target = item.value.copy(tileFace = face.value)
-    stack.saveTogether { if (target != saved) viewModel.updateMapTarget(target) }
-    val browsableApps by viewModel.labeledApps.collectAsState()
-    var showAppPicker by remember { mutableStateOf(false) }
-    var confirmingDelete by remember { mutableStateOf(false) }
-    val usages = rememberUsages(com.bisc.flauncher.data.model.GridItemType.MAP_TARGET, targetId.toString(), home)
-
-    ElementStackScreen(
-        title = target.label.ifBlank { saved.label },
+    ElementCollectionScreen(
+        title = stringResource(R.string.settings_elements_addresses_title),
         navController = navController,
         onBack = onBack,
         startElement = startElement,
         draft = stack,
         home = home,
-        partTitle = stringResource(R.string.stack_el_address),
-        partSummary = target.address.takeIf { it.isNotBlank() },
-        partKeys = listOf("item"),
-        symbolTitle = stringResource(R.string.stack_el_symbol),
-        symbolKeys = listOf("face"),
-        name = target.label,
-        symbol = { size, ink -> ElementTile(target.face(), target.label, size, ink, Icons.Filled.Place) },
-        partOptions = {
+        elements = elements,
+        items = sorted.map { t -> val s = shown(t); CollectionItem(placeKey(t.id), s.label) { size, ink -> ElementTile(s.face(), s.label, size, ink, Icons.Filled.Place) } },
+        listHeader = { StackAddRow(stringResource(R.string.settings_elements_add_address)) { adding = true } }
+    )
+
+    if (adding) {
+        AddMapTargetDialog(
+            onSave = { label, lat, lon, address -> viewModel.addMapTarget(label, lat, lon, address); adding = false },
+            onDismiss = { adding = false }
+        )
+    }
+}
+
+/** One place, the way in from outside: the stack, opened on it. */
+@Composable
+fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+    SettingsAddressesScreen(navController, onBack, startElement = placeKey(targetId), viewModel = viewModel)
+}
+
+/** A place's options: name, address and the app it opens in, where it is used; and its symbol. */
+@Composable
+private fun ColumnScope.PlaceEditor(saved: SavedMapTarget, stack: StackDraft, navController: NavController, home: HomeViewModel, viewModel: SettingsViewModel) {
+    val key = placeKey(saved.id)
+    val item = stack.field("$key:item", saved.copy(tileFace = null)) {}
+    val face = stack.field("$key:face", saved.tileFace) {}
+    val target = item.value.copy(tileFace = face.value)
+    // Stored as one place.
+    stack.saveTogether(key) { if (target != saved) viewModel.updateMapTarget(target) }
+    val browsableApps by viewModel.labeledApps.collectAsState()
+    var showAppPicker by remember { mutableStateOf(false) }
+    var confirmingDelete by remember { mutableStateOf(false) }
+    val usages = rememberUsages(com.bisc.flauncher.data.model.GridItemType.MAP_TARGET, saved.id.toString(), home)
+
+    StackTabs(listOf(
+        stringResource(R.string.stack_el_address) to {
             SettingsPreferenceGroup {
                 OutlinedTextField(
                     value = target.label,
@@ -135,7 +143,7 @@ fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, on
                 SettingsPreference(icon = Icons.Filled.DeleteOutline, title = stringResource(R.string.settings_elements_delete_address), onClick = { confirmingDelete = true }, trailing = null)
             }
         },
-        symbolOptions = {
+        stringResource(R.string.stack_el_symbol) to {
             PartIntro(stringResource(R.string.element_tile_info))
             TileFaceEditor(
                 face = target.face(),
@@ -149,7 +157,7 @@ fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, on
                 defaultSymbol = Icons.Filled.Place
             )
         }
-    )
+    ))
 
     if (showAppPicker) {
         ShortcutSourceAppSheet(
@@ -159,11 +167,10 @@ fun SettingsAddressDetailScreen(targetId: Long, navController: NavController, on
             onDismiss = { showAppPicker = false }
         )
     }
-
     if (confirmingDelete) {
         ConfirmRemoveDialog(
             label = target.label,
-            onConfirm = { viewModel.removeMapTarget(saved); confirmingDelete = false; onBack() },
+            onConfirm = { viewModel.removeMapTarget(saved); confirmingDelete = false },
             onDismiss = { confirmingDelete = false }
         )
     }
