@@ -1,5 +1,11 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.ui.semantics.selected
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material.icons.filled.BrightnessMedium
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.activity.compose.BackHandler
@@ -85,6 +91,9 @@ import com.bisc.flauncher.ui.StackMarkers
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
+/** What the replica stands on: the page's own background, light, dark, or as the phone is set. */
+enum class ReplicaBackdrop { PAGE, LIGHT, DARK, SYSTEM }
+
 /** The three cards of a page's settings. */
 enum class StackCard { SCREEN, ELEMENTS, ADJUST }
 
@@ -133,6 +142,9 @@ internal fun stackNumberColor(number: Int): Color = NumberColors[number.mod(Numb
  *  device); only what differs from the stored value is kept. */
 class StackDraft : ViewModel() {
     private val edits = mutableStateMapOf<String, Any?>()
+
+    /** The replica's backdrop; only for looking, never saved. */
+    var backdrop by mutableStateOf(ReplicaBackdrop.PAGE)
     private val savers = HashMap<String, (Any?) -> Unit>()
     private val together = LinkedHashMap<String, () -> Unit>()
 
@@ -172,6 +184,20 @@ class DraftField<T>(private val draft: StackDraft, val key: String, private val 
 fun <T> StackDraft.field(key: String, saved: T, save: (T) -> Unit): DraftField<T> {
     register(key) { save(it as T) }
     return DraftField(this, key, saved)
+}
+
+/** [real] as the replica shows it: itself, or a plain light or dark one to judge the parts on. */
+@Composable
+fun StackDraft.shownBackground(real: com.bisc.flauncher.data.model.BackgroundConfig): com.bisc.flauncher.data.model.BackgroundConfig {
+    val dark = when (backdrop) {
+        ReplicaBackdrop.PAGE -> return real
+        ReplicaBackdrop.LIGHT -> false
+        ReplicaBackdrop.DARK -> true
+        ReplicaBackdrop.SYSTEM -> androidx.compose.foundation.isSystemInDarkTheme()
+    }
+    return com.bisc.flauncher.data.model.BackgroundConfig(
+        fill = com.bisc.flauncher.data.model.ColorFill(color = if (dark) 0xFF1C1B1F.toInt() else 0xFFF3F1F5.toInt())
+    )
 }
 
 // ---- Pages inside the Adjust card ----
@@ -281,6 +307,7 @@ fun SettingsCardStackScreen(
             }
             val screen = @Composable {
                 ScreenCard(
+                    draft = draft,
                     elements = elements,
                     selected = selected,
                     states = states,
@@ -441,6 +468,41 @@ private fun CardStrip(card: StackCard, selected: StackElement, onOpen: (StackCar
     }
 }
 
+/** Four small buttons for what the replica stands on: the page, light, dark, the phone's mode. */
+@Composable
+private fun BackdropSwitch(current: ReplicaBackdrop, onChange: (ReplicaBackdrop) -> Unit) {
+    Row(
+        modifier = Modifier.clip(RoundedCornerShape(50)).background(MaterialTheme.colorScheme.surfaceContainerHigh).padding(2.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        listOf(
+            ReplicaBackdrop.PAGE to (Icons.Filled.Wallpaper to R.string.backdrop_page),
+            ReplicaBackdrop.LIGHT to (Icons.Filled.LightMode to R.string.backdrop_light),
+            ReplicaBackdrop.DARK to (Icons.Filled.DarkMode to R.string.backdrop_dark),
+            ReplicaBackdrop.SYSTEM to (Icons.Filled.BrightnessMedium to R.string.backdrop_system)
+        ).forEach { (value, iconAndLabel) ->
+            val chosen = value == current
+            val label = stringResource(iconAndLabel.second)
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(if (chosen) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
+                    .clickable(onClick = { onChange(value) })
+                    .semantics { contentDescription = label; role = Role.RadioButton; selected = chosen },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    iconAndLabel.first,
+                    contentDescription = null,
+                    tint = if (chosen) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+    }
+}
+
 /** Text turned a quarter to the right, reading from top to bottom. */
 private fun Modifier.sideways(): Modifier = layout { measurable, constraints ->
     val placeable = measurable.measure(Constraints(maxWidth = if (constraints.hasBoundedHeight) constraints.maxHeight else Constraints.Infinity))
@@ -478,6 +540,7 @@ internal fun NumberBadge(number: Int, size: Dp = 24.dp, dot: Boolean = false) {
 
 @Composable
 private fun ScreenCard(
+    draft: StackDraft,
     elements: List<StackElement>,
     selected: StackElement,
     states: List<Pair<String, String>>,
@@ -492,13 +555,19 @@ private fun ScreenCard(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        if (states.size > 1) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            if (states.size > 1) {
                 states.forEachIndexed { i, (id, label) ->
                     val value = if (i == 0) null else id
                     FilterChip(selected = stateId == value, onClick = { onState(value) }, label = { Text(label, maxLines = 1) })
                 }
             }
+            Spacer(Modifier.weight(1f))
+            BackdropSwitch(draft.backdrop) { draft.backdrop = it }
         }
         Replica(
             elements = elements.filter { it.state == null || it.state == stateId },

@@ -181,7 +181,7 @@ fun SettingsCategoriesScreen(
 
     val pageId by home.categoriesPageId.collectAsState()
     val background by remember(pageId) { home.pageBackgroundConfig(pageId ?: -1L) }.collectAsState(initial = com.bisc.flauncher.data.model.BackgroundConfig())
-    val dark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(com.bisc.flauncher.data.model.ElementAppearance(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE), background)
+    val dark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(com.bisc.flauncher.data.model.ElementAppearance(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE), stack.shownBackground(background))
     val boxLook by home.categoryBoxLook.collectAsState()
     val iconScale by home.iconSizeScale.collectAsState()
     androidx.compose.runtime.CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalSurfaceIsDark provides dark) {
@@ -202,7 +202,7 @@ fun SettingsCategoriesScreen(
             val symbols = com.bisc.flauncher.ui.home.LauncherCategories.symbolsOnPage
             androidx.compose.runtime.CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalAppIconLoader provides home.iconLoader) {
                 Box(Modifier.fillMaxSize()) {
-                    com.bisc.flauncher.ui.home.dock.BackgroundFill(background, Modifier.fillMaxSize())
+                    com.bisc.flauncher.ui.home.dock.BackgroundFill(stack.shownBackground(background), Modifier.fillMaxSize())
                     Column(Modifier.fillMaxSize().padding(top = statusTop + 12.dp)) {
                         // The labels on top, the chosen one filled.
                         Row(

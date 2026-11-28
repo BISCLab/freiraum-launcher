@@ -161,7 +161,7 @@ fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, sta
     val homeId = pages.find { it.isHome }?.id ?: -1L
     val global by home.globalBackground.collectAsState()
     val background by remember(homeId) { home.pageBackgroundConfig(homeId) }.collectAsState(initial = global)
-    val dark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(com.bisc.flauncher.data.model.ElementAppearance(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE), background)
+    val dark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(com.bisc.flauncher.data.model.ElementAppearance(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE), stack.shownBackground(background))
     androidx.compose.runtime.CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalSurfaceIsDark provides dark) {
         SettingsCardStackScreen(
             title = stringResource(R.string.settings_section_gestures),
@@ -174,7 +174,7 @@ fun SettingsGesturesScreen(navController: NavController, onBack: () -> Unit, sta
             val ink = if (dark) Color.White else Color.Black
             val statusTop = replicaStatusHeight()
             Box(Modifier.fillMaxSize()) {
-                com.bisc.flauncher.ui.home.dock.BackgroundFill(background, Modifier.fillMaxSize())
+                com.bisc.flauncher.ui.home.dock.BackgroundFill(stack.shownBackground(background), Modifier.fillMaxSize())
                 // Where each gesture happens: down at the top, taps and pinch in the middle, up at the bottom;
                 // one finger on the left, two on the right.
                 Column(

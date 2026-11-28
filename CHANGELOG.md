@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Card stacks: four small buttons above every replica set what it stands on: the page's own background, light, dark, or like the phone; the automatic colors follow, nothing is saved
+
 - Icon shapes: besides rounded square and circle now soft square, square, teardrop and leaf, for all apps and for each app
 - All apps in three tabs: Shape (with "How round?" for the rounded square, and the size), Icon pack, and Extras
 - Extras: small icons can be filled into the shape with a fill in their own color, and all icons can get a border (thin, medium or thick, any color)

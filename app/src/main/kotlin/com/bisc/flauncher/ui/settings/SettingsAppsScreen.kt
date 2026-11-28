@@ -146,7 +146,7 @@ fun SettingsAppsScreen(
     val homeId = pages.find { it.isHome }?.id ?: -1L
     val global by home.globalBackground.collectAsState()
     val background by remember(homeId) { home.pageBackgroundConfig(homeId) }.collectAsState(initial = global)
-    val dark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(com.bisc.flauncher.data.model.ElementAppearance(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE), background)
+    val dark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(com.bisc.flauncher.data.model.ElementAppearance(fillMode = com.bisc.flauncher.data.model.ElementFillMode.NONE), stack.shownBackground(background))
     CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalAppIconLoader provides viewModel.iconLoader, com.bisc.flauncher.ui.home.LocalSurfaceIsDark provides dark) {
         SettingsCardStackScreen(
             title = stringResource(R.string.settings_section_manage_apps),
@@ -162,7 +162,7 @@ fun SettingsAppsScreen(
             val ink = if (dark) Color.White else Color.Black
             val statusTop = replicaStatusHeight()
             Box(Modifier.fillMaxSize()) {
-                com.bisc.flauncher.ui.home.dock.BackgroundFill(background, Modifier.fillMaxSize())
+                com.bisc.flauncher.ui.home.dock.BackgroundFill(stack.shownBackground(background), Modifier.fillMaxSize())
                 val app = apps.find { appKey(it) == selected }
                 Column(
                     modifier = Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 24.dp),

@@ -60,7 +60,7 @@ internal fun ElementCollectionScreen(
     val global by home.globalBackground.collectAsState()
     val background by androidx.compose.runtime.remember(homeId) { home.pageBackgroundConfig(homeId) }.collectAsState(initial = global)
     val iconScale by home.iconSizeScale.collectAsState()
-    val dark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), background)
+    val dark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), draft.shownBackground(background))
     CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalSurfaceIsDark provides dark) {
         SettingsCardStackScreen(
             title = title,
@@ -78,7 +78,7 @@ internal fun ElementCollectionScreen(
             val chosen = items.find { it.id == selected }
             CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalAppIconLoader provides home.iconLoader) {
                 Box(Modifier.fillMaxSize()) {
-                    com.bisc.flauncher.ui.home.dock.BackgroundFill(background, Modifier.fillMaxSize())
+                    com.bisc.flauncher.ui.home.dock.BackgroundFill(draft.shownBackground(background), Modifier.fillMaxSize())
                     @Composable
                     fun Cell(item: CollectionItem) {
                         Column(Modifier.width(96.dp), horizontalAlignment = Alignment.CenterHorizontally) {

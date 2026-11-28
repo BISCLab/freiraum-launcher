@@ -99,7 +99,7 @@ fun SettingsSearchFullScreen(
     val resultsCorner = draft.field("results_corner", viewModel.searchResultsCornerRadiusPercent.collectAsState().value ?: 100, viewModel::setSearchResultsCornerRadiusPercent)
 
     // ---- What follows from it ----
-    val dark = rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), page.shown)
+    val dark = rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), draft.shownBackground(page.shown))
     val defaultBox = com.bisc.flauncher.ui.theme.defaultBoxAppearanceFor(MaterialTheme.colorScheme.background.luminance() < 0.5f)
     val field = fieldLook.value ?: automaticRailAppearance(false)
     val rail = railLook.value ?: automaticRailAppearance(dark)
@@ -308,7 +308,7 @@ fun SettingsSearchFullScreen(
                                 contactsPermissionGranted = true,
                                 appearance = pageLook.copy(contentColor = textColor.value),
                                 cornerRadiusPercent = defaultCorner,
-                                background = page.shown,
+                                background = draft.shownBackground(page.shown),
                                 barCornerRadiusPercent = barCorner,
                                 resultsAppearance = resultsLook.value,
                                 resultsCornerRadiusPercent = resultsCorner.value,

@@ -76,7 +76,7 @@ fun SettingsAppGridScreen(
     val barShown = position.value != AppGridBarPosition.NONE
     val barAt = if (barShown) position.value else lastPosition
 
-    val dark = rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), page.shown)
+    val dark = rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), draft.shownBackground(page.shown))
     val bar = barLook.value ?: automaticRailAppearance(dark)
 
     val off = stringResource(R.string.stack_summary_off)
@@ -240,7 +240,7 @@ fun SettingsAppGridScreen(
             val statusTop = replicaStatusHeight()
             CompositionLocalProvider(LocalAppIconLoader provides home.iconLoader, LocalContentColor provides ink) {
                 Box(Modifier.fillMaxSize()) {
-                    BackgroundFill(page.shown, Modifier.fillMaxSize())
+                    BackgroundFill(draft.shownBackground(page.shown), Modifier.fillMaxSize())
                     com.bisc.flauncher.ui.home.search.AppGridContent(
                         apps = drawnApps,
                         folders = drawnFolders,

@@ -97,7 +97,7 @@ fun SettingsAppOverviewScreen(
     val page = rememberPageDraft(draft, home, id)
 
     // ---- What follows from it ----
-    val pageBackground = page.shown
+    val pageBackground = draft.shownBackground(page.shown)
     val dark = rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), pageBackground)
     val left = handedness.value == Handedness.LEFT
     val rail = railLook.value ?: automaticRailAppearance(dark)

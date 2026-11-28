@@ -50,7 +50,7 @@ fun SettingsCategoriesPageScreen(
     val symbols = draft.field("symbols", settings.categorySymbolsPage.collectAsState().value) { settings.setCategorySymbols("page", it) }
     val counts = draft.field("counts", settings.categoryCountsPage.collectAsState().value) { settings.setCategoryCounts("page", it) }
 
-    val dark = rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), page.shown)
+    val dark = rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), draft.shownBackground(page.shown))
     val off = stringResource(R.string.stack_summary_off)
     val tabs = view.value == "TABS"
 
@@ -144,7 +144,7 @@ fun SettingsCategoriesPageScreen(
             val statusTop = replicaStatusHeight()
             CompositionLocalProvider(LocalAppIconLoader provides home.iconLoader, LocalContentColor provides ink) {
                 Box(Modifier.fillMaxSize()) {
-                    BackgroundFill(page.shown, Modifier.fillMaxSize())
+                    BackgroundFill(draft.shownBackground(page.shown), Modifier.fillMaxSize())
                     com.bisc.flauncher.ui.home.HomeCategoriesPage(
                         viewModel = home,
                         hideStatusBar = page.hideStatus.value,

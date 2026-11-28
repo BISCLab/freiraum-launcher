@@ -158,7 +158,7 @@ fun SettingsFolderScreen(
     val mapTargets by home.savedMapTargets.collectAsState()
     val websites by home.pinnedWebsites.collectAsState()
     val iconScale by home.iconSizeScale.collectAsState()
-    val dark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), global)
+    val dark = com.bisc.flauncher.ui.home.search.rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), stack.shownBackground(global))
     CompositionLocalProvider(com.bisc.flauncher.ui.home.LocalSurfaceIsDark provides dark) {
         SettingsCardStackScreen(
             title = stringResource(R.string.settings_folder_title),
@@ -179,7 +179,7 @@ fun SettingsFolderScreen(
                 com.bisc.flauncher.ui.home.widgets.LocalHostAppWidgets provides false
             ) {
                 Box(Modifier.fillMaxSize()) {
-                    com.bisc.flauncher.ui.home.dock.BackgroundFill(global, Modifier.fillMaxSize())
+                    com.bisc.flauncher.ui.home.dock.BackgroundFill(stack.shownBackground(global), Modifier.fillMaxSize())
                     @Composable
                     fun Closed(f: Folder) {
                         Column(Modifier.width(96.dp), horizontalAlignment = Alignment.CenterHorizontally) {

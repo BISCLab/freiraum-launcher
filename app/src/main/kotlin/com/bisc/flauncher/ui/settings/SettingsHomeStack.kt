@@ -94,7 +94,7 @@ fun SettingsHomeStackScreen(
     // Rows added elsewhere meanwhile come last.
     val others = order.value.mapNotNull { id -> savedOthers.find { it.id == id } } + savedOthers.filter { it.id !in order.value }
 
-    val dark = rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), page.shown)
+    val dark = rememberSurfaceIsDark(ElementAppearance(fillMode = ElementFillMode.NONE), draft.shownBackground(page.shown))
     val off = stringResource(R.string.stack_summary_off)
     val pages by home.pages.collectAsState()
 
@@ -243,6 +243,7 @@ fun SettingsHomeStackScreen(
             startElement = startElement
         ) { state, _ ->
             HomeReplica(
+                background = draft.shownBackground(page.shown),
                 home = home,
                 pageId = pageId,
                 page = page,
@@ -268,6 +269,7 @@ private fun PageRow.with(e: RowEdit): PageRow = withAppearance(e.look).copy(enab
  *  while open, the Panel from the top. Every part is drawn, also the ones switched off. */
 @Composable
 private fun HomeReplica(
+    background: com.bisc.flauncher.data.model.BackgroundConfig,
     home: HomeViewModel,
     pageId: Long,
     page: PageDraft,
@@ -326,7 +328,7 @@ private fun HomeReplica(
         com.bisc.flauncher.ui.home.widgets.LocalHostAppWidgets provides false
     ) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
-            BackgroundFill(page.shown, Modifier.fillMaxSize())
+            BackgroundFill(background, Modifier.fillMaxSize())
             val top = (if (page.hideStatus.value) 0.dp else statusTop) + 16.dp
             val reserve = dock?.let { DockDimens.height(it) + PageRowDimens.rowSpacing + navBottom } ?: (navBottom + 16.dp)
             val unit = PageRowDimens.stretchedUnit(maxHeight - top - reserve, unitCounts[pageId] ?: 0)

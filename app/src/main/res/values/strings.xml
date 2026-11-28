@@ -1206,6 +1206,10 @@ AndroidX, Jetpack Compose, Material Components, Room, DataStore, Kotlin and Dagg
     <string name="stack_show">Show</string>
     <string name="stack_page_summary">Alignment, background, status bar, name</string>
     <string name="stack_page_summary_plain">Background, status bar, name</string>
+    <string name="backdrop_page">Background of the page</string>
+    <string name="backdrop_light">Light</string>
+    <string name="backdrop_dark">Dark</string>
+    <string name="backdrop_system">Like the phone</string>
     <string name="settings_icon_shape_squircle">Soft square</string>
     <string name="settings_icon_shape_square">Square</string>
     <string name="settings_icon_shape_teardrop">Teardrop</string>
