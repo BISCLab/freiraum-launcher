@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.ColumnScope
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.async
@@ -93,7 +94,7 @@ internal fun ColumnScope.AllAppsOptions(all: AllAppsDraft, viewModel: SettingsVi
     val samples = rememberIconSamples(viewModel)
     val context = LocalContext.current
     SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_shape_label)) {
-        Row(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(modifier = Modifier.fillMaxWidth().height(androidx.compose.foundation.layout.IntrinsicSize.Min).background(MaterialTheme.colorScheme.surfaceContainer).padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             listOf(
                 IconShape.ROUNDED_SQUARE to R.string.settings_icon_shape_rounded_square,
                 IconShape.CIRCLE to R.string.settings_icon_shape_circle
@@ -106,7 +107,7 @@ internal fun ColumnScope.AllAppsOptions(all: AllAppsDraft, viewModel: SettingsVi
                     sample = samples.firstOrNull(),
                     selected = all.shape.value == shape,
                     onClick = { all.shape.value = shape },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).fillMaxHeight()
                 )
             }
         }
@@ -218,7 +219,8 @@ private fun ShapeTile(label: String, shape: IconShape, iconPack: String?, viewMo
         Box(Modifier.size(56.dp), contentAlignment = Alignment.Center) {
             icon?.let { Image(it, contentDescription = null, modifier = Modifier.size(56.dp)) }
         }
-        Text(label, style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
+        // Room for two lines on every tile, so they are all the same height.
+        Text(label, style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center, minLines = 2, modifier = Modifier.padding(top = 8.dp))
     }
 }
 

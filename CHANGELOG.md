@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- All apps: the icon shape tiles are the same height
+
 - Pages: the "Open with" chips on the function pages are all the same height
 
 ## 0.32.0
