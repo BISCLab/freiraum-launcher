@@ -40,7 +40,18 @@ enum class Handedness { LEFT, RIGHT }
 
 /** Shape every app icon is masked to - both the dock/search-button containers and the actual
  *  icon bitmaps rendered everywhere else (see [com.bisc.flauncher.util.AppIconLoader]). */
-enum class IconShape { CIRCLE, ROUNDED_SQUARE }
+enum class IconShape { CIRCLE, ROUNDED_SQUARE, SQUARE, SQUIRCLE, TEARDROP, LEAF }
+
+/** How every app icon is drawn besides its shape: how round a rounded square is (0-100 % of a
+ *  circle's rounding), small icons filled into the shape, and a border around all of them. */
+data class IconStyle(
+    val cornerPercent: Int = 44,
+    val fillSmall: Boolean = false,
+    val border: Boolean = false,
+    /** 1 thin, 2 medium, 3 thick. */
+    val borderWidth: Int = 1,
+    val borderColor: Int = 0xCCFFFFFF.toInt()
+)
 
 /** Persistent settings in DataStore; each setting is exposed as a flow with its default value. */
 class SettingsRepository @Inject constructor(
@@ -897,6 +908,26 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[THEMED_ICONS_KEY] = on }
     }
 
+    val iconStyle: Flow<IconStyle> = dataStore.data.map { prefs ->
+        IconStyle(
+            cornerPercent = prefs[ICON_CORNER_KEY] ?: 44,
+            fillSmall = prefs[ICON_FILL_SMALL_KEY] ?: false,
+            border = prefs[ICON_BORDER_KEY] ?: false,
+            borderWidth = prefs[ICON_BORDER_WIDTH_KEY] ?: 1,
+            borderColor = prefs[ICON_BORDER_COLOR_KEY] ?: 0xCCFFFFFF.toInt()
+        )
+    }
+
+    suspend fun setIconStyle(style: IconStyle) {
+        dataStore.edit {
+            it[ICON_CORNER_KEY] = style.cornerPercent
+            it[ICON_FILL_SMALL_KEY] = style.fillSmall
+            it[ICON_BORDER_KEY] = style.border
+            it[ICON_BORDER_WIDTH_KEY] = style.borderWidth
+            it[ICON_BORDER_COLOR_KEY] = style.borderColor
+        }
+    }
+
     suspend fun setIconShape(shape: IconShape) {
         dataStore.edit { it[ICON_SHAPE_KEY] = shape.name }
     }
@@ -1360,6 +1391,11 @@ class SettingsRepository @Inject constructor(
         private val ICON_PACK_KEY = stringPreferencesKey("active_icon_pack")
         private val FONT_KEY = stringPreferencesKey("font_preference")
         private val ICON_SHAPE_KEY = stringPreferencesKey("icon_shape")
+        private val ICON_CORNER_KEY = intPreferencesKey("icon_corner_percent")
+        private val ICON_FILL_SMALL_KEY = booleanPreferencesKey("icon_fill_small")
+        private val ICON_BORDER_KEY = booleanPreferencesKey("icon_border")
+        private val ICON_BORDER_WIDTH_KEY = intPreferencesKey("icon_border_width")
+        private val ICON_BORDER_COLOR_KEY = intPreferencesKey("icon_border_color")
         private val THEMED_ICONS_KEY = booleanPreferencesKey("themed_icons")
         // Renamed from the old "icon_size_percent" key when the scale changed from a -50..50
         // offset to a direct 0..200 percent, so a pre-existing stored offset is never misread as

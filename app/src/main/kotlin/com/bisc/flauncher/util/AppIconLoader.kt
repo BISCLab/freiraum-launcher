@@ -24,6 +24,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.bisc.flauncher.data.db.AppOverrideDao
 import com.bisc.flauncher.data.settings.IconShape
+import com.bisc.flauncher.data.settings.IconStyle
 import com.bisc.flauncher.data.settings.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -51,7 +52,9 @@ class AppIconLoader @Inject constructor(
     }
 
     // Declared before init: the collectors started there may clear it right away.
-    private val renderCache = LruCache<Triple<ComponentName, IconShape, String?>, ImageBitmap>(96)
+    private data class RenderKey(val component: ComponentName, val shape: IconShape, val pack: String?, val style: IconStyle)
+
+    private val renderCache = LruCache<RenderKey, ImageBitmap>(96)
 
     // Bounded (and thread-safe).
     private val packIconCache = LruCache<Pair<String, String>, ImageBitmap>(400)
@@ -65,6 +68,9 @@ class AppIconLoader @Inject constructor(
 
     @Volatile
     private var globalShape: IconShape = IconShape.ROUNDED_SQUARE
+
+    @Volatile
+    private var globalStyle: IconStyle = IconStyle()
 
     /** Themed icons in light (false) or dark (true) colors; null while they are off. */
     @Volatile
@@ -97,6 +103,14 @@ class AppIconLoader @Inject constructor(
                 if (dark != themedDark) {
                     themedDark = dark
                     renderCache.evictAll()
+                    clearCache()
+                }
+            }
+        }
+        CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+            settingsRepository.iconStyle.collect { style ->
+                if (style != globalStyle) {
+                    globalStyle = style
                     clearCache()
                 }
             }
@@ -189,21 +203,21 @@ class AppIconLoader @Inject constructor(
     }
 
     /** A rendering made before, without any work; null if there is none yet. */
-    fun peekRender(componentName: ComponentName, shape: IconShape, iconPack: String?): ImageBitmap? =
-        renderCache.get(Triple(componentName, shape, iconPack))
+    fun peekRender(componentName: ComponentName, shape: IconShape, iconPack: String?, style: IconStyle = globalStyle): ImageBitmap? =
+        renderCache.get(RenderKey(componentName, shape, iconPack, style))
 
     /** An app's icon exactly as the launcher draws it with [shape] and [iconPack] (null = the apps'
      *  own icons), for the settings' previews of a choice. Kept, so showing it again is instant. */
-    fun render(componentName: ComponentName, shape: IconShape, iconPack: String?): ImageBitmap? {
-        val key = Triple(componentName, shape, iconPack)
+    fun render(componentName: ComponentName, shape: IconShape, iconPack: String?, style: IconStyle = globalStyle): ImageBitmap? {
+        val key = RenderKey(componentName, shape, iconPack, style)
         renderCache.get(key)?.let { return it }
         if (ProfileComponents.isProfile(componentName)) {
-            return loadProfileIcon(componentName, shape, iconPack, forPreview = true)?.also { renderCache.put(key, it) }
+            return loadProfileIcon(componentName, shape, iconPack, forPreview = true, style = style)?.also { renderCache.put(key, it) }
         }
         val fromPack = iconPack?.let { pack -> packDrawableFor(pack, componentName)?.let { loadPackIcon(pack, it) } }
         val result = fromPack ?: run {
             val drawable = runCatching { context.packageManager.getActivityIcon(componentName) }.getOrNull() ?: return null
-            renderMasked(drawable, shape).asImageBitmap()
+            renderMasked(drawable, shape, style).asImageBitmap()
         }
         renderCache.put(key, result)
         return result
@@ -228,7 +242,7 @@ class AppIconLoader @Inject constructor(
     /** An app of another profile: its own icon (or the icon pack's) in the shape, with the
      *  profile's badge on it as the system draws it. */
     /** [shape] and [pack] for a preview of a choice; by default the ones in use. */
-    private fun loadProfileIcon(marked: ComponentName, shape: IconShape? = null, pack: String? = activeIconPackState.activePackage, forPreview: Boolean = false): ImageBitmap? {
+    private fun loadProfileIcon(marked: ComponentName, shape: IconShape? = null, pack: String? = activeIconPackState.activePackage, forPreview: Boolean = false, style: IconStyle = globalStyle): ImageBitmap? {
         val user = ProfileComponents.userOf(context, marked) ?: return null
         val real = ProfileComponents.real(marked)
         val launcherApps = context.getSystemService(android.content.pm.LauncherApps::class.java)
@@ -238,7 +252,7 @@ class AppIconLoader @Inject constructor(
             val info = runCatching {
                 launcherApps.resolveActivity(android.content.Intent(android.content.Intent.ACTION_MAIN).setComponent(real), user)
             }.getOrNull() ?: return null
-            renderMasked(info.getIcon(0), shape ?: shapeOverrides[marked.flattenToString()] ?: globalShape)
+            renderMasked(info.getIcon(0), shape ?: shapeOverrides[marked.flattenToString()] ?: globalShape, style)
         }
         val badged = runCatching {
             context.packageManager.getUserBadgedIcon(base.toDrawable(context.resources), user)
@@ -246,19 +260,65 @@ class AppIconLoader @Inject constructor(
         return badged.toBitmap(width = ICON_SIZE_PX, height = ICON_SIZE_PX).asImageBitmap()
     }
 
-    private fun renderMasked(drawable: Drawable, shape: IconShape): Bitmap {
-        val output = createBitmap(ICON_SIZE_PX, ICON_SIZE_PX, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(output)
-        val path = when (shape) {
-            IconShape.CIRCLE -> Path().apply {
-                val r = ICON_SIZE_PX / 2f
-                addCircle(r, r, r, Path.Direction.CW)
-            }
+    /** The outline of [shape] at the icon's size; [style] says how round a rounded square is. */
+    private fun shapePath(shape: IconShape, style: IconStyle): Path {
+        val size = ICON_SIZE_PX.toFloat()
+        val rect = RectF(0f, 0f, size, size)
+        val half = size / 2f
+        return when (shape) {
+            IconShape.CIRCLE -> Path().apply { addCircle(half, half, half, Path.Direction.CW) }
             IconShape.ROUNDED_SQUARE -> Path().apply {
-                val radius = ICON_SIZE_PX * CORNER_RADIUS_FRACTION
-                addRoundRect(RectF(0f, 0f, ICON_SIZE_PX.toFloat(), ICON_SIZE_PX.toFloat()), radius, radius, Path.Direction.CW)
+                val radius = half * (style.cornerPercent.coerceIn(0, 100) / 100f)
+                addRoundRect(rect, radius, radius, Path.Direction.CW)
+            }
+            IconShape.SQUARE -> Path().apply { addRect(rect, Path.Direction.CW) }
+            // A superellipse: sides that bulge a little, corners that round softly.
+            IconShape.SQUIRCLE -> Path().apply {
+                val steps = 96
+                for (i in 0..steps) {
+                    val t = (i.toFloat() / steps) * 2f * Math.PI.toFloat()
+                    val c = kotlin.math.cos(t)
+                    val s = kotlin.math.sin(t)
+                    val x = half + half * Math.signum(c) * Math.pow(kotlin.math.abs(c).toDouble(), 0.5).toFloat()
+                    val y = half + half * Math.signum(s) * Math.pow(kotlin.math.abs(s).toDouble(), 0.5).toFloat()
+                    if (i == 0) moveTo(x, y) else lineTo(x, y)
+                }
+                close()
+            }
+            // Three corners round, the lower right one nearly sharp.
+            IconShape.TEARDROP -> Path().apply {
+                val r = half
+                val sharp = size * 0.08f
+                addRoundRect(rect, floatArrayOf(r, r, r, r, sharp, sharp, r, r), Path.Direction.CW)
+            }
+            // Two opposite corners round, the other two nearly sharp.
+            IconShape.LEAF -> Path().apply {
+                val r = half
+                val sharp = size * 0.08f
+                addRoundRect(rect, floatArrayOf(r, r, sharp, sharp, r, r, sharp, sharp), Path.Direction.CW)
             }
         }
+    }
+
+    /** The mean color of an icon's visible pixels, for the fill behind a small one. */
+    private fun meanColor(drawable: Drawable): Int {
+        val small = createBitmap(16, 16, Bitmap.Config.ARGB_8888)
+        drawable.setBounds(0, 0, 16, 16)
+        drawable.draw(Canvas(small))
+        var r = 0L; var g = 0L; var b = 0L; var n = 0L
+        for (x in 0 until 16) for (y in 0 until 16) {
+            val p = small.getPixel(x, y)
+            if (android.graphics.Color.alpha(p) > 200) {
+                r += android.graphics.Color.red(p); g += android.graphics.Color.green(p); b += android.graphics.Color.blue(p); n++
+            }
+        }
+        return if (n == 0L) android.graphics.Color.WHITE else android.graphics.Color.rgb((r / n).toInt(), (g / n).toInt(), (b / n).toInt())
+    }
+
+    private fun renderMasked(drawable: Drawable, shape: IconShape, style: IconStyle = globalStyle): Bitmap {
+        val output = createBitmap(ICON_SIZE_PX, ICON_SIZE_PX, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(output)
+        val path = shapePath(shape, style)
         canvas.clipPath(path)
         val dark = themedDark
         val monochrome = if (dark != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) (drawable as? AdaptiveIconDrawable)?.monochrome else null
@@ -275,9 +335,24 @@ class AppIconLoader @Inject constructor(
         } else if (drawable is AdaptiveIconDrawable) {
             drawable.background?.let { bg -> bg.setBounds(0, 0, ICON_SIZE_PX, ICON_SIZE_PX); bg.draw(canvas) }
             drawable.foreground?.let { fg -> fg.setBounds(0, 0, ICON_SIZE_PX, ICON_SIZE_PX); fg.draw(canvas) }
+        } else if (style.fillSmall) {
+            // An icon that does not fill the shape: a fill in its own color behind it, the icon a little smaller.
+            canvas.drawColor(meanColor(drawable))
+            val inset = (ICON_SIZE_PX * 0.16f).toInt()
+            drawable.setBounds(inset, inset, ICON_SIZE_PX - inset, ICON_SIZE_PX - inset)
+            drawable.draw(canvas)
         } else {
             drawable.setBounds(0, 0, ICON_SIZE_PX, ICON_SIZE_PX)
             drawable.draw(canvas)
+        }
+        if (style.border) {
+            // Half the stroke falls outside the shape and is cut off: the width is the visible part.
+            val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                this.style = android.graphics.Paint.Style.STROKE
+                color = style.borderColor
+                strokeWidth = ICON_SIZE_PX * 0.035f * style.borderWidth.coerceIn(1, 3)
+            }
+            canvas.drawPath(path, paint)
         }
         return output
     }
@@ -294,7 +369,6 @@ class AppIconLoader @Inject constructor(
 
     private companion object {
         const val ICON_SIZE_PX = 128
-        const val CORNER_RADIUS_FRACTION = 0.22f
         const val WARM_CHUNK = 16
 
         fun cacheSizeKb(): Int = (Runtime.getRuntime().maxMemory() / 1024L / 8L).toInt().coerceIn(8 * 1024, 48 * 1024)

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Icon shapes: besides rounded square and circle now soft square, square, teardrop and leaf, for all apps and for each app
+- All apps in three tabs: Shape (with "How round?" for the rounded square, and the size), Icon pack, and Extras
+- Extras: small icons can be filled into the shape with a fill in their own color, and all icons can get a border (thin, medium or thick, any color)
+
 - All apps: the icon shape tiles are the same height
 
 - Pages: the "Open with" chips on the function pages are all the same height

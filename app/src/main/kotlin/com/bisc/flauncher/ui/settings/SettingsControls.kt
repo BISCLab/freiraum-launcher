@@ -1,5 +1,6 @@
 package com.bisc.flauncher.ui.settings
 
+import com.bisc.flauncher.ui.home.cellShape
 import com.bisc.flauncher.ui.accessibleOutline
 import androidx.compose.foundation.layout.width
 import com.bisc.flauncher.ui.theme.current
@@ -649,10 +650,7 @@ fun IconShapePreference(
     selected: IconShape?,
     onSelect: (IconShape) -> Unit
 ) {
-    val shape = when (value) {
-        IconShape.CIRCLE -> CircleShape
-        IconShape.ROUNDED_SQUARE -> RoundedCornerShape(6.dp)
-    }
+    val shape = value.cellShape(6.dp)
     SettingsPreference(
         icon = null,
         title = label,

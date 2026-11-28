@@ -444,9 +444,16 @@ internal fun actionButtonDefaultIcon(type: com.bisc.flauncher.data.model.ActionB
     else -> Icons.Filled.ViewCarousel
 }
 
-private fun elementCellShape(iconShape: IconShape): Shape = when (iconShape) {
+private fun elementCellShape(iconShape: IconShape): Shape = iconShape.cellShape(16.dp)
+
+/** The same outline as the app icons (see AppIconLoader), for cells drawn beside them. */
+fun IconShape.cellShape(rounded: androidx.compose.ui.unit.Dp): Shape = when (this) {
     IconShape.CIRCLE -> CircleShape
-    IconShape.ROUNDED_SQUARE -> RoundedCornerShape(16.dp)
+    IconShape.ROUNDED_SQUARE -> RoundedCornerShape(rounded)
+    IconShape.SQUARE -> androidx.compose.ui.graphics.RectangleShape
+    IconShape.SQUIRCLE -> RoundedCornerShape(32)
+    IconShape.TEARDROP -> RoundedCornerShape(topStartPercent = 50, topEndPercent = 50, bottomEndPercent = 8, bottomStartPercent = 50)
+    IconShape.LEAF -> RoundedCornerShape(topStartPercent = 50, topEndPercent = 8, bottomEndPercent = 50, bottomStartPercent = 8)
 }
 
 @Composable
@@ -683,10 +690,7 @@ private fun ActionButtonCell(
 /** Per-icon clip shape for a pill-style row - shared by [PillRow] and the Dock's own flush panel in
  *  HomeScreen.kt, which lays [PillRowEntries] out directly rather than through [PillRow]. */
 @Composable
-fun pillItemShape(iconShape: IconShape): Shape = when (iconShape) {
-    IconShape.CIRCLE -> CircleShape
-    IconShape.ROUNDED_SQUARE -> RoundedCornerShape(DockDimens.iconCornerRadius)
-}
+fun pillItemShape(iconShape: IconShape): Shape = iconShape.cellShape(DockDimens.iconCornerRadius)
 
 /**
  * A single non-wrapping line of entries (no per-cell text labels, uniform squircle buttons), for

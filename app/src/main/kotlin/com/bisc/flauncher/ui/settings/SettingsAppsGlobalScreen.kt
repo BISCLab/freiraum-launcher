@@ -50,15 +50,16 @@ import com.bisc.flauncher.data.settings.IconShape
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/** What is set for all apps, as a draft in a stack: shape, size, pack, themed icons and dots. */
+/** What is set for all apps, as a draft in a stack: shape, size, pack, the icon style, themed icons and dots. */
 internal class AllAppsDraft(
     val shape: DraftField<IconShape>,
     val size: DraftField<Int>,
     val pack: DraftField<String?>,
+    val style: DraftField<com.bisc.flauncher.data.settings.IconStyle>,
     val themed: DraftField<Boolean>,
     val dots: DraftField<Boolean>
 ) {
-    val keys = listOf("all:shape", "all:size", "all:pack", "all:themed", "all:dots")
+    val keys = listOf("all:shape", "all:size", "all:pack", "all:style", "all:themed", "all:dots")
 }
 
 @Composable
@@ -66,8 +67,20 @@ internal fun rememberAllAppsDraft(draft: StackDraft, viewModel: SettingsViewMode
     shape = draft.field("all:shape", viewModel.iconShape.collectAsState().value, viewModel::setIconShape),
     size = draft.field("all:size", viewModel.iconSizePercent.collectAsState().value, viewModel::setIconSizePercent),
     pack = draft.field("all:pack", viewModel.activeIconPack.collectAsState().value, viewModel::selectIconPack),
+    style = draft.field("all:style", viewModel.iconStyle.collectAsState().value, viewModel::setIconStyle),
     themed = draft.field("all:themed", viewModel.themedIcons.collectAsState().value, viewModel::setThemedIcons),
     dots = draft.field("all:dots", viewModel.showNotificationDots.collectAsState().value, viewModel::setShowNotificationDots)
+)
+
+/** Every shape with its name, in the order the tiles show them. */
+@Composable
+internal fun iconShapeChoices(): List<Pair<IconShape, String>> = listOf(
+    IconShape.ROUNDED_SQUARE to stringResource(R.string.settings_icon_shape_rounded_square),
+    IconShape.CIRCLE to stringResource(R.string.settings_icon_shape_circle),
+    IconShape.SQUIRCLE to stringResource(R.string.settings_icon_shape_squircle),
+    IconShape.SQUARE to stringResource(R.string.settings_icon_shape_square),
+    IconShape.TEARDROP to stringResource(R.string.settings_icon_shape_teardrop),
+    IconShape.LEAF to stringResource(R.string.settings_icon_shape_leaf)
 )
 
 /** A few well-known apps first, so the samples look familiar. */
@@ -81,92 +94,132 @@ internal fun rememberIconSamples(viewModel: SettingsViewModel): List<AppInfo> {
     }
 }
 
-/** The samples as the stack's replica shows them: real apps in the shape, size and pack of the draft. */
+/** The samples as the stack's replica shows them: real apps in the shape, size, pack and style of the draft. */
 @Composable
 internal fun AllAppsSample(all: AllAppsDraft, viewModel: SettingsViewModel) {
-    IconsPreview(rememberIconSamples(viewModel), all.size.value, all.shape.value, all.pack.value, viewModel)
+    IconsPreview(rememberIconSamples(viewModel), all.size.value, all.shape.value, all.pack.value, viewModel, all.style.value)
 }
 
-/** ⓪ "All apps": shape, themed icons, dots, size and icon pack for every app without its own. */
+/** ⓪ "All apps" in three tabs: the shape (with how round and how big), the icon pack, and extras
+ *  (small icons filled, a border, themed icons, dots). */
 @Composable
 internal fun ColumnScope.AllAppsOptions(all: AllAppsDraft, viewModel: SettingsViewModel) {
     val iconPacks by viewModel.iconPacks.collectAsState()
     val samples = rememberIconSamples(viewModel)
     val context = LocalContext.current
-    SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_shape_label)) {
-        Row(modifier = Modifier.fillMaxWidth().height(androidx.compose.foundation.layout.IntrinsicSize.Min).background(MaterialTheme.colorScheme.surfaceContainer).padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            listOf(
-                IconShape.ROUNDED_SQUARE to R.string.settings_icon_shape_rounded_square,
-                IconShape.CIRCLE to R.string.settings_icon_shape_circle
-            ).forEach { (shape, label) ->
-                ShapeTile(
-                    label = stringResource(label),
-                    shape = shape,
-                    iconPack = all.pack.value,
-                    viewModel = viewModel,
-                    sample = samples.firstOrNull(),
-                    selected = all.shape.value == shape,
-                    onClick = { all.shape.value = shape },
-                    modifier = Modifier.weight(1f).fillMaxHeight()
-                )
-            }
-        }
-    }
-    // Themed icons exist from Android 13 on.
-    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-        SettingsPreferenceGroup(title = stringResource(R.string.settings_themed_icons_label)) {
-            DraftSwitchRow(stringResource(R.string.settings_themed_icons), all.themed.value, { all.themed.value = it }, summary = stringResource(R.string.settings_themed_icons_summary))
-        }
-    }
-    var tick by remember { androidx.compose.runtime.mutableIntStateOf(0) }
-    // Checked again whenever the page comes back, e.g. after granting access in the system.
-    androidx.lifecycle.compose.LifecycleResumeEffect(Unit) { tick++; onPauseOrDispose { } }
-    val access = tick.let { androidx.core.app.NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName) }
-    SettingsPreferenceGroup(title = stringResource(R.string.settings_dots_label), info = stringResource(R.string.settings_dots_info)) {
-        DraftSwitchRow(
-            stringResource(R.string.settings_dots_show), all.dots.value, { all.dots.value = it },
-            summary = if (all.dots.value && !access) stringResource(R.string.settings_dots_no_access) else null
-        )
-        if (all.dots.value && !access) {
-            SettingsPreference(icon = null, title = stringResource(R.string.settings_dots_grant), onClick = { com.bisc.flauncher.util.openNotificationAccessSettings(context) })
-        }
-    }
-    SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_size_label)) {
-        ExpandableIconSizeSlider(percent = all.size.value, onSettled = { all.size.value = it })
-    }
-    SettingsPreferenceGroup(title = stringResource(R.string.settings_section_icon_pack)) {
-        val cards = listOf<IconPackInfo?>(null) + iconPacks
-        Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            cards.chunked(2).forEach { row ->
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    row.forEach { pack ->
-                        PackCard(
-                            pack = pack,
-                            samples = samples.take(3),
-                            selected = all.pack.value == pack?.packageName,
-                            onClick = { all.pack.value = pack?.packageName },
-                            viewModel = viewModel,
-                            modifier = Modifier.weight(1f)
-                        )
+    val style = all.style.value
+    StackTabs(listOf(
+        stringResource(R.string.icons_tab_shape) to {
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_shape_label)) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    iconShapeChoices().chunked(3).forEach { row ->
+                        Row(Modifier.fillMaxWidth().height(androidx.compose.foundation.layout.IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            row.forEach { (shape, label) ->
+                                ShapeTile(
+                                    label = label,
+                                    shape = shape,
+                                    iconPack = all.pack.value,
+                                    viewModel = viewModel,
+                                    sample = samples.firstOrNull(),
+                                    selected = all.shape.value == shape,
+                                    onClick = { all.shape.value = shape },
+                                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                                    style = style
+                                )
+                            }
+                        }
                     }
-                    if (row.size == 1) Spacer(Modifier.weight(1f))
+                }
+            }
+            // How round: only where the shape has corners to round.
+            if (all.shape.value == IconShape.ROUNDED_SQUARE) {
+                SettingsPreferenceGroup(title = stringResource(R.string.icons_corner_label)) {
+                    CornerPercentPicker(percent = style.cornerPercent, onChange = { all.style.value = style.copy(cornerPercent = it) })
+                }
+            }
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_size_label)) {
+                ExpandableIconSizeSlider(percent = all.size.value, onSettled = { all.size.value = it })
+            }
+        },
+        stringResource(R.string.settings_section_icon_pack) to {
+            SettingsPreferenceGroup {
+                val cards = listOf<IconPackInfo?>(null) + iconPacks
+                Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    cards.chunked(2).forEach { row ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            row.forEach { pack ->
+                                PackCard(
+                                    pack = pack,
+                                    samples = samples.take(3),
+                                    selected = all.pack.value == pack?.packageName,
+                                    onClick = { all.pack.value = pack?.packageName },
+                                    viewModel = viewModel,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                            if (row.size == 1) Spacer(Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
+        },
+        stringResource(R.string.icons_tab_extras) to {
+            SettingsPreferenceGroup(title = stringResource(R.string.icons_fill_title)) {
+                DraftSwitchRow(stringResource(R.string.icons_fill_small), style.fillSmall, { all.style.value = style.copy(fillSmall = it) }, summary = stringResource(R.string.icons_fill_small_summary))
+            }
+            SettingsPreferenceGroup(title = stringResource(R.string.icons_border_title)) {
+                DraftSwitchRow(stringResource(R.string.icons_border), style.border, { all.style.value = style.copy(border = it) }, summary = stringResource(R.string.icons_border_summary))
+                if (style.border) {
+                    SettingsChoiceRow(
+                        title = stringResource(R.string.icons_border_width),
+                        options = listOf(1 to stringResource(R.string.icons_border_thin), 2 to stringResource(R.string.icons_border_medium), 3 to stringResource(R.string.icons_border_thick)),
+                        selected = style.borderWidth,
+                        onSelect = { all.style.value = style.copy(borderWidth = it) }
+                    )
+                    ColorPickerRow(
+                        title = stringResource(R.string.icons_border_color),
+                        color = style.borderColor,
+                        onColorChange = { all.style.value = style.copy(borderColor = it) }
+                    )
+                }
+            }
+            // Themed icons exist from Android 13 on.
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                SettingsPreferenceGroup(title = stringResource(R.string.settings_themed_icons_label)) {
+                    DraftSwitchRow(stringResource(R.string.settings_themed_icons), all.themed.value, { all.themed.value = it }, summary = stringResource(R.string.settings_themed_icons_summary))
+                }
+            }
+            var tick by remember { androidx.compose.runtime.mutableIntStateOf(0) }
+            // Checked again whenever the page comes back, e.g. after granting access in the system.
+            androidx.lifecycle.compose.LifecycleResumeEffect(Unit) { tick++; onPauseOrDispose { } }
+            val access = tick.let { androidx.core.app.NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName) }
+            SettingsPreferenceGroup(title = stringResource(R.string.settings_dots_label), info = stringResource(R.string.settings_dots_info)) {
+                DraftSwitchRow(
+                    stringResource(R.string.settings_dots_show), all.dots.value, { all.dots.value = it },
+                    summary = if (all.dots.value && !access) stringResource(R.string.settings_dots_no_access) else null
+                )
+                if (all.dots.value && !access) {
+                    SettingsPreference(icon = null, title = stringResource(R.string.settings_dots_grant), onClick = { com.bisc.flauncher.util.openNotificationAccessSettings(context) })
                 }
             }
         }
-    }
+    ))
 }
 
 /** Real apps as they look on the home screen right now: shape, size and pack. */
 @Composable
-private fun IconsPreview(samples: List<AppInfo>, sizePercent: Int, shape: IconShape, pack: String?, viewModel: SettingsViewModel) {
+private fun IconsPreview(samples: List<AppInfo>, sizePercent: Int, shape: IconShape, pack: String?, viewModel: SettingsViewModel, style: com.bisc.flauncher.data.settings.IconStyle) {
     // Instantly what is known (this choice rendered before, or the icon as it is now), then the
     // exact rendering, all icons at once.
     val icons by produceState(
-        samples.map { viewModel.iconLoader.peekRender(it.componentName, shape, pack) ?: viewModel.iconLoader.peek(it.componentName) },
-        samples, shape, pack, viewModel.iconLoader.revision
+        samples.map { viewModel.iconLoader.peekRender(it.componentName, shape, pack, style) ?: viewModel.iconLoader.peek(it.componentName) },
+        samples, shape, pack, style, viewModel.iconLoader.revision
     ) {
         value = withContext(Dispatchers.Default) {
-            samples.map { app -> async { runCatching { viewModel.iconLoader.render(app.componentName, shape, pack) }.getOrNull() } }.awaitAll()
+            samples.map { app -> async { runCatching { viewModel.iconLoader.render(app.componentName, shape, pack, style) }.getOrNull() } }.awaitAll()
         }
     }
     Box(
@@ -211,9 +264,9 @@ private fun rememberSystemIcon(component: ComponentName?): ImageBitmap? {
 /** One shape as a picture: a sample icon drawn the way the launcher draws it with that shape and
  *  the chosen icon pack. */
 @Composable
-private fun ShapeTile(label: String, shape: IconShape, iconPack: String?, viewModel: SettingsViewModel, sample: AppInfo?, selected: Boolean, onClick: () -> Unit, modifier: Modifier) {
-    val icon by produceState(sample?.let { viewModel.iconLoader.peekRender(it.componentName, shape, iconPack) }, sample?.componentName, shape, iconPack) {
-        value = sample?.let { app -> withContext(Dispatchers.Default) { runCatching { viewModel.iconLoader.render(app.componentName, shape, iconPack) }.getOrNull() } }
+private fun ShapeTile(label: String, shape: IconShape, iconPack: String?, viewModel: SettingsViewModel, sample: AppInfo?, selected: Boolean, onClick: () -> Unit, modifier: Modifier, style: com.bisc.flauncher.data.settings.IconStyle) {
+    val icon by produceState(sample?.let { viewModel.iconLoader.peekRender(it.componentName, shape, iconPack, style) }, sample?.componentName, shape, iconPack, style) {
+        value = sample?.let { app -> withContext(Dispatchers.Default) { runCatching { viewModel.iconLoader.render(app.componentName, shape, iconPack, style) }.getOrNull() } }
     }
     SelectableCard(selected, onClick, modifier) {
         Box(Modifier.size(56.dp), contentAlignment = Alignment.Center) {

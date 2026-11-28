@@ -406,6 +406,13 @@ class SettingsViewModel @Inject constructor(
     val themedIcons: StateFlow<Boolean> =
         repository.themedIcons.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    val iconStyle: StateFlow<com.bisc.flauncher.data.settings.IconStyle> =
+        repository.iconStyle.stateIn(viewModelScope, SharingStarted.Eagerly, com.bisc.flauncher.data.settings.IconStyle())
+
+    fun setIconStyle(style: com.bisc.flauncher.data.settings.IconStyle) {
+        viewModelScope.launch { repository.setIconStyle(style) }
+    }
+
     fun setThemedIcons(on: Boolean) {
         viewModelScope.launch { repository.setThemedIcons(on) }
     }

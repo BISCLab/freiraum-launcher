@@ -176,7 +176,7 @@ fun SettingsAppsScreen(
                         val d = DraftField(stack, appKey(app), (overrides[key] ?: AppOverride(key)).draft()).value
                         val iconScale by home.iconSizeScale.collectAsState()
                         Box(Modifier.stackElement(appKey(app))) {
-                            AppShapeIcon(app, d.shape ?: all.shape.value, overrides[key]?.iconPackDrawable != null, all.pack.value, viewModel, Modifier.size(56.dp * iconScale * ((d.size ?: all.size.value) / 100f)))
+                            AppShapeIcon(app, d.shape ?: all.shape.value, overrides[key]?.iconPackDrawable != null, all.pack.value, viewModel, Modifier.size(56.dp * iconScale * ((d.size ?: all.size.value) / 100f)), all.style.value)
                         }
                         Spacer(Modifier.height(8.dp))
                         Text(d.label.ifBlank { app.label }, color = ink, style = MaterialTheme.typography.labelSmall, maxLines = 1)
@@ -203,11 +203,11 @@ private fun appSummary(override: AppOverride?): String? {
 
 /** This app's icon in [shape], drawn as the launcher draws it; its own pack icon stays as it is. */
 @Composable
-private fun AppShapeIcon(app: AppInfo, shape: IconShape, ownIcon: Boolean, pack: String?, viewModel: SettingsViewModel, modifier: Modifier) {
+private fun AppShapeIcon(app: AppInfo, shape: IconShape, ownIcon: Boolean, pack: String?, viewModel: SettingsViewModel, modifier: Modifier, style: com.bisc.flauncher.data.settings.IconStyle? = null) {
     val own = com.bisc.flauncher.ui.home.rememberAppIcon(app.componentName, viewModel::loadIcon)
-    val bitmap by androidx.compose.runtime.produceState<androidx.compose.ui.graphics.ImageBitmap?>(null, shape, pack, ownIcon) {
+    val bitmap by androidx.compose.runtime.produceState<androidx.compose.ui.graphics.ImageBitmap?>(null, shape, pack, ownIcon, style) {
         value = if (ownIcon) null else kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-            runCatching { viewModel.iconLoader.render(app.componentName, shape, pack) }.getOrNull()
+            runCatching { if (style != null) viewModel.iconLoader.render(app.componentName, shape, pack, style) else viewModel.iconLoader.render(app.componentName, shape, pack) }.getOrNull()
         }
     }
     (if (ownIcon) own else bitmap ?: own)?.let { Image(it, contentDescription = null, modifier = modifier) }
@@ -314,13 +314,11 @@ private fun ColumnScope.AppEditor(
                     PictureChoice(stringResource(R.string.settings_app_shape_like_all), e.shape == null, { field.value = e.copy(shape = null) }) {
                         AppShapeIcon(app, all.shape.value, ownIcon, all.pack.value, viewModel, Modifier.fillMaxSize(0.62f))
                     },
-                    PictureChoice(stringResource(R.string.settings_icon_shape_rounded_square), e.shape == IconShape.ROUNDED_SQUARE, { field.value = e.copy(shape = IconShape.ROUNDED_SQUARE) }) {
-                        AppShapeIcon(app, IconShape.ROUNDED_SQUARE, ownIcon, all.pack.value, viewModel, Modifier.fillMaxSize(0.62f))
-                    },
-                    PictureChoice(stringResource(R.string.settings_icon_shape_circle), e.shape == IconShape.CIRCLE, { field.value = e.copy(shape = IconShape.CIRCLE) }) {
-                        AppShapeIcon(app, IconShape.CIRCLE, ownIcon, all.pack.value, viewModel, Modifier.fillMaxSize(0.62f))
+                ) + iconShapeChoices().map { (shape, label) ->
+                    PictureChoice(label, e.shape == shape, { field.value = e.copy(shape = shape) }) {
+                        AppShapeIcon(app, shape, ownIcon, all.pack.value, viewModel, Modifier.fillMaxSize(0.62f), all.style.value)
                     }
-                )
+                }
             )
             SettingsPreferenceGroup(title = stringResource(R.string.settings_icon_size_label)) {
                 ExpandableOptionalIconSizeSlider(percent = e.size, globalDefault = all.size.value, onSettled = { field.value = e.copy(size = it) })
