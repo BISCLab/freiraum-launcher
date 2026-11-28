@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.32.0
+
 - Apps, folders, categories, places, links and action buttons each in one card stack: the list is the card Elements, so there is no list page and no page per element any more
 - Apps: ⓪ All apps holds shape, size, icon pack, themed icons and dots for all; a search on top, then the apps with something of their own, then all; each app in the tabs App and App icon
 - Folders: ⓪ All folders holds the window every folder follows and what goes away while one is open; each folder in the tabs Folder, Folder icon, Folder window and Contents

@@ -1,0 +1,3 @@
+- Apps, folders, categories, places, links and action buttons each in one card stack: the list is the Elements card, no list page and no page per element any more
+- On top each time ⓪ for all of them, e.g. All apps with shape, size and icon pack
+- Every element in tabs; change several one after another and save once

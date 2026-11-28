@@ -1,0 +1,3 @@
+- Apps, Ordner, Kategorien, Adressen, Links und Aktionsbuttons je in einem Kartenstapel: die Liste ist die Karte Elemente, keine eigene Listen- und Einzelseite mehr
+- Oben jeweils ⓪ für alle, z. B. Alle Apps mit Form, Größe und Icon-Paket
+- Jedes Element mit Reitern, mehrere Elemente nacheinander ändern und einmal speichern
