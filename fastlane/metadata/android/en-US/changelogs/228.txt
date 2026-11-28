@@ -1,0 +1,4 @@
+- New icon shapes: soft square, square, teardrop and leaf; plus how round, small icons filled, and a border around all icons
+- All apps in three tabs: Shape, Icon pack, Extras
+- Above every replica: the page's background, light, dark, or like the phone
+- Cut-off text in the settings runs through now and then

@@ -1,0 +1,4 @@
+- Neue Icon-Formen: Weiches Quadrat, Quadrat, Tropfen und Blatt; dazu Wie rund?, kleine Icons auffüllen und ein Rand um alle Icons
+- Alle Apps in drei Reitern: Form, Icon-Paket, Extras
+- Über jedem Nachbau: Hintergrund der Seite, Hell, Dunkel oder wie das Handy
+- Abgeschnittener Text in den Einstellungen läuft ab und zu durch
